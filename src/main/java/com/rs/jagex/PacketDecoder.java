@@ -74,11 +74,6 @@ public class PacketDecoder {
 		}
 
 		switch(context.currentPacket) {
-			case CUSTOMIZE_OBJECT, REMOVE_GROUND_ITEM, CREATE_GROUND_ITEM,
-				DESTROY_OBJECT, CREATE_OBJECT, MAP_PROJANIM, MAP_PROJANIM_HALFSQ,
-				OBJECT_PREFETCH, GROUND_ITEM_REVEAL, GROUND_ITEM_COUNT, MIDI_SONG_LOCATION,
-				TILE_MESSAGE, OBJ_ANIM, SPOT_ANIM -> decodeTilestreamPacket(UpdateZonePacket.forServerPacket(context.currentPacket));
-
 			case IF_OPENTOP -> {
 				int key = buffer.readIntV1();
 				int flags = buffer.readIntV1();
@@ -1147,9 +1142,13 @@ public class PacketDecoder {
 				Static.UPDATE_ZONE_X = buffer.readByte() << 3;
 				while (buffer.index < context.currentPacketSize) {
 					UpdateZonePacket tilestreampacket_68 = UpdateZonePacket.values()[buffer.readUnsignedByte()];
-					PacketDecoder.decodeTilestreamPacket(tilestreampacket_68);
+					PacketDecoder.decodeUpdateZonePacket(tilestreampacket_68);
 				}
 			}
+			case CUSTOMIZE_OBJECT, REMOVE_GROUND_ITEM, CREATE_GROUND_ITEM,
+				DESTROY_OBJECT, CREATE_OBJECT, MAP_PROJANIM, MAP_PROJANIM_HALFSQ,
+				OBJECT_PREFETCH, GROUND_ITEM_REVEAL, GROUND_ITEM_COUNT, MIDI_SONG_LOCATION,
+				TILE_MESSAGE, OBJ_ANIM, SPOT_ANIM -> decodeUpdateZonePacket(UpdateZonePacket.forServerPacket(context.currentPacket));
 			case UPDATE_DOB -> {
 				Class504.PLAYER_DOB = buffer.read24BitInteger();
 				client.USERDETAIL_QUICKCHAT = buffer.readUnsignedByte() == 1;
@@ -1944,7 +1943,7 @@ public class PacketDecoder {
 		return true;
 	}
 
-	static void decodeTilestreamPacket(UpdateZonePacket packet) {
+	static void decodeUpdateZonePacket(UpdateZonePacket packet) {
 		ByteBuf.Bit buffer = client.GAME_CONNECTION_CONTEXT.recievedBuffer;
 		switch(packet) {
 			case SPOT_ANIM -> {
