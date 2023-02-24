@@ -155,7 +155,7 @@ public class UID192 {
 				aLong5351 = aLong5345;
 			}
 
-			aClass442_5346.method7386(aByteArray5348, 0, anInt5356 * 675653231);
+			aClass442_5346.writeBytesToFile(aByteArray5348, 0, anInt5356 * 675653231);
 			aLong5351 += 675653231L * anInt5356;
 			if (aLong5351 > aLong5354)
 				aLong5354 = aLong5351;
@@ -229,7 +229,7 @@ public class UID192 {
 					aLong5351 = aLong5353;
 				}
 
-				aClass442_5346.method7386(bytes_1, i_2, i_3);
+				aClass442_5346.writeBytesToFile(bytes_1, i_2, i_3);
 				aLong5351 += i_3;
 				if (aLong5351 > aLong5354)
 					aLong5354 = aLong5351;

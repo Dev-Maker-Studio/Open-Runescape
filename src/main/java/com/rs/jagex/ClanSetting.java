@@ -16,7 +16,7 @@ public abstract class ClanSetting extends Node {
 					rsbytebuffer_2.writeShort(varcId);
 					rsbytebuffer_2.writeInt(Class320.VARC_INT[varcId]);
 				}
-			class442_1.method7386(rsbytebuffer_2.buffer, 0, rsbytebuffer_2.index);
+			class442_1.writeBytesToFile(rsbytebuffer_2.buffer, 0, rsbytebuffer_2.index);
 		} catch (Exception ignored) {
 		}
 		try {

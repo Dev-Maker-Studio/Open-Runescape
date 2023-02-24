@@ -54,7 +54,7 @@ public class Class442 {
 
 	}
 
-	public void method7386(byte[] bytes_1, int i_2, int i_3) throws IOException {
+	public void writeBytesToFile(byte[] bytes_1, int i_2, int i_3) throws IOException {
 		if (aLong5360 + i_3 > aLong5358) {
 			aRandomAccessFile5359.seek(aLong5358);
 			aRandomAccessFile5359.write(1);

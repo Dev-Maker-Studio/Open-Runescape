@@ -475,7 +475,7 @@ public abstract class Engine implements Interface24, Runnable, FocusListener, Wi
 			rsbytebuffer_5.method13071(file_1.getPath());
 			if (file_2 != null)
 				rsbytebuffer_5.method13071(file_2.getPath());
-			class442_4.method7386(rsbytebuffer_5.buffer, 0, rsbytebuffer_5.index);
+			class442_4.writeBytesToFile(rsbytebuffer_5.buffer, 0, rsbytebuffer_5.index);
 			class442_4.method7385();
 		} catch (IOException ioexception_6) {
 			ioexception_6.printStackTrace();
