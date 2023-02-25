@@ -24,7 +24,7 @@ public class CutsceneAction_Sub9 extends CutsceneAction {
 
 	@Override
 	public void method1592() {
-		RegionLoadType.method4412(aClass116_9281, anInt9279);
+		RegionLoadType.playMusic(aClass116_9281, anInt9279);
 	}
 
 	@Override
@@ -35,6 +35,6 @@ public class CutsceneAction_Sub9 extends CutsceneAction {
 	}
 
 	public void method1601() {
-		RegionLoadType.method4412(aClass116_9281, 68269153 * anInt9279 * -321392735);
+		RegionLoadType.playMusic(aClass116_9281, 68269153 * anInt9279 * -321392735);
 	}
 }

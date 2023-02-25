@@ -6759,7 +6759,7 @@ public class CS2Interpreter {
 	static void method3038(CS2Executor executor) {
 		int i_2 = executor.intStack[--executor.intStackPtr];
 		if (i_2 == -1) {
-			int i_3 = 16383;
+			int i_3 = i_2 >> 14 & 0x3fff;
 			int i_4 = i_2 & 0x3fff;
 			CoordGrid coordgrid_5 = IndexLoaders.MAP_REGION_DECODER.getBase();
 			i_3 -= coordgrid_5.x;

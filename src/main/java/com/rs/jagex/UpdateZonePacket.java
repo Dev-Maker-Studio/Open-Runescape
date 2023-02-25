@@ -15,10 +15,10 @@ public enum UpdateZonePacket {
 	OBJECT_PREFETCH(ServerProt.OBJECT_PREFETCH, 5),
 	GROUND_ITEM_REVEAL(ServerProt.GROUND_ITEM_REVEAL, 7),
 	GROUND_ITEM_COUNT(ServerProt.GROUND_ITEM_COUNT, 7),
-	MIDI_SONG_LOCATION(ServerProt.MIDI_SONG_LOCATION, 8),
+	SOUND_EFFECT_TILE(ServerProt.SOUND_EFFECT_TILE, 8),
 	TILE_MESSAGE(ServerProt.TILE_MESSAGE, -1),
 	OBJ_ANIM(ServerProt.OBJ_ANIM, 6),
-	SOUND_AREA(null, 9),
+	SOUND_SYNTH_TILE(null, 9),
 	SPOT_ANIM(ServerProt.SPOT_ANIM, 8);
 
 	static void method6292(int i_0, int i_1, int i_2, int i_3) {

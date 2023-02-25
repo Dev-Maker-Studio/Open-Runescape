@@ -1148,7 +1148,7 @@ public class PacketDecoder {
 
 			case CUSTOMIZE_OBJECT, REMOVE_GROUND_ITEM, CREATE_GROUND_ITEM,
 				DESTROY_OBJECT, CREATE_OBJECT, MAP_PROJANIM, MAP_PROJANIM_HALFSQ,
-				OBJECT_PREFETCH, GROUND_ITEM_REVEAL, GROUND_ITEM_COUNT, MIDI_SONG_LOCATION,
+				OBJECT_PREFETCH, GROUND_ITEM_REVEAL, GROUND_ITEM_COUNT, SOUND_EFFECT_TILE,
 				TILE_MESSAGE, OBJ_ANIM, SPOT_ANIM -> decodeUpdateZonePacket(UpdateZonePacket.forServerPacket(context.currentPacket));
 
 			case UPDATE_DOB -> {
@@ -1641,6 +1641,30 @@ public class PacketDecoder {
 				Class470.method7825();
 				Camera.moveTo(localX, localY, moveZ, constantSpeed, variableSpeed, true);
 			}
+			case CAM_REMOVEROOF -> {
+				int key = buffer.readIntLE();
+				Class470.method7825();
+				if (key == -1) {
+					Camera.anInt5864 = -1;
+					Camera.anInt833 = -1;
+				} else {
+					CoordGrid coordgrid_114 = IndexLoaders.MAP_REGION_DECODER.getBase();
+					int localX = key >> 14 & 0x3fff;
+					int localY = key & 0x3fff;
+					localX -= coordgrid_114.x;
+					if (localX < 0)
+						localX = 0;
+					else if (localX >= IndexLoaders.MAP_REGION_DECODER.getSizeX())
+						localX = IndexLoaders.MAP_REGION_DECODER.getSizeX();
+					localY -= coordgrid_114.y;
+					if (localY < 0)
+						localY = 0;
+					else if (localY >= IndexLoaders.MAP_REGION_DECODER.getSizeY())
+						localY = IndexLoaders.MAP_REGION_DECODER.getSizeY();
+					Camera.anInt5864 = (localX << 9) + 256;
+					Camera.anInt833 = (localY << 9) + 256;
+				}
+			}
 			case CAM_SHAKE -> {
 				int key = buffer.readUnsigned128Byte();
 				int flags = buffer.readUnsignedShort();
@@ -1654,11 +1678,11 @@ public class PacketDecoder {
 				Camera.SHAKE_3[index] = i_8;
 				Camera.SHAKE_4[index] = flags;
 			}
-			case CAM_RESET -> {
+			case CAM_RESET_SMOOTH -> {
 				Class470.method7825();
 				Camera.resetSmoothly();
 			}
-			case CAM_SMOOTHRESET -> {
+			case CAM_RESET_HARD -> {
 				Class470.method7825();
 				Camera.resetHard();
 			}
@@ -1701,12 +1725,23 @@ public class PacketDecoder {
 				Huffman.playSoundJingle(i_6, flags);
 			}
 			case MUSIC_TRACK -> {
-				int key = buffer.readUnsignedByte128();
-				int flags = buffer.readUnsignedByte128();
-				int i_6 = buffer.readUnsignedShort128();
-				if (i_6 == 65535)
-					i_6 = -1;
-				Class42.playSoundSong(i_6, flags, key);
+				int delay = buffer.readUnsignedByte128();
+				int volume = buffer.readUnsignedByte128();
+				int id = buffer.readUnsignedShort128();
+				if (id == 65535)
+					id = -1;
+				Class42.playSoundSong(id, volume, delay);
+			}
+			case MUSIC_TRACK_TILE -> {
+				int key = buffer.readUnsigned128Byte();
+				int volume = buffer.readUnsignedByte();
+				int i_6 = buffer.readUnsignedByteC();
+				int id = buffer.readInt();
+				int tileHash = buffer.readIntV1();
+				int z = tileHash >> 28;
+				int x = tileHash >> 14 & 0x3fff;
+				int y = tileHash & 0x3fff;
+				Class320.playMusicAtTile(x, y, key, i_6, id, volume);
 			}
 			case PRELOAD_SONG -> {
 				int songId = buffer.readUnsignedShortLE128();
@@ -1883,30 +1918,6 @@ public class PacketDecoder {
 				Class470.method7825();
 				CutsceneEntityMovement.method1575(flags, key, true);
 			}
-			case aClass375_4399 -> {
-				int key = buffer.readIntLE();
-				Class470.method7825();
-				if (key == -1) {
-					Camera.anInt5864 = -1;
-					Camera.anInt833 = -1;
-				} else {
-					CoordGrid coordgrid_114 = IndexLoaders.MAP_REGION_DECODER.getBase();
-					int i_6 = key >> 14 & 0x3fff;
-					int i_7 = key & 0x3fff;
-					i_6 -= coordgrid_114.x;
-					if (i_6 < 0)
-						i_6 = 0;
-					else if (i_6 >= IndexLoaders.MAP_REGION_DECODER.getSizeX())
-						i_6 = IndexLoaders.MAP_REGION_DECODER.getSizeX();
-					i_7 -= coordgrid_114.y;
-					if (i_7 < 0)
-						i_7 = 0;
-					else if (i_7 >= IndexLoaders.MAP_REGION_DECODER.getSizeY())
-						i_7 = IndexLoaders.MAP_REGION_DECODER.getSizeY();
-					Camera.anInt5864 = (i_6 << 9) + 256;
-					Camera.anInt833 = (i_7 << 9) + 256;
-				}
-			}
 			case aClass375_4437 -> {
 				if (Class475.supportsFullScreen && Engine.fullScreenFrame != null)
 					UID192.method7373(Class393.preferences.screenSize.getValue(), -1, -1);
@@ -1917,27 +1928,16 @@ public class PacketDecoder {
 				if (!client.aBool7310 || !Class186.method3082(string_88, 1, str_92))
 					PingRequester.method8736(string_88, true, str_92, client.aBool7158);
 			}
-			case aClass375_3828 -> {
-				int key = buffer.readUnsigned128Byte();
-				int flags = buffer.readUnsignedByte();
-				int i_6 = buffer.readUnsignedByteC();
-				int i_7 = buffer.readInt();
-				int i_8 = buffer.readIntV1();
-				int i_9 = i_8 >> 28;
-				int i_10 = i_8 >> 14 & 0x3fff;
-				int i_11 = i_8 & 0x3fff;
-				Class320.method5731(i_10, i_11, key, i_6, i_7, flags);
-			}
 			case aClass375_4457 -> {
 				int key = buffer.readUnsignedShort();
 				Class470.method7825();
 				Class123.method2152(key);
 			}
-			case aClass375_4453 -> {
+			case SOUND_MIXBUSS_SETLEVEL -> {
 				byte b_100 = buffer.readByte();
 				int flags = buffer.readUnsignedByteC();
 				Class470.method7825();
-				Class52_Sub2.method14501(b_100, flags);
+				Class52_Sub2.mixbusSetLevel(b_100, flags);
 			}
 		}
 
@@ -2214,7 +2214,7 @@ public class PacketDecoder {
 					}
 				}
 			}
-			case SOUND_AREA -> {
+			case SOUND_SYNTH_TILE -> {
 				int flags = buffer.readUnsignedByte();
 				int localX = (flags >> 4 & 0x7) + Static.UPDATE_ZONE_X;
 				int localY = (flags & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
@@ -2231,10 +2231,10 @@ public class PacketDecoder {
 				if (IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY()) {
 					int i_14 = i_8 + 1;
 					if (VertexNormal.MY_PLAYER.regionBaseX[0] >= localX - i_14 && VertexNormal.MY_PLAYER.regionBaseX[0] <= localX + i_14 && VertexNormal.MY_PLAYER.regionBaseY[0] >= localY - i_14 && VertexNormal.MY_PLAYER.regionBaseY[0] <= i_14 + localY)
-						RegionLoadType.method4414(soundId, i_9, i_10, i_11, i_8 + (Class272.UPDATE_ZONE_PLANE << 24) + (localY << 8) + (localX << 16), soundType, i_23);
+						RegionLoadType.playSoundSynth(soundId, i_9, i_10, i_11, i_8 + (Class272.UPDATE_ZONE_PLANE << 24) + (localY << 8) + (localX << 16), soundType, i_23);
 				}
 			}
-			case MIDI_SONG_LOCATION -> {
+			case SOUND_EFFECT_TILE -> {
 				int i_3 = buffer.readUnsignedByte();
 				int i_21 = (i_3 >> 4 & 0x7) + Static.UPDATE_ZONE_X;
 				int i_5 = (i_3 & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
@@ -2250,7 +2250,7 @@ public class PacketDecoder {
 				if (IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && i_21 >= 0 && i_5 >= 0 && i_21 < IndexLoaders.MAP_REGION_DECODER.getSizeX() && i_5 < IndexLoaders.MAP_REGION_DECODER.getSizeY()) {
 					int i_24 = i_8 + 1;
 					if (VertexNormal.MY_PLAYER.regionBaseX[0] >= i_21 - i_24 && VertexNormal.MY_PLAYER.regionBaseX[0] <= i_21 + i_24 && VertexNormal.MY_PLAYER.regionBaseY[0] >= i_5 - i_24 && VertexNormal.MY_PLAYER.regionBaseY[0] <= i_24 + i_5)
-						Class383.method6509(i_6, i_9, i_10, i_11, i_8 + (Class272.UPDATE_ZONE_PLANE << 24) + (i_5 << 8) + (i_21 << 16), i_23);
+						Class383.playtiledSoundEffect(i_6, i_9, i_10, i_11, i_8 + (Class272.UPDATE_ZONE_PLANE << 24) + (i_5 << 8) + (i_21 << 16), i_23);
 				}
 			}
 			case TILE_MESSAGE -> {

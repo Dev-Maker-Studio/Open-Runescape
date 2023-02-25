@@ -44,7 +44,7 @@ public enum ServerProt {
 	IF_OPENTOP(37, 19),
 	IF_OPENSUB(38, 23),
 	CAM_MOVETO(39, 6),
-	aClass375_4399(40, 4), //map region x and y static variables?
+	CAM_REMOVEROOF(40, 4), //map region x and y static variables?
 	UPDATE_ZONE_FULL_FOLLOWS(41, 3),
 	UPDATE_INV_STOP_TRANSMIT(42, 3),
 	PLAYER_UPDATE(43, -2),
@@ -70,7 +70,7 @@ public enum ServerProt {
 	MUSIC_TRACK(63, 4),
 	RUN_ENERGY(64, 1),
 	UPDATE_ZONE_PARTIAL_ENCLOSED(65, -2),
-	CAM_SMOOTHRESET(66, 0),
+	CAM_RESET_HARD(66, 0),
 	CHAT_FILTER_SETTINGS_PRIVATECHAT(67, 1),
 	VARBIT_SMALL(68, 3),
 	DESTROY_OBJECT(69, 2),
@@ -93,11 +93,11 @@ public enum ServerProt {
 	aClass375_4437(86, -2), //"opensn" maybe social network login?
 			CREATE_ACCOUNT_REPLY(87, 1),
 			OBJECT_PREFETCH(88, 5),
-			CAM_RESET(89, 0),
+	CAM_RESET_SMOOTH(89, 0),
 			UPDATE_UID192(90, 28),
 			UPDATE_SITESETTINGS_COOKIE(91, -1),
 			SEND_PRIVATE_MESSAGE(92, -2),
-			aClass375_3828(93, 11), //play sound song but with specific volume or something?
+			MUSIC_TRACK_TILE(93, 11), //play sound song but with specific volume or something?
 			VARCLAN_DISABLE(94, 0),
 			MAP_PROJANIM_HALFSQ(95, 17),
 			DEPRECATED_PULSE_EVENT(96, 8),
@@ -132,13 +132,13 @@ public enum ServerProt {
 			REMOVE_GROUND_ITEM(125, 3),
 			SPOT_ANIM_SPECIFIC(126, 12),
 			FRIENDS_CHAT_CHANNEL(127, -2),
-			MIDI_SONG_LOCATION(128, 6),
+			SOUND_EFFECT_TILE(128, 6),
 			SET_TARGET(129, 2),
 			IF_SETPLAYERHEAD_IGNOREWORN(130, 10),
 			MESSAGE_QUICKCHAT_CLANCHANNEL(131, -1),
 			IF_SETRETEX(132, 9),
 			MESSAGE_PLAYER_GROUP(133, -1),
-			aClass375_4453(134, 2), //SOUND_MIXBUSS_SETLEVEL? Changes array of 16 values having to do with sound (volumes?)
+			SOUND_MIXBUSS_SETLEVEL(134, 2), //SOUND_MIXBUSS_SETLEVEL? Changes array of 16 values having to do with sound (volumes?)
 			IF_SETMODEL(135, 8),
 			SOUND_SYNTH(136, 8),
 			CLANSETTINGS_FULL(137, -2),

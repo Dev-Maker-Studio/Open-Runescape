@@ -5,9 +5,9 @@ public class Class320 {
 	public static Class253 aClass253_3723;
 	public static int[] VARC_INT;
 	static Node_Sub25 aNode_Sub25_3719 = new Node_Sub25(0, 0);
-	public static void method5731(int i_1, int i_2, int i_3, int i_4, int i_5, int i_6) {
-		Class42.playSoundSong(i_5, i_6, 100);
-		Class260.aClass277_3234 = new Class277(i_1 << 9, i_2 << 9, i_3 << 8, i_4 * 8);
+	public static void playMusicAtTile(int x, int y, int i_3, int i_4, int id, int volume) {
+		Class42.playSoundSong(id, volume, 100);
+		Class260.aClass277_3234 = new Class277(x << 9, y << 9, i_3 << 8, i_4 * 8);
 	}
 	public boolean aBool3722;
 	Node_Sub25[] aNode_Sub25Array3720;

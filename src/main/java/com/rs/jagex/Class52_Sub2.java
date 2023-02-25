@@ -2,7 +2,7 @@ package com.rs.jagex;
 
 public class Class52_Sub2 extends Class52 {
 
-	public static void method14501(int i_0, int i_1) {
+	public static void mixbusSetLevel(int i_0, int i_1) {
 		Class150.method2580(i_0, i_1);
 	}
 	NativeSprite aNativeSprite_9162;
