@@ -394,7 +394,7 @@ public class Node_Sub15_Sub2 extends Node_Sub15 {
 					}
 
 					if (class282_sub14_10.aShortArray7590[i_2] < 0)
-						class282_sub13_7.aNode_Sub15_Sub5_7568.method15325(-1);
+						class282_sub13_7.aNode_Sub15_Sub5_7568.setUnk0to8(-1);
 
 					if (class282_sub13_7.anInt7567 >= 0) {
 						Node_Sub13 class282_sub13_8 = aNode_Sub13ArrayArray9714[i_1][class282_sub13_7.anInt7567];

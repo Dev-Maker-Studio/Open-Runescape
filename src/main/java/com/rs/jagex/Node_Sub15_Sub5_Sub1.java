@@ -694,7 +694,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 			int i_6 = ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15223() << 8;
 			int i_7 = i_5 - i_4;
 			if (i_7 <= 0)
-				anInt9854 = 0;
+				unk0to8 = 0;
 
 			int i_8 = i_2;
 			i_3 += i_2;
@@ -718,7 +718,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 				anInt9853 = i_6 - 1;
 			}
 
-			if (anInt9854 < 0) {
+			if (unk0to8 < 0) {
 				if (aBool9857) {
 					if (anInt9855 < 0) {
 						i_8 = method15732(ints_1, i_2, i_4, i_3, ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15778()[anInt9844]);
@@ -760,7 +760,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 						anInt9853 = i_4 + (anInt9853 - i_4) % i_7;
 					}
 			} else {
-				if (anInt9854 > 0)
+				if (unk0to8 > 0)
 					if (aBool9857)
 						label111:
 						{
@@ -771,7 +771,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = i_4 + i_4 - 1 - anInt9853;
 							anInt9855 = -(anInt9855 * 1927994969) * -177305111;
-							if (--anInt9854 == 0)
+							if (--unk0to8 == 0)
 								break label111;
 						}
 
@@ -782,7 +782,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = i_5 + i_5 - 1 - anInt9853;
 							anInt9855 = -(anInt9855 * 1927994969) * -177305111;
-							if (--anInt9854 == 0)
+							if (--unk0to8 == 0)
 								break;
 
 							i_8 = method15732(ints_1, i_8, i_4, i_3, ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15778()[anInt9844]);
@@ -791,7 +791,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = i_4 + i_4 - 1 - anInt9853;
 							anInt9855 = -(anInt9855 * 1927994969) * -177305111;
-						} while (--anInt9854 != 0);
+						} while (--unk0to8 != 0);
 						}
 					else {
 						int i_9;
@@ -802,14 +802,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (i_5 - 1 - anInt9853) / i_7;
-								if (i_9 >= anInt9854) {
-									anInt9853 += i_7 * anInt9854;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8) {
+									anInt9853 += i_7 * unk0to8;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 += i_7 * i_9;
-								anInt9854 -= i_9;
+								unk0to8 -= i_9;
 							}
 						else
 							while (true) {
@@ -818,14 +818,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (anInt9853 - i_4) / i_7;
-								if (i_9 >= anInt9854) {
-									anInt9853 -= i_7 * anInt9854;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8) {
+									anInt9853 -= i_7 * unk0to8;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 -= i_7 * i_9;
-								anInt9854 -= i_9;
+								unk0to8 -= i_9;
 							}
 					}
 
@@ -859,7 +859,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 			int i_6 = ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15223() << 8;
 			int i_7 = i_5 - i_4;
 			if (i_7 <= 0)
-				anInt9854 = 0;
+				unk0to8 = 0;
 
 			int i_8 = i_2;
 			i_3 += i_2;
@@ -883,7 +883,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 				anInt9853 = (i_6 - 1) * -834443097 * -354697449;
 			}
 
-			if (anInt9854 * -485012237 * 1507503163 < 0) {
+			if (unk0to8 * -485012237 * 1507503163 < 0) {
 				if (aBool9857) {
 					if (anInt9855 * 1927994969 * -177305111 * 1927994969 * -177305111 < 0) {
 						i_8 = method15732(ints_1, i_2, i_4, i_3, ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15778()[anInt9844 * 900940833 * -99794975]);
@@ -925,7 +925,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 						anInt9853 = (i_4 + (anInt9853 * -834443097 * -354697449 - i_4) % i_7) * -834443097 * -354697449;
 					}
 			} else {
-				if (anInt9854 * -485012237 * 1507503163 > 0)
+				if (unk0to8 * -485012237 * 1507503163 > 0)
 					if (aBool9857)
 						label111:
 						{
@@ -937,8 +937,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_4 + i_4 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 							if (i_10002 * 1507503163 == 0)
 								break label111;
 						}
@@ -950,8 +950,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_5 + i_5 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 							if (i_10002 * 1507503163 == 0)
 								break;
 
@@ -961,8 +961,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_4 + i_4 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 						} while (i_10002 * 1507503163 != 0);
 						}
 					else {
@@ -974,14 +974,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (i_5 - 1 - anInt9853 * -834443097 * -354697449) / i_7;
-								if (i_9 >= anInt9854 * -485012237 * 1507503163) {
-									anInt9853 = (anInt9853 * -834443097 + i_7 * anInt9854 * -485012237 * 1507503163 * -834443097) * -354697449;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8 * -485012237 * 1507503163) {
+									anInt9853 = (anInt9853 * -834443097 + i_7 * unk0to8 * -485012237 * 1507503163 * -834443097) * -354697449;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 = (anInt9853 * -834443097 + i_7 * i_9 * -834443097) * -354697449;
-								anInt9854 = (anInt9854 * -485012237 - i_9 * -485012237) * 1507503163;
+								unk0to8 = (unk0to8 * -485012237 - i_9 * -485012237) * 1507503163;
 							}
 						else
 							while (true) {
@@ -990,14 +990,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (anInt9853 * -834443097 * -354697449 - i_4) / i_7;
-								if (i_9 >= anInt9854 * -485012237 * 1507503163) {
-									anInt9853 = (anInt9853 * -834443097 - i_7 * anInt9854 * -485012237 * 1507503163 * -834443097) * -354697449;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8 * -485012237 * 1507503163) {
+									anInt9853 = (anInt9853 * -834443097 - i_7 * unk0to8 * -485012237 * 1507503163 * -834443097) * -354697449;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 = (anInt9853 * -834443097 - i_7 * i_9 * -834443097) * -354697449;
-								anInt9854 = (anInt9854 * -485012237 - i_9 * -485012237) * 1507503163;
+								unk0to8 = (unk0to8 * -485012237 - i_9 * -485012237) * 1507503163;
 							}
 					}
 
@@ -1031,7 +1031,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 			int i_6 = ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15223() << 8;
 			int i_7 = i_5 - i_4;
 			if (i_7 <= 0)
-				anInt9854 = 0;
+				unk0to8 = 0;
 
 			int i_8 = i_2;
 			i_3 += i_2;
@@ -1055,7 +1055,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 				anInt9853 = (i_6 - 1) * -834443097 * -354697449;
 			}
 
-			if (anInt9854 * -485012237 * 1507503163 < 0) {
+			if (unk0to8 * -485012237 * 1507503163 < 0) {
 				if (aBool9857) {
 					if (anInt9855 * 1927994969 * -177305111 * 1927994969 * -177305111 < 0) {
 						i_8 = method15732(ints_1, i_2, i_4, i_3, ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15778()[anInt9844 * 900940833 * -99794975]);
@@ -1097,7 +1097,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 						anInt9853 = (i_4 + (anInt9853 * -834443097 * -354697449 - i_4) % i_7) * -834443097 * -354697449;
 					}
 			} else {
-				if (anInt9854 * -485012237 * 1507503163 > 0)
+				if (unk0to8 * -485012237 * 1507503163 > 0)
 					if (aBool9857)
 						label111:
 						{
@@ -1109,8 +1109,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_4 + i_4 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 							if (i_10002 * 1507503163 == 0)
 								break label111;
 						}
@@ -1122,8 +1122,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_5 + i_5 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 							if (i_10002 * 1507503163 == 0)
 								break;
 
@@ -1133,8 +1133,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_4 + i_4 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 						} while (i_10002 * 1507503163 != 0);
 						}
 					else {
@@ -1146,14 +1146,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (i_5 - 1 - anInt9853 * -834443097 * -354697449) / i_7;
-								if (i_9 >= anInt9854 * -485012237 * 1507503163) {
-									anInt9853 = (anInt9853 * -834443097 + i_7 * anInt9854 * -485012237 * 1507503163 * -834443097) * -354697449;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8 * -485012237 * 1507503163) {
+									anInt9853 = (anInt9853 * -834443097 + i_7 * unk0to8 * -485012237 * 1507503163 * -834443097) * -354697449;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 = (anInt9853 * -834443097 + i_7 * i_9 * -834443097) * -354697449;
-								anInt9854 = (anInt9854 * -485012237 - i_9 * -485012237) * 1507503163;
+								unk0to8 = (unk0to8 * -485012237 - i_9 * -485012237) * 1507503163;
 							}
 						else
 							while (true) {
@@ -1162,14 +1162,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (anInt9853 * -834443097 * -354697449 - i_4) / i_7;
-								if (i_9 >= anInt9854 * -485012237 * 1507503163) {
-									anInt9853 = (anInt9853 * -834443097 - i_7 * anInt9854 * -485012237 * 1507503163 * -834443097) * -354697449;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8 * -485012237 * 1507503163) {
+									anInt9853 = (anInt9853 * -834443097 - i_7 * unk0to8 * -485012237 * 1507503163 * -834443097) * -354697449;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 = (anInt9853 * -834443097 - i_7 * i_9 * -834443097) * -354697449;
-								anInt9854 = (anInt9854 * -485012237 - i_9 * -485012237) * 1507503163;
+								unk0to8 = (unk0to8 * -485012237 - i_9 * -485012237) * 1507503163;
 							}
 					}
 
@@ -1203,7 +1203,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 			int i_6 = ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15223() << 8;
 			int i_7 = i_5 - i_4;
 			if (i_7 <= 0)
-				anInt9854 = 0;
+				unk0to8 = 0;
 
 			int i_8 = i_2;
 			i_3 += i_2;
@@ -1227,7 +1227,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 				anInt9853 = (i_6 - 1) * -834443097 * -354697449;
 			}
 
-			if (anInt9854 * -485012237 * 1507503163 < 0) {
+			if (unk0to8 * -485012237 * 1507503163 < 0) {
 				if (aBool9857) {
 					if (anInt9855 * 1927994969 * -177305111 * 1927994969 * -177305111 < 0) {
 						i_8 = method15732(ints_1, i_2, i_4, i_3, ((Node_Sub26_Sub1_Sub1) aNode_Sub26_7601).method15778()[anInt9844 * 900940833 * -99794975]);
@@ -1269,7 +1269,7 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 						anInt9853 = (i_4 + (anInt9853 * -834443097 * -354697449 - i_4) % i_7) * -834443097 * -354697449;
 					}
 			} else {
-				if (anInt9854 * -485012237 * 1507503163 > 0)
+				if (unk0to8 * -485012237 * 1507503163 > 0)
 					if (aBool9857)
 						label111:
 						{
@@ -1281,8 +1281,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_4 + i_4 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 							if (i_10002 * 1507503163 == 0)
 								break label111;
 						}
@@ -1294,8 +1294,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_5 + i_5 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 							if (i_10002 * 1507503163 == 0)
 								break;
 
@@ -1305,8 +1305,8 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 
 							anInt9853 = (i_4 + i_4 - 1 - anInt9853 * -834443097 * -354697449) * -834443097 * -354697449;
 							anInt9855 = -(anInt9855 * 1927994969 * -177305111 * 1927994969) * -177305111 * 1927994969 * -177305111;
-							i_10002 = anInt9854 * -485012237 - -485012237;
-							anInt9854 = (anInt9854 * -485012237 - -485012237) * 1507503163;
+							i_10002 = unk0to8 * -485012237 - -485012237;
+							unk0to8 = (unk0to8 * -485012237 - -485012237) * 1507503163;
 						} while (i_10002 * 1507503163 != 0);
 						}
 					else {
@@ -1318,14 +1318,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (i_5 - 1 - anInt9853 * -834443097 * -354697449) / i_7;
-								if (i_9 >= anInt9854 * -485012237 * 1507503163) {
-									anInt9853 = (anInt9853 * -834443097 + i_7 * anInt9854 * -485012237 * 1507503163 * -834443097) * -354697449;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8 * -485012237 * 1507503163) {
+									anInt9853 = (anInt9853 * -834443097 + i_7 * unk0to8 * -485012237 * 1507503163 * -834443097) * -354697449;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 = (anInt9853 * -834443097 + i_7 * i_9 * -834443097) * -354697449;
-								anInt9854 = (anInt9854 * -485012237 - i_9 * -485012237) * 1507503163;
+								unk0to8 = (unk0to8 * -485012237 - i_9 * -485012237) * 1507503163;
 							}
 						else
 							while (true) {
@@ -1334,14 +1334,14 @@ public class Node_Sub15_Sub5_Sub1 extends Node_Sub15_Sub5 {
 									return;
 
 								i_9 = (anInt9853 * -834443097 * -354697449 - i_4) / i_7;
-								if (i_9 >= anInt9854 * -485012237 * 1507503163) {
-									anInt9853 = (anInt9853 * -834443097 - i_7 * anInt9854 * -485012237 * 1507503163 * -834443097) * -354697449;
-									anInt9854 = 0;
+								if (i_9 >= unk0to8 * -485012237 * 1507503163) {
+									anInt9853 = (anInt9853 * -834443097 - i_7 * unk0to8 * -485012237 * 1507503163 * -834443097) * -354697449;
+									unk0to8 = 0;
 									break;
 								}
 
 								anInt9853 = (anInt9853 * -834443097 - i_7 * i_9 * -834443097) * -354697449;
-								anInt9854 = (anInt9854 * -485012237 - i_9 * -485012237) * 1507503163;
+								unk0to8 = (unk0to8 * -485012237 - i_9 * -485012237) * 1507503163;
 							}
 					}
 

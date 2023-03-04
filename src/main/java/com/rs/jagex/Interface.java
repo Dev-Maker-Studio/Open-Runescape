@@ -1,5 +1,7 @@
 package com.rs.jagex;
 
+import com.rs.jagex.AreadSound.SoundType;
+
 public class Interface {
 	public static Interface[] INTERFACES;
 
@@ -11,13 +13,13 @@ public class Interface {
 			int i_4;
 			if (sound.aNode_Sub15_Sub5_3304 == null) {
 				--sound.delay;
-				if (sound.delay >= (sound.method4793() ? -1500 : -10)) {
-					if (sound.type == 1 && sound.soundEffect == null) {
+				if (sound.delay >= (sound.isVorbis() ? -1500 : -10)) {
+					if (sound.type == SoundType.EFFECT && sound.soundEffect == null) {
 						sound.soundEffect = SoundEffect.getSoundEffect(IndexLoaders.SOUND_EFFECT_INDEX, sound.soundId, 0);
 						if (sound.soundEffect == null)
 							continue;
 						sound.delay += sound.soundEffect.getDelay();
-					} else if (sound.method4793() && (sound.aNode_Sub18_3294 == null || sound.aNode_Sub26_Sub1_Sub1_3296 == null)) {
+					} else if (sound.isVorbis() && (sound.aNode_Sub18_3294 == null || sound.aNode_Sub26_Sub1_Sub1_3296 == null)) {
 						if (sound.aNode_Sub18_3294 == null)
 							sound.aNode_Sub18_3294 = MIDIInstrument.method12270(IndexLoaders.MIDI_INSTRUMENT_INDEX, sound.soundId);
 						if (sound.aNode_Sub18_3294 == null)
@@ -69,15 +71,15 @@ public class Interface {
 							} else
 								i_5 = 0;
 						} else
-							i_5 = sound.volume * (sound.type == 3 ? Class393.preferences.voiceOverVolume.method12714() : Class393.preferences.soundEffectVolume.method12714()) >> 2;
+							i_5 = sound.volume * (sound.type == SoundType.VOICE ? Class393.preferences.voiceOverVolume.method12714() : Class393.preferences.soundEffectVolume.method12714()) >> 2;
 						if (i_5 > 0) {
-							if (sound.type == 1) {
+							if (sound.type == SoundType.EFFECT) {
 								Object obj_18 = null;
 								Node_Sub26_Sub1_Sub2 class282_sub26_sub1_sub2_19 = sound.soundEffect.getMixedAudio().method16062(Class119.aClass344_1460);
 								sound.aNode_Sub15_Sub5_3304 = class282_sub26_sub1_sub2_19.method15225(sound.sampleRate, i_5, i_4);
-							} else if (sound.method4793())
+							} else if (sound.isVorbis())
 								sound.aNode_Sub15_Sub5_3304 = sound.aNode_Sub26_Sub1_Sub1_3296.method15225(sound.sampleRate, i_5, i_4);
-							sound.aNode_Sub15_Sub5_3304.method15325(sound.anInt3302 - 1);
+							sound.aNode_Sub15_Sub5_3304.setUnk0to8(sound.unk0to8 - 1);
 							Class79.aNode_Sub15_Sub4_783.method15275(sound.aNode_Sub15_Sub5_3304);
 						}
 					}

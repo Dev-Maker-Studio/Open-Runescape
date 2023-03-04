@@ -1691,11 +1691,11 @@ public class PacketDecoder {
 				int soundId = buffer.readUnsignedShort();
 				if (soundId == 65535)
 					soundId = -1;
-				int flags = buffer.readUnsignedByte();
-				int i_6 = buffer.readUnsignedShort();
-				int delay = buffer.readUnsignedByte();
-				int i_8 = buffer.readUnsignedShort();
-				VarNPCMap.playSoundSynth(soundId, flags, i_6, delay, i_8);
+				int repeat = buffer.readUnsignedByte();
+				int delay = buffer.readUnsignedShort();
+				int volume = buffer.readUnsignedByte();
+				int sampleRate = buffer.readUnsignedShort();
+				VarNPCMap.playSoundEffect(soundId, repeat, delay, volume, sampleRate);
 			}
 			case VORBIS_SOUND -> {
 				int key = buffer.readUnsignedShort();
@@ -2136,17 +2136,36 @@ public class PacketDecoder {
 			case CREATE_GROUND_ITEM -> {
 				int amount = buffer.readUnsignedShortLE128();
 				int id = buffer.readUnsignedShort128();
-				int i_5 = buffer.readUnsignedByteC();
+				int chunkCoords = buffer.readUnsignedByteC();
 				CoordGrid coordgrid_31 = IndexLoaders.MAP_REGION_DECODER.getBase();
-				int localY = (i_5 & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
+				int localY = (chunkCoords & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
 				int y = localY + coordgrid_31.y;
-				int localX = (i_5 >> 4 & 0x7) + Static.UPDATE_ZONE_X;
+				int localX = (chunkCoords >> 4 & 0x7) + Static.UPDATE_ZONE_X;
 				int x = localX + coordgrid_31.x;
 				boolean bool_36 = localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY();
 				if (bool_36 || IndexLoaders.MAP_REGION_DECODER.method4419().method4401()) {
 					Class353.addGroundItem(Class272.UPDATE_ZONE_PLANE, x, y, new GroundItemNode(id, amount));
 					if (bool_36)
 						Class434_Sub1.method12760(Class272.UPDATE_ZONE_PLANE, localX, localY);
+				}
+			}
+			case GROUND_ITEM_REVEAL -> {
+				int playerId = buffer.readUnsignedShort();
+				int chunkCoords = buffer.readUnsignedByte();
+				CoordGrid coordgrid_25 = IndexLoaders.MAP_REGION_DECODER.getBase();
+				int localY = (chunkCoords & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
+				int y = localY + coordgrid_25.y;
+				int localX = (chunkCoords >> 4 & 0x7) + Static.UPDATE_ZONE_X;
+				int x = localX + coordgrid_25.x;
+				int amount = buffer.readUnsignedShortLE128();
+				int id = buffer.readUnsignedShortLE128();
+				if (playerId != client.myPlayerIndex) {
+					boolean bool_40 = localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY();
+					if (bool_40 || IndexLoaders.MAP_REGION_DECODER.method4419().method4401()) {
+						Class353.addGroundItem(Class272.UPDATE_ZONE_PLANE, x, y, new GroundItemNode(id, amount));
+						if (bool_40)
+							Class434_Sub1.method12760(Class272.UPDATE_ZONE_PLANE, localX, localY);
+					}
 				}
 			}
 			case REMOVE_GROUND_ITEM -> {
@@ -2168,25 +2187,6 @@ public class PacketDecoder {
 						class282_sub29_39.unlink();
 					if (i_7 >= 0 && i_5 >= 0 && i_7 < IndexLoaders.MAP_REGION_DECODER.getSizeX() && i_5 < IndexLoaders.MAP_REGION_DECODER.getSizeY())
 						Class434_Sub1.method12760(Class272.UPDATE_ZONE_PLANE, i_7, i_5);
-				}
-			}
-			case GROUND_ITEM_REVEAL -> {
-				int playerId = buffer.readUnsignedShort();
-				int i_21 = buffer.readUnsignedByte();
-				CoordGrid coordgrid_25 = IndexLoaders.MAP_REGION_DECODER.getBase();
-				int i_6 = (i_21 & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
-				int y = i_6 + coordgrid_25.y;
-				int i_8 = (i_21 >> 4 & 0x7) + Static.UPDATE_ZONE_X;
-				int x = i_8 + coordgrid_25.x;
-				int amount = buffer.readUnsignedShortLE128();
-				int id = buffer.readUnsignedShortLE128();
-				if (playerId != client.myPlayerIndex) {
-					boolean bool_40 = i_8 >= 0 && i_6 >= 0 && i_8 < IndexLoaders.MAP_REGION_DECODER.getSizeX() && i_6 < IndexLoaders.MAP_REGION_DECODER.getSizeY();
-					if (bool_40 || IndexLoaders.MAP_REGION_DECODER.method4419().method4401()) {
-						Class353.addGroundItem(Class272.UPDATE_ZONE_PLANE, x, y, new GroundItemNode(id, amount));
-						if (bool_40)
-							Class434_Sub1.method12760(Class272.UPDATE_ZONE_PLANE, i_8, i_6);
-					}
 				}
 			}
 			case GROUND_ITEM_COUNT -> {
@@ -2214,43 +2214,46 @@ public class PacketDecoder {
 					}
 				}
 			}
-			case SOUND_SYNTH_TILE -> {
-				int flags = buffer.readUnsignedByte();
-				int localX = (flags >> 4 & 0x7) + Static.UPDATE_ZONE_X;
-				int localY = (flags & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
+			case SOUND_VORBIS_TILE -> {
+				int locHash = buffer.readUnsignedByte();
+				int localX = (locHash >> 4 & 0x7) + Static.UPDATE_ZONE_X;
+				int localY = (locHash & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
 				int soundId = buffer.readUnsignedShort();
 				if (soundId == 65535)
 					soundId = -1;
 				int i_7 = buffer.readUnsignedByte();
 				int i_8 = i_7 >> 4 & 0xf;
-				int i_9 = i_7 & 0x7;
-				int i_10 = buffer.readUnsignedByte();
-				int i_11 = buffer.readUnsignedByte();
-				int i_23 = buffer.readUnsignedShort();
-				boolean soundType = buffer.readUnsignedByte() == 1;
+				int repeat = i_7 & 0x7;
+				int delay = buffer.readUnsignedByte();
+				int volume = buffer.readUnsignedByte();
+				int sampleRate = buffer.readUnsignedShort();
+				boolean isVoice = buffer.readUnsignedByte() == 1;
 				if (IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY()) {
 					int i_14 = i_8 + 1;
 					if (VertexNormal.MY_PLAYER.regionBaseX[0] >= localX - i_14 && VertexNormal.MY_PLAYER.regionBaseX[0] <= localX + i_14 && VertexNormal.MY_PLAYER.regionBaseY[0] >= localY - i_14 && VertexNormal.MY_PLAYER.regionBaseY[0] <= i_14 + localY)
-						RegionLoadType.playSoundSynth(soundId, i_9, i_10, i_11, i_8 + (Class272.UPDATE_ZONE_PLANE << 24) + (localY << 8) + (localX << 16), soundType, i_23);
+						RegionLoadType.playSoundVorbis(soundId, repeat, delay, volume, i_8 + (Class272.UPDATE_ZONE_PLANE << 24) + (localY << 8) + (localX << 16), isVoice, sampleRate);
 				}
 			}
 			case SOUND_EFFECT_TILE -> {
-				int i_3 = buffer.readUnsignedByte();
-				int i_21 = (i_3 >> 4 & 0x7) + Static.UPDATE_ZONE_X;
-				int i_5 = (i_3 & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
-				int i_6 = buffer.readUnsignedShort();
-				if (i_6 == 65535)
-					i_6 = -1;
-				int i_7 = buffer.readUnsignedByte();
-				int i_8 = i_7 >> 4 & 0xf;
-				int i_9 = i_7 & 0x7;
-				int i_10 = buffer.readUnsignedByte();
-				int i_11 = buffer.readUnsignedByte();
-				int i_23 = buffer.readUnsignedShort();
-				if (IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && i_21 >= 0 && i_5 >= 0 && i_21 < IndexLoaders.MAP_REGION_DECODER.getSizeX() && i_5 < IndexLoaders.MAP_REGION_DECODER.getSizeY()) {
-					int i_24 = i_8 + 1;
-					if (VertexNormal.MY_PLAYER.regionBaseX[0] >= i_21 - i_24 && VertexNormal.MY_PLAYER.regionBaseX[0] <= i_21 + i_24 && VertexNormal.MY_PLAYER.regionBaseY[0] >= i_5 - i_24 && VertexNormal.MY_PLAYER.regionBaseY[0] <= i_24 + i_5)
-						Class383.playtiledSoundEffect(i_6, i_9, i_10, i_11, i_8 + (Class272.UPDATE_ZONE_PLANE << 24) + (i_5 << 8) + (i_21 << 16), i_23);
+				int locHash = buffer.readUnsignedByte();
+				int localChunkX = (locHash >> 4 & 0x7) + Static.UPDATE_ZONE_X;
+				int localChunkY = (locHash & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
+				int soundId = buffer.readUnsignedShort();
+				if (soundId == 65535)
+					soundId = -1;
+				int flags = buffer.readUnsignedByte();
+				int playRadius = flags >> 4 & 0xf;
+				int unk0to8 = flags & 0x7;
+				int delay = buffer.readUnsignedByte();
+				int volume = buffer.readUnsignedByte();
+				int sampleRate = buffer.readUnsignedShort();
+				if (IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && localChunkX >= 0 && localChunkY >= 0 && localChunkX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localChunkY < IndexLoaders.MAP_REGION_DECODER.getSizeY()) {
+					int radiusP1 = playRadius + 1;
+					if (VertexNormal.MY_PLAYER.regionBaseX[0] >= localChunkX - radiusP1 &&
+						VertexNormal.MY_PLAYER.regionBaseX[0] <= localChunkX + radiusP1 &&
+						VertexNormal.MY_PLAYER.regionBaseY[0] >= localChunkY - radiusP1 &&
+						VertexNormal.MY_PLAYER.regionBaseY[0] <= localChunkY + radiusP1)
+						Class383.playtiledSoundEffect(soundId, unk0to8, delay, volume, playRadius + (Class272.UPDATE_ZONE_PLANE << 24) + (localChunkY << 8) + (localChunkX << 16), sampleRate);
 				}
 			}
 			case TILE_MESSAGE -> {

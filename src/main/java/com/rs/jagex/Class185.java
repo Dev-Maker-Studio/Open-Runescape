@@ -1,10 +1,12 @@
 package com.rs.jagex;
 
+import com.rs.jagex.AreadSound.SoundType;
+
 public class Class185 {
 	public static void resetSounds() {
 		for (int i_1 = 0; i_1 < Class260.SOUNDS_SIZE; i_1++) {
 			AreadSound sound = Class260.SOUNDS[i_1];
-			if (sound.type == 3)
+			if (sound.type == SoundType.VOICE)
 				QuickchatFiller.method1142(sound);
 		}
 	}

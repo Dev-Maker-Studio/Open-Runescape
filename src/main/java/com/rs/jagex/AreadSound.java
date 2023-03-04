@@ -1,6 +1,8 @@
 package com.rs.jagex;
 
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AreadSound {
 
@@ -46,15 +48,38 @@ public class AreadSound {
 
 	Node_Sub15_Sub5 aNode_Sub15_Sub5_3304;
 
+	public enum SoundType {
+		EFFECT((byte) 1),
+		VORBIS_EFFECT((byte) 2),
+		VOICE((byte) 3);
+
+		final byte type;
+
+		SoundType(byte type) {
+			this.type = type;
+		}
+
+		static final Map<Byte, SoundType> MAP = new HashMap<>();
+
+		static {
+			for (SoundType t : SoundType.values())
+				MAP.put(t.type, t);
+		}
+
+		public static SoundType forId(byte id) {
+			return MAP.get(id);
+		}
+	}
+
 	int anInt3305 = -1;
 
 	int anInt3306 = -1;
 
-	byte type;
+	SoundType type;
 
 	int soundId;
 
-	int anInt3302;
+	int unk0to8;
 
 	int delay;
 
@@ -64,10 +89,10 @@ public class AreadSound {
 
 	int sampleRate;
 
-	AreadSound(byte type, int soundId, int i_3, int delay, int volume, int sourceTile, int sampleRate, GraphNode_Sub1 class521_sub1_8) {
+	AreadSound(SoundType type, int soundId, int i_3, int delay, int volume, int sourceTile, int sampleRate, GraphNode_Sub1 class521_sub1_8) {
 		this.type = type;
 		this.soundId = soundId;
-		this.anInt3302 = i_3;
+		this.unk0to8 = i_3;
 		this.delay = delay;
 		this.volume = volume;
 		this.sourceTile = sourceTile;
@@ -78,7 +103,7 @@ public class AreadSound {
 		}
 	}
 
-	boolean method4793() {
-		return type == 2 || type == 3;
+	boolean isVorbis() {
+		return type == SoundType.VORBIS_EFFECT || type == SoundType.VOICE;
 	}
 }

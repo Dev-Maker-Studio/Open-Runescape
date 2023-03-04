@@ -1,5 +1,7 @@
 package com.rs.jagex;
 
+import com.rs.jagex.AreadSound.SoundType;
+
 public class WorldType {
 
 	public static void method3662(AnimationDefinitions animDef, int i_1, GraphNode_Sub1 class521_sub1_2) {
@@ -25,7 +27,7 @@ public class WorldType {
 				if (animDef.vorbisSound)
 					Class435.playSoundVorbis(i_5, i_6, 0, i_9, false, i_8);
 				else
-					VarNPCMap.playSoundSynth(i_5, i_6, 0, i_9, i_8);
+					VarNPCMap.playSoundEffect(i_5, i_6, 0, i_9, i_8);
 		} else {
 			if (class521_sub1_2 == VertexNormal.MY_PLAYER) {
 				if (Class393.preferences.soundEffectVolume.method12714() == 0)
@@ -37,7 +39,7 @@ public class WorldType {
 			int i_11 = (int) vector3_10.x - 256 >> 9;
 			int i_12 = (int) vector3_10.z - 256 >> 9;
 			int i_13 = class521_sub1_2 == VertexNormal.MY_PLAYER ? 0 : i_7 + (i_12 << 8) + (class521_sub1_2.plane << 24) + (i_11 << 16);
-			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = new AreadSound((byte) (animDef.vorbisSound ? 2 : 1), i_5, i_6, 0, i_9, i_13, i_8, class521_sub1_2);
+			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = new AreadSound(animDef.vorbisSound ? SoundType.VORBIS_EFFECT : SoundType.EFFECT, i_5, i_6, 0, i_9, i_13, i_8, class521_sub1_2);
 		}
 		}
 

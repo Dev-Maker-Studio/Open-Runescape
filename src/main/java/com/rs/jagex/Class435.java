@@ -1,5 +1,7 @@
 package com.rs.jagex;
 
+import com.rs.jagex.AreadSound.SoundType;
+
 public class Class435 {
 
 	static NodeCollection PENDING_REFLECTION_CHECKS = new NodeCollection();
@@ -198,7 +200,7 @@ public class Class435 {
 
 	public static AreadSound playSoundVorbis(int soundId, int unk, int delay, int volume, boolean voiceEffect, int sampleRate) {
 		if ((voiceEffect ? Class393.preferences.voiceOverVolume.method12714() : Class393.preferences.soundEffectVolume.method12714()) != 0 && unk != 0 && Class260.SOUNDS_SIZE < 50 && soundId != -1) {
-			AreadSound class268_7 = new AreadSound((byte) (voiceEffect ? 3 : 2), soundId, unk, delay, volume, 0, sampleRate, null);
+			AreadSound class268_7 = new AreadSound(voiceEffect ? SoundType.VOICE : SoundType.VORBIS_EFFECT, soundId, unk, delay, volume, 0, sampleRate, null);
 			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = class268_7;
 			return class268_7;
 		}

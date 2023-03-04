@@ -77,7 +77,7 @@ public class Class175 {
 								class282_sub48_0.aNode_Sub26_Sub1_Sub1_8082 = class282_sub48_0.aNode_Sub18_8097.method12272();
 							if (class282_sub48_0.aNode_Sub26_Sub1_Sub1_8082 != null) {
 								class282_sub15_sub5_sub1_14 = (Node_Sub15_Sub5_Sub1) class282_sub48_0.aNode_Sub26_Sub1_Sub1_8082.method15225(i_12, i_9 << 6, i_11);
-								class282_sub15_sub5_sub1_14.method15325(-1);
+								class282_sub15_sub5_sub1_14.setUnk0to8(-1);
 								Class79.aNode_Sub15_Sub4_783.method15275(class282_sub15_sub5_sub1_14);
 								class282_sub48_0.aNode_Sub15_Sub5_8099 = class282_sub15_sub5_sub1_14;
 							}
@@ -87,7 +87,7 @@ public class Class175 {
 						if (class343_19 != null) {
 							class282_sub26_sub1_sub2_15 = class343_19.getMixedAudio().method16062(Class119.aClass344_1460);
 							class282_sub15_sub5_sub2_16 = (Node_Sub15_Sub5_Sub2) class282_sub26_sub1_sub2_15.method15225(i_12, i_9 << 6, i_11);
-							class282_sub15_sub5_sub2_16.method15325(-1);
+							class282_sub15_sub5_sub2_16.setUnk0to8(-1);
 							Class79.aNode_Sub15_Sub4_783.method15275(class282_sub15_sub5_sub2_16);
 							class282_sub48_0.aNode_Sub15_Sub5_8099 = class282_sub15_sub5_sub2_16;
 						}
@@ -110,7 +110,7 @@ public class Class175 {
 								class282_sub48_0.aNode_Sub26_Sub1_Sub1_8106 = class282_sub48_0.aNode_Sub18_8087.method12272();
 							if (class282_sub48_0.aNode_Sub26_Sub1_Sub1_8106 != null) {
 								class282_sub15_sub5_sub1_14 = (Node_Sub15_Sub5_Sub1) class282_sub48_0.aNode_Sub26_Sub1_Sub1_8106.method15225(i_12, i_9 << 6, i_11);
-								class282_sub15_sub5_sub1_14.method15325(0);
+								class282_sub15_sub5_sub1_14.setUnk0to8(0);
 								Class79.aNode_Sub15_Sub4_783.method15275(class282_sub15_sub5_sub1_14);
 								class282_sub48_0.aNode_Sub15_Sub5_8096 = class282_sub15_sub5_sub1_14;
 								class282_sub48_0.anInt8080 = class282_sub48_0.anInt8072 + (int) (Math.random() * (class282_sub48_0.anInt8101 - class282_sub48_0.anInt8072));
@@ -122,7 +122,7 @@ public class Class175 {
 						if (class343_19 != null) {
 							class282_sub26_sub1_sub2_15 = class343_19.getMixedAudio().method16062(Class119.aClass344_1460);
 							class282_sub15_sub5_sub2_16 = (Node_Sub15_Sub5_Sub2) class282_sub26_sub1_sub2_15.method15225(i_12, i_9 << 6, i_11);
-							class282_sub15_sub5_sub2_16.method15325(0);
+							class282_sub15_sub5_sub2_16.setUnk0to8(0);
 							Class79.aNode_Sub15_Sub4_783.method15275(class282_sub15_sub5_sub2_16);
 							class282_sub48_0.aNode_Sub15_Sub5_8096 = class282_sub15_sub5_sub2_16;
 							class282_sub48_0.anInt8080 = class282_sub48_0.anInt8072 + (int) (Math.random() * (class282_sub48_0.anInt8101 - class282_sub48_0.anInt8072));

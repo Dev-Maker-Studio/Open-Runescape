@@ -5325,7 +5325,7 @@ public class CS2Interpreter {
 
 	static void method14520(CS2Executor executor) {
 		executor.intStackPtr -= 4;
-		VarNPCMap.playSoundSynth(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], 256);
+		VarNPCMap.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], 256);
 	}
 
 	static void method14521(CS2Executor executor) {
@@ -6193,7 +6193,7 @@ public class CS2Interpreter {
 
 	static void method1888(CS2Executor executor) {
 		executor.intStackPtr -= 5;
-		VarNPCMap.playSoundSynth(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], executor.intStack[executor.intStackPtr + 4]);
+		VarNPCMap.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], executor.intStack[executor.intStackPtr + 4]);
 	}
 
 	static void method1889(CS2Executor executor) {
@@ -10566,7 +10566,7 @@ public class CS2Interpreter {
 
 	static void playSoundSynth(CS2Executor executor) {
 		executor.intStackPtr -= 3;
-		VarNPCMap.playSoundSynth(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], 255, 256);
+		VarNPCMap.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], 255, 256);
 	}
 
 	static void playSoundVorbisVolume(CS2Executor executor) {

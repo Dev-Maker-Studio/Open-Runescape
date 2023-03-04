@@ -18,7 +18,7 @@ public enum UpdateZonePacket {
 	SOUND_EFFECT_TILE(ServerProt.SOUND_EFFECT_TILE, 8),
 	TILE_MESSAGE(ServerProt.TILE_MESSAGE, -1),
 	OBJ_ANIM(ServerProt.OBJ_ANIM, 6),
-	SOUND_SYNTH_TILE(null, 9),
+	SOUND_VORBIS_TILE(null, 9),
 	SPOT_ANIM(ServerProt.SPOT_ANIM, 8);
 
 	static void method6292(int i_0, int i_1, int i_2, int i_3) {

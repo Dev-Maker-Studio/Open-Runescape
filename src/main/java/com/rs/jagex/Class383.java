@@ -1,14 +1,16 @@
 package com.rs.jagex;
 
+import com.rs.jagex.AreadSound.SoundType;
+
 import java.awt.*;
 
 public class Class383 implements Interface41 {
 
 	static int anInt4664;
 
-	public static AreadSound playtiledSoundEffect(int i_0, int i_1, int i_2, int i_3, int i_4, int i_5) {
-		if (Class393.preferences.soundEffectVolume.method12714() != 0 && i_1 != 0 && Class260.SOUNDS_SIZE < 50 && i_0 != -1) {
-			AreadSound class268_7 = new AreadSound((byte) 1, i_0, i_1, i_2, i_3, i_4, i_5, null);
+	public static AreadSound playtiledSoundEffect(int soundId, int unk, int delay, int volume, int tile, int sampleRate) {
+		if (Class393.preferences.soundEffectVolume.method12714() != 0 && unk != 0 && Class260.SOUNDS_SIZE < 50 && soundId != -1) {
+			AreadSound class268_7 = new AreadSound(SoundType.EFFECT, soundId, unk, delay, volume, tile, sampleRate, null);
 			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = class268_7;
 			return class268_7;
 		}
@@ -60,17 +62,17 @@ public class Class383 implements Interface41 {
 			MeshRasterizer meshrasterizer_9 = Renderers.CURRENT_RENDERER.createMeshRasterizer(rsmesh_5, 2048, 64, 64, 768);
 			int i_10 = 0;
 			label43:
-				for (int i_11 = 0; i_11 < 500; i_11++) {
-					Renderers.CURRENT_RENDERER.ba(3, 0);
-					for (int i_12 = 15; i_12 >= 0; --i_12)
-						for (int i_13 = 0; i_13 <= i_12; i_13++) {
-							client.aClass294_7169.method5223(((int) (512.0F * (i_13 - i_12 / 2.0F))), 0.0F, ((i_12 + 1) * 512));
-							meshrasterizer_9.method11282(client.aClass294_7169, null, 0);
-							++i_10;
-							if (Utils.time() - long_6 >= i_1)
-								break label43;
-						}
-				}
+			for (int i_11 = 0; i_11 < 500; i_11++) {
+				Renderers.CURRENT_RENDERER.ba(3, 0);
+				for (int i_12 = 15; i_12 >= 0; --i_12)
+					for (int i_13 = 0; i_13 <= i_12; i_13++) {
+						client.aClass294_7169.method5223(((int) (512.0F * (i_13 - i_12 / 2.0F))), 0.0F, ((i_12 + 1) * 512));
+						meshrasterizer_9.method11282(client.aClass294_7169, null, 0);
+						++i_10;
+						if (Utils.time() - long_6 >= i_1)
+							break label43;
+					}
+			}
 			Renderers.CURRENT_RENDERER.method8395();
 			long long_14 = (i_10 * 1000) / (Utils.time() - long_6);
 			Renderers.CURRENT_RENDERER.ba(3, 0);

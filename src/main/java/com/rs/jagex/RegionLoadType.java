@@ -1,5 +1,7 @@
 package com.rs.jagex;
 
+import com.rs.jagex.AreadSound.SoundType;
+
 public enum RegionLoadType {
 
 	LOAD_MAP_SCENE_BACKGROUND(false, false),
@@ -20,9 +22,9 @@ public enum RegionLoadType {
 			VarBitIndexLoader.method3912();
 		}
 	}
-	public static AreadSound playSoundSynth(int soundId, int i_1, int i_2, int i_3, int i_4, boolean type, int i_6) {
-		if ((type ? Class393.preferences.voiceOverVolume.method12714() : Class393.preferences.soundEffectVolume.method12714()) != 0 && i_1 != 0 && Class260.SOUNDS_SIZE < 50 && soundId != -1) {
-			AreadSound class268_8 = new AreadSound((byte) (type ? 3 : 2), soundId, i_1, i_2, i_3, i_4, i_6, null);
+	public static AreadSound playSoundVorbis(int soundId, int repeat, int delay, int volume, int sourceTile, boolean isVoice, int sampleRate) {
+		if ((isVoice ? Class393.preferences.voiceOverVolume.method12714() : Class393.preferences.soundEffectVolume.method12714()) != 0 && repeat != 0 && Class260.SOUNDS_SIZE < 50 && soundId != -1) {
+			AreadSound class268_8 = new AreadSound(isVoice ? SoundType.VOICE : SoundType.VORBIS_EFFECT, soundId, repeat, delay, volume, sourceTile, sampleRate, null);
 			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = class268_8;
 			return class268_8;
 		}
