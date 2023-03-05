@@ -27,7 +27,7 @@ public class Class520 {
 	}
 
 	public GroundItem method11158() {
-		Node_Sub29 class282_sub29_2 = (Node_Sub29) client.aClass465_7414.get(aClass219_5934.plane << 28 | aClass219_5934.y << 14 | aClass219_5934.x);
+		Node_Sub29 class282_sub29_2 = (Node_Sub29) client.GROUND_ITEMS.get(aClass219_5934.plane << 28 | aClass219_5934.y << 14 | aClass219_5934.x);
 		if (class282_sub29_2 != null) {
 			CoordGrid coordgrid_3 = IndexLoaders.MAP_REGION_DECODER.getBase();
 			int i_4 = aClass219_5934.x - coordgrid_3.x;

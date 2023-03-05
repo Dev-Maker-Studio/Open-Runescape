@@ -100,7 +100,7 @@ public class client extends Engine {
 	public static boolean VERIFIED_EMAIL_ADDRESS;
 	public static boolean aBool7323;
 	public static boolean IS_QUICKCHAT_ONLY;
-	public static IterableNodeMap aClass465_7414;
+	public static IterableNodeMap GROUND_ITEMS;
 	public static NodeCollection PROJECTILES;
 	public static IterableNodeMap aClass465_7334;
 	public static EntityList aClass457_7335;
@@ -409,7 +409,7 @@ public class client extends Engine {
 		PLAYER_OPTIONS = new String[8];
 		PLAYER_OPTION_REDUCED_PRIORITY = new boolean[8];
 		anInt7311 = -1;
-		aClass465_7414 = new IterableNodeMap(64);
+		GROUND_ITEMS = new IterableNodeMap(64);
 		PROJECTILES = new NodeCollection();
 		aClass465_7334 = new IterableNodeMap(16);
 		aClass457_7335 = new EntityList();

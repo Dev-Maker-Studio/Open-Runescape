@@ -650,7 +650,7 @@ public class MapRegion {
 			if (mapType != RegionLoadType.aRegionLoadType_3161 && (class282_sub31_26.anInt7762 < 0 || class282_sub31_26.anInt7763 < 0 || class282_sub31_26.anInt7762 >= sizeX || class282_sub31_26.anInt7763 >= sizeY))
 				class282_sub31_26.unlink();
 		}
-		for (Node_Sub29 class282_sub29_27 = (Node_Sub29) client.aClass465_7414.method7750(); class282_sub29_27 != null; class282_sub29_27 = (Node_Sub29) client.aClass465_7414.method7751()) {
+		for (Node_Sub29 class282_sub29_27 = (Node_Sub29) client.GROUND_ITEMS.method7750(); class282_sub29_27 != null; class282_sub29_27 = (Node_Sub29) client.GROUND_ITEMS.method7751()) {
 			i_16 = (int) (class282_sub29_27.pointer >> 28 & 0x3L);
 			i_8 = (int) (class282_sub29_27.pointer & 0x3fffL);
 			int i_17 = i_8 - coordGrid.x;

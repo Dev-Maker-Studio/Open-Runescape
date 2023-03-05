@@ -12,10 +12,10 @@ public class Class353 {
 
 	static void addGroundItem(int i_0, int x, int y, GroundItemNode groundItem) {
 		long long_5 = i_0 << 28 | y << 14 | x;
-		Node_Sub29 class282_sub29_7 = (Node_Sub29) client.aClass465_7414.get(long_5);
+		Node_Sub29 class282_sub29_7 = (Node_Sub29) client.GROUND_ITEMS.get(long_5);
 		if (class282_sub29_7 == null) {
 			class282_sub29_7 = new Node_Sub29();
-			client.aClass465_7414.put(class282_sub29_7, long_5);
+			client.GROUND_ITEMS.put(class282_sub29_7, long_5);
 		} else {
 			ItemDefinitions itemdefinitions_8 = IndexLoaders.ITEM_LOADER.getItemDefinitions(groundItem.id);
 			int i_9 = itemdefinitions_8.value;

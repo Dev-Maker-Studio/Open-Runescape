@@ -1106,17 +1106,17 @@ public class PacketDecoder {
 			}
 			case PLAYER_UPDATE -> PlayerUpdate.decode(buffer, context.currentPacketSize);
 			case NPC_UPDATE, NPC_UPDATE_LARGE -> NPCUpdate.decode(context.currentPacket == ServerProt.NPC_UPDATE_LARGE);
-			case UPDATE_ZONE_FULL_FOLLOWS -> {
+			case UPDATE_ZONE_PARTIAL_FOLLOWS -> {
 				Class158_Sub1_Sub2.UPDATE_ZONE_Y = buffer.readByte128() << 3;
 				Class272.UPDATE_ZONE_PLANE = buffer.readUnsignedByte128();
 				Static.UPDATE_ZONE_X = buffer.readByte128() << 3;
 			}
-			case UPDATE_ZONE_PARTIAL_FOLLOWS -> {
+			case UPDATE_ZONE_FULL_FOLLOWS -> {
 				Static.UPDATE_ZONE_X = buffer.read128Byte() << 3;
 				Class158_Sub1_Sub2.UPDATE_ZONE_Y = buffer.readByte() << 3;
 				Class272.UPDATE_ZONE_PLANE = buffer.readUnsignedByte();
 				CoordGrid coordgrid_67 = IndexLoaders.MAP_REGION_DECODER.getBase();
-				for (Node_Sub29 class282_sub29_109 = (Node_Sub29) client.aClass465_7414.method7750(); class282_sub29_109 != null; class282_sub29_109 = (Node_Sub29) client.aClass465_7414.method7751()) {
+				for (Node_Sub29 class282_sub29_109 = (Node_Sub29) client.GROUND_ITEMS.method7750(); class282_sub29_109 != null; class282_sub29_109 = (Node_Sub29) client.GROUND_ITEMS.method7751()) {
 					int i_6 = (int) (class282_sub29_109.pointer >> 28 & 0x3L);
 					int i_7 = (int) (class282_sub29_109.pointer & 0x3fffL);
 					int i_8 = i_7 - coordgrid_67.x;
@@ -1947,6 +1947,7 @@ public class PacketDecoder {
 
 	static void decodeUpdateZonePacket(UpdateZonePacket packet) {
 		ByteBuf.Bit buffer = client.GAME_CONNECTION_CONTEXT.recievedBuffer;
+		System.out.println("Update zone packet: " + packet);
 		switch(packet) {
 			case SPOT_ANIM -> {
 				int i_3 = buffer.readUnsignedByte();
@@ -2142,6 +2143,7 @@ public class PacketDecoder {
 				int y = localY + coordgrid_31.y;
 				int localX = (chunkCoords >> 4 & 0x7) + Static.UPDATE_ZONE_X;
 				int x = localX + coordgrid_31.x;
+				System.out.println(x + ", " + y);
 				boolean bool_36 = localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY();
 				if (bool_36 || IndexLoaders.MAP_REGION_DECODER.method4419().method4401()) {
 					Class353.addGroundItem(Class272.UPDATE_ZONE_PLANE, x, y, new GroundItemNode(id, amount));
@@ -2176,7 +2178,7 @@ public class PacketDecoder {
 				int i_7 = (i_3 >> 4 & 0x7) + Static.UPDATE_ZONE_X;
 				int i_8 = i_7 + coordgrid_4.x;
 				int i_9 = buffer.readUnsignedShortLE128();
-				Node_Sub29 class282_sub29_39 = (Node_Sub29) client.aClass465_7414.get(Class272.UPDATE_ZONE_PLANE << 28 | i_6 << 14 | i_8);
+				Node_Sub29 class282_sub29_39 = (Node_Sub29) client.GROUND_ITEMS.get(Class272.UPDATE_ZONE_PLANE << 28 | i_6 << 14 | i_8);
 				if (class282_sub29_39 != null) {
 					for (GroundItemNode class282_sub34_26 = (GroundItemNode) class282_sub29_39.aClass482_7708.head(); class282_sub34_26 != null; class282_sub34_26 = (GroundItemNode) class282_sub29_39.aClass482_7708.next())
 						if ((i_9 & 0x7fff) == class282_sub34_26.id) {
@@ -2199,8 +2201,8 @@ public class PacketDecoder {
 				int itemId = buffer.readUnsignedShort();
 				int oldAmount = buffer.readUnsignedShort();
 				int amount = buffer.readUnsignedShort();
-				if (client.aClass465_7414 != null) {
-					Node_Sub29 class282_sub29_12 = (Node_Sub29) client.aClass465_7414.get(Class272.UPDATE_ZONE_PLANE << 28 | y << 14 | x);
+				if (client.GROUND_ITEMS != null) {
+					Node_Sub29 class282_sub29_12 = (Node_Sub29) client.GROUND_ITEMS.get(Class272.UPDATE_ZONE_PLANE << 28 | y << 14 | x);
 					if (class282_sub29_12 != null) {
 						for (GroundItemNode item = (GroundItemNode) class282_sub29_12.aClass482_7708.head(); item != null; item = (GroundItemNode) class282_sub29_12.aClass482_7708.next())
 							if ((itemId & 0x7fff) == item.id && oldAmount == item.amount) {

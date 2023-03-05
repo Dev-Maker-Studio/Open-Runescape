@@ -113,7 +113,7 @@ public class Class190 {
 		client.PROJECTILES.removeAll();
 		client.aClass465_7334.method7749();
 		client.aClass457_7335.method7651();
-		client.aClass465_7414.method7749();
+		client.GROUND_ITEMS.method7749();
 		Node_Sub31.aClass482_7775 = new NodeCollection();
 		Node_Sub31.aClass482_7776 = new NodeCollection();
 		Class158_Sub1.PLAYER_VAR_PROVIDER.method265();

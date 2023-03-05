@@ -211,7 +211,7 @@ public class GraphNode_Sub1_Sub4_Sub1 extends GraphNode_Sub1_Sub4 implements Wor
 								if (class285_34.aTransform_Sub1_3391 instanceof GroundItem) {
 									int i_48 = i_46 + coordgrid_4.x;
 									i_49 = i_47 + coordgrid_4.y;
-									Node_Sub29 class282_sub29_61 = (Node_Sub29) client.aClass465_7414.get(class285_34.aTransform_Sub1_3391.plane << 28 | i_49 << 14 | i_48);
+									Node_Sub29 class282_sub29_61 = (Node_Sub29) client.GROUND_ITEMS.get(class285_34.aTransform_Sub1_3391.plane << 28 | i_49 << 14 | i_48);
 									if (class282_sub29_61 != null) {
 										i_21 = 0;
 

@@ -18,7 +18,7 @@ public class Class434_Sub1 extends Class434 {
 		int i_6 = i_2 + coordgrid_4.y;
 		if (IndexLoaders.MAP_REGION_DECODER.getSceneObjectManager() != null && IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && i_1 >= 0 && i_2 >= 0 && i_1 < IndexLoaders.MAP_REGION_DECODER.getSizeX() && i_2 < IndexLoaders.MAP_REGION_DECODER.getSizeY()) {
 			long long_7 = i_0 << 28 | i_6 << 14 | i_5;
-			Node_Sub29 class282_sub29_9 = (Node_Sub29) client.aClass465_7414.get(long_7);
+			Node_Sub29 class282_sub29_9 = (Node_Sub29) client.GROUND_ITEMS.get(long_7);
 			if (class282_sub29_9 == null)
 				IndexLoaders.MAP_REGION_DECODER.getSceneObjectManager().method3405(i_0, i_1, i_2);
 			else {

@@ -21,7 +21,7 @@ public class Class42_Sub1 extends Class42 {
 		client.NPC_UPDATE_INDEX = 0;
 		client.NPC_MAP.method7749();
 		client.anInt7210 = 0;
-		client.aClass465_7414.method7749();
+		client.GROUND_ITEMS.method7749();
 		Camera.resetHard();
 		client.anInt7221 = 0;
 		Class158_Sub1.PLAYER_VAR_PROVIDER.method265();

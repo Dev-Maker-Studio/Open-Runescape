@@ -64,7 +64,7 @@ public class Item extends Node {
 					Class158.method2731(graphicalrenderer_0, class455_6, icomponentdefinitions_1, i_2, i_3, i_16, i_17, objectdefinitions_23.mapIcon);
 				}
 
-				for (Node_Sub29 class282_sub29_24 = (Node_Sub29) client.aClass465_7414.method7750(); class282_sub29_24 != null; class282_sub29_24 = (Node_Sub29) client.aClass465_7414.method7751()) {
+				for (Node_Sub29 class282_sub29_24 = (Node_Sub29) client.GROUND_ITEMS.method7750(); class282_sub29_24 != null; class282_sub29_24 = (Node_Sub29) client.GROUND_ITEMS.method7751()) {
 					i_16 = (int) (class282_sub29_24.pointer >> 28 & 0x3L);
 					if (i_16 == Class187.anInt2351) {
 						i_17 = (int) (class282_sub29_24.pointer & 0x3fffL) - coordgrid_7.x;
