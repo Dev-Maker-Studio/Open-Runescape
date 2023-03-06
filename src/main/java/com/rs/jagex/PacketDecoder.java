@@ -72,7 +72,6 @@ public class PacketDecoder {
 			CursorIndexLoader.killConnections(false);
 			return true;
 		}
-
 		switch(context.currentPacket) {
 			case IF_OPENTOP -> {
 				int key = buffer.readIntV1();
@@ -1947,7 +1946,6 @@ public class PacketDecoder {
 
 	static void decodeUpdateZonePacket(UpdateZonePacket packet) {
 		ByteBuf.Bit buffer = client.GAME_CONNECTION_CONTEXT.recievedBuffer;
-		System.out.println("Update zone packet: " + packet);
 		switch(packet) {
 			case SPOT_ANIM -> {
 				int i_3 = buffer.readUnsignedByte();
@@ -2143,7 +2141,6 @@ public class PacketDecoder {
 				int y = localY + coordgrid_31.y;
 				int localX = (chunkCoords >> 4 & 0x7) + Static.UPDATE_ZONE_X;
 				int x = localX + coordgrid_31.x;
-				System.out.println(x + ", " + y);
 				boolean bool_36 = localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY();
 				if (bool_36 || IndexLoaders.MAP_REGION_DECODER.method4419().method4401()) {
 					Class353.addGroundItem(Class272.UPDATE_ZONE_PLANE, x, y, new GroundItemNode(id, amount));
