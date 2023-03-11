@@ -39,10 +39,10 @@ public class NPCUpdate {
 				client.NPC_ARRAY[i_6] = null;
 		}
 		if (client.GAME_CONNECTION_CONTEXT.recievedBuffer.index != client.GAME_CONNECTION_CONTEXT.currentPacketSize)
-			throw new RuntimeException(client.GAME_CONNECTION_CONTEXT.recievedBuffer.index + " " + client.GAME_CONNECTION_CONTEXT.currentPacketSize);
+			throw new RuntimeException(client.GAME_CONNECTION_CONTEXT.recievedBuffer.index + "," + client.GAME_CONNECTION_CONTEXT.currentPacketSize);
 		for (i_3 = 0; i_3 < client.NPC_UPDATE_INDEX; i_3++)
 			if (client.NPC_MAP.get(client.NPC_UPDATE_INDICES[i_3]) == null)
-				throw new RuntimeException(i_3 + " " + client.NPC_UPDATE_INDEX);
+				throw new RuntimeException(i_3 + "," + client.NPC_UPDATE_INDEX);
 		if (client.anInt7210 - client.NPC_UPDATE_INDEX != 0)
 			throw new RuntimeException("" + (client.anInt7210 - client.NPC_UPDATE_INDEX));
 		else
@@ -61,7 +61,7 @@ public class NPCUpdate {
 				client.anIntArray7421[++client.anInt7216 - 1] = client.NPC_UPDATE_INDICES[i];
 
 		if (size > client.NPC_UPDATE_INDEX)
-			throw new RuntimeException();
+			throw new RuntimeException(size+"/"+client.NPC_UPDATE_INDEX);
 		client.NPC_UPDATE_INDEX = 0;
 
 		for (i = 0; i < size; i++) {

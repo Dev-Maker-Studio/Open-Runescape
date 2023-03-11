@@ -23,8 +23,6 @@ public class Class197 {
 		byte b_5 = (byte) (i_4 >> 28);
 		int i_6 = i_4 >> 14 & 0x3fff;
 		int i_7 = i_4 & 0x3fff;
-		System.out.println(Class9.CURRENT_CONNECTION_CONTEXT.currentPacket);
-		System.out.println("Decoded: " + b_5 + " " + i_6 + " " + i_7);
 		CoordGrid coordgrid_8 = IndexLoaders.MAP_REGION_DECODER.getBase();
 		player_3.regionBaseX[0] = i_6 - coordgrid_8.x;
 		player_3.regionBaseY[0] = i_7 - coordgrid_8.y;
@@ -54,6 +52,7 @@ public class Class197 {
 				PLAYER_UPDATE_SLOT_FLAGS[i_9] = 0;
 			}
 		packet.finishBitAccess();
+		System.out.println("Finished reading LSWP: " + packet.index + "/" + packet.buffer.length);
 	}
 
 	Class197() throws Throwable {
