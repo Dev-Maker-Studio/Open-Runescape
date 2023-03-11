@@ -1,5 +1,6 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "6.0.0"
+    id("com.github.johnrengelman.shadow") version "8.1.0"
+    id("maven-publish")
     java
     application
 }
@@ -23,10 +24,32 @@ dependencies {
 
 }
 
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifact(tasks["shadowJar"])
+        }
+    }
+    repositories {
+        maven {
+            name = "GitLabRepository"
+            url = uri("https://gitlab.com/api/v4/projects/42378995/packages/maven")
+            credentials(HttpHeaderCredentials::class) {
+                name = "Job-Token"
+                value = System.getenv("CI_JOB_TOKEN")
+            }
+            authentication {
+                create("header", HttpHeaderAuthentication::class)
+            }
+        }
+    }
+}
+
 tasks {
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_19
+        targetCompatibility = JavaVersion.VERSION_19
     }
 
     withType<JavaCompile> {
@@ -40,7 +63,7 @@ tasks {
     }
 
     shadowJar {
-        archiveName = "darkan-client-shaded.jar"
+        archiveBaseName.set("darkan-client-shaded")
     }
 }
 
