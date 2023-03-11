@@ -28,13 +28,12 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
-            artifact(tasks["shadowJar"])
         }
     }
     repositories {
         maven {
-            name = "GitLabRepository"
-            url = uri("https://gitlab.com/api/v4/projects/42378995/packages/maven")
+            name = "GitLab"
+            url = uri("https://gitlab.example.com/api/v4/groups/42378995/-/packages/maven")
             credentials(HttpHeaderCredentials::class) {
                 name = "Job-Token"
                 value = System.getenv("CI_JOB_TOKEN")
