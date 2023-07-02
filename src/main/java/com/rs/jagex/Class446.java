@@ -118,7 +118,7 @@ public class Class446 {
 				Class292.method5201(i_11, i_12, i_7, i_8);
 			} else {
 				i_7 = fontmetrics_41.method6951(string_0, 250, null);
-				i_8 = fontmetrics_41.method6949(string_0, 250, null) * 13;
+				i_8 = fontmetrics_41.getLineCount(string_0, 250, null) * 13;
 				byte b_9 = 4;
 				i_10 = b_9 + 6;
 				i_11 = b_9 + 6;

@@ -1,6 +1,7 @@
 package com.rs.jagex;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class Class291 {
@@ -546,7 +547,6 @@ public class Class291 {
 							ints_17[i_19] = rsbytebuffer_1.readBigSmart();
 							bytes_18[i_19] = rsbytebuffer_1.readByte();
 						}
-
 						anObjectArray3488[i_5 * xLength + i_4] = new Node_Sub49(ints_17, bytes_18);
 					}
 				} else {
@@ -564,7 +564,6 @@ public class Class291 {
 
 					if (anArrayListArrayArrayArray3484[i_12 - 1][i_2 - (anInt3472 >> 6)][i_3 - (anInt3473 >> 6)] == null)
 						anArrayListArrayArrayArray3484[i_12 - 1][i_2 - (anInt3472 >> 6)][i_3 - (anInt3473 >> 6)] = new ArrayList();
-
 					Class269 class269_20 = new Class269(i_4 & 0x3f, i_5 & 0x3f, i_13, i_14, i_15, ints_17, bytes_18);
 					anArrayListArrayArrayArray3484[i_12 - 1][i_2 - (anInt3472 >> 6)][i_3 - (anInt3473 >> 6)].add(class269_20);
 				}

@@ -143,7 +143,7 @@ public class MapAreaDefinitions {
 		if (worldmapareadefs_2.areaName != null) {
 			class194_15 = AsyncInputStream.method5048(worldmapareadefs_2.anInt2722);
 			if (class194_15 != null) {
-				i_16 = Node_Sub17_Sub2.aClass414_9933.method6987(worldmapareadefs_2.areaName, null, Class291_Sub1.aStringArray8024, null);
+				i_16 = Node_Sub17_Sub2.aClass414_9933.getLineCount(worldmapareadefs_2.areaName, null, Class291_Sub1.aStringArray8024, null);
 				i_17 = (Class291.anInt3476 - Class291.anInt3489) * worldmapareadefs_2.anInt2750 / (Class291.anInt3480 - Class291.anInt3485) + class282_sub36_1.anInt7990;
 				i_18 = class282_sub36_1.anInt7992 - (Class291.anInt3492 - Class291.anInt3490) * worldmapareadefs_2.anInt2752 / (Class291.anInt3486 - Class291.anInt3465);
 				if (nativesprite_10 == null)

@@ -358,7 +358,7 @@ public abstract class FontRenderer {
 			ints_18 = null;
 		else
 			ints_18 = new int[]{i_4};
-		int i_19 = fontMetrics.method6987(string_1, ints_18, aStringArray69, arr_12);
+		int i_19 = fontMetrics.getLineCount(string_1, ints_18, aStringArray69, arr_12);
 		if (i_111 == -1) {
 			i_111 = i_5 / i_101;
 			if (i_111 <= 0)

@@ -7005,7 +7005,7 @@ public class CS2Interpreter {
 		int i_3 = executor.intStack[executor.intStackPtr];
 		int i_4 = executor.intStack[executor.intStackPtr + 1];
 		FontMetrics fontmetrics_5 = Class94.getFontMetrics(IndexLoaders.FONT_METRICS_INDEX, i_4);
-		executor.intStack[++executor.intStackPtr - 1] = fontmetrics_5.method6949(string_2, i_3, Class182.aNativeSpriteArray2261);
+		executor.intStack[++executor.intStackPtr - 1] = fontmetrics_5.getLineCount(string_2, i_3, Class182.aNativeSpriteArray2261);
 	}
 
 	static void method3357(CS2Executor executor) {

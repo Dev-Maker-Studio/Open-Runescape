@@ -226,12 +226,12 @@ public class FontMetrics {
 		return glyphWidths[i_1] & 0xff;
 	}
 
-	public int method6949(String string_1, int i_2, Sprite[] arr_3) {
-		return method6987(string_1, new int[]{i_2}, aStringArray4980, arr_3);
+	public int getLineCount(String string_1, int width, Sprite[] arr_3) {
+		return getLineCount(string_1, new int[]{width}, aStringArray4980, arr_3);
 	}
 
 	public int method6951(String message, int i_2, Sprite[] spriteArray) {
-		int i_5 = method6987(message, new int[]{i_2}, aStringArray4980, spriteArray);
+		int i_5 = getLineCount(message, new int[]{i_2}, aStringArray4980, spriteArray);
 		int i_6 = 0;
 
 		for (int i_7 = 0; i_7 < i_5; i_7++) {
@@ -284,7 +284,7 @@ public class FontMetrics {
 		if (i_31 == 0)
 			i_31 = verticalSpacing;
 
-		int i_8 = method6987(string_1, new int[]{i_2}, aStringArray4980, arr_6);
+		int i_8 = getLineCount(string_1, new int[]{i_2}, aStringArray4980, arr_6);
 		if (i_8 == 0)
 			return 0;
 		if (i_51 < 0)
@@ -321,17 +321,17 @@ public class FontMetrics {
 		if (i_31 == 0)
 			i_31 = verticalSpacing;
 
-		int i_6 = method6987(string_1, new int[]{i_2}, aStringArray4980, arr_4);
+		int i_6 = getLineCount(string_1, new int[]{i_2}, aStringArray4980, arr_4);
 		int i_7 = i_31 * (i_6 - 1);
 		return i_7 + bottomPadding + topPadding;
 	}
 
-	public int method6987(String string_1, int[] ints_2, String[] arr_3, Sprite[] arr_4) {
+	public int getLineCount(String string_1, int[] ints_2, String[] arr_3, Sprite[] arr_4) {
 		return splitLines(string_1, ints_2, arr_3, arr_4, true);
 	}
 
-	int splitLines(String string_1, int[] ints_2, String[] arr_3, Sprite[] arr_4, boolean bool_5) {
-		if (string_1 == null)
+	int splitLines(String string, int[] widths, String[] arr_3, Sprite[] characters, boolean bool_5) {
+		if (string == null)
 			return 0;
 		int i_7 = 0;
 		int i_8 = 0;
@@ -341,10 +341,10 @@ public class FontMetrics {
 		int i_12 = -1;
 		int i_13 = -1;
 		int i_14 = 0;
-		int i_15 = string_1.length();
+		int i_15 = string.length();
 
 		for (int i_16 = 0; i_16 < i_15; i_16++) {
-			int i_17 = QuestIndexLoader.getByteForChar(string_1.charAt(i_16)) & 0xff;
+			int i_17 = QuestIndexLoader.getByteForChar(string.charAt(i_16)) & 0xff;
 			int i_18 = 0;
 			if (i_17 == 60)
 				i_12 = i_16;
@@ -355,10 +355,10 @@ public class FontMetrics {
 						continue;
 
 					i_19 = i_12;
-					String string_20 = string_1.substring(i_12 + 1, i_16);
+					String string_20 = string.substring(i_12 + 1, i_16);
 					i_12 = -1;
 					if ("br".equals(string_20)) {
-						arr_3[i_14] = string_1.substring(i_8, i_16 + 1);
+						arr_3[i_14] = string.substring(i_8, i_16 + 1);
 						++i_14;
 						if (i_14 >= arr_3.length)
 							return 0;
@@ -418,10 +418,10 @@ public class FontMetrics {
 							i_18 += kerning[i_13][174];
 
 						i_13 = 174;
-					} else if (string_20.startsWith("img=") && arr_4 != null)
+					} else if (string_20.startsWith("img=") && characters != null)
 						try {
 							int i_21 = Utils.parseInt(string_20.substring(4));
-							i_18 += arr_4[i_21].scaleWidth();
+							i_18 += characters[i_21].scaleWidth();
 							i_13 = -1;
 						} catch (Exception ignored) {
 						}
@@ -438,16 +438,16 @@ public class FontMetrics {
 
 				if (i_18 > 0) {
 					i_7 += i_18;
-					if (ints_2 != null) {
+					if (widths != null) {
 						if (i_17 == 32) {
 							i_9 = i_16;
 							i_10 = i_7;
 							i_11 = bool_5 ? 1 : 0;
 						}
 
-						if (i_7 > ints_2[i_14 < ints_2.length ? i_14 : ints_2.length - 1]) {
+						if (i_7 > widths[i_14 < widths.length ? i_14 : widths.length - 1]) {
 							if (i_9 >= 0) {
-								arr_3[i_14] = string_1.substring(i_8, i_9 + 1 - i_11);
+								arr_3[i_14] = string.substring(i_8, i_9 + 1 - i_11);
 								++i_14;
 								if (i_14 >= arr_3.length)
 									return 0;
@@ -456,7 +456,7 @@ public class FontMetrics {
 								i_9 = -1;
 								i_7 -= i_10;
 							} else {
-								arr_3[i_14] = string_1.substring(i_8, i_19);
+								arr_3[i_14] = string.substring(i_8, i_19);
 								++i_14;
 								if (i_14 >= arr_3.length)
 									return 0;
@@ -478,8 +478,8 @@ public class FontMetrics {
 			}
 		}
 
-		if (string_1.length() > i_8) {
-			arr_3[i_14] = string_1.substring(i_8);
+		if (string.length() > i_8) {
+			arr_3[i_14] = string.substring(i_8);
 			++i_14;
 		}
 

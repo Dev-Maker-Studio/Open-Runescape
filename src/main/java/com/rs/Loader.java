@@ -35,6 +35,7 @@ public class Loader extends Panel implements ImageObserver, MenuContainer, Seria
 
 	public static int RENDER_DISTANCE_MULTIPLIER = 1; //Default 1
 	public static int FOG_DISTANCE_MULTIPLIER = 1; //Default 1
+	public static boolean X10_HITS_MODE = false;
 
 	public static Loader INSTANCE;
 

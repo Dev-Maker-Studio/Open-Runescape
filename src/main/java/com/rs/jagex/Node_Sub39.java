@@ -21,7 +21,7 @@ public class Node_Sub39 extends Node {
 			int i_12;
 			int i_14;
 			if (worldmapareadefs_2.areaName != null) {
-				i_9 = Node_Sub17_Sub2.aClass414_9933.method6987(worldmapareadefs_2.areaName, null, Class291_Sub1.aStringArray8024, null);
+				i_9 = Node_Sub17_Sub2.aClass414_9933.getLineCount(worldmapareadefs_2.areaName, null, Class291_Sub1.aStringArray8024, null);
 
 				for (i_12 = 0; i_12 < i_9; i_12++) {
 					String string_22 = Class291_Sub1.aStringArray8024[i_12];

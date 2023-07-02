@@ -1,5 +1,7 @@
 package com.rs.jagex;
 
+import com.rs.Loader;
+
 public abstract class PathingEntity extends GraphNode_Sub1_Sub1 {
 
 	public int index;
@@ -119,6 +121,8 @@ public abstract class PathingEntity extends GraphNode_Sub1_Sub1 {
 	}
 
 	public void applyHit(int i_1, int i_2, int i_3, int i_4, int i_5, int i_6) {
+		if (Loader.X10_HITS_MODE)
+			i_2 = (int) Math.ceil((double) i_2 / 10.0);
 		boolean bool_8 = true;
 		boolean bool_9 = true;
 
