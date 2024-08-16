@@ -4,19 +4,7 @@
 package jaclib.memory;
 
 public interface Source {
-	int method1();
+	int getSize();
 
-	long method2();
-
-	int method3();
-
-	int method4();
-
-	long method5();
-
-	long method6();
-
-	long method7();
-
-	long method8();
+	long getBufferAddress();
 }

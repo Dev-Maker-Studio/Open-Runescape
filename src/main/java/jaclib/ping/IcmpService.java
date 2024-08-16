@@ -4,28 +4,30 @@
 package jaclib.ping;
 
 public abstract class IcmpService implements Runnable {
-	public static native boolean available();
-
 	protected IcmpService() {
 		/* empty */
 	}
 
-	public native void h();
-
-	public native void m();
-
-	protected abstract void method11597();
-
-	protected abstract void method11598();
-
-	protected abstract void method11599(int i, int i_2_, int i_3_);
-
-	protected abstract void method11600(int i, int i_4_, int i_5_);
-
 	protected abstract void notify(int i);
 
-	public native void quit();
+	protected abstract void notify(int i, int i0, int i1);
 
 	@Override
 	public native void run();
+
+	public native void quit();
+
+	public static native boolean available();
+
+	public native void m();
+
+	public native void h();
+
+	protected abstract void method11597(int i);
+
+	protected abstract void method11598(int i);
+
+	protected abstract void method11599(int i, int i2, int i3);
+
+	protected abstract void method11600(int i, int i4, int i5);
 }

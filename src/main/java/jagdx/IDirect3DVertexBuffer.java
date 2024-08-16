@@ -3,16 +3,60 @@
  */
 package jagdx;
 
+/**
+ * Represents a Direct3D vertex buffer.
+ */
 public class IDirect3DVertexBuffer extends IUnknown {
-	public static native int Download(long l, int i, int i_5_, int i_6_, long l_7_);
 
-	public static native long Lock(long l, int i, int i_0_, int i_1_);
+    /**
+     * Constructs a new IDirect3DVertexBuffer object.
+     *
+     * @throws Throwable if an error occurs
+     */
+    public IDirect3DVertexBuffer() throws Throwable {
+        throw new Error();
+    }
 
-	public static native void Unlock(long l);
+    /**
+     * Locks a range of vertices in the vertex buffer.
+     *
+     * @param buffer a pointer to the vertex buffer
+     * @param offset offset from the beginning of the buffer to the start of the range to lock
+     * @param size size of the range to lock
+     * @param flags lock options
+     * @return a pointer to the locked vertex data
+     */
+    public static native long Lock(long buffer, int offset, int size, int flags);
 
-	public static native int Upload(long l, int i, int i_2_, int i_3_, long l_4_);
+    /**
+     * Unlocks a previously locked vertex buffer.
+     *
+     * @param buffer a pointer to the vertex buffer
+     */
+    public static native void Unlock(long buffer);
 
-	private IDirect3DVertexBuffer() throws Throwable {
-		throw new Error();
-	}
+    /**
+     * Uploads vertex data from system memory to the vertex buffer.
+     *
+     * @param buffer a pointer to the vertex buffer
+     * @param offset offset from the beginning of the buffer to the start of the data to upload
+     * @param size size of the data to upload
+     * @param flags upload options
+     * @param data a pointer to the data to upload
+     * @return HRESULT indicating success or failure
+     */
+    public static native int Upload(long buffer, int offset, int size, int flags, long data);
+
+    /**
+     * Downloads vertex data from the vertex buffer to system memory.
+     *
+     * @param buffer a pointer to the vertex buffer
+     * @param offset offset from the beginning of the buffer to the start of the data to download
+     * @param size size of the data to download
+     * @param flags download options
+     * @param data a pointer to the buffer to receive the downloaded data
+     * @return HRESULT indicating success or failure
+     */
+    public static native int Download(long buffer, int offset, int size, int flags, long data);
 }
+

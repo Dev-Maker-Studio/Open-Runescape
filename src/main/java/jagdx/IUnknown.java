@@ -4,11 +4,11 @@
 package jagdx;
 
 public class IUnknown {
-	public static native int AddRef(long l);
+    IUnknown() {
+        throw new Error();
+    }
 
-	public static native int Release(long l);
+    public static native int AddRef(long l);
 
-	IUnknown() throws Throwable {
-		throw new Error();
-	}
+    public static native int Release(long l);
 }

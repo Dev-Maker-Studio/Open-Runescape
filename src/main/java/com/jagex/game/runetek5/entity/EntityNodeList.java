@@ -1,0 +1,80 @@
+package com.jagex.game.runetek5.entity;
+
+/**
+ * Needs better naming...
+ *
+ */
+public class EntityNodeList {
+
+    public final EntityNode head = new EntityNode();
+    public EntityNode pointer;
+
+    public EntityNodeList() {
+        this.head.next = this.head;
+        this.head.previous = this.head;
+    }
+
+    public void getPrevious(EntityNode entityNode) {
+        if (entityNode.previous != null) {
+            entityNode.unlinkNode();
+        }
+        entityNode.previous = this.head;
+        entityNode.next = this.head.next;
+        entityNode.previous.next = entityNode;
+        entityNode.next.previous = entityNode;
+    }
+
+    public EntityNode get() {
+        EntityNode entityNode = this.head.next;
+        if (entityNode == this.head) {
+            return null;
+        } 
+        entityNode.unlinkNode();
+        return entityNode;
+    }
+
+    public void offer(EntityNode entityNode) {
+        if (entityNode.previous != null) {
+            entityNode.unlinkNode();
+        }
+        entityNode.previous = this.head.previous;
+        entityNode.next = this.head;
+        entityNode.previous.next = entityNode;
+        entityNode.next.previous = entityNode;
+    }
+
+    public EntityNode getNext() {
+        EntityNode entity = this.pointer;
+        if (entity == this.head) {
+            this.pointer = null;
+            return null;
+        } 
+        this.pointer = entity.next;
+        return entity;
+    }
+
+    public void unlink() {
+        while (true) {
+            EntityNode entity = this.head.next;
+            if (entity == this.head) {
+                this.pointer = null;
+                return;
+            }
+            entity.unlinkNode();
+        }
+    }
+
+    public EntityNode getFirst() {
+        EntityNode entity = this.head.next;
+        if (entity == this.head) {
+            this.pointer = null;
+            return null;
+        } 
+        this.pointer = entity.next;
+        return entity;
+    }
+
+    public boolean isEmpty() {
+        return this.head.next == this.head;
+    }
+}

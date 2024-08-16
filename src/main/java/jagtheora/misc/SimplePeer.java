@@ -4,43 +4,46 @@
 package jagtheora.misc;
 
 public abstract class SimplePeer {
-	static {
-		init();
-	}
+    static {
+        init();
+    }
 
-	private static native void init();
+    public long peer;
 
-	private long peer;
+    protected SimplePeer() {
+        /* empty */
+    }
 
-	protected SimplePeer() {
-		/* empty */
-	}
+    private static native void init();
 
-	protected abstract void clear();
+    public boolean peerPresent() {
+        return this.peer == 0L;
+    }
 
-	protected abstract void f();
+    public void setPeer(long peer) {
+        this.peer = peer;
+    }
 
+    public void resetPeer() {
+        if (!peerPresent()) {
+            clear();
+        }
+    }
+
+    protected abstract void clear();
+
+    @SuppressWarnings("removal")
 	@Override
-	protected void finalize() throws Throwable {
-		if (!method6698())
-			method6699();
-		super.finalize();
-	}
+    protected void finalize() throws Throwable {
+        if (!peerPresent()) {
+            resetPeer();
+        }
+        super.finalize();
+    }
 
-	protected abstract void m();
+    protected abstract void q();
 
-	public boolean method6698() {
-		return peer == 0L;
-	}
+    protected abstract void f();
 
-	public void method6699() {
-		if (!method6698())
-			clear();
-	}
-
-	protected abstract void q();
-
-	private void setPeer(long l) {
-		peer = l;
-	}
+    protected abstract void m();
 }

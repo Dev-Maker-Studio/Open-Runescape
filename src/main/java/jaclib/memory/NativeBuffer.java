@@ -11,61 +11,51 @@ public class NativeBuffer implements Buffer, Source {
 		/* empty */
 	}
 
-	private native void get(long l, byte[] is, int i, int i_2_, int i_3_);
-
-	@Override
-	public int method1() {
-		return anInt4084 * 75849029;
+	public final int getSize() {
+		return this.anInt4084 * 75849029;
 	}
 
-	@Override
-	public void method116(byte[] is, int i, int i_0_, int i_1_) {
-		if (aLong4085 * -8386277585485031121L == 0L | is == null | i < 0 | i + i_1_ > is.length | i_0_ < 0 | i_1_ + i_0_ > 75849029 * anInt4084)
+	public final long getBufferAddress() {
+		return this.aLong4085 * -8386277585485031121L;
+	}
+
+	public void put(byte[] is, int i, int i0, int i1) {
+		if (this.aLong4085 * -8386277585485031121L == 0L | null == is | i < 0 | i + i1 > is.length | i0 < 0 | i1 + i0 > 75849029 * this.anInt4084)
 			throw new RuntimeException();
-		put(-8386277585485031121L * aLong4085, is, i, i_0_, i_1_);
+		put(-8386277585485031121L * this.aLong4085, is, i, i0, i1);
 	}
 
-	@Override
-	public void method117(byte[] is, int i, int i_6_, int i_7_) {
-		if (aLong4085 * -8386277585485031121L == 0L | is == null | i < 0 | i + i_7_ > is.length | i_6_ < 0 | i_7_ + i_6_ > 75849029 * anInt4084)
+	private final native void get(long l, byte[] is, int i, int i2, int i3);
+
+	private final native void put(long l, byte[] is, int i, int i4, int i5);
+
+	public void method117(byte[] is, int i, int i6, int i7) {
+		if (this.aLong4085 * -8386277585485031121L == 0L | null == is | i < 0 | i + i7 > is.length | i6 < 0 | i7 + i6 > 75849029 * this.anInt4084)
 			throw new RuntimeException();
-		put(-8386277585485031121L * aLong4085, is, i, i_6_, i_7_);
+		put(-8386277585485031121L * this.aLong4085, is, i, i6, i7);
 	}
 
-	@Override
-	public long method2() {
-		return aLong4085 * -8386277585485031121L;
+	public final int method3() {
+		return this.anInt4084 * 75849029;
 	}
 
-	@Override
-	public int method3() {
-		return anInt4084 * 75849029;
+	public final int method4() {
+		return this.anInt4084 * 75849029;
 	}
 
-	@Override
-	public int method4() {
-		return anInt4084 * 75849029;
+	public final long method5() {
+		return this.aLong4085 * -8386277585485031121L;
 	}
 
-	@Override
-	public long method5() {
-		return aLong4085 * -8386277585485031121L;
+	public final long method6() {
+		return this.aLong4085 * -8386277585485031121L;
 	}
 
-	@Override
-	public long method6() {
-		return aLong4085 * -8386277585485031121L;
+	public final long method7() {
+		return this.aLong4085 * -8386277585485031121L;
 	}
 
-	@Override
-	public long method7() {
-		return aLong4085 * -8386277585485031121L;
+	public final long method8() {
+		return this.aLong4085 * -8386277585485031121L;
 	}
-
-	@Override
-	public long method8() {
-		return aLong4085 * -8386277585485031121L;
-	}
-
-	private native void put(long l, byte[] is, int i, int i_4_, int i_5_);
 }

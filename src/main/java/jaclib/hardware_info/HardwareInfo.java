@@ -4,17 +4,17 @@
 package jaclib.hardware_info;
 
 public class HardwareInfo {
-	public static native int[] getCPUInfo();
-
-	public static native String[][] getDXDiagDisplayDevicesProps();
-
-	public static native String[] getDXDiagSystemProps();
-
-	public static native String[] getOpenGLProps();
-
-	public static native int[] getRawCPUInfo();
-
 	private HardwareInfo() throws Throwable {
 		throw new Error();
 	}
+
+	public static final native int[] getCPUInfo();
+
+	public static final native int[] getRawCPUInfo();
+
+	public static final native String[] getDXDiagSystemProps();
+
+	public static final native String[][] getDXDiagDisplayDevicesProps();
+
+	public static final native String[] getOpenGLProps();
 }

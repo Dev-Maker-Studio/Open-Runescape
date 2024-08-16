@@ -6,31 +6,31 @@ package jagtheora.ogg;
 import jagtheora.misc.SimplePeer;
 
 public class OggSyncState extends SimplePeer {
-	public OggSyncState() {
-		init();
-		if (method6698())
-			throw new IllegalStateException();
-	}
+    public OggSyncState() {
+        init();
+        if (peerPresent())
+            throw new IllegalStateException();
+    }
 
-	@Override
-	protected native void clear();
+    private native void init();
 
-	@Override
-	protected native void f();
+    public native boolean write(byte[] is, int i);
 
-	private native void init();
+    public native long pageSeek(OggPage oggpage);
 
-	@Override
-	protected native void m();
+    public native int pageOut(OggPage oggpage);
 
-	public native int pageOut(OggPage oggpage);
+    public native boolean reset();
 
-	public native long pageSeek(OggPage oggpage);
+    @Override
+    protected native void clear();
 
-	@Override
-	protected native void q();
+    @Override
+    protected native void q();
 
-	public native boolean reset();
+    @Override
+    protected native void f();
 
-	public native boolean write(byte[] is, int i);
+    @Override
+    protected native void m();
 }

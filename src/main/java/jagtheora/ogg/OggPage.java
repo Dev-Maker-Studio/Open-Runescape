@@ -6,31 +6,31 @@ package jagtheora.ogg;
 import jagtheora.misc.SimplePeer;
 
 public class OggPage extends SimplePeer {
-	@Override
-	protected native void clear();
+    public native long getGranulePos();
 
-	@Override
-	protected native void f();
+    public native int getSerialNumber();
 
-	public native int getCompletedPackets();
+    public native long getPageNumber();
 
-	public native long getGranulePos();
+    public native int getCompletedPackets();
 
-	public native long getPageNumber();
+    public native int getVersion();
 
-	public native int getSerialNumber();
+    public native boolean isContinued();
 
-	public native int getVersion();
+    public native boolean isBOS();
 
-	public native boolean isBOS();
+    public native boolean isEOS();
 
-	public native boolean isContinued();
+    @Override
+    protected native void clear();
 
-	public native boolean isEOS();
+    @Override
+    protected native void q();
 
-	@Override
-	protected native void m();
+    @Override
+    protected native void f();
 
-	@Override
-	protected native void q();
+    @Override
+    protected native void m();
 }

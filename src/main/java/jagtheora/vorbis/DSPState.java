@@ -6,31 +6,31 @@ package jagtheora.vorbis;
 import jagtheora.misc.SimplePeer;
 
 public class DSPState extends SimplePeer {
-	public DSPState(VorbisInfo vorbisinfo) {
-		init(vorbisinfo);
-		if (method6698())
-			throw new IllegalStateException();
-	}
+    public DSPState(VorbisInfo vorbisinfo) {
+        init(vorbisinfo);
+        if (peerPresent())
+            throw new IllegalStateException();
+    }
 
-	public native void blockIn(VorbisBlock vorbisblock);
+    public native void init(VorbisInfo vorbisinfo);
 
-	@Override
-	protected native void clear();
+    public native void blockIn(VorbisBlock vorbisblock);
 
-	@Override
-	protected native void f();
+    public native float[][] pcmOut(int i);
 
-	public native double granuleTime();
+    public native void read(int i);
 
-	private native void init(VorbisInfo vorbisinfo);
+    public native double granuleTime();
 
-	@Override
-	protected native void m();
+    @Override
+    protected native void clear();
 
-	public native float[][] pcmOut(int i);
+    @Override
+    protected native void q();
 
-	@Override
-	protected native void q();
+    @Override
+    protected native void f();
 
-	public native void read(int i);
+    @Override
+    protected native void m();
 }
