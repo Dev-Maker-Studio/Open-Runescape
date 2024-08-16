@@ -6,6 +6,7 @@ import java.net.URL;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.JFS32;
 import com.jagex.game.runetek5.client.GameShell;
+import com.jagex.game.runetek5.client.GameState;
 import com.jagex.game.runetek5.client.PreferenceManager;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.client.input.camera.Camera;
@@ -61,7 +62,7 @@ public class PacketEncoder {
     }
 
     public static void method2074(String string_0, String string_1, int i_2, boolean bool3) {
-        if (client.gameState == 3) {
+        if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
             TcpPacket tcpmessage5 = createPacket(ClientProt.SEND_SIGN_UP_FORM, client.LOBBY_CONNECTION_CONTEXT.isaac);
             tcpmessage5.buffer.writeShort(0);
             int i_6 = tcpmessage5.buffer.currentPosition;
@@ -234,7 +235,7 @@ public class PacketEncoder {
     }
 
     public static void sendCheckEmailPacket(String string_0) {
-        if (client.gameState == 3) {
+        if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
             TcpPacket message = createPacket(ClientProt.CHECK_EMAIL_VALIDITY, client.LOBBY_CONNECTION_CONTEXT.isaac);
             message.buffer.writeShort(0);
             int start = message.buffer.currentPosition;
@@ -539,7 +540,7 @@ public class PacketEncoder {
 	}
 
 	public static void method16088(int i_0) {
-	    if (client.gameState == 3) {
+	    if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
 	        TcpPacket packet = createPacket(ClientProt.ACCOUNT_CREATION_STAGE, client.LOBBY_CONNECTION_CONTEXT.isaac);
 	        packet.buffer.writeByte(i_0);
 	        client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet);

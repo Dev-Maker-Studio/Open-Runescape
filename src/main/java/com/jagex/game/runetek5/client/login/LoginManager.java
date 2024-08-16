@@ -162,7 +162,7 @@ public class LoginManager {
 	                    tcpPacket.buffer.writeInt(MAJOR_BUILD);
 	                    tcpPacket.buffer.writeInt(MINOR_BUILD);
 	                    if (LoginManager.lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
-	                        tcpPacket.buffer.writeByte(client.gameState == 10 ? 1 : 0);
+	                        tcpPacket.buffer.writeByte(client.gameState == GameState.UNK_10 ? 1 : 0);
 	                    }
 	                    Packet seedBlock = LoginManager.encodeClientSeed();
 	                    seedBlock.writeByte(StaticMethods.anInt76);
@@ -270,7 +270,7 @@ public class LoginManager {
 	                    if (!LoginManager.socialNetworkLogin) {
 	                        loginBlock.writeInt(MAJOR_BUILD);
 	                        loginBlock.writeInt(MINOR_BUILD);
-	                        loginBlock.writeByte(client.gameState == 10 ? 1 : 0);
+	                        loginBlock.writeByte(client.gameState == GameState.UNK_10 ? 1 : 0);
 	                        startPositionLoginBlock = loginBlock.currentPosition;
 	                        Packet seedBlock = LoginManager.getSeedBlock(false);
 	                        loginBlock.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition);
@@ -546,7 +546,7 @@ public class LoginManager {
 	                        LoginManager.loginStage = LoginStage.NONE_2;
 	                        LoginManager.method13784(2);
 	                        LoginManager.prepareIngame();
-	                        client.setGameState(0);
+	                        client.setGameState(GameState.UNK_0);
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacket = null;
 	                        return;
 	                    }
@@ -718,8 +718,8 @@ public class LoginManager {
 	}
 
 	public static void method7777() {
-	    if (client.gameState == 0 && !method3360() && !AccountCreationStage.method1466()) {
-	        client.setGameState(7);
+	    if (client.gameState == GameState.UNK_0 && !method3360() && !AccountCreationStage.method1466()) {
+	        client.setGameState(GameState.UNK_7);
 	    }
 	}
 
@@ -768,7 +768,7 @@ public class LoginManager {
 	        LoginManager.method5118();
 	        StaticMethods.aString99 = string_0;
 	        StaticMethods.aString102 = string_1;
-	        client.setGameState(14);
+	        client.setGameState(GameState.UNK_14);
 	    }
 	}
 
@@ -783,7 +783,7 @@ public class LoginManager {
 	        LoginManager.method5118();
 	        StaticMethods.aString99 = string_0;
 	        StaticMethods.aString102 = string_1;
-	        client.setGameState(19);
+	        client.setGameState(GameState.UNK_19);
 	    }
 	}
 
@@ -793,7 +793,7 @@ public class LoginManager {
 	            LoginManager.aLong77 = -1L;
 	        }
 	        StaticMethods.anInt76 = i_0;
-	        client.setGameState(19);
+	        client.setGameState(GameState.UNK_19);
 	    }
 	}
 
@@ -916,7 +916,7 @@ public class LoginManager {
 	    Camera.cameraCalculationType = 2;
 	    StaticMethods.anInt833 = -1;
 	    PingRequester.anInt5864 = -1;
-	    client.setGameState(13);
+	    client.setGameState(GameState.LOGGED_INGAME);
 	
 	    for (int index = 0; index < 107; index++) {
 	        client.IS_COMPONENT_ON_TOP[index] = true;
@@ -951,7 +951,7 @@ public class LoginManager {
 	}
 
 	public static void onEnterIngame() {
-	    if (client.gameState == 17) {
+	    if (client.gameState == GameState.UNK_17) {
 	        client.method14562();
 	    }
 	

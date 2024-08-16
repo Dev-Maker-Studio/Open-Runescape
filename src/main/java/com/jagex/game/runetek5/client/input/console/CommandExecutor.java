@@ -8,10 +8,7 @@ import java.io.FileOutputStream;
 import javax.imageio.ImageIO;
 
 import com.jagex.game.launch.Loader;
-import com.jagex.game.runetek5.client.GameShell;
-import com.jagex.game.runetek5.client.PreferenceManager;
-import com.jagex.game.runetek5.client.ServerEnvironment;
-import com.jagex.game.runetek5.client.client;
+import com.jagex.game.runetek5.client.*;
 import com.jagex.game.runetek5.client.input.camera.Camera;
 import com.jagex.game.runetek5.client.login.LoginManager;
 import com.jagex.game.runetek5.client.window.WindowMode;
@@ -233,9 +230,9 @@ public class CommandExecutor {
 	                return;
 	            }
 	            if ("clientdrop".equalsIgnoreCase(command)) {
-	                if (client.gameState == 13) {
+	                if (client.gameState == GameState.LOGGED_INGAME) {
 	                    WorldConnection.dropClient();
-	                } else if (client.gameState == 18) {
+	                } else if (client.gameState == GameState.UNK_18) {
 	                    client.GAME_CONNECTION_CONTEXT.dropped = true;
 	                }
 	                return;
@@ -378,7 +375,7 @@ public class CommandExecutor {
 	            	return;
 	            }
 	            /**/
-	            if (client.gameState == 13) {
+	            if (client.gameState == GameState.LOGGED_INGAME) {
 	                TcpPacket clientPacket = PacketEncoder.createPacket(ClientProt.COMMAND, client.GAME_CONNECTION_CONTEXT.isaac);
 	                clientPacket.buffer.writeByte(command.length() + 3);
 	                clientPacket.buffer.writeByte(bool1 ? 1 : 0);
@@ -391,7 +388,7 @@ public class CommandExecutor {
 	            return;
 	        }
 	    }
-	    if (client.gameState != 13) {
+	    if (client.gameState != GameState.LOGGED_INGAME) {
 	        Console.writeLine(LocalizedText.UNKNOWN_DEV_COMMAND.translate(client.CURRENT_LANGUAGE) + command);
 	    }
 	}

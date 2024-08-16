@@ -122,7 +122,7 @@ public class LoadingStage {
             }
         } else if (LoadingStage.LOADING_STAGE == PREPARE_PLAYER) {
             LoadingStage.plainLoginScreenRenderer = null;
-            client.setGameState(5);
+            client.setGameState(GameState.UNK_5);
         } else {
             LoadingStage.LOADING_TEXT = loadingStage.secondaryTextDisplay.translate(client.CURRENT_LANGUAGE);
             if (LoadingStage.LOADING_STAGE.aBool4694) {
@@ -137,7 +137,7 @@ public class LoadingStage {
             LoadingStage.plainLoginScreenRenderer.initialize(LoadingStage.LOADING_STAGE_CHANGED, LoadingStage.LOADING_TEXT, LoadingStage.displayedLoadingPercentage, LoadingStage.LOADING_STAGE);
             if (LoadingStage.gametipsToDisplay != null) {
                 for (int index = LoadingStage.lastDisplayedGametip + 1; index < LoadingStage.gametipsToDisplay.length; index++) {
-                    if (LoadingStage.gametipsToDisplay[index].calculateLoadingPercent() >= 100 && index - 1 == LoadingStage.lastDisplayedGametip && client.gameState != 4 && LoadingStage.plainLoginScreenRenderer.replaceComponent()) {
+                    if (LoadingStage.gametipsToDisplay[index].calculateLoadingPercent() >= 100 && index - 1 == LoadingStage.lastDisplayedGametip && client.gameState != GameState.UNK_4 && LoadingStage.plainLoginScreenRenderer.replaceComponent()) {
                         try {
                             LoadingStage.gametipsToDisplay[index].initialize();
                         } catch (Exception exception) {

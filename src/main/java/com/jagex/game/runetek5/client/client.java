@@ -221,7 +221,7 @@ public class client extends GameShell {
     public static boolean aBool7159;
     public static int ENTITY_TARGET;
     public static String aString7165;
-    public static int gameState = 4;
+    public static GameState gameState = GameState.UNK_4;
     public static boolean renderWithCpu;
     public static int TEST_ENVIRONMENT_APPEARANCE_OVERRIDES;
     public static int cycles;
@@ -677,30 +677,30 @@ public class client extends GameShell {
         ArrayUtils.quicksort(NPC_INDEX_REFERENCES, ENTITY_INDEX_REFERENCES, 0, anInt7304 - 1);
     }
 
-    public static void setGameState(int state) {
+    public static void setGameState(GameState state) {
         if (state != gameState) {
             anInt7396 = 0;
-            if (state == 10 || state == 17) {
+            if (state == GameState.UNK_10 || state == GameState.UNK_17) {
                 LoginManager.method1384();
             }
 
-            if (state != 10 && WorldConnection.gameConnection != null) {
+            if (state != GameState.UNK_10 && WorldConnection.gameConnection != null) {
                 WorldConnection.gameConnection.close();
                 WorldConnection.gameConnection = null;
             }
 
-            if (state == 5) {
-                ClientStartup.preparePlayer(gameState == 3 || gameState == 8 || BASE_WINDOW_ID != client.ENTITY_DEFAULTS.loginInterfaceId);
+            if (state == GameState.UNK_5) {
+                ClientStartup.preparePlayer(gameState == GameState.IN_ACCOUNT_CREATION || gameState == GameState.UNK_8 || BASE_WINDOW_ID != client.ENTITY_DEFAULTS.loginInterfaceId);
             }
 
-            if (state == 0) {
+            if (state == GameState.UNK_0) {
                 LoginManager.openLobby(BASE_WINDOW_ID != client.ENTITY_DEFAULTS.lobbyWindow);
             }
 
-            if (state != 14 && state != 12) {
-                if (state == 19 || state == 7 && gameState != 6) {
+            if (state != GameState.UNK_14 && state != GameState.UNK_12) {
+                if (state == GameState.UNK_19 || state == GameState.UNK_7 && gameState != GameState.UNK_6) {
                     LoginManager.method1384();
-                } else if (state == 8) {
+                } else if (state == GameState.UNK_8) {
                     AccountCreationStage.method4251();
                 }
             } else {
@@ -712,8 +712,8 @@ public class client extends GameShell {
                 GraphicsCache.resetWorldmapCaches(true);
             }
 
-            boolean isOutsideGame = state == 1 || GameState.isLoggedOut(state) || GameState.inLobby(state);
-            boolean wasOutsideGame = gameState == 1 || GameState.isLoggedOut(gameState) || GameState.inLobby(gameState);
+            boolean isOutsideGame = state == GameState.UNK_1 || GameState.isLoggedOut(state) || GameState.inLobby(state);
+            boolean wasOutsideGame = gameState == GameState.UNK_1 || GameState.isLoggedOut(gameState) || GameState.inLobby(gameState);
             if (isOutsideGame != wasOutsideGame) {
                 if (isOutsideGame) {
                     AreaSoundPlayer.currentMusicArchive = AreaSoundPlayer.titlescreenMusicArchive;
@@ -731,7 +731,7 @@ public class client extends GameShell {
                 }
             }
 
-            if (GameState.isLoadingRegion(state) || state == 10 || state == 17) {
+            if (GameState.isLoadingRegion(state) || state == GameState.UNK_10 || state == GameState.UNK_17) {
                 Renderers.activeToolkit.renderLastFrame();
             }
 
@@ -765,9 +765,9 @@ public class client extends GameShell {
         method3367();
         client.method14562();
         if (reconnect) {
-            setGameState(12);
+            setGameState(GameState.UNK_12);
         } else {
-            setGameState(5);
+            setGameState(GameState.UNK_5);
         }
     }
 
@@ -787,7 +787,7 @@ public class client extends GameShell {
     }
 
     public static void setLoading() {
-        setGameState(18);
+        setGameState(GameState.UNK_18);
         AbstractNativeToolkit.drawLoadingPleaseWaitHardware();
         System.gc();
     }
@@ -813,12 +813,12 @@ public class client extends GameShell {
         }
     }
 
-    public static boolean method4198(int i_0) {
-        return i_0 == 5 || i_0 == 14 || i_0 == 19 || i_0 == 3 || i_0 == 8 || i_0 == 9;
+    public static boolean method4198(GameState i_0) {
+        return i_0 == GameState.UNK_5 || i_0 == GameState.UNK_14 || i_0 == GameState.UNK_19 || i_0 == GameState.IN_ACCOUNT_CREATION || i_0 == GameState.UNK_8 || i_0 == GameState.UNK_9;
     }
 
-    public static boolean method5789(int i_0) {
-        return i_0 == 0 || i_0 == 7;
+    public static boolean method5789(GameState i_0) {
+        return i_0 == GameState.UNK_0 || i_0 == GameState.UNK_7;
     }
 
     public static void disableTitlescreenMusic() {
@@ -853,7 +853,7 @@ public class client extends GameShell {
             }
             for (int i_1 = 0; i_1 < 100 && PacketDecoder.decodePacketFromStream(GAME_CONNECTION_CONTEXT); i_1++) {
             }
-            if (gameState == 13) {
+            if (gameState == GameState.LOGGED_INGAME) {
                 while (ReflectionCheckManager.hasPendingChecks()) {
                     TcpPacket reflectionCheckPacket = PacketEncoder.createPacket(ClientProt.REFLECTION_CHECK, GAME_CONNECTION_CONTEXT.isaac);
                     reflectionCheckPacket.buffer.writeByte(0);
@@ -893,7 +893,7 @@ public class client extends GameShell {
                     aFloat7266 /= 2.0F;
                 }
                 ComponentMinimap.drawGame();
-                if (gameState == 13) {
+                if (gameState == GameState.LOGGED_INGAME) {
                     Resource.mapRegion.getEnvironmentManager().updateAtmosphere(Resource.mapRegion);
                     LocAction.transformObjects();
                     AreaSoundPlayer.method1623();
@@ -913,7 +913,7 @@ public class client extends GameShell {
                                 Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.CUTSCENE, null));
                                 MAP_LOADING_STAGE = 0;
                             }
-                            if (MAP_LOADING_STAGE == 0 && gameState != 18) {
+                            if (MAP_LOADING_STAGE == 0 && gameState != GameState.UNK_18) {
                                 CutsceneTypeList.CONFIG_CUTSCENES.clear();
                                 MAP_LOADING_STAGE = 4;
                                 cycleCutsceneLoaded = cycles;
@@ -1326,7 +1326,7 @@ public class client extends GameShell {
     }
 
     public void pulse() {
-        if (gameState != 16) {
+        if (gameState != GameState.UNK_16) {
             //System.out.println("[Client]GameState: "+client.gameState);
             if (maploadingLockTaken) {
                 synchronized (ASYNC_MAPLOADING_LOCK) {
@@ -1427,21 +1427,21 @@ public class client extends GameShell {
             } else if (GameState.inLobby(gameState) && !GameState.isLoadingRegion(gameState)) {
                 method12044();
                 LoginManager.loginBlock();
-            } else if (gameState == 12) {
+            } else if (gameState == GameState.UNK_12) {
                 LoginManager.loginBlock();
             } else if (GameState.isRenderingScene(gameState) && !GameState.isLoadingRegion(gameState)) {
                 method15386();
-            } else if (gameState == 10 || gameState == 17) {
+            } else if (gameState == GameState.UNK_10 || gameState == GameState.UNK_17) {
                 LoginManager.loginBlock();
                 if (StaticMethods.anInt106 != -3 && StaticMethods.anInt106 != 2 && StaticMethods.anInt106 != 15) {
-                    if (gameState == 17) {
+                    if (gameState == GameState.UNK_17) {
                         StaticMethods.anInt109 = LoginManager.anInt112;
                         StaticMethods.anInt108 = LoginManager.anInt94;
                         StaticMethods.anInt107 = StaticMethods.anInt106;
                         if (WorldConnection.reconnectingWorld) {
                             LoginManager.setGameHost(WorldConnection.connectionInfo.worldId, WorldConnection.connectionInfo.host);
                             GAME_CONNECTION_CONTEXT.reset();
-                            setGameState(10);
+                            setGameState(GameState.UNK_10);
                         } else {
                             logout(LoginManager.currentlyInLobby);
                         }
@@ -1458,7 +1458,7 @@ public class client extends GameShell {
     }
 
     public void redraw() {
-        if (gameState != 16) {
+        if (gameState != GameState.UNK_16) {
             long long_2 = getCurrentCycle() / 1000000L - aLong7170;
             aLong7170 = getCurrentCycle() / 1000000L;
             boolean bool4 = SoundResourceManager.method7730();
@@ -1530,11 +1530,11 @@ public class client extends GameShell {
                 } else {
                     MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont);
                 }
-            } else if (gameState == 13) {
+            } else if (gameState == GameState.LOGGED_INGAME) {
                 client.method2601(long_2);
-            } else if (gameState == 10) {
+            } else if (gameState == GameState.UNK_10) {
                 MessageBox.draw(LocalizedText.CONNECTION_LOST.translate(CURRENT_LANGUAGE) + "<br>" + LocalizedText.ATTEMPTING_TO_REESTABLISH.translate(CURRENT_LANGUAGE), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont);
-            } else if (gameState == 17) {
+            } else if (gameState == GameState.UNK_17) {
                 MessageBox.draw(LocalizedText.PLEASE_WAIT.translate(CURRENT_LANGUAGE), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont);
             }
 
@@ -1582,7 +1582,7 @@ public class client extends GameShell {
                 TypeLists.clean();
             }
 
-            if (PreferenceManager.preferences.safeMode.getValue() == 1 && gameState == 5 && BASE_WINDOW_ID != -1) {
+            if (PreferenceManager.preferences.safeMode.getValue() == 1 && gameState == GameState.UNK_5 && BASE_WINDOW_ID != -1) {
                 PreferenceManager.preferences.setValue(PreferenceManager.preferences.safeMode, 0);
                 PreferenceManager.savePreferences();
             }
@@ -1685,19 +1685,19 @@ public class client extends GameShell {
 
             if (Resource.remoteFileRequesterJs5.failedRequests >= 2 && Resource.remoteFileRequesterJs5.connectionStatus == 6) {
                 raiseErrorScreen("js5connect_outofdate");
-                gameState = 16;
+                gameState = GameState.UNK_16;
                 return;
             }
 
             if (Resource.remoteFileRequesterJs5.failedRequests >= 1 && Resource.remoteFileRequesterJs5.connectionStatus == 48) {
                 raiseErrorScreen("sessionexpired");
-                gameState = 16;
+                gameState = GameState.UNK_16;
                 return;
             }
 
             if (Resource.remoteFileRequesterJs5.failedRequests >= 4 && Resource.remoteFileRequesterJs5.connectionStatus == -1) {
                 raiseErrorScreen("js5crc");
-                gameState = 16;
+                gameState = GameState.UNK_16;
                 return;
             }
 
@@ -1716,7 +1716,7 @@ public class client extends GameShell {
                     raiseErrorScreen("js5connect_full");
                 }
 
-                gameState = 16;
+                gameState = GameState.UNK_16;
                 return;
             }
         }
@@ -1929,7 +1929,7 @@ public class client extends GameShell {
     }
 
     public void method12044() {
-        if (gameState == 0 && !LoginManager.method3360() || gameState == 7 && StaticMethods.anInt106 == 42 || gameState == 3) {
+        if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
             if (REBOOT_TIMER > 1) {
                 REBOOT_TIMER--;
                 anInt7397 = anInt7347;
@@ -2006,7 +2006,7 @@ public class client extends GameShell {
             }
         }
 
-        if ((gameState == 5 || gameState == 7 || gameState == 0 || gameState == 3) && (!LoginManager.method3360() || gameState == 7 && StaticMethods.anInt106 == 42) && !AccountCreationStage.method1466()) {
+        if ((gameState == GameState.UNK_5 || gameState == GameState.UNK_7 || gameState == GameState.UNK_0 || gameState == GameState.IN_ACCOUNT_CREATION) && (!LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42) && !AccountCreationStage.method1466()) {
             if (Camera.cameraCalculationType == 5) {
                 Camera.calculateCameraPosition();
             } else {
@@ -2037,7 +2037,7 @@ public class client extends GameShell {
                                                 client.method2827();
                                             }
 
-                                            if (gameState == 0 && !LoginManager.method3360() || gameState == 7 && StaticMethods.anInt106 == 42) {
+                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42) {
                                                 MenuInteraction.method7703();
                                             }
 
@@ -2060,8 +2060,8 @@ public class client extends GameShell {
                                                 }
                                             }
 
-                                            if (gameState == 0 && !LoginManager.method3360() || gameState == 7 && StaticMethods.anInt106 == 42 || gameState == 3) {
-                                                if (gameState != 7 && LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
+                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
+                                                if (gameState != GameState.UNK_7 && LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
                                                     logout(false);
                                                 } else {
                                                     if (++LOBBY_CONNECTION_CONTEXT.lastFlush > 50) {
@@ -2072,7 +2072,7 @@ public class client extends GameShell {
                                                     try {
                                                         LOBBY_CONNECTION_CONTEXT.flush();
                                                     } catch (IOException ioexception) {
-                                                        if (gameState == 7) {
+                                                        if (gameState == GameState.UNK_7) {
                                                             LOBBY_CONNECTION_CONTEXT.closeConnection();
                                                         } else {
                                                             logout(false);
@@ -2250,7 +2250,7 @@ public class client extends GameShell {
                         PlayerUpdate.MY_PLAYER.plane + 1, roofPreference, PreferenceManager.preferences.flickeringEffects.getValue() == 0);
                 anInt7396++;
                 SoundEffectPlayer.updatePlayers();
-                if (gameState == 13) {
+                if (gameState == GameState.LOGGED_INGAME) {
                     StaticMethods.drawTileMessages(x, y);
                     EntityUpdating.drawEntitites(x, y, gameAreaWidth, gameAreaHeight);
                     HintRenderer.drawHintArrow(x, y);
@@ -2456,17 +2456,17 @@ public class client extends GameShell {
         StaticMedia.initializeChatIcons(StaticMedia.nameIconSprites);
         GameShell.setComponentsOnTop();
         GraphicsCache.resetGraphicCaches();
-        if (gameState == 5) {
-            setGameState(11);
-        } else if (gameState == 0) {
-            setGameState(2);
-        } else if (gameState == 7) {
-            setGameState(6);
-        } else if (gameState == 13) {
-            setGameState(18);
-        } else if (gameState != 15 && gameState != 1) {
-            if (gameState == 3) {
-                setGameState(9);
+        if (gameState == GameState.UNK_5) {
+            setGameState(GameState.UNK_11);
+        } else if (gameState == GameState.UNK_0) {
+            setGameState(GameState.UNK_2);
+        } else if (gameState == GameState.UNK_7) {
+            setGameState(GameState.UNK_6);
+        } else if (gameState == GameState.LOGGED_INGAME) {
+            setGameState(GameState.UNK_18);
+        } else if (gameState != GameState.UNK_15 && gameState != GameState.UNK_1) {
+            if (gameState == GameState.IN_ACCOUNT_CREATION) {
+                setGameState(GameState.UNK_9);
             }
         } else {
             client.initializeTips();

@@ -6,10 +6,7 @@ import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.NodeCollection;
 import com.jagex.game.runetek5.cache.node.impl.*;
-import com.jagex.game.runetek5.client.GameShell;
-import com.jagex.game.runetek5.client.GraphicsCache;
-import com.jagex.game.runetek5.client.PreferenceManager;
-import com.jagex.game.runetek5.client.client;
+import com.jagex.game.runetek5.client.*;
 import com.jagex.game.runetek5.client.input.camera.Camera;
 import com.jagex.game.runetek5.client.input.console.Console;
 import com.jagex.game.runetek5.client.menu.MiniMenu;
@@ -197,15 +194,15 @@ public class MapRegion {
             this.underwaterMapArchives[index] = -1;
             this.underwaterLocArchives[index] = -1;
         }
-        byte newGamestate;
-        if (client.gameState == 5) {
-            newGamestate = 11;
-        } else if (client.gameState == 7) {
-            newGamestate = 6;
-        } else if (client.gameState == 0) {
-            newGamestate = 2;
-        } else if (client.gameState == 3) {
-        	newGamestate = 9;
+        GameState newGamestate;
+        if (client.gameState == GameState.UNK_5) {
+            newGamestate = GameState.UNK_11;
+        } else if (client.gameState == GameState.UNK_7) {
+            newGamestate = GameState.UNK_6;
+        } else if (client.gameState == GameState.UNK_0) {
+            newGamestate = GameState.UNK_2;
+        } else if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
+        	newGamestate = GameState.UNK_9;
         } else {
         	throw new RuntimeException("" + client.gameState);
         }
@@ -253,7 +250,7 @@ public class MapRegion {
                 regionCount++;
             }
         }
-        performUpdate(chunkX, chunkY, 18, positionUpdate);
+        performUpdate(chunkX, chunkY, GameState.UNK_18, positionUpdate);
     }
     
     public void initializeCutscene() {
@@ -353,7 +350,7 @@ public class MapRegion {
         }
         this.xteas = MapRegion.CUTSCENE_MAP_XTEAS;
         MapRegion.CUTSCENE_MAP_XTEAS = null;
-        performUpdate(this.sceneSizeX >> 4, this.sceneSizeY >> 4, 18, false);
+        performUpdate(this.sceneSizeX >> 4, this.sceneSizeY >> 4, GameState.UNK_18, false);
     }
     
     public void initializeConstructedMap(Packet.Bit stream) {
@@ -437,7 +434,7 @@ public class MapRegion {
                 }
             }
         }
-        performUpdate(mapBaseX, mapBaseY, 18, forcedPositionUpdate);
+        performUpdate(mapBaseX, mapBaseY, GameState.UNK_18, forcedPositionUpdate);
     }
     
     public void buildRegionBase(MapRegion mapRegion) {
@@ -612,6 +609,14 @@ public class MapRegion {
         if (this.asyncMaploading) {
             sleep(50);
         }
+        //ADDED
+        if (this.asyncMaploading) {
+            Utils.time();
+            while (!Renderers.activeToolkit.readyForRendering()) {
+                System.out.println("Waiting for renderer");
+                sleep(1);
+            }
+        }
         this.environmentManager.initializeEnvironment(this.sceneSizeX >> 4, this.sceneSizeY >> 4);
         this.environmentManager.updateAtmosphere(this);
         if (hasUnderwaterMap) {
@@ -659,6 +664,12 @@ public class MapRegion {
         if (!this.asyncMaploading) {
             PingRequester.keepalive(true);
         }
+        if (this.asyncMaploading) {
+            Utils.time();
+            while (!Renderers.activeToolkit.readyForRendering()) {
+                sleep(1);
+            }
+        }
         this.surfaceMap.calculateUnderlayPalette(Renderers.activeToolkit, hasUnderwaterMap ? this.scene.underwaterHeightmap[0] : null, null);
         if (this.asyncMaploading) {
             sleep(75);
@@ -682,6 +693,13 @@ public class MapRegion {
             }
             if (!this.asyncMaploading) {
                 PingRequester.keepalive(true);
+            }
+            //ADDED
+            if (this.asyncMaploading) {
+                Utils.time();
+                while (!Renderers.activeToolkit.readyForRendering()) {
+                    sleep(1);
+                }
             }
             this.underwaterMap.calculateUnderlayPalette(Renderers.activeToolkit, null, this.scene.surfaceHeightmap[0]);
             this.underwaterMap.calculateVisibility(true);
@@ -721,7 +739,7 @@ public class MapRegion {
             }
             Resource.mapRegion = this;
             mapRegion.clear();
-            updateEntities(18);
+            updateEntities(GameState.UNK_18);
             resetNonCutsceneEntities();
         } else {
             SoundEffectPlayer.updatePlayers();
@@ -742,7 +760,7 @@ public class MapRegion {
         }
         Scene.setRoofOverride();
         LocAction.onRegionChanged();
-        if (GameShell.getApplicationType() == ApplicationType.APPLET && client.GAME_CONNECTION_CONTEXT.getConnection() != null && client.gameState == 18) {
+        if (GameShell.getApplicationType() == ApplicationType.APPLET && client.GAME_CONNECTION_CONTEXT.getConnection() != null && client.gameState == GameState.UNK_18) {
         	TcpPacket packet = PacketEncoder.createPacket(ClientProt.UNK_82, client.GAME_CONNECTION_CONTEXT.isaac);
             packet.buffer.writeInt(1057001181);
             client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
@@ -763,16 +781,16 @@ public class MapRegion {
                 }
             }
         }
-        if (client.gameState == 11) {
-            client.setGameState(5);
-        } else if (client.gameState == 2) {
-            client.setGameState(0);
-        } else if (client.gameState == 6) {
-            client.setGameState(7);
-        } else if (client.gameState == 9) {
-            client.setGameState(3);
+        if (client.gameState == GameState.UNK_11) {
+            client.setGameState(GameState.UNK_5);
+        } else if (client.gameState == GameState.UNK_2) {
+            client.setGameState(GameState.UNK_0);
+        } else if (client.gameState == GameState.UNK_6) {
+            client.setGameState(GameState.UNK_7);
+        } else if (client.gameState == GameState.UNK_9) {
+            client.setGameState(GameState.IN_ACCOUNT_CREATION);
         } else {
-            client.setGameState(13);
+            client.setGameState(GameState.LOGGED_INGAME);
             if (client.GAME_CONNECTION_CONTEXT.getConnection() != null) {
             	TcpPacket packet = PacketEncoder.createPacket(ClientProt.REGION_LOADED_CONFIRM, client.GAME_CONNECTION_CONTEXT.isaac);
                 client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
@@ -1205,7 +1223,7 @@ public class MapRegion {
         }
     }
 
-    public void performUpdate(int BaseX, int BaseY, int newGamestate, boolean forcedPositionUpdate) {
+    public void performUpdate(int BaseX, int BaseY, GameState newGamestate, boolean forcedPositionUpdate) {
         if (client.MAP_LOADING_STAGE == 2) {
             if (this.asyncMaploading) {
                 throw new IllegalStateException();
@@ -1234,10 +1252,10 @@ public class MapRegion {
         }
     }
 
-    public void updateEntities(int requestedGamestate) {
+    public void updateEntities(GameState requestedGamestate) {
         int deltaX = this.baseCoordinates.x - this.lastCoordgrid.x;
         int deltaY = this.baseCoordinates.y - this.lastCoordgrid.y;
-        if (requestedGamestate == 18) {
+        if (requestedGamestate == GameState.UNK_18) {
             for (int npcIndex = 0; npcIndex < client.npcCount; npcIndex++) {
                 ObjectNode objectNode = client.NPC_ARRAY[npcIndex];
                 if (objectNode != null) {
@@ -1358,7 +1376,7 @@ public class MapRegion {
         }
         AreaSoundPlayer.initialize();
         AmbientSound.unlinkSounds(false);
-        if (requestedGamestate == 18) {
+        if (requestedGamestate == GameState.UNK_18) {
             client.anInt7262 -= deltaX * 512;
             client.anInt7376 -= deltaY * 512;
             Camera.cameraBaseX -= deltaX * 512;
@@ -1408,11 +1426,11 @@ public class MapRegion {
     }
 
     public void sleep(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException interruptedException) {
-        	// NOOP
-        }
+//        try {
+//            Thread.sleep(ms);
+//        } catch (InterruptedException interruptedException) {
+//        	// NOOP
+//        }
     }
 
     public void decodeClientUnderlayMasks(SceneGraph sceneGraph, byte[][] mapDatas) {
@@ -1622,16 +1640,16 @@ public class MapRegion {
             this.baseY = mapRegion.baseY;
             this.sceneSizeX = mapRegion.sceneSizeX;
             this.sceneSizeY = mapRegion.sceneSizeY;
-        } else if (client.gameState == 5) {
-            client.setGameState(11);
-        } else if (client.gameState == 0) {
-            client.setGameState(2);
-        } else if (client.gameState == 7) {
-            client.setGameState(6);
-        } else if (client.gameState == 13) {
-            client.setGameState(18);
-        } else if (client.gameState == 3) {
-            client.setGameState(9);
+        } else if (client.gameState == GameState.UNK_5) {
+            client.setGameState(GameState.UNK_11);
+        } else if (client.gameState == GameState.UNK_0) {
+            client.setGameState(GameState.UNK_2);
+        } else if (client.gameState == GameState.UNK_7) {
+            client.setGameState(GameState.UNK_6);
+        } else if (client.gameState == GameState.LOGGED_INGAME) {
+            client.setGameState(GameState.UNK_18);
+        } else if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
+            client.setGameState(GameState.UNK_9);
         }
     }
 

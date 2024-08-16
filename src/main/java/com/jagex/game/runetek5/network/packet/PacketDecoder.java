@@ -111,7 +111,7 @@ public class PacketDecoder {
 	        return success;
 	    } catch (IOException ioexception) {
 	    	ioexception.printStackTrace();
-	        if (client.gameState == 7) {
+	        if (client.gameState == GameState.UNK_7) {
 	            connectionContext.reset();
 	            return false;
 	        } else {
@@ -810,7 +810,7 @@ public class PacketDecoder {
             WorldConnection.connectionInfo = LoginManager.GAME_CONNECTION_INFO;
             WorldConnection.reconnectingWorld = reconnecting;
             LoginManager.setGameHost(port, host);
-            client.setGameState(17);
+            client.setGameState(GameState.UNK_17);
             context.currentPacket = null;
             return false;
         } else if (context.currentPacket == ServerProt.LOGOUT_LOBBY) {

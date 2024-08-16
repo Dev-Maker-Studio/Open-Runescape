@@ -295,7 +295,7 @@ public class Interface {
 	        }
 	        if (client.listComponentSettings(component).clickOptionEnabled(option - 1)) {
 	            BufferedConnectionContext connection = client.getConnectionContext();
-	            if (client.gameState == 0 || client.gameState == 13) {
+	            if (client.gameState == GameState.UNK_0 || client.gameState == GameState.LOGGED_INGAME) {
 	                TcpPacket packet;
 	                if (option == 1) {
 	                    packet = PacketEncoder.createPacket(ClientProt.IF_OP1, connection.isaac);

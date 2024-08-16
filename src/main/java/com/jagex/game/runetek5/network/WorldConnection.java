@@ -38,7 +38,7 @@ public class WorldConnection {
 	    if (!GameState.inLobby(client.gameState) && !GameState.isLoggedOut(client.gameState)) {
 	        WorldConnection.gameConnection = client.GAME_CONNECTION_CONTEXT.getConnection();
 	        client.GAME_CONNECTION_CONTEXT.reset();
-	        client.setGameState(10);
+	        client.setGameState(GameState.UNK_10);
 	    } else {
 	        client.logout(false);
 	    }

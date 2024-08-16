@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.client.login;
 
+import com.jagex.game.runetek5.client.GameState;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Identifiable;
 import com.jagex.game.runetek5.network.AsyncConnection;
@@ -36,7 +37,7 @@ public class AccountCreationStage {
         } else {
             AccountCreationStage.ACCOUNT_CREATION_STAGE = null;
             AccountCreationStage.RECEIVED_RESPONSE = AccountCreationResponseOpcodes.aClass4835731;
-            client.setGameState(5);
+            client.setGameState(GameState.UNK_5);
         }
     }
 
@@ -106,7 +107,7 @@ public class AccountCreationStage {
 
                             client.LOBBY_CONNECTION_CONTEXT.instreamEncryption = new Isaac(seed);
                             client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.setIsaacCipher(client.LOBBY_CONNECTION_CONTEXT.instreamEncryption);
-                            client.setGameState(3);
+                            client.setGameState(GameState.IN_ACCOUNT_CREATION);
                             client.LOBBY_CONNECTION_CONTEXT.clearAllQueuedPackets();
                             client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0;
                             client.LOBBY_CONNECTION_CONTEXT.lastPacket = null;

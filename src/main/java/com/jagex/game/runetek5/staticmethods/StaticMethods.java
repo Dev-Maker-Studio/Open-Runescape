@@ -347,7 +347,7 @@ public class StaticMethods {
 
             anInt76 = i_0;
             client.LOBBY_CONNECTION_CONTEXT.closeConnection();
-            client.setGameState(14);
+            client.setGameState(GameState.UNK_14);
         }
 
     }
@@ -459,8 +459,8 @@ public class StaticMethods {
         }
     }
 
-    public static boolean method4180(int i_0) {
-        return i_0 == 7 || i_0 == 6;
+    public static boolean method4180(GameState i_0) {
+        return i_0 == GameState.UNK_7 || i_0 == GameState.UNK_6;
     }
 
     public static void method1630(int i_0, int i_1, int i_2, int i_4, int i_6, ColoredMiniMenuEntry class282Sub50Sub157, AbstractFontRenderer fontrenderer8, FontMetrics fontmetrics9, int i_10, int i_11) {

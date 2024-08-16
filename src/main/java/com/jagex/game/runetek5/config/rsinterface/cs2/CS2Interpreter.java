@@ -3410,7 +3410,7 @@ public class CS2Interpreter {
     }
 
     public static void setPingWorlds(CS2Executor executor) {
-        if (client.gameState == 0) {
+        if (client.gameState == GameState.UNK_0) {
             WorldConnection.PING_WORLDS = executor.intStack[--executor.intStackPtr] == 1;
         }
     }
@@ -4430,7 +4430,7 @@ public class CS2Interpreter {
     public static void method5010(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         String string_3 = (String) executor.stringStack[--executor.stringStackPtr];
-        if (client.gameState == 0 && !LoginManager.method3360()) {
+        if (client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
             executor.intStack[++executor.intStackPtr - 1] = LoginManager.setGameHost(i_2, string_3) ? 1 : 0;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
@@ -5298,7 +5298,7 @@ public class CS2Interpreter {
 
     public static void sendAClass3794624(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        if (client.gameState == 0 && !LoginManager.method3360()) {
+        if (client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
             if (string_2.length() > 20) {
                 client.aByte7458 = -4;
             } else {
@@ -7336,7 +7336,7 @@ public class CS2Interpreter {
     }
 
     public static void method15437(CS2Executor executor) {
-        if (client.gameState == 0 && !LoginManager.method3360()) {
+        if (client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
             if (WorldConnection.aBool5422) {
                 executor.intStack[++executor.intStackPtr - 1] = 0;
             } else if (WorldConnection.aLong5425 > Utils.time() - 1000L) {

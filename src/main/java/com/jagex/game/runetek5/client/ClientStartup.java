@@ -188,7 +188,7 @@ public class ClientStartup {
 
             StaticMethods.initializedFontcombos.initializeFontMap(client.FONT_PROVIDER);
             FontManager.initialize();
-            client.setGameState(15);
+            client.setGameState(GameState.UNK_15);
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.CREATE_JS5) {
@@ -252,7 +252,7 @@ public class ClientStartup {
 
             decodeTitlescreenMusic(data);
             SoundEffectPlayer.initializeAudio();
-            client.setGameState(1);
+            client.setGameState(GameState.UNK_1);
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.PREPARE_NATIVE_LIBRARY_LOADER) {
