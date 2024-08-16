@@ -13,7 +13,7 @@ public class AsyncInputStream implements Runnable {
 		byte[] bytes_2 = IndexLoaders.CS2_SCRIPTS_INDEX.getFile(i_0, 0);
 		if (bytes_2 != null && bytes_2.length > 1) {
 			try {
-				cs2script_1 = AbstractRenderer.method8699(bytes_2);
+				cs2script_1 = AbstractRenderer.method8699(i_0, bytes_2);
 			} catch (Exception exception_4) {
 				throw new RuntimeException(exception_4.getMessage() + " " + i_0);
 			}

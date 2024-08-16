@@ -682,8 +682,8 @@ public class MapRegion {
 		} else {
 			Camera.CAM_MOVE_LOCALX -= i_3;
 			Camera.CAM_MOVE_LOCALY -= i_4;
-			Camera.anInt9368 -= i_3;
-			Camera.anInt4280 -= i_4;
+			Camera.CAM_LOOK_ABSOLUTE_X -= i_3;
+			Camera.CAM_LOOK_ABSOLUTE_Y -= i_4;
 			Camera.CAM_MOVE_ABSOLUTEX -= i_3 * 512;
 			Camera.CAM_MOVE_ABSOLUTEY -= i_4 * 512;
 			if (Math.abs(i_3) > sizeX || Math.abs(i_4) > sizeY)

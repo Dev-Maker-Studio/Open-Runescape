@@ -44,9 +44,9 @@ public class Class123 {
 
 	int anInt1554;
 
-	LocationIndexLoader aClass474_1536;
+	LocationIndexLoader objectDefLoader;
 
-	int anInt1540;
+	int objectId;
 
 	int anInt1555;
 
@@ -63,8 +63,8 @@ public class Class123 {
 	Animation aAnimation_1545;
 
 	Class123(AbstractRenderer graphicalrenderer_1, LocationIndexLoader objectindexloader_2, ObjectDefinition objectdefinitions_3, int i_4, int i_5, int i_6, int i_7, GraphNode_Sub1 class521_sub1_8, boolean bool_9, int i_10) {
-		aClass474_1536 = objectindexloader_2;
-		anInt1540 = objectdefinitions_3.id;
+		objectDefLoader = objectindexloader_2;
+		objectId = objectdefinitions_3.id;
 		anInt1555 = i_4;
 		anInt1542 = i_5;
 		aTransform_Sub1_1539 = class521_sub1_8;
@@ -108,7 +108,7 @@ public class Class123 {
 		ParticleEmitterConfig[] arr_10 = meshrasterizer_2.method11253();
 		SurfaceSkin[] arr_11 = meshrasterizer_2.method11274();
 		if ((aClass539_1538 == null || aClass539_1538.aBool7132) && (arr_10 != null || arr_11 != null)) {
-			ObjectDefinition objectdefinitions_12 = aClass474_1536.getObjectDefs(anInt1540);
+			ObjectDefinition objectdefinitions_12 = objectDefLoader.getObjectDefs(objectId);
 			if (objectdefinitions_12.transformTo != null)
 				objectdefinitions_12 = objectdefinitions_12.getMultiLoc(client.anInt7341 == 4 ? Class86.anInterface42_832 : Class158_Sub1.PLAYER_VAR_PROVIDER);
 			if (objectdefinitions_12 != null)
@@ -130,43 +130,43 @@ public class Class123 {
 
 	void method2124(boolean bool_1, int i_2, int i_3) {
 		int i_31 = i_3;
-		int i_5 = i_2;
+		int animationId = i_2;
 		boolean bool_6 = false;
 		if (i_2 == -1) {
-			ObjectDefinition objectdefinitions_7 = aClass474_1536.getObjectDefs(anInt1540);
-			ObjectDefinition objectdefinitions_8 = objectdefinitions_7;
-			if (objectdefinitions_7.transformTo != null)
-				objectdefinitions_7 = objectdefinitions_7.getMultiLoc(client.anInt7341 == 4 ? Class86.anInterface42_832 : Class158_Sub1.PLAYER_VAR_PROVIDER);
-			if (objectdefinitions_7 == null)
+			ObjectDefinition baseObjectDef = objectDefLoader.getObjectDefs(objectId);
+			ObjectDefinition objectdefinitions_8 = baseObjectDef;
+			if (baseObjectDef.transformTo != null)
+				baseObjectDef = baseObjectDef.getMultiLoc(client.anInt7341 == 4 ? Class86.anInterface42_832 : Class158_Sub1.PLAYER_VAR_PROVIDER);
+			if (baseObjectDef == null)
 				return;
-			if (objectdefinitions_8 == objectdefinitions_7)
+			if (objectdefinitions_8 == baseObjectDef)
 				objectdefinitions_8 = null;
-			if (objectdefinitions_7.method7967()) {
-				if (bool_1 && aAnimation_1545.hasDefs() && objectdefinitions_7.method7979(aAnimation_1545.method7597()))
+			if (baseObjectDef.method7967()) {
+				if (bool_1 && aAnimation_1545.hasDefs() && baseObjectDef.method7979(aAnimation_1545.method7597()))
 					return;
-				if (objectdefinitions_7.id != anInt1547)
-					bool_6 = objectdefinitions_7.aBool5702;
-				i_5 = objectdefinitions_7.method7977();
-				if (objectdefinitions_7.method7976())
+				if (baseObjectDef.id != anInt1547)
+					bool_6 = baseObjectDef.aBool5702;
+				animationId = baseObjectDef.getRandomAnimationId();
+				if (baseObjectDef.hasAnims())
 					i_31 = 0;
 				else
 					i_31 = 1;
 			} else if (objectdefinitions_8 != null && objectdefinitions_8.method7967()) {
 				if (bool_1 && aAnimation_1545.hasDefs() && objectdefinitions_8.method7979(aAnimation_1545.method7597()))
 					return;
-				if (anInt1547 != objectdefinitions_7.id)
+				if (anInt1547 != baseObjectDef.id)
 					bool_6 = objectdefinitions_8.aBool5702;
-				i_5 = objectdefinitions_8.method7977();
-				if (objectdefinitions_8.method7976())
+				animationId = objectdefinitions_8.getRandomAnimationId();
+				if (objectdefinitions_8.hasAnims())
 					i_31 = 0;
 				else
 					i_31 = 1;
 			}
 		}
-		if (i_5 == -1)
+		if (animationId == -1)
 			aAnimation_1545.method7569();
 		else {
-			aAnimation_1545.animateFull(i_5, 0, i_31, bool_6);
+			aAnimation_1545.animateFull(animationId, 0, i_31, bool_6);
 			anInt1548 = client.FRAME_COUNT;
 			aBool1552 = false;
 			aMeshRasterizer_1544 = null;
@@ -174,7 +174,7 @@ public class Class123 {
 	}
 
 	MeshRasterizer method2132(AbstractRenderer graphicalrenderer_1, int i_2, boolean bool_3, boolean bool_4) {
-		ObjectDefinition objectdefinitions_6 = aClass474_1536.getObjectDefs(anInt1540);
+		ObjectDefinition objectdefinitions_6 = objectDefLoader.getObjectDefs(objectId);
 		if (objectdefinitions_6.transformTo != null)
 			objectdefinitions_6 = objectdefinitions_6.getMultiLoc(client.anInt7341 == 4 ? Class86.anInterface42_832 : Class158_Sub1.PLAYER_VAR_PROVIDER);
 		if (objectdefinitions_6 == null) {

@@ -15,8 +15,10 @@ public class CS2Script extends CacheableNode {
 	public Object[] stringOpValues;
 	public int[] intOpValues;
 	public long[] longOpValues;
+	public int id;
 
-	public CS2Script(ByteBuf rsbytebuffer_1) {
+	public CS2Script(int scriptId, ByteBuf rsbytebuffer_1) {
+		this.id = scriptId;
 		int i_2 = decodeHeader(rsbytebuffer_1);
 		int i_3 = 0;
 

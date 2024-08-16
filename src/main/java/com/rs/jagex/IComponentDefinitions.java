@@ -248,7 +248,7 @@ public class IComponentDefinitions {
 									int i_27;
 									int i_39;
 									if (inter.type == ComponentType.SPRITE) {
-										if (inter.anInt1404 >= 0)
+										if (inter.skyboxId >= 0)
 											inter.method2027(IndexLoaders.SKYBOX_LOADER, IndexLoaders.SUN_LOADER).method4214(Renderers.CURRENT_RENDERER, drawEndX, drawEndY, inter.width, inter.height, inter.anInt1430 << 3, inter.anInt1431 << 3);
 										else {
 											NativeSprite nativesprite_41;
@@ -435,9 +435,9 @@ public class IComponentDefinitions {
 	public int[] anIntArray1425;
 	public int anInt1430;
 	public int anInt1431;
-	public int anInt1432;
-	public int anInt1433;
-	public int anInt1434;
+	public int lightPositionX;
+	public int lightPositionY;
+	public int lightPositionZ;
 	public Animation anim;
 	public IComponentDefinitions[] slotChildren;
 	public IComponentDefinitions[] itemSlots;
@@ -570,7 +570,7 @@ public class IComponentDefinitions {
 	public int containerItemId;
 	public int anInt1427;
 	public boolean wearCol;
-	public int anInt1404;
+	public int skyboxId;
 	public int vorbisStringId;
 	public boolean aBool1440;
 	public boolean aBool1286;
@@ -607,7 +607,7 @@ public class IComponentDefinitions {
 		containerItemId = -1;
 		anInt1427 = 0;
 		wearCol = false;
-		anInt1404 = -1;
+		skyboxId = -1;
 		vorbisStringId = -1;
 		animation = -1;
 		aBool1440 = false;
@@ -877,12 +877,12 @@ public class IComponentDefinitions {
 	}
 
 	public Class247 method2027(SkyboxIndexLoader class288_1, SunIndexLoader class45_2) {
-		if (anInt1404 == -1)
+		if (skyboxId == -1)
 			return null;
-		long long_4 = (anInt1432 & 0xffffL) << 48 | (anInt1433 & 0xffffL) << 32 | (anInt1434 & 0xffffL) << 16 | anInt1404 & 0xffffL;
+		long long_4 = (lightPositionX & 0xffffL) << 48 | (lightPositionY & 0xffffL) << 32 | (lightPositionZ & 0xffffL) << 16 | skyboxId & 0xffffL;
 		Class247 class247_6 = (Class247) aClass229_1282.get(long_4);
 		if (class247_6 == null) {
-			class247_6 = class288_1.method5077(anInt1404, anInt1432, anInt1433, anInt1434, class45_2);
+			class247_6 = class288_1.method5077(skyboxId, lightPositionX, lightPositionY, lightPositionZ, class45_2);
 			aClass229_1282.put(class247_6, long_4);
 		}
 		return class247_6;

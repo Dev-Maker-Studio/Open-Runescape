@@ -9,10 +9,23 @@ public class Class383 implements Interface41 {
 	static int anInt4664;
 
 	public static AreadSound playtiledSoundEffect(int soundId, int unk, int delay, int volume, int tile, int sampleRate) {
+		System.out.println("Playing tiled sound effect: ");
+		System.out.println("id: " + soundId + " unk: " + unk + " delay: " + delay + " volume: " + volume + " tile: " + tile + " sampleRate: " + sampleRate);
 		if (Class393.preferences.soundEffectVolume.method12714() != 0 && unk != 0 && Class260.SOUNDS_SIZE < 50 && soundId != -1) {
 			AreadSound class268_7 = new AreadSound(SoundType.EFFECT, soundId, unk, delay, volume, tile, sampleRate, null);
 			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = class268_7;
 			return class268_7;
+		}
+		return null;
+	}
+
+	public static AreadSound playSoundEffect(int soundId, int repeat, int delay, int volume, int sampleRate) {
+		System.out.println("Playing sound effect: ");
+		System.out.println("id: " + soundId + " repeat: " + repeat + " delay: " + delay + " volume: " + volume + " tile: 0, sampleRate: " + sampleRate);
+		if (Class393.preferences.soundEffectVolume.method12714() != 0 && repeat != 0 && Class260.SOUNDS_SIZE < 50 && soundId != -1) {
+			AreadSound class268_6 = new AreadSound(SoundType.EFFECT, soundId, repeat, delay, volume, 0, sampleRate, null);
+			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = class268_6;
+			return class268_6;
 		}
 		return null;
 	}

@@ -969,7 +969,7 @@ public class client extends Engine {
 								HitsplatDefinitions.method3851();
 						}
 
-						boolean clickable = iCompDef.clickMask && iCompDef.type == ComponentType.SPRITE && iCompDef.transparency == 0 && iCompDef.anInt1404 < 0 && iCompDef.containerItemId == -1 && iCompDef.vorbisStringId == -1 && !iCompDef.tiling && iCompDef.angle2d == 0;
+						boolean clickable = iCompDef.clickMask && iCompDef.type == ComponentType.SPRITE && iCompDef.transparency == 0 && iCompDef.skyboxId < 0 && iCompDef.containerItemId == -1 && iCompDef.vorbisStringId == -1 && !iCompDef.tiling && iCompDef.angle2d == 0;
 						boolean bool_48 = false;
 						int i_24;
 						if (mouseX >= leftBound && mouseY >= lowerBound && mouseX < rightBound && mouseY < upperBound)
@@ -1578,7 +1578,7 @@ public class client extends Engine {
 							}
 						}
 
-						if (iCompDef.type == ComponentType.SPRITE && iCompDef.anInt1404 != -1)
+						if (iCompDef.type == ComponentType.SPRITE && iCompDef.skyboxId != -1)
 							iCompDef.method2027(IndexLoaders.SKYBOX_LOADER, IndexLoaders.SUN_LOADER).method4217(Renderers.CURRENT_RENDERER, iCompDef.height, Class393.preferences.skyBoxes.method12728());
 
 						Class86.renderItemInvSprite(iCompDef);

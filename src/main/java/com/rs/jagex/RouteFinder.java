@@ -135,8 +135,14 @@ public class RouteFinder {
 						}
 						if ("getcamerapos".equalsIgnoreCase(string_0)) {
 							CoordGrid coordgrid_27 = IndexLoaders.MAP_REGION_DECODER.getBase();
-							Class209.printConsoleMessage("Pos: " + VertexNormal.MY_PLAYER.plane + "," + ((Camera.CAM_MOVE_ABSOLUTEX >> 9) + coordgrid_27.x >> 6) + "," + ((Camera.CAM_MOVE_ABSOLUTEY >> 9) + coordgrid_27.y >> 6) + "," + ((Camera.CAM_MOVE_ABSOLUTEX >> 9) + coordgrid_27.x & 0x3f) + "," + ((Camera.CAM_MOVE_ABSOLUTEY >> 9) + coordgrid_27.y & 0x3f) + " Height: " + (Class504.getTerrainHeightAtPos(Camera.CAM_MOVE_ABSOLUTEX, Camera.CAM_MOVE_ABSOLUTEY, VertexNormal.MY_PLAYER.plane) - Camera.CAM_MOVE_ABSOLUTEZ));
-							Class209.printConsoleMessage("Look: " + VertexNormal.MY_PLAYER.plane + "," + (coordgrid_27.x + Camera.anInt9368 >> 6) + "," + (coordgrid_27.y + Camera.anInt4280 >> 6) + "," + (coordgrid_27.x + Camera.anInt9368 & 0x3f) + "," + (coordgrid_27.y + Camera.anInt4280 & 0x3f) + " Height: " + (Class504.getTerrainHeightAtPos(Camera.anInt9368, Camera.anInt4280, VertexNormal.MY_PLAYER.plane) - Camera.anInt1527));
+							Class209.printConsoleMessage(
+									"Pos: " + VertexNormal.MY_PLAYER.plane + "," + ((Camera.CAM_MOVE_ABSOLUTEX >> 9) + coordgrid_27.x >> 6) + "," + ((Camera.CAM_MOVE_ABSOLUTEY >> 9) + coordgrid_27.y >> 6) + "," + ((Camera.CAM_MOVE_ABSOLUTEX >> 9) + coordgrid_27.x & 0x3f) + "," + ((Camera.CAM_MOVE_ABSOLUTEY >> 9) + coordgrid_27.y & 0x3f) +
+											" Height: " + (Class504.getTerrainHeightAtPos(Camera.CAM_MOVE_ABSOLUTEX, Camera.CAM_MOVE_ABSOLUTEY, VertexNormal.MY_PLAYER.plane) - Camera.CAM_MOVE_ABSOLUTEZ)
+							);
+							Class209.printConsoleMessage(
+									"Look: " + VertexNormal.MY_PLAYER.plane + "," + ((coordgrid_27.x + Camera.CAM_LOOK_ABSOLUTE_X) >> 6) + "," + ((coordgrid_27.y + Camera.CAM_LOOK_ABSOLUTE_Y) >> 6) + "," + ((coordgrid_27.x + Camera.CAM_LOOK_ABSOLUTE_X) & 0x3f) + "," + ((coordgrid_27.y + Camera.CAM_LOOK_ABSOLUTE_Y) & 0x3f) +
+											" Height: " + (Class504.getTerrainHeightAtPos(Camera.CAM_LOOK_ABSOLUTE_X, Camera.CAM_LOOK_ABSOLUTE_Y, VertexNormal.MY_PLAYER.plane) - Camera.CAM_LOOK_ABSOLUTE_Z)
+							);
 							return;
 						}
 						break label381;

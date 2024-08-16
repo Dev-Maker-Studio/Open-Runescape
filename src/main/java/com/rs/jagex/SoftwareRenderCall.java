@@ -24,7 +24,7 @@ public class SoftwareRenderCall implements Hashable {
 		if (defs.vorbisSound)
 			Class435.playSoundVorbis(i_4, i_5, 0, i_7, false, i_6);
 		else
-			VarNPCMap.playSoundEffect(i_4, i_5, 0, i_7, i_6);
+			Class383.playSoundEffect(i_4, i_5, 0, i_7, i_6);
 		}
 	}
 

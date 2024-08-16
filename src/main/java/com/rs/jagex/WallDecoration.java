@@ -86,7 +86,7 @@ public class WallDecoration extends GraphNode_Sub1_Sub4 implements WorldObject {
 
 	@Override
 	public int getId() {
-		return aClass123_10501.anInt1540;
+		return aClass123_10501.objectId;
 	}
 
 	@Override
@@ -331,7 +331,7 @@ public class WallDecoration extends GraphNode_Sub1_Sub4 implements WorldObject {
 
 	@Override
 	public int method39() {
-		return aClass123_10501.anInt1540 * 1623064993 * 1535779425;
+		return aClass123_10501.objectId * 1623064993 * 1535779425;
 	}
 
 	@Override
@@ -341,7 +341,7 @@ public class WallDecoration extends GraphNode_Sub1_Sub4 implements WorldObject {
 
 	@Override
 	public int method76() {
-		return aClass123_10501.anInt1540 * 1623064993 * 1535779425;
+		return aClass123_10501.objectId * 1623064993 * 1535779425;
 	}
 
 	@Override

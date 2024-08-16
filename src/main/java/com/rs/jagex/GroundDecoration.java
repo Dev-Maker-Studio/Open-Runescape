@@ -16,7 +16,7 @@ public class GroundDecoration extends SceneObjectNode implements WorldObject {
 
 	@Override
 	public int getId() {
-		return aClass123_10507.anInt1540;
+		return aClass123_10507.objectId;
 	}
 
 	@Override
@@ -290,7 +290,7 @@ public class GroundDecoration extends SceneObjectNode implements WorldObject {
 
 	@Override
 	public int method39() {
-		return 1535779425 * aClass123_10507.anInt1540 * 1623064993;
+		return 1535779425 * aClass123_10507.objectId * 1623064993;
 	}
 
 	@Override
@@ -300,7 +300,7 @@ public class GroundDecoration extends SceneObjectNode implements WorldObject {
 
 	@Override
 	public int method76() {
-		return 1535779425 * aClass123_10507.anInt1540 * 1623064993;
+		return 1535779425 * aClass123_10507.objectId * 1623064993;
 	}
 
 	@Override

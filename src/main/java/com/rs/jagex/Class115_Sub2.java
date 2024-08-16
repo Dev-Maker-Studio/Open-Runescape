@@ -48,6 +48,7 @@ public class Class115_Sub2 extends Class115 {
 
 			programString.append(new String(class505_sub2_sub1_1.getGLShaderData(shaderName)));
 			aString9434 = programString.toString();
+			System.out.println(aString9434);
 		}
 
 		if (class99_2.aString1002 != null) {
@@ -65,6 +66,7 @@ public class Class115_Sub2 extends Class115 {
 
 			programString.append(new String(class505_sub2_sub1_1.getGLShaderData(aString1246)));
 			shaderProgram = programString.toString();
+			System.out.println(shaderProgram);
 		}
 
 		Class503.method8365(anIntArray9426, 0, anIntArray9426.length, -1);

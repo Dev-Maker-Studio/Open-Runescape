@@ -80,6 +80,7 @@ public class CS2Executor {
 		}
 	}
 	static void executeScript(CS2Script cs2script_0, int stackLimit, CS2Executor cs2executor_2) {
+		System.out.println("Executing script: " + cs2script_0.id);
 		cs2executor_2.intStackPtr = 0;
 		cs2executor_2.stringStackPtr = 0;
 		cs2executor_2.instrPtr = -1;
@@ -94,7 +95,7 @@ public class CS2Executor {
 				while (true) {
 					++anInt5904;
 					if (anInt5904 > stackLimit)
-						throw new RuntimeException("");
+						throw new RuntimeException("Stack_overflow_at_script[" + cs2executor_2.current.id + "]");
 					cs2opinfo_4 = cs2executor_2.operations[++cs2executor_2.instrPtr];
 					if (aBool5898 && (aString5897 == null || cs2executor_2.current.scriptName != null && cs2executor_2.current.scriptName.indexOf(aString5897) != -1))
 						System.out.println(cs2executor_2.current.scriptName + ": " + cs2opinfo_4);

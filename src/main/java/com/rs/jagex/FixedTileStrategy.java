@@ -15,7 +15,7 @@ public class FixedTileStrategy extends RouteStrategy {
 				return null;
 			else {
 				try {
-					cs2script_5 = AbstractRenderer.method8699(bytes_6);
+					cs2script_5 = AbstractRenderer.method8699(i_4, bytes_6);
 				} catch (Exception exception_8) {
 					throw new RuntimeException(exception_8.getMessage() + " " + i_4);
 				}
@@ -36,7 +36,7 @@ public class FixedTileStrategy extends RouteStrategy {
 						return null;
 					else {
 						try {
-							cs2script_5 = AbstractRenderer.method8699(bytes_6);
+							cs2script_5 = AbstractRenderer.method8699(i_4, bytes_6);
 						} catch (Exception exception_9) {
 							throw new RuntimeException(exception_9.getMessage() + " " + i_4);
 						}
@@ -56,7 +56,7 @@ public class FixedTileStrategy extends RouteStrategy {
 							return null;
 						else {
 							try {
-								cs2script_5 = AbstractRenderer.method8699(bytes_6);
+								cs2script_5 = AbstractRenderer.method8699(i_4, bytes_6);
 							} catch (Exception exception_10) {
 								throw new RuntimeException(exception_10.getMessage() + " " + i_4);
 							}

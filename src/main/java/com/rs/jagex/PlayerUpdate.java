@@ -393,7 +393,6 @@ public class PlayerUpdate {
 					b_20 = tempMoveType;
 				else
 					b_20 = Class197.playerMovementTypes[i_1];
-
 				Class236.method3985(player, b_20);
 				player.method16129(player.anInt10569, player.anInt10570, b_20);
 			}

@@ -50,9 +50,9 @@ public class Wall extends GraphNode_Sub1_Sub5 implements WorldObject {
 			}
 		}
 
-		i_1 = Camera.anInt9368 * 512 + 256;
-		i_2 = Camera.anInt4280 * 512 + 256;
-		i_3 = Class504.getTerrainHeightAtPos(i_1, i_2, Class4.MY_PLAYER_PLANE) - Camera.anInt1527;
+		i_1 = Camera.CAM_LOOK_ABSOLUTE_X * 512 + 256;
+		i_2 = Camera.CAM_LOOK_ABSOLUTE_Y * 512 + 256;
+		i_3 = Class504.getTerrainHeightAtPos(i_1, i_2, Class4.MY_PLAYER_PLANE) - Camera.CAM_LOOK_ABSOLUTE_Z;
 		int i_4 = i_1 - Camera.CAM_MOVE_ABSOLUTEX;
 		int i_5 = i_3 - Camera.CAM_MOVE_ABSOLUTEZ;
 		int i_6 = i_2 - Camera.CAM_MOVE_ABSOLUTEY;
@@ -131,7 +131,7 @@ public class Wall extends GraphNode_Sub1_Sub5 implements WorldObject {
 
 	@Override
 	public int getId() {
-		return aClass123_10532.anInt1540;
+		return aClass123_10532.objectId;
 	}
 
 	@Override
@@ -419,7 +419,7 @@ public class Wall extends GraphNode_Sub1_Sub5 implements WorldObject {
 
 	@Override
 	public int method39() {
-		return aClass123_10532.anInt1540 * 1623064993 * 1535779425;
+		return aClass123_10532.objectId * 1623064993 * 1535779425;
 	}
 
 	@Override
@@ -429,7 +429,7 @@ public class Wall extends GraphNode_Sub1_Sub5 implements WorldObject {
 
 	@Override
 	public int method76() {
-		return aClass123_10532.anInt1540 * 1623064993 * 1535779425;
+		return aClass123_10532.objectId * 1623064993 * 1535779425;
 	}
 
 	@Override

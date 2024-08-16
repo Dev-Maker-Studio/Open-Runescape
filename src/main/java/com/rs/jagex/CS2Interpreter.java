@@ -589,8 +589,8 @@ public class CS2Interpreter {
 			longLessOrEqual(exec);
 			break;
 		case LONG_GE: //also branch
-		longGreaterOrEqual(exec);
-		break;
+			longGreaterOrEqual(exec);
+			break;
 		case BRANCH_EQ1:
 			branchEq1(exec);
 			break;
@@ -810,11 +810,11 @@ public class CS2Interpreter {
 		case CC_SETITEM_NONUM:
 			method12719(exec);
 			break;
-		case instr6063:
+		case CC_SETMODELLIGHTING:
 			method4970(exec);
 			break;
 		case instr6064:
-			method2567(exec);
+			method2567(exec); //set light source angle?
 			break;
 		case instr6065:
 			method6318(exec);
@@ -5325,7 +5325,7 @@ public class CS2Interpreter {
 
 	static void method14520(CS2Executor executor) {
 		executor.intStackPtr -= 4;
-		VarNPCMap.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], 256);
+		Class383.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], 256);
 	}
 
 	static void method14521(CS2Executor executor) {
@@ -6193,7 +6193,7 @@ public class CS2Interpreter {
 
 	static void method1888(CS2Executor executor) {
 		executor.intStackPtr -= 5;
-		VarNPCMap.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], executor.intStack[executor.intStackPtr + 4]);
+		Class383.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], executor.intStack[executor.intStackPtr + 3], executor.intStack[executor.intStackPtr + 4]);
 	}
 
 	static void method1889(CS2Executor executor) {
@@ -9115,10 +9115,10 @@ public class CS2Interpreter {
 
 	static void method6313(IComponentDefinitions icomponentdefinitions_0, CS2Executor cs2executor_2) {
 		cs2executor_2.intStackPtr -= 4;
-		icomponentdefinitions_0.anInt1404 = cs2executor_2.intStack[cs2executor_2.intStackPtr];
-		icomponentdefinitions_0.anInt1432 = cs2executor_2.intStack[cs2executor_2.intStackPtr + 1];
-		icomponentdefinitions_0.anInt1433 = cs2executor_2.intStack[cs2executor_2.intStackPtr + 2];
-		icomponentdefinitions_0.anInt1434 = cs2executor_2.intStack[cs2executor_2.intStackPtr + 3];
+		icomponentdefinitions_0.skyboxId = cs2executor_2.intStack[cs2executor_2.intStackPtr];
+		icomponentdefinitions_0.lightPositionX = cs2executor_2.intStack[cs2executor_2.intStackPtr + 1];
+		icomponentdefinitions_0.lightPositionY = cs2executor_2.intStack[cs2executor_2.intStackPtr + 2];
+		icomponentdefinitions_0.lightPositionZ = cs2executor_2.intStack[cs2executor_2.intStackPtr + 3];
 		IComponentDefinitions.redrawComponent(icomponentdefinitions_0);
 	}
 
@@ -10566,7 +10566,7 @@ public class CS2Interpreter {
 
 	static void playSoundSynth(CS2Executor executor) {
 		executor.intStackPtr -= 3;
-		VarNPCMap.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], 255, 256);
+		Class383.playSoundEffect(executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1], executor.intStack[executor.intStackPtr + 2], 255, 256);
 	}
 
 	static void playSoundVorbisVolume(CS2Executor executor) {

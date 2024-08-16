@@ -1,7 +1,5 @@
 package com.rs.jagex;
 
-import com.rs.jagex.AreadSound.SoundType;
-
 import java.io.File;
 
 public class VarNPCMap {
@@ -37,15 +35,6 @@ public class VarNPCMap {
 		}
 		class208_2.aTransform_Sub1_Sub1_2659 = class521_sub1_sub1_0;
 		return class208_2;
-	}
-
-	public static AreadSound playSoundEffect(int soundId, int repeat, int delay, int volume, int sampleRate) {
-		if (Class393.preferences.soundEffectVolume.method12714() != 0 && repeat != 0 && Class260.SOUNDS_SIZE < 50 && soundId != -1) {
-			AreadSound class268_6 = new AreadSound(SoundType.EFFECT, soundId, repeat, delay, volume, 0, sampleRate, null);
-			Class260.SOUNDS[++Class260.SOUNDS_SIZE - 1] = class268_6;
-			return class268_6;
-		}
-		return null;
 	}
 
 	int anInt1964;

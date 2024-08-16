@@ -27,7 +27,7 @@ public class WorldType {
 				if (animDef.vorbisSound)
 					Class435.playSoundVorbis(i_5, i_6, 0, i_9, false, i_8);
 				else
-					VarNPCMap.playSoundEffect(i_5, i_6, 0, i_9, i_8);
+					Class383.playSoundEffect(i_5, i_6, 0, i_9, i_8);
 		} else {
 			if (class521_sub1_2 == VertexNormal.MY_PLAYER) {
 				if (Class393.preferences.soundEffectVolume.method12714() == 0)

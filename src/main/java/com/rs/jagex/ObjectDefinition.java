@@ -561,11 +561,11 @@ public class ObjectDefinition {
 		return class282_sub47_4 == null ? string_2 : (String) class282_sub47_4.anObject8068;
 	}
 
-	public boolean method7976() {
+	public boolean hasAnims() {
 		return animations != null && animations.length > 1;
 	}
 
-	public int method7977() {
+	public int getRandomAnimationId() {
 		if (animations != null) {
 			if (animations.length <= 1)
 				return animations[0];

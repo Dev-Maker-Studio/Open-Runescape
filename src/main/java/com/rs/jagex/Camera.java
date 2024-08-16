@@ -16,10 +16,10 @@ public class Camera {
 	static int[] SHAKE_3;
 	static int[] SHAKE_4;
 	
-	public static int anInt9368;
-	public static int anInt4280;
+	public static int CAM_LOOK_ABSOLUTE_X;
+	public static int CAM_LOOK_ABSOLUTE_Y;
 	public static int CAM_MOVE_ABSOLUTEX;
-	static int anInt1527;
+	static int CAM_LOOK_ABSOLUTE_Z;
 	static int anInt5606;
 	static int anInt5828;
 	public static int anInt5930;
@@ -42,15 +42,15 @@ public class Camera {
 	static int anInt7273;
 
 	public static void lookAt(int x, int y, int height, int startSpeed, int deccelTo) {
-		anInt9368 = x;
-		anInt4280 = y;
-		anInt1527 = height;
+		CAM_LOOK_ABSOLUTE_X = x;
+		CAM_LOOK_ABSOLUTE_Y = y;
+		CAM_LOOK_ABSOLUTE_Z = height;
 		anInt5606 = startSpeed;
 		anInt5828 = deccelTo;
 		if (anInt5828 >= 100) {
-			int i_6 = anInt9368 * 512 + 256;
-			int i_7 = anInt4280 * 512 + 256;
-			int i_8 = Class504.getTerrainHeightAtPos(i_6, i_7, Class4.MY_PLAYER_PLANE) - anInt1527;
+			int i_6 = CAM_LOOK_ABSOLUTE_X * 512 + 256;
+			int i_7 = CAM_LOOK_ABSOLUTE_Y * 512 + 256;
+			int i_8 = Class504.getTerrainHeightAtPos(i_6, i_7, Class4.MY_PLAYER_PLANE) - CAM_LOOK_ABSOLUTE_Z;
 			int i_9 = i_6 - CAM_MOVE_ABSOLUTEX;
 			int i_10 = i_8 - CAM_MOVE_ABSOLUTEZ;
 			int i_11 = i_7 - CAM_MOVE_ABSOLUTEY;

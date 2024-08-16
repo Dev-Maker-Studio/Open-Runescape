@@ -1694,7 +1694,7 @@ public class PacketDecoder {
 				int delay = buffer.readUnsignedShort();
 				int volume = buffer.readUnsignedByte();
 				int sampleRate = buffer.readUnsignedShort();
-				VarNPCMap.playSoundEffect(soundId, repeat, delay, volume, sampleRate);
+				Class383.playSoundEffect(soundId, repeat, delay, volume, sampleRate);
 			}
 			case VORBIS_SOUND -> {
 				int key = buffer.readUnsignedShort();
@@ -1977,10 +1977,14 @@ public class PacketDecoder {
 			case MAP_PROJANIM -> {
 				int flags = buffer.readUnsignedByte();
 				boolean useFloorHeight = (flags & 0x80) != 0;
-				int localX = (flags >> 3 & 0x7) + Static.UPDATE_ZONE_X;
-				int localY = (flags & 0x7) + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
-				int xOff = localX + buffer.readByte();
-				int yOff = localY + buffer.readByte();
+				int chunkLocalX = (flags >> 3 & 0x7);
+				int chunkLocalY = (flags & 0x7);
+				int localX = chunkLocalX + Static.UPDATE_ZONE_X;
+				int localY = chunkLocalY + Class158_Sub1_Sub2.UPDATE_ZONE_Y;
+				int xOff = buffer.readByte();
+				int targetX = localX + xOff;
+				int yOff = buffer.readByte();
+				int targetY = localY + yOff;
 				int lockOn = buffer.readShort();
 				int spotAnimId = buffer.readUnsignedShort();
 				int startHeight = buffer.readUnsignedByte() * 4;
@@ -1988,19 +1992,19 @@ public class PacketDecoder {
 				int startTime = buffer.readUnsignedShort();
 				int endTime = buffer.readUnsignedShort();
 				int angle = buffer.readUnsignedByte();
-				int slope = buffer.readUnsignedShort();
+				int offset = buffer.readUnsignedShort();
 				if (angle == 255)
 					angle = -1;
-				if (IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY() && xOff >= 0 && yOff >= 0 && xOff < IndexLoaders.MAP_REGION_DECODER.getSizeX() && yOff < IndexLoaders.MAP_REGION_DECODER.getSizeY() && spotAnimId != 65535) {
+				if (IndexLoaders.MAP_REGION_DECODER.method4419() != RegionLoadType.aRegionLoadType_3153 && localX >= 0 && localY >= 0 && localX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && localY < IndexLoaders.MAP_REGION_DECODER.getSizeY() && targetX >= 0 && targetY >= 0 && targetX < IndexLoaders.MAP_REGION_DECODER.getSizeX() && targetY < IndexLoaders.MAP_REGION_DECODER.getSizeY() && spotAnimId != 65535) {
 					localX = localX * 512 + 256;
 					localY = localY * 512 + 256;
-					xOff = xOff * 512 + 256;
-					yOff = yOff * 512 + 256;
+					targetX = targetX * 512 + 256;
+					targetY = targetY * 512 + 256;
 					startHeight <<= 2;
 					endHeight <<= 2;
-					slope <<= 2;
-					ProjectileAnimation p = new ProjectileAnimation(IndexLoaders.MAP_REGION_DECODER.getSceneObjectManager(), spotAnimId, Class272.UPDATE_ZONE_PLANE, Class272.UPDATE_ZONE_PLANE, localX, localY, startHeight, startTime + client.FRAME_COUNT, endTime + client.FRAME_COUNT, angle, slope, 0, lockOn, endHeight, useFloorHeight, -1);
-					p.start(xOff, yOff, Class504.getTerrainHeightAtPos(xOff, yOff, Class272.UPDATE_ZONE_PLANE) - endHeight, startTime + client.FRAME_COUNT);
+					offset <<= 2;
+					ProjectileAnimation p = new ProjectileAnimation(IndexLoaders.MAP_REGION_DECODER.getSceneObjectManager(), spotAnimId, Class272.UPDATE_ZONE_PLANE, Class272.UPDATE_ZONE_PLANE, localX, localY, startHeight, startTime + client.FRAME_COUNT, endTime + client.FRAME_COUNT, angle, offset, 0, lockOn, endHeight, useFloorHeight, -1);
+					p.start(targetX, targetY, Class504.getTerrainHeightAtPos(targetX, targetY, Class272.UPDATE_ZONE_PLANE) - endHeight, startTime + client.FRAME_COUNT);
 					client.PROJECTILES.append(new ProjectileNode(p));
 				}
 			}

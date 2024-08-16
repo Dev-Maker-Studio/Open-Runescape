@@ -48,8 +48,8 @@ public abstract class AbstractRenderer {
 	public static MenuActionEvent method8697() {
 		return CutsceneAction_Sub23.aCacheableNode_Sub7_9445;
 	}
-	static CS2Script method8699(byte[] bytes_0) {
-		return new CS2Script(new ByteBuf(bytes_0));
+	static CS2Script method8699(int scriptId, byte[] bytes_0) {
+		return new CS2Script(scriptId, new ByteBuf(bytes_0));
 	}
 	public ImageLoader textureCache;
 

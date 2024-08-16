@@ -123,9 +123,9 @@ public class Class190 {
 		Camera.CAM_MOVE_Z = 0;
 		Camera.CAM_MOVE_CONST_SPEED = 0;
 		Camera.CAM_MOVE_VAR_SPEED = 0;
-		Camera.anInt9368 = 0;
-		Camera.anInt4280 = 0;
-		Camera.anInt1527 = 0;
+		Camera.CAM_LOOK_ABSOLUTE_X = 0;
+		Camera.CAM_LOOK_ABSOLUTE_Y = 0;
+		Camera.CAM_LOOK_ABSOLUTE_Z = 0;
 		Camera.anInt5606 = 0;
 		Camera.anInt5828 = 0;
 
