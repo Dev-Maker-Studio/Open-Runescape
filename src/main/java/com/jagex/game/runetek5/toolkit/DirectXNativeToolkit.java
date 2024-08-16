@@ -481,8 +481,8 @@ public class DirectXNativeToolkit extends AbstractNativeToolkit {
     }
 
     @Override
-    protected void finalize() {
-        super.finalize();
+    public void close() {
+        super.close();
     }
 
     @Override

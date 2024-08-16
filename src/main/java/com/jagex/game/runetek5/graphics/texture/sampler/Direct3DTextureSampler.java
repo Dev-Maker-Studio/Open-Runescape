@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat;
 
 import jagdx.IUnknown;
 
-public abstract class Direct3DTextureSampler implements Binding {
+public abstract class Direct3DTextureSampler implements Binding, AutoCloseable {
 
 	public long handle;
 	public final DirectXNativeToolkit dxToolkit;
@@ -49,7 +49,7 @@ public abstract class Direct3DTextureSampler implements Binding {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         method6246();
     }
 

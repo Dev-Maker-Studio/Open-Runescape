@@ -10,7 +10,7 @@ import java.io.RandomAccessFile;
  * @author Brainpower
  *
  */
-public class JFS32 {
+public class JFS32 implements AutoCloseable {
 
     public RandomAccessFile rwFile;
     public long seekPosition;
@@ -34,6 +34,7 @@ public class JFS32 {
         this.rwFile.seek(0L);
     }
 
+    @Override
     public void close() throws IOException {
         if (this.rwFile != null) {
         	this.rwFile.close();
@@ -62,13 +63,6 @@ public class JFS32 {
         	this.seekPosition += seekOffset;
         }
         return seekOffset;
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        if (this.rwFile != null) {
-            close();
-        }
     }
 
     public void seek(long seekTo) throws IOException {

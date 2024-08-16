@@ -1,7 +1,5 @@
 package com.jagex.game.runetek5.graphics.shadow;
 
-import com.jagex.game.launch.Loader;
-
 public class ShadowDX extends Shadow {
 
 	public int minX;

@@ -1,7 +1,5 @@
 package com.jagex.game.runetek5.client.menu;
 
-import java.util.Iterator;
-
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;
 import com.jagex.game.runetek5.cache.node.NodeCollection;
 import com.jagex.game.runetek5.cache.node.NodeIterator;
@@ -32,7 +30,6 @@ import com.jagex.game.runetek5.scene.Scene;
 import com.jagex.game.runetek5.staticmethods.StaticMethods;
 import com.jagex.game.runetek5.toolkit.AbstractToolkit;
 import com.jagex.game.runetek5.tools.LocalizedText;
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.utils.TextUtils;
 import com.jagex.game.runetek5.vardomain.VarProviders;
 

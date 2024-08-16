@@ -1,6 +1,5 @@
 package com.jagex.game.runetek5.js5;
 
-import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.compression.Bzip2Compressor;
 import com.jagex.game.runetek5.cache.compression.GzipDecompressor;

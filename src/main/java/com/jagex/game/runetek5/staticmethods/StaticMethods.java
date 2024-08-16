@@ -1,6 +1,5 @@
 package com.jagex.game.runetek5.staticmethods;
 
-import java.applet.Applet;
 import java.util.Random;
 
 import com.jagex.game.launch.Loader;

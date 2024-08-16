@@ -4,11 +4,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import com.jagex.game.runetek5.client.GameShell;
-import com.jagex.game.runetek5.client.Parameter;
-import com.jagex.game.runetek5.client.client;
-import com.jagex.game.runetek5.client.window.ApplicationType;
-import com.jagex.game.runetek5.systeminfo.SystemInfo;
 import com.jagex.game.runetek5.tools.Language;
 import com.jagex.game.runetek5.tools.TimeZoneManager;
 

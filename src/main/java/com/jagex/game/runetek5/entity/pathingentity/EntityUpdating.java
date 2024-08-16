@@ -37,7 +37,6 @@ import com.jagex.game.runetek5.movement.CoordGrid;
 import com.jagex.game.runetek5.rendering.Renderers;
 import com.jagex.game.runetek5.scene.MapRegion;
 import com.jagex.game.runetek5.staticmethods.StaticMethods;
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.utils.MathUtils;
 import com.jagex.game.runetek5.vardomain.VarProviders;
 

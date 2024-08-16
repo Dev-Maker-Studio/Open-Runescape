@@ -1,7 +1,5 @@
 package com.jagex.game.runetek5.cache.node;
 
-import com.jagex.game.runetek5.network.packet.PacketEncoder;
-
 public class LinkedList {
 
     public final Node head = new Node();

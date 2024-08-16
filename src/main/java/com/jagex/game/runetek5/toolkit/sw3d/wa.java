@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.toolkit.sw3d;
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface;
 import com.jagex.game.runetek5.toolkit.SoftwareToolkit;
 
-public class wa extends ComponentSurface implements INativeObject {
+public class wa extends ComponentSurface implements INativeObject, AutoCloseable {
 
     public long nativeid;
 
@@ -16,7 +16,7 @@ public class wa extends ComponentSurface implements INativeObject {
     native void l(SoftwareToolkit var1, ba var2, int var3, int var4, int[] var5, int[] var6);
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

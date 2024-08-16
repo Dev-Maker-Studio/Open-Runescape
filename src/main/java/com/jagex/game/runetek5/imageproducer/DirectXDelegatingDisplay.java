@@ -10,7 +10,7 @@ import java.awt.*;
 import com.jagex.game.runetek5.toolkit.DirectXNativeToolkit;
 import com.jagex.game.runetek5.utils.Utils;
 
-public class DirectXDelegatingDisplay extends AbstractImageProducerDX implements DirectXDisplay {
+public class DirectXDelegatingDisplay extends AbstractImageProducerDX implements DirectXDisplay, AutoCloseable {
 
     public int backBufferWidth;
     public int backBufferHeight;
@@ -132,9 +132,8 @@ public class DirectXDelegatingDisplay extends AbstractImageProducerDX implements
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() {
         release();
-        super.finalize();
     }
 
     @Override

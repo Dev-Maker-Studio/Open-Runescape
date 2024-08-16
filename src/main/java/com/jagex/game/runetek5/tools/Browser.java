@@ -3,9 +3,7 @@ package com.jagex.game.runetek5.tools;
 import java.awt.Desktop;
 import java.awt.Desktop.Action;
 import java.net.URI;
-import java.net.URL;
 
-import com.jagex.game.runetek5.client.GameShell;
 import com.jagex.game.runetek5.client.ServerEnvironment;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.systeminfo.SystemInfo;

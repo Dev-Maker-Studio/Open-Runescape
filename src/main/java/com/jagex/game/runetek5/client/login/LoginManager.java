@@ -1,10 +1,7 @@
 package com.jagex.game.runetek5.client.login;
 
 import java.io.IOException;
-import java.net.URL;
 
-import com.jagex.game.launch.Loader;
-import com.jagex.game.runetek5.botdetection.ReflectionCheck;
 import com.jagex.game.runetek5.botdetection.ReflectionCheckManager;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.FileOnDisk;

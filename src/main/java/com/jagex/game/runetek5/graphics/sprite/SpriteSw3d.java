@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.sw3d.FinalizeCacheSw3d;
 import com.jagex.game.runetek5.toolkit.sw3d.INativeObject;
 import com.jagex.game.runetek5.toolkit.sw3d.wa;
 
-public class SpriteSw3d extends NativeSprite implements INativeObject, FrameBuffer {
+public class SpriteSw3d extends NativeSprite implements INativeObject, FrameBuffer, AutoCloseable {
 
     public long nativeid;
     public boolean aBool7477;
@@ -41,7 +41,7 @@ public class SpriteSw3d extends NativeSprite implements INativeObject, FrameBuff
     native void K(SoftwareToolkit var1, int var2, int var3, int var4, int var5, boolean var6);
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

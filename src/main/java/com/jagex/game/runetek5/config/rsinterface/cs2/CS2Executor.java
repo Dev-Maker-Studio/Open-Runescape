@@ -14,7 +14,6 @@ import com.jagex.game.runetek5.interaction.chat.clanchat.channel.ClanChannel;
 import com.jagex.game.runetek5.interaction.chat.clanchat.settings.ClanSettings;
 import com.jagex.game.runetek5.network.packet.PacketEncoder;
 import com.jagex.game.runetek5.trigger.ClientTriggerType;
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.utils.DirectoryPicker;
 
 public class CS2Executor {
@@ -61,7 +60,7 @@ public class CS2Executor {
     int instrPtr = -1;
 
     public static void logError(String errorString) {
-        System.out.println("Error: " + CS2Executor.formatCs2Error(errorString));
+        System.out.println("\u001B[31m" + "CS2 Error: " + CS2Executor.formatCs2Error(errorString, " ", "\n     ") + "\u001B[0m");
     }
 
     public static void execute_trigger(ClientTriggerType triggerType, int scriptId, int i_2, CS2Executor cs2executor3) {
@@ -261,19 +260,26 @@ public class CS2Executor {
         CS2Interpreter.queryItem(itemName, tradeableOnly, paramId, -1, paramString, true);
     }
 
-	public static void executeTrigger(ClientTriggerType triggerType, int i_1, int i_2) {
-	    CS2Executor cs2Executor = getNextScriptExecutor();
-	    execute_trigger(triggerType, i_1, i_2, cs2Executor);
-	}
+    public static void executeTrigger(ClientTriggerType triggerType, int i_1, int i_2) {
+        CS2Executor cs2Executor = getNextScriptExecutor();
+        execute_trigger(triggerType, i_1, i_2, cs2Executor);
+    }
 
-	public static void resetCs2Cache() {
-	    CS2_CACHE.reset();
-	}
+    public static void resetCs2Cache() {
+        CS2_CACHE.reset();
+    }
 
-	public static String formatCs2Error(String errorString) {
-	    for (int errorPartIndex = errorString.indexOf("%0a"); errorPartIndex != -1; errorPartIndex = errorString.indexOf("%0a", errorPartIndex + "\n".length())) {
-	        errorString = errorString.substring(0, errorPartIndex) + "\n" + errorString.substring(errorPartIndex + "%0a".length());
-	    }
-	    return errorString;
-	}
+    public static String formatCs2Error(String errorString, String errorPrevious, String errorNext) {
+        String exceptionStr = "";
+        if (errorString.contains("|")) {
+            exceptionStr = errorString.substring(errorString.indexOf("|") + 1, errorString.indexOf("|", errorString.indexOf("|") + 1));
+            errorString = errorString.replaceFirst(exceptionStr, "");
+            exceptionStr = exceptionStr.replaceAll(" ", "");
+            errorString = exceptionStr + " " + errorString;
+        }
+        for (int i = errorString.indexOf(errorPrevious); i != -1; i = errorString.indexOf(errorPrevious, i + errorNext.length())) {
+            errorString = errorString.substring(0, i) + errorNext + errorString.substring(i + errorPrevious.length());
+        }
+        return errorString;
+    }
 }

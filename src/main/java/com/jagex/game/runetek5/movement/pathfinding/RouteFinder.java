@@ -10,7 +10,6 @@ import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate;
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap;
 import com.jagex.game.runetek5.scene.CollisionFlag;
 import com.jagex.game.runetek5.scene.CollisionMap;
-import com.jagex.game.runetek5.unidentified.*;
 
 public class RouteFinder {
     public static final int DIR_NORTH = 0x1;

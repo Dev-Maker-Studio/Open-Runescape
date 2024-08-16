@@ -2517,7 +2517,7 @@ public class OpenGlToolkit extends AbstractToolkit {
 
     @Override
     public void copyLights(int lightCount, PointLight[] lights) {
-        if (lightCount >= 0) System.arraycopy(lights, 0, this.lightNodes, 0, lightCount);
+        if (lightCount > 0) System.arraycopy(lights, 0, this.lightNodes, 0, lightCount);
         this.lastSceneLightCount = lightCount;
         if (this.depthClippingMode != 1) {
             renderLights();

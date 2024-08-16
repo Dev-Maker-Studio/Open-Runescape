@@ -1,10 +1,8 @@
 package com.jagex.game.runetek5.config.material.texture.operation;
 
 import com.jagex.game.runetek5.buffer.Packet;
-import com.jagex.game.runetek5.cache.node.impl.*;
 import com.jagex.game.runetek5.config.material.texture.TextureOperation;
 import com.jagex.game.runetek5.config.material.texture.TextureRaster;
-import com.jagex.game.runetek5.network.packet.PacketEncoder;
 
 /**
  * 

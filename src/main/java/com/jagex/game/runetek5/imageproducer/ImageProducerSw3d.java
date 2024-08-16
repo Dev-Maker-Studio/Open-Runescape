@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.sw3d.FinalizeCacheSw3d;
 import com.jagex.game.runetek5.toolkit.sw3d.INativeObject;
 import com.jagex.game.runetek5.utils.Utils;
 
-public class ImageProducerSw3d extends DelegatingDisplay implements INativeObject {
+public class ImageProducerSw3d extends DelegatingDisplay implements INativeObject, AutoCloseable {
 
     public static boolean aBool10291;
     public static long aLong10286;
@@ -26,7 +26,7 @@ public class ImageProducerSw3d extends DelegatingDisplay implements INativeObjec
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

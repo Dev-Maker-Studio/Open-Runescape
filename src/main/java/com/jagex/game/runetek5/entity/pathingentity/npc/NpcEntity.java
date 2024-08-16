@@ -21,7 +21,6 @@ import com.jagex.game.runetek5.graphics.hint.HintDetails;
 import com.jagex.game.runetek5.graphics.model.Model;
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL;
 import com.jagex.game.runetek5.graphics.model.particle.Silhouette;
-import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper;
 import com.jagex.game.runetek5.math.Matrix43;
 import com.jagex.game.runetek5.math.Vector3;
 import com.jagex.game.runetek5.math.Vector3Pool;

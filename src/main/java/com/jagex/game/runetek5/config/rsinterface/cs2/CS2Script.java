@@ -1,6 +1,5 @@
 package com.jagex.game.runetek5.config.rsinterface.cs2;
 
-import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.IntNode;
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;

@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.toolkit.sw3d.FinalizeCacheSw3d;
 import com.jagex.game.runetek5.toolkit.sw3d.INativeObject;
 import com.jagex.game.runetek5.toolkit.sw3d.ba;
 
-public class GroundSw3d extends Ground implements INativeObject {
+public class GroundSw3d extends Ground implements INativeObject, AutoCloseable {
 
     public long nativeid;
     public final NodeCollection aClass4827143 = new NodeCollection();
@@ -178,7 +178,7 @@ public class GroundSw3d extends Ground implements INativeObject {
 
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

@@ -9,7 +9,7 @@ import jagdx.IDirect3DDevice;
 import jagdx.IDirect3DVertexBuffer;
 import jagdx.IUnknown;
 
-public class DirectXStreamSource implements NativeStream {
+public class DirectXStreamSource implements NativeStream, AutoCloseable {
 
     public int capacity;
     public byte aByte3547;
@@ -96,7 +96,7 @@ public class DirectXStreamSource implements NativeStream {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         cleanup();
     }
 

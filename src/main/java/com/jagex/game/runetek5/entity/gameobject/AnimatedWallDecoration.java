@@ -10,7 +10,6 @@ import com.jagex.game.runetek5.graphics.model.particle.Silhouette;
 import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper;
 import com.jagex.game.runetek5.math.Matrix43;
 import com.jagex.game.runetek5.movement.CoordinateSpace;
-import com.jagex.game.runetek5.network.packet.PacketEncoder;
 import com.jagex.game.runetek5.scene.RenderedEntityCache;
 import com.jagex.game.runetek5.scene.Scene;
 import com.jagex.game.runetek5.toolkit.AbstractToolkit;

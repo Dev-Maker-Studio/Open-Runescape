@@ -35,7 +35,7 @@ import com.jagex.game.runetek5.scene.tile.WaterTile;
 import com.jagex.game.runetek5.toolkit.AbstractToolkit;
 import com.jagex.game.runetek5.utils.ColorUtil;
 
-public abstract class AbstractToolkit {
+public abstract class AbstractToolkit implements AutoCloseable {
 
     public static final boolean[] ACTIVE_RENDER_UNITS = new boolean[8];
     public final MaterialProvider materialProvider;
@@ -154,7 +154,7 @@ public abstract class AbstractToolkit {
     public abstract int getOffheap();
 
     @Override
-    protected void finalize() {
+    public void close() {
         cleanupAndShutdown();
     }
 

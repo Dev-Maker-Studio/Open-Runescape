@@ -10,12 +10,10 @@ import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate;
-import com.jagex.game.runetek5.js5.Whirlpool;
 import com.jagex.game.runetek5.math.Vector3;
 import com.jagex.game.runetek5.rendering.Renderers;
 import com.jagex.game.runetek5.scene.MapRegion;
 import com.jagex.game.runetek5.scene.culling.Culling;
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.utils.Utils;
 
 import java.io.*;
@@ -116,7 +114,7 @@ public class DebugDisplay {
     public static String getStringFromThrowable(Throwable throwable) throws IOException {
         String error;
         if (throwable instanceof ExplicitRuntimeException runtimeException) {
-            error = runtimeException.error + " | ";
+            error = runtimeException.error + "|";
             throwable = runtimeException.throwable;
         } else {
             error = "";

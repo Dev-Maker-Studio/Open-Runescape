@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit;
 
 import jaggl.OpenGL;
 
-public class ImageProducerDX1_Sub2 extends AbstractImageProducerDX1 {
+public class ImageProducerDX1_Sub2 extends AbstractImageProducerDX1 implements AutoCloseable {
 
     public final TextureFramebufferGenerator[] anInterface28Array10449 = new TextureFramebufferGenerator[4];
     public final OpenGLNativeToolkit aGraphicalRendererSub2Sub110446;
@@ -111,8 +111,7 @@ public class ImageProducerDX1_Sub2 extends AbstractImageProducerDX1 {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
+    public void close() {
         cleanup();
     }
 

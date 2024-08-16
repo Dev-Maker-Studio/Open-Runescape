@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.scene.ground.GroundSw3d;
 import com.jagex.game.runetek5.toolkit.AbstractToolkit;
 import com.jagex.game.runetek5.toolkit.SoftwareToolkit;
 
-public class ThreadResourceSw3d implements INativeObject {
+public class ThreadResourceSw3d implements INativeObject, AutoCloseable {
 
     public long nativeid;
     public Runnable aRunnable48;
@@ -38,7 +38,7 @@ public class ThreadResourceSw3d implements INativeObject {
     native void ha(long var1, AbstractToolkit var3, int var4, int var5);
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

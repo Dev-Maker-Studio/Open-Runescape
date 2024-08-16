@@ -5,7 +5,6 @@ import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.client.login.LoginManager;
 import com.jagex.game.runetek5.network.WorldConnection;
 import com.jagex.game.runetek5.network.packet.PacketEncoder;
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.utils.TextUtils;
 
 public class WorldDescriptor extends WorldDescriptorFlags {

@@ -1,7 +1,5 @@
 package com.jagex.game.runetek5.tools;
 
-import com.jagex.game.launch.Loader;
-
 /**
  * 
  * @author Steven - 29/07/2023

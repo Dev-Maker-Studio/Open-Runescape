@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.framebuffer;
 import com.jagex.game.runetek5.toolkit.sw3d.FinalizeCacheSw3d;
 import com.jagex.game.runetek5.toolkit.sw3d.INativeObject;
 
-public class SoftwareRenderBuffer implements RenderBuffer, INativeObject {
+public class SoftwareRenderBuffer implements RenderBuffer, INativeObject, AutoCloseable {
 
     public long nativeid;
     public final int anInt2681;
@@ -25,7 +25,7 @@ public class SoftwareRenderBuffer implements RenderBuffer, INativeObject {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

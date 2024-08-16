@@ -11,7 +11,7 @@ import jagdx.IUnknown;
  * @author Brainpower - 02/05/2022
  *
  */
-public class DirectXWeakReferencedTexture implements DirectXFrameBuffer, DirectXFrameBufferObject {
+public class DirectXWeakReferencedTexture implements DirectXFrameBuffer, DirectXFrameBufferObject, AutoCloseable {
 
     public long surfaceLevel;
     public final int level;
@@ -52,7 +52,7 @@ public class DirectXWeakReferencedTexture implements DirectXFrameBuffer, DirectX
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         destroy();
     }
 

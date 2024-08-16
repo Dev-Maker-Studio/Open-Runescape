@@ -171,7 +171,7 @@ public class MiniMenuBuilder {
 	            if (client.interfaceSelectionActive && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x40) != 0x0) {
 	                final Component component = Component.listIcomponent(client.anInt56, client.anInt7345);
 	                if (component != null) {
-	                    MiniMenu.addEntry(client.useOnType, " -> ", MiniMenu.useOnCursor, 59, -1, 0L, x, y, true, false, x << 0 | y, true);
+	                    MiniMenu.addEntry(client.useOnType, " -> ", MiniMenu.useOnCursor, 59, -1, 0L, x, y, true, false, x | y, true);
 	                }
 	                else {
 	                    InterfaceComponentRenderer.method1170();
@@ -179,9 +179,9 @@ public class MiniMenuBuilder {
 	            }
 	            else {
 	                if (MiniMenuBuilder.SHOW_FACE_HERE) {
-	                    MiniMenu.addEntry(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE), "", -1, 60, -1, 0L, x, y, true, false, x << 0 | y, true);
+	                    MiniMenu.addEntry(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE), "", -1, 60, -1, 0L, x, y, true, false, x | y, true);
 	                }
-	                MiniMenu.addEntry(InterfaceRenderer.translatedUptext, "", CursorManager.activeCursorId, 23, -1, 0L, x, y, true, false, x << 0 | y, true);
+	                MiniMenu.addEntry(InterfaceRenderer.translatedUptext, "", CursorManager.activeCursorId, 23, -1, 0L, x, y, true, false, x | y, true);
 	            }
 	        }
 	    }

@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 import com.jagex.game.runetek5.toolkit.DirectXNativeToolkit;
 
-public class VertexDeclarationDX extends VertexDeclaration {
+public class VertexDeclarationDX extends VertexDeclaration implements AutoCloseable {
 
     public long pointer;
     public final DirectXNativeToolkit aGraphicalRendererSub2Sub29178;
@@ -91,7 +91,7 @@ public class VertexDeclarationDX extends VertexDeclaration {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         method14505();
     }
 

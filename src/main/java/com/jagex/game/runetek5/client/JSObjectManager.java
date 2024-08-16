@@ -1,7 +1,5 @@
 package com.jagex.game.runetek5.client;
 
-import com.jagex.game.runetek5.systeminfo.SystemInfo;
-
 public class JSObjectManager {
 
     public static final JSObjectManager PERIODIC = new JSObjectManager(9);

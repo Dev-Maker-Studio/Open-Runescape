@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.sw3d.FinalizeCacheSw3d;
 import com.jagex.game.runetek5.toolkit.sw3d.INativeObject;
 import com.jagex.game.runetek5.toolkit.sw3d.ba;
 
-public class OpaqueFontRendererSw3d extends AbstractFontRenderer implements INativeObject {
+public class OpaqueFontRendererSw3d extends AbstractFontRenderer implements INativeObject, AutoCloseable {
 
     public long nativeid;
 
@@ -48,7 +48,7 @@ public class OpaqueFontRendererSw3d extends AbstractFontRenderer implements INat
     native void aa(char var1, int var2, int var3, int var4, boolean var5, ComponentSurface var6, int var7, int var8);
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

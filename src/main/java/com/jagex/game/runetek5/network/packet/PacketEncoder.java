@@ -48,7 +48,6 @@ import com.jagex.game.runetek5.systeminfo.SystemInfo;
 import com.jagex.game.runetek5.tools.DebugDisplay;
 import com.jagex.game.runetek5.tools.Isaac;
 import com.jagex.game.runetek5.tools.LocalizedText;
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.utils.TextUtils;
 import com.jagex.game.runetek5.utils.Utils;
 

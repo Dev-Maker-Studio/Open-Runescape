@@ -229,8 +229,8 @@ public abstract class GameShell implements Engine, Runnable, FocusListener, Wind
     public void initializeResources(String gameName, String buildEnvironmentName, int storeId, int numIndices) throws Exception {
         SystemInfo.numIndices = numIndices;
         SystemInfo.storeId = storeId;
-        SystemInfo.clientBuild = 727;
-        SystemInfo.clientBuildSub = 1;
+        SystemInfo.clientBuild = Loader.MAJOR_BUILD;
+        SystemInfo.clientBuildSub = Loader.MINOR_BUILD;
         SystemInfo.javaVendor = "Unknown";
         SystemInfo.javaVersion = "1.1";
         try {

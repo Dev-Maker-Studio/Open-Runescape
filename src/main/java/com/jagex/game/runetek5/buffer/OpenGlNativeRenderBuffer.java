@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat;
 
 import jaggl.OpenGL;
 
-public class OpenGlNativeRenderBuffer implements TextureFramebufferGenerator {
+public class OpenGlNativeRenderBuffer implements TextureFramebufferGenerator, AutoCloseable {
 
     public int handle;
     public final GLFormat aClass1503880;
@@ -30,9 +30,8 @@ public class OpenGlNativeRenderBuffer implements TextureFramebufferGenerator {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() {
         method5931();
-        super.finalize();
     }
 
     @Override

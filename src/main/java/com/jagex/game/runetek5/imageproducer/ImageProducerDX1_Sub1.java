@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.utils.Utils;
 
 import jagdx.IDirect3DDevice;
 
-public class ImageProducerDX1_Sub1 extends AbstractImageProducerDX1 {
+public class ImageProducerDX1_Sub1 extends AbstractImageProducerDX1 implements AutoCloseable {
 
     public boolean useDepthstencil;
     public int flags;
@@ -152,9 +152,8 @@ public class ImageProducerDX1_Sub1 extends AbstractImageProducerDX1 {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() {
         destroy();
-        super.finalize();
     }
 
     public boolean setRenderTarget(int i_1, long surfaceLevel) {

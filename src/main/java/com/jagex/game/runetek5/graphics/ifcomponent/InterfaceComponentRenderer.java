@@ -14,7 +14,6 @@ import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.midi.VorbisNode;
 import com.jagex.game.runetek5.config.obj.ObjType;
 import com.jagex.game.runetek5.config.rsinterface.Component;
-import com.jagex.game.runetek5.config.rsinterface.ComponentContentType;
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface;
 import com.jagex.game.runetek5.config.rsinterface.ComponentType;
 import com.jagex.game.runetek5.config.rsinterface.HookRequest;

@@ -3,8 +3,6 @@ package com.jagex.game.runetek5.cache;
 import java.io.EOFException;
 import java.io.IOException;
 
-import com.jagex.game.runetek5.client.window.WindowMode;
-
 public class FileOnDisk {
 
     public static int anInt5357;

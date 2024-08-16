@@ -16,7 +16,7 @@ import com.jagex.game.runetek5.toolkit.sw3d.INativeObject;
 import com.jagex.game.runetek5.toolkit.sw3d.ba;
 
 //h
-public class ModelSw3d extends Model implements INativeObject {
+public class ModelSw3d extends Model implements INativeObject, AutoCloseable {
 
     public long nativeid;
     public final SoftwareToolkit aja7140;
@@ -83,7 +83,7 @@ public class ModelSw3d extends Model implements INativeObject {
     native void ba(SoftwareToolkit var1);
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

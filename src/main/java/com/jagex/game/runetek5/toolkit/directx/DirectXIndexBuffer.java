@@ -8,7 +8,7 @@ import jagdx.IDirect3DDevice;
 import jagdx.IDirect3DIndexBuffer;
 import jagdx.IUnknown;
 
-public class DirectXIndexBuffer implements DirectXBuffer {
+public class DirectXIndexBuffer implements DirectXBuffer, AutoCloseable {
 
     public long handle;
     public int sizeOccupied;
@@ -52,7 +52,7 @@ public class DirectXIndexBuffer implements DirectXBuffer {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         cleanup();
     }
 

@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.toolkit.SoftwareToolkit;
  * @author Brainpower
  *
  */
-public class ba extends NativeMemoryNode implements INativeObject {
+public class ba extends NativeMemoryNode implements INativeObject, AutoCloseable {
 
     public long nativeid;
 
@@ -43,7 +43,7 @@ public class ba extends NativeMemoryNode implements INativeObject {
     native void g(SoftwareToolkit var1, int var2);
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }

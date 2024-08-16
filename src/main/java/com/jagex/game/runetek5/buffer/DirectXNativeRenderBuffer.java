@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat;
 import jagdx.IDirect3DDevice;
 import jagdx.IUnknown;
 
-public class DirectXNativeRenderBuffer implements DirectXFrameBufferObject {
+public class DirectXNativeRenderBuffer implements DirectXFrameBufferObject, AutoCloseable {
 
     public long aLong3610;
     public final DirectXNativeToolkit aGraphicalRendererSub2Sub23608;
@@ -60,7 +60,7 @@ public class DirectXNativeRenderBuffer implements DirectXFrameBufferObject {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         destroy();
     }
 

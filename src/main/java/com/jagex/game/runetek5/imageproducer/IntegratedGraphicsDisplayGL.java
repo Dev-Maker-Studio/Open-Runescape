@@ -15,7 +15,7 @@ import jaggl.OpenGL;
  * @author Brainpower - 22/04/2022
  *
  */
-public class IntegratedGraphicsDisplayGL extends DirectDisplay {
+public class IntegratedGraphicsDisplayGL extends DirectDisplay implements AutoCloseable {
 
     public int handle;
     public int occupiedSlots;
@@ -189,8 +189,7 @@ public class IntegratedGraphicsDisplayGL extends DirectDisplay {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
+    public void close() {
         cleanup();
     }
 }

@@ -12,7 +12,7 @@ import com.jagex.game.runetek5.utils.ArrayUtils;
 
 import jaggl.OpenGL;
 
-public class ShaderMappingGL extends ShaderMapping {
+public class ShaderMappingGL extends ShaderMapping implements AutoCloseable {
 
     public static final boolean $assertionsDisabled = !ShaderMappingGL.class.desiredAssertionStatus();
     public static final int[] STATUS_BUFFER = new int[2];
@@ -238,7 +238,7 @@ public class ShaderMappingGL extends ShaderMapping {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         deallocate();
     }
 

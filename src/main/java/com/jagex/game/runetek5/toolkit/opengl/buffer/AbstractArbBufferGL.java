@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.OpenGlToolkit;
 import jaclib.memory.Buffer;
 import jaggl.OpenGL;
 
-abstract class AbstractArbBufferGL {
+abstract class AbstractArbBufferGL implements AutoCloseable {
 
     public static final int[] HANDLE = new int[1];
     public boolean deallocated;
@@ -42,13 +42,11 @@ abstract class AbstractArbBufferGL {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() {
         if (!this.deallocated) {
             this.toolkit.requestArbBufferCleanup(this.id, this.bufferSize);
             this.deallocated = true;
         }
-
-        super.finalize();
     }
 
     abstract void setAsActiveBuffer();

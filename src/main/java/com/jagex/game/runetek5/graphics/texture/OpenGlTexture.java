@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat;
 import jaggl.OpenGL;
 import static com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*;
 
-public abstract class OpenGlTexture {
+public abstract class OpenGlTexture implements AutoCloseable {
 
     public static final int[] HANDLE_ALLOCATE = new int[1];
     public boolean linearTextureFilter;
@@ -91,9 +91,8 @@ public abstract class OpenGlTexture {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() {
         dispose();
-        super.finalize();
     }
 
     public void dispose() {

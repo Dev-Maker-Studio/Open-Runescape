@@ -1,8 +1,5 @@
 package com.jagex.game.runetek5.network.packet;
 
-import com.jagex.game.launch.Loader;
-import com.jagex.game.runetek5.*;
-import com.jagex.game.runetek5.botdetection.ReflectionCheck;
 import com.jagex.game.runetek5.botdetection.ReflectionCheckManager;
 import com.jagex.game.runetek5.client.*;
 import com.jagex.game.runetek5.client.input.camera.Camera;
@@ -21,12 +18,10 @@ import com.jagex.game.runetek5.client.window.WindowMode;
 import com.jagex.game.runetek5.config.Identifiable;
 import com.jagex.game.runetek5.config.rsinterface.*;
 import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer;
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.utils.*;
 import com.jagex.game.runetek5.vardomain.VarProviders;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.QueueIterator;

@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.network;
 import java.io.IOException;
 import java.net.Socket;
 
-public class AsyncConnection extends Connection {
+public class AsyncConnection extends Connection implements AutoCloseable {
 
     public final Socket socket;
 
@@ -41,11 +41,6 @@ public class AsyncConnection extends Connection {
     @Override
     public void write(byte[] buffer, int size) throws IOException {
         this.outputStream.write(buffer, 0, size);
-    }
-
-    @Override
-    protected void finalize() {
-        close();
     }
 
     @Override

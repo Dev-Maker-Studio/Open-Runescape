@@ -10,7 +10,7 @@ import com.jagex.game.runetek5.utils.ArrayUtils;
 import jagdx.IDirect3DDevice;
 import jagdx.IUnknown;
 
-public class ShaderMappingDX extends ShaderMapping {
+public class ShaderMappingDX extends ShaderMapping implements AutoCloseable {
 
     public static final float[] MATRIX = new float[16];
     public boolean isBuild;
@@ -258,7 +258,7 @@ public class ShaderMappingDX extends ShaderMapping {
     }
 
     @Override
-    protected void finalize() {
+    public void close() {
         method14592();
     }
 

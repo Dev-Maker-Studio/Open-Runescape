@@ -2,7 +2,6 @@ package com.jagex.game.runetek5.toolkit;
 
 import java.awt.*;
 
-import com.jagex.game.runetek5.unidentified.*;
 import com.jagex.game.runetek5.buffer.NativeMemoryNode;
 import com.jagex.game.runetek5.cache.node.NodeCollection;
 import com.jagex.game.runetek5.config.material.MaterialProvider;
@@ -152,7 +151,7 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
     native void wa(float[] var1);
 
     @Override
-    protected synchronized void finalize() {
+    public synchronized void close() {
         cleanupAndShutdown();
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
@@ -162,7 +161,6 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
 
     public void h() {
         System.gc();
-        System.runFinalization();
         FinalizeCacheSw3d.destroyAll();
     }
 

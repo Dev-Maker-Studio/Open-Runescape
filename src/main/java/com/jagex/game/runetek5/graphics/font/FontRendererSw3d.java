@@ -12,7 +12,7 @@ import com.jagex.game.runetek5.toolkit.sw3d.ba;
  * @author Brainpower
  *
  */
-public class FontRendererSw3d extends AbstractFontRenderer implements INativeObject {
+public class FontRendererSw3d extends AbstractFontRenderer implements INativeObject, AutoCloseable {
 
     public long nativeid;
 
@@ -38,7 +38,7 @@ public class FontRendererSw3d extends AbstractFontRenderer implements INativeObj
     native void EA(SoftwareToolkit var1, ba var2, byte[][] var3, int[] var4, int[] var5, int[] var6, int[] var7, int[] var8);
 
     @Override
-    protected void finalize() {
+    public void close() {
         if (this.nativeid != 0L) {
             FinalizeCacheSw3d.addFinalizedObject(this);
         }
