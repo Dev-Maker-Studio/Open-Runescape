@@ -475,7 +475,7 @@ public class CS2Interpreter {
             case CC_SETITEM_NONUM:
                 method12719(exec);
                 break;
-            case instr6063:
+            case CC_SETMODELLIGHTING:
                 method4970(exec);
                 break;
             case instr6064:
@@ -520,7 +520,7 @@ public class CS2Interpreter {
             case instr6110:
                 method1511(exec);
                 break;
-            case instr6179:
+            case CC_RESETOPTIONNAMES:
                 method8298(exec);
                 break;
             case instr6218:
@@ -586,10 +586,10 @@ public class CS2Interpreter {
             case instr6084:
                 method4797(exec);
                 break;
-            case instr6346:
+            case CC_SETONMOUSEOVER:
                 method260(exec);
                 break;
-            case instr6452:
+            case CC_SETONMOUSELEAVE:
                 method6043(exec);
                 break;
             case instr6899:
@@ -643,7 +643,7 @@ public class CS2Interpreter {
             case instr6782:
                 method3546(exec);
                 break;
-            case instr6119:
+            case CC_SETLINKACTIVECLANCHANNEL:
                 method741(exec);
                 break;
             case instr6120:
@@ -664,7 +664,7 @@ public class CS2Interpreter {
             case instr6125:
                 method5598(exec);
                 break;
-            case instr6344:
+            case CC_ISHIDDEN:
                 method892(exec);
                 break;
             case instr6462:
@@ -691,19 +691,19 @@ public class CS2Interpreter {
             case instr6134:
                 method14578(exec);
                 break;
-            case instr6135:
+            case CC_GETSPRITESCALE:
                 method11249(exec);
                 break;
-            case instr6901:
+            case CC_GETSPRITEPITCH:
                 method12925(exec);
                 break;
-            case instr6529:
+            case CC_GETSPRITEYAW:
                 method8211(exec);
                 break;
             case instr6670:
                 method6236(exec);
                 break;
-            case instr6139:
+            case CC_GETTRANSPARENCY:
                 method8735(exec);
                 break;
             case instr6005:
@@ -733,7 +733,7 @@ public class CS2Interpreter {
             case instr6148:
                 method8154(exec);
                 break;
-            case instr6636:
+            case CC_CONTAINERITEMID:
                 method4277(exec);
                 break;
             case instr6150:
@@ -742,7 +742,7 @@ public class CS2Interpreter {
             case instr6151:
                 method4802(exec);
                 break;
-            case instr6585:
+            case CC_GETOPTIONFLAGS:
                 method1562(exec);
                 break;
             case instr6153:
@@ -811,7 +811,7 @@ public class CS2Interpreter {
             case instr6174:
                 method11492(exec);
                 break;
-            case instr6369:
+            case IF_SETMODELTINT:
                 method1509(exec);
                 break;
             case IF_SETTEXT:
@@ -832,7 +832,7 @@ public class CS2Interpreter {
             case instr6181:
                 method484(exec);
                 break;
-            case instr6182:
+            case IF_SETSPRITESHADOW:
                 method4960(exec);
                 break;
             case instr6183:
@@ -841,10 +841,10 @@ public class CS2Interpreter {
             case instr6184:
                 method1492(exec);
                 break;
-            case instr6185:
+            case IF_SETSCROLLSIZE:
                 method15510(exec);
                 break;
-            case instr6216:
+            case IF_SETALPHA:
                 method11252(exec);
                 break;
             case instr6187:
@@ -1069,7 +1069,7 @@ public class CS2Interpreter {
             case instr6260:
                 method2855(exec);
                 break;
-            case instr6261:
+            case IF_SETLINKACTIVECLANCHANNEL:
                 method4629(exec);
                 break;
             case instr6898:
@@ -1111,7 +1111,7 @@ public class CS2Interpreter {
             case IF_GETTEXT:
                 getCompText(exec);
                 break;
-            case instr6275:
+            case IF_GETSCROLLWIDTH:
                 method858(exec);
                 break;
             case instr6276:
@@ -1132,13 +1132,13 @@ public class CS2Interpreter {
             case instr6281:
                 method11247(exec);
                 break;
-            case instr6544:
+            case IF_GETOFFSETX:
                 method5926(exec);
                 break;
-            case instr6283:
+            case IF_GETOFFSETY:
                 method6696(exec);
                 break;
-            case instr6284:
+            case IF_GETSPRITEID:
                 method6212(exec);
                 break;
             case instr6072:
@@ -1168,7 +1168,7 @@ public class CS2Interpreter {
             case instr6293:
                 method4898(exec);
                 break;
-            case instr6294:
+            case IF_ISOPEN:
                 method5002(exec);
                 break;
             case instr6295:
@@ -1966,28 +1966,28 @@ public class CS2Interpreter {
             case CHAT_SENDABUSEREPORT:
                 sendReportAbusePacket(exec);
                 break;
-            case instr6560: //CHAT_GETHISTORY_BYUID
+            case CHAT_GETBYLINE:
                 method2824(exec);
                 break;
-            case instr6739: //CHAT_GETHISTORY_BYTYPEANDLINE
+            case CHAT_GETTYPEBYLINE:
                 method15512(exec);
                 break;
-            case instr6562: //CHAT_GETFILTER_PRIVATE
+            case CHAT_GETFILTER_PRIVATE:
                 setPrivateFilter(exec);
                 break;
             case instr6563:
                 method6005(exec);
                 break;
-            case instr6010:
+            case SEND_PUBLIC_CHAT:
                 method1860(exec);
                 break;
-            case instr6211:
+            case SEND_PRIVATE_MESSAGE:
                 method6913(exec);
                 break;
             case instr6189:
                 method6237(exec);
                 break;
-            case instr6624:
+            case CHAT_GETCLAN:
                 method6733(exec);
                 break;
             case instr6565:
@@ -2014,13 +2014,13 @@ public class CS2Interpreter {
             case instr6682:
                 method3803(exec);
                 break;
-            case instr6249:
+            case CHATLINE_GETCYCLES20MS:
                 method894(exec);
                 break;
             case instr6577:
                 method565(exec);
                 break;
-            case instr6578:
+            case QC_GETNAME:
                 method12689(exec);
                 break;
             case instr6202:
@@ -2032,7 +2032,7 @@ public class CS2Interpreter {
             case instr6581:
                 method814(exec);
                 break;
-            case instr6425:
+            case QC_GETMESSAGE:
                 method14492(exec);
                 break;
             case instr6583:
@@ -2044,19 +2044,19 @@ public class CS2Interpreter {
             case instr6069:
                 method1362(exec);
                 break;
-            case instr6586:
+            case QC_SETMESSAGE:
                 method11154(exec);
                 break;
-            case instr6587:
+            case QC_SENDPUBLICMESSAGE:
                 method6315(exec);
                 break;
-            case instr6588:
+            case QC_SENDPRIVATEMESSAGE:
                 method8296(exec);
                 break;
-            case instr6368:
+            case QC_SENDFRIENDSCHATMESSAGE:
                 method3921(exec);
                 break;
-            case instr6590:
+            case QC_GETSUBHOTKEY:
                 method291(exec);
                 break;
             case instr6591:
@@ -2092,10 +2092,10 @@ public class CS2Interpreter {
             case instr6601:
                 method3950();
                 break;
-            case instr6602:
+            case QC_SENDCLANCHATMESSAGE:
                 method468(exec);
                 break;
-            case instr6603:
+            case QC_SENDGUESTCLANCHATMESSAGE:
                 method1603(exec);
                 break;
             case instr6233:
@@ -2203,25 +2203,25 @@ public class CS2Interpreter {
             case instr6818:
                 method15403();
                 break;
-            case instr6639:
+            case FULLSCREEN:
                 method3804(exec);
                 break;
             case instr6488:
                 method3613();
                 break;
-            case instr6704:
+            case FULLSCREEN_MODECOUNT:
                 method3066(exec);
                 break;
-            case instr6404:
+            case FULLSCREEN_GETMODE:
                 method5769(exec);
                 break;
-            case instr6643:
+            case FULLSCREEN_LASTMODE:
                 method14244(exec);
                 break;
             case instr6644:
                 method8199(exec);
                 break;
-            case instr6645:
+            case CHOOSE_RENDER_TYPE:
                 method12933(exec);
                 break;
             case instr6406:
@@ -2266,7 +2266,7 @@ public class CS2Interpreter {
             case instr6666:
                 method11405(exec);
                 break;
-            case instr6660:
+            case POP_2_INT:
                 method3938(exec);
                 break;
             case instr6661:
@@ -2359,7 +2359,7 @@ public class CS2Interpreter {
             case instr6013:
                 method3038(exec);
                 break;
-            case instr6122:
+            case CAM_MODEISFOLLOWPLAYER:
                 method12115(exec);
                 break;
             case instr6692:
@@ -2512,7 +2512,7 @@ public class CS2Interpreter {
             case DETAIL_BLOOM:
                 setBloom(exec);
                 break;
-            case instr6742:
+            case DETAIL_CUSTOMCURSOR:
                 method1857(exec);
                 break;
             case instr6743:
@@ -2521,7 +2521,7 @@ public class CS2Interpreter {
             case instr6744:
                 method1803(exec);
                 break;
-            case instr6745:
+            case CHANGE_RENDER:
                 method6678(exec);
                 break;
             case instr6922:
