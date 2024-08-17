@@ -81,69 +81,69 @@ public class Skybox {
         this.skyboxArchiveId = skyboxArchiveId;
     }
 
-    public void method4206(AbstractToolkit toolkit, int skyboxAngle, int x, int y, int width, int height, int i_7, int i_8, int i_9, int color, boolean clearCurrentBackground, int alpha) {
+    public void renderSkybox(AbstractToolkit toolkit, int skyboxAngle, int x, int y, int width, int height, int rotationY, int rotationX, int rotationZ, int backgroundColor, boolean clearBackground, int alpha) {
         int invertedAlpha = 255 - alpha;
+
         if (this.skyModel == null) {
             toolkit.applyClearFlags(2, 0);
-            i_8 = i_8 + skyboxAngle & 0x3fff;
+            rotationX = rotationX + skyboxAngle & 0x3fff;
+
             if (this.currentMaterialId != -1 && this.useSize != 0) {
                 MaterialType material = materialProvider.getMaterial(this.currentMaterialId);
                 if (this.backgroundSprite == null && materialProvider.isCached(this.currentMaterialId)) {
-                    int[] materialPixels = material.effectCombiner == 2 ? materialProvider.getPixelsArgb(this.currentMaterialId, this.useSize, this.useSize) : materialProvider.getPixels(this.currentMaterialId, 0.7F, this.useSize, this.useSize, false);
+                    int[] materialPixels = material.effectCombiner == 2
+                            ? materialProvider.getPixelsArgb(this.currentMaterialId, this.useSize, this.useSize)
+                            : materialProvider.getPixels(this.currentMaterialId, 0.7F, this.useSize, this.useSize, false);
+
                     this.srcBackgroundColor = materialPixels[0];
                     this.dstBackgroundColor = materialPixels[materialPixels.length - 1];
                     this.backgroundSprite = toolkit.createNativeSprite(materialPixels, this.useSize, this.useSize, this.useSize);
                 }
-                int combineMode = invertedAlpha == 255 ? (material.effectCombiner == 2 ? 1 : 0) : 1;
-                if (combineMode == 1 && clearCurrentBackground) {
-                    toolkit.drawFilledRectangle(x, y, width, height, color, 0);
-                }
+
+                int combineMode = (invertedAlpha == 255 && material.effectCombiner != 2) ? 0 : 1;
+
+                if (combineMode == 1 && clearBackground)
+                    toolkit.drawFilledRectangle(x, y, width, height, backgroundColor, 0);
+
                 if (this.backgroundSprite != null) {
-                    int i_18 = i_7 * height / -4096;
-                    int i_19;
-                    for (i_19 = i_8 * height / 4096 + (width - height) / 2; i_19 > height; i_19 -= height) {
-                    }
-                    while (i_19 < 0) {
-                        i_19 += height;
-                    }
-                    int i_20;
-                    if (this.backgroundMode != BackgroundMode.COLOR_TRANSITION) {
-                        while (i_18 > height) {
-                            i_18 -= height;
-                        }
-                        while (i_18 < 0) {
-                            i_18 += height;
-                        }
-                        for (i_20 = i_19 - height; i_20 < width; i_20 += height) {
-                            for (int i_21 = i_18 - height; i_21 < height; i_21 += height) {
-                                this.backgroundSprite.drawCircle(x + i_20, i_21 + y, height, height, 0, invertedAlpha << 24 | 0xffffff, combineMode);
-                            }
-                        }
-                    } else {
-                        for (i_20 = i_19 - height; i_20 < width; i_20 += height) {
-                            this.backgroundSprite.drawCircle(x + i_20, i_18 + y, height, height, 0, invertedAlpha << 24 | 0xffffff, combineMode);
-                        }
-                        if ((this.srcBackgroundColor & -16777216) != 0) {
-                            toolkit.clearPixels(0, 0, width, i_18 + y + 1, this.srcBackgroundColor);
-                        }
-                        if ((this.dstBackgroundColor & -16777216) != 0) {
-                            toolkit.clearPixels(0, i_18 + y + height, width, height - (i_18 + y + height), this.dstBackgroundColor);
-                        }
-                    }
+                    int yOffset = rotationY * height / -4096;
+                    int xOffset = rotationX * height / 4096 + (width - height) / 2;
+
+                    xOffset = xOffset % height;
+                    yOffset = yOffset % height;
+
+                    if (this.backgroundMode != BackgroundMode.COLOR_TRANSITION)
+                        drawRepeatingBackground(toolkit, x, y, width, height, xOffset, yOffset, invertedAlpha, combineMode);
+                    else
+                        drawTransitioningBackground(toolkit, x, y, width, height, xOffset, yOffset, invertedAlpha, combineMode);
                 }
-            } else {
-                toolkit.drawFilledRectangle(x, y, width, height, invertedAlpha << 24 | color, 1);
-            }
+            } else
+                toolkit.drawFilledRectangle(x, y, width, height, invertedAlpha << 24 | backgroundColor, 1);
         } else {
-            if (clearCurrentBackground) {
-                toolkit.applyClearFlags(3, color);
-            }
-            method4231(toolkit, i_7, i_8, i_9, alpha);
+            if (clearBackground)
+                toolkit.applyClearFlags(3, backgroundColor);
+            applySunRotation(toolkit, rotationY, rotationX, rotationZ, alpha);
         }
-        for (int index = this.availableSunCount - 1; index >= 0; --index) {
+        // Render additional sun projections
+        for (int index = this.availableSunCount - 1; index >= 0; --index)
             this.availableSuns[index].calculateProjection(toolkit, width, height, this.positionX, this.positionY, this.positionZ, invertedAlpha);
-        }
         toolkit.applyClearFlags(2, 0);
+    }
+
+    private void drawRepeatingBackground(AbstractToolkit toolkit, int x, int y, int width, int height, int xOffset, int yOffset, int invertedAlpha, int combineMode) {
+        for (int i = xOffset - height; i < width; i += height) {
+            for (int j = yOffset - height; j < height; j += height) {
+                this.backgroundSprite.drawCircle(x + i, y + j, height, height, 0, invertedAlpha << 24 | 0xffffff, combineMode);
+            }
+        }
+    }
+
+    private void drawTransitioningBackground(AbstractToolkit toolkit, int x, int y, int width, int height, int xOffset, int yOffset, int invertedAlpha, int combineMode) {
+        this.backgroundSprite.drawCircle(x + xOffset, y + yOffset, height, height, 0, invertedAlpha << 24 | 0xffffff, combineMode);
+        if ((this.srcBackgroundColor & -16777216) != 0)
+            toolkit.clearPixels(0, 0, width, yOffset + y + 1, this.srcBackgroundColor);
+        if ((this.dstBackgroundColor & -16777216) != 0)
+            toolkit.clearPixels(0, yOffset + y + height, width, height - (yOffset + y + height), this.dstBackgroundColor);
     }
 
     public void method4207(int i_1, int i_2) {
@@ -194,10 +194,10 @@ public class Skybox {
                 class24716 = this;
                 alpha = 255 - alpha;
             }
-            class24715.method4206(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, true, alpha);
-            class24716.method4206(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, false, 255 - alpha);
+            class24715.renderSkybox(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, true, alpha);
+            class24716.renderSkybox(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, false, 255 - alpha);
         } else {
-            method4206(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, true, alpha);
+            renderSkybox(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, true, alpha);
         }
     }
 
@@ -275,20 +275,26 @@ public class Skybox {
         }
     }
 
-    public void method4231(AbstractToolkit toolkit, int rotationY, int rotationX, int rotationZ, int alpha) {
-        Matrix43 sunMatrix = toolkit.copySunPosition();
-        Matrix43 newSunPosition = new Matrix43();
-        newSunPosition.setViewPosition(0.0F, 0.0F, 0.0F);
-        newSunPosition.rotate(0.0F, -1.0f, 0.0F, MathUtils.getTheta(-rotationX & 0x3fff));
-        newSunPosition.rotate(-1.0f, 0.0F, 0.0F, MathUtils.getTheta(-rotationY & 0x3fff));
-        newSunPosition.rotate(0.0F, 0.0F, -1.0f, MathUtils.getTheta(-rotationZ & 0x3fff));
-        toolkit.setSunPosition(newSunPosition);
-        Matrix43 drawnMatrix = new Matrix43();
+    public void applySunRotation(AbstractToolkit toolkit, int rotationY, int rotationX, int rotationZ, int alpha) {
+        // Backup the current sun position
+        Matrix43 originalSunPosition = toolkit.copySunPosition();
+        // Create a new matrix for the sun position and apply the rotations
+        Matrix43 rotatedSunPosition = new Matrix43();
+        rotatedSunPosition.setViewPosition(0.0F, 0.0F, 0.0F);
+        rotatedSunPosition.rotate(0.0F, -1.0f, 0.0F, MathUtils.getTheta(-rotationX & 0x3fff));
+        rotatedSunPosition.rotate(-1.0f, 0.0F, 0.0F, MathUtils.getTheta(-rotationY & 0x3fff));
+        rotatedSunPosition.rotate(0.0F, 0.0F, -1.0f, MathUtils.getTheta(-rotationZ & 0x3fff));
+        // Update the sun position in the toolkit
+        toolkit.setSunPosition(rotatedSunPosition);
+        // Update the sky model's alpha value if it has changed
         if (alpha != this.lastAlpha) {
             this.skyModel.applyEnvironmentAlpha((byte) alpha, this.faceAlpha);
             this.lastAlpha = alpha;
         }
+        // Draw the sky model using the rotated matrix
+        Matrix43 drawnMatrix = new Matrix43();
         this.skyModel.drawMatrixThreaded(drawnMatrix, null, ModelFunctionMaskGL.EMPTY);
-        toolkit.setSunPosition(sunMatrix);
+        // Restore the original sun position
+        toolkit.setSunPosition(originalSunPosition);
     }
 }
