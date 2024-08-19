@@ -5,8 +5,8 @@ import static com.jagex.game.runetek5.graphics.model.ModelFunctionMask.*;
 import com.jagex.game.runetek5.client.PreferenceManager;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeResult;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.graphics.model.Model;
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL;
@@ -22,7 +22,7 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit;
 
 public class StationaryWallDecoration extends AbstractWallDecoration implements GameObject {
 
-    public final LocTypeList locTypeList;
+    public final ObjectTypeList locTypeList;
     public final int locTypeId;
     public final boolean underwater;
     public final byte rotation;
@@ -33,7 +33,7 @@ public class StationaryWallDecoration extends AbstractWallDecoration implements 
     public Shadow shadow;
     public Silhouette axisAlignedBoundingBox;
 
-    public StationaryWallDecoration(Scene scene, AbstractToolkit toolkit, LocTypeList loctypelist, LocType locType, int i_5, int i_6, int i_7, int i_8, int i_9, boolean belowWater, int i_11, int i_12, int type, int rotation) {
+    public StationaryWallDecoration(Scene scene, AbstractToolkit toolkit, ObjectTypeList loctypelist, ObjectType locType, int i_5, int i_6, int i_7, int i_8, int i_9, boolean belowWater, int i_11, int i_12, int type, int rotation) {
         super(scene, i_7, i_8, i_9, i_5, i_6, i_11, i_12);
         this.locTypeList = loctypelist;
         this.locTypeId = locType.id;
@@ -103,7 +103,7 @@ public class StationaryWallDecoration extends AbstractWallDecoration implements 
     }
 
     public TypeResult getLocResult(AbstractToolkit toolkit, int functionMask, boolean hasShadow) {
-        LocType locType = this.locTypeList.list(this.locTypeId);
+        ObjectType locType = this.locTypeList.list(this.locTypeId);
         Ground groundCurrentLvl;
         Ground groundNextLvl;
         if (this.underwater) {

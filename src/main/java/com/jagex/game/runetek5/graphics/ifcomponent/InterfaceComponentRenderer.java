@@ -12,7 +12,7 @@ import com.jagex.game.runetek5.client.input.mouse.MouseRecord;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.midi.VorbisNode;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface;
 import com.jagex.game.runetek5.config.rsinterface.ComponentType;
@@ -271,7 +271,7 @@ public class InterfaceComponentRenderer {
                                     int color = component.color;
                                     String itemDisplayText = component.text;
                                     if (component.containerItemId != -1) {
-                                        ObjType objType = TypeLists.OBJ.list(component.containerItemId);
+                                        ItemType objType = TypeLists.OBJ.list(component.containerItemId);
                                         itemDisplayText = objType.name;
                                         if (itemDisplayText == null) {
                                             itemDisplayText = "null";
@@ -304,7 +304,7 @@ public class InterfaceComponentRenderer {
                                 }
                             } else if (component.type == ComponentType.SPRITE) {
                                 if (component.skyboxId >= 0) {
-                                    component.calculateLighting(TypeLists.SKYBOX, TypeLists.SUN).method4214(Renderers.activeToolkit, drawX, drawY, component.width, component.height, component.anInt1430 << 3, component.anInt1431 << 3);
+                                    component.calculateLighting(TypeLists.SKYBOX, TypeLists.SUN).render(Renderers.activeToolkit, drawX, drawY, component.width, component.height, component.sunRotationX << 3, component.sunRotationY << 3);
                                 } else {
                                     NativeSprite sprite;
                                     if (component.containerItemId != -1) {
@@ -367,7 +367,7 @@ public class InterfaceComponentRenderer {
                                 }
                                 int centerY = 0;
                                 if (component.containerItemId != -1) {
-                                    ObjType objType = TypeLists.OBJ.list(component.containerItemId);
+                                    ItemType objType = TypeLists.OBJ.list(component.containerItemId);
                                     if (objType != null) {
                                         objType = objType.getStackSizeAlt(component.itemStackSize);
                                         renderedMediaModel = objType.getAnimatedModel(Renderers.activeToolkit, functionMask, 1, component.wearCol ? PlayerUpdate.MY_PLAYER.playerAppearance : null, component.animatingSequence, 0, 0, 0, 0);
@@ -636,7 +636,7 @@ public class InterfaceComponentRenderer {
 	    if (!Component.ITEMS.isEmpty()) {
 	        if (PreferenceManager.preferences.activeToolkit.getValue() == 0) {
 	            for (Item item = (Item) Component.ITEMS.getFirst(); item != null; item = (Item) Component.ITEMS.next()) {
-	                TypeLists.OBJ.getSprite(toolkit, toolkit, item.id, item.amount, item.outlineSize, item.shadowColor, false, false, item.anInt7819, Renderers.FONT_RENDERER, item.hasPlayerAppearance ? PlayerUpdate.MY_PLAYER.playerAppearance : null);
+	                TypeLists.OBJ.getSprite(toolkit, toolkit, item.id, item.amount, item.outlineSize, item.shadowColor, false, false, item.stackMode, Renderers.FONT_RENDERER, item.hasPlayerAppearance ? PlayerUpdate.MY_PLAYER.playerAppearance : null);
 	                item.unlink();
 	            }
 	            GameShell.setComponentsOnTop();
@@ -648,7 +648,7 @@ public class InterfaceComponentRenderer {
 	                Renderers.GPU_ITEM_FONT_RENDERER = Renderers.GPU_ITEM_RENDERER.createFontRenderer(FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p11FullIndex), SpriteType.decodeGroup(Resource.SPRITES, FontManager.p11FullIndex), true);
 	            }
 	            for (Item item = (Item) Component.ITEMS.getFirst(); item != null; item = (Item) Component.ITEMS.next()) {
-	                TypeLists.OBJ.getSprite(Renderers.GPU_ITEM_RENDERER, toolkit, item.id, item.amount, item.outlineSize, item.shadowColor, false, false, item.anInt7819, Renderers.GPU_ITEM_FONT_RENDERER, item.hasPlayerAppearance ? PlayerUpdate.MY_PLAYER.playerAppearance : null);
+	                TypeLists.OBJ.getSprite(Renderers.GPU_ITEM_RENDERER, toolkit, item.id, item.amount, item.outlineSize, item.shadowColor, false, false, item.stackMode, Renderers.GPU_ITEM_FONT_RENDERER, item.hasPlayerAppearance ? PlayerUpdate.MY_PLAYER.playerAppearance : null);
 	                item.unlink();
 	            }
 	        }

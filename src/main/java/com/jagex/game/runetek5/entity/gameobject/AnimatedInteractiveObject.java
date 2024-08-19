@@ -1,9 +1,9 @@
 package com.jagex.game.runetek5.entity.gameobject;
 
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
@@ -26,8 +26,8 @@ public class AnimatedInteractiveObject extends AbstractInteractiveEntity impleme
     public Silhouette axisAlignedBoundingBox;
     public final boolean canInteract;
 
-    public AnimatedInteractiveObject(Scene scene, AbstractToolkit toolkit, LocTypeList loctypeList, LocType loctype, int i_5, int collisionPlane, int x, int y, int z, boolean overlayHidden, int startX, int endX, int startY, int endY, int type, int rotation, int sequenceId) {
-        super(scene, i_5, collisionPlane, x, y, z, startX, endX, startY, endY, loctype.supportsItems == 1, LocShapes.getRotatedWall(type, rotation));
+    public AnimatedInteractiveObject(Scene scene, AbstractToolkit toolkit, ObjectTypeList loctypeList, ObjectType loctype, int i_5, int collisionPlane, int x, int y, int z, boolean overlayHidden, int startX, int endX, int startY, int endY, int type, int rotation, int sequenceId) {
+        super(scene, i_5, collisionPlane, x, y, z, startX, endX, startY, endY, loctype.supportsItems == 1, ObjectShapes.getRotatedWall(type, rotation));
         this.activeGameObject = new AnimatedGameObject(toolkit, loctypeList, loctype, type, rotation, super.plane, collisionPlane, this, overlayHidden, sequenceId);
         this.canInteract = loctype.hasActions != 0 && !overlayHidden;
         setupBoundingBox(1);
@@ -86,7 +86,7 @@ public class AnimatedInteractiveObject extends AbstractInteractiveEntity impleme
         }
     }
 
-    public void addCustomisation(LocTypeCustomisation class4761) {
+    public void addCustomisation(ObjectTypeCustomisation class4761) {
         this.activeGameObject.addCustomisation(class4761);
     }
 

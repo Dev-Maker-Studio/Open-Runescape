@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.cache.node.Node;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.movement.CoordGrid;
 import com.jagex.game.runetek5.scene.MapRegion;
 import com.jagex.game.runetek5.scene.RegionLoadingType;
@@ -18,13 +18,13 @@ public class GroundItemUpdating {
 	        groundItemWrapper = new GroundItemWrapper();
 	        client.GROUND_ITEMS.put(groundItemWrapper, uid);
 	    } else {
-	        ObjType addedObjType = TypeLists.OBJ.list(addedGroundItem.id);
+	        ItemType addedObjType = TypeLists.OBJ.list(addedGroundItem.id);
 	        int addedItemValue = addedObjType.value;
 	        if (addedObjType.stackable == 1) {
 	            addedItemValue *= addedGroundItem.amount + 1;
 	        }
 	        for (GroundItemNode existingGroundItem = (GroundItemNode) groundItemWrapper.groundItems.getFirst(); existingGroundItem != null; existingGroundItem = (GroundItemNode) groundItemWrapper.groundItems.next()) {
-	            ObjType existingObjType = TypeLists.OBJ.list(existingGroundItem.id);
+	            ItemType existingObjType = TypeLists.OBJ.list(existingGroundItem.id);
 	            int existingItemValue = existingObjType.value;
 	            if (existingObjType.stackable == 1) {
 	                existingItemValue *= existingGroundItem.amount + 1;

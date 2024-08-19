@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.config.quickchat;
 
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.enumtype.EnumType;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import static com.jagex.game.runetek5.config.quickchat.QuickChatValueType.*;
 
 /**
@@ -19,7 +19,7 @@ public class QuickchatFiller implements QuickchatFillerList {
             return enumType.getStringValue((int) data);
         }
         if (value == OBJ_DIALOG || value == OBJ_TRADE_DIALOG) {
-            ObjType objType = TypeLists.OBJ.list((int) data);
+            ItemType objType = TypeLists.OBJ.list((int) data);
             return objType.name;
         }
         if (value == ENUM_STRING || value == ENUM_STRING_CLAN || value == ENUM_STRING_STATBASE) {

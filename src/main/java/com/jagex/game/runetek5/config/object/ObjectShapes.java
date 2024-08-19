@@ -1,8 +1,8 @@
-package com.jagex.game.runetek5.config.loc;
+package com.jagex.game.runetek5.config.object;
 
 import com.jagex.game.runetek5.config.Identifiable;
 
-public enum LocShapes implements Identifiable {
+public enum ObjectShapes implements Identifiable {
     WALL_STRAIGHT(0, 0),
     WALL_DIAGONAL_CORNER(1, 0),
     WALL_WHOLE_CORNER(2, 0),
@@ -32,7 +32,7 @@ public enum LocShapes implements Identifiable {
 	public static final int[] BOUNDARY_CULL_TYPES = {16, 32, 64, 128};
 	public static final int[] OBJECT_CULL_TYPES = {1, 2, 4, 8};
 
-    LocShapes(int type, int group) {
+    ObjectShapes(int type, int group) {
         this.shape = type;
         this.group = group;
     }
@@ -48,8 +48,8 @@ public enum LocShapes implements Identifiable {
 
 	public static int getWallCullType(int type, int rotation) {
         return type == WALL_DIAGONAL_CORNER.shape || type == WALL_STRAIGHT_CORNER.shape         		
-    		? LocShapes.BOUNDARY_CULL_TYPES[rotation & 0x3]
-    		: LocShapes.OBJECT_CULL_TYPES[rotation & 0x3];
+    		? ObjectShapes.BOUNDARY_CULL_TYPES[rotation & 0x3]
+    		: ObjectShapes.OBJECT_CULL_TYPES[rotation & 0x3];
     }
 
     public static byte getRotatedWall(int type, int rotation) {

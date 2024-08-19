@@ -1,10 +1,10 @@
 package com.jagex.game.runetek5.entity.gameobject;
 
 import static com.jagex.game.runetek5.graphics.model.ModelFunctionMask.*;
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
 import com.jagex.game.runetek5.graphics.model.Model;
@@ -25,9 +25,9 @@ public class AnimatedGroundDecoration extends AbstractGroundDecoration implement
     public Silhouette axisAlignedBoundingBox;
     public final boolean canInteract;
 
-    public AnimatedGroundDecoration(Scene scene, AbstractToolkit renderer, LocTypeList loctypelist, LocType loctype, int logicHeight, int plane, int i_7, int i_8, int i_9, boolean overlayHidden, int rotation, int sequenceId) {
+    public AnimatedGroundDecoration(Scene scene, AbstractToolkit renderer, ObjectTypeList loctypelist, ObjectType loctype, int logicHeight, int plane, int i_7, int i_8, int i_9, boolean overlayHidden, int rotation, int sequenceId) {
         super(scene, i_7, i_8, i_9, logicHeight, plane, loctype.groundDecorationHeight);
-        this.gameObject = new AnimatedGameObject(renderer, loctypelist, loctype, LocShapes.GROUND_DECORATION.shape, rotation, logicHeight, plane, this, overlayHidden, sequenceId);
+        this.gameObject = new AnimatedGameObject(renderer, loctypelist, loctype, ObjectShapes.GROUND_DECORATION.shape, rotation, logicHeight, plane, this, overlayHidden, sequenceId);
         this.canInteract = loctype.hasActions != 0 && !overlayHidden;
         setupBoundingBox(1);
     }
@@ -125,7 +125,7 @@ public class AnimatedGroundDecoration extends AbstractGroundDecoration implement
         return this.gameObject.rotation;
     }
 
-    public void addCustomisation(LocTypeCustomisation locCustomisation) {
+    public void addCustomisation(ObjectTypeCustomisation locCustomisation) {
         this.gameObject.addCustomisation(locCustomisation);
     }
 

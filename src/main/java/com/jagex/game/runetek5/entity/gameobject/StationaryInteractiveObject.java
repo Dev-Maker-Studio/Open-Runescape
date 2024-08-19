@@ -3,9 +3,9 @@ package com.jagex.game.runetek5.entity.gameobject;
 import com.jagex.game.runetek5.client.PreferenceManager;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeResult;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
@@ -25,7 +25,7 @@ public class StationaryInteractiveObject extends AbstractInteractiveEntity imple
 
     public Silhouette axisAlignedBoundingBox;
 
-    public final LocTypeList aClass47410542;
+    public final ObjectTypeList aClass47410542;
 
     public final int id;
 
@@ -45,8 +45,8 @@ public class StationaryInteractiveObject extends AbstractInteractiveEntity imple
 
     public Shadow currentShadow;
 
-    public StationaryInteractiveObject(Scene scene, AbstractToolkit toolkit, LocTypeList locTypeList, LocType objectdefinitions4, int i_5, int i_6, int i_7, int i_8, int i_9, boolean bool10, int i_11, int i_12, int i_13, int i_14, int i_15, int i_16, boolean bool17) {
-        super(scene, i_5, i_6, i_7, i_8, i_9, i_11, i_12, i_13, i_14, objectdefinitions4.supportsItems == 1, LocShapes.method7853(i_15, i_16));
+    public StationaryInteractiveObject(Scene scene, AbstractToolkit toolkit, ObjectTypeList locTypeList, ObjectType objectdefinitions4, int i_5, int i_6, int i_7, int i_8, int i_9, boolean bool10, int i_11, int i_12, int i_13, int i_14, int i_15, int i_16, boolean bool17) {
+        super(scene, i_5, i_6, i_7, i_8, i_9, i_11, i_12, i_13, i_14, objectdefinitions4.supportsItems == 1, ObjectShapes.method7853(i_15, i_16));
         this.aClass47410542 = locTypeList;
         this.id = objectdefinitions4.id;
         super.collisionPlane = (byte) i_6;
@@ -112,7 +112,7 @@ public class StationaryInteractiveObject extends AbstractInteractiveEntity imple
     }
 
     public TypeResult method16117(AbstractToolkit graphicalrenderer1, int i_2, boolean bool3) {
-        LocType objectdefinitions5 = this.aClass47410542.list(this.id);
+        ObjectType objectdefinitions5 = this.aClass47410542.list(this.id);
         Ground class3906;
         Ground class3907;
         if (this.aBool10536) {
@@ -127,7 +127,7 @@ public class StationaryInteractiveObject extends AbstractInteractiveEntity imple
             }
         }
         Vector3 vector38 = getAbsolutePosition().coords;
-        return objectdefinitions5.getPair(graphicalrenderer1, i_2, this.aByte10539 != LocShapes.GROUND_INTERACT.shape ? this.aByte10539 : LocShapes.SCENERY_INTERACT.shape, LocShapes.GROUND_INTERACT.shape == this.aByte10539 ? this.aByte10540 + 4 : this.aByte10540, class3906, class3907, (int) vector38.x, (int) vector38.y, (int) vector38.z, bool3, null);
+        return objectdefinitions5.getPair(graphicalrenderer1, i_2, this.aByte10539 != ObjectShapes.GROUND_INTERACT.shape ? this.aByte10539 : ObjectShapes.SCENERY_INTERACT.shape, ObjectShapes.GROUND_INTERACT.shape == this.aByte10539 ? this.aByte10540 + 4 : this.aByte10540, class3906, class3907, (int) vector38.x, (int) vector38.y, (int) vector38.z, bool3, null);
     }
 
     @Override

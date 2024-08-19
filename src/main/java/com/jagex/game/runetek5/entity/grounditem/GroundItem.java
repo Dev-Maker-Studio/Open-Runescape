@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.entity.grounditem;
 
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.entity.InteractiveEntityContainer;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.entity.gameobject.AbstractGroundDecoration;
@@ -111,17 +111,17 @@ public class GroundItem extends AbstractGroundItem {
 
     @Override
     public int getMaxSizeShift() {
-        ObjType objType = TypeLists.OBJ.list(this.nodeId);
+        ItemType objType = TypeLists.OBJ.list(this.nodeId);
         int sizeShift = objType.pickSizeShift;
         if (this.lastId != -1) {
-        	ObjType nextObjType = TypeLists.OBJ.list(this.lastId);
+        	ItemType nextObjType = TypeLists.OBJ.list(this.lastId);
             if (nextObjType.pickSizeShift > sizeShift) {
                 sizeShift = nextObjType.pickSizeShift;
             }
         }
 
         if (this.itemId != -1) {
-        	ObjType nextObjType = TypeLists.OBJ.list(this.itemId);
+        	ItemType nextObjType = TypeLists.OBJ.list(this.itemId);
             if (nextObjType.pickSizeShift > sizeShift) {
                 sizeShift = nextObjType.pickSizeShift;
             }

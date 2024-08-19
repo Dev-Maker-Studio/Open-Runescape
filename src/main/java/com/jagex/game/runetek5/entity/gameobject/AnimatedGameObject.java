@@ -6,9 +6,9 @@ import com.jagex.game.runetek5.client.PreferenceManager;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeResult;
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.config.sequence.EntitySequence;
 import com.jagex.game.runetek5.config.sequence.Sequence;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
@@ -28,7 +28,7 @@ public class AnimatedGameObject {
 
     public boolean hasSequenceId;
 
-    public LocTypeCustomisation locCustomisation;
+    public ObjectTypeCustomisation locCustomisation;
 
     public Model pairModel;
 
@@ -48,7 +48,7 @@ public class AnimatedGameObject {
 
     public int modelMinY;
 
-    public final LocTypeList loctypelist;
+    public final ObjectTypeList loctypelist;
 
     public final int locId;
 
@@ -66,7 +66,7 @@ public class AnimatedGameObject {
 
     public final Sequence sequence;
 
-    public AnimatedGameObject(AbstractToolkit renderer, LocTypeList loctypelist, LocType loctype, int type, int rotation,
+    public AnimatedGameObject(AbstractToolkit renderer, ObjectTypeList loctypelist, ObjectType loctype, int type, int rotation,
                               int logicHeight, int plane, SceneGraphEntity transform, boolean overlayHidden, int sequenceId) {
         this.loctypelist = loctypelist;
         this.locId = loctype.id;
@@ -91,7 +91,7 @@ public class AnimatedGameObject {
         return this.modelMinY;
     }
 
-    public void addCustomisation(LocTypeCustomisation customisation) {
+    public void addCustomisation(ObjectTypeCustomisation customisation) {
         this.locCustomisation = customisation;
         this.pairModel = null;
     }
@@ -113,7 +113,7 @@ public class AnimatedGameObject {
         EmissiveTriangle[] emitters = model.getEmissiveTriangles();
         EffectiveVertex[] effectiveVertices = model.getEffectiveVertices();
         if ((this.particleSystem == null || this.particleSystem.isDisabled) && (emitters != null || effectiveVertices != null)) {
-            LocType locType = this.loctypelist.list(this.locId);
+            ObjectType locType = this.loctypelist.list(this.locId);
             if (locType.alternativeIds != null) {
                 locType = locType.getMultiLoc(client.MAP_LOADING_STAGE == 4 ? VarProviders.CUTSCENE_ACTION_VAR_PROVIDER : VarProviders.PLAYER_VAR_PROVIDER);
             }
@@ -142,8 +142,8 @@ public class AnimatedGameObject {
         int randomSequenceId = seqId;
         boolean replay = false;
         if (seqId == -1) {
-            LocType computedLoc = this.loctypelist.list(this.locId);
-            LocType originalLoc = computedLoc;
+            ObjectType computedLoc = this.loctypelist.list(this.locId);
+            ObjectType originalLoc = computedLoc;
             if (computedLoc.alternativeIds != null) {
                 computedLoc = computedLoc.getMultiLoc(client.MAP_LOADING_STAGE == 4 ? VarProviders.CUTSCENE_ACTION_VAR_PROVIDER : VarProviders.PLAYER_VAR_PROVIDER);
             }
@@ -192,7 +192,7 @@ public class AnimatedGameObject {
     }
 
     public Model getAnimatedModel(AbstractToolkit renderer, int functionMask, boolean bool3, boolean hasShadow) {
-        LocType loctype = this.loctypelist.list(this.locId);
+        ObjectType loctype = this.loctypelist.list(this.locId);
         if (loctype.alternativeIds != null) {
             loctype = loctype.getMultiLoc(client.MAP_LOADING_STAGE == 4 ? VarProviders.CUTSCENE_ACTION_VAR_PROVIDER : VarProviders.PLAYER_VAR_PROVIDER);
         }

@@ -4,8 +4,8 @@ import com.jagex.game.runetek5.client.*;
 import com.jagex.game.runetek5.client.periodic.PulseEventQueue;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.Identifiable;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate;
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap;
 import com.jagex.game.runetek5.scene.CollisionFlag;
@@ -498,16 +498,16 @@ public class RouteFinder {
         int shape = (int) locUid >> 14 & 0x1f;
         int rotation = (int) locUid >> 20 & 0x3;
         int locId = (int) (locUid >>> 32) & 0x7fffffff;
-        LocShapes locShape = (LocShapes) Identifiable.identify(LocShapes.values(), shape);
+        ObjectShapes locShape = (ObjectShapes) Identifiable.identify(ObjectShapes.values(), shape);
         RouteStrategy strategy;
-        if (locShape != LocShapes.SCENERY_INTERACT && locShape != LocShapes.GROUND_INTERACT && locShape != LocShapes.GROUND_DECORATION) {
-            if (LocShapes.isWall(locShape.shape)) {
+        if (locShape != ObjectShapes.SCENERY_INTERACT && locShape != ObjectShapes.GROUND_INTERACT && locShape != ObjectShapes.GROUND_DECORATION) {
+            if (ObjectShapes.isWall(locShape.shape)) {
                 strategy = RouteStrategies.forWallObject(destinationX, destinationY, 0, 0, locShape, rotation);
             } else {
                 strategy = RouteStrategies.forInteractiveObject(destinationX, destinationY, locShape, rotation);
             }
         } else {
-            LocType loctype = Resource.mapRegion.getLoctypeList().list(locId);
+            ObjectType loctype = Resource.mapRegion.getLoctypeList().list(locId);
             int sizeX;
             int sizeY;
             if (rotation != 0 && rotation != 2) {
@@ -518,7 +518,7 @@ public class RouteFinder {
                 sizeY = loctype.sizeY;
             }
 
-            strategy = RouteStrategies.forWallObject(destinationX, destinationY, sizeX, sizeY, LocShapes.WALL_STRAIGHT, 0);
+            strategy = RouteStrategies.forWallObject(destinationX, destinationY, sizeX, sizeY, ObjectShapes.WALL_STRAIGHT, 0);
         }
 
         RouteFinder.calculateRoute(destinationX, destinationY, true, strategy);

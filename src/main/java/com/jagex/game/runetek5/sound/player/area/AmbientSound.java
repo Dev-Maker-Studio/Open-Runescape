@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.cache.node.IterableNodeMap;
 import com.jagex.game.runetek5.cache.node.Node;
 import com.jagex.game.runetek5.cache.node.NodeCollection;
 import com.jagex.game.runetek5.client.client;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.config.midi.instrument.MusicSample;
 import com.jagex.game.runetek5.config.npc.NPCType;
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity;
@@ -29,7 +29,7 @@ public class AmbientSound extends Node<AmbientSound> {
     public MusicSample aNodeSub188087;
     public boolean hasTransformation;
     public AreaSoundStream aNodeSub15Sub58096;
-    public LocType emittingLoc;
+    public ObjectType emittingLoc;
     public AudioBuffer aNodeSub26Sub1Sub18106;
     public int absStartX;
     public int soundEffectId;
@@ -67,7 +67,7 @@ public class AmbientSound extends Node<AmbientSound> {
         int currentEffect = this.soundEffectId;
         boolean currentTransformState = this.instrumentSoundEffect;
         if (this.emittingLoc != null) {
-            LocType loctype = this.emittingLoc.getMultiLoc(client.MAP_LOADING_STAGE == 4 ? VarProviders.CUTSCENE_ACTION_VAR_PROVIDER : VarProviders.PLAYER_VAR_PROVIDER);
+            ObjectType loctype = this.emittingLoc.getMultiLoc(client.MAP_LOADING_STAGE == 4 ? VarProviders.CUTSCENE_ACTION_VAR_PROVIDER : VarProviders.PLAYER_VAR_PROVIDER);
             if (loctype != null) {
                 this.soundEffectId = loctype.soundId;
                 this.instrumentSoundEffect = loctype.instrumentSoundEffect;
@@ -146,7 +146,7 @@ public class AmbientSound extends Node<AmbientSound> {
 	    }
 	}
 
-	public static void unlinkLocSound(int z, int x, int y, LocType locType) {
+	public static void unlinkLocSound(int z, int x, int y, ObjectType locType) {
 	    for (AmbientSound soundNode = (AmbientSound) LOC_AMBIENT_SOUNDS.getFirst(); soundNode != null; soundNode = (AmbientSound) LOC_AMBIENT_SOUNDS.next()) {
 	        if (z == soundNode.plane && soundNode.absStartX == x << 9 && y << 9 == soundNode.absStartY && soundNode.emittingLoc.id == locType.id) {
 	            if (soundNode.soundEffect != null) {
@@ -205,7 +205,7 @@ public class AmbientSound extends Node<AmbientSound> {
 	    }
 	}
 
-	public static void createAmbientSoundEffect(int effectPlane, int baseX, int baseY, int rotation, LocType locType, NpcEntity npc, PlayerEntity player) {
+	public static void createAmbientSoundEffect(int effectPlane, int baseX, int baseY, int rotation, ObjectType locType, NpcEntity npc, PlayerEntity player) {
 	    AmbientSound soundEffectNode = new AmbientSound();
 	    soundEffectNode.plane = effectPlane;
 	    soundEffectNode.absStartX = baseX << 9;

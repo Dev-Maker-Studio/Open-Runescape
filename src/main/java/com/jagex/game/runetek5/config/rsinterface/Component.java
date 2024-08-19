@@ -12,8 +12,8 @@ import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.bas.BasTypeList;
 import com.jagex.game.runetek5.config.identitykit.IdkTypeList;
 import com.jagex.game.runetek5.config.npc.NpcTypeList;
-import com.jagex.game.runetek5.config.obj.ObjType;
-import com.jagex.game.runetek5.config.obj.ObjTypeList;
+import com.jagex.game.runetek5.config.item.ItemType;
+import com.jagex.game.runetek5.config.item.ItemTypeList;
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor;
 import com.jagex.game.runetek5.config.sequence.InterfaceSequence;
 import com.jagex.game.runetek5.config.sequence.MovingSequence;
@@ -54,6 +54,12 @@ import static com.jagex.game.runetek5.graphics.model.ModelFunctionMask.*;
  */
 public class Component {
 
+    public enum StackMode {
+        NONUM,
+        ALWAYS_NUM,
+        WHEN_MULTIPLE
+    }
+
     public static int anInt1283;
     public static final int anInt1373 = 1;
     public static final int anInt1265 = 2;
@@ -72,8 +78,8 @@ public class Component {
     public int serverTriggers;
     public Object[] anObjectArray1418;
     public int[] cycles;
-    public int anInt1430;
-    public int anInt1431;
+    public int sunRotationX;
+    public int sunRotationY;
     public int lightPositionX;
     public int lightPositionY;
     public int lightPositionZ;
@@ -202,7 +208,7 @@ public class Component {
     public int secondaryMediaId = -1;
     public int offsetX;
     public int offsetY;
-    public int renderStack = 2;
+    public StackMode renderStack = StackMode.WHEN_MULTIPLE;
     public boolean textAntiMacro;
     public int clickType;
     public Component aClass1181379;
@@ -271,7 +277,7 @@ public class Component {
         return Interface.INTERFACES[interfaceId].getComponent(hash);
     }
     
-    public Model getAnimatedMediaModel(AbstractToolkit toolkit, int functionMask, BasTypeList bastypelist, IdkTypeList idktypelist, NpcTypeList npctypelist, ObjTypeList objtypelist, VarDomain varprovider, Sequence sequence, PlayerAppearance playerappearance) {
+    public Model getAnimatedMediaModel(AbstractToolkit toolkit, int functionMask, BasTypeList bastypelist, IdkTypeList idktypelist, NpcTypeList npctypelist, ItemTypeList objtypelist, VarDomain varprovider, Sequence sequence, PlayerAppearance playerappearance) {
         missingMedia = false;
         if (this.mediaType == MediaType.UNDEFINED) {
             return null;
@@ -355,7 +361,7 @@ public class Component {
                 } 
                 return decoratedHeadModel;
             } else if (this.mediaType == MediaType.ITEM) {
-                ObjType objtype = objtypelist.list(this.primaryMediaId);
+                ItemType objtype = objtypelist.list(this.primaryMediaId);
                 Model objModel = objtype.getAnimatedModel(toolkit, functionMask, 10, playerappearance, sequence, 0, 0, 0, 0);
                 if (objModel == null) {
                     missingMedia = true;

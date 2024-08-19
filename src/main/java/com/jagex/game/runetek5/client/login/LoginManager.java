@@ -21,9 +21,9 @@ import com.jagex.game.runetek5.client.periodic.PulseEventHandler;
 import com.jagex.game.runetek5.client.window.WindowMode;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.config.npc.NPCType;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.config.rsinterface.Interface;
 import com.jagex.game.runetek5.config.rsinterface.SubInterface;
@@ -1046,7 +1046,7 @@ public class LoginManager {
 	
 	    Resource.mapRegion.getEnvironmentManager().requestDirectEnvironmentTransition();
 	    client.sendCameraAngleToServer = true;
-	    client.recolorPalette = LocType.locRecolorPalette = NPCType.npcRecolorPalette = ObjType.recolorPalette = new short[256];
+	    client.recolorPalette = ObjectType.locRecolorPalette = NPCType.npcRecolorPalette = ItemType.recolorPalette = new short[256];
 	    InterfaceRenderer.translatedUptext = LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE);
 	    PreferenceManager.preferences.setValue(PreferenceManager.preferences.removeRoofsOptionOverride, PreferenceManager.preferences.removeRoofs.getValue());
 	    client.varVerifyId = 0;

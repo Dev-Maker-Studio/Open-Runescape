@@ -5,8 +5,8 @@ import com.jagex.game.runetek5.config.bas.BasTypeList;
 import com.jagex.game.runetek5.config.defaults.EquipmentDefaultsType;
 import com.jagex.game.runetek5.config.identitykit.IdkTypeList;
 import com.jagex.game.runetek5.config.npc.NpcTypeList;
-import com.jagex.game.runetek5.config.obj.ObjTypeCustomisation;
-import com.jagex.game.runetek5.config.obj.ObjTypeList;
+import com.jagex.game.runetek5.config.item.ItemTypeCustomisation;
+import com.jagex.game.runetek5.config.item.ItemTypeList;
 import com.jagex.game.runetek5.config.sequence.SeqType;
 import com.jagex.game.runetek5.config.sequence.Sequence;
 import com.jagex.game.runetek5.graphics.model.Mesh;
@@ -58,14 +58,14 @@ public class PlayerAppearance {
 	/**
 	 * Appearance data
 	 */
-    public ObjTypeCustomisation[] meshModifiers;
+    public ItemTypeCustomisation[] meshModifiers;
     public int[] recolorDstIndices;
     public int morphism = -1;
     public boolean female;
     public int basId;
     public int[] appearance;
 
-    public void setAppearance(int basId, int[] appearance, ObjTypeCustomisation[] meshModifiers, int[] recolorDst, boolean female, int morphism) {
+    public void setAppearance(int basId, int[] appearance, ItemTypeCustomisation[] meshModifiers, int[] recolorDst, boolean female, int morphism) {
         if (this.basId != basId) {
             this.basId = basId;
         }
@@ -85,7 +85,7 @@ public class PlayerAppearance {
         }
     }
 
-    public void addAppearanceItem(int index, int itemId, ObjTypeList objTypeList) {
+    public void addAppearanceItem(int index, int itemId, ItemTypeList objTypeList) {
         if (itemId == -1) {
             this.appearance[index] = 0;
         } else if (objTypeList.list(itemId) != null) {
@@ -114,7 +114,7 @@ public class PlayerAppearance {
     /**
 	 * 839 [unused]
      */
-    public Model getBodyModelRev839(AbstractToolkit toolkit, int initialFunctionMask, BasTypeList basTypeList, IdkTypeList idkTypeList, NpcTypeList loader, ObjTypeList objTypeList, VarDomain varProvider, Sequence animatingSequence, Sequence idleSequence, Sequence[] objSequences, int[] rotations, int rotationDelta, EquipmentDefaultsType equipmentDefaults) {
+    public Model getBodyModelRev839(AbstractToolkit toolkit, int initialFunctionMask, BasTypeList basTypeList, IdkTypeList idkTypeList, NpcTypeList loader, ItemTypeList objTypeList, VarDomain varProvider, Sequence animatingSequence, Sequence idleSequence, Sequence[] objSequences, int[] rotations, int rotationDelta, EquipmentDefaultsType equipmentDefaults) {
         if (this.morphism != -1) {
             return loader.list(this.morphism).getAnimatedBodymodel(toolkit, initialFunctionMask, basTypeList, varProvider, animatingSequence, idleSequence, objSequences, rotations, rotationDelta, null);
         } 
@@ -204,7 +204,7 @@ public class PlayerAppearance {
 			boolean missingModels = false;
 			for (int appearanceIndex = 0; appearanceIndex < playerAppearance.length; appearanceIndex++) {
 				int appearancePart = playerAppearance[appearanceIndex];
-				ObjTypeCustomisation meshModifier = null;
+				ItemTypeCustomisation meshModifier = null;
 				boolean hiddenReplacements = false;
 				if (hasReplacementShield) {
 					if (appearanceIndex == equipmentDefaults.shieldSlot) {
@@ -254,7 +254,7 @@ public class PlayerAppearance {
 				Mesh[] meshes = new Mesh[playerAppearance.length];
 				for (int appearanceIndex = 0; appearanceIndex < playerAppearance.length; appearanceIndex++) {
 					int appearancePart = playerAppearance[appearanceIndex];
-					ObjTypeCustomisation meshModifier = null;
+					ItemTypeCustomisation meshModifier = null;
 					boolean hasReplacements = appearanceIndex == 5 && hasReplacementShield || appearanceIndex == 3 && hasReplacementWeapon;
 					if ((appearancePart & 0x40000000) != 0) {
 						if (!hasReplacements && this.meshModifiers != null && this.meshModifiers[appearanceIndex] != null) {
@@ -374,7 +374,7 @@ public class PlayerAppearance {
 	}
 
     // 727
-    public Model getBodyModel(AbstractToolkit toolkit, int initialFunctionMask, BasTypeList basTypeList, IdkTypeList idkTypeList, NpcTypeList loader, ObjTypeList objTypeList, VarDomain varProvider, Sequence animatingSequence, Sequence idleSequence, Sequence[] objSequence, int[] rotations, int rotationDelta, EquipmentDefaultsType equipmentDefaults) {
+    public Model getBodyModel(AbstractToolkit toolkit, int initialFunctionMask, BasTypeList basTypeList, IdkTypeList idkTypeList, NpcTypeList loader, ItemTypeList objTypeList, VarDomain varProvider, Sequence animatingSequence, Sequence idleSequence, Sequence[] objSequence, int[] rotations, int rotationDelta, EquipmentDefaultsType equipmentDefaults) {
         if (this.morphism != -1) {
             return loader.list(this.morphism).getAnimatedBodymodel(toolkit, initialFunctionMask, basTypeList, varProvider, animatingSequence, idleSequence, objSequence, rotations, rotationDelta, null);
         } 
@@ -475,7 +475,7 @@ public class PlayerAppearance {
                         Mesh[] meshesToCombine = new Mesh[playerAppearance.length];
                         for (int slot = 0; slot < playerAppearance.length; slot++) {
                         	int bitpackedAppearancePart = playerAppearance[slot];
-                            ObjTypeCustomisation meshModifier = null;
+                            ItemTypeCustomisation meshModifier = null;
                             boolean objReplacement = slot == 5 && hasReplacementShield || slot == 3 && hasReplacementWeapon;
                             if ((bitpackedAppearancePart & 0x40000000) != 0) {
                                 if (!objReplacement && this.meshModifiers != null && this.meshModifiers[slot] != null) {
@@ -563,7 +563,7 @@ public class PlayerAppearance {
                     }
                 }
                 if ((bitpackedAppearancePart & 0x40000000) != 0) {
-                	ObjTypeCustomisation meshModifier = null;
+                	ItemTypeCustomisation meshModifier = null;
                     if (!slotObjReplaced && this.meshModifiers != null && this.meshModifiers[currentSlot] != null) {
                         meshModifier = this.meshModifiers[currentSlot];
                     }
@@ -680,7 +680,7 @@ public class PlayerAppearance {
     /**
      * Gets the head model of a player with equipment displayed
      */
-    public Model getAnimatedHeadModel(AbstractToolkit toolkit, int initialFunctionMask, IdkTypeList idkTypeList, NpcTypeList npcTypeList, ObjTypeList objTypeList, VarDomain varProvider, Sequence sequence) {
+    public Model getAnimatedHeadModel(AbstractToolkit toolkit, int initialFunctionMask, IdkTypeList idkTypeList, NpcTypeList npcTypeList, ItemTypeList objTypeList, VarDomain varProvider, Sequence sequence) {
         if (this.morphism != -1) {
             return npcTypeList.list(this.morphism).getAnimatedHeadmodel(toolkit, initialFunctionMask, varProvider, sequence, null);
         } 
@@ -696,7 +696,7 @@ public class PlayerAppearance {
             boolean missingModels = false;
             for (int index = 0; index < this.appearance.length; index++) {
                 int appearancePart = this.appearance[index];
-                ObjTypeCustomisation meshModifier = null;
+                ItemTypeCustomisation meshModifier = null;
                 if ((appearancePart & 0x40000000) != 0) {
                     if (this.meshModifiers != null && this.meshModifiers[index] != null) {
                         meshModifier = this.meshModifiers[index];
@@ -716,7 +716,7 @@ public class PlayerAppearance {
             for (int index = 0; index < this.appearance.length; index++) {
                 int appearancePart = this.appearance[index];
                 if ((appearancePart & 0x40000000) != 0) {
-                    ObjTypeCustomisation meshModifier = null;
+                    ItemTypeCustomisation meshModifier = null;
                     if (this.meshModifiers != null && this.meshModifiers[index] != null) {
                         meshModifier = this.meshModifiers[index];
                     }

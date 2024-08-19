@@ -3,8 +3,8 @@ package com.jagex.game.runetek5.config.cutscene;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.config.Identifiable;
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.scene.LocAction;
 
 /**
@@ -16,7 +16,7 @@ public class CutsceneObject {
 
     public final int locId;
 
-    public final LocShapes locShape;
+    public final ObjectShapes locShape;
 
     public int plane;
 
@@ -28,7 +28,7 @@ public class CutsceneObject {
 
     public CutsceneObject(Packet buffer) {
         this.locId = buffer.readBigSmart();
-        this.locShape = (LocShapes) Identifiable.identify(LocShapes.values(), buffer.readUnsignedByte());
+        this.locShape = (ObjectShapes) Identifiable.identify(ObjectShapes.values(), buffer.readUnsignedByte());
     }
 
 
@@ -36,7 +36,7 @@ public class CutsceneObject {
         if (this.locId < 0) {
             return true;
         } 
-        LocType locType = TypeLists.LOC.list(this.locId);
+        ObjectType locType = TypeLists.LOC.list(this.locId);
         boolean cached = locType.isTypeCached(this.locShape.shape);
         int[] seqIds = locType.getAnimations();
         if (seqIds != null) {

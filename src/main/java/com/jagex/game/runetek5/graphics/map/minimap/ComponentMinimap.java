@@ -8,9 +8,9 @@ import com.jagex.game.runetek5.client.input.camera.Camera;
 import com.jagex.game.runetek5.client.menu.MiniMenu;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.config.mapsprite.MapSpriteType;
 import com.jagex.game.runetek5.config.mec.MECType;
 import com.jagex.game.runetek5.config.npc.NPCType;
@@ -81,7 +81,7 @@ public class ComponentMinimap {
 	    Scene scene = Resource.mapRegion.getScene();
 	    GameObject sceneObject = (GameObject) scene.getWall(plane, sceneX, sceneY);
 	    if (sceneObject != null) {
-	        LocType locType = Resource.mapRegion.getLoctypeList().list(sceneObject.getId());
+	        ObjectType locType = Resource.mapRegion.getLoctypeList().list(sceneObject.getId());
 	        int rotation = sceneObject.getRotation() & 0x3;
 	        int shape = sceneObject.getShape();
 	        if (locType.mapIconId != -1) {
@@ -91,7 +91,7 @@ public class ComponentMinimap {
 	            if (locType.hasActions > 0) {
 	                color = colorHasActions;
 	            }
-	            if (shape == LocShapes.WALL_STRAIGHT.shape || shape == LocShapes.WALL_WHOLE_CORNER.shape) {
+	            if (shape == ObjectShapes.WALL_STRAIGHT.shape || shape == ObjectShapes.WALL_WHOLE_CORNER.shape) {
 	                if (rotation == 0) {
 	                    toolkit.drawOpaqueVerticalLine(x, y, 4, color);
 	                } else if (rotation == 1) {
@@ -102,7 +102,7 @@ public class ComponentMinimap {
 	                    toolkit.drawOpaqueHorizontalLine(x, y + 3, 4, color);
 	                }
 	            }
-	            if (shape == LocShapes.WALL_STRAIGHT_CORNER.shape) {
+	            if (shape == ObjectShapes.WALL_STRAIGHT_CORNER.shape) {
 	                if (rotation == 0) {
 	                    toolkit.clearPixels(x, y, 1, 1, color);
 	                } else if (rotation == 1) {
@@ -113,7 +113,7 @@ public class ComponentMinimap {
 	                    toolkit.clearPixels(x, y + 3, 1, 1, color);
 	                }
 	            }
-	            if (shape == LocShapes.WALL_WHOLE_CORNER.shape) {
+	            if (shape == ObjectShapes.WALL_WHOLE_CORNER.shape) {
 	                if (rotation == 0) {
 	                    toolkit.drawOpaqueHorizontalLine(x, y, 4, color);
 	                } else if (rotation == 1) {
@@ -128,12 +128,12 @@ public class ComponentMinimap {
 	    }
 	    sceneObject = (GameObject) scene.getInteractiveObject(plane, sceneX, sceneY, client.INTERACTIVE_OBJECT_COMPARABLE);
 	    if (sceneObject != null) {
-	    	LocType loctype = Resource.mapRegion.getLoctypeList().list(sceneObject.getId());
+	    	ObjectType loctype = Resource.mapRegion.getLoctypeList().list(sceneObject.getId());
 	    	int rotation = sceneObject.getRotation() & 0x3;
 	    	int type = sceneObject.getShape();
 	        if (loctype.mapIconId != -1) {
 	            ComponentMinimap.drawMapIcon(toolkit, loctype, rotation, x, y);
-	        } else if (type == LocShapes.WALL_INTERACT.shape) {
+	        } else if (type == ObjectShapes.WALL_INTERACT.shape) {
 	        	int color = -1118482;
 	            if (loctype.hasActions > 0) {
 	                color = -1179648;
@@ -147,7 +147,7 @@ public class ComponentMinimap {
 	    }
 	    sceneObject = (GameObject) scene.getGroundDecoration(plane, sceneX, sceneY);
 	    if (sceneObject != null) {
-	        LocType locType = Resource.mapRegion.getLoctypeList().list(sceneObject.getId());
+	        ObjectType locType = Resource.mapRegion.getLoctypeList().list(sceneObject.getId());
 	        int rotation = sceneObject.getRotation() & 0x3;
 	        if (locType.mapIconId != -1) {
 	            ComponentMinimap.drawMapIcon(toolkit, locType, rotation, x, y);
@@ -205,7 +205,7 @@ public class ComponentMinimap {
 	            for (int index = 0; index < minimapLocCount; index++) {
 	            	int i_16 = minimapLocSceneX[index] * 4 + 2 - absX / 128;
 	            	int i_17 = minimapLocSceneY[index] * 4 + 2 - absY / 128;
-	                LocType locType = Resource.mapRegion.getLoctypeList().list(minimapLocId[index]);
+	                ObjectType locType = Resource.mapRegion.getLoctypeList().list(minimapLocId[index]);
 	                if (locType.alternativeIds != null) {
 	                    locType = locType.getMultiLoc(VarProviders.PLAYER_VAR_PROVIDER);
 	                    if (locType == null || locType.mapCategoryid == -1) {
@@ -274,7 +274,7 @@ public class ComponentMinimap {
 	    }	
 	}
 
-	public static void drawMapIcon(AbstractToolkit toolkit, LocType locType, int rotation, int drawPositionX, int drawPositionY) {
+	public static void drawMapIcon(AbstractToolkit toolkit, ObjectType locType, int rotation, int drawPositionX, int drawPositionY) {
 	    MapSpriteType mapspriteType = TypeLists.MAP_SPRITE.list(locType.mapIconId);
 	    if (mapspriteType.fileId != -1) {
 	        if (locType.mapIconRotates) {
@@ -667,7 +667,7 @@ public class ComponentMinimap {
 	        abstractToolkit.resetClipping();
 	        abstractToolkit.applyClearFlags(1, 1);
 	        GameShell.setComponentsOnTop();
-	        LocTypeList locTypeList = Resource.mapRegion.getLoctypeList();
+	        ObjectTypeList locTypeList = Resource.mapRegion.getLoctypeList();
 	        minimapLocCount = 0;
 	        MapRegion.staticElementsAwaitingDrawing.remove_all();
 	        if (!MapRegion.visualizeClippedTilesOnMinimap) {
@@ -686,13 +686,13 @@ public class ComponentMinimap {
 	                                gameObject = (GameObject) scene.getPrimaryWallDecoration(sceneZ, sceneX, sceneY);
 	                            }
 	                            if (gameObject != null) {
-	                                LocType locType = locTypeList.list(gameObject.getId());
+	                                ObjectType locType = locTypeList.list(gameObject.getId());
 	                                if (!locType.members || client.memberWorld) {
 	                                	int mapCategoryId = locType.mapCategoryid;
 	                                    if (locType.alternativeIds != null) {
 	                                        for (int altIndex = 0; altIndex < locType.alternativeIds.length; altIndex++) {
 	                                            if (locType.alternativeIds[altIndex] != -1) {
-	                                                LocType morphedLoc = locTypeList.list(locType.alternativeIds[altIndex]);
+	                                                ObjectType morphedLoc = locTypeList.list(locType.alternativeIds[altIndex]);
 	                                                if (morphedLoc.mapCategoryid >= 0) {
 	                                                    mapCategoryId = morphedLoc.mapCategoryid;
 	                                                }

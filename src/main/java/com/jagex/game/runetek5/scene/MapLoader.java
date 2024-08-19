@@ -8,7 +8,7 @@ import com.jagex.game.runetek5.config.flo.FloType;
 import com.jagex.game.runetek5.config.flo.FloTypeList;
 import com.jagex.game.runetek5.config.flu.FluType;
 import com.jagex.game.runetek5.config.flu.FluTypeList;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.entity.gameobject.GameObject;
 import com.jagex.game.runetek5.scene.environment.EnvironmentManager;
 import com.jagex.game.runetek5.scene.ground.Ground;
@@ -110,7 +110,7 @@ public class MapLoader {
     }
 
     public static long calculateLocUid(GameObject gameObject, int x, int y) {
-        LocType loctype = Resource.mapRegion.getLoctypeList().list(gameObject.getId());
+        ObjectType loctype = Resource.mapRegion.getLoctypeList().list(gameObject.getId());
         long uid = x | (long) y << 7 | (long) gameObject.getShape() << 14 | (long) gameObject.getRotation() << 20 | 0x40000000;
         if (loctype.hasActions == 0) {
             uid |= 0x8000000000000000L;

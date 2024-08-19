@@ -1,8 +1,8 @@
 package com.jagex.game.runetek5.entity.gameobject;
 
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.graphics.model.Model;
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL;
@@ -21,7 +21,7 @@ public class AnimatedWallDecoration extends AbstractWallDecoration implements Ga
     public Silhouette axisAlignedBoundingBox;
     public final boolean interactive;
 
-    public AnimatedWallDecoration(Scene scene, AbstractToolkit toolkit, LocTypeList loctypelist, LocType loctype, int h, int logicHeight, int x, int y, int z, boolean overlayHidden, int posX, int posY, int type, int rotation, int sequenceId) {
+    public AnimatedWallDecoration(Scene scene, AbstractToolkit toolkit, ObjectTypeList loctypelist, ObjectType loctype, int h, int logicHeight, int x, int y, int z, boolean overlayHidden, int posX, int posY, int type, int rotation, int sequenceId) {
         super(scene, x, y, z, h, logicHeight, posX, posY);
         this.wallDecoration = new AnimatedGameObject(toolkit, loctypelist, loctype, type, rotation, super.plane, logicHeight, this, overlayHidden, sequenceId);
         this.interactive = loctype.hasActions != 0 && !overlayHidden;
@@ -51,7 +51,7 @@ public class AnimatedWallDecoration extends AbstractWallDecoration implements Ga
         return this.wallDecoration.getNegativeMinY();
     }
 
-    public void addCustomisation(LocTypeCustomisation class4761) {
+    public void addCustomisation(ObjectTypeCustomisation class4761) {
         this.wallDecoration.addCustomisation(class4761);
     }
 

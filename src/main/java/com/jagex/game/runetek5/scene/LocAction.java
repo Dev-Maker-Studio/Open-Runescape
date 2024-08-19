@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.cache.node.Node;
 import com.jagex.game.runetek5.cache.node.NodeCollection;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Resource;
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
 import com.jagex.game.runetek5.entity.gameobject.GameObject;
 
 public class LocAction extends Node {
@@ -17,7 +17,7 @@ public class LocAction extends Node {
     public int srcId;
     public int gameObjectType;
     public int srcRotation;
-    public LocTypeCustomisation dstCustomization;
+    public ObjectTypeCustomisation dstCustomization;
     public int dstId;
     public int srcShape;
     public int dstShape;
@@ -83,7 +83,7 @@ public class LocAction extends Node {
         locAction.inUpdateZone = false;
     }
 
-    public static void customizeObject(int plane, int x, int y, int type, int locId, int locShape, LocTypeCustomisation locCustomization) {
+    public static void customizeObject(int plane, int x, int y, int type, int locId, int locShape, ObjectTypeCustomisation locCustomization) {
         LocAction locAction = null;
         for (LocAction customization = (LocAction) pendingCustomizations.getFirst(); customization != null; customization = (LocAction) pendingCustomizations.next()) {
             if (plane == customization.plane && customization.x == x && y == customization.y && type == customization.gameObjectType) {

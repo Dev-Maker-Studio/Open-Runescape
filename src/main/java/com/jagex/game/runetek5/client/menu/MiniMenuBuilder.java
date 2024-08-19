@@ -9,9 +9,9 @@ import com.jagex.game.runetek5.client.input.camera.Camera;
 import com.jagex.game.runetek5.client.input.mouse.CursorManager;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.config.npc.NPCType;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.config.param.ParamType;
 import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.config.rsinterface.Interface;
@@ -295,7 +295,7 @@ public class MiniMenuBuilder {
 	                if (groundItems != null) {
 	                    int actionIndex2 = 0;
 	                    for (GroundItemNode groundItem = (GroundItemNode) groundItems.groundItems.first(); groundItem != null; groundItem = (GroundItemNode) groundItems.groundItems.getNext(), ++actionIndex2) {
-	                        final ObjType objtype = TypeLists.OBJ.list(groundItem.id);
+	                        final ItemType objtype = TypeLists.OBJ.list(groundItem.id);
 	                        int color;
 	                        if (objtype.hasTooltipColor) {
 	                            color = objtype.tooltipColor;
@@ -352,7 +352,7 @@ public class MiniMenuBuilder {
 	            if (!(reference.entity instanceof GameObject sceneobject60)) {
 	                continue;
 	            }
-                LocType loctype = Resource.mapRegion.getLoctypeList().list(sceneobject60.getId());
+                ObjectType loctype = Resource.mapRegion.getLoctypeList().list(sceneobject60.getId());
 	            if (loctype.alternativeIds != null) {
 	                loctype = loctype.getMultiLoc(VarProviders.PLAYER_VAR_PROVIDER);
 	            }

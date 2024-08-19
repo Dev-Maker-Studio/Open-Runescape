@@ -1,10 +1,11 @@
-package com.jagex.game.runetek5.config.obj;
+package com.jagex.game.runetek5.config.item;
 
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.IntNode;
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;
 import com.jagex.game.runetek5.cache.node.Node;
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode;
+import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.config.sequence.Sequence;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerAppearance;
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer;
@@ -36,8 +37,7 @@ import static com.jagex.game.runetek5.graphics.model.ModelFunctionMask.*;
 
  *
  */
-public class ObjType {
-
+public class ItemType {
     public static short[] recolorPalette = new short[256];
     public int value = 1;
     public int modelZoom = 2000;
@@ -74,7 +74,7 @@ public class ObjType {
     public int[] quests;
     public int pickSizeShift;
     public int bindTemplateId = -1;
-    public ObjTypeList typeList;
+    public ItemTypeList typeList;
     public int id;
     public int modelId;
     public short[] recolorSrc;
@@ -394,7 +394,7 @@ public class ObjType {
         return model;
     }
 
-    public int[] getSpritePixels(AbstractToolkit mainToolkit, AbstractToolkit itemToolkit, int amount, int outlineSize, int shadowColor, boolean zoomedIn, int renderAmounts, AbstractFontRenderer fontRenderer, PlayerAppearance model) {
+    public int[] getSpritePixels(AbstractToolkit mainToolkit, AbstractToolkit itemToolkit, int amount, int outlineSize, int shadowColor, boolean zoomedIn, Component.StackMode renderAmounts, AbstractFontRenderer fontRenderer, PlayerAppearance model) {
         Mesh inventoryMesh = Mesh.fromResource(this.typeList.meshResource, this.modelId);
         if (inventoryMesh == null) {
             return null;
@@ -440,17 +440,17 @@ public class ObjType {
         }
         NativeSprite sprite = null;
         if (this.certTemplateId != -1) {
-            sprite = this.typeList.getSprite(mainToolkit, itemToolkit, this.certId, 10, 1, 0, true, true, 0, fontRenderer, model);
+            sprite = this.typeList.getSprite(mainToolkit, itemToolkit, this.certId, 10, 1, 0, true, true, Component.StackMode.NONUM, fontRenderer, model);
             if (sprite == null) {
                 return null;
             }
         } else if (this.lendTemplateId != -1) {
-            sprite = this.typeList.getSprite(mainToolkit, itemToolkit, this.lendId, amount, outlineSize, shadowColor, false, true, 0, fontRenderer, model);
+            sprite = this.typeList.getSprite(mainToolkit, itemToolkit, this.lendId, amount, outlineSize, shadowColor, false, true, Component.StackMode.NONUM, fontRenderer, model);
             if (sprite == null) {
                 return null;
             }
         } else if (this.bindTemplateId != -1) {
-            sprite = this.typeList.getSprite(mainToolkit, itemToolkit, this.bindId, amount, outlineSize, shadowColor, false, true, 0, fontRenderer, model);
+            sprite = this.typeList.getSprite(mainToolkit, itemToolkit, this.bindId, amount, outlineSize, shadowColor, false, true, Component.StackMode.NONUM, fontRenderer, model);
             if (sprite == null) {
                 return null;
             }
@@ -504,7 +504,7 @@ public class ObjType {
         if (this.certTemplateId != -1) {
             sprite.draw(0, 0);
         }
-        if (renderAmounts == 1 || renderAmounts == 2 && (this.stackable == 1 || amount != 1) && amount != -1) {
+        if (renderAmounts == Component.StackMode.ALWAYS_NUM || renderAmounts == Component.StackMode.WHEN_MULTIPLE && (this.stackable == 1 || amount != 1) && amount != -1) {
             fontRenderer.renderPlain(TextUtils.formatAmount(amount, this.typeList.language), 0, 9, -256, -16777215);
         }
         pixels = mainToolkit.copyPixelRectangle(0, 0, 36, 32);
@@ -518,7 +518,7 @@ public class ObjType {
         return pixels;      
     }
 
-    public boolean isBodyCached(boolean female, ObjTypeCustomisation customisation) {
+    public boolean isBodyCached(boolean female, ItemTypeCustomisation customisation) {
         int primaryModel;
         int secondaryModel;
         int tertiaryModel;
@@ -554,7 +554,7 @@ public class ObjType {
         return fullyCached;
     }
 
-    public Mesh getBodyMesh(boolean female, ObjTypeCustomisation meshModifier) {
+    public Mesh getBodyMesh(boolean female, ItemTypeCustomisation meshModifier) {
         int primaryModel;
         int secondaryModel;
         int tertiaryModel;
@@ -634,7 +634,7 @@ public class ObjType {
         return primaryMesh;
     }
 
-    public boolean isHeadCached(boolean bool1, ObjTypeCustomisation meshModifier) {
+    public boolean isHeadCached(boolean bool1, ItemTypeCustomisation meshModifier) {
         int primaryHeadModel;
         int secondaryHeadModel;
         if (bool1) {
@@ -662,7 +662,7 @@ public class ObjType {
         return fullyCached;
     }
 
-    public Mesh getHeadMesh(boolean isFemale, ObjTypeCustomisation meshModifier) {
+    public Mesh getHeadMesh(boolean isFemale, ItemTypeCustomisation meshModifier) {
         int primaryHeadModel;
         int secondaryHealModel;
         if (isFemale) {
@@ -723,7 +723,7 @@ public class ObjType {
     /**
      * [J]
      */
-    public ObjType getStackSizeAlt(int stackSize) {
+    public ItemType getStackSizeAlt(int stackSize) {
         if (this.stackIds != null && stackSize > 1) {
             int stackId = -1;
             for (int stackIndex = 0; stackIndex < 10; stackIndex++) {
@@ -738,7 +738,7 @@ public class ObjType {
         return this;
     }
     
-    public void generateLend(ObjType template, ObjType original) {
+    public void generateLend(ItemType template, ItemType original) {
         this.value = 0;
         this.modelId = template.modelId;
         this.modelZoom = template.modelZoom;
@@ -783,7 +783,7 @@ public class ObjType {
         this.inventoryActions[4] = LocalizedText.DISCARD.translate(this.typeList.language);
     }
     
-    public void generateBind(ObjType template, ObjType original) {
+    public void generateBind(ItemType template, ItemType original) {
         this.value = 0;
         this.modelId = template.modelId;
         this.modelZoom = template.modelZoom;
@@ -829,7 +829,7 @@ public class ObjType {
         this.inventoryActions[4] = LocalizedText.DISCARD_2.translate(this.typeList.language);
     }
 
-    public void generateNote(ObjType template, ObjType original) {
+    public void generateNote(ItemType template, ItemType original) {
         this.modelId = template.modelId;
         this.modelZoom = template.modelZoom;
         this.modelRotationX = template.modelRotationX;

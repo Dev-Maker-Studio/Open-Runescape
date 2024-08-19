@@ -15,8 +15,9 @@ import com.jagex.game.runetek5.client.window.WindowMode;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.bas.BasType;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.config.npc.NPCType;
+import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate;
 import com.jagex.game.runetek5.movement.CoordGrid;
 import com.jagex.game.runetek5.network.BufferedConnectionContext;
@@ -129,7 +130,7 @@ public class CommandExecutor {
 	            }
 	            if (command.startsWith("dumpitems")) {
 	                for (int itemId = 0; itemId < 24806; itemId++) {
-	                    int[] pixels = TypeLists.OBJ.list(itemId).getSpritePixels(Renderers.GPU_ITEM_RENDERER, Renderers.activeToolkit, 1, 1, -13623264, false, 0, Renderers.FONT_RENDERER, PlayerUpdate.MY_PLAYER.playerAppearance);
+	                    int[] pixels = TypeLists.OBJ.list(itemId).getSpritePixels(Renderers.GPU_ITEM_RENDERER, Renderers.activeToolkit, 1, 1, -13623264, false, Component.StackMode.NONUM, Renderers.FONT_RENDERER, PlayerUpdate.MY_PLAYER.playerAppearance);
 	                    try {
 	                    	int dimension = (int) Math.sqrt(pixels.length) - 1;
 	                        BufferedImage itemImage = new BufferedImage(36, 32, 2);
@@ -341,7 +342,7 @@ public class CommandExecutor {
 	            }
 	            if (command.startsWith("checklocop")) {
 	            	for (int id = 0; id < 100_000; id++) {
-	            		LocType locType = TypeLists.LOC.list(id);
+	            		ObjectType locType = TypeLists.LOC.list(id);
 	            		if (locType.requiresTextures) {
 	            			Console.writeLine("LOC: "+id);
 	            		}

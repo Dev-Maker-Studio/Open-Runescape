@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.cache.node.lru.LRUCache;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.SharedConfigsType;
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.entity.gameobject.GameObject;
 import com.jagex.game.runetek5.js5.Js5ResourceProvider;
 
@@ -30,7 +30,7 @@ public class MapSpriteTypeList {
     }
 
     public static boolean isCached(GameObject gameObject) {
-        LocType locType = Resource.mapRegion.getLoctypeList().list(gameObject.getId());
+        ObjectType locType = Resource.mapRegion.getLoctypeList().list(gameObject.getId());
         if (locType.mapIconId == -1) {
             return true;
         } 

@@ -11,8 +11,8 @@ import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.bas.BasType;
-import com.jagex.game.runetek5.config.obj.ObjType;
-import com.jagex.game.runetek5.config.obj.ObjTypeCustomisation;
+import com.jagex.game.runetek5.config.item.ItemType;
+import com.jagex.game.runetek5.config.item.ItemTypeCustomisation;
 import com.jagex.game.runetek5.config.sequence.MovementType;
 import com.jagex.game.runetek5.config.sequence.MovingSequence;
 import com.jagex.game.runetek5.config.sequence.Sequence;
@@ -414,8 +414,8 @@ public class PlayerEntity extends PathingEntity {
         int currentMorphId = -1;
         this.teamId = 0;
         int[] bodyAppearances = new int[TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length];
-        ObjTypeCustomisation[] meshModifiers = new ObjTypeCustomisation[TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length];
-        ObjType[] wornItems = new ObjType[TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length];
+        ItemTypeCustomisation[] meshModifiers = new ItemTypeCustomisation[TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length];
+        ItemType[] wornItems = new ItemType[TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length];
 
         for (int slot = 0; slot < TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length; slot++) {
             if (TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots[slot] != 1) {
@@ -452,7 +452,7 @@ public class PlayerEntity extends PathingEntity {
             for (int slot = 0; slot < TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length; slot++) {
                 if (TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots[slot] == 0) {
                     if ((functionMask & 1 << count) != 0) {
-                        meshModifiers[slot] = ObjTypeCustomisation.decodeItemEffects(wornItems[slot], buffer);
+                        meshModifiers[slot] = ItemTypeCustomisation.decodeItemEffects(wornItems[slot], buffer);
                     }
                     count++;
                 }

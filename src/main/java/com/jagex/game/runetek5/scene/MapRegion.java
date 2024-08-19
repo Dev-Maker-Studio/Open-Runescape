@@ -15,9 +15,9 @@ import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.cutscene.CutsceneArea;
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList;
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.config.mapsprite.MapSpriteTypeList;
 import com.jagex.game.runetek5.config.npc.NPCType;
 import com.jagex.game.runetek5.config.sequence.PositionedGfx;
@@ -95,7 +95,7 @@ public class MapRegion {
     public byte[][] underwaterLocBuffer;
     public RegionLoadingType currentLoadingType;
     public byte[][][] configuration;
-    public LocTypeList loctypeList;
+    public ObjectTypeList loctypeList;
     public Scene scene;
     public RegionLoadingStage currentStage;
     public int missingMapCount;
@@ -978,7 +978,7 @@ public class MapRegion {
 
     }
 
-    public static void addCustomisation(int z, int type, int x, int y, LocTypeCustomisation locCustomisation) {
+    public static void addCustomisation(int z, int type, int x, int y, ObjectTypeCustomisation locCustomisation) {
         if (x >= 1 && y >= 1 && x <= Resource.mapRegion.getSceneSizeX() - 2 && y <= Resource.mapRegion.getSceneSizeY() - 2 && Resource.mapRegion.getScene() != null) {
             GameObject gameObject = Resource.mapRegion.getSurfaceSceneGraph().getGameObject(z, type, x, y);
             if (gameObject != null) {
@@ -1102,7 +1102,7 @@ public class MapRegion {
         return this.environmentManager;
     }
 
-    public LocTypeList getLoctypeList() {
+    public ObjectTypeList getLoctypeList() {
         return this.loctypeList;
     }
 
@@ -1135,7 +1135,7 @@ public class MapRegion {
         return this.surfaceMap;
     }
 
-    public void setLoctypelist(LocTypeList loctypelist) {
+    public void setLoctypelist(ObjectTypeList loctypelist) {
         this.loctypeList = loctypelist;
     }
 
@@ -1737,7 +1737,7 @@ public class MapRegion {
 
 	public static void applyGameobjectAction(LocAction action, boolean customize) {
 	    if (action.inUpdateZone) {
-	        if (action.srcId < 0 || LocType.isTypeCached(Resource.mapRegion.getLoctypeList(), action.srcId, action.srcShape)) {
+	        if (action.srcId < 0 || ObjectType.isTypeCached(Resource.mapRegion.getLoctypeList(), action.srcId, action.srcShape)) {
 	            if (customize) {
 	                addCustomisation(action.plane, action.gameObjectType, action.x, action.y, null);
 	            } else {
@@ -1745,7 +1745,7 @@ public class MapRegion {
 	            }
 	            action.unlink();
 	        }
-	    } else if (action.queued && action.x >= 1 && action.y >= 1 && action.x <= Resource.mapRegion.getSceneSizeX() - 2 && action.y <= Resource.mapRegion.getSceneSizeY() - 2 && (action.dstId < 0 || LocType.isTypeCached(Resource.mapRegion.getLoctypeList(), action.dstId, action.dstShape))) {
+	    } else if (action.queued && action.x >= 1 && action.y >= 1 && action.x <= Resource.mapRegion.getSceneSizeX() - 2 && action.y <= Resource.mapRegion.getSceneSizeY() - 2 && (action.dstId < 0 || ObjectType.isTypeCached(Resource.mapRegion.getLoctypeList(), action.dstId, action.dstShape))) {
 	        if (customize) {
 	            addCustomisation(action.plane, action.gameObjectType, action.x, action.y, action.dstCustomization);
 	        } else {

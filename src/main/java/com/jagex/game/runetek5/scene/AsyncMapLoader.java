@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.scene;
 import java.util.LinkedList;
 
 import com.jagex.game.runetek5.config.Resource;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 
 /**
  * (identical to 910)
@@ -75,7 +75,7 @@ public class AsyncMapLoader implements Runnable {
         Resource.mapRegion.setLoadingRegion();
     }
 
-    public void initializeRegion(LocTypeList loctypelist) {
+    public void initializeRegion(ObjectTypeList loctypelist) {
         this.region.setLoctypelist(loctypelist);
     }
 

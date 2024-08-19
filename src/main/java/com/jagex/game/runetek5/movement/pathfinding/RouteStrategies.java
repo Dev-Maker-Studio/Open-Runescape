@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.movement.pathfinding;
 
-import com.jagex.game.runetek5.config.loc.LocShapes;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
 
 public class RouteStrategies {
 
@@ -40,7 +40,7 @@ public class RouteStrategies {
         return FIXED_TILE;
     }
 
-    public static RouteStrategy forWallObject(int x, int y, int sizeX, int sizeY, LocShapes shape, int i_5) {
+    public static RouteStrategy forWallObject(int x, int y, int sizeX, int sizeY, ObjectShapes shape, int i_5) {
         WALL_OBJECT.destinationX = x;
         WALL_OBJECT.destinationY = y;
         WALL_OBJECT.destinationSizeX = sizeX;
@@ -59,7 +59,7 @@ public class RouteStrategies {
         return NPC;
     }
 
-	public static RouteStrategy forInteractiveObject(int x, int y, LocShapes shape, int i_5) {
+	public static RouteStrategy forInteractiveObject(int x, int y, ObjectShapes shape, int i_5) {
 	    NORMAL_OBJECT.destinationX = x;
 	    NORMAL_OBJECT.destinationY = y;
 	    NORMAL_OBJECT.destinationSizeX = 0;

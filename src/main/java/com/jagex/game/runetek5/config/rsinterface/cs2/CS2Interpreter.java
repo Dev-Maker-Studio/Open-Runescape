@@ -38,7 +38,7 @@ import com.jagex.game.runetek5.config.material.texture.ColorImageCache;
 import com.jagex.game.runetek5.config.material.texture.operation.TextureOpIrregularBricks;
 import com.jagex.game.runetek5.config.mec.MECType;
 import com.jagex.game.runetek5.config.npc.NPCType;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.config.param.ParamType;
 import com.jagex.game.runetek5.config.quest.QuestType;
 import com.jagex.game.runetek5.config.quickchat.QuickChatCategoryType;
@@ -458,7 +458,7 @@ public class CS2Interpreter {
                 method5833(exec);
                 break;
             case CC_SETITEM:
-                method3080(exec);
+                ccSetItem(exec);
                 break;
             case CC_SETNPCHEAD:
                 method3356(exec);
@@ -473,7 +473,7 @@ public class CS2Interpreter {
                 method6283(exec);
                 break;
             case CC_SETITEM_NONUM:
-                method12719(exec);
+                ccSetItemNoNum(exec);
                 break;
             case CC_SETMODELLIGHTING:
                 method4970(exec);
@@ -481,11 +481,11 @@ public class CS2Interpreter {
             case instr6064:
                 method2567(exec);
                 break;
-            case instr6065:
-                method6318(exec);
+            case CC_SETITEM_WEARCOL:
+                ccSetItemWearCol(exec);
                 break;
-            case instr6066:
-                method2563(exec);
+            case CC_SETITEM_WEARCOL_NONUM:
+                ccSetItemWearColNoNum(exec);
                 break;
             case instr6895:
                 method6510(exec);
@@ -494,10 +494,10 @@ public class CS2Interpreter {
                 method4381(exec);
                 break;
             case CC_SETITEM_ALWAYSNUM:
-                method15552(exec);
+                ccSetItemAlwaysNum(exec);
                 break;
             case CC_SETITEM_WEARCOL_ALWAYSNUM:
-                method1570(exec);
+                ccSetItemWearColAlwaysNum(exec);
                 break;
             case CC_SETOP:
                 method6452(exec);
@@ -884,7 +884,7 @@ public class CS2Interpreter {
                 method1069(exec);
                 break;
             case IF_SETITEM:
-                method5024(exec);
+                ifSetItem(exec);
                 break;
             case IF_SETNPCHEAD:
                 method4863(exec);
@@ -899,7 +899,7 @@ public class CS2Interpreter {
                 method1510(exec);
                 break;
             case instr6879:
-                method6381(exec);
+                ifSetItemNoNum(exec);
                 break;
             case instr6205:
                 method8750(exec);
@@ -908,10 +908,10 @@ public class CS2Interpreter {
                 method12492(exec);
                 break;
             case instr6207:
-                method4961(exec);
+                ifSetItemWearCol(exec);
                 break;
             case instr6208:
-                method8295(exec);
+                ifSetItemWearColNoNum(exec);
                 break;
             case instr6209:
                 method11126(exec);
@@ -920,10 +920,10 @@ public class CS2Interpreter {
                 method3117(exec);
                 break;
             case instr6129:
-                method4962(exec);
+                ifSetItemAlwaysNum(exec);
                 break;
             case instr6793:
-                method3806(exec);
+                ifSetItemWearColAlwaysNum(exec);
                 break;
             case instr6213:
                 method15475(exec);
@@ -4057,11 +4057,11 @@ public class CS2Interpreter {
         client.preferencesSavedOnServer = false;
     }
 
-    public static void method3080(CS2Executor executor) {
+    public static void ccSetItem(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        setItemIFComp(icomponentdefinitions3, interface4, false, 2, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, false, Component.StackMode.WHEN_MULTIPLE, executor);
     }
 
     public static void method15399(CS2Executor executor) {
@@ -4439,7 +4439,7 @@ public class CS2Interpreter {
 
     public static void method12724(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        ObjType itemdefinitions3 = TypeLists.OBJ.list(i_2);
+        ItemType itemdefinitions3 = TypeLists.OBJ.list(i_2);
         if (itemdefinitions3.certTemplateId >= 0 && itemdefinitions3.certId >= 0) {
             executor.intStack[++executor.intStackPtr - 1] = itemdefinitions3.certId;
         } else {
@@ -4449,7 +4449,7 @@ public class CS2Interpreter {
 
     public static void method12215(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        ObjType itemdefinitions3 = TypeLists.OBJ.list(i_2);
+        ItemType itemdefinitions3 = TypeLists.OBJ.list(i_2);
         if (itemdefinitions3.certTemplateId == -1 && itemdefinitions3.certId >= 0) {
             executor.intStack[++executor.intStackPtr - 1] = itemdefinitions3.certId;
         } else {
@@ -5282,11 +5282,11 @@ public class CS2Interpreter {
         }
     }
 
-    public static void method2563(CS2Executor executor) {
+    public static void ccSetItemWearColNoNum(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        setItemIFComp(icomponentdefinitions3, interface4, true, 0, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, true, Component.StackMode.NONUM, executor);
     }
 
     public static void method2564(CS2Executor executor) {
@@ -5482,11 +5482,11 @@ public class CS2Interpreter {
         executor.intStack[++executor.intStackPtr - 1] = GameState.isRenderingScene(client.gameState) ? 1 : 0;
     }
 
-    public static void method6318(CS2Executor executor) {
+    public static void ccSetItemWearCol(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        setItemIFComp(icomponentdefinitions3, interface4, true, 2, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, true, Component.StackMode.WHEN_MULTIPLE, executor);
     }
 
     public static void setCompSprite(CS2Executor executor) {
@@ -5705,7 +5705,7 @@ public class CS2Interpreter {
         executor.intStackPtr -= 2;
         int i_2 = executor.intStack[executor.intStackPtr];
         int i_3 = executor.intStack[executor.intStackPtr + 1];
-        ObjType itemdefinitions4 = TypeLists.OBJ.list(i_2);
+        ItemType itemdefinitions4 = TypeLists.OBJ.list(i_2);
         if (i_3 >= 1 && i_3 <= 5 && itemdefinitions4.inventoryActions[i_3 - 1] != null) {
             executor.stringStack[++executor.stringStackPtr - 1] = itemdefinitions4.inventoryActions[i_3 - 1];
         } else {
@@ -6001,12 +6001,12 @@ public class CS2Interpreter {
         }
     }
 
-    public static void method3806(CS2Executor executor) {
+    public static void ifSetItemWearColAlwaysNum(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        setItemIFComp(icomponentdefinitions3, interface4, true, 1, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, true, Component.StackMode.ALWAYS_NUM, executor);
     }
 
     public static void method4556(CS2Executor executor) {
@@ -8250,7 +8250,7 @@ public class CS2Interpreter {
         executor.intStackPtr -= 2;
         int i_2 = executor.intStack[executor.intStackPtr];
         int i_3 = executor.intStack[executor.intStackPtr + 1];
-        ObjType itemdefinitions4 = TypeLists.OBJ.list(i_2);
+        ItemType itemdefinitions4 = TypeLists.OBJ.list(i_2);
         if (i_3 >= 1 && i_3 <= 5 && itemdefinitions4.groundActions[i_3 - 1] != null) {
             executor.stringStack[++executor.stringStackPtr - 1] = itemdefinitions4.groundActions[i_3 - 1];
         } else {
@@ -8342,12 +8342,12 @@ public class CS2Interpreter {
         }
     }
 
-    public static void method6381(CS2Executor executor) {
+    public static void ifSetItemNoNum(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        setItemIFComp(icomponentdefinitions3, interface4, false, 0, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, false, Component.StackMode.NONUM, executor);
     }
 
     public static void method7915(CS2Executor executor) {
@@ -8573,7 +8573,7 @@ public class CS2Interpreter {
 
     public static void method3030(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        ObjType itemdefinitions3 = TypeLists.OBJ.list(i_2);
+        ItemType itemdefinitions3 = TypeLists.OBJ.list(i_2);
         executor.intStack[++executor.intStackPtr - 1] = itemdefinitions3.hasTooltipColor ? 1 : 0;
     }
 
@@ -8609,7 +8609,7 @@ public class CS2Interpreter {
         executor.intStackPtr -= 2;
         int i_2 = executor.intStack[executor.intStackPtr];
         int i_3 = executor.intStack[executor.intStackPtr + 1] - 1;
-        ObjType itemdefinitions4 = TypeLists.OBJ.list(i_2);
+        ItemType itemdefinitions4 = TypeLists.OBJ.list(i_2);
         if (i_3 == itemdefinitions4.customCursorOp1) {
             executor.intStack[++executor.intStackPtr - 1] = itemdefinitions4.customCursorId1;
         } else if (i_3 == itemdefinitions4.customCursorOp2) {
@@ -8826,12 +8826,12 @@ public class CS2Interpreter {
         }
     }
 
-    public static void method5024(CS2Executor executor) {
+    public static void ifSetItem(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        setItemIFComp(icomponentdefinitions3, interface4, false, 2, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, false, Component.StackMode.WHEN_MULTIPLE, executor);
     }
 
     public static void method5027(CS2Executor executor) {
@@ -9474,7 +9474,7 @@ public class CS2Interpreter {
         client.preferencesSavedOnServer = false;
     }
 
-    public static void method12719(CS2Executor executor) {
+    public static void ccSetItemNoNum(CS2Executor executor) {
         CS2Interface underlaydefinition2;
         if (executor.aBool7022) {
             underlaydefinition2 = executor.hookedInterface2;
@@ -9483,7 +9483,7 @@ public class CS2Interpreter {
         }
         Component icomponentdefinitions4 = underlaydefinition2.comp;
         Interface interface5 = underlaydefinition2.inter;
-        setItemIFComp(icomponentdefinitions4, interface5, false, 0, executor);
+        setItemIFComp(icomponentdefinitions4, interface5, false, Component.StackMode.NONUM, executor);
     }
 
     public static void method8285(CS2Executor executor) {
@@ -9493,12 +9493,12 @@ public class CS2Interpreter {
         method6289(icomponentdefinitions3, executor);
     }
 
-    public static void method8295(CS2Executor executor) {
+    public static void ifSetItemWearColNoNum(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        setItemIFComp(icomponentdefinitions3, interface4, true, 0, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, true, Component.StackMode.NONUM, executor);
     }
 
     public static void method8296(CS2Executor executor) {
@@ -9772,7 +9772,7 @@ public class CS2Interpreter {
 
     public static void method911(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        ObjType itemdefinitions3 = TypeLists.OBJ.list(i_2);
+        ItemType itemdefinitions3 = TypeLists.OBJ.list(i_2);
         int i_4;
         if (itemdefinitions3.hasTooltipColor) {
             i_4 = itemdefinitions3.tooltipColor;
@@ -9906,20 +9906,20 @@ public class CS2Interpreter {
         method2915(icomponentdefinitions3, executor);
     }
 
-    public static void method4961(CS2Executor executor) {
+    public static void ifSetItemWearCol(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        setItemIFComp(icomponentdefinitions3, interface4, true, 2, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, true, Component.StackMode.WHEN_MULTIPLE, executor);
     }
 
-    public static void method4962(CS2Executor executor) {
+    public static void ifSetItemAlwaysNum(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        setItemIFComp(icomponentdefinitions3, interface4, false, 1, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, false, Component.StackMode.ALWAYS_NUM, executor);
     }
 
     public static void method1569(CS2Executor executor) {
@@ -9929,11 +9929,11 @@ public class CS2Interpreter {
         method4280(icomponentdefinitions3, executor);
     }
 
-    public static void method1570(CS2Executor executor) {
+    public static void ccSetItemWearColAlwaysNum(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        setItemIFComp(icomponentdefinitions3, interface4, true, 1, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, true, Component.StackMode.ALWAYS_NUM, executor);
     }
 
     public static void method1571(CS2Executor executor) {
@@ -10695,11 +10695,11 @@ public class CS2Interpreter {
         method3672(icomponentdefinitions3, executor);
     }
 
-    public static void method15552(CS2Executor executor) {
+    public static void ccSetItemAlwaysNum(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        setItemIFComp(icomponentdefinitions3, interface4, false, 1, executor);
+        setItemIFComp(icomponentdefinitions3, interface4, false, Component.StackMode.ALWAYS_NUM, executor);
     }
 
     public static void method15555(CS2Executor executor) {
@@ -11370,7 +11370,7 @@ public class CS2Interpreter {
         icomponentdefinitions0.hasScript = true;
     }
 
-    public static void setItemIFComp(Component ifComp, Interface interface1, boolean wearCol, int renderStack, CS2Executor cs2executor4) {
+    public static void setItemIFComp(Component ifComp, Interface interface1, boolean wearCol, Component.StackMode renderStack, CS2Executor cs2executor4) {
         cs2executor4.intStackPtr -= 2;
         int itemId = cs2executor4.intStack[cs2executor4.intStackPtr];
         int i_7 = cs2executor4.intStack[cs2executor4.intStackPtr + 1];
@@ -11387,7 +11387,7 @@ public class CS2Interpreter {
             ifComp.containerItemId = itemId;
             ifComp.itemStackSize = i_7;
             ifComp.wearCol = wearCol;
-            ObjType itemdefinitions8 = TypeLists.OBJ.list(itemId);
+            ItemType itemdefinitions8 = TypeLists.OBJ.list(itemId);
             ifComp.spritePitch = itemdefinitions8.modelRotationX;
             ifComp.spriteRoll = itemdefinitions8.modelRotationY;
             ifComp.spriteYaw = itemdefinitions8.modelRotationZ;
@@ -11488,8 +11488,8 @@ public class CS2Interpreter {
 
     public static void method7729(Component icomponentdefinitions0, CS2Executor cs2executor2) {
         cs2executor2.intStackPtr -= 2;
-        icomponentdefinitions0.anInt1430 = cs2executor2.intStack[cs2executor2.intStackPtr];
-        icomponentdefinitions0.anInt1431 = cs2executor2.intStack[cs2executor2.intStackPtr + 1];
+        icomponentdefinitions0.sunRotationX = cs2executor2.intStack[cs2executor2.intStackPtr];
+        icomponentdefinitions0.sunRotationY = cs2executor2.intStack[cs2executor2.intStackPtr + 1];
         Component.redrawComponent(icomponentdefinitions0);
     }
 
@@ -12038,7 +12038,7 @@ public class CS2Interpreter {
 	    }
 	    int numResults = 0;
 	    for (int i = 0; i < TypeLists.OBJ.totalItemCount; i++) {
-	        ObjType itemDef = TypeLists.OBJ.list(i);
+	        ItemType itemDef = TypeLists.OBJ.list(i);
 	        if ((!tradeableOnly || itemDef.tradeable) && itemDef.certTemplateId == -1 && itemDef.lendTemplateId == -1 && itemDef.bindTemplateId == -1 && itemDef.unknownInt6 == 0 && itemDef.name.toLowerCase().indexOf(query) != -1) {
 	            if (paramId != -1) {
 	                if (paramIsString) {

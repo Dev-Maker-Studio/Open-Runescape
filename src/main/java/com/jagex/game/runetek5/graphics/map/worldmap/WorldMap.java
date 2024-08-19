@@ -16,9 +16,9 @@ import com.jagex.game.runetek5.config.flo.FloType;
 import com.jagex.game.runetek5.config.flo.FloTypeList;
 import com.jagex.game.runetek5.config.flu.FluType;
 import com.jagex.game.runetek5.config.flu.FluTypeList;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.config.mapsprite.MapSpriteType;
 import com.jagex.game.runetek5.config.mapsprite.MapSpriteTypeList;
 import com.jagex.game.runetek5.config.material.MaterialProvider;
@@ -53,7 +53,7 @@ public class WorldMap {
     public static int lightnessRandomisation = (int) (Math.random() * 17.0D) - 8;
     public static final NodeCollection worldMapCategories = new NodeCollection();
     public static Js5ResourceProvider MAP_AREA_RESOURCE;
-    public static LocTypeList LOCTYPE_LIST;
+    public static ObjectTypeList LOCTYPE_LIST;
     public  static MECTypeList MECTYPE_LIST;
     public static MapSpriteTypeList MAP_SPRITE_TYPE_LIST;
     public static VarDomain PLAYER_VAR_PROVIDER;
@@ -85,7 +85,7 @@ public class WorldMap {
         throw new Error();
     }
 
-    public static void initialize(Js5ResourceProvider areaResource, FloTypeList floTypeList, FluTypeList fluTypeList, LocTypeList locTypeList, MECTypeList mecTypeList, MapSpriteTypeList mapspriteTypeList, VarDomain varProvider) {
+    public static void initialize(Js5ResourceProvider areaResource, FloTypeList floTypeList, FluTypeList fluTypeList, ObjectTypeList locTypeList, MECTypeList mecTypeList, MapSpriteTypeList mapspriteTypeList, VarDomain varProvider) {
         MAP_AREA_RESOURCE = areaResource;
         FLOTYPE_LIST = floTypeList;
         FLUTYPE_LIST = fluTypeList;
@@ -351,7 +351,7 @@ public class WorldMap {
                 if (drawInfo != null) {
                     if (drawInfo instanceof LocOnWorldMap mapLoc) {
                         for (int index = 0; index < mapLoc.locIds.length; index++) {
-                            LocType locType = LOCTYPE_LIST.list(mapLoc.locIds[index]);
+                            ObjectType locType = LOCTYPE_LIST.list(mapLoc.locIds[index]);
                             int mecId = locType.mapCategoryid;
                             if (locType.alternativeIds != null) {
                                 locType = locType.getMultiLoc(PLAYER_VAR_PROVIDER);
@@ -369,7 +369,7 @@ public class WorldMap {
                         }
                     } else {
                         Integer locId = (Integer) drawInfo;
-                        LocType locType = LOCTYPE_LIST.list(locId.intValue());
+                        ObjectType locType = LOCTYPE_LIST.list(locId.intValue());
                         int mecId = locType.mapCategoryid;
                         if (locType.alternativeIds != null) {
                             locType = locType.getMultiLoc(PLAYER_VAR_PROVIDER);
@@ -408,7 +408,7 @@ public class WorldMap {
                             } while (tile.locIds == null);
 
                             for (int index = 0; index < tile.locIds.length; index++) {
-                                LocType locType = LOCTYPE_LIST.list(tile.locIds[index]);
+                                ObjectType locType = LOCTYPE_LIST.list(tile.locIds[index]);
                                 int mecId = locType.mapCategoryid;
                                 if (locType.alternativeIds != null) {
                                     locType = locType.getMultiLoc(PLAYER_VAR_PROVIDER);
@@ -491,9 +491,9 @@ public class WorldMap {
 
             for (int index = 0; index < locids.length; index++) {
                 int shape = locShapesAndRotations[index] & 0x3f;
-                if (shape == LocShapes.WALL_STRAIGHT.shape || shape == LocShapes.WALL_WHOLE_CORNER.shape 
-                		|| shape == LocShapes.WALL_STRAIGHT_CORNER.shape || shape == LocShapes.WALL_INTERACT.shape) {
-                    LocType loctype = LOCTYPE_LIST.list(locids[index]);
+                if (shape == ObjectShapes.WALL_STRAIGHT.shape || shape == ObjectShapes.WALL_WHOLE_CORNER.shape
+                		|| shape == ObjectShapes.WALL_STRAIGHT_CORNER.shape || shape == ObjectShapes.WALL_INTERACT.shape) {
+                    ObjectType loctype = LOCTYPE_LIST.list(locids[index]);
                     if (loctype.mapIconId == -1) {
                         int color = -3355444;
                         if (loctype.hasActions == 1) {
@@ -501,7 +501,7 @@ public class WorldMap {
                         }
 
                         int rotation = locShapesAndRotations[index] >> 6 & 0x3;
-                        if (shape == LocShapes.WALL_STRAIGHT.shape) {
+                        if (shape == ObjectShapes.WALL_STRAIGHT.shape) {
                             if (rotation == 0) {
                                 toolkit.drawTransparentVerticalLine(x, y, height, color, 0);
                             } else if (rotation == 1) {
@@ -511,7 +511,7 @@ public class WorldMap {
                             } else {
                                 toolkit.drawTransparentHorizontalLine(x, endY, width, color, 0);
                             }
-                        } else if (shape == LocShapes.WALL_WHOLE_CORNER.shape) {
+                        } else if (shape == ObjectShapes.WALL_WHOLE_CORNER.shape) {
                             if (rotation == 0) {
                                 toolkit.drawTransparentVerticalLine(x, y, height, -1, 0);
                                 toolkit.drawTransparentHorizontalLine(x, y, width, color, 0);
@@ -525,7 +525,7 @@ public class WorldMap {
                                 toolkit.drawTransparentVerticalLine(x, y, height, -1, 0);
                                 toolkit.drawTransparentHorizontalLine(x, endY, width, color, 0);
                             }
-                        } else if (shape == LocShapes.WALL_STRAIGHT_CORNER.shape) {
+                        } else if (shape == ObjectShapes.WALL_STRAIGHT_CORNER.shape) {
                             if (rotation == 0) {
                                 toolkit.drawTransparentHorizontalLine(x, y, 1, color, 0);
                             } else if (rotation == 1) {
@@ -535,7 +535,7 @@ public class WorldMap {
                             } else {
                                 toolkit.drawTransparentHorizontalLine(x, endY, 1, color, 0);
                             }
-                        } else if (shape == LocShapes.WALL_INTERACT.shape) {
+                        } else if (shape == ObjectShapes.WALL_INTERACT.shape) {
                             if (rotation != 0 && rotation != 2) {
                                 for (int h = 0; h < height; h++) {
                                     toolkit.drawTransparentHorizontalLine(h + x, h + y, 1, color, 0);
@@ -766,7 +766,7 @@ public class WorldMap {
     public static void renderObjectSprites(AbstractToolkit toolkit, int i_1, int i_2, int i_3, int i_4, int[] ints_5, byte[] spriteRotation) {
         if (ints_5 != null) {
             for (int index = 0; index < ints_5.length; index++) {
-                LocType loctype = LOCTYPE_LIST.list(ints_5[index]);
+                ObjectType loctype = LOCTYPE_LIST.list(ints_5[index]);
                 int i_9 = loctype.mapIconId;
                 if (i_9 != -1) {
                     MapSpriteType mapspriteType = MAP_SPRITE_TYPE_LIST.list(i_9);

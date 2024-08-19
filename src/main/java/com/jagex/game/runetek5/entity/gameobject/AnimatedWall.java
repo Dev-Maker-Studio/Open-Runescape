@@ -1,9 +1,9 @@
 package com.jagex.game.runetek5.entity.gameobject;
 
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
 import com.jagex.game.runetek5.graphics.model.Model;
@@ -23,8 +23,8 @@ public class AnimatedWall extends AbstractWall implements GameObject {
     public Silhouette silhouette;
     public final boolean interactable;
 
-    public AnimatedWall(Scene scene, AbstractToolkit toolkit, LocTypeList locTypeList, LocType locType, int plane, int collisionPlane, int x, int y, int z, boolean hideOverlay, int type, int rotation, int sequenceId) {
-        super(scene, x, y, z, plane, collisionPlane, LocShapes.getWallCullType(type, rotation));
+    public AnimatedWall(Scene scene, AbstractToolkit toolkit, ObjectTypeList locTypeList, ObjectType locType, int plane, int collisionPlane, int x, int y, int z, boolean hideOverlay, int type, int rotation, int sequenceId) {
+        super(scene, x, y, z, plane, collisionPlane, ObjectShapes.getWallCullType(type, rotation));
         this.gameObject = new AnimatedGameObject(toolkit, locTypeList, locType, type, rotation, plane, collisionPlane, this, hideOverlay, sequenceId);
         this.interactable = locType.hasActions != 0 && !hideOverlay;
         setupBoundingBox(1);
@@ -80,7 +80,7 @@ public class AnimatedWall extends AbstractWall implements GameObject {
     }
 
 
-    public void addCustomisation(LocTypeCustomisation customisation) {
+    public void addCustomisation(ObjectTypeCustomisation customisation) {
         this.gameObject.addCustomisation(customisation);
     }
 

@@ -1,4 +1,4 @@
-package com.jagex.game.runetek5.config.obj;
+package com.jagex.game.runetek5.config.item;
 
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.Node;
@@ -7,6 +7,7 @@ import com.jagex.game.runetek5.client.Game;
 import com.jagex.game.runetek5.config.SharedConfigsType;
 import com.jagex.game.runetek5.config.param.ParamType;
 import com.jagex.game.runetek5.config.param.ParamTypeList;
+import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerAppearance;
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer;
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite;
@@ -17,7 +18,7 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit;
 import com.jagex.game.runetek5.tools.Language;
 import com.jagex.game.runetek5.tools.LocalizedText;
 
-public class ObjTypeList {
+public class ItemTypeList {
 
     public final SpriteDrawQueue spriteDrawQueue = new SpriteDrawQueue();
     public final int totalItemCount;
@@ -34,7 +35,7 @@ public class ObjTypeList {
     public final String[] defaultGroundActions;
     public final String[] defaultInventoryActions;
 
-    public ObjTypeList(Game game, Language language, ParamTypeList paramTypeList, Js5ResourceProvider objResource, Js5ResourceProvider meshResource) {
+    public ItemTypeList(Game game, Language language, ParamTypeList paramTypeList, Js5ResourceProvider objResource, Js5ResourceProvider meshResource) {
     	this.game = game;
         this.language = language;
         this.isMember = true;
@@ -57,10 +58,10 @@ public class ObjTypeList {
         this.defaultInventoryActions = new String[]{null, null, null, null, LocalizedText.DROP.translate(this.language)};
     }
 
-    public ObjType list(int itemId) {
-        ObjType objType;
+    public ItemType list(int itemId) {
+        ItemType objType;
         synchronized (this.typeCache) {
-            objType = (ObjType) this.typeCache.get(itemId);
+            objType = (ItemType) this.typeCache.get(itemId);
         }
         if (objType != null) {
             return objType;
@@ -69,7 +70,7 @@ public class ObjTypeList {
         synchronized (this.objResource) {
             data = this.objResource.getFile(SharedConfigsType.ITEMS.archiveId(itemId), SharedConfigsType.ITEMS.archiveFileId(itemId));
         }
-        objType = new ObjType();
+        objType = new ItemType();
         objType.typeList = this;
         objType.id = itemId;
         objType.groundActions = this.defaultGroundActions.clone();
@@ -114,14 +115,14 @@ public class ObjTypeList {
         }
     }
 
-    public NativeSprite getSprite(AbstractToolkit mainToolkit, AbstractToolkit itemToolkit, int itemId, int itemStacksize, int outlineSize, int shadowColor, boolean zoomedIn, boolean useMainToolkit, int renderStack, AbstractFontRenderer fontRenderer, PlayerAppearance playerAppearance) {
+    public NativeSprite getSprite(AbstractToolkit mainToolkit, AbstractToolkit itemToolkit, int itemId, int itemStacksize, int outlineSize, int shadowColor, boolean zoomedIn, boolean useMainToolkit, Component.StackMode renderStack, AbstractFontRenderer fontRenderer, PlayerAppearance playerAppearance) {
         if (!useMainToolkit) {
             NativeSprite sprite = createNativeSprite(itemToolkit, itemId, itemStacksize, outlineSize, shadowColor, renderStack, playerAppearance);
             if (sprite != null) {
                 return sprite;
             }
         }
-        ObjType objType = list(itemId);
+        ItemType objType = list(itemId);
         if (itemStacksize > 1 && objType.stackIds != null) {
             int stackId = -1;
             for (int index = 0; index < 10; index++) {
@@ -209,7 +210,7 @@ public class ObjTypeList {
         }
     }
 
-    public NativeSprite createNativeSprite(AbstractToolkit toolkit, int itemId, int itemAmount, int outlineSize, int shadowColor, int renderStack, PlayerAppearance playerAppearance) {
+    public NativeSprite createNativeSprite(AbstractToolkit toolkit, int itemId, int itemAmount, int outlineSize, int shadowColor, Component.StackMode renderStack, PlayerAppearance playerAppearance) {
         this.softwareItemRenderer.rendererId = toolkit.renderId;
         this.softwareItemRenderer.itemId = itemId;
         this.softwareItemRenderer.itemAmount = itemAmount;

@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.cache.node.Node;
 import com.jagex.game.runetek5.cache.node.lru.LRUCache;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.bas.BasType;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.config.sequence.Sequence;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerAppearance;
 import com.jagex.game.runetek5.graphics.model.Mesh;
@@ -117,7 +117,7 @@ public class ItemContainer extends Node {
         int total = 0;
         for (int index = 0; index < container.itemIds.length; index++) {
             if (container.itemIds[index] >= 0 && container.itemIds[index] < TypeLists.OBJ.totalItemCount) {
-                ObjType objType = TypeLists.OBJ.list(container.itemIds[index]);
+                ItemType objType = TypeLists.OBJ.list(container.itemIds[index]);
                 int param = objType.getCs2Integer(paramId, TypeLists.PARAMS.list(paramId).defaultInt);
                 if (stackable) {
                     total += param * container.amounts[index];

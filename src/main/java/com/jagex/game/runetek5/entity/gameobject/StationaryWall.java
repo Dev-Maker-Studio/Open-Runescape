@@ -2,9 +2,9 @@ package com.jagex.game.runetek5.entity.gameobject;
 
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeResult;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
 import com.jagex.game.runetek5.graphics.model.Model;
@@ -31,7 +31,7 @@ public class StationaryWall extends AbstractWall implements GameObject {
     public Shadow aCacheableNodeSub1710517;
     public Silhouette axisAlignedBoundingBox;
     public boolean shadowed;
-    public final LocTypeList locTypeList;
+    public final ObjectTypeList locTypeList;
     public final int locId;
     public final boolean aBool10525;
     public final byte shape;
@@ -40,7 +40,7 @@ public class StationaryWall extends AbstractWall implements GameObject {
     public final boolean aBool10516;
     Model model;
 
-    public StationaryWall(Scene scene, AbstractToolkit toolkit, LocTypeList locTypeList, LocType locType,
+    public StationaryWall(Scene scene, AbstractToolkit toolkit, ObjectTypeList locTypeList, ObjectType locType,
                           int plane, int collisionPlane, int x, int y, int z, boolean bool10, int shape, int rotation, boolean delayShading) {
         super(scene, x, y, z, plane, collisionPlane, getCullingType(shape, rotation));
         this.locTypeList = locTypeList;
@@ -95,7 +95,7 @@ public class StationaryWall extends AbstractWall implements GameObject {
     }
     
     public static int getCullingType(int type, int rotation) {
-        return type != LocShapes.WALL_DIAGONAL_CORNER.shape && type != LocShapes.WALL_STRAIGHT_CORNER.shape ? StationaryWall.anIntArray10522[rotation & 0x3] : StationaryWall.anIntArray10518[rotation & 0x3];
+        return type != ObjectShapes.WALL_DIAGONAL_CORNER.shape && type != ObjectShapes.WALL_STRAIGHT_CORNER.shape ? StationaryWall.anIntArray10522[rotation & 0x3] : StationaryWall.anIntArray10518[rotation & 0x3];
     }
 
     @Override
@@ -122,7 +122,7 @@ public class StationaryWall extends AbstractWall implements GameObject {
     }
 
     public TypeResult method16101(AbstractToolkit toolkit, int functionMask, boolean hasShadow) {
-        LocType locType = this.locTypeList.list(this.locId);
+        ObjectType locType = this.locTypeList.list(this.locId);
         Ground currentLevel;
         Ground nextLevel;
         if (this.aBool10525) {

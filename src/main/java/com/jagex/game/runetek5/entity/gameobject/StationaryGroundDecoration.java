@@ -2,9 +2,9 @@ package com.jagex.game.runetek5.entity.gameobject;
 
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeResult;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.RenderedEntity;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
 import com.jagex.game.runetek5.graphics.model.Model;
@@ -27,7 +27,7 @@ public class StationaryGroundDecoration extends AbstractGroundDecoration impleme
     public Shadow primaryShadow;
     public Silhouette axisAlignedBoundingBox;
     public boolean hasTileShadow;
-    public final LocTypeList locTypeLst;
+    public final ObjectTypeList locTypeLst;
     public final int id;
     public final boolean underwater;
     public final byte currentRotation;
@@ -35,7 +35,7 @@ public class StationaryGroundDecoration extends AbstractGroundDecoration impleme
     public final boolean hasShadow;
     public Model model;
 
-    public StationaryGroundDecoration(Scene scene, AbstractToolkit toolkit, LocTypeList locTypeList, LocType loctype, int i_5, int i_6, int i_7, int i_8, int i_9, boolean underwater, int rotation, boolean hasShadow) {
+    public StationaryGroundDecoration(Scene scene, AbstractToolkit toolkit, ObjectTypeList locTypeList, ObjectType loctype, int i_5, int i_6, int i_7, int i_8, int i_9, boolean underwater, int rotation, boolean hasShadow) {
         super(scene, i_7, i_8, i_9, i_5, i_6, loctype.groundDecorationHeight);
         this.locTypeLst = locTypeList;
         this.id = loctype.id;
@@ -99,7 +99,7 @@ public class StationaryGroundDecoration extends AbstractGroundDecoration impleme
     }
 
     public TypeResult getLocresult(AbstractToolkit toolkit, int functionMask, boolean hasShadow) {
-        LocType loctype = this.locTypeLst.list(this.id);
+        ObjectType loctype = this.locTypeLst.list(this.id);
         Ground heightsCurrentLvl;
         Ground heightsNextLvl;
         if (this.underwater) {
@@ -114,7 +114,7 @@ public class StationaryGroundDecoration extends AbstractGroundDecoration impleme
             }
         }
         Vector3 absolute = getAbsolutePosition().coords;
-        return loctype.getPair(toolkit, functionMask, LocShapes.GROUND_DECORATION.shape, this.currentRotation, heightsCurrentLvl, heightsNextLvl, (int) absolute.x, (int) absolute.y, (int) absolute.z, hasShadow, null);
+        return loctype.getPair(toolkit, functionMask, ObjectShapes.GROUND_DECORATION.shape, this.currentRotation, heightsCurrentLvl, heightsNextLvl, (int) absolute.x, (int) absolute.y, (int) absolute.z, hasShadow, null);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class StationaryGroundDecoration extends AbstractGroundDecoration impleme
 
     @Override
     public int getShape() {
-        return LocShapes.GROUND_DECORATION.shape;
+        return ObjectShapes.GROUND_DECORATION.shape;
     }
 
 

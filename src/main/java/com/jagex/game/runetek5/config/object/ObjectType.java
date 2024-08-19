@@ -1,4 +1,4 @@
-package com.jagex.game.runetek5.config.loc;
+package com.jagex.game.runetek5.config.object;
 
 import static com.jagex.game.runetek5.graphics.model.ModelFunctionMask.*;
 import com.jagex.game.runetek5.buffer.Packet;
@@ -34,7 +34,7 @@ import com.jagex.game.runetek5.vardomain.VarDomain;
 	[X] jag::game::LocType::PostDecode(void)    
  *
  */
-public class LocType {
+public class ObjectType {
 
     public static short[] locRecolorPalette = new short[256];
     public int id;
@@ -161,7 +161,7 @@ public class LocType {
      * used for fetching if player is member
      * and usage of caches stored there
      */
-    LocTypeList locTypeList;
+    ObjectTypeList locTypeList;
     
     /**
      * The type of ground adjustment that has to
@@ -502,7 +502,7 @@ public class LocType {
     void postDecode() {
         if (this.hasActions == -1) {
             this.hasActions = 0;
-            if (this.shapes != null && this.shapes.length == 1 && this.shapes[0] == LocShapes.SCENERY_INTERACT.shape) {
+            if (this.shapes != null && this.shapes.length == 1 && this.shapes[0] == ObjectShapes.SCENERY_INTERACT.shape) {
                 this.hasActions = 1;
             }
             for (int index = 0; index < 5; index++) {
@@ -520,9 +520,9 @@ public class LocType {
         }
     }
     
-    public synchronized TypeResult getPair(AbstractToolkit toolkit, int initialFunctionMask, int shape, int rotation, Ground currentLevel, Ground nextLevel, int sceneX, int averageHeight, int sceneY, boolean hasShadow, LocTypeCustomisation locCustomisation) {
-        if (LocShapes.isWallDecoration(shape)) {
-            shape = LocShapes.STRAIGHT_INSIDE_WALL_DEC.shape;
+    public synchronized TypeResult getPair(AbstractToolkit toolkit, int initialFunctionMask, int shape, int rotation, Ground currentLevel, Ground nextLevel, int sceneX, int averageHeight, int sceneY, boolean hasShadow, ObjectTypeCustomisation locCustomisation) {
+        if (ObjectShapes.isWallDecoration(shape)) {
+            shape = ObjectShapes.STRAIGHT_INSIDE_WALL_DEC.shape;
         }
         long uid = ((long) shape << 3) + rotation + ((long) this.id << 10);
         uid |= (long) toolkit.renderId << 29;
@@ -562,14 +562,14 @@ public class LocType {
                 adjustedFunctionMask = toolkit.mergeFunctionMasks(adjustedFunctionMask, model.getFunctionMask());
             }
             int rotatingFunctionMask = adjustedFunctionMask;
-            if (shape == LocShapes.SCENERY_INTERACT.shape && rotation > 3) {
+            if (shape == ObjectShapes.SCENERY_INTERACT.shape && rotation > 3) {
                 rotatingFunctionMask = adjustedFunctionMask | DISPLACE_X | DISPLACE_Z;
             }
             model = getStationaryModel(toolkit, rotatingFunctionMask, shape, rotation, locCustomisation);
             if (model == null) {
                 return null;
             }
-            if (shape == LocShapes.SCENERY_INTERACT.shape && rotation > 3) {
+            if (shape == ObjectShapes.SCENERY_INTERACT.shape && rotation > 3) {
                 model.yaxisRotateWithoutNormals(2048);
             }
             if (hasShadow) {
@@ -600,11 +600,11 @@ public class LocType {
         return this.locTypeList.locresult;
     }
 
-    public Model getStationaryModel(AbstractToolkit toolkit, int functionMask, int type, int rotation, LocTypeCustomisation locCustomisation) {
+    public Model getStationaryModel(AbstractToolkit toolkit, int functionMask, int type, int rotation, ObjectTypeCustomisation locCustomisation) {
         int adjustedAmbient = 64 + this.ambient;
         int adjustedContrast = 850 + this.contrast;
         int initialFunctionMask = functionMask;
-        boolean invert = this.inverted || type == LocShapes.WALL_WHOLE_CORNER.shape && rotation > 3;
+        boolean invert = this.inverted || type == ObjectShapes.WALL_WHOLE_CORNER.shape && rotation > 3;
         if (invert)
             functionMask |= INVERT;
         if (rotation == 0) {
@@ -686,7 +686,7 @@ public class LocType {
             model.setContrast(adjustedContrast);
         if (invert)
             model.mirror();
-        if (LocShapes.STRAIGHT_INSIDE_WALL_DEC.shape == type && rotation > 3) {
+        if (ObjectShapes.STRAIGHT_INSIDE_WALL_DEC.shape == type && rotation > 3) {
             model.rotateWithNormals(2048);
             model.translate(180, 0, -180);
         }
@@ -729,9 +729,9 @@ public class LocType {
         return model;
     }
 
-    public synchronized Model getAnimatedModel(AbstractToolkit toolkit, int functionMask, int type, int rotation, Ground currentLvl, Ground nextLvl, int sceneX, int averageHeight, int sceneY, Sequence sequence, LocTypeCustomisation locCustomisation) {
-        if (LocShapes.isWallDecoration(type)) {
-            type = LocShapes.STRAIGHT_INSIDE_WALL_DEC.shape;
+    public synchronized Model getAnimatedModel(AbstractToolkit toolkit, int functionMask, int type, int rotation, Ground currentLvl, Ground nextLvl, int sceneX, int averageHeight, int sceneY, Sequence sequence, ObjectTypeCustomisation locCustomisation) {
+        if (ObjectShapes.isWallDecoration(type)) {
+            type = ObjectShapes.STRAIGHT_INSIDE_WALL_DEC.shape;
         }
         long uid = ((long) type << 3) + rotation + ((long) this.id << 10);
         uid |= (long) toolkit.renderId << 29;
@@ -754,7 +754,7 @@ public class LocType {
                 functionMask |= DISPLACE_Z;
             }
         }
-        if (type == LocShapes.SCENERY_INTERACT.shape && rotation > 3) {
+        if (type == ObjectShapes.SCENERY_INTERACT.shape && rotation > 3) {
             functionMask |= DISPLACE_X | DISPLACE_Z;
         }
         Model model;
@@ -779,7 +779,7 @@ public class LocType {
             applyShading = true;
             sequence.animateRotatedModel(model, rotation & 0x3);
         }
-        if (type == LocShapes.SCENERY_INTERACT.shape && rotation > 3) {
+        if (type == ObjectShapes.SCENERY_INTERACT.shape && rotation > 3) {
             if (!applyShading) {
                 model = model.copy((byte) 3, functionMask, true);
                 applyShading = true;
@@ -809,7 +809,7 @@ public class LocType {
     /**
      * [J]
      */
-    public LocType getMultiLoc(VarDomain vars) {
+    public ObjectType getMultiLoc(VarDomain vars) {
         int index = -1;
         if (this.varpbitId != -1) {
             index = vars.getVarBitValue(this.varpbitId);
@@ -838,8 +838,8 @@ public class LocType {
         }
     }
     
-    public static boolean isTypeCached(LocTypeList loctypelist, int id, int type) {
-        LocType loctype = loctypelist.list(id);
+    public static boolean isTypeCached(ObjectTypeList loctypelist, int id, int type) {
+        ObjectType loctype = loctypelist.list(id);
         if (type == 11) {
             type = 10;
         }
@@ -874,7 +874,7 @@ public class LocType {
         }
         for (int alternativeIndex = 0; alternativeIndex < this.alternativeIds.length; alternativeIndex++) {
             if (this.alternativeIds[alternativeIndex] != -1) {
-                LocType loctype = this.locTypeList.list(this.alternativeIds[alternativeIndex]);
+                ObjectType loctype = this.locTypeList.list(this.alternativeIds[alternativeIndex]);
                 if (loctype.soundId != -1 || loctype.soundGroupIds != null) {
                     return true;
                 }

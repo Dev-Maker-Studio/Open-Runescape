@@ -37,10 +37,10 @@ import com.jagex.game.runetek5.config.cursor.CursorTypeList;
 import com.jagex.game.runetek5.config.cutscene.*;
 import com.jagex.game.runetek5.config.cutscene.action.CutsceneBasicMovement;
 import com.jagex.game.runetek5.config.defaults.EntityDefaults;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.config.midi.VorbisNode;
 import com.jagex.game.runetek5.config.npc.NPCType;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.config.rsinterface.*;
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor;
@@ -1909,7 +1909,7 @@ public class client extends GameShell {
             playingAltGame = false;
         }
 
-        client.recolorPalette = LocType.locRecolorPalette = NPCType.npcRecolorPalette = ObjType.recolorPalette = new short[256];
+        client.recolorPalette = ObjectType.locRecolorPalette = NPCType.npcRecolorPalette = ItemType.recolorPalette = new short[256];
 
         try {
             Console.clipboard = WindowMode.getActiveContainer().getToolkit().getSystemClipboard();

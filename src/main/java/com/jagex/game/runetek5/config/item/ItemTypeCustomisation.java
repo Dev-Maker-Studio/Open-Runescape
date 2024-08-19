@@ -1,4 +1,4 @@
-package com.jagex.game.runetek5.config.obj;
+package com.jagex.game.runetek5.config.item;
 
 import com.jagex.game.runetek5.buffer.Packet;
 
@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.buffer.Packet;
  * @author Steven - 22/11/2023
  *
  */
-public class ObjTypeCustomisation {
+public class ItemTypeCustomisation {
 
     public final int[] maleBody = new int[3];
     public final int[] femaleBody = new int[3];
@@ -16,7 +16,7 @@ public class ObjTypeCustomisation {
     public short[] recolDst;
     public short[] retexDst;
 
-    public ObjTypeCustomisation(ObjType objType) {
+    public ItemTypeCustomisation(ItemType objType) {
         this.maleBody[0] = objType.maleEquip1;
         this.maleBody[1] = objType.maleEquip2;
         this.maleBody[2] = objType.maleEquip3;
@@ -37,8 +37,8 @@ public class ObjTypeCustomisation {
         }
     }
 
-    public static ObjTypeCustomisation decodeItemEffects(ObjType objType, Packet stream) {
-        ObjTypeCustomisation customisation = new ObjTypeCustomisation(objType);
+    public static ItemTypeCustomisation decodeItemEffects(ItemType objType, Packet stream) {
+        ItemTypeCustomisation customisation = new ItemTypeCustomisation(objType);
         int flags = stream.readUnsignedByte();
         boolean modifiesBody = (flags & 0x1) != 0;
         boolean modifiesHead = (flags & 0x2) != 0;

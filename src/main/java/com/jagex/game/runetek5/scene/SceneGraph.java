@@ -6,9 +6,9 @@ import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.light.LightType;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.loc.LocTypeList;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.object.ObjectTypeList;
 import com.jagex.game.runetek5.entity.gameobject.GameObject;
 import com.jagex.game.runetek5.entity.gameobject.AbstractGroundDecoration;
 import com.jagex.game.runetek5.entity.gameobject.AbstractWall;
@@ -44,11 +44,11 @@ public class SceneGraph extends MapLoader {
 
     public int activeLogicHeight = 99;
 
-    public final LocTypeList locTypeList;
+    public final ObjectTypeList locTypeList;
 
     public final EnvironmentManager environmentManager;
 
-    public SceneGraph(Scene scene, LocTypeList loctypelist, int dimensionZ, int dimensionX, int dimensionY, boolean hideOverlay, SettingsBits regionMap, EnvironmentManager sceneDefault) {
+    public SceneGraph(Scene scene, ObjectTypeList loctypelist, int dimensionZ, int dimensionX, int dimensionY, boolean hideOverlay, SettingsBits regionMap, EnvironmentManager sceneDefault) {
         super(scene, dimensionZ, dimensionX, dimensionY, hideOverlay, TypeLists.FLO, TypeLists.FLU, regionMap);
         this.locTypeList = loctypelist;
         this.environmentManager = sceneDefault;
@@ -58,7 +58,7 @@ public class SceneGraph extends MapLoader {
         if (logicHeight < this.activeLogicHeight) {
             this.activeLogicHeight = logicHeight;
         }
-        LocType locType = this.locTypeList.list(locId);
+        ObjectType locType = this.locTypeList.list(locId);
         if (PreferenceManager.preferences.textures.getValue() != 0 || !locType.requiresTextures) {
             int locSizeX;
             int locSizeY;
@@ -96,8 +96,8 @@ public class SceneGraph extends MapLoader {
                 AmbientSound.createAmbientSoundEffect(logicHeight, baseX, baseY, locRotation, locType, null, null);
             }
             boolean stationary = sequenceId == -1 && !locType.isAnimated() && locType.alternativeIds == null && !locType.hasAnimation && !locType.transforms;
-            if (!soundsOnly || (!LocShapes.isWall(locShape) || locType.occlusionMode == 1) && (!LocShapes.isRoof(locShape) || locType.occlusionMode != 0)) {
-                if (locShape == LocShapes.GROUND_DECORATION.shape) {
+            if (!soundsOnly || (!ObjectShapes.isWall(locShape) || locType.occlusionMode == 1) && (!ObjectShapes.isRoof(locShape) || locType.occlusionMode != 0)) {
+                if (locShape == ObjectShapes.GROUND_DECORATION.shape) {
                     if (PreferenceManager.preferences.groundDecoration.getValue() != 0 || locType.hasActions != 0 || locType.blocksMovement == 1 || locType.forceDisplayDecoration) {
                     	AbstractGroundDecoration groundDecoration;
                     	if (stationary) {
@@ -114,8 +114,8 @@ public class SceneGraph extends MapLoader {
                             collisionMap.flagBlockedDecoration(baseX, baseY);
                         }
                     }
-                } else if (locShape != LocShapes.SCENERY_INTERACT.shape && locShape != LocShapes.GROUND_INTERACT.shape) {
-                    if (!LocShapes.isRoof(locShape) && !LocShapes.isRoofEdge(locShape)) {
+                } else if (locShape != ObjectShapes.SCENERY_INTERACT.shape && locShape != ObjectShapes.GROUND_INTERACT.shape) {
+                    if (!ObjectShapes.isRoof(locShape) && !ObjectShapes.isRoofEdge(locShape)) {
                         if (!addWall(toolkit, locShape, locRotation, stationary, locType, sequenceId, logicHeight, locPlane, sceneX, averageHeight, sceneY, baseX, baseY, applyShading, surfaceGround, collisionMap, locSizeX, locSizeY)) {
                             addWallDecoration(toolkit, locShape, locRotation, stationary, locType, sequenceId, logicHeight, locPlane, sceneX, averageHeight, sceneY, baseX, baseY);
                         }
@@ -131,7 +131,7 @@ public class SceneGraph extends MapLoader {
                             interactive = new AnimatedInteractiveObject(super.scene, toolkit, this.locTypeList, locType, logicHeight, locPlane, sceneX, averageHeight, sceneY, super.overlayHidden, baseX, locSizeX + baseX - 1, baseY, baseY + locSizeY - 1, locShape, locRotation, sequenceId);
                         }
                         super.scene.addInteractive(interactive, false);
-                        if (super.lowDetailShadows && !super.overlayHidden && LocShapes.isRoof(locShape) && locShape != LocShapes.DIAGONAL_SLOPE_ROOF.shape && logicHeight > 0 && locType.occlusionMode != 0) {
+                        if (super.lowDetailShadows && !super.overlayHidden && ObjectShapes.isRoof(locShape) && locShape != ObjectShapes.DIAGONAL_SLOPE_ROOF.shape && logicHeight > 0 && locType.occlusionMode != 0) {
                             super.cullingsMap[logicHeight][baseX][baseY] |= 0x4;
                         }
                         if (locType.blocksMovement != 0 && collisionMap != null) {
@@ -381,7 +381,7 @@ public class SceneGraph extends MapLoader {
                 int type = bitpackedLocDetails >> 2;
                 int locRotation = bitpackedLocDetails & 0x3;
                 if (z == landscapeZ && x >= mapX && x < mapX + 8 && y >= mapY && y < mapY + 8) {
-                    LocType loctype = this.locTypeList.list(locId);
+                    ObjectType loctype = this.locTypeList.list(locId);
                     int localX = sceneX + EnvironmentManager.localOffsetX(x & 0x7, y & 0x7, rotation, loctype.sizeX, loctype.sizeY, locRotation);
                     int localY = sceneY + EnvironmentManager.localOffsetY(x & 0x7, y & 0x7, rotation, loctype.sizeX, loctype.sizeY, locRotation);
                     if (localX > 0 && localY > 0 && localX < super.regionSizeX - 1 && localY < super.regionSizeY - 1) {
@@ -466,8 +466,8 @@ public class SceneGraph extends MapLoader {
         super.cullingsMap = null;
     }
 
-    public boolean addWall(AbstractToolkit toolkit, int locShape, int locRotation, boolean stationary, LocType locType, int i_6, int locHeight, int locPlane, int sceneX, int averageHeight, int sceneY, int baseX, int baseY, boolean delayShading, Ground currentSurfaceGround, CollisionMap localCollisionMap, int locSizeX, int locSizeY) {
-        if (locShape == LocShapes.WALL_STRAIGHT.shape) {
+    public boolean addWall(AbstractToolkit toolkit, int locShape, int locRotation, boolean stationary, ObjectType locType, int i_6, int locHeight, int locPlane, int sceneX, int averageHeight, int sceneY, int baseX, int baseY, boolean delayShading, Ground currentSurfaceGround, CollisionMap localCollisionMap, int locSizeX, int locSizeY) {
+        if (locShape == ObjectShapes.WALL_STRAIGHT.shape) {
         	int cullable = locType.occlusionMode;
             if (cullingAdjustment && locType.occlusionMode == -1) {
                 cullable = 1;
@@ -524,7 +524,7 @@ public class SceneGraph extends MapLoader {
             }
             return true;
         } else {          
-            if (locShape == LocShapes.WALL_DIAGONAL_CORNER.shape) {
+            if (locShape == ObjectShapes.WALL_DIAGONAL_CORNER.shape) {
             	AbstractWall wall;
                 if (stationary) {
                 	StationaryWall stationaryWall = new StationaryWall(super.scene, toolkit, this.locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, super.overlayHidden, locShape, locRotation, delayShading);
@@ -551,7 +551,7 @@ public class SceneGraph extends MapLoader {
                     localCollisionMap.flagBoundary(baseX, baseY, locShape, locRotation, locType.blocksProjectiles, !locType.ignoreClipOnAltRoute);
                 }
                 return true;
-            } else if (locShape == LocShapes.WALL_WHOLE_CORNER.shape) {
+            } else if (locShape == ObjectShapes.WALL_WHOLE_CORNER.shape) {
             	int signedRotation = locRotation + 1 & 0x3;
                 AbstractWall primaryWall;
                 AbstractWall secondaryWall;
@@ -593,7 +593,7 @@ public class SceneGraph extends MapLoader {
                     super.scene.offsetWallDecoration(locHeight, baseX, baseY, locType.decorDisplacement);
                 }
                 return true;
-            } else if (locShape == LocShapes.WALL_STRAIGHT_CORNER.shape) {
+            } else if (locShape == ObjectShapes.WALL_STRAIGHT_CORNER.shape) {
             	AbstractWall wall;
                 if (stationary) {
                     StationaryWall stationaryWall = new StationaryWall(super.scene, toolkit, this.locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, super.overlayHidden, locShape, locRotation, delayShading);
@@ -620,7 +620,7 @@ public class SceneGraph extends MapLoader {
                     localCollisionMap.flagBoundary(baseX, baseY, locShape, locRotation, locType.blocksProjectiles, !locType.ignoreClipOnAltRoute);
                 }
                 return true;
-            } else if (locShape == LocShapes.WALL_INTERACT.shape) {
+            } else if (locShape == ObjectShapes.WALL_INTERACT.shape) {
             	AbstractInteractiveEntity interactive;
                 if (stationary) {
                     StationaryInteractiveObject stationaryInteractive = new StationaryInteractiveObject(super.scene, toolkit, this.locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, super.overlayHidden, baseX, baseX, baseY, baseY, locShape, locRotation, delayShading);
@@ -653,8 +653,8 @@ public class SceneGraph extends MapLoader {
         }
     }
 
-    public boolean addWallDecoration(AbstractToolkit toolkit, int locShape, int locRotation, boolean stationary, LocType locType, int sequenceId, int logicHeight, int locPlane, int sceneX, int averageHeight, int sceneY, int baseX, int baseY) {
-        if (locShape == LocShapes.STRAIGHT_INSIDE_WALL_DEC.shape) {
+    public boolean addWallDecoration(AbstractToolkit toolkit, int locShape, int locRotation, boolean stationary, ObjectType locType, int sequenceId, int logicHeight, int locPlane, int sceneX, int averageHeight, int sceneY, int baseX, int baseY) {
+        if (locShape == ObjectShapes.STRAIGHT_INSIDE_WALL_DEC.shape) {
             AbstractWallDecoration wallDecoration;
             if (stationary) {
                 StationaryWallDecoration stationaryDecoration = new StationaryWallDecoration(super.scene, toolkit, this.locTypeList, locType, logicHeight, locPlane, sceneX, averageHeight, sceneY, super.overlayHidden, 0, 0, locShape, locRotation);
@@ -668,7 +668,7 @@ public class SceneGraph extends MapLoader {
             super.scene.addWallDecoration(logicHeight, baseX, baseY, wallDecoration, null);
             return true;
         } 
-        if (locShape == LocShapes.STRAIGHT_OUSIDE_WALL_DEC.shape) {
+        if (locShape == ObjectShapes.STRAIGHT_OUSIDE_WALL_DEC.shape) {
         	int decorationDisplacement = 65;
         	GameObject gameObject = (GameObject) super.scene.getWall(logicHeight, baseX, baseY);
             if (gameObject != null) {
@@ -687,7 +687,7 @@ public class SceneGraph extends MapLoader {
             super.scene.addWallDecoration(logicHeight, baseX, baseY, wallDecoration, null);
             return true;
         }
-        if (locShape == LocShapes.DIAGONAL_OUTSIDE_WALL_DEC.shape) {
+        if (locShape == ObjectShapes.DIAGONAL_OUTSIDE_WALL_DEC.shape) {
         	int decorationDisplacement = 33;
         	GameObject gameObject = (GameObject) super.scene.getWall(logicHeight, baseX, baseY);
             if (gameObject != null) {
@@ -706,7 +706,7 @@ public class SceneGraph extends MapLoader {
             super.scene.addWallDecoration(logicHeight, baseX, baseY, wallDecoration, null);
             return true;
         } 
-        if (locShape == LocShapes.DIAGONAL_INSIDE_WALL_DEC.shape) {
+        if (locShape == ObjectShapes.DIAGONAL_INSIDE_WALL_DEC.shape) {
         	int signedRotation = locRotation + 2 & 0x3;
             AbstractWallDecoration wallDecoration;
             if (stationary) {
@@ -721,7 +721,7 @@ public class SceneGraph extends MapLoader {
             super.scene.addWallDecoration(logicHeight, baseX, baseY, wallDecoration, null);
             return true;
         } 
-        if (locShape == LocShapes.DIAGONAL_INWALL_DEC.shape) {
+        if (locShape == ObjectShapes.DIAGONAL_INWALL_DEC.shape) {
         	int signedRotation = locRotation + 2 & 0x3;
             int displacement = 33;
             GameObject gameObject = (GameObject) super.scene.getWall(logicHeight, baseX, baseY);
@@ -948,7 +948,7 @@ public class SceneGraph extends MapLoader {
     public void removeGameObject(AbstractToolkit toolkit, int z, int gameObjectType, int x, int y, CollisionMap clipping) {
         GameObject gameObject = getGameObject(z, gameObjectType, x, y);
         if (gameObject != null) {
-            LocType locType = this.locTypeList.list(gameObject.getId());
+            ObjectType locType = this.locTypeList.list(gameObject.getId());
             int type = gameObject.getShape();
             int rotation = gameObject.getRotation();
             if (locType.hasSound()) {
@@ -982,7 +982,7 @@ public class SceneGraph extends MapLoader {
                 if (locType.blocksMovement != 0 && x + locType.sizeX < super.regionSizeX && y + locType.sizeX < super.regionSizeY && x + locType.sizeY < super.regionSizeX && y + locType.sizeY < super.regionSizeY) {
                     clipping.unflagBlocked(x, y, locType.sizeX, locType.sizeY, rotation, locType.blocksProjectiles, !locType.ignoreClipOnAltRoute);
                 }
-                if (type == LocShapes.WALL_INTERACT.shape) {
+                if (type == ObjectShapes.WALL_INTERACT.shape) {
                     if ((rotation & 0x1) == 0) {
                         super.scene.culling.removeCullingCluster(8, z, x, y);
                     } else {
@@ -998,7 +998,7 @@ public class SceneGraph extends MapLoader {
         }
     }
 
-	public static int loadLocs(LocTypeList locTypeList, byte[] mapdata, int x, int y, int regionSizeX, int regionSizeY) {
+	public static int loadLocs(ObjectTypeList locTypeList, byte[] mapdata, int x, int y, int regionSizeX, int regionSizeY) {
 	    int incompleteLocs = 0;
 	    Packet stream = new Packet(mapdata);
 	    int locId = -1;
@@ -1025,8 +1025,8 @@ public class SceneGraph extends MapLoader {
 	                int sceneX = deltaX + x;
 	                int sceneY = y + deltaY;
 	                if (sceneX > 0 && sceneY > 0 && sceneX < regionSizeX - 1 && sceneY < regionSizeY - 1) {
-	                    LocType loctype = locTypeList.list(locId);
-	                    if (type != LocShapes.GROUND_DECORATION.shape || PreferenceManager.preferences.groundDecoration.getValue() != 0
+	                    ObjectType loctype = locTypeList.list(locId);
+	                    if (type != ObjectShapes.GROUND_DECORATION.shape || PreferenceManager.preferences.groundDecoration.getValue() != 0
 	                    		|| loctype.hasActions != 0 || loctype.blocksMovement == 1 || loctype.forceDisplayDecoration) {
 	                        if (!loctype.fullyCached()) {
 	                            incompleteLocs++;

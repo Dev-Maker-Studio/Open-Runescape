@@ -15,7 +15,7 @@ import com.jagex.game.runetek5.client.input.mouse.Mouse;
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
-import com.jagex.game.runetek5.config.loc.LocType;
+import com.jagex.game.runetek5.config.object.ObjectType;
 import com.jagex.game.runetek5.config.npc.NPCType;
 import com.jagex.game.runetek5.entity.gameobject.StationaryWall;
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity;
@@ -276,7 +276,7 @@ public class MiniMenu {
 	            }
 	        }
 	    } else if (Mouse.isClicktypeLoc(menuEntry.clickType)) {
-	        LocType locType = Resource.mapRegion.getLoctypeList().list((int) (menuEntry.entityUid >>> 32 & 0x7fffffffL));
+	        ObjectType locType = Resource.mapRegion.getLoctypeList().list((int) (menuEntry.entityUid >>> 32 & 0x7fffffffL));
 	        if (locType.alternativeIds != null) {
 	            locType = locType.getMultiLoc(VarProviders.PLAYER_VAR_PROVIDER);
 	        }

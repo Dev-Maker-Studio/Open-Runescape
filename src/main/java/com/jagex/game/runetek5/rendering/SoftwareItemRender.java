@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.rendering;
 
+import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.graphics.sprite.IItemRenderer;
 import com.jagex.game.runetek5.tools.Hashing;
 
@@ -15,7 +16,7 @@ public class SoftwareItemRender implements IItemRenderer {
 
 	public int shadowColor;
 
-	public int renderStack;
+	public Component.StackMode renderStack;
 
 	public boolean hasPlayerAppearance;
 
@@ -50,7 +51,7 @@ public class SoftwareItemRender implements IItemRenderer {
         hash = hash >>> 8 ^ table[(int) ((hash ^ (this.shadowColor >> 16)) & 0xffL)];
         hash = hash >>> 8 ^ table[(int) ((hash ^ (this.shadowColor >> 8)) & 0xffL)];
         hash = hash >>> 8 ^ table[(int) ((hash ^ this.shadowColor) & 0xffL)];
-        hash = hash >>> 8 ^ table[(int) ((hash ^ this.renderStack) & 0xffL)];
+        hash = hash >>> 8 ^ table[(int) ((hash ^ this.renderStack.ordinal()) & 0xffL)];
         hash = hash >>> 8 ^ table[(int) ((hash ^ (this.hasPlayerAppearance ? 1 : 0)) & 0xffL)];
         return hash;
     }

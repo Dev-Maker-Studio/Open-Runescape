@@ -1,4 +1,4 @@
-package com.jagex.game.runetek5.config.loc;
+package com.jagex.game.runetek5.config.object;
 
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.lru.LRUCache;
@@ -10,7 +10,7 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider;
 import com.jagex.game.runetek5.tools.Language;
 import com.jagex.game.runetek5.tools.LocalizedText;
 
-public class LocTypeList {
+public class ObjectTypeList {
 
 	/**
 	 * The preferences set for the player, EG: textures off
@@ -41,7 +41,7 @@ public class LocTypeList {
 
     public final String[] defaultActions;
 
-    public LocTypeList(Game game, Language language, Js5ResourceProvider configResource, Js5ResourceProvider meshResource) {
+    public ObjectTypeList(Game game, Language language, Js5ResourceProvider configResource, Js5ResourceProvider meshResource) {
         this.game = game;
         this.language = language;
         this.playerIsMember = true;
@@ -59,10 +59,10 @@ public class LocTypeList {
         }
     }
 
-    public LocType list(int id) {
-        LocType loctype;
+    public ObjectType list(int id) {
+        ObjectType loctype;
         synchronized (this.cache) {
-            loctype = (LocType) this.cache.get(id);
+            loctype = (ObjectType) this.cache.get(id);
         }
         if (loctype != null) {
             return loctype;
@@ -71,7 +71,7 @@ public class LocTypeList {
         synchronized (this.configResource) {
             data = this.configResource.getFile(SharedConfigsType.OBJECTS.archiveId(id), SharedConfigsType.OBJECTS.archiveFileId(id));
         }
-        loctype = new LocType();
+        loctype = new ObjectType();
         loctype.id = id;
         loctype.locTypeList = this;
         loctype.actions = this.defaultActions.clone();

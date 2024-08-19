@@ -31,10 +31,10 @@ import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.clanvar.ClanVarTypeList;
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList;
-import com.jagex.game.runetek5.config.loc.LocTypeCustomisation;
-import com.jagex.game.runetek5.config.loc.LocShapes;
-import com.jagex.game.runetek5.config.loc.LocType;
-import com.jagex.game.runetek5.config.obj.ObjType;
+import com.jagex.game.runetek5.config.object.ObjectTypeCustomisation;
+import com.jagex.game.runetek5.config.object.ObjectShapes;
+import com.jagex.game.runetek5.config.object.ObjectType;
+import com.jagex.game.runetek5.config.item.ItemType;
 import com.jagex.game.runetek5.config.quickchat.QuickChatMessage;
 import com.jagex.game.runetek5.config.quickchat.QuickchatMessageTypeList;
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor;
@@ -1783,7 +1783,7 @@ public class PacketDecoder {
             int amount = buffer.readIntV2();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfitemUpdate(interfaceHash, itemId, amount);
-            ObjType defs = TypeLists.OBJ.list(itemId);
+            ItemType defs = TypeLists.OBJ.list(itemId);
             PulseEventQueue.priorityIfangleUpdate(interfaceHash, defs.modelRotationX, defs.modelRotationY, defs.modelZoom);
             PulseEventQueue.priorityIfoffsetUpdate(interfaceHash, defs.modelOffsetX, defs.modelOffsetY, defs.modelRotationZ);
             context.currentPacket = null;
@@ -2568,7 +2568,7 @@ public class PacketDecoder {
             }
         } else if (packet == UpdateZonePacket.CUSTOMIZE_OBJECT) {
             int locId = buffer.readInt();
-            LocType locType = Resource.mapRegion.getLoctypeList().list(locId);
+            ObjectType locType = Resource.mapRegion.getLoctypeList().list(locId);
             int i_5 = buffer.readUnsignedByte128();
             int locShape = i_5 >> 2;
             int type = client.OBJECT_TYPE_SLOTS[locShape];
@@ -2576,8 +2576,8 @@ public class PacketDecoder {
             int coords = buffer.readUnsignedByte128();
             int x = (coords >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int y = (coords & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            if (locShape == LocShapes.GROUND_INTERACT.shape) {
-                locShape = LocShapes.SCENERY_INTERACT.shape;
+            if (locShape == ObjectShapes.GROUND_INTERACT.shape) {
+                locShape = ObjectShapes.SCENERY_INTERACT.shape;
             }
             int modelCount = 0;
             if (locType.shapes != null) {
@@ -2622,7 +2622,7 @@ public class PacketDecoder {
                         locTextureTransform[index] = (short) buffer.readUnsignedShort();
                     }
                 }
-                LocAction.customizeObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, locId, locShape, new LocTypeCustomisation(LocTypeCustomisation.locCustomisationId++, locModelTransform, locColorTransform, locTextureTransform));
+                LocAction.customizeObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, locId, locShape, new ObjectTypeCustomisation(ObjectTypeCustomisation.locCustomisationId++, locModelTransform, locColorTransform, locTextureTransform));
             }
         } else if (packet == UpdateZonePacket.TILE_MESSAGE) {
             buffer.readUnsignedByte();

@@ -177,27 +177,30 @@ public class Skybox {
         return this.skybox;
     }
 
-    public void method4214(AbstractToolkit toolkit, int x, int y, int width, int height, int i_7, int i_8) {
-        render(toolkit, 0, x, y, width, height, i_7, i_8, 0, 0);
+    public void render(AbstractToolkit toolkit, int x, int y, int width, int height, int rotationX, int rotationY) {
+        render(toolkit, 0, x, y, width, height, rotationX, rotationY, 0, 0);
     }
 
-    public void render(AbstractToolkit toolkit, int angle, int x, int y, int width, int height, int i_7, int i_8, int i_9, int fogColor) {
-        int alpha = 0;
-        if (this.copyAlpha) {
-            alpha = this.skyboxAlpha;
-        }
+    public void render(AbstractToolkit toolkit, int angle, int x, int y, int width, int height, int rotationX, int rotationY, int rotationZ, int fogColor) {
+        int alpha = this.copyAlpha ? this.skyboxAlpha : 0;
+
         if (this.skybox != null) {
-            Skybox class24715 = this;
-            Skybox class24716 = this.skybox;
-            if (hashCode() > class24716.hashCode()) {
-                class24715 = this.skybox;
-                class24716 = this;
+            Skybox primarySkybox = this;
+            Skybox secondarySkybox = this.skybox;
+
+            // Swap if necessary based on hashCode to ensure consistent rendering order
+            if (hashCode() > secondarySkybox.hashCode()) {
+                primarySkybox = this.skybox;
+                secondarySkybox = this;
                 alpha = 255 - alpha;
             }
-            class24715.renderSkybox(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, true, alpha);
-            class24716.renderSkybox(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, false, 255 - alpha);
+
+            // Render the primary and secondary skyboxes
+            primarySkybox.renderSkybox(toolkit, angle, x, y, width, height, rotationX, rotationY, rotationZ, fogColor, true, alpha);
+            secondarySkybox.renderSkybox(toolkit, angle, x, y, width, height, rotationX, rotationY, rotationZ, fogColor, false, 255 - alpha);
         } else {
-            renderSkybox(toolkit, angle, x, y, width, height, i_7, i_8, i_9, fogColor, true, alpha);
+            // Render the single skybox if no secondary is present
+            renderSkybox(toolkit, angle, x, y, width, height, rotationX, rotationY, rotationZ, fogColor, true, alpha);
         }
     }
 
