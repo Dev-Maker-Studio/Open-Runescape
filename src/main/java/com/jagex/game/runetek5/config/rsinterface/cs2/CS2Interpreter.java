@@ -48,7 +48,7 @@ import com.jagex.game.runetek5.config.rsinterface.InteractiveComponentSprite;
 import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.config.rsinterface.ComponentType;
 import com.jagex.game.runetek5.config.rsinterface.HookRequest;
-import com.jagex.game.runetek5.config.rsinterface.IFTargetParams;
+import com.jagex.game.runetek5.config.rsinterface.IFEvents;
 import com.jagex.game.runetek5.config.rsinterface.Interface;
 import com.jagex.game.runetek5.config.rsinterface.SubInterface;
 import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer;
@@ -5509,7 +5509,7 @@ public class CS2Interpreter {
         Component icomponentdefinitions5 = Component.listIcomponent(i_2 << 16 | i_3, i_4);
         InterfaceComponentRenderer.method1170();
         assert icomponentdefinitions5 != null;
-        IFTargetParams class282Sub106 = client.listComponentSettings(icomponentdefinitions5);
+        IFEvents class282Sub106 = client.listComponentSettings(icomponentdefinitions5);
         InterfaceRenderer.setUseOptionFlags(icomponentdefinitions5, class282Sub106.getUseOptionFlags(), class282Sub106.interfaceId);
     }
 
@@ -11884,9 +11884,9 @@ public class CS2Interpreter {
         int i_4 = cs2executor2.intStack[cs2executor2.intStackPtr];
         int i_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 1];
         if (i_4 == -1 && i_5 == -1) {
-            icomponentdefinitions0.aClass1181379 = null;
+            icomponentdefinitions0.depthChildOverride = null;
         } else {
-            icomponentdefinitions0.aClass1181379 = Component.listIcomponent(i_4, i_5);
+            icomponentdefinitions0.depthChildOverride = Component.listIcomponent(i_4, i_5);
         }
     }
 

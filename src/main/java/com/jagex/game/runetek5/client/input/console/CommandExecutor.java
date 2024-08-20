@@ -233,7 +233,7 @@ public class CommandExecutor {
 	            if ("clientdrop".equalsIgnoreCase(command)) {
 	                if (client.gameState == GameState.LOGGED_INGAME) {
 	                    WorldConnection.dropClient();
-	                } else if (client.gameState == GameState.UNK_18) {
+	                } else if (client.gameState == GameState.LOADING_PLEASE_WAIT) {
 	                    client.GAME_CONNECTION_CONTEXT.dropped = true;
 	                }
 	                return;

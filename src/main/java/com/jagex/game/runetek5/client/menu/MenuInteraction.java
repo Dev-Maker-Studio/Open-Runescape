@@ -12,7 +12,7 @@ import com.jagex.game.runetek5.client.input.mouse.MouseRecord;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.rsinterface.Component;
-import com.jagex.game.runetek5.config.rsinterface.IFTargetParams;
+import com.jagex.game.runetek5.config.rsinterface.IFEvents;
 import com.jagex.game.runetek5.config.rsinterface.Interface;
 import com.jagex.game.runetek5.entity.gameobject.StationaryWall;
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity;
@@ -264,7 +264,7 @@ public class MenuInteraction {
 	        	Component component = Component.listIcomponent(attr2, attr1);
 	            if (component != null) {
 	                InterfaceComponentRenderer.method1170();
-	                IFTargetParams class282Sub1021 = client.listComponentSettings(component);
+	                IFEvents class282Sub1021 = client.listComponentSettings(component);
 	                InterfaceRenderer.setUseOptionFlags(component, class282Sub1021.getUseOptionFlags(), class282Sub1021.interfaceId);
 	                client.useOnType = Interface.getUseOptionString(component);
 	                if (client.useOnType == null) {

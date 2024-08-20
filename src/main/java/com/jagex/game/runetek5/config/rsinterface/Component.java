@@ -152,7 +152,7 @@ public class Component {
     public int animation;
     public int targetOverCursor = -1;
     public int moveOverCursor = -1;
-    public IFTargetParams targetParams;
+    public IFEvents targetParams;
     public int aspectWidth;
     public int targetLeaveCursor = -1;
     public Object[] onLoadScript;
@@ -211,7 +211,7 @@ public class Component {
     public StackMode renderStack = StackMode.WHEN_MULTIPLE;
     public boolean textAntiMacro;
     public int clickType;
-    public Component aClass1181379;
+    public Component depthChildOverride;
     public int containerItemId;
     public int itemStackSize;
     public boolean wearCol;
@@ -233,7 +233,7 @@ public class Component {
     public short[] recolorDst;
     public short[] retextureSrc;
     public short[] retextureDst;
-	public static final IFTargetParams DEFAULT_SETTINGS = new IFTargetParams(0, -1);
+	public static final IFEvents DEFAULT_SETTINGS = new IFEvents(0, -1);
 	public static final NodeCollection ITEMS = new NodeCollection();
 
     public Component() {
@@ -241,7 +241,7 @@ public class Component {
         this.hasInteraction = false;
         this.useOnName = "";
         this.clickType = -1;
-        this.aClass1181379 = null;
+        this.depthChildOverride = null;
         this.anInt1380 = 0;
         this.anInt1381 = 0;
         this.anInt1382 = anInt1283;
@@ -555,10 +555,10 @@ public class Component {
         				: (client.DISPLAY_HIDDEN_MENU_OPTIONS ? "Hidden-" + option : null));
     }
 
-    public static Component method12880(Component icomponentdefinitions0) {
+    public static Component getDepthChild(Component icomponentdefinitions0) {
         Component icomponentdefinitions2 = client.method11634(icomponentdefinitions0);
         if (icomponentdefinitions2 == null) {
-            icomponentdefinitions2 = icomponentdefinitions0.aClass1181379;
+            icomponentdefinitions2 = icomponentdefinitions0.depthChildOverride;
         }
 
         return icomponentdefinitions2;
@@ -758,7 +758,7 @@ public class Component {
                 this.moveOverCursor = -1;
             }
         }
-        this.targetParams = new IFTargetParams(optionMask, i_10);
+        this.targetParams = new IFEvents(optionMask, i_10);
         if (i_3 >= 0) {
             i_11 = buffer.readUnsignedByte();
             int i_12;

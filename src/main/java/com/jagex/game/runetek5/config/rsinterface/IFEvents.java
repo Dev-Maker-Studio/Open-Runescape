@@ -2,12 +2,12 @@ package com.jagex.game.runetek5.config.rsinterface;
 
 import com.jagex.game.runetek5.cache.node.Node;
 
-public class IFTargetParams extends Node {
+public class IFEvents extends Node {
 
     public final int settingsHash;
     public final int interfaceId;
 
-    public IFTargetParams(int i_1, int i_2) {
+    public IFEvents(int i_1, int i_2) {
         this.settingsHash = i_1;
         this.interfaceId = i_2;
     }
@@ -28,7 +28,7 @@ public class IFTargetParams extends Node {
         return this.settingsHash >> 18 & 0x7;
     }
 
-    public boolean bit22Enabled() {
+    public boolean isTargetableByUse() {
         return (this.settingsHash >> 22 & 0x1) != 0;
     }
 
@@ -36,7 +36,7 @@ public class IFTargetParams extends Node {
         return (this.settingsHash & 0x1) != 0;
     }
 
-    public boolean bit23Enabled() {
+    public boolean ignoresDepthFlags() {
         return (this.settingsHash >> 23 & 0x1) != 0;
     }
 

@@ -6,7 +6,7 @@ import com.jagex.game.runetek5.staticmethods.StaticMethods;
 
 public enum GameState {
 
-	UNK_0, UNK_1, UNK_2, IN_ACCOUNT_CREATION, UNK_4, UNK_5, UNK_6, UNK_7, UNK_8, UNK_9, UNK_10, UNK_11, UNK_12, LOGGED_INGAME, UNK_14, UNK_15, UNK_16, UNK_17, UNK_18, UNK_19, UNK_20, UNK_21;
+	UNK_0, UNK_1, UNK_2, IN_ACCOUNT_CREATION, UNK_4, UNK_5, UNK_6, UNK_7, UNK_8, UNK_9, UNK_10, UNK_11, UNK_12, LOGGED_INGAME, UNK_14, UNK_15, UNK_16, UNK_17, LOADING_PLEASE_WAIT, UNK_19, UNK_20, UNK_21;
 
 	public static boolean isLoggedOut(GameState gameState) {
         return gameState == GameState.UNK_5 || gameState == GameState.UNK_11 || gameState == GameState.UNK_14 || gameState == GameState.UNK_19 || gameState == GameState.IN_ACCOUNT_CREATION || gameState == GameState.UNK_8 || gameState == GameState.UNK_9;
@@ -19,7 +19,7 @@ public enum GameState {
     }
 
     public static boolean isRenderingScene(GameState gameState) {
-        return gameState == GameState.LOGGED_INGAME || gameState == GameState.UNK_18 || gameState == GameState.UNK_12;
+        return gameState == GameState.LOGGED_INGAME || gameState == GameState.LOADING_PLEASE_WAIT || gameState == GameState.UNK_12;
     }
 
 	public static void method6270() {
@@ -47,7 +47,7 @@ public enum GameState {
 	}
 
 	public static boolean isLoadingRegion(GameState gameState) {
-	    return gameState == GameState.UNK_11 || gameState == GameState.UNK_2 || gameState == GameState.UNK_18 || gameState == GameState.UNK_6 || gameState == GameState.UNK_9;
+	    return gameState == GameState.UNK_11 || gameState == GameState.UNK_2 || gameState == GameState.LOADING_PLEASE_WAIT || gameState == GameState.UNK_6 || gameState == GameState.UNK_9;
 	}
 
 	public static boolean isIngame() {

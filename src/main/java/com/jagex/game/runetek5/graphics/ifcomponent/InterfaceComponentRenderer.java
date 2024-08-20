@@ -107,7 +107,7 @@ public class InterfaceComponentRenderer {
 	                int startX;
 	                int startY;
 	                if (component == client.aClass1187257) {
-	                    if (i_1 != -1412584499 && (component.anInt1382 == Component.anInt1265 || component.anInt1382 == Component.anInt1283 || client.listComponentSettings(component).bit23Enabled())) {
+	                    if (i_1 != -1412584499 && (component.anInt1382 == Component.anInt1265 || component.anInt1382 == Component.anInt1283 || client.listComponentSettings(component).ignoresDepthFlags())) {
 	                        InterfaceComponentRenderer.aClass118Array3772 = components;
 	                        InterfaceComponentRenderer.anInt4822 = offsetX;
 	                        InterfaceComponentRenderer.anInt5157 = offsetY;
@@ -130,7 +130,7 @@ public class InterfaceComponentRenderer {
 	                        if (startY + component.height > client.anInt7265 + client.anInt7476) {
 	                            startY = client.anInt7476 + client.anInt7265 - component.height;
 	                        }
-	                        if (client.listComponentSettings(component).bit23Enabled()) {
+	                        if (client.listComponentSettings(component).ignoresDepthFlags()) {
 	                            InterfaceComponentRenderer.inboundsComponentToTop(startX, startY, component.width, component.height);
 	                        }
 	                        drawX = startX;

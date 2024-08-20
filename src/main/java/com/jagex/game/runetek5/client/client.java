@@ -618,14 +618,14 @@ public class client extends GameShell {
         HITSPLAT_SIZE_CACHE = new int[4];
     }
 
-    public static IFTargetParams listComponentSettings(Component icomponentdefinitions0) {
-        IFTargetParams class282Sub101 = (IFTargetParams) ICOMPONENT_SETTINGS_SLOTS.get(((long) icomponentdefinitions0.idHash << 32) + icomponentdefinitions0.slotId);
+    public static IFEvents listComponentSettings(Component icomponentdefinitions0) {
+        IFEvents class282Sub101 = (IFEvents) ICOMPONENT_SETTINGS_SLOTS.get(((long) icomponentdefinitions0.idHash << 32) + icomponentdefinitions0.slotId);
         return class282Sub101 != null ? class282Sub101 : icomponentdefinitions0.targetParams;
     }
 
     public static Component method11634(Component component) {
-        IFTargetParams targetParams = listComponentSettings(component);
-        if (targetParams.bit23Enabled()) {
+        IFEvents targetParams = listComponentSettings(component);
+        if (targetParams.ignoresDepthFlags()) {
             return client.frameComponent;
         }
         int depthFlags = targetParams.depthFlags();
@@ -771,9 +771,9 @@ public class client extends GameShell {
         }
     }
 
-    public static boolean method14643(Component component) {
-        IFTargetParams targetParams = listComponentSettings(component);
-        return targetParams.depthFlags() > 0 || (targetParams.bit23Enabled() || component.aClass1181379 != null);
+    public static boolean hasDepthFlags(Component component) {
+        IFEvents targetParams = listComponentSettings(component);
+        return targetParams.depthFlags() > 0 || (targetParams.ignoresDepthFlags() || component.depthChildOverride != null);
     }
 
     public static void buildCanvasComponents() {
@@ -787,7 +787,7 @@ public class client extends GameShell {
     }
 
     public static void setLoading() {
-        setGameState(GameState.UNK_18);
+        setGameState(GameState.LOADING_PLEASE_WAIT);
         AbstractNativeToolkit.drawLoadingPleaseWaitHardware();
         System.gc();
     }
@@ -913,7 +913,7 @@ public class client extends GameShell {
                                 Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.CUTSCENE, null));
                                 MAP_LOADING_STAGE = 0;
                             }
-                            if (MAP_LOADING_STAGE == 0 && gameState != GameState.UNK_18) {
+                            if (MAP_LOADING_STAGE == 0 && gameState != GameState.LOADING_PLEASE_WAIT) {
                                 CutsceneTypeList.CONFIG_CUTSCENES.clear();
                                 MAP_LOADING_STAGE = 4;
                                 cycleCutsceneLoaded = cycles;
@@ -2463,7 +2463,7 @@ public class client extends GameShell {
         } else if (gameState == GameState.UNK_7) {
             setGameState(GameState.UNK_6);
         } else if (gameState == GameState.LOGGED_INGAME) {
-            setGameState(GameState.UNK_18);
+            setGameState(GameState.LOADING_PLEASE_WAIT);
         } else if (gameState != GameState.UNK_15 && gameState != GameState.UNK_1) {
             if (gameState == GameState.IN_ACCOUNT_CREATION) {
                 setGameState(GameState.UNK_9);

@@ -19,7 +19,7 @@ import com.jagex.game.runetek5.config.rsinterface.Component;
 import com.jagex.game.runetek5.config.rsinterface.ComponentContentType;
 import com.jagex.game.runetek5.config.rsinterface.ComponentType;
 import com.jagex.game.runetek5.config.rsinterface.HookRequest;
-import com.jagex.game.runetek5.config.rsinterface.IFTargetParams;
+import com.jagex.game.runetek5.config.rsinterface.IFEvents;
 import com.jagex.game.runetek5.config.rsinterface.Interface;
 import com.jagex.game.runetek5.config.rsinterface.SubInterface;
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor;
@@ -80,7 +80,7 @@ public class InterfaceRenderer {
 	                    Component.drawComponentObjSprite(component);
 	                }
 	            } else if (!InterfaceRenderer.isComponentHidden(component)) {
-	                if (component == client.aClass1187257 && client.method14643(client.aClass1187257)) {
+	                if (component == client.aClass1187257 && client.hasDepthFlags(client.aClass1187257)) {
 	                    client.aBool7369 = true;
 	                    client.anInt7252 = x;
 	                    client.anInt7215 = y;
@@ -205,7 +205,7 @@ public class InterfaceRenderer {
 	                                    Interface.ifOptionInteract(keyIndex + 1, component.idHash, component.slotId, "");
 	                                } else if (keyIndex == 10) {
 	                                    InterfaceComponentRenderer.method1170();
-	                                    IFTargetParams iftParams = client.listComponentSettings(component);
+	                                    IFEvents iftParams = client.listComponentSettings(component);
 	                                    InterfaceRenderer.setUseOptionFlags(component, iftParams.getUseOptionFlags(), iftParams.interfaceId);
 	                                    client.useOnType = Interface.getUseOptionString(component);
 	                                    if (client.useOnType == null) {
@@ -870,9 +870,9 @@ public class InterfaceRenderer {
 	}
 
 	public static void method12221(Component component, int offsetX, int offsetY) {
-	    if (client.aClass1187257 == null && !MiniMenu.isOpen && component != null && client.method14643(component)) {
+	    if (client.aClass1187257 == null && !MiniMenu.isOpen && component != null && client.hasDepthFlags(component)) {
 	        client.aClass1187257 = component;
-	        client.aClass1187247 = Component.method12880(component);
+	        client.aClass1187247 = Component.getDepthChild(component);
 	        client.anInt7361 = offsetX;
 	        client.anInt7362 = offsetY;
 	        InterfaceRenderer.anInt8308 = 0;

@@ -250,7 +250,7 @@ public class MapRegion {
                 regionCount++;
             }
         }
-        performUpdate(chunkX, chunkY, GameState.UNK_18, positionUpdate);
+        performUpdate(chunkX, chunkY, GameState.LOADING_PLEASE_WAIT, positionUpdate);
     }
     
     public void initializeCutscene() {
@@ -350,7 +350,7 @@ public class MapRegion {
         }
         this.xteas = MapRegion.CUTSCENE_MAP_XTEAS;
         MapRegion.CUTSCENE_MAP_XTEAS = null;
-        performUpdate(this.sceneSizeX >> 4, this.sceneSizeY >> 4, GameState.UNK_18, false);
+        performUpdate(this.sceneSizeX >> 4, this.sceneSizeY >> 4, GameState.LOADING_PLEASE_WAIT, false);
     }
     
     public void initializeConstructedMap(Packet.Bit stream) {
@@ -434,7 +434,7 @@ public class MapRegion {
                 }
             }
         }
-        performUpdate(mapBaseX, mapBaseY, GameState.UNK_18, forcedPositionUpdate);
+        performUpdate(mapBaseX, mapBaseY, GameState.LOADING_PLEASE_WAIT, forcedPositionUpdate);
     }
     
     public void buildRegionBase(MapRegion mapRegion) {
@@ -739,7 +739,7 @@ public class MapRegion {
             }
             Resource.mapRegion = this;
             mapRegion.clear();
-            updateEntities(GameState.UNK_18);
+            updateEntities(GameState.LOADING_PLEASE_WAIT);
             resetNonCutsceneEntities();
         } else {
             SoundEffectPlayer.updatePlayers();
@@ -760,7 +760,7 @@ public class MapRegion {
         }
         Scene.setRoofOverride();
         LocAction.onRegionChanged();
-        if (GameShell.getApplicationType() == ApplicationType.APPLET && client.GAME_CONNECTION_CONTEXT.getConnection() != null && client.gameState == GameState.UNK_18) {
+        if (GameShell.getApplicationType() == ApplicationType.APPLET && client.GAME_CONNECTION_CONTEXT.getConnection() != null && client.gameState == GameState.LOADING_PLEASE_WAIT) {
         	TcpPacket packet = PacketEncoder.createPacket(ClientProt.UNK_82, client.GAME_CONNECTION_CONTEXT.isaac);
             packet.buffer.writeInt(1057001181);
             client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
@@ -1255,7 +1255,7 @@ public class MapRegion {
     public void updateEntities(GameState requestedGamestate) {
         int deltaX = this.baseCoordinates.x - this.lastCoordgrid.x;
         int deltaY = this.baseCoordinates.y - this.lastCoordgrid.y;
-        if (requestedGamestate == GameState.UNK_18) {
+        if (requestedGamestate == GameState.LOADING_PLEASE_WAIT) {
             for (int npcIndex = 0; npcIndex < client.npcCount; npcIndex++) {
                 ObjectNode objectNode = client.NPC_ARRAY[npcIndex];
                 if (objectNode != null) {
@@ -1376,7 +1376,7 @@ public class MapRegion {
         }
         AreaSoundPlayer.initialize();
         AmbientSound.unlinkSounds(false);
-        if (requestedGamestate == GameState.UNK_18) {
+        if (requestedGamestate == GameState.LOADING_PLEASE_WAIT) {
             client.anInt7262 -= deltaX * 512;
             client.anInt7376 -= deltaY * 512;
             Camera.cameraBaseX -= deltaX * 512;
@@ -1647,7 +1647,7 @@ public class MapRegion {
         } else if (client.gameState == GameState.UNK_7) {
             client.setGameState(GameState.UNK_6);
         } else if (client.gameState == GameState.LOGGED_INGAME) {
-            client.setGameState(GameState.UNK_18);
+            client.setGameState(GameState.LOADING_PLEASE_WAIT);
         } else if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
             client.setGameState(GameState.UNK_9);
         }

@@ -1127,16 +1127,16 @@ public class PacketDecoder {
             client.requestVarVerifyid();
             for (int slot = fromSlot; slot <= toSlot; slot++) {
                 long slots = slot + ((long) interfaceHash << 32);
-                IFTargetParams currentSettings = (IFTargetParams) client.ICOMPONENT_SETTINGS_SLOTS.get(slots);
-                IFTargetParams newSettings;
+                IFEvents currentSettings = (IFEvents) client.ICOMPONENT_SETTINGS_SLOTS.get(slots);
+                IFEvents newSettings;
                 if (currentSettings == null) {
                     if (slot == -1) {
-                        newSettings = new IFTargetParams(settings, Component.fromHash(interfaceHash).targetParams.interfaceId);
+                        newSettings = new IFEvents(settings, Component.fromHash(interfaceHash).targetParams.interfaceId);
                     } else {
-                        newSettings = new IFTargetParams(settings, -1);
+                        newSettings = new IFEvents(settings, -1);
                     }
                 } else {
-                    newSettings = new IFTargetParams(settings, currentSettings.interfaceId);
+                    newSettings = new IFEvents(settings, currentSettings.interfaceId);
                     currentSettings.unlink();
                 }
                 client.ICOMPONENT_SETTINGS_SLOTS.put(newSettings, slots);
@@ -1157,16 +1157,16 @@ public class PacketDecoder {
             client.requestVarVerifyid();
             for (int slot = fromSlot; slot <= toSlot; slot++) {
                 long slots = slot + ((long) interfaceHash << 32);
-                IFTargetParams currentSettings = (IFTargetParams) client.ICOMPONENT_SETTINGS_SLOTS.get(slots);
-                IFTargetParams newSettings;
+                IFEvents currentSettings = (IFEvents) client.ICOMPONENT_SETTINGS_SLOTS.get(slots);
+                IFEvents newSettings;
                 if (currentSettings == null) {
                     if (slot == -1) {
-                        newSettings = new IFTargetParams(Component.fromHash(interfaceHash).targetParams.settingsHash, interfaceId);
+                        newSettings = new IFEvents(Component.fromHash(interfaceHash).targetParams.settingsHash, interfaceId);
                     } else {
-                        newSettings = new IFTargetParams(0, interfaceId);
+                        newSettings = new IFEvents(0, interfaceId);
                     }
                 } else {
-                    newSettings = new IFTargetParams(currentSettings.settingsHash, interfaceId);
+                    newSettings = new IFEvents(currentSettings.settingsHash, interfaceId);
                     currentSettings.unlink();
                 }
                 client.ICOMPONENT_SETTINGS_SLOTS.put(newSettings, slots);

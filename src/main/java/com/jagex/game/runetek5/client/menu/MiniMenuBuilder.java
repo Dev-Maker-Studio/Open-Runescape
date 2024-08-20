@@ -410,7 +410,7 @@ public class MiniMenuBuilder {
 	public static void interfaceComponentHovered(Component component) {
 	    if (client.interfaceSelectionActive) {
 	        ParamType param = MiniMenu.USE_INTERFACE_ID != -1 ? TypeLists.PARAMS.list(MiniMenu.USE_INTERFACE_ID) : null;
-	        if (client.listComponentSettings(component).bit22Enabled() && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x20) != 0 && (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
+	        if (client.listComponentSettings(component).isTargetableByUse() && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x20) != 0 && (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
 	            MiniMenu.addEntry(client.useOnType, client.useOnTarget + " " + "->" + " " + component.useOnName, MiniMenu.useOnCursor, 58, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        }
 	    }
