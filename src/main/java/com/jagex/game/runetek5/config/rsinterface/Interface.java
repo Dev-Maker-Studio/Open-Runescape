@@ -371,8 +371,8 @@ public class Interface {
 
 	public static String getUseOptionString(Component component) {
         return client.listComponentSettings(component).getUseOptionFlags() == 0 ? null
-        		: (component.useOptionString != null && !component.useOptionString.trim().isEmpty() 
-        				? component.useOptionString 
+        		: (component.targetVerb != null && !component.targetVerb.trim().isEmpty()
+        				? component.targetVerb
         				: (client.DISPLAY_HIDDEN_MENU_OPTIONS ? "Hidden-use" : null));
     }
 

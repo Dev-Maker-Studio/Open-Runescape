@@ -271,7 +271,7 @@ public class MenuInteraction {
 	                    client.useOnType = "Null";
 	                }
 	
-	                client.useOnTarget = component.useOnName + TextUtils.setTextColor(16777215);
+	                client.useOnTarget = component.opBase + TextUtils.setTextColor(16777215);
 	            }
 	        } else {
 	            ClientProt groundItemInteract = null;

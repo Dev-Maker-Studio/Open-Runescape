@@ -5,6 +5,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
 
+import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.cache.FileOnDisk;
 import com.jagex.game.runetek5.cache.node.IntNode;
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;
@@ -503,33 +504,33 @@ public class CS2Interpreter {
                 method6452(exec);
                 break;
             case instr6676:
-                method3941(exec);
+                ccSetDepthChild(exec);
                 break;
-            case instr6073:
+            case instr6073: //CC_SETDRAGRENDERBEHAVIOUR?
                 method2169(exec);
                 break;
-            case instr6443:
+            case instr6443: //CC_SETDRAGDEADZONE?
                 method2965(exec);
                 break;
-            case instr6075:
+            case instr6075: //CC_SETDRAGDEADTIME?
                 method4801(exec);
                 break;
-            case instr6076: //CC_SETTARGETVERB?
-                method7522(exec);
+            case CC_SETOPBASE:
+                ccSetOpBase(exec);
                 break;
-            case instr6110:
-                method1511(exec);
+            case CC_SETTARGETVERB:
+                ccSetTargetVerb(exec);
                 break;
-            case CC_RESETOPTIONNAMES:
+            case CC_CLEAROPS:
                 method8298(exec);
                 break;
-            case instr6218:
+            case CC_SETTARGETCURSORS:
                 method6150(exec);
                 break;
             case CC_SETOPCURSOR:
                 method5203(exec);
                 break;
-            case instr6081:
+            case CC_SETRESUMETEXT: //(pause text is official name but that's absolutely cooked)
                 method541(exec);
                 break;
             case instr6737:
@@ -929,7 +930,7 @@ public class CS2Interpreter {
                 method15475(exec);
                 break;
             case instr6214:
-                method4838(exec);
+                ifSetDepthChild(exec);
                 break;
             case instr6215:
                 method2150(exec);
@@ -3279,11 +3280,11 @@ public class CS2Interpreter {
         executor.intStack[++executor.intStackPtr - 1] = PreferenceManager.preferences.water.getValue() == 2 ? 1 : 0;
     }
 
-    public static void method7522(CS2Executor executor) {
+    public static void ccSetOpBase(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        method6122(icomponentdefinitions3, executor);
+        setOpBase(icomponentdefinitions3, executor);
     }
 
     public static void getMyPlayerPos(CS2Executor executor) {
@@ -3944,10 +3945,10 @@ public class CS2Interpreter {
     public static void method1864(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
-        if (icomponentdefinitions3.useOnName == null) {
+        if (icomponentdefinitions3.opBase == null) {
             executor.stringStack[++executor.stringStackPtr - 1] = "";
         } else {
-            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.useOnName;
+            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.opBase;
         }
     }
 
@@ -4369,8 +4370,8 @@ public class CS2Interpreter {
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         int i_4 = executor.intStack[--executor.intStackPtr];
         --i_4;
-        if (icomponentdefinitions3.optionNames != null && i_4 < icomponentdefinitions3.optionNames.length && icomponentdefinitions3.optionNames[i_4] != null) {
-            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.optionNames[i_4];
+        if (icomponentdefinitions3.options != null && i_4 < icomponentdefinitions3.options.length && icomponentdefinitions3.options[i_4] != null) {
+            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.options[i_4];
         } else {
             executor.stringStack[++executor.stringStackPtr - 1] = "";
         }
@@ -5107,7 +5108,7 @@ public class CS2Interpreter {
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        method7547(icomponentdefinitions3, executor);
+        setResumeText(icomponentdefinitions3, executor);
     }
 
     public static void method6142(CS2Executor executor) {
@@ -5522,7 +5523,7 @@ public class CS2Interpreter {
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        method6122(icomponentdefinitions3, executor);
+        setOpBase(icomponentdefinitions3, executor);
     }
 
     public static void method787(CS2Executor executor) {
@@ -6039,10 +6040,10 @@ public class CS2Interpreter {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         assert icomponentdefinitions3 != null;
-        if (icomponentdefinitions3.useOnName == null) {
+        if (icomponentdefinitions3.opBase == null) {
             executor.stringStack[++executor.stringStackPtr - 1] = "";
         } else {
-            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.useOnName;
+            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.opBase;
         }
     }
 
@@ -6089,11 +6090,11 @@ public class CS2Interpreter {
         method14586(icomponentdefinitions4, executor);
     }
 
-    public static void method4838(CS2Executor executor) {
+    public static void ifSetDepthChild(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
-        method3738(icomponentdefinitions3, executor);
+        setDepthChild(icomponentdefinitions3, executor);
     }
 
     public static void method4839(CS2Executor executor) {
@@ -6927,11 +6928,11 @@ public class CS2Interpreter {
         method6689(icomponentdefinitions3, executor);
     }
 
-    public static void method3941(CS2Executor executor) {
+    public static void ccSetDepthChild(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        method3738(icomponentdefinitions3, executor);
+        setDepthChild(icomponentdefinitions3, executor);
     }
 
     public static void setMonoStero(CS2Executor executor) {
@@ -7516,7 +7517,7 @@ public class CS2Interpreter {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        method7547(icomponentdefinitions3, executor);
+        setResumeText(icomponentdefinitions3, executor);
     }
 
     public static void method543(CS2Executor executor) {
@@ -7581,8 +7582,8 @@ public class CS2Interpreter {
         int i_4 = executor.intStack[--executor.intStackPtr];
         --i_4;
         assert icomponentdefinitions3 != null;
-        if (icomponentdefinitions3.optionNames != null && i_4 < icomponentdefinitions3.optionNames.length && icomponentdefinitions3.optionNames[i_4] != null) {
-            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.optionNames[i_4];
+        if (icomponentdefinitions3.options != null && i_4 < icomponentdefinitions3.options.length && icomponentdefinitions3.options[i_4] != null) {
+            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3.options[i_4];
         } else {
             executor.stringStack[++executor.stringStackPtr - 1] = "";
         }
@@ -7674,11 +7675,11 @@ public class CS2Interpreter {
         method5066(icomponentdefinitions3, interface4, executor);
     }
 
-    public static void method1511(CS2Executor executor) {
+    public static void ccSetTargetVerb(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        method3369(icomponentdefinitions3, executor);
+        setTargetVerb(icomponentdefinitions3, executor);
     }
 
     public static void method1512(CS2Executor executor) {
@@ -8631,7 +8632,7 @@ public class CS2Interpreter {
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        method3369(icomponentdefinitions3, executor);
+        setTargetVerb(icomponentdefinitions3, executor);
     }
 
     public static void method6938(CS2Executor executor) {
@@ -11414,8 +11415,10 @@ public class CS2Interpreter {
         }
     }
 
-    public static void method6122(Component icomponentdefinitions0, CS2Executor cs2executor2) {
-        icomponentdefinitions0.useOnName = (String) cs2executor2.stringStack[--cs2executor2.stringStackPtr];
+    public static void setOpBase(Component icomponentdefinitions0, CS2Executor cs2executor2) {
+        icomponentdefinitions0.opBase = (String) cs2executor2.stringStack[--cs2executor2.stringStackPtr];
+        if (Loader.DEBUG_IF_OPS)
+            icomponentdefinitions0.opBase += "(opBase)";
     }
 
     public static void method14482(Component icomponentdefinitions0, CS2Executor cs2executor2) {
@@ -11634,8 +11637,10 @@ public class CS2Interpreter {
         icomponentdefinitions0.hasScript = true;
     }
 
-    public static void method3369(Component icomponentdefinitions0, CS2Executor cs2executor2) {
-        icomponentdefinitions0.useOptionString = (String) cs2executor2.stringStack[--cs2executor2.stringStackPtr];
+    public static void setTargetVerb(Component icomponentdefinitions0, CS2Executor cs2executor2) {
+        icomponentdefinitions0.targetVerb = (String) cs2executor2.stringStack[--cs2executor2.stringStackPtr];
+        if (Loader.DEBUG_IF_OPS)
+            icomponentdefinitions0.targetVerb += "(targetVerb)";
     }
 
     public static void method3965(Component icomponentdefinitions0, CS2Executor cs2executor1) {
@@ -11675,8 +11680,10 @@ public class CS2Interpreter {
         }
     }
 
-    public static void method7547(Component icomponentdefinitions0, CS2Executor cs2executor2) {
-        icomponentdefinitions0.opName = (String) cs2executor2.stringStack[--cs2executor2.stringStackPtr];
+    public static void setResumeText(Component icomponentdefinitions0, CS2Executor cs2executor2) {
+        icomponentdefinitions0.resumeText = (String) cs2executor2.stringStack[--cs2executor2.stringStackPtr];
+        if (Loader.DEBUG_IF_OPS)
+            icomponentdefinitions0.resumeText += "(resumeText)";
     }
 
     public static void method12401(Component icomponentdefinitions0, Interface interface1) {
@@ -11879,7 +11886,7 @@ public class CS2Interpreter {
         InterfaceComponentRenderer.componentPositionAdjustment(icomponentdefinitions1, i_4, i_5);
     }
 
-    public static void method3738(Component icomponentdefinitions0, CS2Executor cs2executor2) {
+    public static void setDepthChild(Component icomponentdefinitions0, CS2Executor cs2executor2) {
         cs2executor2.intStackPtr -= 2;
         int i_4 = cs2executor2.intStack[cs2executor2.intStackPtr];
         int i_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 1];
@@ -11914,10 +11921,9 @@ public class CS2Interpreter {
     }
 
     public static void method869(Component icomponentdefinitions0, CS2Executor cs2executor2) {
-        int i_4 = cs2executor2.intStack[--cs2executor2.intStackPtr];
-        if (i_4 == Component.anInt1283 || i_4 == Component.anInt1373 || i_4 == Component.anInt1265) {
-            icomponentdefinitions0.anInt1382 = i_4;
-        }
+        Component.UnkSetting1 i_4 = Component.UnkSetting1.forId(cs2executor2.intStack[--cs2executor2.intStackPtr]);
+        if (i_4 != null)
+            icomponentdefinitions0.anUnkSetting11 = i_4;
     }
 
     public static void method910(Component icomponentdefinitions0, CS2Executor cs2executor2) {
@@ -11978,7 +11984,7 @@ public class CS2Interpreter {
     }
 
     public static void method15474(Component icomponentdefinitions0) {
-        icomponentdefinitions0.optionNames = null;
+        icomponentdefinitions0.options = null;
     }
 
     public static void method1642(Component icomponentdefinitions0, CS2Executor cs2executor2) {

@@ -32,6 +32,8 @@ public class Loader extends Panel {
     public static String IP_ADDRESS;
     public static Properties clientParams = new Properties();
 
+    public static boolean DEBUG_IF_OPS = false;
+
     public static int RENDER_DISTANCE_MULTIPLIER = 1; //Default 1
     public static int FOG_DISTANCE_MULTIPLIER = 1; //Default 1
     public static boolean X10_HITS_MODE = false;

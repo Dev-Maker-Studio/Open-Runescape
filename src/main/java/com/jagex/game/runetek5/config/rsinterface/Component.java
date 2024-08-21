@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.config.rsinterface;
 
+import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.IntNode;
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;
@@ -46,6 +47,8 @@ import com.jagex.game.runetek5.tools.Hashing;
 import com.jagex.game.runetek5.utils.Utils;
 import com.jagex.game.runetek5.vardomain.VarDomain;
 
+import java.util.Arrays;
+
 import static com.jagex.game.runetek5.graphics.model.ModelFunctionMask.*;
 
 /**
@@ -60,9 +63,21 @@ public class Component {
         WHEN_MULTIPLE
     }
 
-    public static int anInt1283;
-    public static final int anInt1373 = 1;
-    public static final int anInt1265 = 2;
+    public enum UnkSetting1 {
+        UNK_0(0),
+        UNK_1(1),
+        UNK_2(2);
+
+        public final int value;
+
+        UnkSetting1(int value) {
+            this.value = value;
+        }
+
+        public static UnkSetting1 forId(int id) {
+            return Arrays.stream(UnkSetting1.values()).filter(setting -> setting.value == id).findFirst().orElse(null);
+        }
+    }
     public static final LRUCache NATIVE_SPRITE_CACHE = new LRUCache(3000000, 200);
     public static final LRUCache MODEL_CACHE = new LRUCache(50);
     public static boolean missingMedia;
@@ -125,22 +140,22 @@ public class Component {
     public byte[][] triggeredKeyFunctionMasks;
     public int[] cycleSteps;
     public int[] anIntArray1267;
-    public String useOnName;
+    public String opBase;
     public boolean flipVertical;
     public boolean shadow;
     public boolean lineDirection;
-    public String[] optionNames;
+    public String[] options;
     public boolean usesOrthogonal;
     public int maxTextLines;
     public int[] opCursors;
     public boolean flipHorizontal;
-    public String opName;
+    public String resumeText;
     public boolean priorityRender;
     public boolean hasInteraction;
     public int anInt1380;
     public int anInt1381;
-    public int anInt1382;
-    public String useOptionString;
+    public UnkSetting1 anUnkSetting11;
+    public String targetVerb;
     public int originX;
     public int originY;
     public int spritePitch;
@@ -239,13 +254,13 @@ public class Component {
     public Component() {
         this.targetParams = Component.DEFAULT_SETTINGS;
         this.hasInteraction = false;
-        this.useOnName = "";
+        this.opBase = "";
         this.clickType = -1;
         this.depthChildOverride = null;
         this.anInt1380 = 0;
         this.anInt1381 = 0;
-        this.anInt1382 = anInt1283;
-        this.useOptionString = "";
+        this.anUnkSetting11 = UnkSetting1.UNK_0;
+        this.targetVerb = "";
         this.hasScript = false;
         this.containerItemId = -1;
         this.itemStackSize = 0;
@@ -549,9 +564,9 @@ public class Component {
     public static String componentMenuOption(Component component, int option) {
         return !client.listComponentSettings(component).clickOptionEnabled(option)
         		&& component.params == null ? null 
-        		: (component.optionNames != null && component.optionNames.length > option && component.optionNames[option] != null 
-        			&& !component.optionNames[option].trim().isEmpty() 
-        				? component.optionNames[option] 
+        		: (component.options != null && component.options.length > option && component.options[option] != null
+        			&& !component.options[option].trim().isEmpty()
+        				? component.options[option]
         				: (client.DISPLAY_HIDDEN_MENU_OPTIONS ? "Hidden-" + option : null));
     }
 
@@ -705,15 +720,17 @@ public class Component {
                 this.triggeredKeyFunctionMasks[i_7] = new byte[]{b_9};
             }
         }
-        this.useOnName = buffer.readString();
+        this.opBase = buffer.readString();
+        if (Loader.DEBUG_IF_OPS)
+            this.opBase += "(opBase)";
         i_7 = buffer.readUnsignedByte();
         int i_17 = i_7 & 0xf;
         int i_18 = i_7 >> 4;
         int i_10;
         if (i_17 > 0) {
-            this.optionNames = new String[i_17];
+            this.options = new String[i_17];
             for (i_10 = 0; i_10 < i_17; i_10++) {
-                this.optionNames[i_10] = buffer.readString();
+                this.options[i_10] = buffer.readString();
             }
         }
         int i_11;
@@ -729,14 +746,18 @@ public class Component {
             i_10 = buffer.readUnsignedByte();
             this.opCursors[i_10] = buffer.readUnsignedShort();
         }
-        this.opName = buffer.readString();
-        if (this.opName.isEmpty()) {
-            this.opName = null;
+        this.resumeText = buffer.readString();
+        if (Loader.DEBUG_IF_OPS)
+            this.resumeText += "(resumeText)";
+        if (this.resumeText.isEmpty()) {
+            this.resumeText = null;
         }
         this.anInt1380 = buffer.readUnsignedByte();
         this.anInt1381 = buffer.readUnsignedByte();
-        this.anInt1382 = buffer.readUnsignedByte();
-        this.useOptionString = buffer.readString();
+        this.anUnkSetting11 = UnkSetting1.forId(buffer.readUnsignedByte());
+        this.targetVerb = buffer.readString();
+        if (Loader.DEBUG_IF_OPS)
+            this.targetVerb += "(targetVerb)";
         i_10 = -1;
         if (Component.getUseOptionFlags(optionMask) != 0) {
             i_10 = buffer.readUnsignedShort();
@@ -901,14 +922,14 @@ public class Component {
     }
 
     public void addOptionName(int index, String optionName) {
-        if (this.optionNames == null || this.optionNames.length <= index) {
+        if (this.options == null || this.options.length <= index) {
             String[] replacementOptionNames = new String[index + 1];
-            if (this.optionNames != null) {
-                System.arraycopy(this.optionNames, 0, replacementOptionNames, 0, this.optionNames.length);
+            if (this.options != null) {
+                System.arraycopy(this.options, 0, replacementOptionNames, 0, this.options.length);
             }
-            this.optionNames = replacementOptionNames;
+            this.options = replacementOptionNames;
         }
-        this.optionNames[index] = optionName;
+        this.options[index] = optionName;
     }
 
     public void method1995(int i_1) {

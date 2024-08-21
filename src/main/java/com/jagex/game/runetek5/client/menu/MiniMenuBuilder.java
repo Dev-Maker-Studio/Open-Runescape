@@ -411,28 +411,28 @@ public class MiniMenuBuilder {
 	    if (client.interfaceSelectionActive) {
 	        ParamType param = MiniMenu.USE_INTERFACE_ID != -1 ? TypeLists.PARAMS.list(MiniMenu.USE_INTERFACE_ID) : null;
 	        if (client.listComponentSettings(component).isTargetableByUse() && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x20) != 0 && (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
-	            MiniMenu.addEntry(client.useOnType, client.useOnTarget + " " + "->" + " " + component.useOnName, MiniMenu.useOnCursor, 58, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
+	            MiniMenu.addEntry(client.useOnType, client.useOnTarget + " " + "->" + " " + component.opBase, MiniMenu.useOnCursor, 58, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        }
 	    }
 	    for (int option = 9; option >= 5; --option) {
 	        String action = Component.componentMenuOption(component, option);
 	        if (action != null) {
-	            MiniMenu.addEntry(action, component.useOnName, Component.getCursor(component, option), 1007, component.containerItemId, option + 1, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
+	            MiniMenu.addEntry(action, component.opBase, Component.getCursor(component, option), 1007, component.containerItemId, option + 1, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        }
 	    }
 	    String action = Interface.getUseOptionString(component);
 	    if (action != null) {
-	        MiniMenu.addEntry(action, component.useOnName, component.clickType, 25, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
+	        MiniMenu.addEntry(action, component.opBase, component.clickType, 25, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	    }
 	    for (int option = 4; option >= 0; --option) {
 	        String menuAction = Component.componentMenuOption(component, option);
 	        if (menuAction != null) {
-	            MiniMenu.addEntry(menuAction, component.useOnName, Component.getCursor(component, option), 57, component.containerItemId, option + 1, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
+	            MiniMenu.addEntry(menuAction, component.opBase, Component.getCursor(component, option), 57, component.containerItemId, option + 1, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        }
 	    }
 	    if (client.listComponentSettings(component).continueOptionEnabled()) {
-	        if (component.opName != null) {
-	            MiniMenu.addEntry(component.opName, "", -1, 30, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
+	        if (component.resumeText != null) {
+	            MiniMenu.addEntry(component.resumeText, "", -1, 30, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        } else {
 	            MiniMenu.addEntry(LocalizedText.CONTINUE.translate(client.CURRENT_LANGUAGE), "", -1, 30, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        }
