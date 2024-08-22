@@ -103,7 +103,7 @@ public class Component {
     public Component[] itemSlots;
     public ComponentType type;
     public String name;
-    public int contentType;
+    public ComponentContentType contentType;
     public int basePositionX;
     public int basePositionY;
     public int baseWidth;
@@ -112,11 +112,11 @@ public class Component {
     public byte aspectHeightType;
     public byte aspectXType;
     public byte aspectYType;
-    public int parent = -1;
+    public int parentId = -1;
     public boolean hidden;
     public int scrollWidth;
     public int scrollHeight;
-    public boolean noClickThrough;
+    public boolean preventClickThrough;
     public int spriteId = -1;
     public int angle2d;
     public MediaType mediaType = MediaType.RAW_MODEL;
@@ -137,7 +137,7 @@ public class Component {
     public boolean monospaced = true;
     public boolean filled;
     public byte[][] keyTriggeringAction;
-    public byte[][] triggeredKeyFunctionMasks;
+    public byte[][] keyTriggerParams;
     public int[] cycleSteps;
     public int[] anIntArray1267;
     public String opBase;
@@ -171,7 +171,7 @@ public class Component {
     public int aspectWidth;
     public int targetLeaveCursor = -1;
     public Object[] onLoadScript;
-    public Object[] onMouseHoverScript;
+    public Object[] onMouseOver;
     public Object[] onMouseLeaveScript;
     public Object[] hookParams;
     public Object[] anObjectArray1400;
@@ -183,20 +183,20 @@ public class Component {
     public int aspectHeight;
     public Object[] anObjectArray1393;
     public Object[] popupScript;
-    public Object[] anObjectArray1386;
+    public Object[] onClick;
     public Object[] anObjectArray1319;
-    public Object[] anObjectArray1302;
-    public Object[] anObjectArray1389;
+    public Object[] onRelease;
+    public Object[] onHold;
     public Object[] anObjectArray1451;
     public Object[] anObjectArray1394;
-    public Object[] anObjectArray1412;
-    public Object[] anObjectArray1403;
-    public Object[] anObjectArray1405;
+    public Object[] onMouseMove;
+    public Object[] onKey;
+    public Object[] onScrollWheel;
     public int[] varps;
     public int[] mouseLeaveArrayParams;
     public int[] anIntArray1402;
-    public int[] anIntArray1315;
-    public int[] anIntArray1406;
+    public int[] keyPressArray;
+    public int[] mouseWheelArray;
     public Object[] anObjectArray1413;
     public Object[] anObjectArray1292;
     public Object[] anObjectArray1415;
@@ -225,7 +225,7 @@ public class Component {
     public int offsetY;
     public StackMode renderStack = StackMode.WHEN_MULTIPLE;
     public boolean textAntiMacro;
-    public int clickType;
+    public int targetOpCursor;
     public Component depthChildOverride;
     public int containerItemId;
     public int itemStackSize;
@@ -233,13 +233,13 @@ public class Component {
     public int skyboxId;
     public int anInt1435;
     public boolean isHooked;
-    public boolean aBool1286;
+    public boolean isPressed;
     public int anInt1442;
     public int anInt1443;
     public int anInt1444;
     public int anInt1445;
-    public int anInt1446;
-    public int anInt1447;
+    public int lastKeyCycle;
+    public int lastMouseWheelCycle;
     public int anInt1448;
     public int cacheReference;
     public int lastRenderedCycle;
@@ -255,7 +255,7 @@ public class Component {
         this.targetParams = Component.DEFAULT_SETTINGS;
         this.hasInteraction = false;
         this.opBase = "";
-        this.clickType = -1;
+        this.targetOpCursor = -1;
         this.depthChildOverride = null;
         this.anInt1380 = 0;
         this.anInt1381 = 0;
@@ -269,13 +269,13 @@ public class Component {
         this.anInt1435 = -1;
         this.animation = -1;
         this.isHooked = false;
-        this.aBool1286 = false;
+        this.isPressed = false;
         this.anInt1442 = -1;
         this.anInt1443 = 0;
         this.anInt1444 = 0;
         this.anInt1445 = 0;
-        this.anInt1446 = 0;
-        this.anInt1447 = 0;
+        this.lastKeyCycle = 0;
+        this.lastMouseWheelCycle = 0;
         this.anInt1448 = 0;
         this.cacheReference = -1;
         this.lastRenderedCycle = -1;
@@ -512,7 +512,7 @@ public class Component {
     public static void update(Component[] components, int parent) {
         for (int index = 0; index < components.length; index++) {
             Component component = components[index];
-            if (component != null && component.parent == parent && !InterfaceRenderer.isComponentHidden(component)) {
+            if (component != null && component.parentId == parent && !InterfaceRenderer.isComponentHidden(component)) {
                 if (component.type == ComponentType.CONTAINER) {
                     update(components, component.idHash);
                     if (component.itemSlots != null) {
@@ -544,7 +544,7 @@ public class Component {
     }
 
     public static int getCursor(Component component, int option) {
-        return !client.listComponentSettings(component).clickOptionEnabled(option) && component.params == null
+        return !client.getComponentSettings(component).clickOptionEnabled(option) && component.params == null
         		? -1 : (component.opCursors != null && component.opCursors.length > option ? component.opCursors[option] : -1);
     }
 
@@ -562,7 +562,7 @@ public class Component {
     }
 
     public static String componentMenuOption(Component component, int option) {
-        return !client.listComponentSettings(component).clickOptionEnabled(option)
+        return !client.getComponentSettings(component).clickOptionEnabled(option)
         		&& component.params == null ? null 
         		: (component.options != null && component.options.length > option && component.options[option] != null
         			&& !component.options[option].trim().isEmpty()
@@ -590,7 +590,7 @@ public class Component {
             this.name = buffer.readString();
         }
         this.type = ComponentType.forId(typeId);
-        this.contentType = buffer.readUnsignedShort();
+        this.contentType = ComponentContentType.forId(buffer.readUnsignedShort());
         this.basePositionX = buffer.readShort();
         this.basePositionY = buffer.readShort();
         this.baseWidth = buffer.readUnsignedShort();
@@ -599,22 +599,22 @@ public class Component {
         this.aspectHeightType = buffer.readByte();
         this.aspectXType = buffer.readByte();
         this.aspectYType = buffer.readByte();
-        this.parent = buffer.readUnsignedShort();
-        if (this.parent == 65535) {
-            this.parent = -1;
+        this.parentId = buffer.readUnsignedShort();
+        if (this.parentId == 65535) {
+            this.parentId = -1;
         } else {
-            this.parent += this.idHash & -65536;
+            this.parentId += this.idHash & -65536;
         }
         int interationMask = buffer.readUnsignedByte();
         this.hidden = (interationMask & 0x1) != 0;
         if (i_3 >= 0) {
-            this.noClickThrough = (interationMask & 0x2) != 0;
+            this.preventClickThrough = (interationMask & 0x2) != 0;
         }
         if (this.type == ComponentType.CONTAINER) {
             this.scrollWidth = buffer.readUnsignedShort();
             this.scrollHeight = buffer.readUnsignedShort();
             if (i_3 < 0) {
-                this.noClickThrough = buffer.readUnsignedByte() == 1;
+                this.preventClickThrough = buffer.readUnsignedByte() == 1;
             }
         }
         if (this.type == ComponentType.SPRITE) {
@@ -701,7 +701,7 @@ public class Component {
         int i_7;
         if (i_16 != 0) {
             this.keyTriggeringAction = new byte[11][];
-            this.triggeredKeyFunctionMasks = new byte[11][];
+            this.keyTriggerParams = new byte[11][];
             this.cycleSteps = new int[11];
             for (this.anIntArray1267 = new int[11]; i_16 != 0; i_16 = buffer.readUnsignedByte()) {
                 i_7 = (i_16 >> 4) - 1;
@@ -717,7 +717,7 @@ public class Component {
                 byte b_9 = buffer.readByte();
                 this.cycleSteps[i_7] = i_16;
                 this.keyTriggeringAction[i_7] = new byte[]{b_8};
-                this.triggeredKeyFunctionMasks[i_7] = new byte[]{b_9};
+                this.keyTriggerParams[i_7] = new byte[]{b_9};
             }
         }
         this.opBase = buffer.readString();
@@ -798,7 +798,7 @@ public class Component {
             }
         }
         this.onLoadScript = decodeScript(buffer);
-        this.onMouseHoverScript = decodeScript(buffer);
+        this.onMouseOver = decodeScript(buffer);
         this.onMouseLeaveScript = decodeScript(buffer);
         this.hookParams = decodeScript(buffer);
         this.anObjectArray1400 = decodeScript(buffer);
@@ -811,29 +811,29 @@ public class Component {
             this.anObjectArray1393 = decodeScript(buffer);
         }
         this.popupScript = decodeScript(buffer);
-        this.anObjectArray1386 = decodeScript(buffer);
+        this.onClick = decodeScript(buffer);
         this.anObjectArray1319 = decodeScript(buffer);
-        this.anObjectArray1302 = decodeScript(buffer);
-        this.anObjectArray1389 = decodeScript(buffer);
+        this.onRelease = decodeScript(buffer);
+        this.onHold = decodeScript(buffer);
         this.anObjectArray1451 = decodeScript(buffer);
         this.anObjectArray1394 = decodeScript(buffer);
-        this.anObjectArray1412 = decodeScript(buffer);
-        this.anObjectArray1403 = decodeScript(buffer);
-        this.anObjectArray1405 = decodeScript(buffer);
+        this.onMouseMove = decodeScript(buffer);
+        this.onKey = decodeScript(buffer);
+        this.onScrollWheel = decodeScript(buffer);
         this.varps = decodeScript3(buffer);
         this.mouseLeaveArrayParams = decodeScript3(buffer);
         this.anIntArray1402 = decodeScript3(buffer);
-        this.anIntArray1315 = decodeScript3(buffer);
-        this.anIntArray1406 = decodeScript3(buffer);
+        this.keyPressArray = decodeScript3(buffer);
+        this.mouseWheelArray = decodeScript3(buffer);
     }
 
     public void reset() {
         this.onLoadScript = null;
-        this.anObjectArray1386 = null;
+        this.onClick = null;
         this.anObjectArray1319 = null;
-        this.anObjectArray1302 = null;
-        this.anObjectArray1389 = null;
-        this.onMouseHoverScript = null;
+        this.onRelease = null;
+        this.onHold = null;
+        this.onMouseOver = null;
         this.popupScript = null;
         this.onMouseLeaveScript = null;
         this.anObjectArray1451 = null;
@@ -846,14 +846,14 @@ public class Component {
         this.mouseLeaveArrayParams = null;
         this.anObjectArray1387 = null;
         this.anIntArray1402 = null;
-        this.anObjectArray1403 = null;
-        this.anIntArray1315 = null;
-        this.anObjectArray1405 = null;
-        this.anIntArray1406 = null;
+        this.onKey = null;
+        this.keyPressArray = null;
+        this.onScrollWheel = null;
+        this.mouseWheelArray = null;
         this.anObjectArray1409 = null;
         this.params = null;
         this.anObjectArray1393 = null;
-        this.anObjectArray1412 = null;
+        this.onMouseMove = null;
         this.anObjectArray1413 = null;
         this.anObjectArray1292 = null;
         this.anObjectArray1415 = null;
@@ -1119,4 +1119,8 @@ public class Component {
 	        client.IS_COMPONENT_ON_TOP[component.cacheReference] = true;
 	    }
 	}
+
+    public boolean isIgnoredContentType() {
+        return contentType != ComponentContentType.MINIMAP && contentType != ComponentContentType.CONTENT_TYPE_1406 && contentType != ComponentContentType.GAME_WINDOW && contentType != ComponentContentType.CONTENT_TYPE_1403;
+    }
 }

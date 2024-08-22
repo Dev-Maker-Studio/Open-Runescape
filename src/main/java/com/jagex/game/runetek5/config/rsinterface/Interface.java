@@ -26,13 +26,13 @@ public class Interface {
     public static Js5ResourceProvider interfaceResource;
     public static int anInt3008;
     public Component[] components;
-    public boolean aBool999;
+    public boolean preventInteraction;
     public Component[] subComponents;
 	public static int preferenceMask;
 
     public Interface(boolean bool1, Component[] components) {
         this.components = components;
-        this.aBool999 = bool1;
+        this.preventInteraction = bool1;
     }
     
     public static void initialize(Js5ResourceProvider interfacesResource, Js5ResourceProvider meshResource, Js5ResourceProvider spriteResource) {
@@ -181,7 +181,7 @@ public class Interface {
             rsInterface = new Interface(bool3, interfaceComponents);
         } else {
             rsInterface.components = interfaceComponents;
-            rsInterface.aBool999 = bool3;
+            rsInterface.preventInteraction = bool3;
         }
         for (int componentIndex = 0; componentIndex < componentCount; componentIndex++) {
             if (rsInterface.components[componentIndex] == null) {
@@ -268,12 +268,12 @@ public class Interface {
 	            x = record.getX();
 	            y = record.getY();
 	        }
-	        if (client.aClass1187257 != null && client.frameComponent == client.aClass1187247) {
-	            client.aBool7403 = true;
-	            client.anInt7432 = 0;
-	            client.anInt7265 = 0;
-	            client.anInt7367 = GameShell.screenCanvasWidth;
-	            client.anInt7476 = client.screenCanvasHeight * -969250379;
+	        if (client.draggingComponent != null && client.frameComponent == client.selectedComponent) {
+	            client.isComponentSelected = true;
+	            client.selectedComponentX = 0;
+	            client.selectedComponentY = 0;
+	            client.selectedComponentWidth = GameShell.screenCanvasWidth;
+	            client.selectedComponentHeight = client.screenCanvasHeight * -969250379;
 	        }
 	        open_sub(null, client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379, 0, 0, x, y);
 	        if (WorldMap.worldmapComponent != null) {
@@ -293,7 +293,7 @@ public class Interface {
 	            hookRequest.params = component.params;
 	            CS2Executor.executeHookInner(hookRequest);
 	        }
-	        if (client.listComponentSettings(component).clickOptionEnabled(option - 1)) {
+	        if (client.getComponentSettings(component).clickOptionEnabled(option - 1)) {
 	            BufferedConnectionContext connection = client.getConnectionContext();
 	            if (client.gameState == GameState.UNK_0 || client.gameState == GameState.LOGGED_INGAME) {
 	                TcpPacket packet;
@@ -353,10 +353,10 @@ public class Interface {
 	}
 
 	public static Component getSub(Interface inter, Component component) {
-	    if (component.parent != -1) {
-	        return inter.getComponent(component.parent);
+	    if (component.parentId != -1) {
+	        return inter.getComponent(component.parentId);
 	    } 
-	    if (!inter.aBool999) {
+	    if (!inter.preventInteraction) {
 	        int interfaceId = component.idHash >>> 16;
 	        HashTableIterator subInterfaces = new HashTableIterator(client.OPEN_INTERFACES);
 	
@@ -370,7 +370,7 @@ public class Interface {
 	}
 
 	public static String getUseOptionString(Component component) {
-        return client.listComponentSettings(component).getUseOptionFlags() == 0 ? null
+        return client.getComponentSettings(component).getUseOptionFlags() == 0 ? null
         		: (component.targetVerb != null && !component.targetVerb.trim().isEmpty()
         				? component.targetVerb
         				: (client.DISPLAY_HIDDEN_MENU_OPTIONS ? "Hidden-use" : null));
@@ -416,7 +416,7 @@ public class Interface {
         if (defs != null) {
             int i_4;
             if (defs.slotId != -1) {
-                Component interfaceComponent = inter.getComponent(defs.parent);
+                Component interfaceComponent = inter.getComponent(defs.parentId);
                 if (interfaceComponent != null) {
                     if (interfaceComponent.itemSlots == interfaceComponent.slotChildren) {
                         interfaceComponent.itemSlots = new Component[interfaceComponent.slotChildren.length];
@@ -450,7 +450,7 @@ public class Interface {
         if (defs != null) {
             int i_4;
             if (defs.slotId != -1) {
-                Component interfaceComponent = inter.components[defs.parent & 0xffff];
+                Component interfaceComponent = inter.components[defs.parentId & 0xffff];
                 if (interfaceComponent != null) {
                     if (interfaceComponent.slotChildren == interfaceComponent.itemSlots) {
                         interfaceComponent.itemSlots = new Component[interfaceComponent.slotChildren.length];

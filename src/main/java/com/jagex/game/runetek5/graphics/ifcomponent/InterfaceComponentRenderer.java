@@ -84,7 +84,7 @@ public class InterfaceComponentRenderer {
 	    Renderers.activeToolkit.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom);
 	    for (int componentIndex = 0; componentIndex < components.length; componentIndex++) {
 	        Component component = components[componentIndex];
-	        if (component != null && (component.parent == i_1 || i_1 == -1412584499 && component == client.aClass1187257)) {
+	        if (component != null && (component.parentId == i_1 || i_1 == -1412584499 && component == client.draggingComponent)) {
 	            int componentReference;
 	            if (i_8 == -1) {
 	                client.INTERFACE_BG_COMPONENTS[client.anInt7407].setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height);
@@ -95,42 +95,42 @@ public class InterfaceComponentRenderer {
 	            component.cacheReference = componentReference;
 	            component.lastRenderedCycle = client.cycles;
 	            if (!InterfaceRenderer.isComponentHidden(component)) {
-	                if (component.contentType != 0) {
+	                if (component.contentType != null) {
 	                    Component.prepareSequenceOnInterface(component);
 	                }
 	                int drawX = component.x + offsetX;
 	                int drawY = component.y + offsetY;
 	                int drawTransparency = component.transparency;
-	                if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.listComponentSettings(component).settingsHash != 0 || component.type == ComponentType.CONTAINER) && drawTransparency > 127) {
+	                if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component).settingsHash != 0 || component.type == ComponentType.CONTAINER) && drawTransparency > 127) {
 	                    drawTransparency = 127;
 	                }
 	                int startX;
 	                int startY;
-	                if (component == client.aClass1187257) {
-	                    if (i_1 != -1412584499 && (component.anUnkSetting11 == Component.UnkSetting1.UNK_2 || component.anUnkSetting11 == Component.UnkSetting1.UNK_0 || client.listComponentSettings(component).ignoresDepthFlags())) {
+	                if (component == client.draggingComponent) {
+	                    if (i_1 != -1412584499 && (component.anUnkSetting11 == Component.UnkSetting1.UNK_2 || component.anUnkSetting11 == Component.UnkSetting1.UNK_0 || client.getComponentSettings(component).ignoresDepthFlags())) {
 	                        InterfaceComponentRenderer.aClass118Array3772 = components;
 	                        InterfaceComponentRenderer.anInt4822 = offsetX;
 	                        InterfaceComponentRenderer.anInt5157 = offsetY;
 	                        continue;
 	                    }
-	                    if (client.aBool7364 && client.aBool7403) {
+	                    if (client.aBool7364 && client.isComponentSelected) {
 	                        startX = MouseRecord.recorder.getMouseX();
 	                        startY = MouseRecord.recorder.getMouseY();
-	                        startX -= client.anInt7361;
-	                        startY -= client.anInt7362;
-	                        if (startX < client.anInt7432) {
-	                            startX = client.anInt7432;
+	                        startX -= client.mouseX;
+	                        startY -= client.mouseY;
+	                        if (startX < client.selectedComponentX) {
+	                            startX = client.selectedComponentX;
 	                        }
-	                        if (startX + component.width > client.anInt7432 + client.anInt7367) {
-	                            startX = client.anInt7432 + client.anInt7367 - component.width;
+	                        if (startX + component.width > client.selectedComponentX + client.selectedComponentWidth) {
+	                            startX = client.selectedComponentX + client.selectedComponentWidth - component.width;
 	                        }
-	                        if (startY < client.anInt7265) {
-	                            startY = client.anInt7265;
+	                        if (startY < client.selectedComponentY) {
+	                            startY = client.selectedComponentY;
 	                        }
-	                        if (startY + component.height > client.anInt7265 + client.anInt7476) {
-	                            startY = client.anInt7476 + client.anInt7265 - component.height;
+	                        if (startY + component.height > client.selectedComponentY + client.selectedComponentHeight) {
+	                            startY = client.selectedComponentHeight + client.selectedComponentY - component.height;
 	                        }
-	                        if (client.listComponentSettings(component).ignoresDepthFlags()) {
+	                        if (client.getComponentSettings(component).ignoresDepthFlags()) {
 	                            InterfaceComponentRenderer.inboundsComponentToTop(startX, startY, component.width, component.height);
 	                        }
 	                        drawX = startX;
@@ -160,7 +160,7 @@ public class InterfaceComponentRenderer {
 	                    endY = Math.min(lineStartY, clippingBottom);
 	                }
 	                if (startX < endX && startY < endY) {
-	                    if (component.contentType != 0) {
+	                    if (component.contentType != null) {
 	                        if (component.contentType == GAME_WINDOW || component.contentType == CONTENT_TYPE_1403) {
 	                            client.drawGameArea(drawX, drawY, component.width, component.height, component.contentType == CONTENT_TYPE_1403);
 	                            EntityUpdating.method12366(componentReference, startX, startY, endX, endY, drawX, drawY);
@@ -567,7 +567,7 @@ public class InterfaceComponentRenderer {
 	    } else {
 	        component.y = y - component.height - (y * component.basePositionY >> 14);
 	    }
-	    if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.listComponentSettings(component).settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
+	    if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component).settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
 	        if (component.x < 0) {
 	            component.x = 0;
 	        } else if (component.x + component.width > x) {

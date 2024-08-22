@@ -264,7 +264,7 @@ public class MenuInteraction {
 	        	Component component = Component.listIcomponent(attr2, attr1);
 	            if (component != null) {
 	                InterfaceComponentRenderer.method1170();
-	                IFEvents class282Sub1021 = client.listComponentSettings(component);
+	                IFEvents class282Sub1021 = client.getComponentSettings(component);
 	                InterfaceRenderer.setUseOptionFlags(component, class282Sub1021.getUseOptionFlags(), class282Sub1021.interfaceId);
 	                client.useOnType = Interface.getUseOptionString(component);
 	                if (client.useOnType == null) {
@@ -567,7 +567,7 @@ public class MenuInteraction {
 	                bool20 = true;
 	            }
 	            if (bool20 && MiniMenu.entryCount > 0) {
-	                if (client.aClass1187257 == null && client.anInt7184 == 0) {
+	                if (client.draggingComponent == null && client.menuItemCount == 0) {
 	                    StaticMethods.method4653(mouseX, mouseY);
 	                } else {
 	                    MiniMenu.anInt167 = 2;
@@ -582,7 +582,7 @@ public class MenuInteraction {
 	                        InterfaceComponentRenderer.method1170();
 	                    }
 	                } else {
-	                    boolean bool19 = client.aClass1187257 != null || client.anInt7184 > 0;
+	                    boolean bool19 = client.draggingComponent != null || client.menuItemCount > 0;
 	                    if (bool19) {
 	                        MiniMenu.anInt167 = 1;
 	                        MiniMenu.aCacheableNodeSub7438 = MiniMenu.aCacheableNodeSub79445;
@@ -591,7 +591,7 @@ public class MenuInteraction {
 	                    }
 	                }
 	            }
-	            if (client.aClass1187257 == null && client.anInt7184 == 0) {
+	            if (client.draggingComponent == null && client.menuItemCount == 0) {
 	                MiniMenu.anInt167 = 0;
 	                MiniMenu.aCacheableNodeSub7438 = null;
 	            }

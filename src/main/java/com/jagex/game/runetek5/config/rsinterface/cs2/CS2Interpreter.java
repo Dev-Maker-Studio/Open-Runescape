@@ -533,22 +533,22 @@ public class CS2Interpreter {
             case CC_SETRESUMETEXT: //(pause text is official name but that's absolutely cooked)
                 method541(exec);
                 break;
-            case instr6737:
-                method12118(exec);
+            case CC_SETTARGETOPCURSOR:
+                ccSetTargetOpCursor(exec);
                 break;
-            case instr6083:
+            case CC_SETOPCHAR:
                 method6305(exec);
                 break;
-            case instr6258:
+            case CC_SETOPTCHAR:
                 method5512(exec);
                 break;
-            case instr6085:
+            case CC_SETOPKEY:
                 method4200(exec);
                 break;
-            case instr6086:
+            case CC_SETOPTKEY:
                 method15416(exec);
                 break;
-            case instr6087:
+            case CC_SETMOUSEOVERCURSOR:
                 method6776(exec);
                 break;
             case instr6088:
@@ -4537,7 +4537,7 @@ public class CS2Interpreter {
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         Interface interface4 = Interface.INTERFACES[i_2 >> 16];
         assert icomponentdefinitions3 != null;
-        method4149(icomponentdefinitions3, executor);
+        setTargetOpCursor(icomponentdefinitions3, executor);
     }
 
     public static void method1387(CS2Executor executor) {
@@ -5240,7 +5240,7 @@ public class CS2Interpreter {
     public static void method1562(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
-        executor.intStack[++executor.intStackPtr - 1] = client.listComponentSettings(icomponentdefinitions3).getUseOptionFlags();
+        executor.intStack[++executor.intStackPtr - 1] = client.getComponentSettings(icomponentdefinitions3).getUseOptionFlags();
     }
 
     public static void method2101(CS2Executor executor) {
@@ -5510,7 +5510,7 @@ public class CS2Interpreter {
         Component icomponentdefinitions5 = Component.listIcomponent(i_2 << 16 | i_3, i_4);
         InterfaceComponentRenderer.method1170();
         assert icomponentdefinitions5 != null;
-        IFEvents class282Sub106 = client.listComponentSettings(icomponentdefinitions5);
+        IFEvents class282Sub106 = client.getComponentSettings(icomponentdefinitions5);
         InterfaceRenderer.setUseOptionFlags(icomponentdefinitions5, class282Sub106.getUseOptionFlags(), class282Sub106.interfaceId);
     }
 
@@ -7112,7 +7112,7 @@ public class CS2Interpreter {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         assert icomponentdefinitions3 != null;
-        executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3.parent;
+        executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3.parentId;
     }
 
     public static void setPrivateFilter(CS2Executor executor) {
@@ -7805,7 +7805,7 @@ public class CS2Interpreter {
     public static void method13491(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
-        executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3.parent;
+        executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3.parentId;
     }
 
     public static void getWorldLanguage(CS2Executor executor) {
@@ -9447,7 +9447,7 @@ public class CS2Interpreter {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         assert icomponentdefinitions3 != null;
-        executor.intStack[++executor.intStackPtr - 1] = client.listComponentSettings(icomponentdefinitions3).getUseOptionFlags();
+        executor.intStack[++executor.intStackPtr - 1] = client.getComponentSettings(icomponentdefinitions3).getUseOptionFlags();
     }
 
     public static void method6042(CS2Executor executor) {
@@ -10299,11 +10299,11 @@ public class CS2Interpreter {
         method15511(icomponentdefinitions3, interface4, executor);
     }
 
-    public static void method12118(CS2Executor executor) {
+    public static void ccSetTargetOpCursor(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
         Interface interface4 = underlaydefinition2.inter;
-        method4149(icomponentdefinitions3, executor);
+        setTargetOpCursor(icomponentdefinitions3, executor);
     }
 
     public static void method296(CS2Executor executor) {
@@ -10768,7 +10768,7 @@ public class CS2Interpreter {
     public static void method15511(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
         icomponentdefinitions0.spriteScale = cs2executor2.intStack[--cs2executor2.intStackPtr];
         Component.redrawComponent(icomponentdefinitions0);
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfangleUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -10850,7 +10850,7 @@ public class CS2Interpreter {
                 return;
             }
             icomponentdefinitions0.keyTriggeringAction = new byte[11][];
-            icomponentdefinitions0.triggeredKeyFunctionMasks = new byte[11][];
+            icomponentdefinitions0.keyTriggerParams = new byte[11][];
             icomponentdefinitions0.cycleSteps = new int[11];
             icomponentdefinitions0.anIntArray1267 = new int[11];
         }
@@ -10905,7 +10905,7 @@ public class CS2Interpreter {
             component.scrollY = 0;
         }
         Component.redrawComponent(component);
-        if (component.slotId == -1 && !intr.aBool999) {
+        if (component.slotId == -1 && !intr.preventInteraction) {
             PulseEventQueue.delayedIfscrollposUpdate(component.idHash);
         }
     }
@@ -10915,7 +10915,7 @@ public class CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4.substring(0, string_4.length() - 1);
         }
-        icomponentdefinitions0.onMouseHoverScript = popParamsDynamic(string_4, cs2executor2);
+        icomponentdefinitions0.onMouseOver = popParamsDynamic(string_4, cs2executor2);
         icomponentdefinitions0.hasScript = true;
     }
 
@@ -10935,7 +10935,7 @@ public class CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4.substring(0, string_4.length() - 1);
         }
-        icomponentdefinitions0.anObjectArray1389 = popParamsDynamic(string_4, cs2executor2);
+        icomponentdefinitions0.onHold = popParamsDynamic(string_4, cs2executor2);
         icomponentdefinitions0.hasScript = true;
     }
 
@@ -10944,7 +10944,7 @@ public class CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4.substring(0, string_4.length() - 1);
         }
-        icomponentdefinitions0.anObjectArray1412 = popParamsDynamic(string_4, cs2executor2);
+        icomponentdefinitions0.onMouseMove = popParamsDynamic(string_4, cs2executor2);
         icomponentdefinitions0.hasScript = true;
     }
 
@@ -11014,8 +11014,8 @@ public class CS2Interpreter {
         if (ints_5 != null) {
             string_4 = string_4.substring(0, string_4.length() - 1);
         }
-        icomponentdefinitions0.anObjectArray1405 = popParamsDynamic(string_4, cs2executor2);
-        icomponentdefinitions0.anIntArray1406 = ints_5;
+        icomponentdefinitions0.onScrollWheel = popParamsDynamic(string_4, cs2executor2);
+        icomponentdefinitions0.mouseWheelArray = ints_5;
         icomponentdefinitions0.hasScript = true;
     }
 
@@ -11032,7 +11032,7 @@ public class CS2Interpreter {
     public static void ifSetColor(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
         icomponentdefinitions0.color = cs2executor2.intStack[--cs2executor2.intStackPtr];
         Component.redrawComponent(icomponentdefinitions0);
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfcolorUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11117,8 +11117,8 @@ public class CS2Interpreter {
         if (ints_5 != null) {
             string_4 = string_4.substring(0, string_4.length() - 1);
         }
-        icomponentdefinitions0.anObjectArray1403 = popParamsDynamic(string_4, cs2executor2);
-        icomponentdefinitions0.anIntArray1315 = ints_5;
+        icomponentdefinitions0.onKey = popParamsDynamic(string_4, cs2executor2);
+        icomponentdefinitions0.keyPressArray = ints_5;
         icomponentdefinitions0.hasScript = true;
     }
 
@@ -11174,7 +11174,7 @@ public class CS2Interpreter {
             } else {
                 Component icomponentdefinitions12 = new Component();
                 icomponentdefinitions12.type = ComponentType.forId(i_2);
-                icomponentdefinitions12.parent = icomponentdefinitions12.idHash = icomponentdefinitions7.idHash;
+                icomponentdefinitions12.parentId = icomponentdefinitions12.idHash = icomponentdefinitions7.idHash;
                 icomponentdefinitions12.slotId = i_3;
                 icomponentdefinitions7.slotChildren[i_3] = icomponentdefinitions12;
                 if (icomponentdefinitions7.slotChildren != icomponentdefinitions7.itemSlots) {
@@ -11210,7 +11210,7 @@ public class CS2Interpreter {
             icomponentdefinitions0.spriteId = i_4;
             Component.redrawComponent(icomponentdefinitions0);
         }
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfgraphicUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11243,7 +11243,7 @@ public class CS2Interpreter {
             icomponentdefinitions0.hidden = bool4;
             Component.redrawComponent(icomponentdefinitions0);
         }
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfhide(icomponentdefinitions0.idHash);
         }
     }
@@ -11276,13 +11276,13 @@ public class CS2Interpreter {
         icomponentdefinitions0.hasScript = true;
     }
 
-    public static void method7429(Component icomponentdefinitions0, int i_1, byte[] bytes_2, byte[] bytes_3) {
+    public static void setTriggerKey(Component icomponentdefinitions0, int i_1, byte[] bytes_2, byte[] bytes_3) {
         if (icomponentdefinitions0.keyTriggeringAction == null) {
             if (bytes_2 == null) {
                 return;
             }
             icomponentdefinitions0.keyTriggeringAction = new byte[11][];
-            icomponentdefinitions0.triggeredKeyFunctionMasks = new byte[11][];
+            icomponentdefinitions0.keyTriggerParams = new byte[11][];
             icomponentdefinitions0.cycleSteps = new int[11];
             icomponentdefinitions0.anIntArray1267 = new int[11];
         }
@@ -11298,14 +11298,14 @@ public class CS2Interpreter {
                 }
             }
         }
-        icomponentdefinitions0.triggeredKeyFunctionMasks[i_1] = bytes_3;
+        icomponentdefinitions0.keyTriggerParams[i_1] = bytes_3;
     }
 
     public static void ifSetNPCHead(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
         icomponentdefinitions0.mediaType = MediaType.NPC_HEAD;
         icomponentdefinitions0.npcCustomisation = null;
         icomponentdefinitions0.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr];
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11313,7 +11313,7 @@ public class CS2Interpreter {
     public static void method2960(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
         icomponentdefinitions0.textAntiMacro = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1;
         Component.redrawComponent(icomponentdefinitions0);
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedClearIftextantimacro(icomponentdefinitions0.idHash);
         }
     }
@@ -11357,7 +11357,7 @@ public class CS2Interpreter {
     public static void method13468(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
         icomponentdefinitions0.clickMask = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1;
         Component.redrawComponent(icomponentdefinitions0);
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfclickmaskUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11375,7 +11375,7 @@ public class CS2Interpreter {
         cs2executor4.intStackPtr -= 2;
         int itemId = cs2executor4.intStack[cs2executor4.intStackPtr];
         int i_7 = cs2executor4.intStack[cs2executor4.intStackPtr + 1];
-        if (ifComp.slotId == -1 && !interface1.aBool999) {
+        if (ifComp.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfitemUpdate(ifComp.idHash);
             PulseEventQueue.delayedIfangleUpdate(ifComp.idHash);
             PulseEventQueue.delayedIfoffsetUpdate(ifComp.idHash);
@@ -11410,7 +11410,7 @@ public class CS2Interpreter {
             component.text = text;
             Component.redrawComponent(component);
         }
-        if (component.slotId == -1 && !intr.aBool999) {
+        if (component.slotId == -1 && !intr.preventInteraction) {
             PulseEventQueue.delayedIftextUpdate(component.idHash);
         }
     }
@@ -11484,7 +11484,7 @@ public class CS2Interpreter {
     public static void setIfFont(Component component, Interface intr, CS2Executor cs2) {
         component.fontId = cs2.intStack[--cs2.intStackPtr];
         Component.redrawComponent(component);
-        if (component.slotId == -1 && !intr.aBool999) {
+        if (component.slotId == -1 && !intr.preventInteraction) {
             PulseEventQueue.delayedIffontUpdate(component.idHash);
         }
     }
@@ -11519,7 +11519,7 @@ public class CS2Interpreter {
         if (icomponentdefinitions0.type == ComponentType.CONTAINER) {
             Component.method483(interface1, icomponentdefinitions0, false);
         }
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfpositionUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11546,7 +11546,7 @@ public class CS2Interpreter {
             icomponentdefinitions0.mediaType = MediaType.ITEM_CONTAINER_MALE;
         }
         icomponentdefinitions0.wearCol = cs2executor2.intStack[cs2executor2.intStackPtr + 3] == 1;
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11591,7 +11591,7 @@ public class CS2Interpreter {
         icomponentdefinitions0.mediaType = MediaType.RAW_MODEL;
         icomponentdefinitions0.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr];
         Component.redrawComponent(icomponentdefinitions0);
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11604,7 +11604,7 @@ public class CS2Interpreter {
         if (i_4 >= 0 && i_4 < 5) {
             icomponentdefinitions0.retexture(i_4, s_5, s_6);
             Component.redrawComponent(icomponentdefinitions0);
-            if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+            if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
                 PulseEventQueue.delayedIfretex(icomponentdefinitions0.idHash, i_4);
             }
         }
@@ -11624,7 +11624,7 @@ public class CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4.substring(0, string_4.length() - 1);
         }
-        icomponentdefinitions0.anObjectArray1302 = popParamsDynamic(string_4, cs2executor2);
+        icomponentdefinitions0.onRelease = popParamsDynamic(string_4, cs2executor2);
         icomponentdefinitions0.hasScript = true;
     }
 
@@ -11655,7 +11655,7 @@ public class CS2Interpreter {
         icomponentdefinitions0.mediaType = MediaType.PLAYER_HEAD;
         icomponentdefinitions0.primaryMediaId = PlayerUpdate.myPlayerIndex;
         icomponentdefinitions0.secondaryMediaId = 0;
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11690,7 +11690,7 @@ public class CS2Interpreter {
         icomponentdefinitions0.mediaType = MediaType.PLAYER_MODEL;
         icomponentdefinitions0.primaryMediaId = PlayerUpdate.myPlayerIndex;
         icomponentdefinitions0.secondaryMediaId = 0;
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11709,7 +11709,7 @@ public class CS2Interpreter {
         icomponentdefinitions0.spriteYaw = cs2executor2.intStack[cs2executor2.intStackPtr + 4];
         icomponentdefinitions0.spriteScale = cs2executor2.intStack[cs2executor2.intStackPtr + 5];
         Component.redrawComponent(icomponentdefinitions0);
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfangleUpdate(icomponentdefinitions0.idHash);
             PulseEventQueue.delayedIfoffsetUpdate(icomponentdefinitions0.idHash);
         }
@@ -11729,7 +11729,7 @@ public class CS2Interpreter {
     public static void method5066(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
         icomponentdefinitions0.mediaType = MediaType.PLAYER_MODEL;
         icomponentdefinitions0.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr];
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11741,7 +11741,7 @@ public class CS2Interpreter {
     }
 
     public static void method6942(Component component) {
-        if (client.listComponentSettings(component).continueOptionEnabled() && client.aClass1187352 == null) {
+        if (client.getComponentSettings(component).continueOptionEnabled() && client.aClass1187352 == null) {
             PacketEncoder.continueInterfacePressed(component.idHash, component.slotId);
             client.aClass1187352 = Component.listIcomponent(component.idHash, component.slotId);
             assert client.aClass1187352 != null;
@@ -11792,7 +11792,7 @@ public class CS2Interpreter {
             component.animation = sequenceId;
             Component.redrawComponent(component);
         }
-        if (component.slotId == -1 && !intr.aBool999) {
+        if (component.slotId == -1 && !intr.preventInteraction) {
             PulseEventQueue.delayedIfanimUpdate(component.idHash);
         }
     }
@@ -11817,7 +11817,7 @@ public class CS2Interpreter {
             icomponentdefinitions0.anInt1435 = i_4;
             Component.redrawComponent(icomponentdefinitions0);
         }
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.method5581(icomponentdefinitions0.idHash);
         }
     }
@@ -11936,7 +11936,7 @@ public class CS2Interpreter {
     }
 
     public static void setNoClickThrough(Component icomponentdefinitions0, CS2Executor cs2executor2) {
-        icomponentdefinitions0.noClickThrough = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1;
+        icomponentdefinitions0.preventClickThrough = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1;
     }
 
     public static void method12209(Component icomponentdefinitions0, CS2Executor cs2executor2) {
@@ -11944,13 +11944,13 @@ public class CS2Interpreter {
         byte b_4 = 10;
         byte[] bytes_5 = {(byte) cs2executor2.intStack[cs2executor2.intStackPtr]};
         byte[] bytes_6 = {(byte) cs2executor2.intStack[cs2executor2.intStackPtr + 1]};
-        method7429(icomponentdefinitions0, b_4, bytes_5, bytes_6);
+        setTriggerKey(icomponentdefinitions0, b_4, bytes_5, bytes_6);
     }
 
     public static void method1838(Component icomponentdefinitions0, byte[] bytes_1, byte[] bytes_2, CS2Executor cs2executor3) {
         int i_5 = cs2executor3.intStack[--cs2executor3.intStackPtr] - 1;
         if (i_5 >= 0 && i_5 <= 9) {
-            method7429(icomponentdefinitions0, i_5, bytes_1, bytes_2);
+            setTriggerKey(icomponentdefinitions0, i_5, bytes_1, bytes_2);
         } else {
             throw new RuntimeException();
         }
@@ -11961,7 +11961,7 @@ public class CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4.substring(0, string_4.length() - 1);
         }
-        icomponentdefinitions0.anObjectArray1386 = popParamsDynamic(string_4, cs2executor2);
+        icomponentdefinitions0.onClick = popParamsDynamic(string_4, cs2executor2);
         icomponentdefinitions0.hasScript = true;
     }
 
@@ -11978,7 +11978,7 @@ public class CS2Interpreter {
         icomponentdefinitions0.mediaType = MediaType.NPC_MODEL;
         icomponentdefinitions0.npcCustomisation = null;
         icomponentdefinitions0.primaryMediaId = cs2executor2.intStack[--cs2executor2.intStackPtr];
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayIfcontentUpdate(icomponentdefinitions0.idHash);
         }
     }
@@ -11996,8 +11996,8 @@ public class CS2Interpreter {
         icomponentdefinitions0.hasScript = true;
     }
 
-    public static void method4149(Component icomponentdefinitions0, CS2Executor cs2executor2) {
-        icomponentdefinitions0.clickType = cs2executor2.intStack[--cs2executor2.intStackPtr];
+    public static void setTargetOpCursor(Component icomponentdefinitions0, CS2Executor cs2executor2) {
+        icomponentdefinitions0.targetOpCursor = cs2executor2.intStack[--cs2executor2.intStackPtr];
     }
 
     public static void method7667(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
@@ -12008,7 +12008,7 @@ public class CS2Interpreter {
         if (i_4 >= 0 && i_4 < 5) {
             icomponentdefinitions0.recolor(i_4, s_5, s_6);
             Component.redrawComponent(icomponentdefinitions0);
-            if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+            if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
                 PulseEventQueue.delayedIfrecol(icomponentdefinitions0.idHash, i_4);
             }
         }
@@ -12017,7 +12017,7 @@ public class CS2Interpreter {
     public static void method6697(Component icomponentdefinitions0, Interface interface1, CS2Executor cs2executor2) {
         icomponentdefinitions0.monospaced = cs2executor2.intStack[--cs2executor2.intStackPtr] == 1;
         Component.redrawComponent(icomponentdefinitions0);
-        if (icomponentdefinitions0.slotId == -1 && !interface1.aBool999) {
+        if (icomponentdefinitions0.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfmonospacedUpdate(icomponentdefinitions0.idHash);
         }
     }

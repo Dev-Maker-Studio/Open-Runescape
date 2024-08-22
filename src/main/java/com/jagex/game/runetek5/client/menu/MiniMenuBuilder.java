@@ -410,7 +410,7 @@ public class MiniMenuBuilder {
 	public static void interfaceComponentHovered(Component component) {
 	    if (client.interfaceSelectionActive) {
 	        ParamType param = MiniMenu.USE_INTERFACE_ID != -1 ? TypeLists.PARAMS.list(MiniMenu.USE_INTERFACE_ID) : null;
-	        if (client.listComponentSettings(component).isTargetableByUse() && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x20) != 0 && (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
+	        if (client.getComponentSettings(component).isTargetableByUse() && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x20) != 0 && (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
 	            MiniMenu.addEntry(client.useOnType, client.useOnTarget + " " + "->" + " " + component.opBase, MiniMenu.useOnCursor, 58, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        }
 	    }
@@ -422,7 +422,7 @@ public class MiniMenuBuilder {
 	    }
 	    String action = Interface.getUseOptionString(component);
 	    if (action != null) {
-	        MiniMenu.addEntry(action, component.opBase, component.clickType, 25, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
+	        MiniMenu.addEntry(action, component.opBase, component.targetOpCursor, 25, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	    }
 	    for (int option = 4; option >= 0; --option) {
 	        String menuAction = Component.componentMenuOption(component, option);
@@ -430,7 +430,7 @@ public class MiniMenuBuilder {
 	            MiniMenu.addEntry(menuAction, component.opBase, Component.getCursor(component, option), 57, component.containerItemId, option + 1, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        }
 	    }
-	    if (client.listComponentSettings(component).continueOptionEnabled()) {
+	    if (client.getComponentSettings(component).continueOptionEnabled()) {
 	        if (component.resumeText != null) {
 	            MiniMenu.addEntry(component.resumeText, "", -1, 30, component.containerItemId, 0L, component.slotId, component.idHash, true, false, component.slotId | component.idHash, false);
 	        } else {

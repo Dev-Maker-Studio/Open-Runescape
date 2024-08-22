@@ -183,7 +183,7 @@ public class client extends GameShell {
     public static final int[] RECENTLY_USED_ITEM_CONTAINERS;
     public static final int[] anIntArray7283;
     public static final int[] anIntArray7150;
-    public static final int[] anIntArray7387;
+    public static final int[] recentMouseWheels;
     public static final int[] CLAN_VAR_KEYS;
     public static final NodeCollection aClass4827233;
     public static final NodeCollection aClass4827404;
@@ -348,27 +348,27 @@ public class client extends GameShell {
     public static int anInt7345;
     public static int anInt7346;
     public static int anInt7351;
-    public static Component aClass1187257;
-    public static Component aClass1187247;
-    public static int anInt7361;
-    public static int anInt7362;
-    public static Component aClass1187370;
-    public static boolean aBool7403;
-    public static int anInt7432;
-    public static int anInt7265;
-    public static int anInt7367;
-    public static int anInt7476;
-    public static boolean aBool7369;
-    public static int anInt7252;
-    public static int anInt7215;
+    public static Component draggingComponent;
+    public static Component selectedComponent;
+    public static int mouseX;
+    public static int mouseY;
+    public static Component hoveredComponent;
+    public static boolean isComponentSelected;
+    public static int selectedComponentX;
+    public static int selectedComponentY;
+    public static int selectedComponentWidth;
+    public static int selectedComponentHeight;
+    public static boolean isDraggingComponent;
+    public static int dragStartX;
+    public static int dragStartY;
     public static boolean aBool7364;
-    public static int anInt7184;
-    public static boolean aBool7374;
+    public static int menuItemCount;
+    public static boolean isMapMoving;
     public static int pulseEventConfigsPtr;
     public static int RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS;
     public static int anInt7384;
-    public static int anInt7368;
-    public static int anInt7388;
+    public static int keyCycle;
+    public static int mouseWheelCycle;
     public static int CLAN_VAR_COUNTER;
     public static int anInt7386;
     public static int anInt7179;
@@ -524,22 +524,22 @@ public class client extends GameShell {
         prefixMinimenuOps = false;
         GAME_SCREEN_INTERFACE = null;
         CLIP_INTERFACES = false;
-        aClass1187257 = null;
-        aClass1187247 = null;
-        anInt7361 = 0;
-        anInt7362 = 0;
-        aClass1187370 = null;
-        aBool7403 = false;
-        anInt7432 = -1;
-        anInt7265 = -1;
-        anInt7367 = -1;
-        anInt7476 = -1;
-        aBool7369 = false;
-        anInt7252 = -1;
-        anInt7215 = -1;
+        draggingComponent = null;
+        selectedComponent = null;
+        mouseX = 0;
+        mouseY = 0;
+        hoveredComponent = null;
+        isComponentSelected = false;
+        selectedComponentX = -1;
+        selectedComponentY = -1;
+        selectedComponentWidth = -1;
+        selectedComponentHeight = -1;
+        isDraggingComponent = false;
+        dragStartX = -1;
+        dragStartY = -1;
         aBool7364 = false;
-        anInt7184 = 0;
-        aBool7374 = false;
+        menuItemCount = 0;
+        isMapMoving = false;
         CommandExecutor.teleportCommandRequested = false;
         anInt7347 = 1;
         PULSE_EVENT_CONFIGS_CACHE = new int[32];
@@ -549,9 +549,9 @@ public class client extends GameShell {
         anIntArray7283 = new int[32];
         anInt7384 = 0;
         anIntArray7150 = new int[32];
-        anInt7368 = 0;
-        anIntArray7387 = new int[32];
-        anInt7388 = 0;
+        keyCycle = 0;
+        recentMouseWheels = new int[32];
+        mouseWheelCycle = 0;
         CLAN_VAR_KEYS = new int[32];
         CLAN_VAR_COUNTER = 0;
         anInt7391 = 0;
@@ -618,13 +618,13 @@ public class client extends GameShell {
         HITSPLAT_SIZE_CACHE = new int[4];
     }
 
-    public static IFEvents listComponentSettings(Component icomponentdefinitions0) {
+    public static IFEvents getComponentSettings(Component icomponentdefinitions0) {
         IFEvents class282Sub101 = (IFEvents) ICOMPONENT_SETTINGS_SLOTS.get(((long) icomponentdefinitions0.idHash << 32) + icomponentdefinitions0.slotId);
         return class282Sub101 != null ? class282Sub101 : icomponentdefinitions0.targetParams;
     }
 
     public static Component method11634(Component component) {
-        IFEvents targetParams = listComponentSettings(component);
+        IFEvents targetParams = getComponentSettings(component);
         if (targetParams.ignoresDepthFlags()) {
             return client.frameComponent;
         }
@@ -772,7 +772,7 @@ public class client extends GameShell {
     }
 
     public static boolean hasDepthFlags(Component component) {
-        IFEvents targetParams = listComponentSettings(component);
+        IFEvents targetParams = getComponentSettings(component);
         return targetParams.depthFlags() > 0 || (targetParams.ignoresDepthFlags() || component.depthChildOverride != null);
     }
 
@@ -959,9 +959,9 @@ public class client extends GameShell {
                                 MenuInteraction.aClass1184825 = null;
                             }
                         }
-                        aClass1187370 = null;
-                        aBool7369 = false;
-                        aBool7403 = false;
+                        hoveredComponent = null;
+                        isDraggingComponent = false;
+                        isComponentSelected = false;
                         WorldMap.worldmapComponent = null;
                         InterfaceComponentRenderer.method544(null, -1, -1);
                         if (!interfaceSelectionActive) {
@@ -992,9 +992,9 @@ public class client extends GameShell {
                                                         hookRequest = (HookRequest) PENDING_HOOK_REQUESTS.popHead();
                                                         if (hookRequest == null) {
                                                             if (WorldMap.worldmapComponent == null) {
-                                                                anInt7184 = 0;
+                                                                menuItemCount = 0;
                                                             }
-                                                            if (aClass1187257 != null) {
+                                                            if (draggingComponent != null) {
                                                                 client.method2827();
                                                             }
                                                             MenuInteraction.method7703();
@@ -1102,7 +1102,7 @@ public class client extends GameShell {
                                                         if (icomponentdefinitions10.slotId < 0) {
                                                             break;
                                                         }
-                                                        icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parent);
+                                                        icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parentId);
                                                     } while (icomponentdefinitions11 == null || icomponentdefinitions11.slotChildren == null || icomponentdefinitions10.slotId >= icomponentdefinitions11.slotChildren.length || icomponentdefinitions10 != icomponentdefinitions11.slotChildren[icomponentdefinitions10.slotId]);
                                                     CS2Executor.executeHookInner(hookRequest);
                                                 }
@@ -1111,7 +1111,7 @@ public class client extends GameShell {
                                             if (icomponentdefinitions10.slotId < 0) {
                                                 break;
                                             }
-                                            icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parent);
+                                            icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parentId);
                                         } while (icomponentdefinitions11 == null || icomponentdefinitions11.slotChildren == null || icomponentdefinitions10.slotId >= icomponentdefinitions11.slotChildren.length || icomponentdefinitions10 != icomponentdefinitions11.slotChildren[icomponentdefinitions10.slotId]);
                                         CS2Executor.executeHookInner(hookRequest);
                                     }
@@ -1120,7 +1120,7 @@ public class client extends GameShell {
                                 if (icomponentdefinitions10.slotId < 0) {
                                     break;
                                 }
-                                icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parent);
+                                icomponentdefinitions11 = Component.fromHash(icomponentdefinitions10.parentId);
                             } while (icomponentdefinitions11 == null || icomponentdefinitions11.slotChildren == null || icomponentdefinitions10.slotId >= icomponentdefinitions11.slotChildren.length || icomponentdefinitions10 != icomponentdefinitions11.slotChildren[icomponentdefinitions10.slotId]);
                             CS2Executor.executeHookInner(hookRequest);
                         }
@@ -2033,7 +2033,7 @@ public class client extends GameShell {
                                     do {
                                         hookRequest = (HookRequest) PENDING_HOOK_REQUESTS.popHead();
                                         if (hookRequest == null) {
-                                            if (aClass1187257 != null) {
+                                            if (draggingComponent != null) {
                                                 client.method2827();
                                             }
 
@@ -2089,7 +2089,7 @@ public class client extends GameShell {
                                             break;
                                         }
 
-                                        parentComponent = Component.fromHash(srcComponent.parent);
+                                        parentComponent = Component.fromHash(srcComponent.parentId);
                                     } while (parentComponent == null || parentComponent.slotChildren == null || srcComponent.slotId >= parentComponent.slotChildren.length || srcComponent != parentComponent.slotChildren[srcComponent.slotId]);
 
                                     CS2Executor.executeHookInner(hookRequest);
@@ -2101,7 +2101,7 @@ public class client extends GameShell {
                                 break;
                             }
 
-                            parentComponent = Component.fromHash(srcComponent.parent);
+                            parentComponent = Component.fromHash(srcComponent.parentId);
                         } while (parentComponent == null || parentComponent.slotChildren == null || srcComponent.slotId >= parentComponent.slotChildren.length || srcComponent != parentComponent.slotChildren[srcComponent.slotId]);
 
                         CS2Executor.executeHookInner(hookRequest);
@@ -2113,7 +2113,7 @@ public class client extends GameShell {
                     break;
                 }
 
-                parentComponent = Component.fromHash(srcComponent.parent);
+                parentComponent = Component.fromHash(srcComponent.parentId);
             } while (parentComponent == null || parentComponent.slotChildren == null || srcComponent.slotId >= parentComponent.slotChildren.length || srcComponent != parentComponent.slotChildren[srcComponent.slotId]);
 
             CS2Executor.executeHookInner(hookRequest);
@@ -2369,77 +2369,77 @@ public class client extends GameShell {
     }
 
     public static void method2827() {
-        Component.redrawComponent(aClass1187257);
+        Component.redrawComponent(draggingComponent);
         ++InterfaceRenderer.anInt8308;
-        if (aBool7369 && aBool7403) {
+        if (isDraggingComponent && isComponentSelected) {
             int i_1 = MouseRecord.recorder.getMouseX();
             int i_2 = MouseRecord.recorder.getMouseY();
-            i_1 -= anInt7361;
-            i_2 -= anInt7362;
-            if (i_1 < anInt7432) {
-                i_1 = anInt7432;
+            i_1 -= mouseX;
+            i_2 -= mouseY;
+            if (i_1 < selectedComponentX) {
+                i_1 = selectedComponentX;
             }
-            if (i_1 + aClass1187257.width > anInt7367 + anInt7432) {
-                i_1 = anInt7367 + anInt7432 - aClass1187257.width;
+            if (i_1 + draggingComponent.width > selectedComponentWidth + selectedComponentX) {
+                i_1 = selectedComponentWidth + selectedComponentX - draggingComponent.width;
             }
-            if (i_2 < anInt7265) {
-                i_2 = anInt7265;
+            if (i_2 < selectedComponentY) {
+                i_2 = selectedComponentY;
             }
-            if (i_2 + aClass1187257.height > anInt7265 + anInt7476) {
-                i_2 = anInt7476 + anInt7265 - aClass1187257.height;
+            if (i_2 + draggingComponent.height > selectedComponentY + selectedComponentHeight) {
+                i_2 = selectedComponentHeight + selectedComponentY - draggingComponent.height;
             }
             int i_3;
             int i_4;
-            if (aClass1187247 == client.frameComponent) {
+            if (selectedComponent == client.frameComponent) {
                 i_3 = i_1;
                 i_4 = i_2;
             } else {
-                i_3 = i_1 - anInt7432 + aClass1187247.scrollX;
-                i_4 = i_2 - anInt7265 + aClass1187247.scrollY;
+                i_3 = i_1 - selectedComponentX + selectedComponent.scrollX;
+                i_4 = i_2 - selectedComponentY + selectedComponent.scrollY;
             }
             HookRequest hookrequest5;
             if (!MouseRecord.recorder.isMouseButtonPressed()) {
                 if (aBool7364) {
                     InterfaceComponentRenderer.method1170();
-                    if (aClass1187257.anObjectArray1394 != null) {
+                    if (draggingComponent.anObjectArray1394 != null) {
                         hookrequest5 = new HookRequest();
-                        hookrequest5.source = aClass1187257;
+                        hookrequest5.source = draggingComponent;
                         hookrequest5.mouseX = i_3;
                         hookrequest5.mouseY = i_4;
-                        hookrequest5.aClass1188057 = aClass1187370;
-                        hookrequest5.params = aClass1187257.anObjectArray1394;
+                        hookrequest5.aClass1188057 = hoveredComponent;
+                        hookrequest5.params = draggingComponent.anObjectArray1394;
                         CS2Executor.executeHookInner(hookrequest5);
                     }
-                    if (aClass1187370 != null && method11634(aClass1187257) != null) {
-                        PacketEncoder.method2076(aClass1187257, aClass1187370);
+                    if (hoveredComponent != null && method11634(draggingComponent) != null) {
+                        PacketEncoder.method2076(draggingComponent, hoveredComponent);
                     }
                 } else if ((anInt7339 == 1 || MiniMenu.method12562()) && MiniMenu.entryCount > 2) {
-                    StaticMethods.method4164(anInt7361 + anInt7252, anInt7215 + anInt7362);
+                    StaticMethods.method4164(mouseX + dragStartX, dragStartY + mouseY);
                 } else if (MiniMenu.hasEntries()) {
-                    StaticMethods.method4164(anInt7252 + anInt7361, anInt7215 + anInt7362);
+                    StaticMethods.method4164(dragStartX + mouseX, dragStartY + mouseY);
                 }
-                aClass1187257 = null;
-                aClass1187247 = null;
+                draggingComponent = null;
+                selectedComponent = null;
             } else {
-                if (InterfaceRenderer.anInt8308 > aClass1187257.anInt1381) {
-                    int i_7 = i_1 - anInt7252;
-                    int i_6 = i_2 - anInt7215;
-                    if (i_7 > aClass1187257.anInt1380 || i_7 < -aClass1187257.anInt1380 || i_6 > aClass1187257.anInt1380 || i_6 < -aClass1187257.anInt1380) {
+                if (InterfaceRenderer.anInt8308 > draggingComponent.anInt1381) {
+                    int i_7 = i_1 - dragStartX;
+                    int i_6 = i_2 - dragStartY;
+                    if (i_7 > draggingComponent.anInt1380 || i_7 < -draggingComponent.anInt1380 || i_6 > draggingComponent.anInt1380 || i_6 < -draggingComponent.anInt1380) {
                         aBool7364 = true;
                     }
                 }
-                if (aClass1187257.anObjectArray1451 != null && aBool7364) {
+                if (draggingComponent.anObjectArray1451 != null && aBool7364) {
                     hookrequest5 = new HookRequest();
-                    hookrequest5.source = aClass1187257;
+                    hookrequest5.source = draggingComponent;
                     hookrequest5.mouseX = i_3;
                     hookrequest5.mouseY = i_4;
-                    hookrequest5.params = aClass1187257.anObjectArray1451;
+                    hookrequest5.params = draggingComponent.anObjectArray1451;
                     CS2Executor.executeHookInner(hookrequest5);
                 }
             }
         } else if (InterfaceRenderer.anInt8308 > 1) {
-            aClass1187257 = null;
-            aClass1187247 = null;
+            draggingComponent = null;
+            selectedComponent = null;
         }
     }
 

@@ -161,10 +161,10 @@ public class StaticMethods {
             int i_7 = InterfaceComponentRenderer.anInt4822;
             int i_8 = InterfaceComponentRenderer.anInt5157;
             int i_9;
-            if (client.aClass1187247 == client.frameComponent) {
+            if (client.selectedComponent == client.frameComponent) {
                 i_9 = -1;
             } else {
-                i_9 = client.aClass1187247.cacheReference;
+                i_9 = client.selectedComponent.cacheReference;
             }
 
             InterfaceComponentRenderer.drawComponents(arr_1, i_2, b_3, b_4, i_5, i_6, i_7, i_8, i_9, true);

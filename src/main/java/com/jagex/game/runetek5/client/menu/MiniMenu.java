@@ -140,7 +140,7 @@ public class MiniMenu {
     }
 
     public static void method4800() {
-        if ((entryCount >= 2 || client.interfaceSelectionActive) && client.aClass1187257 == null) {
+        if ((entryCount >= 2 || client.interfaceSelectionActive) && client.draggingComponent == null) {
             String menuText;
             if (client.interfaceSelectionActive && entryCount < 2) {
                 menuText = client.useOnType + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE) + client.useOnTarget + " " + "->";
@@ -494,7 +494,7 @@ public class MiniMenu {
 	public static int anInt181 = -1;
 
 	public static int getMinimenuCursor() {
-	    if (client.aClass1187257 == null) {
+	    if (client.draggingComponent == null) {
 	        if (!isOpen) {
 	            if (TypeLists.INTERACTION_DEFAULTS.minimenuCursor) { // own cursor?
 	                if (aCacheableNodeSub7168 != null) {

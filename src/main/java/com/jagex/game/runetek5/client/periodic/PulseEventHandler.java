@@ -85,10 +85,10 @@ public class PulseEventHandler {
 	        if (type == CLIENT_SETVARC) {
 	            VarcTypeList.VARC_INT[(int) value] = event.primary;
 	            client.clientIsActive |= VarcTypeList.VARC_BOOL[(int) value];
-	            client.anIntArray7150[++client.anInt7368 - 1 & 0x1f] = (int) value;
+	            client.anIntArray7150[++client.keyCycle - 1 & 0x1f] = (int) value;
 	        } else if (type == CLIENT_SETVARCSTR) {
 	            VarcTypeList.VARC_STRING[(int) value] = event.string;
-	            client.anIntArray7387[++client.anInt7388 - 1 & 0x1f] = (int) value;
+	            client.recentMouseWheels[++client.mouseWheelCycle - 1 & 0x1f] = (int) value;
 	        } else if (type == IF_SETTEXT) {
 	            Component component = Component.fromHash((int) value);
 	            if (!event.string.equals(component.text)) {
