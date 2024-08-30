@@ -19,7 +19,7 @@ public enum ServerProt {
     CLIENT_SETVARC_LARGE(12, 6),
     IF_MOVESUB(13, 8),
     PLAYER_WEIGHT(14, 2),
-    UPDATE_ZONE_PARTIAL_FOLLOWS(15, 3),
+    UPDATE_ZONE_FULL_FOLLOWS(15, 3),
     OPEN_URL(16, -2),
     aClass3754368(17, 3), //vorbis preload sound probably
     VORBIS_SOUND(18, 8),
@@ -45,7 +45,7 @@ public enum ServerProt {
     IF_OPENSUB(38, 23),
     CAM_MOVETO(39, 6),
     aClass3754399(40, 4), //map region x and y static variables?
-    UPDATE_ZONE_FULL_FOLLOWS(41, 3),
+    UPDATE_ZONE_PARTIAL_FOLLOWS(41, 3),
     UPDATE_INV_STOP_TRANSMIT(42, 3),
     PLAYER_UPDATE(43, -2),
     IF_SETANGLE(44, 10),

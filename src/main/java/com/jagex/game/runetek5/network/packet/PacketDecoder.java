@@ -1239,7 +1239,7 @@ public class PacketDecoder {
             PacketDecoder.decodeTilestreamPacket(UpdateZonePacket.MIDI_SONG_LOCATION);
             context.currentPacket = null;
             return true;
-        } else if (context.currentPacket == ServerProt.UPDATE_ZONE_FULL_FOLLOWS) {
+        } else if (context.currentPacket == ServerProt.UPDATE_ZONE_PARTIAL_FOLLOWS) {
             UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByte128() << 3;
             UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUnsignedByte128();
             UpdateZonePacket.UPDATE_ZONE_X = buffer.readByte128() << 3;
@@ -1255,7 +1255,7 @@ public class PacketDecoder {
             }
             context.currentPacket = null;
             return true;
-        } else if (context.currentPacket == ServerProt.UPDATE_ZONE_PARTIAL_FOLLOWS) {
+        } else if (context.currentPacket == ServerProt.UPDATE_ZONE_FULL_FOLLOWS) {
             UpdateZonePacket.UPDATE_ZONE_X = buffer.read128Byte() << 3;
             UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByte() << 3;
             UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUnsignedByte();
