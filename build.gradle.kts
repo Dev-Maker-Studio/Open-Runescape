@@ -10,10 +10,14 @@ version = "1.0.1"
 description = "Darkan Client"
 
 application {
-    mainClass.set("com.rs.Loader")
+    mainClass.set("com.jagex.game.launch.Loader")
 }
 
-project.setProperty("mainClassName", "com.rs.Loader")
+java {
+	toolchain.languageVersion = JavaLanguageVersion.of(23)
+}
+
+project.setProperty("mainClassName", "com.jagex.game.launch.Loader")
 
 repositories {
     mavenLocal()
@@ -46,18 +50,13 @@ publishing {
 }
 
 tasks {
-    java {
-        sourceCompatibility = JavaVersion.VERSION_19
-        targetCompatibility = JavaVersion.VERSION_19
-    }
-
     withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
 
     jar {
         manifest {
-            attributes(mutableMapOf("Main-Class" to "com.rs.Loader"))
+            attributes(mutableMapOf("Main-Class" to "com.jagex.game.launch.Loader"))
         }
     }
 

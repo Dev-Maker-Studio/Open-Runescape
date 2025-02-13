@@ -110,9 +110,9 @@ public class Loader extends Panel {
         if (args.length > 0 && args[0] != null)
             IP_ADDRESS = args[0];
         else
-            IP_ADDRESS = "axios.trentonkress.com";
+            IP_ADDRESS = "localhost";
         if (args.length > 1 && args[1] != null)
-            LOBBY_PORT = Integer.valueOf(args[1]);
+            LOBBY_PORT = Integer.parseInt(args[1]);
         new Loader().doFrame();
     }
 

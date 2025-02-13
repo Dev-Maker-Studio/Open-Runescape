@@ -2482,6 +2482,43 @@ public class PacketDecoder {
                     client.ACTIVE_GFX.put(new PositionedGfx(spotAnimation), (long) x << 16 | y);
                 }
             }
+        } else if (packet == UpdateZonePacket.MAP_PROJANIM_HALFSQ) {
+            int localCoordsHash = buffer.readUnsignedByte();
+            int localX = (localCoordsHash >> 4 & 0xf) + UpdateZonePacket.UPDATE_ZONE_X * 2;
+            int localY = UpdateZonePacket.UPDATE_ZONE_Y * 2 + (localCoordsHash & 0xf);
+            int flags = buffer.readUnsignedByte();
+            boolean adjustToTerrainHeight = (flags & 0x1) != 0;
+            boolean adjustToBASAnimFrameHeight = (flags & 0x2) != 0;
+            int basOffIdx = adjustToBASAnimFrameHeight ? flags >> 2 : -1;
+            int xOff = localX + buffer.readByte();
+            int yOff = localY + buffer.readByte();
+            int source = buffer.readShort();
+            int lockOn = buffer.readShort();
+            int spotAnimId = buffer.readUnsignedShort();
+            int startHeight = buffer.readUnsignedByte();
+            if (adjustToBASAnimFrameHeight) {
+                startHeight = (byte) startHeight;
+            } else {
+                startHeight *= 4;
+            }
+            int endHeight = buffer.readUnsignedByte() * 4;
+            int startTime = buffer.readUnsignedShort();
+            int endTime = buffer.readUnsignedShort();
+            int angle = buffer.readUnsignedByte();
+            int slope = buffer.readUnsignedShort();
+            if (angle == 255) {
+                angle = -1;
+            }
+            if (Resource.mapRegion.getLoadingType() != RegionLoadingType.CUTSCENE && localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() * 2 && localY < Resource.mapRegion.getSceneSizeX() * 2 && xOff >= 0 && yOff >= 0 && xOff < Resource.mapRegion.getSceneSizeY() * 2 && yOff < Resource.mapRegion.getSceneSizeY() * 2 && spotAnimId != 65535) {
+                localX *= 256;
+                localY *= 256;
+                xOff *= 256;
+                yOff *= 256;
+                startHeight <<= 2;
+                endHeight <<= 2;
+                slope <<= 2;
+                ProjectileSpawnRequest.create(spotAnimId, source, lockOn, basOffIdx, startHeight, endHeight, localX, localY, xOff, yOff, startTime, endTime, angle, slope, adjustToTerrainHeight);
+            }
         } else if (packet == UpdateZonePacket.MAP_PROJANIM) {
             int flags = buffer.readUnsignedByte();
             boolean useFloorHeight = (flags & 0x80) != 0;
@@ -2706,43 +2743,6 @@ public class PacketDecoder {
                 if (bool36) {
                     GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, localX, localY);
                 }
-            }
-        } else if (packet == UpdateZonePacket.MAP_PROJANIM_HALFSQ) {
-            int localCoordsHash = buffer.readUnsignedByte();
-            int localX = (localCoordsHash >> 4 & 0xf) + UpdateZonePacket.UPDATE_ZONE_X * 2;
-            int localY = UpdateZonePacket.UPDATE_ZONE_Y * 2 + (localCoordsHash & 0xf);
-            int flags = buffer.readUnsignedByte();
-            boolean adjustToTerrainHeight = (flags & 0x1) != 0;
-            boolean adjustToBASAnimFrameHeight = (flags & 0x2) != 0;
-            int basOffIdx = adjustToBASAnimFrameHeight ? flags >> 2 : -1;
-            int xOff = localX + buffer.readByte();
-            int yOff = localY + buffer.readByte();
-            int source = buffer.readShort();
-            int lockOn = buffer.readShort();
-            int spotAnimId = buffer.readUnsignedShort();
-            int startHeight = buffer.readUnsignedByte();
-            if (adjustToBASAnimFrameHeight) {
-                startHeight = (byte) startHeight;
-            } else {
-                startHeight *= 4;
-            }
-            int endHeight = buffer.readUnsignedByte() * 4;
-            int startTime = buffer.readUnsignedShort();
-            int endTime = buffer.readUnsignedShort();
-            int angle = buffer.readUnsignedByte();
-            int slope = buffer.readUnsignedShort();
-            if (angle == 255) {
-                angle = -1;
-            }
-            if (Resource.mapRegion.getLoadingType() != RegionLoadingType.CUTSCENE && localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() * 2 && localY < Resource.mapRegion.getSceneSizeX() * 2 && xOff >= 0 && yOff >= 0 && xOff < Resource.mapRegion.getSceneSizeY() * 2 && yOff < Resource.mapRegion.getSceneSizeY() * 2 && spotAnimId != 65535) {
-                localX *= 256;
-                localY *= 256;
-                xOff *= 256;
-                yOff *= 256;
-                startHeight <<= 2;
-                endHeight <<= 2;
-                slope <<= 2;
-                ProjectileSpawnRequest.create(spotAnimId, source, lockOn, basOffIdx, startHeight, endHeight, localX, localY, xOff, yOff, startTime, endTime, angle, slope, adjustToTerrainHeight);
             }
         } else if (packet == UpdateZonePacket.CREATE_OBJECT) {
             int i_3 = buffer.readInt();
