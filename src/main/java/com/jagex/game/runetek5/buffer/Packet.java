@@ -75,7 +75,7 @@ public class Packet extends Node {
         this.buffer[++this.currentPosition - 1] = (byte) i_1;
     }
 
-    public void writeShortLE(int i_1) {
+    public void writeShortLittle(int i_1) {
         this.buffer[++this.currentPosition - 1] = (byte) i_1;
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 8);
     }
@@ -347,12 +347,12 @@ public class Packet extends Node {
         return (byte) (128 - this.buffer[++this.currentPosition - 1]);
     }
 
-    public void writeShort128(int i_1) {
+    public void writeShortAdd(int i_1) {
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 8);
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 + 128);
     }
 
-    public void writeShortLE128(int i_1) {
+    public void writeShortAddLittle(int i_1) {
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 + 128);
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 8);
     }
@@ -401,13 +401,6 @@ public class Packet extends Node {
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 24);
     }
 
-    public void writeIntV2(int i_1) {
-        this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 16);
-        this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 24);
-        this.buffer[++this.currentPosition - 1] = (byte) i_1;
-        this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 8);
-    }
-
     public int readIntLE() {
         this.currentPosition += 4;
         return (this.buffer[this.currentPosition - 4] & 0xff) + ((this.buffer[this.currentPosition - 3] & 0xff) << 8) + ((this.buffer[this.currentPosition - 2] & 0xff) << 16) + ((this.buffer[this.currentPosition - 1] & 0xff) << 24);
@@ -444,11 +437,18 @@ public class Packet extends Node {
         }
     }
 
-    public void writeIntV1(int i_1) {
+    public void writeIntMiddle(int i_1) {
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 8);
         this.buffer[++this.currentPosition - 1] = (byte) i_1;
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 24);
         this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 16);
+    }
+
+    public void writeIntInverseMiddle(int i_1) {
+        this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 16);
+        this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 24);
+        this.buffer[++this.currentPosition - 1] = (byte) i_1;
+        this.buffer[++this.currentPosition - 1] = (byte) (i_1 >> 8);
     }
 
     public int readSignedSmart() {

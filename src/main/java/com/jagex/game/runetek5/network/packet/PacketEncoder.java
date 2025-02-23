@@ -126,11 +126,11 @@ public class PacketEncoder {
 
     public static void method2076(Component icomponentdefinitions0, Component icomponentdefinitions1) {
         TcpPacket tcpmessage3 = createPacket(ClientProt.IF_DRAG_ONTO_IF, client.GAME_CONNECTION_CONTEXT.isaac);
-        tcpmessage3.buffer.writeShortLE128(icomponentdefinitions1.slotId);
-        tcpmessage3.buffer.writeShortLE(icomponentdefinitions0.slotId);
+        tcpmessage3.buffer.writeShortAddLittle(icomponentdefinitions1.slotId);
+        tcpmessage3.buffer.writeShortLittle(icomponentdefinitions0.slotId);
         tcpmessage3.buffer.writeShort(icomponentdefinitions1.containerItemId);
-        tcpmessage3.buffer.writeShortLE128(icomponentdefinitions0.containerItemId);
-        tcpmessage3.buffer.writeIntV1(icomponentdefinitions0.idHash);
+        tcpmessage3.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId);
+        tcpmessage3.buffer.writeIntMiddle(icomponentdefinitions0.idHash);
         tcpmessage3.buffer.writeIntLE(icomponentdefinitions1.idHash);
         client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
@@ -148,12 +148,12 @@ public class PacketEncoder {
                 }
             }
             TcpPacket tcpmessage4 = createPacket(ClientProt.IF_ON_IF, client.GAME_CONNECTION_CONTEXT.isaac);
-            tcpmessage4.buffer.writeShortLE128(icomponentdefinitions0.slotId);
-            tcpmessage4.buffer.writeShortLE(client.anInt7345);
-            tcpmessage4.buffer.writeShortLE128(icomponentdefinitions0.containerItemId);
+            tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.slotId);
+            tcpmessage4.buffer.writeShortLittle(client.anInt7345);
+            tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId);
             tcpmessage4.buffer.writeIntLE(icomponentdefinitions0.idHash);
-            tcpmessage4.buffer.writeIntV2(client.anInt56);
-            tcpmessage4.buffer.writeShortLE(client.anInt7346);
+            tcpmessage4.buffer.writeIntInverseMiddle(client.anInt56);
+            tcpmessage4.buffer.writeShortLittle(client.anInt7346);
             client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage4);
         }
     }
@@ -197,7 +197,7 @@ public class PacketEncoder {
     public static void method12590(TcpPacket packet, int interfaceHash, int slotId, int itemId) {
         packet.buffer.writeIntLE(interfaceHash);
         packet.buffer.writeShort(itemId);
-        packet.buffer.writeShort128(slotId);
+        packet.buffer.writeShortAdd(slotId);
     }
 
     public static void decodePlayerCounts(Packet rsbytebuffer0) {
@@ -292,7 +292,7 @@ public class PacketEncoder {
         CoordGrid base = Resource.mapRegion.getBaseCoordinates();
         packet.buffer.writeByte(KeyDownCommand.runKeyDown() ? 1 : 0);
         packet.buffer.writeShort(x + base.x);
-        packet.buffer.writeShortLE(y + base.y);
+        packet.buffer.writeShortLittle(y + base.y);
         ComponentMinimap.minimapFlagX = x;
         ComponentMinimap.minimapFlagY = y;
         ComponentMinimap.minimapContainsFlag = false;
@@ -445,8 +445,8 @@ public class PacketEncoder {
 	        StaticMethods.anInt2912 = 20;
 	        client.sendCameraAngleToServer = false;
 	        tcpPacket = createPacket(ClientProt.MOVE_CAMERA, client.GAME_CONNECTION_CONTEXT.isaac);
-	        tcpPacket.buffer.writeShortLE128((int) Camera.camAngleX >> 3);
-	        tcpPacket.buffer.writeShort128((int) Camera.camAngleY >> 3);
+	        tcpPacket.buffer.writeShortAddLittle((int) Camera.camAngleX >> 3);
+	        tcpPacket.buffer.writeShortAdd((int) Camera.camAngleY >> 3);
 	        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpPacket);
 	    }
 	
@@ -471,8 +471,8 @@ public class PacketEncoder {
 
 	public static void continueInterfacePressed(int i_0, int i_1) {
 	    TcpPacket packet = createPacket(ClientProt.IF_CONTINUE, client.GAME_CONNECTION_CONTEXT.isaac);
-	    packet.buffer.writeIntV1(i_0);
-	    packet.buffer.writeShortLE128(i_1);
+	    packet.buffer.writeIntMiddle(i_0);
+	    packet.buffer.writeShortAddLittle(i_1);
 	    client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
 	}
 
@@ -486,10 +486,10 @@ public class PacketEncoder {
 	            if (player6.displayName != null && player6.displayName.equalsIgnoreCase(string_0) && (player6 == PlayerUpdate.MY_PLAYER && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x10) != 0 || (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x8) != 0)) {
 	                TcpPacket packet = createPacket(ClientProt.IF_ON_PLAYER, client.GAME_CONNECTION_CONTEXT.isaac);
 	                packet.buffer.writeShort(client.anInt7345);
-	                packet.buffer.writeShortLE(indices[i]);
+	                packet.buffer.writeShortLittle(indices[i]);
 	                packet.buffer.write128Byte(0);
-	                packet.buffer.writeIntV2(client.anInt56);
-	                packet.buffer.writeShortLE(client.anInt7346);
+	                packet.buffer.writeIntInverseMiddle(client.anInt56);
+	                packet.buffer.writeShortLittle(client.anInt7346);
 	                client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
 	                int size = player6.getSize();
 	                RouteFinder.calculateRoute(player6.movementBaseX[0], player6.movementBaseY[0], true, RouteStrategies.forPlayer(player6.movementBaseX[0], player6.movementBaseY[0], size, size));

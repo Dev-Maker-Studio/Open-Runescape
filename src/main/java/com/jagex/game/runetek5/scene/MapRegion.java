@@ -137,7 +137,7 @@ public class MapRegion {
         this.currentLoadingType = regionLoadRequest.loadingType;
         if (this.currentLoadingType == RegionLoadingType.ANIMATED_LOGIN_SCREEN) {
             initializeAnimatedLoginscreen();
-        } else if (this.currentLoadingType == RegionLoadingType.REGION_PACKET) {
+        } else if (this.currentLoadingType == RegionLoadingType.STANDARD) {
             initializeRegion(regionLoadRequest.buffer);
         } else if (this.currentLoadingType == RegionLoadingType.CUTSCENE) {
             initializeCutscene();
@@ -358,13 +358,13 @@ public class MapRegion {
         boolean forcedPositionUpdate = (regionUpdateMask & 0x1) != 0;
         int type = stream.readUnsigned128Byte();
         if (type == 1) {
-            this.currentLoadingType = RegionLoadingType.DYNAMIC_REGION;
+            this.currentLoadingType = RegionLoadingType.INSTANCE;
         } else if (type == 2) {
-            this.currentLoadingType = RegionLoadingType.MAPTYPE2;
+            this.currentLoadingType = RegionLoadingType.INSTANCE_NO_ENTITY_RESET;
         } else if (type == 3) {
-            this.currentLoadingType = RegionLoadingType.MAPTYPE3;
+            this.currentLoadingType = RegionLoadingType.INSTANCE_LARGE;
         } else if (type == 4) {
-            this.currentLoadingType = RegionLoadingType.MAPTYPE4;
+            this.currentLoadingType = RegionLoadingType.INSTANCE_LARGE_NO_RELOAD_UPDATEZONES;
         }
         int mapSizeType = stream.readUnsignedByte128();
         int mapBaseY = stream.readUnsignedShort128();
@@ -1213,8 +1213,8 @@ public class MapRegion {
 
     public void resetNonCutsceneEntities() {
         if (this.currentLoadingType != RegionLoadingType.CUTSCENE && this.previousLoadingType != RegionLoadingType.CUTSCENE) {
-            if (this.currentLoadingType == RegionLoadingType.DYNAMIC_REGION || this.currentLoadingType == RegionLoadingType.MAPTYPE3 || this.previousLoadingType != this.currentLoadingType &&
-            		(this.currentLoadingType == RegionLoadingType.REGION_PACKET || this.previousLoadingType == RegionLoadingType.REGION_PACKET)) {
+            if (this.currentLoadingType == RegionLoadingType.INSTANCE || this.currentLoadingType == RegionLoadingType.INSTANCE_LARGE || this.previousLoadingType != this.currentLoadingType &&
+            		(this.currentLoadingType == RegionLoadingType.STANDARD || this.previousLoadingType == RegionLoadingType.STANDARD)) {
                 client.NPC_UPDATE_INDEX = 0;
                 client.npcCount = 0;
                 client.NPC_MAP.clear();
@@ -1343,14 +1343,14 @@ public class MapRegion {
         for (LocAction action = (LocAction) LocAction.pendingRemovals.getFirst(); action != null; action = (LocAction) LocAction.pendingRemovals.next()) {
             action.x -= deltaX;
             action.y -= deltaY;
-            if (this.currentLoadingType != RegionLoadingType.MAPTYPE4 && (action.x < 0 || action.y < 0 || action.x >= this.sceneSizeX || action.y >= this.sceneSizeY)) {
+            if (this.currentLoadingType != RegionLoadingType.INSTANCE_LARGE_NO_RELOAD_UPDATEZONES && (action.x < 0 || action.y < 0 || action.x >= this.sceneSizeX || action.y >= this.sceneSizeY)) {
                 action.unlink();
             }
         }
         for (LocAction action = (LocAction) LocAction.pendingCustomizations.getFirst(); action != null; action = (LocAction) LocAction.pendingCustomizations.next()) {
             action.x -= deltaX;
             action.y -= deltaY;
-            if (this.currentLoadingType != RegionLoadingType.MAPTYPE4 && (action.x < 0 || action.y < 0 || action.x >= this.sceneSizeX || action.y >= this.sceneSizeY)) {
+            if (this.currentLoadingType != RegionLoadingType.INSTANCE_LARGE_NO_RELOAD_UPDATEZONES && (action.x < 0 || action.y < 0 || action.x >= this.sceneSizeX || action.y >= this.sceneSizeY)) {
                 action.unlink();
             }
         }
@@ -1365,7 +1365,7 @@ public class MapRegion {
                     if (this.scene.tiles != null) {
                         this.scene.removeGroundItem(rotation, nodeSizeX, nodeSizeY);
                     }
-                } else if (this.currentLoadingType != RegionLoadingType.MAPTYPE4) {
+                } else if (this.currentLoadingType != RegionLoadingType.INSTANCE_LARGE_NO_RELOAD_UPDATEZONES) {
                     groundItems.unlink();
                 }
             }

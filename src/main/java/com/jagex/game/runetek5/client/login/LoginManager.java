@@ -587,9 +587,9 @@ public class LoginManager {
 	                        System.arraycopy(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer, LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition, rsbitsbuffer21.buffer, 0, tcpPacketPositionBefore);
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition += tcpPacketPositionBefore;
 	                        if (LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacket == ServerProt.DYNAMIC_MAP_REGION) {
-	                            Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.DYNAMIC_REGION, rsbitsbuffer21));
+	                            Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.INSTANCE, rsbitsbuffer21));
 	                        } else {
-	                            Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.REGION_PACKET, rsbitsbuffer21));
+	                            Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.STANDARD, rsbitsbuffer21));
 	                        }
 	                        if (LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition != i_10) {
 	                            throw new RuntimeException(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition + " " + i_10);

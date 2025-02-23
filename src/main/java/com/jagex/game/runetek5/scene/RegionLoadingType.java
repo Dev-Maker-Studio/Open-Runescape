@@ -11,26 +11,26 @@ public class RegionLoadingType {
      * Cutscene loading is requested
      */
     public static final RegionLoadingType CUTSCENE = new RegionLoadingType(true, false);
-    public static final RegionLoadingType REGION_PACKET = new RegionLoadingType(false, false);
-    public static final RegionLoadingType DYNAMIC_REGION = new RegionLoadingType(true, false);
-    public static final RegionLoadingType MAPTYPE2 = new RegionLoadingType(true, false);
-    public static final RegionLoadingType MAPTYPE3 = new RegionLoadingType(true, true);
-    public static final RegionLoadingType MAPTYPE4 = new RegionLoadingType(true, true);
+    public static final RegionLoadingType STANDARD = new RegionLoadingType(false, false);
+    public static final RegionLoadingType INSTANCE = new RegionLoadingType(true, false);
+    public static final RegionLoadingType INSTANCE_NO_ENTITY_RESET = new RegionLoadingType(true, false);
+    public static final RegionLoadingType INSTANCE_LARGE = new RegionLoadingType(true, true);
+    public static final RegionLoadingType INSTANCE_LARGE_NO_RELOAD_UPDATEZONES = new RegionLoadingType(true, true);
     /**
      * Reload requested by debug opcode
      */
     public static final RegionLoadingType RELOAD = new RegionLoadingType(false, false);
 
     public final boolean constructedMap;
-    public final boolean aBool3159;
+    public final boolean ignoreUpdatezoneSizeLimitations;
 
-    public RegionLoadingType(boolean constructedMap, boolean bool2) {
+    public RegionLoadingType(boolean constructedMap, boolean ignoreUpdatezoneSizeLimitations) {
         this.constructedMap = constructedMap;
-        this.aBool3159 = bool2;
+        this.ignoreUpdatezoneSizeLimitations = ignoreUpdatezoneSizeLimitations;
     }
 
-    public boolean method4401() {
-        return this.aBool3159;
+    public boolean ignoreUpdateZoneSizeLimitations() {
+        return this.ignoreUpdatezoneSizeLimitations;
     }
 
     /**

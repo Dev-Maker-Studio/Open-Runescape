@@ -92,10 +92,10 @@ public class MenuInteraction {
 	            client.crossSpritePtr = 0;
 	            packet = PacketEncoder.createPacket(ClientProt.IF_ON_PLAYER, client.GAME_CONNECTION_CONTEXT.isaac);
 	            packet.buffer.writeShort(client.anInt7345);
-	            packet.buffer.writeShortLE(PlayerUpdate.MY_PLAYER.playerIndex);
+	            packet.buffer.writeShortLittle(PlayerUpdate.MY_PLAYER.playerIndex);
 	            packet.buffer.write128Byte(KeyDownCommand.runKeyDown() ? 1 : 0);
-	            packet.buffer.writeIntV2(client.anInt56);
-	            packet.buffer.writeShortLE(client.anInt7346);
+	            packet.buffer.writeIntInverseMiddle(client.anInt56);
+	            packet.buffer.writeShortLittle(client.anInt7346);
 	            client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
 	        }
 	
@@ -112,10 +112,10 @@ public class MenuInteraction {
 	                client.crossSpritePtr = 0;
 	                TcpPacket ifPlayerPacket = PacketEncoder.createPacket(ClientProt.IF_ON_PLAYER, client.GAME_CONNECTION_CONTEXT.isaac);
 	                ifPlayerPacket.buffer.writeShort(client.anInt7345);
-	                ifPlayerPacket.buffer.writeShortLE(uid);
+	                ifPlayerPacket.buffer.writeShortLittle(uid);
 	                ifPlayerPacket.buffer.write128Byte(KeyDownCommand.runKeyDown() ? 1 : 0);
-	                ifPlayerPacket.buffer.writeIntV2(client.anInt56);
-	                ifPlayerPacket.buffer.writeShortLE(client.anInt7346);
+	                ifPlayerPacket.buffer.writeIntInverseMiddle(client.anInt56);
+	                ifPlayerPacket.buffer.writeShortLittle(client.anInt7346);
 	                client.GAME_CONNECTION_CONTEXT.queuePacket(ifPlayerPacket);
 	                RouteFinder.calculateRoute(player.movementBaseX[0], player.movementBaseY[0], true, RouteStrategies.forPlayer(player.movementBaseX[0], player.movementBaseY[0], player.getSize(), player.getSize()));
 	            }
@@ -127,13 +127,13 @@ public class MenuInteraction {
 	            client.crossType = 2;
 	            client.crossSpritePtr = 0;
 	            packet = PacketEncoder.createPacket(ClientProt.IF_ON_OBJECT, client.GAME_CONNECTION_CONTEXT.isaac);
-	            packet.buffer.writeShortLE128(attr1 + baseCoordinates.x);
+	            packet.buffer.writeShortAddLittle(attr1 + baseCoordinates.x);
 	            packet.buffer.write128Byte(KeyDownCommand.runKeyDown() ? 1 : 0);
-	            packet.buffer.writeIntV1((int) (bitpackedEntity >>> 32) & 0x7fffffff);
+	            packet.buffer.writeIntMiddle((int) (bitpackedEntity >>> 32) & 0x7fffffff);
 	            packet.buffer.writeInt(client.anInt56);
-	            packet.buffer.writeShortLE(client.anInt7346);
-	            packet.buffer.writeShort128(client.anInt7345);
-	            packet.buffer.writeShortLE(attr2 + baseCoordinates.y);
+	            packet.buffer.writeShortLittle(client.anInt7346);
+	            packet.buffer.writeShortAdd(client.anInt7345);
+	            packet.buffer.writeShortLittle(attr2 + baseCoordinates.y);
 	            client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
 	            RouteFinder.routeToSceneobject(attr1, attr2, bitpackedEntity);
 	        }
@@ -178,7 +178,7 @@ public class MenuInteraction {
 	                client.crossType = 1;
 	                client.crossSpritePtr = 0;
 	                TcpPacket walkPacket = PacketEncoder.createPacket(ClientProt.UNK_63, client.GAME_CONNECTION_CONTEXT.isaac);
-	                walkPacket.buffer.writeShort128(attr1 + baseCoordinates.x);
+	                walkPacket.buffer.writeShortAdd(attr1 + baseCoordinates.x);
 	                walkPacket.buffer.writeShort(attr2 + baseCoordinates.y);
 	                client.GAME_CONNECTION_CONTEXT.queuePacket(walkPacket);
 	            }
@@ -219,13 +219,13 @@ public class MenuInteraction {
 	            client.crossType = 2;
 	            client.crossSpritePtr = 0;
 	            TcpPacket ifGrounditemPacket = PacketEncoder.createPacket(ClientProt.IF_ON_GROUND_ITEM, client.GAME_CONNECTION_CONTEXT.isaac);
-	            ifGrounditemPacket.buffer.writeShort128(client.anInt7346);
-	            ifGrounditemPacket.buffer.writeIntV2(client.anInt56);
+	            ifGrounditemPacket.buffer.writeShortAdd(client.anInt7346);
+	            ifGrounditemPacket.buffer.writeIntInverseMiddle(client.anInt56);
 	            ifGrounditemPacket.buffer.writeShort(uid);
 	            ifGrounditemPacket.buffer.write128Byte(KeyDownCommand.runKeyDown() ? 1 : 0);
-	            ifGrounditemPacket.buffer.writeShortLE128(client.anInt7345);
-	            ifGrounditemPacket.buffer.writeShortLE128(attr2 + baseCoordinates.y);
-	            ifGrounditemPacket.buffer.writeShortLE(attr1 + baseCoordinates.x);
+	            ifGrounditemPacket.buffer.writeShortAddLittle(client.anInt7345);
+	            ifGrounditemPacket.buffer.writeShortAddLittle(attr2 + baseCoordinates.y);
+	            ifGrounditemPacket.buffer.writeShortLittle(attr1 + baseCoordinates.x);
 	            client.GAME_CONNECTION_CONTEXT.queuePacket(ifGrounditemPacket);
 	            RouteFinder.routeToGrounditem(attr1, attr2);
 	        }
@@ -236,11 +236,11 @@ public class MenuInteraction {
 	            client.crossType = 1;
 	            client.crossSpritePtr = 0;
 	            TcpPacket ifTilePacket = PacketEncoder.createPacket(ClientProt.IF_ON_TILE, client.GAME_CONNECTION_CONTEXT.isaac);
-	            ifTilePacket.buffer.writeShortLE(client.anInt7346);
-	            ifTilePacket.buffer.writeShortLE(attr2 + baseCoordinates.y);
-	            ifTilePacket.buffer.writeIntV1(client.anInt56);
-	            ifTilePacket.buffer.writeShort128(client.anInt7345);
-	            ifTilePacket.buffer.writeShortLE(attr1 + baseCoordinates.x);
+	            ifTilePacket.buffer.writeShortLittle(client.anInt7346);
+	            ifTilePacket.buffer.writeShortLittle(attr2 + baseCoordinates.y);
+	            ifTilePacket.buffer.writeIntMiddle(client.anInt56);
+	            ifTilePacket.buffer.writeShortAdd(client.anInt7345);
+	            ifTilePacket.buffer.writeShortLittle(attr1 + baseCoordinates.x);
 	            client.GAME_CONNECTION_CONTEXT.queuePacket(ifTilePacket);
 	            RouteFinder.calculateRoute(attr1, attr2, true, RouteStrategies.forFixedTile(attr1, attr2));
 	        }
@@ -295,10 +295,10 @@ public class MenuInteraction {
 	                client.crossType = 2;
 	                client.crossSpritePtr = 0;
 	                TcpPacket groundItemPacket = PacketEncoder.createPacket(groundItemInteract, client.GAME_CONNECTION_CONTEXT.isaac);
-	                groundItemPacket.buffer.writeShortLE128(uid);
+	                groundItemPacket.buffer.writeShortAddLittle(uid);
 	                groundItemPacket.buffer.writeByteC(KeyDownCommand.runKeyDown() ? 1 : 0);
 	                groundItemPacket.buffer.writeShort(attr2 + baseCoordinates.y);
-	                groundItemPacket.buffer.writeShort128(attr1 + baseCoordinates.x);
+	                groundItemPacket.buffer.writeShortAdd(attr1 + baseCoordinates.x);
 	                client.GAME_CONNECTION_CONTEXT.queuePacket(groundItemPacket);
 	                RouteFinder.routeToGrounditem(attr1, attr2);
 	            }
@@ -312,11 +312,11 @@ public class MenuInteraction {
 	                    client.crossType = 2;
 	                    client.crossSpritePtr = 0;
 	                    TcpPacket ifNpcPacket = PacketEncoder.createPacket(ClientProt.IF_ON_NPC, client.GAME_CONNECTION_CONTEXT.isaac);
-	                    ifNpcPacket.buffer.writeIntV2(client.anInt56);
-	                    ifNpcPacket.buffer.writeShortLE128(uid);
+	                    ifNpcPacket.buffer.writeIntInverseMiddle(client.anInt56);
+	                    ifNpcPacket.buffer.writeShortAddLittle(uid);
 	                    ifNpcPacket.buffer.write128Byte(KeyDownCommand.runKeyDown() ? 1 : 0);
-	                    ifNpcPacket.buffer.writeShortLE128(client.anInt7346);
-	                    ifNpcPacket.buffer.writeShort128(client.anInt7345);
+	                    ifNpcPacket.buffer.writeShortAddLittle(client.anInt7346);
+	                    ifNpcPacket.buffer.writeShortAdd(client.anInt7345);
 	                    client.GAME_CONNECTION_CONTEXT.queuePacket(ifNpcPacket);
 	                    RouteFinder.calculateRoute(npc.movementBaseX[0], npc.movementBaseY[0], true, RouteStrategies.forPlayer(npc.movementBaseX[0], npc.movementBaseY[0], npc.getSize(), npc.getSize()));
 	                }

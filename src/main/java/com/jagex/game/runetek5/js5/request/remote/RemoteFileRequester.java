@@ -229,6 +229,7 @@ public class RemoteFileRequester extends Js5NetQueue {
                             int bitpacketSettings = this.incoming.readUnsignedByte();
                             int payloadSize = this.incoming.readInt();
                             int compressed = bitpacketSettings & 0x7f;
+                            //System.out.println("Incoming file: " + cacheIndex + ", " + archiveId + ", " + bitpacketSettings + ", " + payloadSize);
                             boolean regularRequest = (bitpacketSettings & 0x80) != 0;
                             long reference = archiveId + ((long) cacheIndex << 32);
                             Js5NetQueueRequest request;

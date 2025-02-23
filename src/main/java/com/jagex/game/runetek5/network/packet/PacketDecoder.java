@@ -732,9 +732,9 @@ public class PacketDecoder {
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize);
             client.resetCutscenes();
             if (PreferenceManager.preferences.asyncMaploading.getValue() == 1) {
-                Resource.mapRegionLoaderTask.requestMapUpdate(new RegionLoadRequest(RegionLoadingType.DYNAMIC_REGION, bitBuffer));
+                Resource.mapRegionLoaderTask.requestMapUpdate(new RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer));
             } else {
-                Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.DYNAMIC_REGION, bitBuffer));
+                Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer));
             }
             context.currentPacket = null;
             return false;
@@ -1194,8 +1194,8 @@ public class PacketDecoder {
             int key = buffer.readInt();
             int flags = buffer.readInt();
             TcpPacket tcpmessage111 = PacketEncoder.createPacket(ClientProt.SEND_FPS, context.isaac);
-            tcpmessage111.buffer.writeIntV2(key);
-            tcpmessage111.buffer.writeIntV1(flags);
+            tcpmessage111.buffer.writeIntInverseMiddle(key);
+            tcpmessage111.buffer.writeIntMiddle(flags);
             tcpmessage111.buffer.write128Byte(client.FPS);
             context.queuePacket(tcpmessage111);
             context.currentPacket = null;
@@ -1591,9 +1591,9 @@ public class PacketDecoder {
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize);
             client.resetCutscenes();
             if (PreferenceManager.preferences.asyncMaploading.getValue() == 1) {
-                Resource.mapRegionLoaderTask.requestMapUpdate(new RegionLoadRequest(RegionLoadingType.REGION_PACKET, bitBuffer));
+                Resource.mapRegionLoaderTask.requestMapUpdate(new RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer));
             } else {
-                Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.REGION_PACKET, bitBuffer));
+                Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer));
             }
             context.currentPacket = null;
             return false;
@@ -2577,7 +2577,7 @@ public class PacketDecoder {
             int coords = buffer.readUnsignedByte();
             int x = (coords >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int y = (coords & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            if (Resource.mapRegion.getLoadingType().method4401() || x >= 0 && y >= 0 && x < Resource.mapRegion.getSceneSizeX() && y < Resource.mapRegion.getSceneSizeY()) {
+            if (Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations() || x >= 0 && y >= 0 && x < Resource.mapRegion.getSceneSizeX() && y < Resource.mapRegion.getSceneSizeY()) {
                 LocAction.destroyObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, -1, shape, rotation);
             }
         } else if (packet == UpdateZonePacket.REMOVE_GROUND_ITEM) {
@@ -2713,18 +2713,18 @@ public class PacketDecoder {
             int playerId = buffer.readUnsignedShort();
             int i_21 = buffer.readUnsignedByte();
             CoordGrid coordgrid25 = Resource.mapRegion.getBaseCoordinates();
-            int i_6 = (i_21 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            int y = i_6 + coordgrid25.y;
-            int i_8 = (i_21 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
-            int x = i_8 + coordgrid25.x;
+            int localY = (i_21 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
+            int y = localY + coordgrid25.y;
+            int localX = (i_21 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
+            int x = localX + coordgrid25.x;
             int amount = buffer.readUnsignedShortLE128();
             int id = buffer.readUnsignedShortLE128();
             if (playerId != PlayerUpdate.myPlayerIndex) {
-                boolean bool40 = i_8 >= 0 && i_6 >= 0 && i_8 < Resource.mapRegion.getSceneSizeX() && i_6 < Resource.mapRegion.getSceneSizeY();
-                if (bool40 || Resource.mapRegion.getLoadingType().method4401()) {
+                boolean withinSceneRange = localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY();
+                if (withinSceneRange || Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations()) {
                     GroundItemUpdating.addGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, new GroundItemNode(id, amount));
-                    if (bool40) {
-                        GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, i_8, i_6);
+                    if (withinSceneRange) {
+                        GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, localX, localY);
                     }
                 }
             }
@@ -2738,7 +2738,7 @@ public class PacketDecoder {
             int localX = (i_5 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int x = localX + coordgrid31.x;
             boolean bool36 = localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY();
-            if (bool36 || Resource.mapRegion.getLoadingType().method4401()) {
+            if (bool36 || Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations()) {
                 GroundItemUpdating.addGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, new GroundItemNode(id, amount));
                 if (bool36) {
                     GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, localX, localY);
@@ -2753,7 +2753,7 @@ public class PacketDecoder {
             int i_8 = i_7 >> 2;
             int i_9 = i_7 & 0x3;
             int i_10 = client.OBJECT_TYPE_SLOTS[i_8];
-            if (Resource.mapRegion.getLoadingType().method4401() || i_5 >= 0 && i_6 >= 0 && i_5 < Resource.mapRegion.getSceneSizeX() && i_6 < Resource.mapRegion.getSceneSizeY()) {
+            if (Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations() || i_5 >= 0 && i_6 >= 0 && i_5 < Resource.mapRegion.getSceneSizeX() && i_6 < Resource.mapRegion.getSceneSizeY()) {
                 LocAction.destroyObject(UpdateZonePacket.UPDATE_ZONE_PLANE, i_5, i_6, i_10, i_3, i_8, i_9);
             }
         } else {

@@ -1710,7 +1710,7 @@ public class client extends GameShell {
                             raiseErrorScreen("js5proxy_" + js5ProxyAddress.trim());
                         }
                     } else {
-                        raiseErrorScreen("js5io");
+                        raiseErrorScreen("js5io" + Resource.remoteFileRequesterJs5.connectionStatus);
                     }
                 } else {
                     raiseErrorScreen("js5connect_full");
