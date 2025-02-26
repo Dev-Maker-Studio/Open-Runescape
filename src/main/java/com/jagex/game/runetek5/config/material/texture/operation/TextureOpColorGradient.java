@@ -323,15 +323,15 @@ public class TextureOpColorGradient extends TextureOperation {
     @Override
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         if (i_1 == 0) {
-            int i_4 = rsbytebuffer2.readUnsignedByte();
+            int i_4 = rsbytebuffer2.readUByte();
             if (i_4 == 0) {
-                this.anIntArrayArray9822 = new int[rsbytebuffer2.readUnsignedByte()][4];
+                this.anIntArrayArray9822 = new int[rsbytebuffer2.readUByte()][4];
 
                 for (int i_5 = 0; i_5 < this.anIntArrayArray9822.length; i_5++) {
-                    this.anIntArrayArray9822[i_5][0] = rsbytebuffer2.readUnsignedShort();
-                    this.anIntArrayArray9822[i_5][1] = rsbytebuffer2.readUnsignedByte() << 4;
-                    this.anIntArrayArray9822[i_5][2] = rsbytebuffer2.readUnsignedByte() << 4;
-                    this.anIntArrayArray9822[i_5][3] = rsbytebuffer2.readUnsignedByte() << 4;
+                    this.anIntArrayArray9822[i_5][0] = rsbytebuffer2.readUShort();
+                    this.anIntArrayArray9822[i_5][1] = rsbytebuffer2.readUByte() << 4;
+                    this.anIntArrayArray9822[i_5][2] = rsbytebuffer2.readUByte() << 4;
+                    this.anIntArrayArray9822[i_5][3] = rsbytebuffer2.readUByte() << 4;
                 }
             } else {
                 method15269(i_4);

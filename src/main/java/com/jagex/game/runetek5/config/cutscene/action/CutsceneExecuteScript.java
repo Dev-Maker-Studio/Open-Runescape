@@ -19,7 +19,7 @@ public class CutsceneExecuteScript extends CutsceneAction {
     public CutsceneExecuteScript(Packet buffer) {
         super(buffer);
         this.aString9318 = buffer.readString();
-        this.anInt9317 = buffer.readUnsignedShort();
+        this.anInt9317 = buffer.readUShort();
     }
 
 

@@ -60,32 +60,32 @@ public class CutsceneTypeList {
             }
             Packet buffer = new Packet(data);
             readValueLoop(buffer);
-            int numAreas = buffer.readUnsignedByte();
+            int numAreas = buffer.readUByte();
             for (int index = 0; index < numAreas; index++) {
                 CutsceneTypeList.CUTSCENE_AREAS.addFirst(new CutsceneArea(buffer));
             }
-            int numCameraMovements = buffer.readUnsignedSmart();
+            int numCameraMovements = buffer.readUSmart();
             CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS = new CutsceneCameraMovement[numCameraMovements];
             for (int index = 0; index < numCameraMovements; index++) {
                 CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS[index] = new CutsceneCameraMovement(buffer);
             }
-            int numEntities = buffer.readUnsignedSmart();
+            int numEntities = buffer.readUSmart();
             CutsceneTypeList.CUTSCENE_ENTITIES = new CutsceneEntity[numEntities];
             
             for (int index = 0; index < numEntities; index++) {
                 CutsceneTypeList.CUTSCENE_ENTITIES[index] = new CutsceneEntity(buffer, index);
             }
-            int numObjects = buffer.readUnsignedSmart();
+            int numObjects = buffer.readUSmart();
             CutsceneTypeList.CUTSCENE_OBJECTS = new CutsceneObject[numObjects];
             for (int index = 0; index < numObjects; index++) {
                 CutsceneTypeList.CUTSCENE_OBJECTS[index] = new CutsceneObject(buffer);
             }
-            int numEntityMovements = buffer.readUnsignedSmart();
+            int numEntityMovements = buffer.readUSmart();
             CutsceneTypeList.CUTSCENE_ENTITY_MOVEMENTS = new CutsceneEntityMovement[numEntityMovements];
             for (int index = 0; index < numEntityMovements; index++) {
                 CutsceneTypeList.CUTSCENE_ENTITY_MOVEMENTS[index] = new CutsceneEntityMovement(buffer);
             }
-            int numCutsceneActions = buffer.readUnsignedSmart();
+            int numCutsceneActions = buffer.readUSmart();
             CutsceneTypeList.CUTSCENE_MISC_ACTIONS = new CutsceneAction[numCutsceneActions];
             for (int index = 0; index < numCutsceneActions; index++) {
                 CutsceneTypeList.CUTSCENE_MISC_ACTIONS[index] = listCutsceneAction(buffer);
@@ -124,7 +124,7 @@ public class CutsceneTypeList {
     }
 
     public static CutsceneAction listCutsceneAction(Packet buffer) {
-        int id = buffer.readUnsignedByte();
+        int id = buffer.readUByte();
         CutsceneActionType type = getActionType(id);
         CutsceneAction action = null;
         assert type != null;
@@ -222,11 +222,11 @@ public class CutsceneTypeList {
 
     public static void readValueLoop(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             switch (opcode) {
                 case 0:
-                    CutsceneTypeList.anInt825 = buffer.readUnsignedShort();
-                    StaticMethods.anInt824 = buffer.readUnsignedShort();
+                    CutsceneTypeList.anInt825 = buffer.readUShort();
+                    StaticMethods.anInt824 = buffer.readUShort();
                     break;
                 case 255:
                     return;

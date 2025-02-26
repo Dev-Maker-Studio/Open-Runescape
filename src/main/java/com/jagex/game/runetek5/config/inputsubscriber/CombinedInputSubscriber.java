@@ -18,12 +18,12 @@ public class CombinedInputSubscriber implements InputSubscriber {
     }
 
     public static CombinedInputSubscriber decode(Packet buffer) {
-        int clickType = buffer.readUnsignedByte();
-        int minimumClicks = buffer.readUnsignedByte();
-        int count = buffer.readUnsignedByte();
+        int clickType = buffer.readUByte();
+        int minimumClicks = buffer.readUByte();
+        int count = buffer.readUByte();
         int[] keys = new int[count];
         for (int index = 0; index < count; index++) {
-            keys[index] = buffer.readUnsignedByte();
+            keys[index] = buffer.readUByte();
         }
         return new CombinedInputSubscriber(clickType, minimumClicks, keys);
     }

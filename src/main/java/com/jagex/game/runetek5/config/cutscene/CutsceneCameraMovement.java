@@ -20,7 +20,7 @@ public class CutsceneCameraMovement {
     public final int[] anIntArray765;
 
     CutsceneCameraMovement(Packet rsbytebuffer1) {
-        int i_2 = rsbytebuffer1.readUnsignedSmart();
+        int i_2 = rsbytebuffer1.readUSmart();
         this.anIntArray763 = new int[i_2];
         this.anIntArray760 = new int[i_2];
         this.anIntArray762 = new int[i_2];
@@ -29,11 +29,11 @@ public class CutsceneCameraMovement {
         this.anIntArray764 = new int[i_2];
         this.anIntArray765 = new int[i_2];
         for (int i_3 = 0; i_3 < i_2; i_3++) {
-            this.anIntArray763[i_3] = rsbytebuffer1.readUnsignedShort() - 5120;
-            this.anIntArray762[i_3] = rsbytebuffer1.readUnsignedShort() - 5120;
+            this.anIntArray763[i_3] = rsbytebuffer1.readUShort() - 5120;
+            this.anIntArray762[i_3] = rsbytebuffer1.readUShort() - 5120;
             this.anIntArray760[i_3] = rsbytebuffer1.readShort();
-            this.anIntArray761[i_3] = rsbytebuffer1.readUnsignedShort() - 5120;
-            this.anIntArray765[i_3] = rsbytebuffer1.readUnsignedShort() - 5120;
+            this.anIntArray761[i_3] = rsbytebuffer1.readUShort() - 5120;
+            this.anIntArray765[i_3] = rsbytebuffer1.readUShort() - 5120;
             this.anIntArray764[i_3] = rsbytebuffer1.readShort();
             this.anIntArray759[i_3] = rsbytebuffer1.readShort();
         }

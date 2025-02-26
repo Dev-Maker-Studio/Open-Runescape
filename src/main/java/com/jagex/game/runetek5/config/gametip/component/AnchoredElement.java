@@ -44,12 +44,12 @@ public class AnchoredElement implements ITipDetails {
     }
 
 	public static AnchoredElement decode(Packet buffer) {
-	    AnchorX horizontalAnchor = AnchorX.values()[buffer.readUnsignedByte()];
-	    AnchorY verticalAnchor = AnchorY.values()[buffer.readUnsignedByte()];
+	    AnchorX horizontalAnchor = AnchorX.values()[buffer.readUByte()];
+	    AnchorY verticalAnchor = AnchorY.values()[buffer.readUByte()];
 	    int offX = buffer.readShort();
 	    int offY = buffer.readShort();
-	    int width = buffer.readUnsignedShort();
-	    int height = buffer.readUnsignedShort();
+	    int width = buffer.readUShort();
+	    int height = buffer.readUShort();
 	    int i_8 = buffer.readShort();
 	    int fileId = buffer.readBigSmart();
 	    int i_10 = buffer.readInt();

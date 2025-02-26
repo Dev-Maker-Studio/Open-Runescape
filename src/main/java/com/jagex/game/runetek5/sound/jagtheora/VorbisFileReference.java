@@ -33,7 +33,7 @@ public class VorbisFileReference extends JagTheoraManager {
             int len = data.length >> 1;
             this.values = new int[len];
             for (int i_5 = 0; i_5 < len; i_5++) {
-                this.values[i_5] = this.byteBuffer.readUnsignedShort();
+                this.values[i_5] = this.byteBuffer.readUShort();
             }
         }
         if (this.anInt8115 >= this.values.length) {

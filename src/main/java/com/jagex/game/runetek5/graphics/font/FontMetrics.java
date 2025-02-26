@@ -23,11 +23,11 @@ public class FontMetrics {
 
     public FontMetrics(byte[] bytes_1) {
         Packet stream = new Packet(bytes_1);
-        int check = stream.readUnsignedByte();
+        int check = stream.readUByte();
         if (check != 0) {
             throw new RuntimeException("");
         } else {
-            boolean variadicWidth = stream.readUnsignedByte() == 1;
+            boolean variadicWidth = stream.readUByte() == 1;
             this.glyphWidths = new byte[256];
             stream.readBytes(this.glyphWidths, 0, 256);
             if (variadicWidth) {
@@ -36,11 +36,11 @@ public class FontMetrics {
 
                 int i_7;
                 for (i_7 = 0; i_7 < 256; i_7++) {
-                    ints_5[i_7] = stream.readUnsignedByte();
+                    ints_5[i_7] = stream.readUByte();
                 }
 
                 for (i_7 = 0; i_7 < 256; i_7++) {
-                    ints_6[i_7] = stream.readUnsignedByte();
+                    ints_6[i_7] = stream.readUByte();
                 }
 
                 byte[][] bytes_12 = new byte[256][];
@@ -83,13 +83,13 @@ public class FontMetrics {
 
                 this.verticalSpacing = ints_6[32] + ints_5[32];
             } else {
-                this.verticalSpacing = stream.readUnsignedByte();
+                this.verticalSpacing = stream.readUByte();
             }
 
-            stream.readUnsignedByte();
-            stream.readUnsignedByte();
-            this.topPadding = stream.readUnsignedByte();
-            this.bottomPadding = stream.readUnsignedByte();
+            stream.readUByte();
+            stream.readUByte();
+            this.topPadding = stream.readUByte();
+            this.bottomPadding = stream.readUByte();
         }
     }
 

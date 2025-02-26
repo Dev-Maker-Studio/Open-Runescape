@@ -20,7 +20,7 @@ public class ItemContainerType extends CacheableNode {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -30,14 +30,14 @@ public class ItemContainerType extends CacheableNode {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 2) {
-        	this.maxItemSize = buffer.readUnsignedShort();
+        	this.maxItemSize = buffer.readUShort();
         } else if (opcode == 4) {
-            this.defaultItemSize = buffer.readUnsignedByte();
+            this.defaultItemSize = buffer.readUByte();
             this.itemIds = new int[this.defaultItemSize];
             this.amounts = new int[this.defaultItemSize];
             for (int index = 0; index < this.defaultItemSize; index++) {
-            	this.itemIds[index] = buffer.readUnsignedShort();
-            	this.amounts[index] = buffer.readUnsignedShort();
+            	this.itemIds[index] = buffer.readUShort();
+            	this.amounts[index] = buffer.readUShort();
             }
         }
     }

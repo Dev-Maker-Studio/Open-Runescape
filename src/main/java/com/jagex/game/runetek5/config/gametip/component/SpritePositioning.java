@@ -28,8 +28,8 @@ public class SpritePositioning implements ITipDetails {
 
     public static SpritePositioning decode(Packet buffer) {
         int spriteId = buffer.readBigSmart();
-        AnchorX anchorX = AnchorX.values()[buffer.readUnsignedByte()];
-        AnchorY anchorY = AnchorY.values()[buffer.readUnsignedByte()];
+        AnchorX anchorX = AnchorX.values()[buffer.readUByte()];
+        AnchorY anchorY = AnchorY.values()[buffer.readUByte()];
         int offsetX = buffer.readShort();
         int offsetY = buffer.readShort();
         return new SpritePositioning(spriteId, anchorX, anchorY, offsetX, offsetY);

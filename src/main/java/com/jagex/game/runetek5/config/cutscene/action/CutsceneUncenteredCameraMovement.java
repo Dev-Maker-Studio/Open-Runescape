@@ -24,11 +24,11 @@ public class CutsceneUncenteredCameraMovement extends CutsceneAction {
 
     public CutsceneUncenteredCameraMovement(Packet buffer) {
         super(buffer);
-        this.localX = buffer.readUnsignedShort();
-        this.moveZ = buffer.readUnsignedShort();
-        this.localY = buffer.readUnsignedShort();
-        this.angleX = buffer.readUnsignedShort();
-        this.angleY = buffer.readUnsignedShort();
+        this.localX = buffer.readUShort();
+        this.moveZ = buffer.readUShort();
+        this.localY = buffer.readUShort();
+        this.angleX = buffer.readUShort();
+        this.angleY = buffer.readUShort();
     }
 
     @Override

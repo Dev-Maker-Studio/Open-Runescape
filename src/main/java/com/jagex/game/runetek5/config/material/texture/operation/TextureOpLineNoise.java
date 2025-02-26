@@ -34,19 +34,19 @@ public class TextureOpLineNoise extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt10009 = rsbytebuffer2.readUnsignedByte();
+                this.anInt10009 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.anInt10013 = rsbytebuffer2.readUnsignedShort();
+                this.anInt10013 = rsbytebuffer2.readUShort();
                 break;
             case 2:
-                this.anInt10010 = rsbytebuffer2.readUnsignedByte();
+                this.anInt10010 = rsbytebuffer2.readUByte();
                 break;
             case 3:
-                this.anInt10004 = rsbytebuffer2.readUnsignedShort();
+                this.anInt10004 = rsbytebuffer2.readUShort();
                 break;
             case 4:
-                this.anInt10011 = rsbytebuffer2.readUnsignedShort();
+                this.anInt10011 = rsbytebuffer2.readUShort();
         }
 
     }

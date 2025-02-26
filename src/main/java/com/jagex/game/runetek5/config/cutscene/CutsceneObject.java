@@ -28,7 +28,7 @@ public class CutsceneObject {
 
     public CutsceneObject(Packet buffer) {
         this.locId = buffer.readBigSmart();
-        this.locShape = (ObjectShapes) Identifiable.identify(ObjectShapes.values(), buffer.readUnsignedByte());
+        this.locShape = (ObjectShapes) Identifiable.identify(ObjectShapes.values(), buffer.readUByte());
     }
 
 

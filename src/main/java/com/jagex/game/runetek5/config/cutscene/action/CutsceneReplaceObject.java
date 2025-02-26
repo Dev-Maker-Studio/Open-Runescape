@@ -19,12 +19,12 @@ public class CutsceneReplaceObject extends CutsceneAction {
 
     public CutsceneReplaceObject(Packet buffer) {
         super(buffer);
-        this.locIndex = buffer.readUnsignedShort();
+        this.locIndex = buffer.readUShort();
         int bitpackedPosition = buffer.readInt();
         this.x = bitpackedPosition >>> 16;
         this.y = bitpackedPosition & 0xffff;
-        this.plane = buffer.readUnsignedByte();
-        this.rotation = buffer.readUnsignedByte();
+        this.plane = buffer.readUByte();
+        this.rotation = buffer.readUByte();
     }
 
     @Override

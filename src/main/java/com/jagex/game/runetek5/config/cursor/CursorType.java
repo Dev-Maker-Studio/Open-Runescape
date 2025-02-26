@@ -33,7 +33,7 @@ public class CursorType {
      */
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -50,8 +50,8 @@ public class CursorType {
         if (opcode == 1) {
             this.spriteId = buffer.readBigSmart();
         } else if (opcode == 2) {
-            this.hotspotPointX = buffer.readUnsignedByte();
-            this.hotspotPointY = buffer.readUnsignedByte();
+            this.hotspotPointX = buffer.readUByte();
+            this.hotspotPointY = buffer.readUByte();
         }
     }
 

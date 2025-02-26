@@ -55,7 +55,7 @@ public class FrameSet extends CacheableNode {
             byte[] data = this.frameData[index];
             Packet buffer = new Packet(data);
             buffer.currentPosition = 1;
-            int frameId = buffer.readUnsignedShort();
+            int frameId = buffer.readUShort();
             synchronized (framebaseResource) {
                 loaded &= framebaseResource.isFileCached(frameId);
             }
@@ -74,7 +74,7 @@ public class FrameSet extends CacheableNode {
             byte[] data = this.frameData[fileIndex];
             Packet buffer = new Packet(data);
             buffer.currentPosition = 1;
-            int frameId = buffer.readUnsignedShort();
+            int frameId = buffer.readUShort();
             AnimBase frameBase = null;
             for (AnimBase sequenceBase = (AnimBase) frameBaseList.getTail(); sequenceBase != null; sequenceBase = (AnimBase) frameBaseList.getPrevious()) {
                 if (frameId == sequenceBase.id) {

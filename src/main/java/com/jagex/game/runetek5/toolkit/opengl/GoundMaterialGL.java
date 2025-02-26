@@ -157,11 +157,11 @@ public class GoundMaterialGL extends Node {
 
                     while (verticeCount < materialsByTriangle.length) {
                         if ((functionMask & 1 << loops++) != 0) {
-                            textureBuffer.writeLEShort(materialsByTriangle[verticeCount++] & 0xffff);
+                            textureBuffer.writeShortLittle(materialsByTriangle[verticeCount++] & 0xffff);
                             addedTextures++;
-                            textureBuffer.writeLEShort(materialsByTriangle[verticeCount++] & 0xffff);
+                            textureBuffer.writeShortLittle(materialsByTriangle[verticeCount++] & 0xffff);
                             addedTextures++;
-                            textureBuffer.writeLEShort(materialsByTriangle[verticeCount++] & 0xffff);
+                            textureBuffer.writeShortLittle(materialsByTriangle[verticeCount++] & 0xffff);
                             addedTextures++;
                         } else {
                             verticeCount += 3;

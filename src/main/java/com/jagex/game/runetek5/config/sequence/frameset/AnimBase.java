@@ -15,29 +15,29 @@ public class AnimBase extends Node<AnimBase> {
     AnimBase(int id, byte[] baseData) {
         this.id = id;
         Packet stream = new Packet(baseData);
-        this.numTransformation = stream.readUnsignedByte();
+        this.numTransformation = stream.readUByte();
         this.transformationType = new int[this.numTransformation];
         this.labels = new int[this.numTransformation][];
         this.shadowed = new boolean[this.numTransformation];
         this.submeshes = new int[this.numTransformation];
         for (int index = 0; index < this.numTransformation; index++) {
-            this.transformationType[index] = stream.readUnsignedByte();
+            this.transformationType[index] = stream.readUByte();
             if (this.transformationType[index] == 6) {
                 this.transformationType[index] = 2;
             }
         }
         for (int index = 0; index < this.numTransformation; index++) {
-            this.shadowed[index] = stream.readUnsignedByte() == 1;
+            this.shadowed[index] = stream.readUByte() == 1;
         }
         for (int index = 0; index < this.numTransformation; index++) {
-            this.submeshes[index] = stream.readUnsignedShort();
+            this.submeshes[index] = stream.readUShort();
         }
         for (int index = 0; index < this.numTransformation; index++) {
-            this.labels[index] = new int[stream.readUnsignedByte()];
+            this.labels[index] = new int[stream.readUByte()];
         }
         for (int index = 0; index < this.numTransformation; index++) {
             for (int subIndex = 0; subIndex < this.labels[index].length; subIndex++) {
-                this.labels[index][subIndex] = stream.readUnsignedByte();
+                this.labels[index][subIndex] = stream.readUByte();
             }
         }
     }

@@ -752,7 +752,7 @@ public class GroundGL extends Ground {
                             materials = this.materialIndices[materialIndex];
                             if (materials != null) {
                                 for (int index = 0; index < materials.length; index++) {
-                                    textureBuffer.writeLEShort(materials[index] & 0xffff);
+                                    textureBuffer.writeShortLittle(materials[index] & 0xffff);
                                     texturesLoaded++;
                                 }
                             }

@@ -90,15 +90,15 @@ public class AnchoredTextMeta implements ITipDetails {
 
     public static AnchoredTextMeta decode(Packet buffer) {
         String tipText = buffer.readString();
-        AnchorX anchorX = AnchorX.values()[buffer.readUnsignedByte()];
-        AnchorY archorY = AnchorY.values()[buffer.readUnsignedByte()];
+        AnchorX anchorX = AnchorX.values()[buffer.readUByte()];
+        AnchorY archorY = AnchorY.values()[buffer.readUByte()];
         int offsetX = buffer.readShort();
         int offsetY = buffer.readShort();
-        int textAllignment = buffer.readUnsignedByte();
-        int textVerticalAllignment = buffer.readUnsignedByte();
-        int lineSpacing = buffer.readUnsignedByte();
-        int width = buffer.readUnsignedShort();
-        int height = buffer.readUnsignedShort();
+        int textAllignment = buffer.readUByte();
+        int textVerticalAllignment = buffer.readUByte();
+        int lineSpacing = buffer.readUByte();
+        int width = buffer.readUShort();
+        int height = buffer.readUShort();
         int fileId = buffer.readBigSmart();
         int textColor = buffer.readInt();
         int textShadowColor = buffer.readInt();

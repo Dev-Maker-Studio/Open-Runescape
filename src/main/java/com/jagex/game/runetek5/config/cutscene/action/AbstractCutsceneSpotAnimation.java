@@ -16,9 +16,9 @@ public abstract class AbstractCutsceneSpotAnimation extends CutsceneAction {
 
 	public AbstractCutsceneSpotAnimation(Packet buffer) {
         super(buffer);
-        this.gfxId = buffer.readUnsignedShort();
-        this.rotation = buffer.readUnsignedShort();
-        this.displayHeight = buffer.readUnsignedByte();
+        this.gfxId = buffer.readUShort();
+        this.rotation = buffer.readUShort();
+        this.displayHeight = buffer.readUByte();
     }
 
     @Override

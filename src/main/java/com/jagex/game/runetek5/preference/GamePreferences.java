@@ -120,7 +120,7 @@ public class GamePreferences extends Node<GamePreferences> {
 
     public void decode(Packet stream) {
         if (stream != null && stream.buffer != null) {
-            int version = stream.readUnsignedByte();
+            int version = stream.readUByte();
             if (version < 23) {
                 try {
                     decodeDeprecatedVersion(stream, version);
@@ -131,61 +131,61 @@ public class GamePreferences extends Node<GamePreferences> {
             } else if (version > 27) {
                 setDefaults(true);
             } else {
-                this.antiAliasing = new AntiAliasingPreference(stream.readUnsignedByte(), this);
+                this.antiAliasing = new AntiAliasingPreference(stream.readUByte(), this);
                 this.antiAliasingPreview = new AntiAliasingPreference(this.antiAliasing.getValue(), this);
-                this.bloom = new BloomPreference(stream.readUnsignedByte(), this);
-                this.brightness = new BrightnessPreference(stream.readUnsignedByte(), this);
-                this.mapSize = new MapSizePreference(stream.readUnsignedByte(), this);
+                this.bloom = new BloomPreference(stream.readUByte(), this);
+                this.brightness = new BrightnessPreference(stream.readUByte(), this);
+                this.mapSize = new MapSizePreference(stream.readUByte(), this);
                 if (version >= 27) {
-                    this.buildArea = new BuildAreaPreference(stream.readUnsignedByte(), this);
+                    this.buildArea = new BuildAreaPreference(stream.readUByte(), this);
                 }
 
-                this.flickeringEffects = new FlickeringEffectPreference(stream.readUnsignedByte(), this);
-                this.fog = new FogPreference(stream.readUnsignedByte(), this);
-                this.goundBlending = new GroundBlendingPreference(stream.readUnsignedByte(), this);
-                this.groundDecoration = new GroundDecorationPreference(stream.readUnsignedByte(), this);
-                this.idleAnimations = new IdleAnimationsPreference(stream.readUnsignedByte(), this);
-                this.lightDetail = new LightDetailPreference(stream.readUnsignedByte(), this);
-                this.sceneryShadows = new SceneryShadowPreference(stream.readUnsignedByte(), this);
+                this.flickeringEffects = new FlickeringEffectPreference(stream.readUByte(), this);
+                this.fog = new FogPreference(stream.readUByte(), this);
+                this.goundBlending = new GroundBlendingPreference(stream.readUByte(), this);
+                this.groundDecoration = new GroundDecorationPreference(stream.readUByte(), this);
+                this.idleAnimations = new IdleAnimationsPreference(stream.readUByte(), this);
+                this.lightDetail = new LightDetailPreference(stream.readUByte(), this);
+                this.sceneryShadows = new SceneryShadowPreference(stream.readUByte(), this);
                 if (version >= 24) {
-                    this.defaultToolkit = new DefaultToolkitPreference(stream.readUnsignedByte(), this);
+                    this.defaultToolkit = new DefaultToolkitPreference(stream.readUByte(), this);
                 }
 
-                this.particles = new ParticlePreference(stream.readUnsignedByte(), this);
-                this.removeRoofs = new RoofPreference(stream.readUnsignedByte(), this);
+                this.particles = new ParticlePreference(stream.readUByte(), this);
+                this.removeRoofs = new RoofPreference(stream.readUByte(), this);
                 this.removeRoofsOptionOverride = new RoofPreference(this.removeRoofs.getValue(), this);
-                this.maxScreenSize = new MaxScreenSizePreference(stream.readUnsignedByte(), this);
+                this.maxScreenSize = new MaxScreenSizePreference(stream.readUByte(), this);
                 if (version >= 25) {
-                    this.skyboxes = new SkyboxPreference(stream.readUnsignedByte(), this);
+                    this.skyboxes = new SkyboxPreference(stream.readUByte(), this);
                 }
 
-                this.characterShadows = new CharacterShadowPreference(stream.readUnsignedByte(), this);
+                this.characterShadows = new CharacterShadowPreference(stream.readUByte(), this);
                 if (version <= 25) {
                     stream.currentPosition++;
                 }
 
-                this.textures = new TexturesPreference(stream.readUnsignedByte(), this);
-                this.toolkit = new ToolkitPreference(stream.readUnsignedByte(), this);
+                this.textures = new TexturesPreference(stream.readUByte(), this);
+                this.toolkit = new ToolkitPreference(stream.readUByte(), this);
                 this.activeToolkit = new ToolkitPreference(this.toolkit.getValue(), this);
-                stream.readUnsignedByte();
-                this.water = new WaterPreference(stream.readUnsignedByte(), this);
-                this.fixedScreen = new ScreenSizePreference(stream.readUnsignedByte(), this);
+                stream.readUByte();
+                this.water = new WaterPreference(stream.readUByte(), this);
+                this.fixedScreen = new ScreenSizePreference(stream.readUByte(), this);
                 this.fullScreen = new ScreenSizePreference(this.fixedScreen.getValue(), this);
                 this.customCursor = new CustomCursorsPreference(this);
-                this.graphics = new GraphicsPreference(stream.readUnsignedByte(), this);
-                this.cpu = new CpuMaxMemoryPreference(stream.readUnsignedByte(), this);
-                this.gametipStartStagePreference = new GameTipPreference(stream.readUnsignedByte(), this);
-                this.safeMode = new SafeModePreference(stream.readUnsignedByte(), this);
+                this.graphics = new GraphicsPreference(stream.readUByte(), this);
+                this.cpu = new CpuMaxMemoryPreference(stream.readUByte(), this);
+                this.gametipStartStagePreference = new GameTipPreference(stream.readUByte(), this);
+                this.safeMode = new SafeModePreference(stream.readUByte(), this);
                 if (version >= 26) {
-                    this.asyncMaploading = new AsyncMaploadingPreference(stream.readUnsignedByte(), this);
+                    this.asyncMaploading = new AsyncMaploadingPreference(stream.readUByte(), this);
                 }
 
-                this.soundEffectVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
-                this.ambientSoundVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
-                this.voiceOverVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
-                this.musicVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
-                this.soundLevel = new SoundLevelPreference(stream.readUnsignedByte(), this);
-                this.monoStereo = new MonoStereoPreference(stream.readUnsignedByte(), this);
+                this.soundEffectVolume = new SoundLevelPreference(stream.readUByte(), this);
+                this.ambientSoundVolume = new SoundLevelPreference(stream.readUByte(), this);
+                this.voiceOverVolume = new SoundLevelPreference(stream.readUByte(), this);
+                this.musicVolume = new SoundLevelPreference(stream.readUByte(), this);
+                this.soundLevel = new SoundLevelPreference(stream.readUByte(), this);
+                this.monoStereo = new MonoStereoPreference(stream.readUByte(), this);
                 setDefaults(false);
             }
         } else {
@@ -350,86 +350,86 @@ public class GamePreferences extends Node<GamePreferences> {
     }
 
     public void decodeDeprecatedVersion(Packet stream, int version) {
-        this.brightness = new BrightnessPreference(stream.readUnsignedByte(), this);
+        this.brightness = new BrightnessPreference(stream.readUByte(), this);
         stream.currentPosition++;
-        this.removeRoofs = new RoofPreference(stream.readUnsignedByte() + 1, this);
-        this.groundDecoration = new GroundDecorationPreference(stream.readUnsignedByte(), this);
+        this.removeRoofs = new RoofPreference(stream.readUByte() + 1, this);
+        this.groundDecoration = new GroundDecorationPreference(stream.readUByte(), this);
         stream.currentPosition++;
-        this.idleAnimations = new IdleAnimationsPreference(stream.readUnsignedByte(), this);
-        this.flickeringEffects = new FlickeringEffectPreference(stream.readUnsignedByte(), this);
-        stream.readUnsignedByte();
-        this.characterShadows = new CharacterShadowPreference(stream.readUnsignedByte(), this);
-        int i_4 = stream.readUnsignedByte();
+        this.idleAnimations = new IdleAnimationsPreference(stream.readUByte(), this);
+        this.flickeringEffects = new FlickeringEffectPreference(stream.readUByte(), this);
+        stream.readUByte();
+        this.characterShadows = new CharacterShadowPreference(stream.readUByte(), this);
+        int i_4 = stream.readUByte();
         int i_5 = 0;
         if (version >= 17) {
-            i_5 = stream.readUnsignedByte();
+            i_5 = stream.readUByte();
         }
 
         this.sceneryShadows = new SceneryShadowPreference(Math.max(i_4, i_5), this);
         boolean highDetailLight = true;
         boolean highDetailShadows = true;
         if (version >= 2) {
-            highDetailLight = stream.readUnsignedByte() == 1;
+            highDetailLight = stream.readUByte() == 1;
             if (version >= 17) {
-                highDetailShadows = stream.readUnsignedByte() == 1;
+                highDetailShadows = stream.readUByte() == 1;
             }
         } else {
-            highDetailLight = stream.readUnsignedByte() == 1;
-            stream.readUnsignedByte();
+            highDetailLight = stream.readUByte() == 1;
+            stream.readUByte();
         }
 
         this.lightDetail = new LightDetailPreference(highDetailLight | highDetailShadows ? 1 : 0, this);
-        this.water = new WaterPreference(stream.readUnsignedByte(), this);
-        this.fog = new FogPreference(stream.readUnsignedByte(), this);
-        this.antiAliasing = new AntiAliasingPreference(stream.readUnsignedByte(), this);
-        this.monoStereo = new MonoStereoPreference(stream.readUnsignedByte(), this);
-        this.soundEffectVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
+        this.water = new WaterPreference(stream.readUByte(), this);
+        this.fog = new FogPreference(stream.readUByte(), this);
+        this.antiAliasing = new AntiAliasingPreference(stream.readUByte(), this);
+        this.monoStereo = new MonoStereoPreference(stream.readUByte(), this);
+        this.soundEffectVolume = new SoundLevelPreference(stream.readUByte(), this);
         if (version >= 20) {
-            this.voiceOverVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
+            this.voiceOverVolume = new SoundLevelPreference(stream.readUByte(), this);
         } else {
             this.voiceOverVolume = new SoundLevelPreference(this.soundEffectVolume.getValue(), this);
         }
 
-        this.musicVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
-        this.ambientSoundVolume = new SoundLevelPreference(stream.readUnsignedByte(), this);
+        this.musicVolume = new SoundLevelPreference(stream.readUByte(), this);
+        this.ambientSoundVolume = new SoundLevelPreference(stream.readUByte(), this);
         if (version >= 21) {
-            this.soundLevel = new SoundLevelPreference(stream.readUnsignedByte(), this);
+            this.soundLevel = new SoundLevelPreference(stream.readUByte(), this);
         } else {
             this.soundLevel = new SoundLevelPreference(this.musicVolume.getValue(), this);
         }
 
         if (version >= 1) {
-            stream.readUnsignedShort();
-            stream.readUnsignedShort();
+            stream.readUShort();
+            stream.readUShort();
         }
 
         if (version >= 3 && version < 6) {
-            stream.readUnsignedByte();
+            stream.readUByte();
         }
 
         if (version >= 4) {
-            this.particles = new ParticlePreference(stream.readUnsignedByte(), this);
+            this.particles = new ParticlePreference(stream.readUByte(), this);
         }
 
         stream.readInt();
         if (version >= 6) {
-            this.fixedScreen = new ScreenSizePreference(stream.readUnsignedByte(), this);
+            this.fixedScreen = new ScreenSizePreference(stream.readUByte(), this);
         }
 
         if (version >= 7) {
-            this.safeMode = new SafeModePreference(stream.readUnsignedByte(), this);
+            this.safeMode = new SafeModePreference(stream.readUByte(), this);
         }
 
         if (version >= 8) {
-            stream.readUnsignedByte();
+            stream.readUByte();
         }
 
         if (version >= 9) {
-            this.mapSize = new MapSizePreference(stream.readUnsignedByte(), this);
+            this.mapSize = new MapSizePreference(stream.readUByte(), this);
         }
 
         if (version >= 10) {
-            this.bloom = new BloomPreference(stream.readUnsignedByte(), this);
+            this.bloom = new BloomPreference(stream.readUByte(), this);
         }
 
         if (version >= 11) {
@@ -437,35 +437,35 @@ public class GamePreferences extends Node<GamePreferences> {
         }
 
         if (version >= 12) {
-            this.idleAnimations = new IdleAnimationsPreference(stream.readUnsignedByte(), this);
+            this.idleAnimations = new IdleAnimationsPreference(stream.readUByte(), this);
         }
 
         if (version >= 13) {
-            this.goundBlending = new GroundBlendingPreference(stream.readUnsignedByte(), this);
+            this.goundBlending = new GroundBlendingPreference(stream.readUByte(), this);
         }
 
         if (version >= 14) {
-            this.toolkit = new ToolkitPreference(stream.readUnsignedByte(), this);
+            this.toolkit = new ToolkitPreference(stream.readUByte(), this);
         }
 
         if (version >= 15) {
-            this.cpu = new CpuMaxMemoryPreference(stream.readUnsignedByte(), this);
+            this.cpu = new CpuMaxMemoryPreference(stream.readUByte(), this);
         }
 
         if (version >= 16) {
-            this.textures = new TexturesPreference(stream.readUnsignedByte(), this);
+            this.textures = new TexturesPreference(stream.readUByte(), this);
         }
 
         if (version >= 18) {
-            this.graphics = new GraphicsPreference(stream.readUnsignedByte(), this);
+            this.graphics = new GraphicsPreference(stream.readUByte(), this);
         }
 
         if (version >= 19) {
-            this.maxScreenSize = new MaxScreenSizePreference(stream.readUnsignedByte(), this);
+            this.maxScreenSize = new MaxScreenSizePreference(stream.readUByte(), this);
         }
 
         if (version >= 22) {
-            this.gametipStartStagePreference = new GameTipPreference(stream.readUnsignedByte(), this);
+            this.gametipStartStagePreference = new GameTipPreference(stream.readUByte(), this);
         }
 
     }

@@ -580,63 +580,63 @@ public class Component {
     }
 
     public void decode(Packet buffer) {
-        int i_3 = buffer.readUnsignedByte();
+        int i_3 = buffer.readUByte();
         if (i_3 == 255) {
             i_3 = -1;
         }
-        int typeId = buffer.readUnsignedByte();
+        int typeId = buffer.readUByte();
         if ((typeId & 0x80) != 0) {
             typeId &= 0x7f;
             this.name = buffer.readString();
         }
         this.type = ComponentType.forId(typeId);
-        this.contentType = ComponentContentType.forId(buffer.readUnsignedShort());
+        this.contentType = ComponentContentType.forId(buffer.readUShort());
         this.basePositionX = buffer.readShort();
         this.basePositionY = buffer.readShort();
-        this.baseWidth = buffer.readUnsignedShort();
-        this.baseHeight = buffer.readUnsignedShort();
+        this.baseWidth = buffer.readUShort();
+        this.baseHeight = buffer.readUShort();
         this.aspectWidthType = buffer.readByte();
         this.aspectHeightType = buffer.readByte();
         this.aspectXType = buffer.readByte();
         this.aspectYType = buffer.readByte();
-        this.parentId = buffer.readUnsignedShort();
+        this.parentId = buffer.readUShort();
         if (this.parentId == 65535) {
             this.parentId = -1;
         } else {
             this.parentId += this.idHash & -65536;
         }
-        int interationMask = buffer.readUnsignedByte();
+        int interationMask = buffer.readUByte();
         this.hidden = (interationMask & 0x1) != 0;
         if (i_3 >= 0) {
             this.preventClickThrough = (interationMask & 0x2) != 0;
         }
         if (this.type == ComponentType.CONTAINER) {
-            this.scrollWidth = buffer.readUnsignedShort();
-            this.scrollHeight = buffer.readUnsignedShort();
+            this.scrollWidth = buffer.readUShort();
+            this.scrollHeight = buffer.readUShort();
             if (i_3 < 0) {
-                this.preventClickThrough = buffer.readUnsignedByte() == 1;
+                this.preventClickThrough = buffer.readUByte() == 1;
             }
         }
         if (this.type == ComponentType.SPRITE) {
             this.spriteId = buffer.readInt();
-            this.angle2d = buffer.readUnsignedShort();
-            int displayMask = buffer.readUnsignedByte();
+            this.angle2d = buffer.readUShort();
+            int displayMask = buffer.readUByte();
             this.tiling = (displayMask & 0x1) != 0;
             this.alpha = (displayMask & 0x2) != 0;
-            this.transparency = buffer.readUnsignedByte();
-            this.borderThickness = buffer.readUnsignedByte();
+            this.transparency = buffer.readUByte();
+            this.borderThickness = buffer.readUByte();
             this.spriteShadow = buffer.readInt();
-            this.flipVertical = buffer.readUnsignedByte() == 1;
-            this.flipHorizontal = buffer.readUnsignedByte() == 1;
+            this.flipVertical = buffer.readUByte() == 1;
+            this.flipHorizontal = buffer.readUByte() == 1;
             this.color = buffer.readInt();
             if (i_3 >= 3) {
-                this.clickMask = buffer.readUnsignedByte() == 1;
+                this.clickMask = buffer.readUByte() == 1;
             }
         }
         if (this.type == ComponentType.MODEL) {
             this.mediaType = MediaType.RAW_MODEL;
             this.primaryMediaId = buffer.readBigSmart();
-            int flag2 = buffer.readUnsignedByte();
+            int flag2 = buffer.readUByte();
             boolean bool6 = (flag2 & 0x1) == 1;
             this.hasOrigin = (flag2 & 0x2) == 2;
             this.usesOrthogonal = (flag2 & 0x4) == 4;
@@ -644,31 +644,31 @@ public class Component {
             if (bool6) {
                 this.originX = buffer.readShort();
                 this.originY = buffer.readShort();
-                this.spritePitch = buffer.readUnsignedShort();
-                this.spriteRoll = buffer.readUnsignedShort();
-                this.spriteYaw = buffer.readUnsignedShort();
-                this.spriteScale = buffer.readUnsignedShort();
+                this.spritePitch = buffer.readUShort();
+                this.spriteRoll = buffer.readUShort();
+                this.spriteYaw = buffer.readUShort();
+                this.spriteScale = buffer.readUShort();
             } else if (this.hasOrigin) {
                 this.originX = buffer.readShort();
                 this.originY = buffer.readShort();
                 this.originZ = buffer.readShort();
-                this.spritePitch = buffer.readUnsignedShort();
-                this.spriteRoll = buffer.readUnsignedShort();
-                this.spriteYaw = buffer.readUnsignedShort();
+                this.spritePitch = buffer.readUShort();
+                this.spriteRoll = buffer.readUShort();
+                this.spriteYaw = buffer.readUShort();
                 this.spriteScale = buffer.readShort();
             }
             this.animation = buffer.readBigSmart();
             if (this.aspectWidthType != 0) {
-                this.aspectWidth = buffer.readUnsignedShort();
+                this.aspectWidth = buffer.readUShort();
             }
             if (this.aspectHeightType != 0) {
-                this.aspectHeight = buffer.readUnsignedShort();
+                this.aspectHeight = buffer.readUShort();
             }
         }
         if (this.type == ComponentType.TEXT) {
             this.fontId = buffer.readBigSmart();
             if (i_3 >= 2) {
-                this.monospaced = buffer.readUnsignedByte() == 1;
+                this.monospaced = buffer.readUByte() == 1;
             }
             this.text = buffer.readString();
             if (this.text.toLowerCase().contains("runescape")) {
@@ -676,36 +676,36 @@ public class Component {
                 this.text = this.text.replace("RuneScape", "Darkan");
                 this.text = this.text.replace("Runescape", "Darkan");
             }
-            this.anInt1358 = buffer.readUnsignedByte();
-            this.textHorizontalAli = buffer.readUnsignedByte();
-            this.textVerticalAli = buffer.readUnsignedByte();
-            this.shadow = buffer.readUnsignedByte() == 1;
+            this.anInt1358 = buffer.readUByte();
+            this.textHorizontalAli = buffer.readUByte();
+            this.textVerticalAli = buffer.readUByte();
+            this.shadow = buffer.readUByte() == 1;
             this.color = buffer.readInt();
-            this.transparency = buffer.readUnsignedByte();
+            this.transparency = buffer.readUByte();
             if (i_3 >= 0) {
-                this.maxTextLines = buffer.readUnsignedByte();
+                this.maxTextLines = buffer.readUByte();
             }
         }
         if (this.type == ComponentType.FIGURE) {
             this.color = buffer.readInt();
-            this.filled = buffer.readUnsignedByte() == 1;
-            this.transparency = buffer.readUnsignedByte();
+            this.filled = buffer.readUByte() == 1;
+            this.transparency = buffer.readUByte();
         }
         if (this.type == ComponentType.LINE) {
-            this.lineWidth = buffer.readUnsignedByte();
+            this.lineWidth = buffer.readUByte();
             this.color = buffer.readInt();
-            this.lineDirection = buffer.readUnsignedByte() == 1;
+            this.lineDirection = buffer.readUByte() == 1;
         }
-        int optionMask = buffer.read24BitUnsignedInteger();
-        int i_16 = buffer.readUnsignedByte();
+        int optionMask = buffer.readUMedium();
+        int i_16 = buffer.readUByte();
         int i_7;
         if (i_16 != 0) {
             this.keyTriggeringAction = new byte[11][];
             this.keyTriggerParams = new byte[11][];
             this.cycleSteps = new int[11];
-            for (this.anIntArray1267 = new int[11]; i_16 != 0; i_16 = buffer.readUnsignedByte()) {
+            for (this.anIntArray1267 = new int[11]; i_16 != 0; i_16 = buffer.readUByte()) {
                 i_7 = (i_16 >> 4) - 1;
-                i_16 = i_16 << 8 | buffer.readUnsignedByte();
+                i_16 = i_16 << 8 | buffer.readUByte();
                 i_16 &= 0xfff;
                 if (i_16 == 4095) {
                     i_16 = -1;
@@ -723,7 +723,7 @@ public class Component {
         this.opBase = buffer.readString();
         if (Loader.DEBUG_IF_OPS)
             this.opBase += "(opBase)";
-        i_7 = buffer.readUnsignedByte();
+        i_7 = buffer.readUByte();
         int i_17 = i_7 & 0xf;
         int i_18 = i_7 >> 4;
         int i_10;
@@ -735,16 +735,16 @@ public class Component {
         }
         int i_11;
         if (i_18 > 0) {
-            i_10 = buffer.readUnsignedByte();
+            i_10 = buffer.readUByte();
             this.opCursors = new int[i_10 + 1];
             for (i_11 = 0; i_11 < this.opCursors.length; i_11++) {
                 this.opCursors[i_11] = -1;
             }
-            this.opCursors[i_10] = buffer.readUnsignedShort();
+            this.opCursors[i_10] = buffer.readUShort();
         }
         if (i_18 > 1) {
-            i_10 = buffer.readUnsignedByte();
-            this.opCursors[i_10] = buffer.readUnsignedShort();
+            i_10 = buffer.readUByte();
+            this.opCursors[i_10] = buffer.readUShort();
         }
         this.resumeText = buffer.readString();
         if (Loader.DEBUG_IF_OPS)
@@ -752,48 +752,48 @@ public class Component {
         if (this.resumeText.isEmpty()) {
             this.resumeText = null;
         }
-        this.anInt1380 = buffer.readUnsignedByte();
-        this.anInt1381 = buffer.readUnsignedByte();
-        this.anUnkSetting11 = UnkSetting1.forId(buffer.readUnsignedByte());
+        this.anInt1380 = buffer.readUByte();
+        this.anInt1381 = buffer.readUByte();
+        this.anUnkSetting11 = UnkSetting1.forId(buffer.readUByte());
         this.targetVerb = buffer.readString();
         if (Loader.DEBUG_IF_OPS)
             this.targetVerb += "(targetVerb)";
         i_10 = -1;
         if (Component.getUseOptionFlags(optionMask) != 0) {
-            i_10 = buffer.readUnsignedShort();
+            i_10 = buffer.readUShort();
             if (i_10 == 65535) {
                 i_10 = -1;
             }
-            this.targetOverCursor = buffer.readUnsignedShort();
+            this.targetOverCursor = buffer.readUShort();
             if (this.targetOverCursor == 65535) {
                 this.targetOverCursor = -1;
             }
-            this.targetLeaveCursor = buffer.readUnsignedShort();
+            this.targetLeaveCursor = buffer.readUShort();
             if (this.targetLeaveCursor == 65535) {
                 this.targetLeaveCursor = -1;
             }
         }
         if (i_3 >= 0) {
-            this.moveOverCursor = buffer.readUnsignedShort();
+            this.moveOverCursor = buffer.readUShort();
             if (this.moveOverCursor == 65535) {
                 this.moveOverCursor = -1;
             }
         }
         this.targetParams = new IFEvents(optionMask, i_10);
         if (i_3 >= 0) {
-            i_11 = buffer.readUnsignedByte();
+            i_11 = buffer.readUByte();
             int i_12;
             int i_13;
             int i_14;
             for (i_12 = 0; i_12 < i_11; i_12++) {
-                i_13 = buffer.read24BitUnsignedInteger();
+                i_13 = buffer.readUMedium();
                 i_14 = buffer.readInt();
                 this.aClass4651365.put(new IntNode(i_14), i_13);
             }
-            i_12 = buffer.readUnsignedByte();
+            i_12 = buffer.readUByte();
             for (i_13 = 0; i_13 < i_12; i_13++) {
-                i_14 = buffer.read24BitUnsignedInteger();
-                String string_15 = buffer.readGJString();
+                i_14 = buffer.readUMedium();
+                String string_15 = buffer.readJagString();
                 this.aClass4651365.put(new ObjectNode(string_15), i_14);
             }
         }
@@ -880,13 +880,13 @@ public class Component {
     }
 
     public Object[] decodeScript(Packet buffer) {
-        int scriptCount = buffer.readUnsignedByte();
+        int scriptCount = buffer.readUByte();
         if (scriptCount == 0) {
             return null;
         } 
         Object[] components = new Object[scriptCount];
         for (int index = 0; index < scriptCount; index++) {
-            int type = buffer.readUnsignedByte();
+            int type = buffer.readUByte();
             if (type == 0) {
                 components[index] = Integer.valueOf(buffer.readInt());
             } else if (type == 1) {
@@ -898,7 +898,7 @@ public class Component {
     }
     
     public int[] decodeScript3(Packet buffer) {
-        int count = buffer.readUnsignedByte();
+        int count = buffer.readUByte();
         if (count == 0) {
             return null;
         } 

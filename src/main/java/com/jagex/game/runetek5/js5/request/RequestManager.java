@@ -103,7 +103,7 @@ public class RequestManager {
     	/** Read and strip the header from the master index payload **/
         Packet referenceTableBuffer = new Packet(this.masterIndexRequest.getPayload());
         referenceTableBuffer.currentPosition = 5;
-        int numIndices = referenceTableBuffer.readUnsignedByte();
+        int numIndices = referenceTableBuffer.readUByte();
         referenceTableBuffer.currentPosition += numIndices * 72;
         byte[] rsaEncrypted = new byte[referenceTableBuffer.buffer.length - referenceTableBuffer.currentPosition];
         referenceTableBuffer.readBytes(rsaEncrypted, 0, rsaEncrypted.length);

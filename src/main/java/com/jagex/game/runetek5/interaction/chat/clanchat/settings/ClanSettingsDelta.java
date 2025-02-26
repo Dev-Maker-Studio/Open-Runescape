@@ -18,7 +18,7 @@ public class ClanSettingsDelta {
     public void decode(Packet buffer) {
         this.aLong4073 = buffer.readLong();
         this.anInt4060 = buffer.readInt();
-        for (int opcode = buffer.readUnsignedByte(); opcode != 0; opcode = buffer.readUnsignedByte()) {
+        for (int opcode = buffer.readUByte(); opcode != 0; opcode = buffer.readUByte()) {
         	AbstractClanSettingUpdate delta;
             if (opcode == 3) {
                 delta = new BanUser(this);

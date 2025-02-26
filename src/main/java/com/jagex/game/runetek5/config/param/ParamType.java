@@ -12,7 +12,7 @@ public class ParamType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }

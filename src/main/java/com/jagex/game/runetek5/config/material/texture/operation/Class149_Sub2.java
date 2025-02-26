@@ -190,7 +190,7 @@ public class Class149_Sub2 extends Class149 {
 	}
 
 	public static Class149_Sub2 decode(Packet rsbytebuffer0) {
-	    return new Class149_Sub2(rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.read24BitUnsignedInteger(), rsbytebuffer0.readUnsignedByte());
+	    return new Class149_Sub2(rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readUMedium(), rsbytebuffer0.readUByte());
 	}
 
 	public static void method12399(int i_0, int i_1, int i_2, int i_3, int i_4, int i_5, int i_6, int i_7, int i_8) {

@@ -35,7 +35,7 @@ public class SpotAnimType {
 
     void decode(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -49,15 +49,15 @@ public class SpotAnimType {
         } else if (opcode == 2) {
             this.sequenceId = stream.readBigSmart();
         } else if (opcode == 4) {
-            this.scaleXZ = stream.readUnsignedShort();
+            this.scaleXZ = stream.readUShort();
         } else if (opcode == 5) {
-            this.scaleY = stream.readUnsignedShort();
+            this.scaleY = stream.readUShort();
         } else if (opcode == 6) {
-            this.rotation = stream.readUnsignedShort();
+            this.rotation = stream.readUShort();
         } else if (opcode == 7) {
-            this.brightness = stream.readUnsignedByte();
+            this.brightness = stream.readUByte();
         } else if (opcode == 8) {
-            this.contrast = stream.readUnsignedByte();
+            this.contrast = stream.readUByte();
         } else if (opcode == 9) {
             this.contourType = 3;
             this.contourModifier = 8224;
@@ -71,28 +71,28 @@ public class SpotAnimType {
             this.contourType = 5;
         } else if (opcode == 14) {
             this.contourType = 2;
-            this.contourModifier = stream.readUnsignedByte() * 256;
+            this.contourModifier = stream.readUByte() * 256;
         } else if (opcode == 15) {
             this.contourType = 3;
-            this.contourModifier = stream.readUnsignedShort();
+            this.contourModifier = stream.readUShort();
         } else if (opcode == 16) {
             this.contourType = 3;
             this.contourModifier = stream.readInt();
 		} else if (opcode == 40) {
-			int colorCount = stream.readUnsignedByte();
+			int colorCount = stream.readUByte();
 			this.recolorSrc = new short[colorCount];
 			this.recolorDst = new short[colorCount];
 			for (int colorIndex = 0; colorIndex < colorCount; colorIndex++) {
-				this.recolorSrc[colorIndex] = (short) stream.readUnsignedShort();
-				this.recolorDst[colorIndex] = (short) stream.readUnsignedShort();
+				this.recolorSrc[colorIndex] = (short) stream.readUShort();
+				this.recolorDst[colorIndex] = (short) stream.readUShort();
 			}
 		} else if (opcode == 41) {
-			int textureCount = stream.readUnsignedByte();
+			int textureCount = stream.readUByte();
 			this.retextureSrc = new short[textureCount];
 			this.retextureDst = new short[textureCount];
 			for (int textureIndex = 0; textureIndex < textureCount; textureIndex++) {
-				this.retextureSrc[textureIndex] = (short) stream.readUnsignedShort();
-				this.retextureDst[textureIndex] = (short) stream.readUnsignedShort();
+				this.retextureSrc[textureIndex] = (short) stream.readUShort();
+				this.retextureDst[textureIndex] = (short) stream.readUShort();
 			}
 		}
 	}

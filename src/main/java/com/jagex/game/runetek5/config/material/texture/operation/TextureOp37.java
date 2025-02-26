@@ -27,25 +27,25 @@ public class TextureOp37 extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9830 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9830 = rsbytebuffer2.readUShort();
                 break;
             case 1:
-                this.anInt9829 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9829 = rsbytebuffer2.readUShort();
                 break;
             case 2:
-                this.anInt9833 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9833 = rsbytebuffer2.readUShort();
                 break;
             case 3:
-                this.anInt9831 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9831 = rsbytebuffer2.readUShort();
                 break;
             case 4:
-                this.anInt9832 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9832 = rsbytebuffer2.readUShort();
                 break;
             case 5:
-                this.anInt9828 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9828 = rsbytebuffer2.readUShort();
                 break;
             case 6:
-                this.anInt9834 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9834 = rsbytebuffer2.readUShort();
         }
 
     }

@@ -66,10 +66,10 @@ public class TextureOpColorEdgeDetector extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9975 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9975 = rsbytebuffer2.readUShort();
                 break;
             case 1:
-                this.aBool9974 = rsbytebuffer2.readUnsignedByte() == 1;
+                this.aBool9974 = rsbytebuffer2.readUByte() == 1;
         }
     }
 }

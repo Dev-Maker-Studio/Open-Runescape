@@ -29,18 +29,18 @@ public class FlickeringEffect {
         if (FlickeringEffect.flickeringTexture == null) {
             FlickeringEffect.createFlickeringTexture();
         }
-        this.level = stream.readUnsignedByte();
+        this.level = stream.readUByte();
         this.growsUpwards = (this.level & 0x8) != 0;
         this.growsDownwards = (this.level & 0x10) != 0;
         this.level &= 0x7;
-        int positionX = stream.readUnsignedShort() << 2;
-        int positionZ = stream.readUnsignedShort() << 2;
-        int positionY = stream.readUnsignedShort() << 2;
-        int size2d = stream.readUnsignedByte();
+        int positionX = stream.readUShort() << 2;
+        int positionZ = stream.readUShort() << 2;
+        int positionY = stream.readUShort() << 2;
+        int size2d = stream.readUByte();
         int size3d = size2d * 2 + 1;
         this.ranges = new short[size3d];
         for (int index = 0; index < this.ranges.length; index++) {
-            short bitpacked = (short) stream.readUnsignedShort();
+            short bitpacked = (short) stream.readUShort();
             int height = bitpacked >>> 8;
             int lowestHeight = bitpacked & 0xff;
             if (height >= size3d) {
@@ -52,8 +52,8 @@ public class FlickeringEffect {
             this.ranges[index] = (short) (height << 8 | lowestHeight);
         }
         size2d = (size2d << sizeShift) + (1 << sizeShift >> 1);
-        int color = ColorUtil.hslToRgb != null ? ColorUtil.hslToRgb[stream.readUnsignedShort()] : ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(stream.readUnsignedShort()) & 0xffff];
-        int bitpacked = stream.readUnsignedByte();
+        int color = ColorUtil.hslToRgb != null ? ColorUtil.hslToRgb[stream.readUShort()] : ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(stream.readUShort()) & 0xffff];
+        int bitpacked = stream.readUByte();
         this.type = bitpacked & 0x1f;
         this.rotationOffset = (bitpacked & 0xe0) << 3;
         if (this.type != 31) {

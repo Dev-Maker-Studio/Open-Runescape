@@ -57,7 +57,7 @@ public class Environment {
     }
 
     public void decode(Packet buffer, EnvironmentManager manager) {
-        int flags = buffer.readUnsignedByte();
+        int flags = buffer.readUByte();
         if (PreferenceManager.preferences.lightDetail.getValue() == 1 && Renderers.activeToolkit.getMaxLights() > 0) {
             if ((flags & 0x1) != 0) {
                 this.sunColour = buffer.readInt();
@@ -65,17 +65,17 @@ public class Environment {
                 this.sunColour = EnvironmentManager.DEFAULT_SUN_COLOR;
             }
             if ((flags & 0x2) != 0) {
-                this.sunAmbient = buffer.readUnsignedShort() / 256.0F;
+                this.sunAmbient = buffer.readUShort() / 256.0F;
             } else {
                 this.sunAmbient = 1.1523438F;
             }
             if ((flags & 0x4) != 0) {
-                this.sunLight = buffer.readUnsignedShort() / 256.0F;
+                this.sunLight = buffer.readUShort() / 256.0F;
             } else {
                 this.sunLight = 0.69921875F;
             }
             if ((flags & 0x8) != 0) {
-                this.sunBacklight = buffer.readUnsignedShort() / 256.0F;
+                this.sunBacklight = buffer.readUShort() / 256.0F;
             } else {
                 this.sunBacklight = 1.2F;
             }
@@ -84,13 +84,13 @@ public class Environment {
                 buffer.readInt();
             }
             if ((flags & 0x2) != 0) {
-                buffer.readUnsignedShort();
+                buffer.readUShort();
             }
             if ((flags & 0x4) != 0) {
-                buffer.readUnsignedShort();
+                buffer.readUShort();
             }
             if ((flags & 0x8) != 0) {
-                buffer.readUnsignedShort();
+                buffer.readUShort();
             }
             this.sunColour = EnvironmentManager.DEFAULT_SUN_COLOR;
             this.sunBacklight = 1.2F;
@@ -108,17 +108,17 @@ public class Environment {
             this.fogColour = EnvironmentManager.DEFAULT_FOG_COLOR;
         }
         if ((flags & 0x40) != 0) {
-            this.fogDepth = buffer.readUnsignedShort();
+            this.fogDepth = buffer.readUShort();
         } else {
             this.fogDepth = 0;
         }
         if ((flags & 0x80) != 0) {
-            int materialAtPositiveX = buffer.readUnsignedShort();
-            int materialAtNegativeX = buffer.readUnsignedShort();
-            int materialAtPositiveY = buffer.readUnsignedShort();
-            int materialAtNegativeY = buffer.readUnsignedShort();
-            int materialAtPositiveZ = buffer.readUnsignedShort();
-            int materialAtNegativeZ = buffer.readUnsignedShort();
+            int materialAtPositiveX = buffer.readUShort();
+            int materialAtNegativeX = buffer.readUShort();
+            int materialAtPositiveY = buffer.readUShort();
+            int materialAtNegativeY = buffer.readUShort();
+            int materialAtPositiveZ = buffer.readUShort();
+            int materialAtNegativeZ = buffer.readUShort();
             this.sunCubeTexture = manager.getCubeTexture(materialAtPositiveX, materialAtNegativeX,
                     materialAtPositiveY, materialAtNegativeY, materialAtPositiveZ, materialAtNegativeZ);
         } else {
@@ -127,17 +127,17 @@ public class Environment {
     }
 
     public void decodeHdr(Packet mapBuffer) {
-        this.bloom = (mapBuffer.readUnsignedByte() * 8) / 255.0F;
-        this.brightpass = (mapBuffer.readUnsignedByte() * 8) / 255.0F;
-        this.whitePoint = (mapBuffer.readUnsignedByte() * 8) / 255.0F;
+        this.bloom = (mapBuffer.readUByte() * 8) / 255.0F;
+        this.brightpass = (mapBuffer.readUByte() * 8) / 255.0F;
+        this.whitePoint = (mapBuffer.readUByte() * 8) / 255.0F;
     }
 
     public void decodeSkybox(Packet mapBuffer, EnvironmentManager sceneDefaults) {
-        int skyboxId = mapBuffer.readUnsignedShort();
+        int skyboxId = mapBuffer.readUShort();
         int x = mapBuffer.readShort();
         int y = mapBuffer.readShort();
         int z = mapBuffer.readShort();
-        int rotation = mapBuffer.readUnsignedShort();
+        int rotation = mapBuffer.readUShort();
         Environment.skyboxRotation = rotation;
         this.skybox = sceneDefaults.getSkybox(skyboxId, x, y, z);
     }

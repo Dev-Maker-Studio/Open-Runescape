@@ -30,7 +30,7 @@ public class FriendsChat {
 	    BufferedConnectionContext connection = client.getConnectionContext();
 	    TcpPacket packet = PacketEncoder.createPacket(ClientProt.FC_SET_RANK, connection.isaac);
 	    packet.buffer.writeByte(1 + TextUtils.getLength(username));
-	    packet.buffer.write128Byte(rank);
+	    packet.buffer.writeByteSubtract(rank);
 	    packet.buffer.writeString(username);
 	    connection.queuePacket(packet);
 	}

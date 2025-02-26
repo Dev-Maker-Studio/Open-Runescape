@@ -15,14 +15,14 @@ public class CutsceneEntityMovement {
     public final int[] bitpackedPositions;
 
     CutsceneEntityMovement(Packet buffer) {
-        int stepCount = buffer.readUnsignedSmart();
+        int stepCount = buffer.readUSmart();
         this.movementTypes = new int[stepCount];
         this.bitpackedPositions = new int[stepCount];
         for (int index = 0; index < stepCount; index++) {
-            int movementType = buffer.readUnsignedByte();
+            int movementType = buffer.readUByte();
             this.movementTypes[index] = movementType;
-            int x = buffer.readUnsignedShort();
-            int y = buffer.readUnsignedShort();
+            int x = buffer.readUShort();
+            int y = buffer.readUShort();
             this.bitpackedPositions[index] = y + (x << 16);
         }
     }

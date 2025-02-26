@@ -21,23 +21,23 @@ public class QuickchatMessageType extends CacheableNode {
         if (opcode == 1) {
             this.message = Utils.split(buffer.readString(), '<');
         } else if (opcode == 2) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.responses = new int[count];
             for (int index = 0; index < count; index++) {
-                this.responses[index] = buffer.readUnsignedShort();
+                this.responses[index] = buffer.readUShort();
             }
         } else if (opcode == 3) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.valueTypes = new int[count];
             this.configs = new int[count][];
             for (int index = 0; index < count; index++) {
-                int typeId = buffer.readUnsignedShort();
+                int typeId = buffer.readUShort();
                 QuickChatValueType type = QuickChatValueType.get(typeId);
                 if (type != null) {
                     this.valueTypes[index] = typeId;
                     this.configs[index] = new int[type.parameterCount];
                     for (int config = 0; config < type.parameterCount; config++) {
-                        this.configs[index][config] = buffer.readUnsignedShort();
+                        this.configs[index][config] = buffer.readUShort();
                     }
                 }
             }
@@ -51,7 +51,7 @@ public class QuickchatMessageType extends CacheableNode {
             for (int typeIndex = 0; typeIndex < this.valueTypes.length && typeIndex < ints_2.length; typeIndex++) {
                 int size = getValueType(typeIndex).clientTransmitSize;
                 if (size > 0) {
-                    buffer.method13068(ints_2[typeIndex], size);
+                    buffer.writeVariableLengthLong(ints_2[typeIndex], size);
                 }
             }
         }
@@ -105,7 +105,7 @@ public class QuickchatMessageType extends CacheableNode {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }

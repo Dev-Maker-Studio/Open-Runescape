@@ -21,7 +21,7 @@ public class ClanChannel extends Node<ClanChannel> {
     }
     
     public void decode(Packet buffer) {
-        int nameTypeFlag = buffer.readUnsignedByte();
+        int nameTypeFlag = buffer.readUByte();
         if ((nameTypeFlag & 0x1) != 0) {
             this.namesAsLong = true;
         }
@@ -31,10 +31,10 @@ public class ClanChannel extends Node<ClanChannel> {
         super.pointer = buffer.readLong();
         this.nextUpdateNumber = buffer.readLong();
         this.clanName = buffer.readString();
-        buffer.readUnsignedByte();
+        buffer.readUByte();
         this.minRankToKick = buffer.readByte();
         this.guestsTalk = buffer.readByte();
-        this.numPlayers = buffer.readUnsignedShort();
+        this.numPlayers = buffer.readUShort();
         if (this.numPlayers > 0) {
             this.players = new ClanChannelPlayer[this.numPlayers];
             for (int index = 0; index < this.numPlayers; index++) {
@@ -46,7 +46,7 @@ public class ClanChannel extends Node<ClanChannel> {
                     player.name = buffer.readString();
                 }
                 player.rank = buffer.readByte();
-                player.world = buffer.readUnsignedShort();
+                player.world = buffer.readUShort();
                 this.players[index] = player;
             }
         }

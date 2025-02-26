@@ -21,7 +21,7 @@ public class RotatableSpritePositioning extends SpritePositioning {
 
 	public static SpritePositioning decode(Packet buffer) {
 	    SpritePositioning positioning = SpritePositioning.decode(buffer);
-	    int angle = buffer.read24BitInteger();
+	    int angle = buffer.readMedium();
 	    return new RotatableSpritePositioning(positioning.spriteId, positioning.horizontalAnchor, positioning.verticalAnchor, positioning.spriteOffsetX, positioning.spriteOffsetY, angle);
 	}
 }

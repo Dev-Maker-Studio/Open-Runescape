@@ -18,9 +18,9 @@ public class CutsceneBasicMovement extends CutsceneAction {
 
     public CutsceneBasicMovement(Packet buffer) {
         super(buffer);
-        this.entityIndex = buffer.readUnsignedShort();
-        this.movementIndex = buffer.readUnsignedShort();
-        this.plane = buffer.readUnsignedByte();
+        this.entityIndex = buffer.readUShort();
+        this.movementIndex = buffer.readUShort();
+        this.plane = buffer.readUByte();
     }
 
     @Override

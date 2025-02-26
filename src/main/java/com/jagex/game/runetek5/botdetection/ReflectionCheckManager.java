@@ -29,7 +29,7 @@ public class ReflectionCheckManager {
 
     public static void requestReflectionCheck(Packet buffer) {
         ReflectionCheck check = new ReflectionCheck();
-        check.operationCount = buffer.readUnsignedByte();
+        check.operationCount = buffer.readUByte();
         check.header = buffer.readInt();
         check.operations = new int[check.operationCount];
         check.exceptionsEncountered = new int[check.operationCount];
@@ -40,7 +40,7 @@ public class ReflectionCheckManager {
 
         for (int operationIndex = 0; operationIndex < check.operationCount; operationIndex++) {
             try {
-                int operation = buffer.readUnsignedByte();
+                int operation = buffer.readUByte();
                 if (operation == GET_FIELD_VALUE || operation == SET_FIELD_VALUE || operation == GET_FIELD_MODIFIERS) {
                 	String classType = buffer.readString();
                 	String fieldName = buffer.readString();
@@ -57,7 +57,7 @@ public class ReflectionCheckManager {
                 } else if (operation == GET_METHOD_RESULT || operation == GET_METHOD_MODIFIERS) {
                 	String classType = buffer.readString();
                 	String expectedMethodName = buffer.readString();
-                	int expectedParameterCount = buffer.readUnsignedByte();
+                	int expectedParameterCount = buffer.readUByte();
                     String[] argumentTypeNames = new String[expectedParameterCount];
                     for (int argumentIndex = 0; argumentIndex < expectedParameterCount; argumentIndex++) {
                         argumentTypeNames[argumentIndex] = buffer.readString();

@@ -20,12 +20,12 @@ public class CutsceneArea extends Node<CutsceneArea> {
         this.plane = position >>> 28;
         this.regionX = position >>> 14 & 0x3fff;
         this.regionY = position & 0x3fff;
-        this.width = buffer.readUnsignedByte();
-        this.length = buffer.readUnsignedByte();
-        this.cutscenePlane = buffer.readUnsignedByte();
-        this.anInt7480 = buffer.readUnsignedByte();
-        this.anInt7483 = buffer.readUnsignedByte();
-        this.rotation = buffer.readUnsignedByte();
+        this.width = buffer.readUByte();
+        this.length = buffer.readUByte();
+        this.cutscenePlane = buffer.readUByte();
+        this.anInt7480 = buffer.readUByte();
+        this.anInt7483 = buffer.readUByte();
+        this.rotation = buffer.readUByte();
     }
 
 }

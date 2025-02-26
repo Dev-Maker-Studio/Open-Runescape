@@ -184,9 +184,9 @@ public class SystemInfo extends Node {
                 RawCpuInfo class43015 = hashmap6.get(Integer.valueOf(0));
                 if (class43015 != null) {
                     Packet rsbytebuffer16 = new Packet(13);
-                    rsbytebuffer16.put24BitInt(class43015.anInt5137);
-                    rsbytebuffer16.put24BitInt(class43015.anInt5136);
-                    rsbytebuffer16.put24BitInt(class43015.anInt5138);
+                    rsbytebuffer16.writeIntLittle(class43015.anInt5137);
+                    rsbytebuffer16.writeIntLittle(class43015.anInt5136);
+                    rsbytebuffer16.writeIntLittle(class43015.anInt5138);
                     rsbytebuffer16.currentPosition = 0;
                     this.cpuType = rsbytebuffer16.readString();
                 }
@@ -206,10 +206,10 @@ public class SystemInfo extends Node {
                 for (int i_11 = -2147483646; i_11 <= -2147483644; i_11++) {
                     RawCpuInfo class43019 = hashmap6.get(Integer.valueOf(i_11));
                     if (class43019 != null) {
-                        rsbytebuffer18.put24BitInt(class43019.anInt5139);
-                        rsbytebuffer18.put24BitInt(class43019.anInt5137);
-                        rsbytebuffer18.put24BitInt(class43019.anInt5138);
-                        rsbytebuffer18.put24BitInt(class43019.anInt5136);
+                        rsbytebuffer18.writeIntLittle(class43019.anInt5139);
+                        rsbytebuffer18.writeIntLittle(class43019.anInt5137);
+                        rsbytebuffer18.writeIntLittle(class43019.anInt5138);
+                        rsbytebuffer18.writeIntLittle(class43019.anInt5136);
                     }
                 }
                 rsbytebuffer18.currentPosition = 0;
@@ -307,7 +307,7 @@ public class SystemInfo extends Node {
         machineInfoBuffer.writeByte(this.idk ? 1 : 0);
         machineInfoBuffer.writeShort(this.maxMem);
         machineInfoBuffer.writeByte(this.processors);
-        machineInfoBuffer.write24BitInt(this.ram);
+        machineInfoBuffer.writeMedium(this.ram);
         machineInfoBuffer.writeShort(this.cpuClock);
         machineInfoBuffer.writeJagString(this.aString8157);
         machineInfoBuffer.writeJagString(this.aString8160);

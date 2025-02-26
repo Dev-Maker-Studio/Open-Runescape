@@ -15,8 +15,8 @@ public class KeyPressInputSubscriber implements InputSubscriber {
     }
 
     static KeyPressInputSubscriber decode(Packet buffer) {
-        int code = buffer.readUnsignedByte();
-        int flags = buffer.readUnsignedByte();
+        int code = buffer.readUByte();
+        int flags = buffer.readUByte();
         return new KeyPressInputSubscriber(code, flags);
     }
 

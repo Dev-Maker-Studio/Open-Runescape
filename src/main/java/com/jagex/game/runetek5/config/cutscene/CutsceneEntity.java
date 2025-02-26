@@ -22,7 +22,7 @@ public class CutsceneEntity {
 
     CutsceneEntity(Packet buffer, int index) {
         this.index = index;
-        int type = buffer.readUnsignedByte();
+        int type = buffer.readUByte();
         switch (type) {
             case 0:
                 this.id = buffer.readBigSmart();

@@ -19,12 +19,12 @@ public class CutsceneMoveEntity extends CutsceneAction {
 
     public CutsceneMoveEntity(Packet buffer) {
         super(buffer);
-        this.targetIndex = buffer.readUnsignedShort();
+        this.targetIndex = buffer.readUShort();
         int bitpacked = buffer.readInt();
         this.x = bitpacked >>> 16;
         this.y = bitpacked & 0xffff;
-        this.plane = buffer.readUnsignedByte();
-        this.direction = buffer.readSignedSmart();
+        this.plane = buffer.readUByte();
+        this.direction = buffer.readSmart();
     }
 
     @Override

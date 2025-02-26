@@ -64,34 +64,34 @@ public class Js5MasterIndex {
 
     public void decodeTable(byte[] tablePayload) {
         Packet stream = new Packet(Js5Compression.decompress(tablePayload));
-        int protocol = stream.readUnsignedByte();
+        int protocol = stream.readUByte();
         if (protocol >= 5 && protocol <= 7) {
             if (protocol >= 6) {
                 this.revision = stream.readInt();
             } else {
                 this.revision = 0;
             }
-            int flags = stream.readUnsignedByte();
+            int flags = stream.readUByte();
             boolean named = (flags & 0x1) != 0;
             boolean hasWhirlpool = (flags & 0x2) != 0;
             if (protocol >= 7) {
-                this.validArchiveCount = stream.readUnsignedBigSmart();
+                this.validArchiveCount = stream.readUBigSmart();
             } else {
-                this.validArchiveCount = stream.readUnsignedShort();
+                this.validArchiveCount = stream.readUShort();
             }
             int offset = 0;
             int lastArchiveId = -1;
             this.validArchiveIds = new int[this.validArchiveCount];
             if (protocol >= 7) {
                 for (int archiveIndex = 0; archiveIndex < this.validArchiveCount; archiveIndex++) {
-                    this.validArchiveIds[archiveIndex] = offset += stream.readUnsignedBigSmart();
+                    this.validArchiveIds[archiveIndex] = offset += stream.readUBigSmart();
                     if (this.validArchiveIds[archiveIndex] > lastArchiveId) {
                         lastArchiveId = this.validArchiveIds[archiveIndex];
                     }
                 }
             } else {
                 for (int archiveIndex = 0; archiveIndex < this.validArchiveCount; archiveIndex++) {
-                    this.validArchiveIds[archiveIndex] = offset += stream.readUnsignedShort();
+                    this.validArchiveIds[archiveIndex] = offset += stream.readUShort();
                     if (this.validArchiveIds[archiveIndex] > lastArchiveId) {
                         lastArchiveId = this.validArchiveIds[archiveIndex];
                     }
@@ -131,7 +131,7 @@ public class Js5MasterIndex {
             }
             if (protocol >= 7) {
                 for (int index = 0; index < this.validArchiveCount; index++) {
-                    this.archiveFileCount[this.validArchiveIds[index]] = stream.readUnsignedBigSmart();
+                    this.archiveFileCount[this.validArchiveIds[index]] = stream.readUBigSmart();
                 }
                 for (int index = 0; index < this.validArchiveCount; index++) {
                     int archiveId = this.validArchiveIds[index];
@@ -140,7 +140,7 @@ public class Js5MasterIndex {
                     int maxFileId = -1;
                     this.validFileIds[archiveId] = new int[fileCount];
                     for (int archiveFileIndex = 0; archiveFileIndex < fileCount; archiveFileIndex++) {
-                        int fileId = this.validFileIds[archiveId][archiveFileIndex] = offset += stream.readUnsignedBigSmart();
+                        int fileId = this.validFileIds[archiveId][archiveFileIndex] = offset += stream.readUBigSmart();
                         if (fileId > maxFileId) {
                             maxFileId = fileId;
                         }
@@ -152,7 +152,7 @@ public class Js5MasterIndex {
                 }
             } else {
                 for (int index = 0; index < this.validArchiveCount; index++) {
-                    this.archiveFileCount[this.validArchiveIds[index]] = stream.readUnsignedShort();
+                    this.archiveFileCount[this.validArchiveIds[index]] = stream.readUShort();
                 }
                 for (int index = 0; index < this.validArchiveCount; index++) {
                     int archiveId = this.validArchiveIds[index];
@@ -161,7 +161,7 @@ public class Js5MasterIndex {
                     int maxFileId = -1;
                     this.validFileIds[archiveId] = new int[fileCount];
                     for (int archiveFileIndex = 0; archiveFileIndex < fileCount; archiveFileIndex++) {
-                    	int fileId = this.validFileIds[archiveId][archiveFileIndex] = offset += stream.readUnsignedShort();
+                    	int fileId = this.validFileIds[archiveId][archiveFileIndex] = offset += stream.readUShort();
                         if (fileId > maxFileId) {
                             maxFileId = fileId;
                         }

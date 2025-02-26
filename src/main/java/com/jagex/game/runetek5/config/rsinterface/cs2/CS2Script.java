@@ -121,7 +121,7 @@ public class CS2Script extends CacheableNode {
     }
 
     public ClientScriptOpCode getOpcode(Packet buffer) {
-        int opcodeId = buffer.readUnsignedShort();
+        int opcodeId = buffer.readUShort();
         ClientScriptOpCode operation = ClientScriptOpCode.getByOpcode(opcodeId);
         if (operation != null) {
             return operation;
@@ -131,22 +131,22 @@ public class CS2Script extends CacheableNode {
 
     public int decodeHeader(Packet stream) {
         stream.currentPosition = stream.buffer.length - 2;
-        int i_2 = stream.readUnsignedShort();
+        int i_2 = stream.readUShort();
         int i_3 = stream.buffer.length - 2 - i_2 - 16;
         stream.currentPosition = i_3;
         int i_4 = stream.readInt();
-        this.intLocalsCount = stream.readUnsignedShort();
-        this.stringLocalsCount = stream.readUnsignedShort();
-        this.longLocalsCount = stream.readUnsignedShort();
-        this.intArgsCount = stream.readUnsignedShort();
-        this.stringArgsCount = stream.readUnsignedShort();
-        this.longArgsCount = stream.readUnsignedShort();
-        int i_5 = stream.readUnsignedByte();
+        this.intLocalsCount = stream.readUShort();
+        this.stringLocalsCount = stream.readUShort();
+        this.longLocalsCount = stream.readUShort();
+        this.intArgsCount = stream.readUShort();
+        this.stringArgsCount = stream.readUShort();
+        this.longArgsCount = stream.readUShort();
+        int i_5 = stream.readUByte();
         if (i_5 > 0) {
             this.switchMaps = new IterableNodeMap[i_5];
 
             for (int i_6 = 0; i_6 < i_5; i_6++) {
-                int i_7 = stream.readUnsignedShort();
+                int i_7 = stream.readUShort();
                 IterableNodeMap iterablenodemap8 = new IterableNodeMap(MathUtils.nextPowerOfTwo(i_7));
                 this.switchMaps[i_6] = iterablenodemap8;
 
@@ -193,7 +193,7 @@ public class CS2Script extends CacheableNode {
             if (instruction.hasIntConstant) {
                 this.intOpValues[op] = buffer.readInt();
             } else {
-                this.intOpValues[op] = buffer.readUnsignedByte();
+                this.intOpValues[op] = buffer.readUByte();
             }
         }
 

@@ -15,7 +15,7 @@ public class TextureType extends CacheableNode {
     public final TextureOperation hdrOperation;
     
 	public TextureType(Packet stream) {
-        int totalOperations = stream.readUnsignedByte();
+        int totalOperations = stream.readUByte();
         int textureFileCount = 0;
         int materialFileCount = 0;
         int[][] operationIndices = new int[totalOperations][];
@@ -31,7 +31,7 @@ public class TextureType extends CacheableNode {
             int operationCount = textureOperation.operations.length;
             operationIndices[index] = new int[operationCount];
             for (int sub = 0; sub < operationCount; sub++) {
-                operationIndices[index][sub] = stream.readUnsignedByte();
+                operationIndices[index][sub] = stream.readUByte();
             }
             this.textureOperations[index] = textureOperation;
         }
@@ -55,9 +55,9 @@ public class TextureType extends CacheableNode {
             }
             operationIndices[operationIndex] = null;
         }
-        this.opaqueOperation = this.textureOperations[stream.readUnsignedByte()];
-        this.opacityOperation = this.textureOperations[stream.readUnsignedByte()];
-        this.hdrOperation = this.textureOperations[stream.readUnsignedByte()];
+        this.opaqueOperation = this.textureOperations[stream.readUByte()];
+        this.opacityOperation = this.textureOperations[stream.readUByte()];
+        this.hdrOperation = this.textureOperations[stream.readUByte()];
     }
 
     public int[] getPixelsRgb(Js5ResourceProvider textureSpriteResource, MaterialProvider materialProvider, double brightness, int width, int height, boolean readReversed, boolean writeReversed) {

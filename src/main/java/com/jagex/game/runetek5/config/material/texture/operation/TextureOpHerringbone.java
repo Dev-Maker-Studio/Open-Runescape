@@ -75,13 +75,13 @@ public class TextureOpHerringbone extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9762 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9762 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.anInt9767 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9767 = rsbytebuffer2.readUByte();
                 break;
             case 2:
-                this.anInt9768 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9768 = rsbytebuffer2.readUShort();
         }
 
     }

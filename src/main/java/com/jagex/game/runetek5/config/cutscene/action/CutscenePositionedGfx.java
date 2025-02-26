@@ -23,7 +23,7 @@ public class CutscenePositionedGfx extends AbstractCutsceneSpotAnimation {
         int bitpackedPosition = buffer.readInt();
         this.x = bitpackedPosition >>> 16;
         this.y = bitpackedPosition & 0xffff;
-        this.plane = buffer.readUnsignedByte();
+        this.plane = buffer.readUByte();
     }
 
     @Override

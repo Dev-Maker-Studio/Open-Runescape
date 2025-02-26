@@ -361,23 +361,23 @@ public abstract class GameShell implements Engine, Runnable, FocusListener, Wind
                     }
                 }
                 buffer.currentPosition = 0;
-                int contentType = buffer.readUnsignedByte();
+                int contentType = buffer.readUByte();
                 if (contentType < 1 || contentType > 3) {
                     throw new IOException("" + contentType);
                 }
                 int childType = 0;
                 if (contentType > 1) {
-                    childType = buffer.readUnsignedByte();
+                    childType = buffer.readUByte();
                 }
                 if (contentType <= 2) {
-                    parentPath = buffer.readGJString();
+                    parentPath = buffer.readJagString();
                     if (childType == 1) {
-                        childPath = buffer.readGJString();
+                        childPath = buffer.readJagString();
                     }
                 } else {
-                    parentPath = buffer.method13248();
+                    parentPath = buffer.readPathReference();
                     if (childType == 1) {
-                        childPath = buffer.method13248();
+                        childPath = buffer.readPathReference();
                     }
                 }
                 prefFile.close();

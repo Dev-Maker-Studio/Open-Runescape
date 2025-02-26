@@ -12,7 +12,7 @@ public class CutsceneFadeScreen extends CutsceneAction {
 
     public CutsceneFadeScreen(Packet buffer) {
         super(buffer);
-        this.fadeDurationCycles = buffer.readUnsignedShort();
+        this.fadeDurationCycles = buffer.readUShort();
         this.fadeScreenColor = buffer.readInt();
     }
 

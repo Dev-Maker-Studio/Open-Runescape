@@ -21,8 +21,8 @@ public class CutscenePlaySong extends CutsceneAction {
 
     public CutscenePlaySong(Packet buffer) {
         super(buffer);
-        this.musicId = buffer.readUnsignedShort();
-        this.volume = buffer.readUnsignedByte();
+        this.musicId = buffer.readUShort();
+        this.volume = buffer.readUByte();
     }
 
     @Override

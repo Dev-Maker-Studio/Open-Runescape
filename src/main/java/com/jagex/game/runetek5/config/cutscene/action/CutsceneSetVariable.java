@@ -18,7 +18,7 @@ public class CutsceneSetVariable extends CutsceneAction {
 
     public CutsceneSetVariable(Packet buffer, boolean isVarbit) {
         super(buffer);
-        int mask = buffer.readUnsignedShort();
+        int mask = buffer.readUShort();
         if (isVarbit) {
             this.key = 0x100000000L | mask;
         } else {

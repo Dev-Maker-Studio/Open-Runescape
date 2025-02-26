@@ -138,25 +138,25 @@ public class TextureOpVoronoiNoise extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9961 = this.anInt9962 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9961 = this.anInt9962 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.randomSeed = rsbytebuffer2.readUnsignedByte();
+                this.randomSeed = rsbytebuffer2.readUByte();
                 break;
             case 2:
-                this.anInt9960 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9960 = rsbytebuffer2.readUShort();
                 break;
             case 3:
-                this.anInt9963 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9963 = rsbytebuffer2.readUByte();
                 break;
             case 4:
-                this.anInt9949 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9949 = rsbytebuffer2.readUByte();
                 break;
             case 5:
-                this.anInt9961 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9961 = rsbytebuffer2.readUByte();
                 break;
             case 6:
-                this.anInt9962 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9962 = rsbytebuffer2.readUByte();
         }
     }
 }

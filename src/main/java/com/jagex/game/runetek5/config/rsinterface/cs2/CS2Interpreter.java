@@ -9731,7 +9731,7 @@ public class CS2Interpreter {
             int i_6 = tcpmessage5.buffer.currentPosition;
             tcpmessage5.buffer.writeString(string_2);
             PacketEncoder.chatMessageToBuffer(tcpmessage5.buffer, string_3);
-            tcpmessage5.buffer.method13281(tcpmessage5.buffer.currentPosition - i_6);
+            tcpmessage5.buffer.writeShortLength(tcpmessage5.buffer.currentPosition - i_6);
             class1844.queuePacket(tcpmessage5);
         }
     }

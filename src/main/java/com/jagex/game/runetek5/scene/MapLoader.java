@@ -1393,7 +1393,7 @@ public class MapLoader {
                 this.regionMap.tileFunctionMasks[plane][x][y] = 0;
             }
             while (true) {
-                opcode = stream.readUnsignedByte();
+                opcode = stream.readUByte();
                 if (opcode == 0) {
                     if (this.overlayHidden) {
                         this.tileHeights[0][x + deltaX][y + deltaY] = 0;
@@ -1405,7 +1405,7 @@ public class MapLoader {
                     break;
                 }
                 if (opcode == 1) {
-                    int i_13 = stream.readUnsignedByte();
+                    int i_13 = stream.readUByte();
                     if (!this.overlayHidden) {
                         if (i_13 == 1) {
                             i_13 = 0;
@@ -1422,7 +1422,7 @@ public class MapLoader {
                 }
                 if (opcode <= 49) {
                     if (underwater) {
-                        stream.readUnsignedByte();
+                        stream.readUByte();
                     } else {
                         this.overlayIds[plane][x][y] = stream.readByte();
                         this.overlayPathShapes[plane][x][y] = (byte) ((opcode - 2) / 4);
@@ -1438,16 +1438,16 @@ public class MapLoader {
             }
         } else {
             while (true) {
-                opcode = stream.readUnsignedByte();
+                opcode = stream.readUByte();
                 if (opcode == 0) {
                     break;
                 }
                 if (opcode == 1) {
-                    stream.readUnsignedByte();
+                    stream.readUByte();
                     break;
                 }
                 if (opcode <= 49) {
-                    stream.readUnsignedByte();
+                    stream.readUByte();
                 }
             }
         }

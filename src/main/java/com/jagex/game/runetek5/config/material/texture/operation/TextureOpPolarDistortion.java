@@ -72,10 +72,10 @@ public class TextureOpPolarDistortion extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9836 = rsbytebuffer2.readUnsignedShort() << 4;
+                this.anInt9836 = rsbytebuffer2.readUShort() << 4;
                 break;
             case 1:
-                super.monochrome = rsbytebuffer2.readUnsignedByte() == 1;
+                super.monochrome = rsbytebuffer2.readUByte() == 1;
         }
     }
 }

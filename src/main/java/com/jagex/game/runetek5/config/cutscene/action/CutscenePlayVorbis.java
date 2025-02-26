@@ -24,10 +24,10 @@ public class CutscenePlayVorbis extends CutsceneAction {
 
     public CutscenePlayVorbis(Packet buffer) {
         super(buffer);
-        this.soundId = buffer.readUnsignedShort();
-        this.volume = buffer.readUnsignedByte();
-        this.sampleRate = buffer.readUnsignedByte();
-        this.timesRepeated = buffer.readUnsignedByte();
+        this.soundId = buffer.readUShort();
+        this.volume = buffer.readUByte();
+        this.sampleRate = buffer.readUByte();
+        this.timesRepeated = buffer.readUByte();
     }
 
     @Override

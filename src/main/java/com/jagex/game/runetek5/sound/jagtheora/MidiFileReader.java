@@ -28,7 +28,7 @@ public class MidiFileReader {
     }
 
     public void getTrackLength(int i_1) {
-        int i_2 = this.buffer.method13099();
+        int i_2 = this.buffer.readVarInt();
         this.trackLengths[i_1] += i_2;
     }
 
@@ -50,8 +50,8 @@ public class MidiFileReader {
     public void decode(byte[] data) {
         this.buffer.buffer = data;
         this.buffer.currentPosition = 10;
-        int count = this.buffer.readUnsignedShort();
-        this.division = this.buffer.readUnsignedShort();
+        int count = this.buffer.readUShort();
+        this.division = this.buffer.readUShort();
         this.anInt790 = 500000;
         this.trackStarts = new int[count];
 
@@ -138,13 +138,13 @@ public class MidiFileReader {
 
     public int decodeTrackFlags(int track, int initialFlags) {
         if (initialFlags == 255) {
-            int i_7 = this.buffer.readUnsignedByte();
-            int offset = this.buffer.method13099();
+            int i_7 = this.buffer.readUByte();
+            int offset = this.buffer.readVarInt();
             if (i_7 == 47) {
                 this.buffer.currentPosition += offset;
                 return 1;
             } else if (i_7 == 81) {
-                int i_5 = this.buffer.read24BitUnsignedInteger();
+                int i_5 = this.buffer.readUMedium();
                 offset -= 3;
                 int length = this.trackLengths[track];
                 this.aLong786 += (long) length * (this.anInt790 - i_5);
@@ -159,11 +159,11 @@ public class MidiFileReader {
         byte b_3 = aByteArray784[initialFlags - 128];
         int flags = initialFlags;
         if (b_3 >= 1) {
-            flags = initialFlags | this.buffer.readUnsignedByte() << 8;
+            flags = initialFlags | this.buffer.readUByte() << 8;
         }
 
         if (b_3 >= 2) {
-            flags |= this.buffer.readUnsignedByte() << 16;
+            flags |= this.buffer.readUByte() << 16;
         }
 
         return flags;
@@ -183,7 +183,7 @@ public class MidiFileReader {
         if (i_5 != 240 && i_5 != 247) {
             return decodeTrackFlags(track, i_5);
         } 
-        int offset = this.buffer.method13099();
+        int offset = this.buffer.readVarInt();
         if (i_5 == 247 && offset > 0) {
             int flags = this.buffer.buffer[this.buffer.currentPosition] & 0xff;
             if (flags >= 241 && flags <= 243 || flags == 246 || flags == 248 || flags >= 250 && flags <= 252 || flags == 254) {

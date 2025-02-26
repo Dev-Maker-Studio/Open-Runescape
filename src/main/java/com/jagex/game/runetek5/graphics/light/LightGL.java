@@ -197,7 +197,7 @@ public class LightGL extends Node<LightGL> {
         if (this.aGraphicalRendererSub17650.bigEndianess) {
             this.aNodeSub357655.writeShort(s_1);
         } else {
-            this.aNodeSub357655.writeLEShort(s_1);
+            this.aNodeSub357655.writeShortLittle(s_1);
         }
 
     }

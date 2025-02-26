@@ -84,19 +84,19 @@ public class TextureOpBrightness extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9903 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9903 = rsbytebuffer2.readUShort();
                 break;
             case 1:
-                this.anInt9907 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9907 = rsbytebuffer2.readUShort();
                 break;
             case 2:
-                this.anInt9908 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9908 = rsbytebuffer2.readUShort();
                 break;
             case 3:
-                this.anInt9909 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9909 = rsbytebuffer2.readUShort();
                 break;
             case 4:
-                int i_4 = rsbytebuffer2.read24BitUnsignedInteger();
+                int i_4 = rsbytebuffer2.readUMedium();
                 this.anIntArray9911[0] = (i_4 & 0xff0000) << 4;
                 this.anIntArray9911[1] = (i_4 & 0xff00) >> 4;
                 this.anIntArray9911[2] = (i_4 & 0xff) >> 12;

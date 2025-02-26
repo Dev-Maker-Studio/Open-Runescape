@@ -22,7 +22,7 @@ public class HuffmanList {
 
 	public static String decodeHuffmanMessage(Packet buffer) {
 	    try {
-	        int size = buffer.readUnsignedSmart();
+	        int size = buffer.readUSmart();
 	        if (size > 32767) {
 	            size = 32767;
 	        }

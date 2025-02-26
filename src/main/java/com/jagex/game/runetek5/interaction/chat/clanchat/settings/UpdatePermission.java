@@ -31,7 +31,7 @@ public class UpdatePermission extends AbstractClanSettingUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        this.allowGuests = buffer.readUnsignedByte() == 1;
+        this.allowGuests = buffer.readUByte() == 1;
         this.talkRank = buffer.readByte();
         this.kickRank = buffer.readByte();
         this.lootshareRank = buffer.readByte();

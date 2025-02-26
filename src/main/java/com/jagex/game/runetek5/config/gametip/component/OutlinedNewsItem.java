@@ -35,17 +35,17 @@ public class OutlinedNewsItem implements ITipDetails {
     }
 
     public static OutlinedNewsItem decode(Packet buffer) {
-        int newsitemId = buffer.readUnsignedByte();
-        AnchorX horizontalAnchor = AnchorX.values()[buffer.readUnsignedByte()];
-        AnchorY verticalAnchor = AnchorY.values()[buffer.readUnsignedByte()];
+        int newsitemId = buffer.readUByte();
+        AnchorX horizontalAnchor = AnchorX.values()[buffer.readUByte()];
+        AnchorY verticalAnchor = AnchorY.values()[buffer.readUByte()];
         int offsetX = buffer.readShort();
         int offsetY = buffer.readShort();
-        int width = buffer.readUnsignedShort();
-        int height = buffer.readUnsignedShort();
+        int width = buffer.readUShort();
+        int height = buffer.readUShort();
         int textColor = buffer.readInt();
         int textShadeColor = buffer.readInt();
         int backgroundColor = buffer.readInt();
-        boolean drawOutline = buffer.readUnsignedByte() == 1;
+        boolean drawOutline = buffer.readUByte() == 1;
         return new OutlinedNewsItem(newsitemId, horizontalAnchor, verticalAnchor, offsetX, offsetY, width, height, textColor, textShadeColor, backgroundColor, drawOutline);
     }
 

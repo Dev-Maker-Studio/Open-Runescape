@@ -17,8 +17,8 @@ public class StaticElementTypeList {
 		while (elementIndex < elements.elementCount) {
 			Packet stream = new Packet(elementsResource.getFile(archiveId, fileIds[fileIndex++]));
 			int bitpackedPlacement = stream.readInt();
-			int categoryId = stream.readUnsignedShort();
-			int allowSkip = stream.readUnsignedByte();
+			int categoryId = stream.readUShort();
+			int allowSkip = stream.readUByte();
 			if (!positioned && allowSkip == 1) {
 				elements.elementCount--;
 			} else {

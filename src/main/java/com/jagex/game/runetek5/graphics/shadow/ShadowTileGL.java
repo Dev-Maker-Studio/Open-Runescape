@@ -67,7 +67,7 @@ public class ShadowTileGL {
                         materialIndices = ground.materialIndices[indicePtr++];
                         if (materialIndices != null) {
                             for (int idx = 0; idx < materialIndices.length; idx++) {
-                                buffer.writeLEShort(materialIndices[idx] & 0xffff);
+                                buffer.writeShortLittle(materialIndices[idx] & 0xffff);
                             }
                         }
                     }

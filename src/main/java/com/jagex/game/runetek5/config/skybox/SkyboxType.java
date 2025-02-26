@@ -18,7 +18,7 @@ public class SkyboxType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -28,16 +28,16 @@ public class SkyboxType {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            this.materialId = buffer.readUnsignedShort();
+            this.materialId = buffer.readUShort();
         } else if (opcode == 2) {
-            this.sunDefinitionIds = new int[buffer.readUnsignedByte()];
+            this.sunDefinitionIds = new int[buffer.readUByte()];
             for (int index = 0; index < this.sunDefinitionIds.length; index++) {
-                this.sunDefinitionIds[index] = buffer.readUnsignedShort();
+                this.sunDefinitionIds[index] = buffer.readUShort();
             }
         } else if (opcode == 3) {
-            this.defaultSunIndex = buffer.readUnsignedByte();
+            this.defaultSunIndex = buffer.readUByte();
         } else if (opcode == 4) {
-            this.backgroundMode = (BackgroundMode) Identifiable.identify(BackgroundMode.values(), buffer.readUnsignedByte());
+            this.backgroundMode = (BackgroundMode) Identifiable.identify(BackgroundMode.values(), buffer.readUByte());
         } else if (opcode == 5) {
             this.archiveId = buffer.readBigSmart();
         }

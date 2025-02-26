@@ -23,7 +23,7 @@ public class CutsceneAnimatedMovement extends CutsceneAction {
 
     public CutsceneAnimatedMovement(Packet buffer) {
         super(buffer);
-        this.entityIndex = buffer.readUnsignedShort();
+        this.entityIndex = buffer.readUShort();
         this.movementAnimations = new int[MovementType.values().length];
         this.movementAnimationId = buffer.readBigSmart();
         Arrays.fill(this.movementAnimations, 0, this.movementAnimations.length, this.movementAnimationId);

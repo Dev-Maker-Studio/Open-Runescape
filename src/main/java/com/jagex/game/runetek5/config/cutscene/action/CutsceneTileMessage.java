@@ -25,11 +25,11 @@ public class CutsceneTileMessage extends CutsceneAction {
 
     public CutsceneTileMessage(Packet buffer) {
         super(buffer);
-        this.absX = buffer.readUnsignedShort();
-        this.absY = buffer.readUnsignedShort();
+        this.absX = buffer.readUShort();
+        this.absY = buffer.readUShort();
         this.minimenuText = buffer.readString();
         this.minimenuColor = buffer.readInt();
-        this.cycleDuration = buffer.readUnsignedShort();
+        this.cycleDuration = buffer.readUShort();
     }
 
     @Override

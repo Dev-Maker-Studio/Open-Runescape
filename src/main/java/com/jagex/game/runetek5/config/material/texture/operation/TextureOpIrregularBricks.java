@@ -131,31 +131,31 @@ public class TextureOpIrregularBricks extends TextureOperation {
     void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9782 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9782 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.anInt9791 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9791 = rsbytebuffer2.readUShort();
                 break;
             case 2:
-                this.anInt9784 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9784 = rsbytebuffer2.readUShort();
                 break;
             case 3:
-                this.anInt9772 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9772 = rsbytebuffer2.readUShort();
                 break;
             case 4:
-                this.anInt9786 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9786 = rsbytebuffer2.readUShort();
                 break;
             case 5:
-                this.anInt9787 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9787 = rsbytebuffer2.readUShort();
                 break;
             case 6:
-                this.anInt9788 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9788 = rsbytebuffer2.readUByte();
                 break;
             case 7:
-                this.anInt9780 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9780 = rsbytebuffer2.readUShort();
                 break;
             case 8:
-                this.anInt9790 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9790 = rsbytebuffer2.readUShort();
         }
     }
 

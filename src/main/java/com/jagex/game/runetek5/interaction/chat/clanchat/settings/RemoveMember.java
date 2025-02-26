@@ -19,7 +19,7 @@ public class RemoveMember extends AbstractClanSettingUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        this.memberIndex = buffer.readUnsignedShort();
+        this.memberIndex = buffer.readUShort();
     }
 
     @Override

@@ -76,12 +76,12 @@ public class VarcTypeList {
 
 	public static void decodeVarcInt(Packet buffer) {
 	    if (buffer.buffer.length - buffer.currentPosition >= 1) {
-	        int i_2 = buffer.readUnsignedByte();
+	        int i_2 = buffer.readUByte();
 	        if (i_2 >= 0 && i_2 <= 1 && buffer.buffer.length - buffer.currentPosition >= 2) {
-	            int size = buffer.readUnsignedShort();
+	            int size = buffer.readUShort();
 	            if (buffer.buffer.length - buffer.currentPosition >= size * 6) {
 	                for (int index = 0; index < size; index++) {
-	                    int varcId = buffer.readUnsignedShort();
+	                    int varcId = buffer.readUShort();
 	                    int varcState = buffer.readInt();
 	                    if (varcId < VarcTypeList.VARC_INT.length && VarcTypeList.VARC_BOOL[varcId] && (TypeLists.VARC.list(varcId).aChar4984 != 49 || varcState >= -1 && varcState <= 1)) {
 	                        VarcTypeList.VARC_INT[varcId] = varcState;

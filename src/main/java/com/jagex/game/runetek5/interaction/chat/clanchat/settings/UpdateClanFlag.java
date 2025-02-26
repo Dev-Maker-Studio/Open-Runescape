@@ -22,10 +22,10 @@ public class UpdateClanFlag extends AbstractClanSettingUpdate {
 
     @Override
     public void decode(Packet buffer) {
-    	this.index = buffer.readUnsignedShort();
+    	this.index = buffer.readUShort();
     	this.flag = buffer.readInt();
-    	this.shift = buffer.readUnsignedByte();
-    	this.bitmaskSize = buffer.readUnsignedByte();
+    	this.shift = buffer.readUByte();
+    	this.bitmaskSize = buffer.readUByte();
     }
 
     @Override

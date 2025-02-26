@@ -16,8 +16,8 @@ public class CutscenePlayJingle extends CutsceneAction {
 
     public CutscenePlayJingle(Packet buffer) {
         super(buffer);
-        this.jingleId = buffer.readUnsignedShort();
-        this.volume = buffer.readUnsignedByte();
+        this.jingleId = buffer.readUShort();
+        this.volume = buffer.readUByte();
     }
 
     @Override

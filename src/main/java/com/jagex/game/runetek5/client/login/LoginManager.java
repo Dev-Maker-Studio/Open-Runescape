@@ -177,7 +177,7 @@ public class LoginManager {
 	                    seedBlock.writeByte((int) (Math.random() * 9.9999999E7D));
 	                    seedBlock.applyRSA();
 	                    tcpPacket.buffer.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition);
-	                    tcpPacket.buffer.method13281(tcpPacket.buffer.currentPosition - tcpPacketPositionBefore);
+	                    tcpPacket.buffer.writeShortLength(tcpPacket.buffer.currentPosition - tcpPacketPositionBefore);
 	                } else {
 	                    tcpPacket.buffer.writeByte(LoginProt.INIT_GAME_CONNECTION.id);
 	                }
@@ -210,7 +210,7 @@ public class LoginManager {
 	                }
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, 2);
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0;
-	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readUnsignedShort();
+	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readUShort();
 	                LoginManager.loginStage = LoginStage.UNK_57;
 	            }
 	            if (LoginManager.loginStage == LoginStage.UNK_57) {
@@ -218,9 +218,9 @@ public class LoginManager {
 	                    return;
 	                }
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition);
-	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.method13100(LoginManager.clientSeed);
+	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.decryptFullXtea(LoginManager.clientSeed);
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0;
-	                String url = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readGJString();
+	                String url = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readJagString();
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0;
 	                String callName = JSObjectManager.LOGIN_PROMPT_BECOME_MEMBER.getCallName();
 	                if (!client.isApplet || !Browser.openBrowser(url, 1, callName)) {
@@ -243,7 +243,7 @@ public class LoginManager {
 	                }
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, 16);
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 16;
-	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.method13100(LoginManager.clientSeed);
+	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.decryptFullXtea(LoginManager.clientSeed);
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0;
 	                LoginManager.aLong77 = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readLong();
 	                LoginManager.aLong86 = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readLong();
@@ -349,8 +349,8 @@ public class LoginManager {
 	                    loginBlock.writeString(client.aString7164);
 	                    LoginManager.writeResourceCrc(loginBlock);
 	                }
-	                loginBlock.encryptWithXtea(LoginManager.clientSeed, startPositionLoginBlock, loginBlock.currentPosition);
-	                loginBlock.method13281(loginBlock.currentPosition - loginBlockPositionBefore);
+	                loginBlock.encryptXtea(LoginManager.clientSeed, startPositionLoginBlock, loginBlock.currentPosition);
+	                loginBlock.writeShortLength(loginBlock.currentPosition - loginBlockPositionBefore);
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.queuePacket(tcpPacket);
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.flush();
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.isaac = new Isaac(LoginManager.clientSeed);
@@ -477,16 +477,16 @@ public class LoginManager {
 	                        }
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(buffer.buffer, 0, LoginManager.anInt1965);
 	                        buffer.currentPosition = 0;
-	                        client.PLAYER_RIGHTS = buffer.readUnsignedByte();
-	                        client.PLAYER_MOD_LEVEL = buffer.readUnsignedByte();
-	                        client.USERDETAIL_QUICKCHAT = buffer.readUnsignedByte() == 1;
-	                        client.VERIFIED_EMAIL_ADDRESS = buffer.readUnsignedByte() == 1;
-	                        client.aBool7322 = buffer.readUnsignedByte() == 1;
-	                        client.IS_QUICKCHAT_ONLY = buffer.readUnsignedByte() == 1;
-	                        PlayerUpdate.myPlayerIndex = buffer.readUnsignedShort();
-	                        client.IS_MEMBER = buffer.readUnsignedByte() == 1;
-	                        LoginManager.PLAYER_DOB = buffer.read24BitInteger();
-	                        client.memberWorld = buffer.readUnsignedByte() == 1;
+	                        client.PLAYER_RIGHTS = buffer.readUByte();
+	                        client.PLAYER_MOD_LEVEL = buffer.readUByte();
+	                        client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1;
+	                        client.VERIFIED_EMAIL_ADDRESS = buffer.readUByte() == 1;
+	                        client.aBool7322 = buffer.readUByte() == 1;
+	                        client.IS_QUICKCHAT_ONLY = buffer.readUByte() == 1;
+	                        PlayerUpdate.myPlayerIndex = buffer.readUShort();
+	                        client.IS_MEMBER = buffer.readUByte() == 1;
+	                        LoginManager.PLAYER_DOB = buffer.readMedium();
+	                        client.memberWorld = buffer.readUByte() == 1;
 	                        client.aString3643 = buffer.readString();
 	                        Resource.mapRegion.getLoctypeList().setMember(client.memberWorld);
 	                        Resource.mapRegionLoaderTask.getMapRegion().getLoctypeList().setMember(client.memberWorld);
@@ -498,42 +498,42 @@ public class LoginManager {
 	                        }
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(buffer.buffer, 0, LoginManager.anInt1965);
 	                        buffer.currentPosition = 0;
-	                        client.PLAYER_RIGHTS = buffer.readUnsignedByte();
-	                        client.PLAYER_MOD_LEVEL = buffer.readUnsignedByte();
-	                        client.USERDETAIL_QUICKCHAT = buffer.readUnsignedByte() == 1;
-	                        LoginManager.PLAYER_DOB = buffer.read24BitInteger();
-	                        PlayerUpdate.MY_PLAYER.male = (byte) buffer.readUnsignedByte();
-	                        client.VERIFIED_EMAIL_ADDRESS = buffer.readUnsignedByte() == 1;
-	                        client.aBool7322 = buffer.readUnsignedByte() == 1;
+	                        client.PLAYER_RIGHTS = buffer.readUByte();
+	                        client.PLAYER_MOD_LEVEL = buffer.readUByte();
+	                        client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1;
+	                        LoginManager.PLAYER_DOB = buffer.readMedium();
+	                        PlayerUpdate.MY_PLAYER.male = (byte) buffer.readUByte();
+	                        client.VERIFIED_EMAIL_ADDRESS = buffer.readUByte() == 1;
+	                        client.aBool7322 = buffer.readUByte() == 1;
 	                        LoginManager.MEMBERSHIP_END = buffer.readLong();
-	                        LoginManager.aLong420 = LoginManager.MEMBERSHIP_END - Utils.time() - buffer.read5ByteInteger();
-	                        tcpPacketPositionBefore = buffer.readUnsignedByte();
+	                        LoginManager.aLong420 = LoginManager.MEMBERSHIP_END - Utils.time() - buffer.read40BitLong();
+	                        tcpPacketPositionBefore = buffer.readUByte();
 	                        client.IS_MEMBER = (tcpPacketPositionBefore & 0x1) != 0;
 	                        LoginManager.IS_MEMBER_SUBSCRIPTION = (tcpPacketPositionBefore & 0x2) != 0;
 	                        client.JCOINS = buffer.readInt();
-	                        QueueIterator.LOYALTY_ENABLED = buffer.readUnsignedByte() == 1;
+	                        QueueIterator.LOYALTY_ENABLED = buffer.readUByte() == 1;
 	                        LoginManager.LOYALTY_BALANCE = buffer.readInt();
-	                        LoginManager.RECOVERYQUESTIONSSETDATE = buffer.readUnsignedShort();
-	                        LoginManager.MESSAGES = buffer.readUnsignedShort();
-	                        LoginManager.LASTLOGINLDAY = buffer.readUnsignedShort();
+	                        LoginManager.RECOVERYQUESTIONSSETDATE = buffer.readUShort();
+	                        LoginManager.MESSAGES = buffer.readUShort();
+	                        LoginManager.LASTLOGINLDAY = buffer.readUShort();
 	                        LoginManager.LAST_IP_ADDRESS = buffer.readInt();
 							LoginManager.lobbyAuthToken = buffer.readString();
 	                        PacketDecoder.HOSTNAME_IDENTIFIER = new HostNameIdentifier(LoginManager.LAST_IP_ADDRESS);
 	                        (new Thread(PacketDecoder.HOSTNAME_IDENTIFIER)).start();
-	                        LoginManager.EMAIL_STATUS = buffer.readUnsignedByte();
-	                        LoginManager.anInt8307 = buffer.readUnsignedShort();
-	                        FileOnDisk.anInt5357 = buffer.readUnsignedShort();
-	                        LoginManager.aBool5556 = buffer.readUnsignedByte() == 1;
-	                        PlayerUpdate.MY_PLAYER.displayName = PlayerUpdate.MY_PLAYER.username = PlayerUpdate.MY_PLAYER_USERNAME = buffer.readGJString();
-	                        client.anInt3644 = buffer.readUnsignedByte();
+	                        LoginManager.EMAIL_STATUS = buffer.readUByte();
+	                        LoginManager.anInt8307 = buffer.readUShort();
+	                        FileOnDisk.anInt5357 = buffer.readUShort();
+	                        LoginManager.aBool5556 = buffer.readUByte() == 1;
+	                        PlayerUpdate.MY_PLAYER.displayName = PlayerUpdate.MY_PLAYER.username = PlayerUpdate.MY_PLAYER_USERNAME = buffer.readJagString();
+	                        client.anInt3644 = buffer.readUByte();
 	                        LoginManager.anInt1526 = buffer.readInt();
-	                        client.aBool7323 = buffer.readUnsignedByte() == 1;
+	                        client.aBool7323 = buffer.readUByte() == 1;
 	                        WorldConnection.CONNECTION_INFO = new ConnectionInfo();
-	                        WorldConnection.CONNECTION_INFO.worldId = buffer.readUnsignedShort();
+	                        WorldConnection.CONNECTION_INFO.worldId = buffer.readUShort();
 	                        if (WorldConnection.CONNECTION_INFO.worldId == 65535) {
 	                            WorldConnection.CONNECTION_INFO.worldId = -1;
 	                        }
-	                        WorldConnection.CONNECTION_INFO.host = buffer.readGJString();
+	                        WorldConnection.CONNECTION_INFO.host = buffer.readJagString();
 	                        if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE) {
 	                            WorldConnection.CONNECTION_INFO.devWorld1 = WorldConnection.CONNECTION_INFO.worldId;
 	                            WorldConnection.CONNECTION_INFO.devWorld2 = WorldConnection.CONNECTION_INFO.worldId;
@@ -570,7 +570,7 @@ public class LoginManager {
 	                    }
 	                    tcpPacketPositionBefore = buffer.readEncryptedSmart();
 	                    LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacket = ServerProt.forId(tcpPacketPositionBefore);
-	                    LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacketSize = buffer.readUnsignedShort();
+	                    LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacketSize = buffer.readUShort();
 	                    LoginManager.loginStage = LoginStage.UNK_157;
 	                }
 	                if (LoginManager.loginStage == LoginStage.UNK_157) {
@@ -603,7 +603,7 @@ public class LoginManager {
 	                        }
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, 2);
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0;
-	                        LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacketSize = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readUnsignedShort();
+	                        LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacketSize = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.readUShort();
 	                    }
 	                    if (LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().available(LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacketSize)) {
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacketSize);

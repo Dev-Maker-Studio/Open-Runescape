@@ -25,7 +25,7 @@ public class UpdateRank extends AbstractClanSettingUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        this.memberIndex = buffer.readUnsignedShort();
+        this.memberIndex = buffer.readUShort();
         this.rank = buffer.readByte();
     }
 }

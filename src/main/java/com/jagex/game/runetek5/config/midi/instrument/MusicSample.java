@@ -284,7 +284,7 @@ public class MusicSample extends Node<MusicSample> {
             int size = 0;
             int offset;
             do {
-                offset = stream.readUnsignedByte();
+                offset = stream.readUByte();
                 size += offset;
             } while (offset >= 255);
             byte[] packetData = new byte[size];

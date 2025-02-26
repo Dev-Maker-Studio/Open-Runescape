@@ -41,37 +41,37 @@ public class QuestType {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            this.name = buffer.readGJString();
+            this.name = buffer.readJagString();
         } else if (opcode == 2) {
-            this.sortName = buffer.readGJString();
+            this.sortName = buffer.readJagString();
         } else if (opcode == 3) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             this.varpValues = new int[count][3];
             for (int index = 0; index < count; index++) {
-                this.varpValues[index][0] = buffer.readUnsignedShort();
+                this.varpValues[index][0] = buffer.readUShort();
                 this.varpValues[index][1] = buffer.readInt();
                 this.varpValues[index][2] = buffer.readInt();
             }
         } else if (opcode == 4) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             this.varbitValues = new int[count][3];
             for (int index = 0; index < count; index++) {
-                this.varbitValues[index][0] = buffer.readUnsignedShort();
+                this.varbitValues[index][0] = buffer.readUShort();
                 this.varbitValues[index][1] = buffer.readInt();
                 this.varbitValues[index][2] = buffer.readInt();
             }
         } else if (opcode == 5) {
-            buffer.readUnsignedShort();
+            buffer.readUShort();
         } else if (opcode == 6) {
-            this.type = buffer.readUnsignedByte();
+            this.type = buffer.readUByte();
         } else if (opcode == 7) {
-            this.difficulty = buffer.readUnsignedByte();
+            this.difficulty = buffer.readUByte();
         } else if (opcode == 8) {
             this.members = true;
         } else if (opcode == 9) {
-            this.questPointReward = buffer.readUnsignedByte();
+            this.questPointReward = buffer.readUByte();
         } else if (opcode == 10) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             this.unusedOpcode10 = new int[count];
             for (int index = 0; index < count; index++) {
                 this.unusedOpcode10[index] = buffer.readInt();
@@ -79,24 +79,24 @@ public class QuestType {
         } else if (opcode == 12) {
             buffer.readInt();
         } else if (opcode == 13) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             this.questPrerequisiteIds = new int[count];
             for (int index = 0; index < count; index++) {
-                this.questPrerequisiteIds[index] = buffer.readUnsignedShort();
+                this.questPrerequisiteIds[index] = buffer.readUShort();
             }
         } else if (opcode == 14) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             this.levelRequirements = new int[count][2];
             for (int index = 0; index < count; index++) {
-                this.levelRequirements[index][0] = buffer.readUnsignedByte();
-                this.levelRequirements[index][1] = buffer.readUnsignedByte();
+                this.levelRequirements[index][0] = buffer.readUByte();
+                this.levelRequirements[index][1] = buffer.readUByte();
             }
         } else if (opcode == 15) {
-            this.questpointRequirement = buffer.readUnsignedShort();
+            this.questpointRequirement = buffer.readUShort();
         } else if (opcode == 17) {
             this.graphicId = buffer.readBigSmart();
         } else if (opcode == 18) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             this.varpRequirements = new int[count];
             this.minVarpValue = new int[count];
             this.maxVarpValue = new int[count];
@@ -108,7 +108,7 @@ public class QuestType {
                 this.varpRequirementNames[index] = buffer.readString();
             }
         } else if (opcode == 19) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             this.varbitRequirements = new int[count];
             this.minVarbitValue = new int[count];
             this.maxVarbitValue = new int[count];
@@ -120,14 +120,14 @@ public class QuestType {
                 this.varbitRequirementNames[index] = buffer.readString();
             }
         } else if (opcode == 249) {
-        	int count = buffer.readUnsignedByte();
+        	int count = buffer.readUByte();
             if (this.params == null) {
             	int mapSize = MathUtils.nextPowerOfTwo(count);
                 this.params = new IterableNodeMap(mapSize);
             }
             for (int index = 0; index < count; index++) {
-                boolean isObject = buffer.readUnsignedByte() == 1;
-                int key = buffer.read24BitUnsignedInteger();
+                boolean isObject = buffer.readUByte() == 1;
+                int key = buffer.readUMedium();
                 Node value;
                 if (isObject) {
                     value = new ObjectNode(buffer.readString());
@@ -258,7 +258,7 @@ public class QuestType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }

@@ -175,12 +175,12 @@ public class TextureOpCurve extends TextureOperation {
     @Override
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         if (i_1 == 0) {
-            this.anInt9799 = rsbytebuffer2.readUnsignedByte();
-            this.anIntArrayArray9800 = new int[rsbytebuffer2.readUnsignedByte()][2];
+            this.anInt9799 = rsbytebuffer2.readUByte();
+            this.anIntArrayArray9800 = new int[rsbytebuffer2.readUByte()][2];
 
             for (int i_4 = 0; i_4 < this.anIntArrayArray9800.length; i_4++) {
-                this.anIntArrayArray9800[i_4][0] = rsbytebuffer2.readUnsignedShort();
-                this.anIntArrayArray9800[i_4][1] = rsbytebuffer2.readUnsignedShort();
+                this.anIntArrayArray9800[i_4][0] = rsbytebuffer2.readUShort();
+                this.anIntArrayArray9800[i_4][1] = rsbytebuffer2.readUShort();
             }
         }
 

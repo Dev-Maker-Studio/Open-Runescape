@@ -971,7 +971,7 @@ public class client extends GameShell {
                         ++anInt7347;
                         if (CommandExecutor.teleportCommandRequested) {
                             TcpPacket tpPacket = PacketEncoder.createPacket(ClientProt.WORLD_MAP_CLICK, GAME_CONNECTION_CONTEXT.isaac);
-                            tpPacket.buffer.writeIntLE(CommandExecutor.teleportCommandPositionZ << 28 | CommandExecutor.teleportCommandPositionX << 14 | CommandExecutor.teleportCommandPositionY);
+                            tpPacket.buffer.writeIntLittle(CommandExecutor.teleportCommandPositionZ << 28 | CommandExecutor.teleportCommandPositionX << 14 | CommandExecutor.teleportCommandPositionY);
                             GAME_CONNECTION_CONTEXT.queuePacket(tpPacket);
                             CommandExecutor.teleportCommandRequested = false;
                         }

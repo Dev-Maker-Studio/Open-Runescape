@@ -12,7 +12,7 @@ public class ClanVarSettingsType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -24,9 +24,9 @@ public class ClanVarSettingsType {
         if (opcode == 1) {
             this.aChar7096 = Utils.cp1252ToChar(buffer.readByte());
         } else if (opcode == 2) {
-            this.baseVar = buffer.readUnsignedShort();
-            this.startBit = buffer.readUnsignedByte();
-            this.endBit = buffer.readUnsignedByte();
+            this.baseVar = buffer.readUShort();
+            this.startBit = buffer.readUByte();
+            this.endBit = buffer.readUByte();
         }
     }
 }

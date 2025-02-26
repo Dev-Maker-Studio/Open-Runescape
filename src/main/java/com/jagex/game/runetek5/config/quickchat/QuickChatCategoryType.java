@@ -14,7 +14,7 @@ public class QuickChatCategoryType extends CacheableNode {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -27,22 +27,22 @@ public class QuickChatCategoryType extends CacheableNode {
         if (opcode == 1) {
             this.name = buffer.readString();
         } else if (opcode == 2) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.subCategories = new int[count];
             this.subCategoryHotkeys = new char[count];
 
             for (int index = 0; index < count; index++) {
-                this.subCategories[index] = buffer.readUnsignedShort();
+                this.subCategories[index] = buffer.readUShort();
                 byte hotkey = buffer.readByte();
                 this.subCategoryHotkeys[index] = hotkey == 0 ? 0 : Utils.cp1252ToChar(hotkey);
             }
         } else if (opcode == 3) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.messages = new int[count];
             this.messageHotkeys = new char[count];
 
             for (int index = 0; index < count; index++) {
-                this.messages[index] = buffer.readUnsignedShort();
+                this.messages[index] = buffer.readUShort();
                 byte hotkey = buffer.readByte();
                 this.messageHotkeys[index] = hotkey == 0 ? 0 : Utils.cp1252ToChar(hotkey);
             }

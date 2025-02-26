@@ -47,28 +47,28 @@ public class IdkType {
      */
     public void decode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            buffer.readUnsignedByte();
+            buffer.readUByte();
         } else if (opcode == 2) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.bodyModels = new int[count];
             for (int modelIndex = 0; modelIndex < count; modelIndex++) {
                 this.bodyModels[modelIndex] = buffer.readBigSmart();
             }
         } else if (opcode == 40) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.recolorSrc = new short[count];
             this.recolorDst = new short[count];
             for (int colorIndex = 0; colorIndex < count; colorIndex++) {
-                this.recolorSrc[colorIndex] = (short) buffer.readUnsignedShort();
-                this.recolorDst[colorIndex] = (short) buffer.readUnsignedShort();
+                this.recolorSrc[colorIndex] = (short) buffer.readUShort();
+                this.recolorDst[colorIndex] = (short) buffer.readUShort();
             }
         } else if (opcode == 41) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.retexSrc = new short[count];
             this.retexDst = new short[count];
             for (int textureIndex = 0; textureIndex < count; textureIndex++) {
-                this.retexSrc[textureIndex] = (short) buffer.readUnsignedShort();
-                this.retexDst[textureIndex] = (short) buffer.readUnsignedShort();
+                this.retexSrc[textureIndex] = (short) buffer.readUShort();
+                this.retexDst[textureIndex] = (short) buffer.readUShort();
             }
         } else if (opcode >= 60 && opcode < 70) {
             this.headModels[opcode - 60] = buffer.readBigSmart();
@@ -144,7 +144,7 @@ public class IdkType {
      */
     void decode(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }

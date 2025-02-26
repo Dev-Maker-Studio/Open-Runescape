@@ -67,15 +67,15 @@ public class TextureOpWaveform extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9682 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9682 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.anInt9684 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9684 = rsbytebuffer2.readUByte();
             case 2:
             default:
                 break;
             case 3:
-                this.anInt9680 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9680 = rsbytebuffer2.readUByte();
         }
 
     }

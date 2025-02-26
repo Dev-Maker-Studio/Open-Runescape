@@ -323,29 +323,29 @@ public class Mesh {
         Packet seventh = new Packet(data);
         Packet eight = new Packet(data);
         first.currentPosition = data.length - 23;
-        this.numVertices = first.readUnsignedShort();
-        this.numFaces = first.readUnsignedShort();
-        this.numTextures = first.readUnsignedByte();
-        int footerFlags = first.readUnsignedByte();
+        this.numVertices = first.readUShort();
+        this.numFaces = first.readUShort();
+        this.numTextures = first.readUByte();
+        int footerFlags = first.readUByte();
         boolean hasFaceTypes = (footerFlags & 0x1) == 1;
         boolean hasParticleEffects = (footerFlags & 0x2) == 2;
         boolean hasBillboards = (footerFlags & 0x4) == 4;
         boolean hasVersion = (footerFlags & 0x8) == 8;
         if (hasVersion) {
             first.currentPosition -= 7;
-            this.version = first.readUnsignedByte();
+            this.version = first.readUByte();
             first.currentPosition += 6;
         }
-        int modelPriority = first.readUnsignedByte();
-        int hasFaceAlpha = first.readUnsignedByte();
-        int hasFaceSkins = first.readUnsignedByte();
-        int hasFaceTextures = first.readUnsignedByte();
-        int hasVertexSkins = first.readUnsignedByte();
-        int modelVerticesX = first.readUnsignedShort();
-        int modelVerticesY = first.readUnsignedShort();
-        int modelVerticesZ = first.readUnsignedShort();
-        int faceIndices = first.readUnsignedShort();
-        int textureIndices = first.readUnsignedShort();
+        int modelPriority = first.readUByte();
+        int hasFaceAlpha = first.readUByte();
+        int hasFaceSkins = first.readUByte();
+        int hasFaceTextures = first.readUByte();
+        int hasVertexSkins = first.readUByte();
+        int modelVerticesX = first.readUShort();
+        int modelVerticesY = first.readUShort();
+        int modelVerticesZ = first.readUShort();
+        int faceIndices = first.readUShort();
+        int textureIndices = first.readUShort();
         int simpleTextureFaceCount = 0;
         int complexTextureFaceCount = 0;
         int cubeTextureFaceCount = 0;
@@ -480,18 +480,18 @@ public class Mesh {
         int lastVerticeY = 0;
         int lastVerticeZ = 0;
         for (int verticeIndex = 0; verticeIndex < this.numVertices; verticeIndex++) {
-            int offsetFlags = first.readUnsignedByte();
+            int offsetFlags = first.readUByte();
             int verticeXOffset = 0;
             if ((offsetFlags & 0x1) != 0) {
-                verticeXOffset = second.readSignedSmart();
+                verticeXOffset = second.readSmart();
             }
             int verticeYOffset = 0;
             if ((offsetFlags & 0x2) != 0) {
-                verticeYOffset = third.readSignedSmart();
+                verticeYOffset = third.readSmart();
             }
             int verticeZOffset = 0;
             if ((offsetFlags & 0x4) != 0) {
-                verticeZOffset = fourth.readSignedSmart();
+                verticeZOffset = fourth.readSmart();
             }
             this.verticesX[verticeIndex] = lastVerticeX + verticeXOffset;
             this.verticesY[verticeIndex] = lastVerticeY + verticeYOffset;
@@ -500,7 +500,7 @@ public class Mesh {
             lastVerticeY = this.verticesY[verticeIndex];
             lastVerticeZ = this.verticesZ[verticeIndex];
             if (hasVertexSkins == 1) {
-                this.vertexGroups[verticeIndex] = fifth.readUnsignedByte();
+                this.vertexGroups[verticeIndex] = fifth.readUByte();
             }
         }
         first.currentPosition = i_38;
@@ -511,7 +511,7 @@ public class Mesh {
         seventh.currentPosition = i_36;
         eight.currentPosition = i_37;
         for (int faceIndex = 0; faceIndex < this.numFaces; faceIndex++) {
-            this.facesColor[faceIndex] = (short) first.readUnsignedShort();
+            this.facesColor[faceIndex] = (short) first.readUShort();
             if (hasFaceTypes) {
                 this.faceRenderType[faceIndex] = second.readByte();
             }
@@ -522,14 +522,14 @@ public class Mesh {
                 this.facesAlpha[faceIndex] = fourth.readByte();
             }
             if (hasFaceSkins == 1) {
-                this.faceGroups[faceIndex] = fifth.readUnsignedByte();
+                this.faceGroups[faceIndex] = fifth.readUByte();
             }
             if (hasFaceTextures == 1) {
-                this.facesMaterial[faceIndex] = (short) (seventh.readUnsignedShort() - 1);
+                this.facesMaterial[faceIndex] = (short) (seventh.readUShort() - 1);
             }
             if (this.facesTexture != null) {
                 if (this.facesMaterial[faceIndex] != -1) {
-                    this.facesTexture[faceIndex] = (byte) (eight.readUnsignedByte() - 1);
+                    this.facesTexture[faceIndex] = (byte) (eight.readUByte() - 1);
                 } else {
                     this.facesTexture[faceIndex] = -1;
                 }
@@ -548,12 +548,12 @@ public class Mesh {
         decodeTexturedTriangles(first, second, third, fourth, fifth, seventh);
         first.currentPosition = index;
         if (hasParticleEffects) {
-            int emitterCount = first.readUnsignedByte();
+            int emitterCount = first.readUByte();
             if (emitterCount > 0) {
                 this.particleEmitters = new EmissiveTriangle[emitterCount];
                 for (int emitterIndex = 0; emitterIndex < emitterCount; emitterIndex++) {
-                    int particleId = first.readUnsignedShort();
-                    int faceIndex = first.readUnsignedShort();
+                    int particleId = first.readUShort();
+                    int faceIndex = first.readUShort();
                     byte pri;
                     if (modelPriority == 255) {
                         pri = this.facesLayer[faceIndex];
@@ -563,24 +563,24 @@ public class Mesh {
                     this.particleEmitters[emitterIndex] = new EmissiveTriangle(particleId, this.facesA[faceIndex], this.facesB[faceIndex], this.facesC[faceIndex], pri);
                 }
             }
-            int effectorCount = first.readUnsignedByte();
+            int effectorCount = first.readUByte();
             if (effectorCount > 0) {
                 this.particleEffectors = new EffectiveVertex[effectorCount];
                 for (int effectorIndex = 0; effectorIndex < effectorCount; effectorIndex++) {
-                    int effectId = first.readUnsignedShort();
-                    int appliesOnVertex = first.readUnsignedShort();
+                    int effectId = first.readUShort();
+                    int appliesOnVertex = first.readUShort();
                     this.particleEffectors[effectorIndex] = new EffectiveVertex(effectId, appliesOnVertex);
                 }
             }
         }
         if (hasBillboards) {
-            int billboardCount = first.readUnsignedByte();
+            int billboardCount = first.readUByte();
             if (billboardCount > 0) {
                 this.billboards = new Billboard[billboardCount];
                 for (int billboardIndex = 0; billboardIndex < billboardCount; billboardIndex++) {
-                    int id = first.readUnsignedShort();
-                    int face = first.readUnsignedShort();
-                    int depth = first.readUnsignedByte();
+                    int id = first.readUShort();
+                    int face = first.readUShort();
+                    int depth = first.readUByte();
                     byte distance = first.readByte();
                     this.billboards[billboardIndex] = new Billboard(id, face, depth, distance);
                 }
@@ -594,11 +594,11 @@ public class Mesh {
         short c = 0;
         short tmp = 0;
         for (int faceIndex = 0; faceIndex < this.numFaces; faceIndex++) {
-            int mappingType = second.readUnsignedByte();
+            int mappingType = second.readUByte();
             if (mappingType == 1) {
-                a = (short) (first.readSignedSmart() + tmp);
-                b = (short) (first.readSignedSmart() + a);
-                c = (short) (first.readSignedSmart() + b);
+                a = (short) (first.readSmart() + tmp);
+                b = (short) (first.readSmart() + a);
+                c = (short) (first.readSmart() + b);
                 tmp = c;
                 this.facesA[faceIndex] = a;
                 this.facesB[faceIndex] = b;
@@ -617,7 +617,7 @@ public class Mesh {
             }
             if (mappingType == 2) {
                 b = c;
-                c = (short) (first.readSignedSmart() + tmp);
+                c = (short) (first.readSmart() + tmp);
                 tmp = c;
                 this.facesA[faceIndex] = a;
                 this.facesB[faceIndex] = b;
@@ -628,7 +628,7 @@ public class Mesh {
             }
             if (mappingType == 3) {
                 a = c;
-                c = (short) (first.readSignedSmart() + tmp);
+                c = (short) (first.readSmart() + tmp);
                 tmp = c;
                 this.facesA[faceIndex] = a;
                 this.facesB[faceIndex] = b;
@@ -641,7 +641,7 @@ public class Mesh {
                 short s_9 = a;
                 a = b;
                 b = s_9;
-                c = (short) (first.readSignedSmart() + tmp);
+                c = (short) (first.readSmart() + tmp);
                 tmp = c;
                 this.facesA[faceIndex] = a;
                 this.facesB[faceIndex] = s_9;
@@ -658,28 +658,28 @@ public class Mesh {
         for (int textureIndex = 0; textureIndex < this.numTextures; textureIndex++) {
             int mappingType = this.texturesMapping[textureIndex] & 0xff;
             if (mappingType == 0) {
-                this.textureFaceX[textureIndex] = (short) rsbytebuffer1.readUnsignedShort();
-                this.textureFaceY[textureIndex] = (short) rsbytebuffer1.readUnsignedShort();
-                this.textureFaceZ[textureIndex] = (short) rsbytebuffer1.readUnsignedShort();
+                this.textureFaceX[textureIndex] = (short) rsbytebuffer1.readUShort();
+                this.textureFaceY[textureIndex] = (short) rsbytebuffer1.readUShort();
+                this.textureFaceZ[textureIndex] = (short) rsbytebuffer1.readUShort();
             }
 
             if (mappingType == 1) {
-                this.textureFaceX[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
-                this.textureFaceY[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
-                this.textureFaceZ[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
+                this.textureFaceX[textureIndex] = (short) rsbytebuffer2.readUShort();
+                this.textureFaceY[textureIndex] = (short) rsbytebuffer2.readUShort();
+                this.textureFaceZ[textureIndex] = (short) rsbytebuffer2.readUShort();
                 if (this.version < 15) {
-                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUShort();
                     if (this.version < 14) {
-                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUShort();
                     } else {
-                        this.texturesScaleY[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
+                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUMedium();
                     }
 
-                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUShort();
                 } else {
-                    this.texturesScaleX[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
-                    this.texturesScaleY[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
-                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
+                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUMedium();
+                    this.texturesScaleY[textureIndex] = rsbytebuffer3.readUMedium();
+                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUMedium();
                 }
 
                 this.texturesRotation[textureIndex] = rsbytebuffer4.readByte();
@@ -688,22 +688,22 @@ public class Mesh {
             }
 
             if (mappingType == 2) {
-                this.textureFaceX[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
-                this.textureFaceY[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
-                this.textureFaceZ[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
+                this.textureFaceX[textureIndex] = (short) rsbytebuffer2.readUShort();
+                this.textureFaceY[textureIndex] = (short) rsbytebuffer2.readUShort();
+                this.textureFaceZ[textureIndex] = (short) rsbytebuffer2.readUShort();
                 if (this.version < 15) {
-                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUShort();
                     if (this.version < 14) {
-                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUShort();
                     } else {
-                        this.texturesScaleY[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
+                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUMedium();
                     }
 
-                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUShort();
                 } else {
-                    this.texturesScaleX[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
-                    this.texturesScaleY[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
-                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
+                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUMedium();
+                    this.texturesScaleY[textureIndex] = rsbytebuffer3.readUMedium();
+                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUMedium();
                 }
 
                 this.texturesRotation[textureIndex] = rsbytebuffer4.readByte();
@@ -714,22 +714,22 @@ public class Mesh {
             }
 
             if (mappingType == 3) {
-                this.textureFaceX[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
-                this.textureFaceY[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
-                this.textureFaceZ[textureIndex] = (short) rsbytebuffer2.readUnsignedShort();
+                this.textureFaceX[textureIndex] = (short) rsbytebuffer2.readUShort();
+                this.textureFaceY[textureIndex] = (short) rsbytebuffer2.readUShort();
+                this.textureFaceZ[textureIndex] = (short) rsbytebuffer2.readUShort();
                 if (this.version < 15) {
-                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUShort();
                     if (this.version < 14) {
-                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUShort();
                     } else {
-                        this.texturesScaleY[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
+                        this.texturesScaleY[textureIndex] = rsbytebuffer3.readUMedium();
                     }
 
-                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUnsignedShort();
+                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUShort();
                 } else {
-                    this.texturesScaleX[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
-                    this.texturesScaleY[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
-                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.read24BitUnsignedInteger();
+                    this.texturesScaleX[textureIndex] = rsbytebuffer3.readUMedium();
+                    this.texturesScaleY[textureIndex] = rsbytebuffer3.readUMedium();
+                    this.texturesScaleZ[textureIndex] = rsbytebuffer3.readUMedium();
                 }
 
                 this.texturesRotation[textureIndex] = rsbytebuffer4.readByte();
@@ -948,18 +948,18 @@ public class Mesh {
         Packet rsbytebuffer7 = new Packet(bytes_1);
         Packet rsbytebuffer8 = new Packet(bytes_1);
         rsbytebuffer4.currentPosition = bytes_1.length - 18;
-        this.numVertices = rsbytebuffer4.readUnsignedShort();
-        this.numFaces = rsbytebuffer4.readUnsignedShort();
-        this.numTextures = rsbytebuffer4.readUnsignedByte();
-        int i_9 = rsbytebuffer4.readUnsignedByte();
-        int i_10 = rsbytebuffer4.readUnsignedByte();
-        int i_11 = rsbytebuffer4.readUnsignedByte();
-        int i_12 = rsbytebuffer4.readUnsignedByte();
-        int i_13 = rsbytebuffer4.readUnsignedByte();
-        int i_14 = rsbytebuffer4.readUnsignedShort();
-        int i_15 = rsbytebuffer4.readUnsignedShort();
-        int i_16 = rsbytebuffer4.readUnsignedShort();
-        int i_17 = rsbytebuffer4.readUnsignedShort();
+        this.numVertices = rsbytebuffer4.readUShort();
+        this.numFaces = rsbytebuffer4.readUShort();
+        this.numTextures = rsbytebuffer4.readUByte();
+        int i_9 = rsbytebuffer4.readUByte();
+        int i_10 = rsbytebuffer4.readUByte();
+        int i_11 = rsbytebuffer4.readUByte();
+        int i_12 = rsbytebuffer4.readUByte();
+        int i_13 = rsbytebuffer4.readUByte();
+        int i_14 = rsbytebuffer4.readUShort();
+        int i_15 = rsbytebuffer4.readUShort();
+        int i_16 = rsbytebuffer4.readUShort();
+        int i_17 = rsbytebuffer4.readUShort();
         byte b_18 = 0;
         int i_42 = b_18 + this.numVertices;
         int i_20 = i_42;
@@ -1051,20 +1051,20 @@ public class Mesh {
         int i_36;
         int i_39;
         for (i_35 = 0; i_35 < this.numVertices; i_35++) {
-            i_36 = rsbytebuffer4.readUnsignedByte();
+            i_36 = rsbytebuffer4.readUByte();
             int i_37 = 0;
             if ((i_36 & 0x1) != 0) {
-                i_37 = rsbytebuffer5.readSignedSmart();
+                i_37 = rsbytebuffer5.readSmart();
             }
 
             int i_38 = 0;
             if ((i_36 & 0x2) != 0) {
-                i_38 = rsbytebuffer6.readSignedSmart();
+                i_38 = rsbytebuffer6.readSmart();
             }
 
             i_39 = 0;
             if ((i_36 & 0x4) != 0) {
-                i_39 = rsbytebuffer7.readSignedSmart();
+                i_39 = rsbytebuffer7.readSmart();
             }
 
             this.verticesX[i_35] = i_32 + i_37;
@@ -1074,7 +1074,7 @@ public class Mesh {
             i_33 = this.verticesY[i_35];
             i_34 = this.verticesZ[i_35];
             if (i_13 == 1) {
-                this.vertexGroups[i_35] = rsbytebuffer8.readUnsignedByte();
+                this.vertexGroups[i_35] = rsbytebuffer8.readUByte();
             }
         }
 
@@ -1085,9 +1085,9 @@ public class Mesh {
         rsbytebuffer8.currentPosition = i_22;
 
         for (i_35 = 0; i_35 < this.numFaces; i_35++) {
-            this.facesColor[i_35] = (short) rsbytebuffer4.readUnsignedShort();
+            this.facesColor[i_35] = (short) rsbytebuffer4.readUShort();
             if (i_9 == 1) {
-                i_36 = rsbytebuffer5.readUnsignedByte();
+                i_36 = rsbytebuffer5.readUByte();
                 if ((i_36 & 0x1) == 1) {
                     this.faceRenderType[i_35] = 1;
                     hasFaceTypes = true;
@@ -1117,7 +1117,7 @@ public class Mesh {
             }
 
             if (i_12 == 1) {
-                this.faceGroups[i_35] = rsbytebuffer8.readUnsignedByte();
+                this.faceGroups[i_35] = rsbytebuffer8.readUByte();
             }
         }
 
@@ -1131,11 +1131,11 @@ public class Mesh {
 
         int i_40;
         for (i_39 = 0; i_39 < this.numFaces; i_39++) {
-            i_40 = rsbytebuffer5.readUnsignedByte();
+            i_40 = rsbytebuffer5.readUByte();
             if (i_40 == 1) {
-                s_43 = (short) (rsbytebuffer4.readSignedSmart() + s_46);
-                s_44 = (short) (rsbytebuffer4.readSignedSmart() + s_43);
-                s_45 = (short) (rsbytebuffer4.readSignedSmart() + s_44);
+                s_43 = (short) (rsbytebuffer4.readSmart() + s_46);
+                s_44 = (short) (rsbytebuffer4.readSmart() + s_43);
+                s_45 = (short) (rsbytebuffer4.readSmart() + s_44);
                 s_46 = s_45;
                 this.facesA[i_39] = s_43;
                 this.facesB[i_39] = s_44;
@@ -1155,7 +1155,7 @@ public class Mesh {
 
             if (i_40 == 2) {
                 s_44 = s_45;
-                s_45 = (short) (rsbytebuffer4.readSignedSmart() + s_46);
+                s_45 = (short) (rsbytebuffer4.readSmart() + s_46);
                 s_46 = s_45;
                 this.facesA[i_39] = s_43;
                 this.facesB[i_39] = s_44;
@@ -1167,7 +1167,7 @@ public class Mesh {
 
             if (i_40 == 3) {
                 s_43 = s_45;
-                s_45 = (short) (rsbytebuffer4.readSignedSmart() + s_46);
+                s_45 = (short) (rsbytebuffer4.readSmart() + s_46);
                 s_46 = s_45;
                 this.facesA[i_39] = s_43;
                 this.facesB[i_39] = s_44;
@@ -1181,7 +1181,7 @@ public class Mesh {
                 short s_41 = s_43;
                 s_43 = s_44;
                 s_44 = s_41;
-                s_45 = (short) (rsbytebuffer4.readSignedSmart() + s_46);
+                s_45 = (short) (rsbytebuffer4.readSmart() + s_46);
                 s_46 = s_45;
                 this.facesA[i_39] = s_43;
                 this.facesB[i_39] = s_41;
@@ -1197,9 +1197,9 @@ public class Mesh {
 
         for (i_39 = 0; i_39 < this.numTextures; i_39++) {
             this.texturesMapping[i_39] = 0;
-            this.textureFaceX[i_39] = (short) rsbytebuffer4.readUnsignedShort();
-            this.textureFaceY[i_39] = (short) rsbytebuffer4.readUnsignedShort();
-            this.textureFaceZ[i_39] = (short) rsbytebuffer4.readUnsignedShort();
+            this.textureFaceX[i_39] = (short) rsbytebuffer4.readUShort();
+            this.textureFaceY[i_39] = (short) rsbytebuffer4.readUShort();
+            this.textureFaceZ[i_39] = (short) rsbytebuffer4.readUShort();
         }
 
         if (this.facesTexture != null) {

@@ -118,7 +118,7 @@ public class NPCType {
 
     void decodeType(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -549,7 +549,7 @@ public class NPCType {
 
     public void decodeOpcode(Packet stream, int opcode) {
         if (opcode == 1) {
-            int modelCount = stream.readUnsignedByte();
+            int modelCount = stream.readUByte();
             this.modelIds = new int[modelCount];
             for (int index = 0; index < modelCount; index++) {
                 this.modelIds[index] = stream.readBigSmart();
@@ -557,33 +557,33 @@ public class NPCType {
         } else if (opcode == 2) {
             this.name = stream.readString();
         } else if (opcode == 12) {
-            this.size = stream.readUnsignedByte();
+            this.size = stream.readUByte();
         } else if (opcode >= 30 && opcode < 35) {
             this.actions[opcode - 30] = stream.readString();
         } else if (opcode == 40) {
-            int recolorCount = stream.readUnsignedByte();
+            int recolorCount = stream.readUByte();
             this.recolorSrc = new short[recolorCount];
             this.recolorDst = new short[recolorCount];
             for (int index = 0; index < recolorCount; index++) {
-                this.recolorSrc[index] = (short) stream.readUnsignedShort();
-                this.recolorDst[index] = (short) stream.readUnsignedShort();
+                this.recolorSrc[index] = (short) stream.readUShort();
+                this.recolorDst[index] = (short) stream.readUShort();
             }
         } else if (opcode == 41) {
-            int retextureCount = stream.readUnsignedByte();
+            int retextureCount = stream.readUByte();
             this.retextureSrc = new short[retextureCount];
             this.retextureDst = new short[retextureCount];
             for (int index = 0; index < retextureCount; index++) {
-                this.retextureSrc[index] = (short) stream.readUnsignedShort();
-                this.retextureDst[index] = (short) stream.readUnsignedShort();
+                this.retextureSrc[index] = (short) stream.readUShort();
+                this.retextureDst[index] = (short) stream.readUShort();
             }
         } else if (opcode == 42) {
-            int recolorCount = stream.readUnsignedByte();
+            int recolorCount = stream.readUByte();
             this.recolorDPalette = new byte[recolorCount];
             for (int index = 0; index < recolorCount; index++) {
                 this.recolorDPalette[index] = stream.readByte();
             }
         } else if (opcode == 60) {
-            int headmodelCount = stream.readUnsignedByte();
+            int headmodelCount = stream.readUByte();
             this.headModels = new int[headmodelCount];
             for (int index = 0; index < headmodelCount; index++) {
                 this.headModels[index] = stream.readBigSmart();
@@ -591,11 +591,11 @@ public class NPCType {
         } else if (opcode == 93) {
             this.displayOnMinimap = false;
         } else if (opcode == 95) {
-            this.combatLevel = stream.readUnsignedShort();
+            this.combatLevel = stream.readUShort();
         } else if (opcode == 97) {
-            this.scaleXZ = stream.readUnsignedShort();
+            this.scaleXZ = stream.readUShort();
         } else if (opcode == 98) {
-            this.scaleY = stream.readUnsignedShort();
+            this.scaleY = stream.readUShort();
         } else if (opcode == 99) {
             this.highPriority = true;
         } else if (opcode == 100) {
@@ -603,29 +603,29 @@ public class NPCType {
         } else if (opcode == 101) {
             this.contrast = stream.readByte();
         } else if (opcode == 102) {
-            this.headIcons = stream.readUnsignedShort();
+            this.headIcons = stream.readUShort();
         } else if (opcode == 103) {
-            this.turnDirection = stream.readUnsignedShort();
+            this.turnDirection = stream.readUShort();
         } else if (opcode == 106 || opcode == 118) {
-            this.varpbit = stream.readUnsignedShort();
+            this.varpbit = stream.readUShort();
             if (this.varpbit == 65535) {
                 this.varpbit = -1;
             }
-            this.varp = stream.readUnsignedShort();
+            this.varp = stream.readUShort();
             if (this.varp == 65535) {
                 this.varp = -1;
             }
             int lastAlt = -1;
             if (opcode == 118) {
-                lastAlt = stream.readUnsignedShort();
+                lastAlt = stream.readUShort();
                 if (lastAlt == 65535) {
                     lastAlt = -1;
                 }
             }
-            int length = stream.readUnsignedByte();
+            int length = stream.readUByte();
             this.alternativeIds = new int[length + 2];
             for (int index = 0; index <= length; index++) {
-                this.alternativeIds[index] = stream.readUnsignedShort();
+                this.alternativeIds[index] = stream.readUShort();
                 if (this.alternativeIds[index] == 65535) {
                     this.alternativeIds[index] = -1;
                 }
@@ -638,8 +638,8 @@ public class NPCType {
         } else if (opcode == 111) {
             this.shadowed = false;
         } else if (opcode == 113) {
-            this.shadowColorSrc = (short) stream.readUnsignedShort();
-            this.shadowColorDst = (short) stream.readUnsignedShort();
+            this.shadowColorSrc = (short) stream.readUShort();
+            this.shadowColorDst = (short) stream.readUShort();
         } else if (opcode == 114) {
             this.shadowAlphaSrc = stream.readByte();
             this.shadowAlphaDst = stream.readByte();
@@ -647,56 +647,56 @@ public class NPCType {
             this.walkingFlags = stream.readByte();
         } else if (opcode == 121) {
             this.modelOffsets = new int[this.modelIds.length][];
-            int numOffsetAdjustments = stream.readUnsignedByte();
+            int numOffsetAdjustments = stream.readUByte();
             for (int index = 0; index < numOffsetAdjustments; index++) {
-                int model = stream.readUnsignedByte();
+                int model = stream.readUByte();
                 int[] translate = this.modelOffsets[model] = new int[3];
                 translate[0] = stream.readByte();
                 translate[1] = stream.readByte();
                 translate[2] = stream.readByte();
             }
         } else if (opcode == 123) {
-            this.iconHeight = stream.readUnsignedShort();
+            this.iconHeight = stream.readUShort();
         } else if (opcode == 125) {
             this.respawnDirection = (NPCDirection) Identifiable.identify(NPCDirection.values(), stream.readByte());
         } else if (opcode == 127) {
-            this.npcBasId = stream.readUnsignedShort();
+            this.npcBasId = stream.readUShort();
         } else if (opcode == 128) {
-            Identifiable.identify(MovementType.values(), stream.readUnsignedByte());
+            Identifiable.identify(MovementType.values(), stream.readUByte());
         } else if (opcode == 134) { 
-            this.walkingSoundEffect = stream.readUnsignedShort();
+            this.walkingSoundEffect = stream.readUShort();
             if (this.walkingSoundEffect == 65535) {
                 this.walkingSoundEffect = -1;
             }
-            this.teleportSoundEffect = stream.readUnsignedShort();
+            this.teleportSoundEffect = stream.readUShort();
             if (this.teleportSoundEffect == 65535) {
                 this.teleportSoundEffect = -1;
             }
-            this.idleSoundEffect = stream.readUnsignedShort();
+            this.idleSoundEffect = stream.readUShort();
             if (this.idleSoundEffect == 65535) {
                 this.idleSoundEffect = -1;
             }
-            this.runningSoundEffect = stream.readUnsignedShort();
+            this.runningSoundEffect = stream.readUShort();
             if (this.runningSoundEffect == 65535) {
                 this.runningSoundEffect = -1;
             }
-            this.ambientSoundMinHearDistance = stream.readUnsignedByte();
+            this.ambientSoundMinHearDistance = stream.readUByte();
         } else if (opcode == 135) {
-            this.primaryCursorActionIndex = stream.readUnsignedByte();
-            this.primaryCursor = stream.readUnsignedShort();
+            this.primaryCursorActionIndex = stream.readUByte();
+            this.primaryCursor = stream.readUShort();
         } else if (opcode == 136) {
-            this.secondaryCursorActionIndex = stream.readUnsignedByte();
-            this.secondaryCursor = stream.readUnsignedShort();
+            this.secondaryCursorActionIndex = stream.readUByte();
+            this.secondaryCursor = stream.readUShort();
         } else if (opcode == 137) {
-            this.attackCursor = stream.readUnsignedShort();
+            this.attackCursor = stream.readUShort();
         } else if (opcode == 138) {
             this.overheadSprite = stream.readBigSmart();
         } else if (opcode == 140) {
-            this.ambientSoundVolume = stream.readUnsignedByte();
+            this.ambientSoundVolume = stream.readUByte();
         } else if (opcode == 141) {
             this.lowPriority = true;
         } else if (opcode == 142) {
-            this.mecId = stream.readUnsignedShort();
+            this.mecId = stream.readUShort();
         } else if (opcode == 143) {
             this.mediumPriority = true;
         } else if (opcode >= 150 && opcode < 155) {
@@ -714,33 +714,33 @@ public class NPCType {
         } else if (opcode == 159) {
             this.gameType = 0;
         } else if (opcode == 160) {
-            int i_4 = stream.readUnsignedByte();
+            int i_4 = stream.readUByte();
             this.quests = new int[i_4];
             for (int i_5 = 0; i_5 < i_4; i_5++) {
-                this.quests[i_5] = stream.readUnsignedShort();
+                this.quests[i_5] = stream.readUShort();
             }
         } else if (opcode == 162) {
             this.instrumentSoundEffect = true;
         } else if (opcode == 163) {
-            this.shadowSize = stream.readUnsignedByte();
+            this.shadowSize = stream.readUByte();
         } else if (opcode == 164) {
-            this.ambientSoundMaxDelay = stream.readUnsignedShort();
-            this.ambientSoundMinDelay = stream.readUnsignedShort();
+            this.ambientSoundMaxDelay = stream.readUShort();
+            this.ambientSoundMinDelay = stream.readUShort();
         } else if (opcode == 165) {
-            this.sizeShift = stream.readUnsignedByte();
+            this.sizeShift = stream.readUByte();
         } else if (opcode == 168) {
-            this.ambientSoundMaxHearDistance = stream.readUnsignedByte();
+            this.ambientSoundMaxHearDistance = stream.readUByte();
         } else if (opcode == 169) {
             this.hasTint = false;
         } else if (opcode == 249) {
-            int paramCount = stream.readUnsignedByte();
+            int paramCount = stream.readUByte();
             if (this.parameters == null) {
                 int capacity = MathUtils.nextPowerOfTwo(paramCount);
                 this.parameters = new IterableNodeMap<Node<?>>(capacity);
             }
             for (int index = 0; index < paramCount; index++) {
-                boolean isString = stream.readUnsignedByte() == 1;
-                int key = stream.read24BitUnsignedInteger();
+                boolean isString = stream.readUByte() == 1;
+                int key = stream.readUMedium();
                 Object parameter;
                 if (isString) {
                     parameter = new ObjectNode(stream.readString());

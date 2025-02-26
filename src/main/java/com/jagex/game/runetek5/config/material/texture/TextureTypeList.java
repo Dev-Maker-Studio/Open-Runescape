@@ -67,13 +67,13 @@ public class TextureTypeList {
 	}
 	
 	public static TextureOperation listOperation(Packet stream) {
-	    stream.readUnsignedByte();
-	    int implementationType = stream.readUnsignedByte();
+	    stream.readUByte();
+	    int implementationType = stream.readUByte();
 	    TextureOperation textureNode = implementationForType(implementationType);
-	    textureNode.imageCacheCapacity = stream.readUnsignedByte();
-	    int opcodeCount = stream.readUnsignedByte();
+	    textureNode.imageCacheCapacity = stream.readUByte();
+	    int opcodeCount = stream.readUByte();
 	    for (int index = 0; index < opcodeCount; index++) {
-	        int opcode = stream.readUnsignedByte();
+	        int opcode = stream.readUByte();
 	        textureNode.decodeOpcode(opcode, stream);
 	    }
 	    textureNode.postDecode();

@@ -31,26 +31,26 @@ class Filter {
     }
 
     void decode(Packet buffer, Envelope envelope) {
-        int count = buffer.readUnsignedByte();
+        int count = buffer.readUByte();
         this.numPairs[0] = count >> 4;
         this.numPairs[1] = count & 0xf;
         if (count != 0) {
-            this.unity[0] = buffer.readUnsignedShort();
-            this.unity[1] = buffer.readUnsignedShort();
-            int migrated = buffer.readUnsignedByte();
+            this.unity[0] = buffer.readUShort();
+            this.unity[1] = buffer.readUShort();
+            int migrated = buffer.readUByte();
 
             for (int dir = 0; dir < 2; dir++) {
                 for (int term = 0; term < this.numPairs[dir]; term++) {
-                    this.pairPhase[dir][0][term] = buffer.readUnsignedShort();
-                    this.pairMagnitude[dir][0][term] = buffer.readUnsignedShort();
+                    this.pairPhase[dir][0][term] = buffer.readUShort();
+                    this.pairMagnitude[dir][0][term] = buffer.readUShort();
                 }
             }
 
             for (int dir = 0; dir < 2; dir++) {
                 for (int phase = 0; phase < this.numPairs[dir]; phase++) {
                     if ((migrated & 1 << dir * 4 << phase) != 0) {
-                        this.pairPhase[dir][1][phase] = buffer.readUnsignedShort();
-                        this.pairMagnitude[dir][1][phase] = buffer.readUnsignedShort();
+                        this.pairPhase[dir][1][phase] = buffer.readUShort();
+                        this.pairMagnitude[dir][1][phase] = buffer.readUShort();
                     } else {
                         this.pairPhase[dir][1][phase] = this.pairPhase[dir][0][phase];
                         this.pairMagnitude[dir][1][phase] = this.pairMagnitude[dir][0][phase];

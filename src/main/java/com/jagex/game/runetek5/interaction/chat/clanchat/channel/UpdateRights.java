@@ -31,7 +31,7 @@ public class UpdateRights extends AbstractClanChannelUpdate {
     public void decode(Packet buffer) {
         this.clanName = buffer.readNullString();
         if (this.clanName != null) {
-            buffer.readUnsignedByte();
+            buffer.readUByte();
             this.guestsTalk = buffer.readByte();
             this.minRankToKick = buffer.readByte();
         }

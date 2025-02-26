@@ -45,7 +45,7 @@ public class SeqType {
 
     void decode(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -55,62 +55,62 @@ public class SeqType {
 
     public void decode(Packet stream, int opcode) {
         if (opcode == 1) {
-        	int count = stream.readUnsignedShort();
+        	int count = stream.readUShort();
             this.durations = new int[count];
             for (int index = 0; index < count; index++) {
-                this.durations[index] = stream.readUnsignedShort();
+                this.durations[index] = stream.readUShort();
             }
             this.frames = new int[count];
             for (int index = 0; index < count; index++) {
-                this.frames[index] = stream.readUnsignedShort();
+                this.frames[index] = stream.readUShort();
             }
             for (int index = 0; index < count; index++) {
-                this.frames[index] += stream.readUnsignedShort() << 16;
+                this.frames[index] += stream.readUShort() << 16;
             }
         } else if (opcode == 2) {
-            this.replayInterval = stream.readUnsignedShort();
+            this.replayInterval = stream.readUShort();
         } else if (opcode == 3) {
             this.interLeaveOrder = new boolean[256];
-            int count = stream.readUnsignedByte();
+            int count = stream.readUByte();
             for (int index = 0; index < count; index++) {
-                this.interLeaveOrder[stream.readUnsignedByte()] = true;
+                this.interLeaveOrder[stream.readUByte()] = true;
             }
         } else if (opcode == 5) {
-            this.priority = stream.readUnsignedByte();
+            this.priority = stream.readUByte();
         } else if (opcode == 6) {
-            this.replacementShield = stream.readUnsignedShort();
+            this.replacementShield = stream.readUShort();
         } else if (opcode == 7) {
-            this.replacementWeapon = stream.readUnsignedShort();
+            this.replacementWeapon = stream.readUShort();
         } else if (opcode == 8) {
-            this.replayCount = stream.readUnsignedByte();
+            this.replayCount = stream.readUByte();
         } else if (opcode == 9) {
-            this.interruptType = stream.readUnsignedByte();
+            this.interruptType = stream.readUByte();
         } else if (opcode == 10) {
-            this.moveType = stream.readUnsignedByte();
+            this.moveType = stream.readUByte();
         } else if (opcode == 11) {
-            this.loopType = stream.readUnsignedByte();
+            this.loopType = stream.readUByte();
         } else if (opcode == 12) {
-        	int count = stream.readUnsignedByte();
+        	int count = stream.readUByte();
             this.interfaceFrames = new int[count];
             for (int index = 0; index < count; index++) {
-                this.interfaceFrames[index] = stream.readUnsignedShort();
+                this.interfaceFrames[index] = stream.readUShort();
             }
             for (int index = 0; index < count; index++) {
-                this.interfaceFrames[index] += stream.readUnsignedShort() << 16;
+                this.interfaceFrames[index] += stream.readUShort() << 16;
             }
         } else if (opcode == 13) {
-        	int frameCount = stream.readUnsignedShort();
+        	int frameCount = stream.readUShort();
             this.frameSounds = new int[frameCount][];
             for (int frame = 0; frame < frameCount; frame++) {
-                int soundCount = stream.readUnsignedByte();
+                int soundCount = stream.readUByte();
                 if (soundCount > 0) {
                     this.frameSounds[frame] = new int[soundCount];
                     // >> 8 = sound_id
                     // >> 5 & 0x7 = times_repeated
-                    this.frameSounds[frame][0] = stream.read24BitUnsignedInteger();
+                    this.frameSounds[frame][0] = stream.readUMedium();
                     for (int alternativeSound = 1; alternativeSound < soundCount; alternativeSound++) {
                     	// randomly picked non bitpacked frame sound id
-                        this.frameSounds[frame][alternativeSound] = stream.readUnsignedShort();
+                        this.frameSounds[frame][alternativeSound] = stream.readUShort();
                     }
                 }
             }
@@ -127,7 +127,7 @@ public class SeqType {
                     this.frameSoundVolume[count] = 255;
                 }
             }
-            this.frameSoundVolume[stream.readUnsignedByte()] = stream.readUnsignedByte();
+            this.frameSoundVolume[stream.readUByte()] = stream.readUByte();
         } else if (opcode == 20) {
             if (this.soundMaxDelay == null || this.soundMinDelay == null) {
                 this.soundMaxDelay = new int[this.frameSounds.length];
@@ -137,18 +137,18 @@ public class SeqType {
                     this.soundMinDelay[count] = 256;
                 }
             }
-            int count = stream.readUnsignedByte();
-            this.soundMaxDelay[count] = stream.readUnsignedShort();
-            this.soundMinDelay[count] = stream.readUnsignedShort();
+            int count = stream.readUByte();
+            this.soundMaxDelay[count] = stream.readUShort();
+            this.soundMinDelay[count] = stream.readUShort();
         } else if (opcode == 249) {
-        	int count = stream.readUnsignedByte();
+        	int count = stream.readUByte();
             if (this.parameters == null) {
             	int index = MathUtils.nextPowerOfTwo(count);
                 this.parameters = new IterableNodeMap(index);
             }
             for (int index = 0; index < count; index++) {
-                boolean isString = stream.readUnsignedByte() == 1;
-                int key = stream.read24BitUnsignedInteger();
+                boolean isString = stream.readUByte() == 1;
+                int key = stream.readUMedium();
                 Object value;
                 if (isString) {
                     value = new ObjectNode(stream.readString());

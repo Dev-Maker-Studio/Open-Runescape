@@ -52,7 +52,7 @@ public class MouseMovementPacket extends AbstractMousePacket {
                 clickType = 1;
             }
             TcpPacket packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, client.GAME_CONNECTION_CONTEXT.isaac);
-            packet.buffer.writeIntLE(positionX | positionY << 16);
+            packet.buffer.writeIntLittle(positionX | positionY << 16);
             packet.buffer.writeShort(timeDelta | clickType << 15);
             client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
         }

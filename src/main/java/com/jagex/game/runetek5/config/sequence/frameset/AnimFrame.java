@@ -28,9 +28,9 @@ public class AnimFrame {
         try {
             Packet attribBuffer = new Packet(data);
             Packet transformationBuffer = new Packet(data);
-            attribBuffer.readUnsignedByte();
+            attribBuffer.readUByte();
             attribBuffer.currentPosition += 2;
-            int count = attribBuffer.readUnsignedByte();
+            int count = attribBuffer.readUByte();
             int used = 0;
             int last = -1;
             int lastUsed = -1;
@@ -41,7 +41,7 @@ public class AnimFrame {
                 if (type == 0) {
                     last = index;
                 }
-                int attribute = attribBuffer.readUnsignedByte();
+                int attribute = attribBuffer.readUByte();
                 if (attribute > 0) {
                     if (type == 0) {
                         lastUsed = index;
@@ -53,19 +53,19 @@ public class AnimFrame {
                     }
 
                     if ((attribute & DISPLACE_X) != 0) {
-                        TRANSFORM_X[used] = (short) transformationBuffer.readSignedSmart();
+                        TRANSFORM_X[used] = (short) transformationBuffer.readSmart();
                     } else {
                         TRANSFORM_X[used] = value;
                     }
 
                     if ((attribute & DISPLACE_Y) != 0) {
-                        TRANSFORM_Y[used] = (short) transformationBuffer.readSignedSmart();
+                        TRANSFORM_Y[used] = (short) transformationBuffer.readSmart();
                     } else {
                         TRANSFORM_Y[used] = value;
                     }
 
                     if ((attribute & DISPLACE_Z) != 0) {
-                        TRANSFORM_Z[used] = (short) transformationBuffer.readSignedSmart();
+                        TRANSFORM_Z[used] = (short) transformationBuffer.readSmart();
                     } else {
                         TRANSFORM_Z[used] = value;
                     }

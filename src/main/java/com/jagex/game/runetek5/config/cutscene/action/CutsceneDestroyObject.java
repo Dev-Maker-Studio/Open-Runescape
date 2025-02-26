@@ -15,7 +15,7 @@ public class CutsceneDestroyObject extends CutsceneAction {
 
     public CutsceneDestroyObject(Packet buffer) {
         super(buffer);
-        this.cutsceneObjectPtr = buffer.readUnsignedShort();
+        this.cutsceneObjectPtr = buffer.readUShort();
     }
 
     @Override

@@ -21,7 +21,7 @@ public class CutsceneAnimateObject extends CutsceneAction {
 
     public CutsceneAnimateObject(Packet buffer) {
         super(buffer);
-        this.objectIndex = buffer.readUnsignedShort();
+        this.objectIndex = buffer.readUShort();
         this.sequenceId = buffer.readBigSmart();
     }
 

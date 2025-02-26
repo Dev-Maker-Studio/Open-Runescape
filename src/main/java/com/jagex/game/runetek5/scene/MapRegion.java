@@ -211,10 +211,10 @@ public class MapRegion {
 
     
     public void initializeRegion(Packet.Bit instream) {
-        int mapsizeType = instream.readUnsignedByte();
-        int chunkX = instream.readUnsignedShort();
-        int chunkY = instream.readUnsignedShort();
-        boolean positionUpdate = instream.readUnsignedByte() == 1;
+        int mapsizeType = instream.readUByte();
+        int chunkX = instream.readUShort();
+        int chunkY = instream.readUShort();
+        boolean positionUpdate = instream.readUByte() == 1;
         if (!this.asyncMaploading) {
             resetNonCutsceneEntities();
         }
@@ -354,9 +354,9 @@ public class MapRegion {
     }
     
     public void initializeConstructedMap(Packet.Bit stream) {
-        int regionUpdateMask = stream.readUnsignedByteC();
+        int regionUpdateMask = stream.readUByteInverse();
         boolean forcedPositionUpdate = (regionUpdateMask & 0x1) != 0;
-        int type = stream.readUnsigned128Byte();
+        int type = stream.readUByteSubtract();
         if (type == 1) {
             this.currentLoadingType = RegionLoadingType.INSTANCE;
         } else if (type == 2) {
@@ -366,9 +366,9 @@ public class MapRegion {
         } else if (type == 4) {
             this.currentLoadingType = RegionLoadingType.INSTANCE_LARGE_NO_RELOAD_UPDATEZONES;
         }
-        int mapSizeType = stream.readUnsignedByte128();
-        int mapBaseY = stream.readUnsignedShort128();
-        int mapBaseX = stream.readUnsignedShort();
+        int mapSizeType = stream.readUByteAdd();
+        int mapBaseY = stream.readUShortAdd();
+        int mapBaseX = stream.readUShort();
         if (!this.asyncMaploading) {
             resetNonCutsceneEntities();
         }
@@ -1543,13 +1543,13 @@ public class MapRegion {
                 int index = 0;
                 while (stream.currentPosition < this.npcSpawnBuffer[mapIndex].length && index < 511 && client.NPC_UPDATE_INDEX < 1023) {
                     int slot = cursorPosition | index++ << 6;
-                    int i_8 = stream.readUnsignedShort();
+                    int i_8 = stream.readUShort();
                     int plane = i_8 >> 14;
                     int i_10 = i_8 >> 7 & 0x3f;
                     int i_11 = i_8 & 0x3f;
                     int i_12 = (this.regionIds[mapIndex] >> 8) * 64 - this.baseCoordinates.x + i_10;
                     int i_13 = (this.regionIds[mapIndex] & 0xff) * 64 - this.baseCoordinates.y + i_11;
-                    NPCType npcType = TypeLists.NPC.list(stream.readUnsignedShort());
+                    NPCType npcType = TypeLists.NPC.list(stream.readUShort());
                     ObjectNode npcObjectNode = client.NPC_MAP.get(slot);
                     if (npcObjectNode == null && (npcType.walkingFlags & 0x1) > 0 && i_12 >= 0 && i_12 + npcType.size < this.sceneSizeX && i_13 >= 0 && i_13 + npcType.size < this.sceneSizeY) {
                         NpcEntity npcEntity = new NpcEntity(this.scene);

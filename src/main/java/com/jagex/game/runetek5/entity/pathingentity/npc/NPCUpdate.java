@@ -209,22 +209,22 @@ public class NPCUpdate {
         for (int listIndex = 0; listIndex < client.npcListSize; listIndex++) {
             int npcIndice = client.NPC_INDICES[listIndex];
             NpcEntity npc = (NpcEntity) (client.NPC_MAP.get(npcIndice)).value;
-            int updateFlag = buffer.readUnsignedByte();
+            int updateFlag = buffer.readUByte();
             if ((updateFlag & 0x40) != 0) {
-                updateFlag += buffer.readUnsignedByte() << 8;
+                updateFlag += buffer.readUByte() << 8;
             }
             if ((updateFlag & 0x2000) != 0) {
-                updateFlag += buffer.readUnsignedByte() << 16;
+                updateFlag += buffer.readUByte() << 16;
             }
             if ((updateFlag & 0x100000) != 0) {
-                updateFlag += buffer.readUnsignedByte() << 24;
+                updateFlag += buffer.readUByte() << 24;
             }
             if ((updateFlag & 0x10) != 0) {
                 int[] movementAnimations = new int[MovementType.values().length];
                 for (int index = 0; index < MovementType.values().length; index++) {
                     movementAnimations[index] = buffer.readBigSmart();
                 }
-                int speed = buffer.readUnsignedByte();
+                int speed = buffer.readUByte();
                 PlayerUpdate.animate(npc, movementAnimations, speed, true);
             }
             if ((updateFlag & CUSTOMIZE) != 0) {
@@ -237,7 +237,7 @@ public class NPCUpdate {
                 if (npc.definitions.retextureDst != null) {
                     textureAdjustments = npc.definitions.retextureDst.length;
                 }
-                int actionFlags = buffer.readUnsigned128Byte();
+                int actionFlags = buffer.readUByteSubtract();
                 if ((actionFlags & 0x1) == 1) {
                     npc.customisation = null;
                 } else {
@@ -252,14 +252,14 @@ public class NPCUpdate {
                     if ((actionFlags & 0x4) == 4) {
                         colors = new short[colorAdjustments];
                         for (int colorIndex = 0; colorIndex < colorAdjustments; colorIndex++) {
-                            colors[colorIndex] = (short) buffer.readUnsignedShort();
+                            colors[colorIndex] = (short) buffer.readUShort();
                         }
                     }
                     short[] retextures = null;
                     if ((actionFlags & 0x8) == 8) {
                         retextures = new short[textureAdjustments];
                         for (int textureIndex = 0; textureIndex < textureAdjustments; textureIndex++) {
-                            retextures[textureIndex] = (short) buffer.readUnsignedShort();
+                            retextures[textureIndex] = (short) buffer.readUShort();
                         }
                     }
                     long uid = npcIndice | (long) (++npc.meshModifierCount - 1) << 32;
@@ -267,13 +267,13 @@ public class NPCUpdate {
                 }
             }
             if ((updateFlag & FORCE_MOVE) != 0) {
-                npc.forceMovementT1XOff = buffer.read128Byte();
-                npc.forceMovementT1YOff = buffer.readByte128();
-                npc.forceMovementT2XOff = buffer.readByteC();
-                npc.forceMovementT2YOff = buffer.readByte128();
-                npc.forceMovementT1Delay = buffer.readShortLE() + client.cycles;
-                npc.forceMovementT2Delay = buffer.readShortLE() + client.cycles;
-                npc.forceMoveDirection = buffer.readUnsignedShortLE128();
+                npc.forceMovementT1XOff = buffer.readByteSubtract();
+                npc.forceMovementT1YOff = buffer.readByteAdd();
+                npc.forceMovementT2XOff = buffer.readByteInverse();
+                npc.forceMovementT2YOff = buffer.readByteAdd();
+                npc.forceMovementT1Delay = buffer.readShortLittle() + client.cycles;
+                npc.forceMovementT2Delay = buffer.readShortLittle() + client.cycles;
+                npc.forceMoveDirection = buffer.readUShortAddLittle();
                 npc.forceMovementT1XOff += npc.movementBaseX[0];
                 npc.forceMovementT1YOff += npc.movementBaseY[0];
                 npc.forceMovementT2XOff += npc.movementBaseX[0];
@@ -282,7 +282,7 @@ public class NPCUpdate {
                 npc.previousMovementStepsLeft = 0;
             }
             if ((updateFlag & SET_BAS) != 0) {
-                npc.currRenderAnim = buffer.readUnsignedShort();
+                npc.currRenderAnim = buffer.readUShort();
                 if (npc.currRenderAnim == 0xffff) {
                     npc.currRenderAnim = -1;
                 }
@@ -290,18 +290,18 @@ public class NPCUpdate {
             if ((updateFlag & SET_VARN) != 0) {
                 int count = buffer.buffer[++buffer.currentPosition - 1] & 0xff;
                 for (int index = 0; index < count; index++) {
-                    int id = buffer.readUnsignedShortLE128();
-                    int value = buffer.readIntV1();
+                    int id = buffer.readUShortAddLittle();
+                    int value = buffer.readUIntMiddle();
                     npc.varns.setVarn(id, value);
                 }
             }
             if ((updateFlag & PLAY_GFX) != 0) {
-                int i_14 = buffer.readUnsignedShort128();
-                int i_6 = buffer.readIntV2();
+                int i_14 = buffer.readUShortAdd();
+                int i_6 = buffer.readUIntInverseMiddle();
                 if (i_14 == 0xffff) {
                     i_14 = -1;
                 }
-                int i_7 = buffer.readUnsignedByte128();
+                int i_7 = buffer.readUByteAdd();
                 int i_8 = i_7 & 0x7;
                 int i_9 = i_7 >> 3 & 0xf;
                 if (i_9 == 15) {
@@ -311,31 +311,31 @@ public class NPCUpdate {
                 npc.playSpotAnimation(i_14, i_6, i_8, i_9, bool24, 3);
             }
             if ((updateFlag & FACE_ENTITY) != 0) {
-                npc.faceEntity = buffer.readShortLE();
+                npc.faceEntity = buffer.readShortLittle();
                 if (npc.faceEntity == 65535) {
                     npc.faceEntity = -1;
                 }
             }
             if ((updateFlag & ANIMATE) != 0) {
-                int count = buffer.readUnsignedByteC();
+                int count = buffer.readUByteInverse();
                 int[] sequences = new int[count];
                 int[] ints_16 = new int[count];
                 int[] ints_17 = new int[count];
                 for (int index = 0; index < count; index++) {
                     int sequence = buffer.readBigSmart();
                     sequences[index] = sequence;
-                    ints_16[index] = buffer.readUnsignedByte();
-                    ints_17[index] = buffer.readShortLE();
+                    ints_16[index] = buffer.readUByte();
+                    ints_17[index] = buffer.readShortLittle();
                 }
                 PlayerUpdate.animate(npc, sequences, ints_16, ints_17);
             }
             if ((updateFlag & 0x800) != 0) {
-                int gfxId = buffer.readShortLE();
+                int gfxId = buffer.readShortLittle();
                 int i_6 = buffer.readInt();
                 if (gfxId == 0xffff) {
                     gfxId = -1;
                 }
-                int i_7 = buffer.readUnsignedByte128();
+                int i_7 = buffer.readUByteAdd();
                 int i_8 = i_7 & 0x7;
                 int i_9 = i_7 >> 3 & 0xf;
                 if (i_9 == 15) {
@@ -345,40 +345,40 @@ public class NPCUpdate {
                 npc.playSpotAnimation(gfxId, i_6, i_8, i_9, bool24, 1);
             }
             if ((updateFlag & ADD_HITSPLAT) != 0) {
-                int hitCount = buffer.readUnsignedByte128();
+                int hitCount = buffer.readUByteAdd();
                 if (hitCount > 0) {
                     for (int index = 0; index < hitCount; index++) {
                         int soakHitsplatId = -1;
                         int hitText;
                         int soakText = -1;
-                        int hitsplatId = buffer.readUnsignedSmart();
+                        int hitsplatId = buffer.readUSmart();
                         if (hitsplatId == 32767) {
                         	// Soaking
-                            hitsplatId = buffer.readUnsignedSmart();
-                            hitText = buffer.readUnsignedSmart();
-                            soakHitsplatId = buffer.readUnsignedSmart();
-                            soakText = buffer.readUnsignedSmart();
+                            hitsplatId = buffer.readUSmart();
+                            hitText = buffer.readUSmart();
+                            soakHitsplatId = buffer.readUSmart();
+                            soakText = buffer.readUSmart();
                         } else if (hitsplatId != 32766) {
                         	// Hitmark
-                            hitText = buffer.readUnsignedSmart();
+                            hitText = buffer.readUSmart();
                         } else {
                         	// Missed
                             hitsplatId = -1;
-                            hitText = buffer.readUnsignedByte();
+                            hitText = buffer.readUByte();
                         }
-                        int delay = buffer.readUnsignedSmart();
+                        int delay = buffer.readUSmart();
                         npc.applyHit(hitsplatId, hitText, soakHitsplatId, soakText, client.cycles, delay);
                     }
                 }
-                int hitbarCount = buffer.readUnsignedByte128();
+                int hitbarCount = buffer.readUByteAdd();
                 if (hitbarCount > 0) {
                     for (int index = 0; index < hitbarCount; index++) {
-                        int hitbarId = buffer.readUnsignedSmart();
-                        int lifetimeCycles = buffer.readUnsignedSmart();
+                        int hitbarId = buffer.readUSmart();
+                        int lifetimeCycles = buffer.readUSmart();
                         if (lifetimeCycles != 32767) {
-                            int delay = buffer.readUnsignedSmart();
-                            int fromPercentage = buffer.readUnsigned128Byte();
-                            int toPercentage = lifetimeCycles > 0 ? buffer.readUnsignedByte128() : fromPercentage;
+                            int delay = buffer.readUSmart();
+                            int fromPercentage = buffer.readUByteSubtract();
+                            int toPercentage = lifetimeCycles > 0 ? buffer.readUByteAdd() : fromPercentage;
                             npc.displayHitbar(hitbarId, client.cycles, lifetimeCycles, delay, fromPercentage, toPercentage);
                         } else {
                             npc.hideHitbar(hitbarId);
@@ -398,12 +398,12 @@ public class NPCUpdate {
                 }
             }
             if ((updateFlag & 0x2000000) != 0) {
-                int spotanimId = buffer.readShortLE();
-                int flags = buffer.readIntLE();
+                int spotanimId = buffer.readShortLittle();
+                int flags = buffer.readUIntLittle();
                 if (spotanimId == 65535) {
                     spotanimId = -1;
                 }
-                int bitpacked = buffer.readUnsignedByte();
+                int bitpacked = buffer.readUByte();
                 int rotation = bitpacked & 0x7;
                 int i_9 = bitpacked >> 3 & 0xf;
                 if (i_9 == 15) {
@@ -415,9 +415,9 @@ public class NPCUpdate {
             if ((updateFlag & UPDATE_STATS) != 0) {
                 int i_14 = buffer.buffer[++buffer.currentPosition - 1] & 0xff;
                 for (int index = 0; index < i_14; index++) {
-                    int statIndex = buffer.readUnsignedByte128();
+                    int statIndex = buffer.readUByteAdd();
                     int max = buffer.readInt();
-                    int current = buffer.method13132();
+                    int current = buffer.readUMediumAlternateOrder();
                     npc.updateStats(statIndex, max, current);
                 }
             }
@@ -431,7 +431,7 @@ public class NPCUpdate {
                 if (npc.definitions.retextureDst != null) {
                     adjustmentLength = npc.definitions.retextureDst.length;
                 }
-                int actionFlag = buffer.readUnsignedByte128();
+                int actionFlag = buffer.readUByteAdd();
                 if ((actionFlag & 0x1) != 1) {
                     int[] models = null;
                     if ((actionFlag & 0x2) == 2) {
@@ -444,7 +444,7 @@ public class NPCUpdate {
                     if ((actionFlag & 0x4) == 4) {
                         recolorDst = new short[adjustmentLength];
                         for (int colorIndex = 0; colorIndex < adjustmentLength; colorIndex++) {
-                            recolorDst[colorIndex] = (short) buffer.readUnsignedShort();
+                            recolorDst[colorIndex] = (short) buffer.readUShort();
                         }
                     }
                     short[] retextureDst = null;
@@ -456,7 +456,7 @@ public class NPCUpdate {
                 }
             }
             if ((updateFlag & UPDATE_CB_LVL) != 0) {
-                npc.modifiedCbLvl = buffer.readUnsignedShort128();
+                npc.modifiedCbLvl = buffer.readUShortAdd();
                 if (npc.modifiedCbLvl == 0xffff) {
                     npc.modifiedCbLvl = npc.definitions.combatLevel;
                 }
@@ -465,22 +465,22 @@ public class NPCUpdate {
                 npc.varns.clear();
                 int i_14 = buffer.buffer[++buffer.currentPosition - 1] & 0xff;
                 for (int i_6 = 0; i_6 < i_14; i_6++) {
-                    int i_7 = buffer.readUnsignedShort();
-                    int i_8 = buffer.readIntV1();
+                    int i_7 = buffer.readUShort();
+                    int i_8 = buffer.readUIntMiddle();
                     npc.varns.setVarn(i_7, i_8);
                 }
             }
             if ((updateFlag & 0x4) != 0) {
-                npc.faceX = buffer.readUnsignedShortLE128();
-                npc.faceY = buffer.readShortLE();
+                npc.faceX = buffer.readUShortAddLittle();
+                npc.faceY = buffer.readShortLittle();
             }
             if ((updateFlag & 0x20000) != 0) {
-                npc.hue = buffer.read128Byte();
+                npc.hue = buffer.readByteSubtract();
                 npc.saturation = buffer.readByte();
                 npc.lightness = buffer.readByte();
-                npc.opacity = (byte) buffer.readUnsigned128Byte();
-                npc.tintStartCycle = client.cycles + buffer.readShortLE();
-                npc.tintEndCycle = client.cycles + buffer.readUnsignedShort();
+                npc.opacity = (byte) buffer.readUByteSubtract();
+                npc.tintStartCycle = client.cycles + buffer.readShortLittle();
+                npc.tintEndCycle = client.cycles + buffer.readUShort();
             }
             if ((updateFlag & 0x800000) != 0) {
                 npc.modifiedName = buffer.readString();
@@ -493,28 +493,28 @@ public class NPCUpdate {
                 npc.method16164(buffer.readString());
             }
             if ((updateFlag & 0x4000) != 0) {
-                int i_14 = buffer.readUnsigned128Byte();
+                int i_14 = buffer.readUByteSubtract();
                 int[] ints_15 = new int[i_14];
                 int[] ints_16 = new int[i_14];
                 for (int i_8 = 0; i_8 < i_14; i_8++) {
-                    int i_9 = buffer.readUnsignedShortLE128();
+                    int i_9 = buffer.readUShortAddLittle();
                     if ((i_9 & 0xc000) == 49152) {
-                        int i_10 = buffer.readUnsignedShort();
+                        int i_10 = buffer.readUShort();
                         ints_15[i_8] = i_9 << 16 | i_10;
                     } else {
                         ints_15[i_8] = i_9;
                     }
-                    ints_16[i_8] = buffer.readUnsignedShortLE128();
+                    ints_16[i_8] = buffer.readUShortAddLittle();
                 }
                 npc.method15797(ints_15, ints_16);
             }
             if ((updateFlag & 0x20) != 0) {
-                int i_14 = buffer.readUnsignedShort();
-                int i_6 = buffer.readIntV2();
+                int i_14 = buffer.readUShort();
+                int i_6 = buffer.readUIntInverseMiddle();
                 if (i_14 == 65535) {
                     i_14 = -1;
                 }
-                int i_7 = buffer.readUnsignedByteC();
+                int i_7 = buffer.readUByteInverse();
                 int i_8 = i_7 & 0x7;
                 int i_9 = i_7 >> 3 & 0xf;
                 if (i_9 == 15) {

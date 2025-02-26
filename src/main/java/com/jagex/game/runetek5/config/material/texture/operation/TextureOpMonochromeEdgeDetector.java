@@ -45,7 +45,7 @@ public class TextureOpMonochromeEdgeDetector extends TextureOperation {
     @Override
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         if (i_1 == 0) {
-            this.anInt9886 = rsbytebuffer2.readUnsignedShort();
+            this.anInt9886 = rsbytebuffer2.readUShort();
         }
 
     }

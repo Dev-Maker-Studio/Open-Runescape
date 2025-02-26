@@ -55,13 +55,13 @@ public class TextureOpColorize extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9971 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9971 = rsbytebuffer2.readUShort();
                 break;
             case 1:
-                this.anInt9970 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9970 = rsbytebuffer2.readUShort();
                 break;
             case 2:
-                this.anInt9968 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9968 = rsbytebuffer2.readUShort();
         }
 
     }

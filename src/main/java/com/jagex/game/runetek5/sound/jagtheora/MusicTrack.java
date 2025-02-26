@@ -22,8 +22,8 @@ public class MusicTrack extends Node {
 
     public MusicTrack(Packet rsbytebuffer1) {
         rsbytebuffer1.currentPosition = rsbytebuffer1.buffer.length - 3;
-        int i_2 = rsbytebuffer1.readUnsignedByte();
-        int i_3 = rsbytebuffer1.readUnsignedShort();
+        int i_2 = rsbytebuffer1.readUByte();
+        int i_3 = rsbytebuffer1.readUShort();
         int i_4 = i_2 * 10 + 14;
         rsbytebuffer1.currentPosition = 0;
         int i_5 = 0;
@@ -42,7 +42,7 @@ public class MusicTrack extends Node {
             i_14 = -1;
 
             while (true) {
-                i_15 = rsbytebuffer1.readUnsignedByte();
+                i_15 = rsbytebuffer1.readUByte();
                 if (i_15 != i_14) {
                     ++i_4;
                 }
@@ -83,7 +83,7 @@ public class MusicTrack extends Node {
         i_14 = i_2 + i_5 + i_6 + i_7 + i_8 + i_9 + i_10 + i_11 + i_12;
 
         for (i_15 = 0; i_15 < i_14; i_15++) {
-            rsbytebuffer1.method13099();
+            rsbytebuffer1.readVarInt();
         }
 
         i_4 += rsbytebuffer1.currentPosition - i_13;
@@ -104,7 +104,7 @@ public class MusicTrack extends Node {
 
         int i_29;
         for (i_29 = 0; i_29 < i_6; i_29++) {
-            i_28 = i_28 + rsbytebuffer1.readUnsignedByte() & 0x7f;
+            i_28 = i_28 + rsbytebuffer1.readUByte() & 0x7f;
             if (i_28 != 0 && i_28 != 32) {
                 if (i_28 == 1) {
                     ++i_16;
@@ -206,7 +206,7 @@ public class MusicTrack extends Node {
 
             while (true) {
                 while (true) {
-                    int i_63 = rsbytebuffer1.method13099();
+                    int i_63 = rsbytebuffer1.readVarInt();
                     rsbytebuffer51.writeFlags(i_63);
                     int i_64 = rsbytebuffer1.buffer[i_29++] & 0xff;
                     boolean bool65 = i_64 != i_62;
@@ -218,7 +218,7 @@ public class MusicTrack extends Node {
 
                         rsbytebuffer51.writeByte(47);
                         rsbytebuffer51.writeByte(0);
-                        rsbytebuffer51.method13073(rsbytebuffer51.currentPosition - i_61);
+                        rsbytebuffer51.writeIntLength(rsbytebuffer51.currentPosition - i_61);
                         continue label228;
                     }
 

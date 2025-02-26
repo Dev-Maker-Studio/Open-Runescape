@@ -33,7 +33,7 @@ public class ParticleType {
 
     public void decode(Packet rsbytebuffer1) {
         while (true) {
-            int i_3 = rsbytebuffer1.readUnsignedByte();
+            int i_3 = rsbytebuffer1.readUByte();
             if (i_3 == 0) {
                 return;
             }
@@ -43,9 +43,9 @@ public class ParticleType {
 
     public void decode(Packet stream, int opcode) {
         if (opcode == 1) {
-            this.rotation = stream.readUnsignedShort();
+            this.rotation = stream.readUShort();
         } else if (opcode == 2) {
-            stream.readUnsignedByte();
+            stream.readUByte();
         } else if (opcode == 3) {
             this.offsetX = stream.readInt();
             this.offsetY = stream.readInt();
@@ -53,7 +53,7 @@ public class ParticleType {
         } else if (opcode == 4) {
             this.sizeMultiplier = stream.readInt();
         } else if (opcode == 6) {
-            this.particleHandlingType = stream.readUnsignedByte();
+            this.particleHandlingType = stream.readUByte();
         } else if (opcode == 8) {
             this.currentOffset = 1;
         } else if (opcode == 9) {

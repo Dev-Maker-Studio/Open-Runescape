@@ -16,7 +16,7 @@ public class LightType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -26,11 +26,11 @@ public class LightType {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            this.effect = buffer.readUnsignedByte();
+            this.effect = buffer.readUByte();
         } else if (opcode == 2) {
-            this.duration = buffer.readUnsignedShort();
+            this.duration = buffer.readUShort();
         } else if (opcode == 3) {
-            this.ticker = buffer.readUnsignedShort();
+            this.ticker = buffer.readUShort();
         } else if (opcode == 4) {
             this.surrounding = buffer.readShort();
         }

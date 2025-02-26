@@ -17,10 +17,10 @@ public class GameTipType {
     public ITipDetails[] tipDetailsCache;
 
     public void decode(Packet buffer) {
-        this.tipDetailsCache = new ITipDetails[buffer.readUnsignedByte()];
+        this.tipDetailsCache = new ITipDetails[buffer.readUByte()];
         TipRenderDetails[] renderDetails = TipRenderDetails.values();
         for (int index = 0; index < this.tipDetailsCache.length; index++) {
-            this.tipDetailsCache[index] = decode(buffer, renderDetails[buffer.readUnsignedByte()]);
+            this.tipDetailsCache[index] = decode(buffer, renderDetails[buffer.readUByte()]);
         }
     }
 

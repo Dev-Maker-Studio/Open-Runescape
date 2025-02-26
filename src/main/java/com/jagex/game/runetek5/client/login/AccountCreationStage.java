@@ -82,8 +82,8 @@ public class AccountCreationStage {
 
                     SystemInfo.SYSTEM_INFO.writeMachineInformation(packet.buffer);
                     packet.buffer.currentPosition += 7;
-                    packet.buffer.encryptWithXtea(AccountCreationStage.LOGIN_XTEAS, i_4, packet.buffer.currentPosition);
-                    packet.buffer.method13281(packet.buffer.currentPosition - dataStartOffset);
+                    packet.buffer.encryptXtea(AccountCreationStage.LOGIN_XTEAS, i_4, packet.buffer.currentPosition);
+                    packet.buffer.writeShortLength(packet.buffer.currentPosition - dataStartOffset);
                     client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet);
                     client.LOBBY_CONNECTION_CONTEXT.flush();
                     AccountCreationStage.ACCOUNT_CREATION_STAGE = RESPONSE;

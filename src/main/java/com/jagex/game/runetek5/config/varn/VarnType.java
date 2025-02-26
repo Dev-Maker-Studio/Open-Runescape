@@ -22,7 +22,7 @@ public class VarnType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcde = buffer.readUnsignedByte();
+            int opcde = buffer.readUByte();
             if (opcde == 0) {
                 return;
             }

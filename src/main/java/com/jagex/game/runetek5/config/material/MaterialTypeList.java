@@ -22,26 +22,26 @@ public class MaterialTypeList implements MaterialProvider {
         this.textureResource = textureResource;
         this.spriteResource = spriteResource;
         Packet materialBuffer = new Packet(materialResource.getFile(0, 0));
-        this.numMaterials = materialBuffer.readUnsignedShort();
+        this.numMaterials = materialBuffer.readUShort();
         this.textures = new MaterialType[this.numMaterials];
         for (int index = 0; index < this.numMaterials; index++) {
-            if (materialBuffer.readUnsignedByte() == 1) {
+            if (materialBuffer.readUByte() == 1) {
                 this.textures[index] = new MaterialType();
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].detailsOnly = materialBuffer.readUnsignedByte() == 0;
+                this.textures[index].detailsOnly = materialBuffer.readUByte() == 0;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].isSmall = materialBuffer.readUnsignedByte() == 1;
+                this.textures[index].isSmall = materialBuffer.readUByte() == 1;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].skipTriangles = materialBuffer.readUnsignedByte() == 1;
+                this.textures[index].skipTriangles = materialBuffer.readUByte() == 1;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
@@ -66,7 +66,7 @@ public class MaterialTypeList implements MaterialProvider {
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].colorHsl = (short) materialBuffer.readUnsignedShort();
+                this.textures[index].colorHsl = (short) materialBuffer.readUShort();
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
@@ -81,12 +81,12 @@ public class MaterialTypeList implements MaterialProvider {
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].aBool2087 = materialBuffer.readUnsignedByte() == 1;
+                this.textures[index].aBool2087 = materialBuffer.readUByte() == 1;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].isBrickTile = materialBuffer.readUnsignedByte() == 1;
+                this.textures[index].isBrickTile = materialBuffer.readUByte() == 1;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
@@ -96,22 +96,22 @@ public class MaterialTypeList implements MaterialProvider {
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].repeatS = materialBuffer.readUnsignedByte() == 1;
+                this.textures[index].repeatS = materialBuffer.readUByte() == 1;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].repeatT = materialBuffer.readUnsignedByte() == 1;
+                this.textures[index].repeatT = materialBuffer.readUByte() == 1;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].hdr = materialBuffer.readUnsignedByte() == 1;
+                this.textures[index].hdr = materialBuffer.readUByte() == 1;
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].combineMode = materialBuffer.readUnsignedByte();
+                this.textures[index].combineMode = materialBuffer.readUByte();
             }
         }
         for (int index = 0; index < this.numMaterials; index++) {
@@ -121,7 +121,7 @@ public class MaterialTypeList implements MaterialProvider {
         }
         for (int index = 0; index < this.numMaterials; index++) {
             if (this.textures[index] != null) {
-                this.textures[index].effectCombiner = materialBuffer.readUnsignedByte();
+                this.textures[index].effectCombiner = materialBuffer.readUByte();
             }
         }
     }

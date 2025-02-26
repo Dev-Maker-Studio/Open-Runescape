@@ -215,10 +215,10 @@ public class TextureOpPerlinNoise extends TextureOperation {
     public void decodeOpcode(int opcode, Packet buffer) {
         switch (opcode) {
             case 0:
-                this.useFogEffect = buffer.readUnsignedByte() == 1;
+                this.useFogEffect = buffer.readUByte() == 1;
                 break;
             case 1:
-                this.numNoiseSteps = buffer.readUnsignedByte();
+                this.numNoiseSteps = buffer.readUByte();
                 break;
             case 2:
                 this.noiseAmplitude = buffer.readShort();
@@ -230,16 +230,16 @@ public class TextureOpPerlinNoise extends TextureOperation {
                 }
                 break;
             case 3:
-                this.texCoordScaleX = this.texCoordScaleY = buffer.readUnsignedByte();
+                this.texCoordScaleX = this.texCoordScaleY = buffer.readUByte();
                 break;
             case 4:
-                this.randomSeed = buffer.readUnsignedByte();
+                this.randomSeed = buffer.readUByte();
                 break;
             case 5:
-                this.texCoordScaleX = buffer.readUnsignedByte();
+                this.texCoordScaleX = buffer.readUByte();
                 break;
             case 6:
-                this.texCoordScaleY = buffer.readUnsignedByte();
+                this.texCoordScaleY = buffer.readUByte();
         }
     }
 

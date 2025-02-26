@@ -42,10 +42,10 @@ public class WorldMapElement extends CacheableNode {
 
     public static WorldMapElement list(Js5ResourceProvider resourceProvider, int arhiveId, int fileId) {
         Packet buffer = new Packet(resourceProvider.getFile(arhiveId, fileId));
-        WorldMapElement def = new WorldMapElement(fileId, buffer.readString(), buffer.readString(), buffer.readInt(), buffer.readInt(), buffer.readUnsignedByte() == 1, buffer.readUnsignedByte(), buffer.readUnsignedByte());
-        int count = buffer.readUnsignedByte();
+        WorldMapElement def = new WorldMapElement(fileId, buffer.readString(), buffer.readString(), buffer.readInt(), buffer.readInt(), buffer.readUByte() == 1, buffer.readUByte(), buffer.readUByte());
+        int count = buffer.readUByte();
         for (int index = 0; index < count; index++) {
-            def.worldMapPlacements.addFirst(new WorldMapPlacement(buffer.readUnsignedByte(), buffer.readUnsignedShort(), buffer.readUnsignedShort(), buffer.readUnsignedShort(), buffer.readUnsignedShort(), buffer.readUnsignedShort(), buffer.readUnsignedShort(), buffer.readUnsignedShort(), buffer.readUnsignedShort()));
+            def.worldMapPlacements.addFirst(new WorldMapPlacement(buffer.readUByte(), buffer.readUShort(), buffer.readUShort(), buffer.readUShort(), buffer.readUShort(), buffer.readUShort(), buffer.readUShort(), buffer.readUShort(), buffer.readUShort()));
         }
         def.method14779();
         return def;

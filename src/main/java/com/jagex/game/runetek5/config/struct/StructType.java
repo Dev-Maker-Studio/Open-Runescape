@@ -14,15 +14,15 @@ public class StructType extends CacheableNode {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 249) {
-            int size = buffer.readUnsignedByte();
+            int size = buffer.readUByte();
             if (this.nodeMap == null) {
                 int capacity = MathUtils.nextPowerOfTwo(size);
                 this.nodeMap = new IterableNodeMap<Node<?>>(capacity);
             }
 
             for (int index = 0; index < size; index++) {
-                boolean isString = buffer.readUnsignedByte() == 1;
-                int key = buffer.read24BitUnsignedInteger();
+                boolean isString = buffer.readUByte() == 1;
+                int key = buffer.readUMedium();
                 Node<?> node;
                 if (isString) {
                     node = new ObjectNode(buffer.readString());
@@ -38,7 +38,7 @@ public class StructType extends CacheableNode {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }

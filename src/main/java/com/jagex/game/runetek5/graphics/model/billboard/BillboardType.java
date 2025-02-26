@@ -30,7 +30,7 @@ public class BillboardType {
 
     public void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -40,19 +40,19 @@ public class BillboardType {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            this.materialId = buffer.readUnsignedShort();
+            this.materialId = buffer.readUShort();
             if (this.materialId == 65535) {
                 this.materialId = -1;
             }
         } else if (opcode == 2) {
-            this.size2d = buffer.readUnsignedShort() + 1;
-            this.size3d = buffer.readUnsignedShort() + 1;
+            this.size2d = buffer.readUShort() + 1;
+            this.size3d = buffer.readUShort() + 1;
         } else if (opcode == 3) {
             buffer.readByte();
         } else if (opcode == 4) {
-            this.shape = buffer.readUnsignedByte();
+            this.shape = buffer.readUByte();
         } else if (opcode == 5) {
-            this.blendType = buffer.readUnsignedByte();
+            this.blendType = buffer.readUByte();
         } else if (opcode == 6) {
             this.stationary = true;
         } else if (opcode == 7) {

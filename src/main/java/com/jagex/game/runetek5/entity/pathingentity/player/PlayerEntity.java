@@ -378,7 +378,7 @@ public class PlayerEntity extends PathingEntity {
 
     public void decodeAppearance(Packet buffer) {
         buffer.currentPosition = 0;
-        int flags = buffer.readUnsignedByte();
+        int flags = buffer.readUByte();
         this.male = (byte) (flags & 0x1);
         boolean volumeUnadaptableBefore = this.instrumentSoundEffect;
         this.instrumentSoundEffect = (flags & 0x2) != 0;
@@ -393,13 +393,13 @@ public class PlayerEntity extends PathingEntity {
         setBasePosition(absolutePosition);
         absolutePosition.pushVectorStack();
         if (titleBefore) {
-            this.prefixTitle = buffer.readGJString();
+            this.prefixTitle = buffer.readJagString();
         } else {
             this.prefixTitle = null;
         }
 
         if (titleAfter) {
-            this.postfixTitle = buffer.readGJString();
+            this.postfixTitle = buffer.readJagString();
         } else {
             this.postfixTitle = null;
         }
@@ -419,15 +419,15 @@ public class PlayerEntity extends PathingEntity {
 
         for (int slot = 0; slot < TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length; slot++) {
             if (TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots[slot] != 1) {
-            	int i_15 = buffer.readUnsignedByte();
+            	int i_15 = buffer.readUByte();
                 if (i_15 == 0) {
                     bodyAppearances[slot] = 0;
                 } else {
-                	int i_16 = buffer.readUnsignedByte();
+                	int i_16 = buffer.readUByte();
                     int itemId = i_16 + (i_15 << 8);
                     if (slot == 0 && itemId == 65535) {
                         currentMorphId = buffer.readBigSmart();
-                        this.teamId = buffer.readUnsignedByte();
+                        this.teamId = buffer.readUByte();
                         break;
                     }
 
@@ -447,7 +447,7 @@ public class PlayerEntity extends PathingEntity {
         }
 
         if (currentMorphId == -1) {
-        	int functionMask = buffer.readUnsignedShort();
+        	int functionMask = buffer.readUShort();
         	int count = 0;
             for (int slot = 0; slot < TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots.length; slot++) {
                 if (TypeLists.EQUIPMENT_DEFAULTS.customizableObjSlots[slot] == 0) {
@@ -461,23 +461,23 @@ public class PlayerEntity extends PathingEntity {
 
         int[] staticRecolorDst = new int[10];
         for (int slot = 0; slot < 10; slot++) {
-        	int color = buffer.readUnsignedByte();
+        	int color = buffer.readUByte();
             if (PlayerAppearance.recolorPaletteDst.length < 1 || color < 0 || color >= PlayerAppearance.recolorPaletteDst[slot][0].length) {
                 color = 0;
             }
             staticRecolorDst[slot] = color;
         }
 
-        this.renderEmote = buffer.readUnsignedShort();
+        this.renderEmote = buffer.readUShort();
         this.username = buffer.readString();
         this.displayName = this.username;
         if (this == PlayerUpdate.MY_PLAYER) {
             PlayerUpdate.MY_PLAYER_USERNAME = this.username;
         }
 
-        this.combatLevel = buffer.readUnsignedByte();
+        this.combatLevel = buffer.readUByte();
         if (showElo) {
-            this.elo = buffer.readUnsignedShort();
+            this.elo = buffer.readUShort();
             if (this.elo == 65535) {
                 this.elo = -1;
             }
@@ -486,26 +486,26 @@ public class PlayerEntity extends PathingEntity {
             this.cbLevelRelated = -1;
         } else {
             this.elo = 0;
-            this.cbLevelWithSumm = buffer.readUnsignedByte();
-            this.cbLevelRelated = buffer.readUnsignedByte();
+            this.cbLevelWithSumm = buffer.readUByte();
+            this.cbLevelRelated = buffer.readUByte();
             if (this.cbLevelRelated == 255) {
                 this.cbLevelRelated = -1;
             }
         }
 
         int i_15 = this.isNpc;
-        this.isNpc = buffer.readUnsignedByte();
+        this.isNpc = buffer.readUByte();
         if (this.isNpc != 0) {
         	int walk = this.walkingSoundEffectId;
             int teleport = this.teleportingSoundEffectId;
             int def = this.defaultSoundEffectId;
             int run = this.runningSoundEffectId;
             int ambient = this.ambientSoundVolume;
-            this.walkingSoundEffectId = buffer.readUnsignedShort();
-            this.teleportingSoundEffectId = buffer.readUnsignedShort();
-            this.defaultSoundEffectId = buffer.readUnsignedShort();
-            this.runningSoundEffectId = buffer.readUnsignedShort();
-            this.ambientSoundVolume = buffer.readUnsignedByte();
+            this.walkingSoundEffectId = buffer.readUShort();
+            this.teleportingSoundEffectId = buffer.readUShort();
+            this.defaultSoundEffectId = buffer.readUShort();
+            this.runningSoundEffectId = buffer.readUShort();
+            this.ambientSoundVolume = buffer.readUByte();
             if (volumeUnadaptableBefore != this.instrumentSoundEffect || i_15 != this.isNpc || walk != this.walkingSoundEffectId || teleport != this.teleportingSoundEffectId || def != this.defaultSoundEffectId || run != this.runningSoundEffectId || ambient != this.ambientSoundVolume) {
                 PlayerEntity.createPlayerAmbientSound(this);
             }

@@ -7,7 +7,7 @@ public abstract class CutsceneAction {
     public final int lengthInCycles;
     
 	protected CutsceneAction(Packet buffer) {
-        this.lengthInCycles = buffer.readUnsignedShort();
+        this.lengthInCycles = buffer.readUShort();
     }
 
     public abstract void perform();

@@ -16,7 +16,7 @@ public class GrandExchangeSlot {
 
     public GrandExchangeSlot(Packet buffer) {
         this.progress = buffer.readByte();
-        this.itemId = buffer.readUnsignedShort();
+        this.itemId = buffer.readUShort();
         this.price = buffer.readInt();
         this.amount = buffer.readInt();
         this.currentAmount = buffer.readInt();

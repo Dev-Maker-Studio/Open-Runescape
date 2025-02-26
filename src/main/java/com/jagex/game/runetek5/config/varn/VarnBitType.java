@@ -10,7 +10,7 @@ public class VarnBitType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -20,9 +20,9 @@ public class VarnBitType {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            this.varnId = buffer.readUnsignedShort();
-            this.startBit = buffer.readUnsignedByte();
-            this.endBit = buffer.readUnsignedByte();
+            this.varnId = buffer.readUShort();
+            this.startBit = buffer.readUByte();
+            this.endBit = buffer.readUByte();
         }
     }
 }

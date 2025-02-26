@@ -126,13 +126,13 @@ public class TextureOpBoxBlur extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9842 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9842 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.anInt9843 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9843 = rsbytebuffer2.readUByte();
                 break;
             case 2:
-                super.monochrome = rsbytebuffer2.readUnsignedByte() == 1;
+                super.monochrome = rsbytebuffer2.readUByte() == 1;
         }
     }
 }

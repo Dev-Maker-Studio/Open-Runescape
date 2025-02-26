@@ -247,7 +247,7 @@ public class ObjectType {
      */
     void decodeType(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -257,12 +257,12 @@ public class ObjectType {
 
     public void decodeOpcode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.shapes = new byte[count];
             this.objectModelIds = new int[count][];
             for (int shape = 0; shape < count; shape++) {
                 this.shapes[shape] = buffer.readByte();
-                int models = buffer.readUnsignedByte();
+                int models = buffer.readUByte();
                 this.objectModelIds[shape] = new int[models];
                 for (int model = 0; model < models; model++) {
                     this.objectModelIds[shape][model] = buffer.readBigSmart();
@@ -271,16 +271,16 @@ public class ObjectType {
         } else if (opcode == 2) {
             this.name = buffer.readString();
         } else if (opcode == 14) {
-            this.sizeX = buffer.readUnsignedByte();
+            this.sizeX = buffer.readUByte();
         } else if (opcode == 15) {
-            this.sizeY = buffer.readUnsignedByte();
+            this.sizeY = buffer.readUByte();
         } else if (opcode == 17) {
             this.blocksMovement = 0;
             this.blocksProjectiles = false;
         } else if (opcode == 18) {
             this.blocksProjectiles = false;
         } else if (opcode == 19) {
-            this.hasActions = buffer.readUnsignedByte();
+            this.hasActions = buffer.readUByte();
         } else if (opcode == 21) {
             this.groundContourType = 1;
         } else if (opcode == 22) {
@@ -295,7 +295,7 @@ public class ObjectType {
         } else if (opcode == 27) {
             this.blocksMovement = 1;
         } else if (opcode == 28) {
-            this.decorDisplacement = buffer.readUnsignedByte() << 2;
+            this.decorDisplacement = buffer.readUByte() << 2;
         } else if (opcode == 29) {
             this.ambient = buffer.readByte();
         } else if (opcode == 39) {
@@ -303,23 +303,23 @@ public class ObjectType {
         } else if (opcode >= 30 && opcode < 35) {
             this.actions[opcode - 30] = buffer.readString();
         } else if (opcode == 40) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.recolorSrc = new short[count];
             this.recolorDst = new short[count];
             for (int index = 0; index < count; index++) {
-                this.recolorSrc[index] = (short) buffer.readUnsignedShort();
-                this.recolorDst[index] = (short) buffer.readUnsignedShort();
+                this.recolorSrc[index] = (short) buffer.readUShort();
+                this.recolorDst[index] = (short) buffer.readUShort();
             }
         } else if (opcode == 41) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.retextureSrc = new short[count];
             this.retextureDst = new short[count];
             for (int index = 0; index < count; index++) {
-                this.retextureSrc[index] = (short) buffer.readUnsignedShort();
-                this.retextureDst[index] = (short) buffer.readUnsignedShort();
+                this.retextureSrc[index] = (short) buffer.readUShort();
+                this.retextureDst[index] = (short) buffer.readUShort();
             }
         } else if (opcode == 42) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.recolorDPalette = new byte[count];
             for (int index = 0; index < count; index++) {
                 this.recolorDPalette[index] = buffer.readByte();
@@ -329,13 +329,13 @@ public class ObjectType {
         } else if (opcode == 64) {
             this.staticShadow = false;
         } else if (opcode == 65) {
-            this.resizeX = buffer.readUnsignedShort();
+            this.resizeX = buffer.readUShort();
         } else if (opcode == 66) {
-            this.resizeY = buffer.readUnsignedShort();
+            this.resizeY = buffer.readUShort();
         } else if (opcode == 67) {
-            this.resizeZ = buffer.readUnsignedShort();
+            this.resizeZ = buffer.readUShort();
         } else if (opcode == 69) {
-            buffer.readUnsignedByte();
+            buffer.readUByte();
         } else if (opcode == 70) {
             this.offsetX = buffer.readShort() << 2;
         } else if (opcode == 71) {
@@ -347,13 +347,13 @@ public class ObjectType {
         } else if (opcode == 74) {
             this.ignoreClipOnAltRoute = true;
         } else if (opcode == 75) {
-            this.supportsItems = buffer.readUnsignedByte();
+            this.supportsItems = buffer.readUByte();
         } else if (opcode == 77 || opcode == 92) {
-            this.varpbitId = buffer.readUnsignedShort();
+            this.varpbitId = buffer.readUShort();
             if (this.varpbitId == 65535) {
                 this.varpbitId = -1;
             }
-            this.varpId = buffer.readUnsignedShort();
+            this.varpId = buffer.readUShort();
             if (this.varpId == 65535) {
                 this.varpId = -1;
             }
@@ -361,27 +361,27 @@ public class ObjectType {
             if (opcode == 92) {
                 lastAlt = buffer.readBigSmart();
             }
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.alternativeIds = new int[count + 2];
             for (int index = 0; index <= count; index++) {
                 this.alternativeIds[index] = buffer.readBigSmart();
             }
             this.alternativeIds[count + 1] = lastAlt;
         } else if (opcode == 78) {
-            this.soundId = buffer.readUnsignedShort();
-            this.soundRadius = buffer.readUnsignedByte();
+            this.soundId = buffer.readUShort();
+            this.soundRadius = buffer.readUByte();
         } else if (opcode == 79) {
-            this.soundMinInterval = buffer.readUnsignedShort();
-            this.soundMaxInterval = buffer.readUnsignedShort();
-            this.soundRadius = buffer.readUnsignedByte();
-            int count = buffer.readUnsignedByte();
+            this.soundMinInterval = buffer.readUShort();
+            this.soundMaxInterval = buffer.readUShort();
+            this.soundRadius = buffer.readUByte();
+            int count = buffer.readUByte();
             this.soundGroupIds = new int[count];
             for (int index = 0; index < count; index++) {
-                this.soundGroupIds[index] = buffer.readUnsignedShort();
+                this.soundGroupIds[index] = buffer.readUShort();
             }
         } else if (opcode == 81) {
             this.groundContourType = 2;
-            this.goundContourModifier = buffer.readUnsignedByte() * 256;
+            this.goundContourModifier = buffer.readUByte() * 256;
         } else if (opcode == 82) {
             this.requiresTextures = true;
         } else if (opcode == 88) {
@@ -392,7 +392,7 @@ public class ObjectType {
             this.members = true;
         } else if (opcode == 93) {
             this.groundContourType = 3;
-            this.goundContourModifier = buffer.readUnsignedShort();
+            this.goundContourModifier = buffer.readUShort();
         } else if (opcode == 94) {
             this.groundContourType = 4;
         } else if (opcode == 95) {
@@ -403,45 +403,45 @@ public class ObjectType {
         } else if (opcode == 98) {
             this.hasAnimation = true;
         } else if (opcode == 99) {
-            this.primaryCursorActionIndex = buffer.readUnsignedByte();
-            this.primaryCursor = buffer.readUnsignedShort();
+            this.primaryCursorActionIndex = buffer.readUByte();
+            this.primaryCursor = buffer.readUShort();
         } else if (opcode == 100) {
-            this.secondaryCursorActionIndex = buffer.readUnsignedByte();
-            this.secondaryCursor = buffer.readUnsignedShort();
+            this.secondaryCursorActionIndex = buffer.readUByte();
+            this.secondaryCursor = buffer.readUShort();
         } else if (opcode == 101) {
-            this.mapIconRotation = buffer.readUnsignedByte();
+            this.mapIconRotation = buffer.readUByte();
         } else if (opcode == 102) {
-            this.mapIconId = buffer.readUnsignedShort();
+            this.mapIconId = buffer.readUShort();
         } else if (opcode == 103) {
             this.occlusionMode = 0;
         } else if (opcode == 104) {
-            this.soundVolume = buffer.readUnsignedByte();
+            this.soundVolume = buffer.readUByte();
         } else if (opcode == 105) {
             this.mapIconFlipped = true;
         } else if (opcode == 106) {
-            int numAnimations = buffer.readUnsignedByte();
+            int numAnimations = buffer.readUByte();
             int sum = 0;
             this.animations = new int[numAnimations];
             this.animationOdds = new int[numAnimations];
             for (int index = 0; index < numAnimations; index++) {
                 this.animations[index] = buffer.readBigSmart();
-                sum += this.animationOdds[index] = buffer.readUnsignedByte();
+                sum += this.animationOdds[index] = buffer.readUByte();
             }
             for (int index = 0; index < numAnimations; index++) {
                 this.animationOdds[index] = this.animationOdds[index] * 65535 / sum;
             }
         } else if (opcode == 107) {
-            this.mapCategoryid = buffer.readUnsignedShort();
+            this.mapCategoryid = buffer.readUShort();
         } else if (opcode >= 150 && opcode < 155) {
             this.actions[opcode - 150] = buffer.readString();
             if (!this.locTypeList.playerIsMember) {
                 this.actions[opcode - 150] = null;
             }
         } else if (opcode == 160) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.quests = new int[count];
             for (int index = 0; index < count; index++) {
-                this.quests[index] = buffer.readUnsignedShort();
+                this.quests[index] = buffer.readUShort();
             }
         } else if (opcode == 162) {
             this.groundContourType = 3;
@@ -458,33 +458,33 @@ public class ObjectType {
         } else if (opcode == 166) {
             this.shadowOffsetZ = buffer.readShort();
         } else if (opcode == 167) {
-            this.groundDecorationHeight = buffer.readUnsignedShort();
+            this.groundDecorationHeight = buffer.readUShort();
         } else if (opcode == 168) {
             this.instrumentSoundEffect = true; // ambient sound
         } else if (opcode == 169) {
             this.instrumentAmbientSound = true;
         } else if (opcode == 170) {
-            this.cullY = buffer.readUnsignedSmart();
+            this.cullY = buffer.readUSmart();
         } else if (opcode == 171) {
-            this.cullXZ = buffer.readUnsignedSmart();
+            this.cullXZ = buffer.readUSmart();
         } else if (opcode == 173) {
-            this.ambientSoundMaxDelay = buffer.readUnsignedShort();
-            this.ambientSoundMinDelay = buffer.readUnsignedShort();
+            this.ambientSoundMaxDelay = buffer.readUShort();
+            this.ambientSoundMinDelay = buffer.readUShort();
         } else if (opcode == 177) {
             this.transforms = true;
         } else if (opcode == 178) {
-            this.ambientSoundMaxHearDistance = buffer.readUnsignedByte();
+            this.ambientSoundMaxHearDistance = buffer.readUByte();
         } else if (opcode == 189) {
             this.dynamicTint = true;
         } else if (opcode == 249) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             if (this.parameters == null) {
                 int capacity = MathUtils.nextPowerOfTwo(count);
                 this.parameters = new IterableNodeMap<Node<?>>(capacity);
             }
             for (int index = 0; index < count; index++) {
-                boolean isString = buffer.readUnsignedByte() == 1;
-                int key = buffer.read24BitUnsignedInteger();
+                boolean isString = buffer.readUByte() == 1;
+                int key = buffer.readUMedium();
                 Object value;
                 if (isString) {
                     value = new ObjectNode(buffer.readString());

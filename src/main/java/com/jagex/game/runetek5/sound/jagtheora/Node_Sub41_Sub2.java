@@ -24,7 +24,7 @@ public class Node_Sub41_Sub2 extends Node_Sub41 {
     void decode(OggPacket oggpacket1) {
         if (super.anInt8031 <= 0 || "SUB".equals(this.aString9469)) {
             Packet rsbytebuffer3 = new Packet(oggpacket1.getData());
-            int i_4 = rsbytebuffer3.readUnsignedByte();
+            int i_4 = rsbytebuffer3.readUByte();
             if (super.anInt8031 <= 8) {
                 if ((i_4 | 0x80) == 0) {
                     throw new IllegalStateException();
@@ -32,8 +32,8 @@ public class Node_Sub41_Sub2 extends Node_Sub41 {
 
                 if (super.anInt8031 == 0) {
                     rsbytebuffer3.currentPosition += 23;
-                    this.anInt9464 = rsbytebuffer3.g4();
-                    this.anInt9467 = rsbytebuffer3.g4();
+                    this.anInt9464 = rsbytebuffer3.readUIntLittle();
+                    this.anInt9467 = rsbytebuffer3.readUIntLittle();
                     if (this.anInt9464 == 0 || this.anInt9467 == 0) {
                         throw new IllegalStateException();
                     }
@@ -49,13 +49,13 @@ public class Node_Sub41_Sub2 extends Node_Sub41 {
                 if (i_4 == 0) {
                     label64:
                     {
-                        long long_5 = rsbytebuffer3.method13278();
-                        long long_7 = rsbytebuffer3.method13278();
-                        long long_9 = rsbytebuffer3.method13278();
+                        long long_5 = rsbytebuffer3.readULongLittle();
+                        long long_7 = rsbytebuffer3.readULongLittle();
+                        long long_9 = rsbytebuffer3.readULongLittle();
                         if (long_7 >= 0L && long_9 >= 0L && long_9 <= long_5) {
                             this.aFloat9462 = (float) (this.anInt9467 * long_5) / this.anInt9464;
                             this.aFloat9465 = (float) (this.anInt9467 * (long_7 + long_5)) / this.anInt9464;
-                            int i_11 = rsbytebuffer3.g4();
+                            int i_11 = rsbytebuffer3.readUIntLittle();
                             if (i_11 >= 0 && i_11 <= rsbytebuffer3.buffer.length - rsbytebuffer3.currentPosition) {
                                 this.aString9470 = StaticMethods.method4824(rsbytebuffer3.buffer, rsbytebuffer3.currentPosition, i_11);
                                 break label64;

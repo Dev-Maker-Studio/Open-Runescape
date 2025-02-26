@@ -15,7 +15,7 @@ public class CutsceneResetEntity extends CutsceneAction {
 
     public CutsceneResetEntity(Packet buffer) {
         super(buffer);
-        this.entityIndex = buffer.readUnsignedShort();
+        this.entityIndex = buffer.readUShort();
     }
 
     @Override

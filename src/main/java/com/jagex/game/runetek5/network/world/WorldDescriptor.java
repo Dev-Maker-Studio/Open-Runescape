@@ -83,11 +83,11 @@ public class WorldDescriptor extends WorldDescriptorFlags {
 
     public static boolean decodeWorldList(byte[] data) {
         Packet buffer = new Packet(data);
-        int two = buffer.readUnsignedByte();
+        int two = buffer.readUByte();
         if (two != 2) {
             return false;
         }
-        boolean create = buffer.readUnsignedByte() == 1;
+        boolean create = buffer.readUByte() == 1;
         if (create) {
             WorldMeta.decodeWorldList(buffer);
         }

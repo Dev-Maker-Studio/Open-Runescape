@@ -68,13 +68,13 @@ public class TextureOpFlip extends TextureOperation {
     public void decodeOpcode(int opcode, Packet buffer) {
         switch (opcode) {
             case 0:
-                this.mirrorHorizontally = buffer.readUnsignedByte() == 1;
+                this.mirrorHorizontally = buffer.readUByte() == 1;
                 break;
             case 1:
-                this.mirrorVertically = buffer.readUnsignedByte() == 1;
+                this.mirrorVertically = buffer.readUByte() == 1;
                 break;
             case 2:
-                super.monochrome = buffer.readUnsignedByte() == 1;
+                super.monochrome = buffer.readUByte() == 1;
         }
     }
 }

@@ -121,7 +121,7 @@ public class ItemType {
      */
     public void decodeType(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -135,18 +135,18 @@ public class ItemType {
         } else if (opcode == 2) {
             this.name = stream.readString();
         } else if (opcode == 4) {
-            this.modelZoom = stream.readUnsignedShort();
+            this.modelZoom = stream.readUShort();
         } else if (opcode == 5) {
-            this.modelRotationX = stream.readUnsignedShort();
+            this.modelRotationX = stream.readUShort();
         } else if (opcode == 6) {
-            this.modelRotationY = stream.readUnsignedShort();
+            this.modelRotationY = stream.readUShort();
         } else if (opcode == 7) {
-            this.modelOffsetX = stream.readUnsignedShort();
+            this.modelOffsetX = stream.readUShort();
             if (this.modelOffsetX > 32767) {
                 this.modelOffsetX -= 65536;
             }
         } else if (opcode == 8) {
-            this.modelOffsetY = stream.readUnsignedShort();
+            this.modelOffsetY = stream.readUShort();
             if (this.modelOffsetY > 32767) {
                 this.modelOffsetY -= 65536;
             }
@@ -155,13 +155,13 @@ public class ItemType {
         } else if (opcode == 12) {
             this.value = stream.readInt();
         } else if (opcode == 13) {
-            this.wearPos = stream.readUnsignedByte();
+            this.wearPos = stream.readUByte();
         } else if (opcode == 14) {
-            this.wearPos2 = stream.readUnsignedByte();
+            this.wearPos2 = stream.readUByte();
         } else if (opcode == 16) {
             this.membersOnly = true;
         } else if (opcode == 18) {
-            this.multiStackSize = stream.readUnsignedShort();
+            this.multiStackSize = stream.readUShort();
         } else if (opcode == 23) {
             this.maleEquip1 = stream.readBigSmart();
         } else if (opcode == 24) {
@@ -171,29 +171,29 @@ public class ItemType {
         } else if (opcode == 26) {
             this.femaleEquip2 = stream.readBigSmart();
         } else if (opcode == 27) {
-            this.wearPos3 = stream.readUnsignedByte();
+            this.wearPos3 = stream.readUByte();
         } else if (opcode >= 30 && opcode < 35) {
             this.groundActions[opcode - 30] = stream.readString();
         } else if (opcode >= 35 && opcode < 40) {
             this.inventoryActions[opcode - 35] = stream.readString();
         } else if (opcode == 40) {
-            int count = stream.readUnsignedByte();
+            int count = stream.readUByte();
             this.recolorSrc = new short[count];
             this.recolorDst = new short[count];
             for (int index = 0; index < count; index++) {
-                this.recolorSrc[index] = (short) stream.readUnsignedShort();
-                this.recolorDst[index] = (short) stream.readUnsignedShort();
+                this.recolorSrc[index] = (short) stream.readUShort();
+                this.recolorDst[index] = (short) stream.readUShort();
             }
         } else if (opcode == 41) {
-        	int count = stream.readUnsignedByte();
+        	int count = stream.readUByte();
             this.retexSrc = new short[count];
             this.retexDst = new short[count];
             for (int index = 0; index < count; index++) {
-                this.retexSrc[index] = (short) stream.readUnsignedShort();
-                this.retexDst[index] = (short) stream.readUnsignedShort();
+                this.retexSrc[index] = (short) stream.readUShort();
+                this.retexDst[index] = (short) stream.readUShort();
             }
         } else if (opcode == 42) {
-        	int count = stream.readUnsignedByte();
+        	int count = stream.readUByte();
             this.recolorDPalette = new byte[count];
             for (int index = 0; index < count; index++) {
                 this.recolorDPalette[index] = stream.readByte();
@@ -216,36 +216,36 @@ public class ItemType {
         } else if (opcode == 93) {
             this.femaleHead2 = stream.readBigSmart();
         } else if (opcode == 95) {
-            this.modelRotationZ = stream.readUnsignedShort();
+            this.modelRotationZ = stream.readUShort();
         } else if (opcode == 96) {
-            this.unknownInt6 = stream.readUnsignedByte();
+            this.unknownInt6 = stream.readUByte();
         } else if (opcode == 97) {
-            this.certId = stream.readUnsignedShort();
+            this.certId = stream.readUShort();
         } else if (opcode == 98) {
-            this.certTemplateId = stream.readUnsignedShort();
+            this.certTemplateId = stream.readUShort();
         } else if (opcode >= 100 && opcode < 110) {
             if (this.stackIds == null) {
                 this.stackIds = new int[10];
                 this.stackTriggerAmount = new int[10];
             }
-            this.stackIds[opcode - 100] = stream.readUnsignedShort();
-            this.stackTriggerAmount[opcode - 100] = stream.readUnsignedShort();
+            this.stackIds[opcode - 100] = stream.readUShort();
+            this.stackTriggerAmount[opcode - 100] = stream.readUShort();
         } else if (opcode == 110) {
-            this.resizeX = stream.readUnsignedShort();
+            this.resizeX = stream.readUShort();
         } else if (opcode == 111) {
-            this.resizeY = stream.readUnsignedShort();
+            this.resizeY = stream.readUShort();
         } else if (opcode == 112) {
-            this.resizeZ = stream.readUnsignedShort();
+            this.resizeZ = stream.readUShort();
         } else if (opcode == 113) {
             this.ambient = stream.readByte();
         } else if (opcode == 114) {
             this.contrast = stream.readByte();
         } else if (opcode == 115) {
-            this.teamId = stream.readUnsignedByte();
+            this.teamId = stream.readUByte();
         } else if (opcode == 121) {
-            this.lendId = stream.readUnsignedShort();
+            this.lendId = stream.readUShort();
         } else if (opcode == 122) {
-            this.lendTemplateId = stream.readUnsignedShort();
+            this.lendTemplateId = stream.readUShort();
         } else if (opcode == 125) {
             this.maleEquipmentOffsetX = stream.readByte() << 2;
             this.maleEquipmentOffsetY = stream.readByte() << 2;
@@ -255,38 +255,38 @@ public class ItemType {
             this.femaleEquipmentOffsetY = stream.readByte() << 2;
             this.femaleEquipmentOffsetZ = stream.readByte() << 2;
         } else if (opcode == 127) {
-            this.primaryCursorActionIndex = stream.readUnsignedByte();
-            this.primaryCursor = stream.readUnsignedShort();
+            this.primaryCursorActionIndex = stream.readUByte();
+            this.primaryCursor = stream.readUShort();
         } else if (opcode == 128) {
-            this.secondaryCursorActionIndex = stream.readUnsignedByte();
-            this.secondaryCursor = stream.readUnsignedShort();
+            this.secondaryCursorActionIndex = stream.readUByte();
+            this.secondaryCursor = stream.readUShort();
         } else if (opcode == 129) {
-            this.customCursorOp1 = stream.readUnsignedByte();
-            this.customCursorId1 = stream.readUnsignedShort();
+            this.customCursorOp1 = stream.readUByte();
+            this.customCursorId1 = stream.readUShort();
         } else if (opcode == 130) {
-            this.customCursorOp2 = stream.readUnsignedByte();
-            this.customCursorId2 = stream.readUnsignedShort();
+            this.customCursorOp2 = stream.readUByte();
+            this.customCursorId2 = stream.readUShort();
         } else if (opcode == 132) {
-        	int count = stream.readUnsignedByte();
+        	int count = stream.readUByte();
             this.quests = new int[count];
             for (int index = 0; index < count; index++) {
-                this.quests[index] = stream.readUnsignedShort();
+                this.quests[index] = stream.readUShort();
             }
         } else if (opcode == 134) {
-            this.pickSizeShift = stream.readUnsignedByte();
+            this.pickSizeShift = stream.readUByte();
         } else if (opcode == 139) {
-            this.bindId = stream.readUnsignedShort();
+            this.bindId = stream.readUShort();
         } else if (opcode == 140) {
-            this.bindTemplateId = stream.readUnsignedShort();
+            this.bindTemplateId = stream.readUShort();
         } else if (opcode == 249) {
-        	int count = stream.readUnsignedByte();
+        	int count = stream.readUByte();
             if (this.parameters == null) {
             	int index = MathUtils.nextPowerOfTwo(count);
                 this.parameters = new IterableNodeMap<Node<?>>(index);
             }
             for (int index = 0; index < count; index++) {
-                boolean isString = stream.readUnsignedByte() == 1;
-                int key = stream.read24BitUnsignedInteger();
+                boolean isString = stream.readUByte() == 1;
+                int key = stream.readUMedium();
                 Object parameter;
                 if (isString) {
                     parameter = new ObjectNode(stream.readString());

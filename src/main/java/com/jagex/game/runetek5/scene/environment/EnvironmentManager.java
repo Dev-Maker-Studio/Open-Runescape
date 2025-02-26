@@ -216,18 +216,18 @@ public class EnvironmentManager {
 	public static void decodeCubeTextures(byte[] data) {
 	    Packet buffer = new Packet(data);
 	    while (true) {
-	        int opcode = buffer.readUnsignedByte();
+	        int opcode = buffer.readUByte();
 	        if (opcode == 0) {
 	            return;
 	        }
 	        if (opcode == 1) {
 	            int[] textures = EnvironmentManager.cubeTextureIds = new int[6];
-	            textures[0] = buffer.readUnsignedShort();
-	            textures[1] = buffer.readUnsignedShort();
-	            textures[2] = buffer.readUnsignedShort();
-	            textures[3] = buffer.readUnsignedShort();
-	            textures[4] = buffer.readUnsignedShort();
-	            textures[5] = buffer.readUnsignedShort();
+	            textures[0] = buffer.readUShort();
+	            textures[1] = buffer.readUShort();
+	            textures[2] = buffer.readUShort();
+	            textures[3] = buffer.readUShort();
+	            textures[4] = buffer.readUShort();
+	            textures[5] = buffer.readUShort();
 	        }
 	    }
 	}

@@ -25,8 +25,8 @@ public class MouseClickPacket extends AbstractMousePacket {
         MouseActionServer record = this.records.poll();
         if (record != null) {
             TcpPacket packet = PacketEncoder.createPacket(ClientProt.MOUSE_BUTTON_CLICK, client.GAME_CONNECTION_CONTEXT.isaac);
-            packet.buffer.writeIntLE(record.getX() | record.getY() << 16);
-            packet.buffer.writeByte128(record.getClickMeta() << 1 | record.getConstant() & 0x1);
+            packet.buffer.writeIntLittle(record.getX() | record.getY() << 16);
+            packet.buffer.writeByteAdd(record.getClickMeta() << 1 | record.getConstant() & 0x1);
             packet.buffer.writeShortLittle(getServerSubmissionDelta(record, 0xFFFF));
             client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
             record.pushToTop();

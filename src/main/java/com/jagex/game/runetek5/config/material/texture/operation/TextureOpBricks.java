@@ -95,28 +95,28 @@ public class TextureOpBricks extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9982 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9982 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.anInt9994 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9994 = rsbytebuffer2.readUByte();
                 break;
             case 2:
-                this.anInt9989 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9989 = rsbytebuffer2.readUShort();
                 break;
             case 3:
-                this.anInt9990 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9990 = rsbytebuffer2.readUShort();
                 break;
             case 4:
-                this.anInt9987 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9987 = rsbytebuffer2.readUShort();
                 break;
             case 5:
-                this.anInt9986 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9986 = rsbytebuffer2.readUShort();
                 break;
             case 6:
-                this.anInt9991 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9991 = rsbytebuffer2.readUShort();
                 break;
             case 7:
-                this.anInt9984 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9984 = rsbytebuffer2.readUShort();
         }
 
     }

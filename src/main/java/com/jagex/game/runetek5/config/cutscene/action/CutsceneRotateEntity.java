@@ -17,8 +17,8 @@ public class CutsceneRotateEntity extends CutsceneAction {
 
     public CutsceneRotateEntity(Packet buffer) {
         super(buffer);
-        this.cutsceneEntityPtr = buffer.readUnsignedShort();
-        this.rotation = buffer.readUnsignedShort();
+        this.cutsceneEntityPtr = buffer.readUShort();
+        this.rotation = buffer.readUShort();
     }
 
     @Override

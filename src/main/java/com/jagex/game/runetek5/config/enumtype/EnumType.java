@@ -26,7 +26,7 @@ public class EnumType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -45,7 +45,7 @@ public class EnumType {
         } else if (opcode == 4) {
             this.defaultIntValue = stream.readInt();
         } else if (opcode == 5 || opcode == 6) {
-            this.size = stream.readUnsignedShort();
+            this.size = stream.readUShort();
             this.parameters = new HashMap<Integer, Object>(this.size);
 
             for (int index = 0; index < this.size; index++) {
@@ -60,12 +60,12 @@ public class EnumType {
                 this.parameters.put(key, value);
             }
         } else if (opcode == 7 || opcode == 8) {
-            int numValues = stream.readUnsignedShort();
-            this.size = stream.readUnsignedShort();
+            int numValues = stream.readUShort();
+            this.size = stream.readUShort();
             this.values = new Object[numValues];
 
             for (int index = 0; index < this.size; index++) {
-                int valueToSet = stream.readUnsignedShort();
+                int valueToSet = stream.readUShort();
                 if (opcode == 7) {
                     this.values[valueToSet] = stream.readString();
                 } else {

@@ -26,7 +26,7 @@ public class BanUser extends AbstractClanSettingUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        if (buffer.readUnsignedByte() != 255) {
+        if (buffer.readUByte() != 255) {
             buffer.currentPosition--;
             this.bannedUserHash = buffer.readLong();
         }

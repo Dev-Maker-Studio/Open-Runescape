@@ -632,13 +632,13 @@ public class WorldMap {
     }
 
     public static void prepareMapdata(Packet buffer, int i_2, int i_3, int x, int y, int[] ints_6, int[] ints_7) {
-        int flags = buffer.readUnsignedByte();
+        int flags = buffer.readUByte();
         if ((flags & 0x1) == 0) {
             boolean bool9 = (flags & 0x2) == 0;
             int i_10 = flags >> 2 & 0x3f;
             if (i_10 != 62) {
                 if (i_10 == 63) {
-                    i_10 = buffer.readUnsignedByte();
+                    i_10 = buffer.readUByte();
                 } else if (bool9) {
                     i_10 = ints_6[i_10];
                 } else {
@@ -660,17 +660,17 @@ public class WorldMap {
             boolean hasLocs = (flags & 0x10) != 0;
 
             for (int tileType = 0; tileType < i_21; tileType++) {
-                int underlay = buffer.readUnsignedByte();
+                int underlay = buffer.readUByte();
                 int overlay = 0;
                 int tileRotationAndShape = 0;
                 if (bool22) {
-                    overlay = buffer.readUnsignedByte();
-                    tileRotationAndShape = buffer.readUnsignedByte();
+                    overlay = buffer.readUByte();
+                    tileRotationAndShape = buffer.readUByte();
                 }
 
                 int locCount = 0;
                 if (hasLocs) {
-                    locCount = buffer.readUnsignedByte();
+                    locCount = buffer.readUByte();
                 }
 
                 int[] objectIds;
@@ -829,26 +829,26 @@ public class WorldMap {
 
     public static void method5183(int i_1, int i_2) {
         Packet buffer = new Packet(MAP_AREA_RESOURCE.getNamedFile(staticElement.filenamePrefix, "area"));
-        int i_4 = buffer.readUnsignedByte();
+        int i_4 = buffer.readUByte();
         int[] ints_5 = new int[i_4];
 
         for (int i_6 = 0; i_6 < i_4; i_6++) {
-            ints_5[i_6] = buffer.readUnsignedByte();
+            ints_5[i_6] = buffer.readUByte();
         }
 
-        int i_6 = buffer.readUnsignedByte();
+        int i_6 = buffer.readUByte();
         int[] ints_7 = new int[i_6];
 
         for (int i_8 = 0; i_8 < i_6; i_8++) {
-            ints_7[i_8] = buffer.readUnsignedByte();
+            ints_7[i_8] = buffer.readUByte();
         }
 
         while (true) {
             while (buffer.currentPosition < buffer.buffer.length) {
-                if (buffer.readUnsignedByte() == 0) {
+                if (buffer.readUByte() == 0) {
                 	// By tiles in map square
-                    int i_8 = buffer.readUnsignedByte();
-                    int i_9 = buffer.readUnsignedByte();
+                    int i_8 = buffer.readUByte();
+                    int i_9 = buffer.readUByte();
 
                     for (int tileX = 0; tileX < 64; tileX++) {
                         for (int tileY = 0; tileY < 64; tileY++) {
@@ -859,10 +859,10 @@ public class WorldMap {
                     }
                 } else {
                 	// By chunks in map square
-                    int i_8 = buffer.readUnsignedByte();
-                    int i_9 = buffer.readUnsignedByte();
-                    int i_18 = buffer.readUnsignedByte();
-                    int i_11 = buffer.readUnsignedByte();
+                    int i_8 = buffer.readUByte();
+                    int i_9 = buffer.readUByte();
+                    int i_18 = buffer.readUByte();
+                    int i_11 = buffer.readUByte();
 
                     for (int chunkPosX = 0; chunkPosX < 8; chunkPosX++) {
                         for (int chunkPosY = 0; chunkPosY < 8; chunkPosY++) {

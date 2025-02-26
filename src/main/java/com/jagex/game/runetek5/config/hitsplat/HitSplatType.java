@@ -33,7 +33,7 @@ public class HitSplatType {
         if (opcode == 1) {
             this.fontId = stream.readBigSmart();
         } else if (opcode == 2) {
-            this.color = stream.read24BitUnsignedInteger();
+            this.color = stream.readUMedium();
             this.hasColor = true;
         } else if (opcode == 3) {
             this.spriteA = stream.readBigSmart();
@@ -46,25 +46,25 @@ public class HitSplatType {
         } else if (opcode == 7) {
             this.anInt2846 = stream.readShort();
         } else if (opcode == 8) {
-            this.placementExampleString = stream.readGJString();
+            this.placementExampleString = stream.readJagString();
         } else if (opcode == 9) {
-            this.cyclesVisible = stream.readUnsignedShort();
+            this.cyclesVisible = stream.readUShort();
         } else if (opcode == 10) {
             this.anInt2833 = stream.readShort();
         } else if (opcode == 11) {
             this.anInt2847 = 0;
         } else if (opcode == 12) {
-            this.displayType = stream.readUnsignedByte();
+            this.displayType = stream.readUByte();
         } else if (opcode == 13) {
             this.anInt2832 = stream.readShort();
         } else if (opcode == 14) {
-            this.anInt2847 = stream.readUnsignedShort();
+            this.anInt2847 = stream.readUShort();
         }
     }
     
     public void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }

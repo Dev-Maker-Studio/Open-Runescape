@@ -13,9 +13,9 @@ public class CutsceneEntitySpotAnimation extends AbstractCutsceneSpotAnimation {
 
     public CutsceneEntitySpotAnimation(Packet buffer) {
         super(buffer);
-        this.targetIndex = buffer.readUnsignedShort();
-        this.spotAnimationIndex = buffer.readUnsignedByte();
-        this.adjustmentType = buffer.readUnsignedShort();
+        this.targetIndex = buffer.readUShort();
+        this.spotAnimationIndex = buffer.readUByte();
+        this.adjustmentType = buffer.readUShort();
     }
 
     @Override

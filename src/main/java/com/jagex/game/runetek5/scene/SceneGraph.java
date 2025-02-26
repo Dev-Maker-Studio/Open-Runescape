@@ -182,7 +182,7 @@ public class SceneGraph extends MapLoader {
             int i_14 = (i_8 & 0x7) * 8;
             while (true) {
                 while (mapBuffer.currentPosition < mapBuffer.buffer.length) {
-                	int opcode = mapBuffer.readUnsignedByte();
+                	int opcode = mapBuffer.readUByte();
                     if (opcode == 0) {
                         if (environment == null) {
                             environment = new Environment(mapBuffer, this.environmentManager);
@@ -191,12 +191,12 @@ public class SceneGraph extends MapLoader {
                         }
                     } else {
                         if (opcode == 1) {
-                        	int loops = mapBuffer.readUnsignedByte();
+                        	int loops = mapBuffer.readUByte();
                             if (loops > 0) {
                                 for (int index = 0; index < loops; index++) {
                                     FlickeringEffect flickeringEffect = new FlickeringEffect(toolkit, super.scene.tileUnits, mapBuffer);
                                     if (flickeringEffect.type == 31) {
-                                        LightType lightType = TypeLists.LIGHT.list(mapBuffer.readUnsignedShort());
+                                        LightType lightType = TypeLists.LIGHT.list(mapBuffer.readUShort());
                                         flickeringEffect.setType(lightType.effect, lightType.duration, lightType.ticker, lightType.surrounding);
                                     }
                                     if (toolkit.getMaxLights() > 0) {
@@ -328,7 +328,7 @@ public class SceneGraph extends MapLoader {
             locId += locIdOffset;
             int bitpackedPosition = 0;
             while (true) {
-                int positionOffset = buffer.readUnsignedSmart();
+                int positionOffset = buffer.readUSmart();
                 if (positionOffset == 0) {
                     break;
                 }
@@ -336,7 +336,7 @@ public class SceneGraph extends MapLoader {
                 int localY = bitpackedPosition & 0x3f;
                 int localX = bitpackedPosition >> 6 & 0x3f;
                 int plane = bitpackedPosition >> 12;
-                int bitpackedDescription = buffer.readUnsignedByte();
+                int bitpackedDescription = buffer.readUByte();
                 int type = bitpackedDescription >> 2;
                 int rotation = bitpackedDescription & 0x3;
                 int sceneX = localX + offsetX;
@@ -369,7 +369,7 @@ public class SceneGraph extends MapLoader {
             locId += locOffset;
             int bitpackedPosition = 0;
             while (true) {
-                int localPositionOffset = locMapBuffer.readUnsignedSmart();
+                int localPositionOffset = locMapBuffer.readUSmart();
                 if (localPositionOffset == 0) {
                     break;
                 }
@@ -377,7 +377,7 @@ public class SceneGraph extends MapLoader {
                 int y = bitpackedPosition & 0x3f;
                 int x = bitpackedPosition >> 6 & 0x3f;
                 int z = bitpackedPosition >> 12;
-                int bitpackedLocDetails = locMapBuffer.readUnsignedByte();
+                int bitpackedLocDetails = locMapBuffer.readUByte();
                 int type = bitpackedLocDetails >> 2;
                 int locRotation = bitpackedLocDetails & 0x3;
                 if (z == landscapeZ && x >= mapX && x < mapX + 8 && y >= mapY && y < mapY + 8) {
@@ -774,7 +774,7 @@ public class SceneGraph extends MapLoader {
             Environment atmosphere = null;
             while (true) {
                 while (buffer.currentPosition < buffer.buffer.length) {
-                    int opcode = buffer.readUnsignedByte();
+                    int opcode = buffer.readUByte();
                     if (opcode == 0) {
                         if (atmosphere == null) {
                             atmosphere = new Environment(buffer, this.environmentManager);
@@ -783,12 +783,12 @@ public class SceneGraph extends MapLoader {
                         }
                     } else {
                         if (opcode == 1) {
-                            int count = buffer.readUnsignedByte();
+                            int count = buffer.readUByte();
                             if (count > 0) {
                                 for (int i_19 = 0; i_19 < count; i_19++) {
                                     FlickeringEffect flickeringEffect = new FlickeringEffect(toolkit, super.scene.tileUnits, buffer);
                                     if (flickeringEffect.type == 31) {
-                                        LightType lightType = TypeLists.LIGHT.list(buffer.readUnsignedShort());
+                                        LightType lightType = TypeLists.LIGHT.list(buffer.readUShort());
                                         flickeringEffect.setType(lightType.effect, lightType.duration, lightType.ticker, lightType.surrounding);
                                     }
                                     if (toolkit.getMaxLights() > 0) {
@@ -1014,14 +1014,14 @@ public class SceneGraph extends MapLoader {
 	        while (true) {
 	            int offset;
 	            while (!cached) {
-	                offset = stream.readUnsignedSmart();
+	                offset = stream.readUSmart();
 	                if (offset == 0) {
 	                    continue label56;
 	                }
 	                localPositionInfo += offset - 1;
 	                int deltaY = localPositionInfo & 0x3f;
 	                int deltaX = localPositionInfo >> 6 & 0x3f;
-	                int type = stream.readUnsignedByte() >> 2;
+	                int type = stream.readUByte() >> 2;
 	                int sceneX = deltaX + x;
 	                int sceneY = y + deltaY;
 	                if (sceneX > 0 && sceneY > 0 && sceneX < regionSizeX - 1 && sceneY < regionSizeY - 1) {
@@ -1035,11 +1035,11 @@ public class SceneGraph extends MapLoader {
 	                    }
 	                }
 	            }
-	            offset = stream.readUnsignedSmart();
+	            offset = stream.readUSmart();
 	            if (offset == 0) {
 	                break;
 	            }
-	            stream.readUnsignedByte();
+	            stream.readUByte();
 	        }
 	    }
 	}

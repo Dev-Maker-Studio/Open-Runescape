@@ -25,25 +25,25 @@ public class CutsceneApplyHitmark extends CutsceneAction {
 
     public CutsceneApplyHitmark(Packet buffer) {
         super(buffer);
-        this.entityIndex = buffer.readUnsignedShort();
-        int flags = buffer.readUnsignedByte();
+        this.entityIndex = buffer.readUShort();
+        int flags = buffer.readUByte();
         if ((flags & 0x1) != 0) {
-            this.hitsplatId = buffer.readUnsignedShort();
-            this.hitText = buffer.readUnsignedShort();
+            this.hitsplatId = buffer.readUShort();
+            this.hitText = buffer.readUShort();
         } else {
             this.hitsplatId = -1;
             this.hitText = -1;
         }
         if ((flags & 0x2) != 0) {
-            this.soakHitsplatId = buffer.readUnsignedShort();
-            this.soakText = buffer.readUnsignedShort();
+            this.soakHitsplatId = buffer.readUShort();
+            this.soakText = buffer.readUShort();
         } else {
             this.soakHitsplatId = -1;
             this.soakText = -1;
         }
         if ((flags & 0x4) != 0) {
-            int i_3 = buffer.readUnsignedShort();
-            int i_4 = buffer.readUnsignedShort();
+            int i_3 = buffer.readUShort();
+            int i_4 = buffer.readUShort();
             int i_5 = i_3 * 255 / i_4;
             if (i_3 > 0 && i_5 < 1) {
                 boolean bool6 = true;

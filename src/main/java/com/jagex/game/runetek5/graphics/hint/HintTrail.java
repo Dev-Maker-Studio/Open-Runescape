@@ -34,11 +34,11 @@ public class HintTrail {
 
     public HintTrail(AbstractToolkit toolkit, Packet buffer, int modelId) {
         this.modelId = modelId;
-        this.length = buffer.readSignedSmart();
+        this.length = buffer.readSmart();
         this.placementX = new int[this.length];
         this.placementY = new int[this.length];
-        int offsetX = buffer.readUnsignedShort();
-        int offsetY = buffer.readUnsignedShort();
+        int offsetX = buffer.readUShort();
+        int offsetY = buffer.readUShort();
         for (int index = 0; index < this.length; index++) {
         	this.placementX[index] = offsetX + buffer.readByte();
         	this.placementY[index] = offsetY + buffer.readByte();

@@ -73,13 +73,13 @@ public class TextureOpClamp extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9864 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9864 = rsbytebuffer2.readUShort();
                 break;
             case 1:
-                this.anInt9868 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9868 = rsbytebuffer2.readUShort();
                 break;
             case 2:
-                super.monochrome = rsbytebuffer2.readUnsignedByte() == 1;
+                super.monochrome = rsbytebuffer2.readUByte() == 1;
         }
 
     }

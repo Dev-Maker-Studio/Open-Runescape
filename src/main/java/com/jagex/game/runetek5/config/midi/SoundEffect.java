@@ -15,7 +15,7 @@ public class SoundEffect {
 
     public SoundEffect(Packet buffer) {
         for (int index = 0; index < 10; index++) {
-            int hasInstruments = buffer.readUnsignedByte();
+            int hasInstruments = buffer.readUByte();
             if (hasInstruments != 0) {
                 buffer.currentPosition--;
                 this.instruments[index] = new Instrument();
@@ -23,8 +23,8 @@ public class SoundEffect {
             }
         }
 
-        this.loopBegin = buffer.readUnsignedShort();
-        this.loopEnd = buffer.readUnsignedShort();
+        this.loopBegin = buffer.readUShort();
+        this.loopEnd = buffer.readUShort();
     }
 
     public MixedAudioBuffer getMixedAudio() {

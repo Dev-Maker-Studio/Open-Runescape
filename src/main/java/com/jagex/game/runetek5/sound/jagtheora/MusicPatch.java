@@ -71,7 +71,7 @@ public class MusicPatch extends Node {
             i_12 = 2;
 
             for (i_14 = 2; i_14 < i_9; i_14++) {
-                int i_41 = patchBuffer.readUnsignedByte();
+                int i_41 = patchBuffer.readUByte();
                 if (i_41 == 0) {
                     i_13 = i_12++;
                 } else {
@@ -92,21 +92,21 @@ public class MusicPatch extends Node {
 
         for (i_14 = 0; i_14 < arr_37.length; i_14++) {
             MusicPatchNode2 class11015 = arr_37[i_14] = new MusicPatchNode2();
-            int i_40 = patchBuffer.readUnsignedByte();
+            int i_40 = patchBuffer.readUByte();
             if (i_40 > 0) {
                 class11015.aByteArray1097 = new byte[i_40 * 2];
             }
 
-            i_40 = patchBuffer.readUnsignedByte();
+            i_40 = patchBuffer.readUByte();
             if (i_40 > 0) {
                 class11015.aByteArray1094 = new byte[i_40 * 2 + 2];
                 class11015.aByteArray1094[1] = 64;
             }
         }
 
-        i_14 = patchBuffer.readUnsignedByte();
+        i_14 = patchBuffer.readUByte();
         byte[] bytes_43 = i_14 > 0 ? new byte[i_14 * 2] : null;
-        i_14 = patchBuffer.readUnsignedByte();
+        i_14 = patchBuffer.readUByte();
         byte[] bytes_16 = i_14 > 0 ? new byte[i_14 * 2] : null;
 
         int i_17;
@@ -126,14 +126,14 @@ public class MusicPatch extends Node {
 
         int i_20;
         for (i_20 = 0; i_20 < 128; i_20++) {
-            i_19 += patchBuffer.readUnsignedByte();
+            i_19 += patchBuffer.readUByte();
             this.pitchOffset[i_20] = (short) i_19;
         }
 
         i_19 = 0;
 
         for (i_20 = 0; i_20 < 128; i_20++) {
-            i_19 += patchBuffer.readUnsignedByte();
+            i_19 += patchBuffer.readUByte();
             this.pitchOffset[i_20] += (i_19 << 8);
         }
 
@@ -150,7 +150,7 @@ public class MusicPatch extends Node {
                     i_20 = -1;
                 }
 
-                i_22 = patchBuffer.method13099();
+                i_22 = patchBuffer.readVarInt();
             }
 
             this.pitchOffset[i_23] += ((i_22 - 1 & 0x2) << 14);
@@ -236,7 +236,7 @@ public class MusicPatch extends Node {
                 }
 
                 if (this.sampleOffsets[i_27] > 0) {
-                    i_26 = patchBuffer.readUnsignedByte() + 1;
+                    i_26 = patchBuffer.readUByte() + 1;
                 }
             }
 
@@ -244,7 +244,7 @@ public class MusicPatch extends Node {
             --i_20;
         }
 
-        this.baseVelocity = patchBuffer.readUnsignedByte() + 1;
+        this.baseVelocity = patchBuffer.readUByte() + 1;
 
         int i_29;
         MusicPatchNode2 class11042;
@@ -281,7 +281,7 @@ public class MusicPatch extends Node {
                 i_19 = 0;
 
                 for (i_29 = 2; i_29 < class11042.aByteArray1094.length; i_29 += 2) {
-                    i_19 = 1 + i_19 + patchBuffer.readUnsignedByte();
+                    i_19 = 1 + i_19 + patchBuffer.readUByte();
                     class11042.aByteArray1094[i_29] = (byte) i_19;
                 }
             }
@@ -293,7 +293,7 @@ public class MusicPatch extends Node {
                 i_19 = 0;
 
                 for (i_29 = 2; i_29 < class11042.aByteArray1097.length; i_29 += 2) {
-                    i_19 += 1 + patchBuffer.readUnsignedByte();
+                    i_19 += 1 + patchBuffer.readUByte();
                     class11042.aByteArray1097[i_29] = (byte) i_19;
                 }
             }
@@ -306,11 +306,11 @@ public class MusicPatch extends Node {
         Object obj39;
         byte b_47;
         if (bytes_43 != null) {
-            i_19 = patchBuffer.readUnsignedByte();
+            i_19 = patchBuffer.readUByte();
             bytes_43[0] = (byte) i_19;
 
             for (i_27 = 2; i_27 < bytes_43.length; i_27 += 2) {
-                i_19 = 1 + i_19 + patchBuffer.readUnsignedByte();
+                i_19 = 1 + i_19 + patchBuffer.readUByte();
                 bytes_43[i_27] = (byte) i_19;
             }
 
@@ -344,11 +344,11 @@ public class MusicPatch extends Node {
         }
 
         if (bytes_16 != null) {
-            i_19 = patchBuffer.readUnsignedByte();
+            i_19 = patchBuffer.readUByte();
             bytes_16[0] = (byte) i_19;
 
             for (i_27 = 2; i_27 < bytes_16.length; i_27 += 2) {
-                i_19 = 1 + i_19 + patchBuffer.readUnsignedByte();
+                i_19 = 1 + i_19 + patchBuffer.readUByte();
                 bytes_16[i_27] = (byte) i_19;
             }
 
@@ -410,39 +410,39 @@ public class MusicPatch extends Node {
         }
 
         for (i_27 = 0; i_27 < i_12; i_27++) {
-            arr_37[i_27].volumeEnvelopeDecay = patchBuffer.readUnsignedByte();
+            arr_37[i_27].volumeEnvelopeDecay = patchBuffer.readUByte();
         }
 
         for (i_27 = 0; i_27 < i_12; i_27++) {
             class11042 = arr_37[i_27];
             if (class11042.aByteArray1097 != null) {
-                class11042.volumeEnvelopeSustain = patchBuffer.readUnsignedByte();
+                class11042.volumeEnvelopeSustain = patchBuffer.readUByte();
             }
 
             if (class11042.aByteArray1094 != null) {
-                class11042.vibratoLfoDelay = patchBuffer.readUnsignedByte();
+                class11042.vibratoLfoDelay = patchBuffer.readUByte();
             }
 
             if (class11042.volumeEnvelopeDecay > 0) {
-                class11042.vibratoLfoFrequency = patchBuffer.readUnsignedByte();
+                class11042.vibratoLfoFrequency = patchBuffer.readUByte();
             }
         }
 
         for (i_27 = 0; i_27 < i_12; i_27++) {
-            arr_37[i_27].volumeEnvelopeRelease = patchBuffer.readUnsignedByte();
+            arr_37[i_27].volumeEnvelopeRelease = patchBuffer.readUByte();
         }
 
         for (i_27 = 0; i_27 < i_12; i_27++) {
             class11042 = arr_37[i_27];
             if (class11042.volumeEnvelopeRelease > 0) {
-                class11042.vibratoLfoPitch = patchBuffer.readUnsignedByte();
+                class11042.vibratoLfoPitch = patchBuffer.readUByte();
             }
         }
 
         for (i_27 = 0; i_27 < i_12; i_27++) {
             class11042 = arr_37[i_27];
             if (class11042.vibratoLfoPitch > 0) {
-                class11042.anInt1102 = patchBuffer.readUnsignedByte();
+                class11042.anInt1102 = patchBuffer.readUByte();
             }
         }
 

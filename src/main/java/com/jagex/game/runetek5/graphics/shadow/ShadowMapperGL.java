@@ -188,7 +188,7 @@ public class ShadowMapperGL {
                                             }
                                         } else {
                                             for (i_19 = 0; i_19 < shorts_18.length; i_19++) {
-                                                class282Sub35Sub114.writeLEShort(shorts_18[i_19] & 0xffff);
+                                                class282Sub35Sub114.writeShortLittle(shorts_18[i_19] & 0xffff);
                                                 ++i_11;
                                             }
                                         }

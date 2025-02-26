@@ -23,8 +23,8 @@ public class UpdateBitpackedVariable extends AbstractClanSettingUpdate {
     public void decode(Packet buffer) {
         this.key = buffer.readInt();
         this.value = buffer.readInt();
-        this.shift = buffer.readUnsignedByte();
-        this.bitmaskSize = buffer.readUnsignedByte();
+        this.shift = buffer.readUByte();
+        this.bitmaskSize = buffer.readUByte();
     }
 
     @Override

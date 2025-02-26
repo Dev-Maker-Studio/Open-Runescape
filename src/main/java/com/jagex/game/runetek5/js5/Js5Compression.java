@@ -17,7 +17,7 @@ public class Js5Compression {
 	public static byte[] decompress(byte[] compressed) {
 	    try {
 	        Packet buffer = new Packet(compressed);
-	        int compressionType = buffer.readUnsignedByte();
+	        int compressionType = buffer.readUByte();
 	        int payloadLength = buffer.readInt();
 	        if (payloadLength >= 0 && (maxSize == 0 || payloadLength <= maxSize)) {
 	            if (compressionType == 0) {

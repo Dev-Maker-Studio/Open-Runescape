@@ -39,7 +39,7 @@ public class SpriteType {
     public static SpriteType[] decode(byte[] data) {
         Packet stream = new Packet(data);
         stream.currentPosition = data.length - 2;
-        int count = stream.readUnsignedShort();
+        int count = stream.readUShort();
         SpriteType[] sprites = new SpriteType[count];
 
         for (int i = 0; i < count; i++) {
@@ -47,24 +47,24 @@ public class SpriteType {
         }
 
         stream.currentPosition = data.length - 7 - count * 8;
-        int biggestWidth = stream.readUnsignedShort();
-        int biggestHeight = stream.readUnsignedShort();
-        int palleteLength = (stream.readUnsignedByte() & 0xff) + 1;
+        int biggestWidth = stream.readUShort();
+        int biggestHeight = stream.readUShort();
+        int palleteLength = (stream.readUByte() & 0xff) + 1;
 
         for (int i = 0; i < count; i++) {
-            sprites[i].minX = stream.readUnsignedShort();
+            sprites[i].minX = stream.readUShort();
         }
 
         for (int i = 0; i < count; i++) {
-            sprites[i].minY = stream.readUnsignedShort();
+            sprites[i].minY = stream.readUShort();
         }
 
         for (int i = 0; i < count; i++) {
-            sprites[i].width = stream.readUnsignedShort();
+            sprites[i].width = stream.readUShort();
         }
 
         for (int i = 0; i < count; i++) {
-            sprites[i].height = stream.readUnsignedShort();
+            sprites[i].height = stream.readUShort();
         }
 
         for (int i = 0; i < count; i++) {
@@ -77,7 +77,7 @@ public class SpriteType {
         int[] pallete = new int[palleteLength];
 
         for (int i = 1; i < palleteLength; i++) {
-            pallete[i] = stream.read24BitUnsignedInteger();
+            pallete[i] = stream.readUMedium();
             if (pallete[i] == 0) {
                 pallete[i] = 1;
             }
@@ -93,7 +93,7 @@ public class SpriteType {
             SpriteType sprite = sprites[i];
             int numPixels = sprite.width * sprite.height;
             sprite.pixels = new byte[numPixels];
-            int flags = stream.readUnsignedByte();
+            int flags = stream.readUByte();
             if ((flags & 0x2) == 0) {
                 if ((flags & 0x1) == 0) {
                     for (int j = 0; j < numPixels; j++) {

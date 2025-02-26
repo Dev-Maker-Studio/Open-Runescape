@@ -19,7 +19,7 @@ public class UnbanUser extends AbstractClanSettingUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        this.bannedUserIndex = buffer.readUnsignedShort();
+        this.bannedUserIndex = buffer.readUShort();
     }
 
     @Override

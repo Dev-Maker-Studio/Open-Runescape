@@ -39,7 +39,7 @@ public class ItemTypeCustomisation {
 
     public static ItemTypeCustomisation decodeItemEffects(ItemType objType, Packet stream) {
         ItemTypeCustomisation customisation = new ItemTypeCustomisation(objType);
-        int flags = stream.readUnsignedByte();
+        int flags = stream.readUByte();
         boolean modifiesBody = (flags & 0x1) != 0;
         boolean modifiesHead = (flags & 0x2) != 0;
         boolean modifiesColors = (flags & 0x4) != 0;
@@ -65,20 +65,20 @@ public class ItemTypeCustomisation {
             }
         }
         if (modifiesColors) {
-            int bitpackedSlots = stream.readUnsignedShort();
+            int bitpackedSlots = stream.readUShort();
             int[] slots = {bitpackedSlots & 0xf, bitpackedSlots >> 4 & 0xf, bitpackedSlots >> 8 & 0xf, bitpackedSlots >> 12 & 0xf};
             for (int i = 0; i < 4; i++) {
                 if (slots[i] != 15) {
-                    customisation.recolDst[slots[i]] = (short) stream.readUnsignedShort();
+                    customisation.recolDst[slots[i]] = (short) stream.readUShort();
                 }
             }
         }
         if (modifiesTextures) {
-            int bitpackedSlots = stream.readUnsignedByte();
+            int bitpackedSlots = stream.readUByte();
             int[] slots = {bitpackedSlots & 0xf, bitpackedSlots >> 4 & 0xf};
             for (int i = 0; i < 2; i++) {
                 if (slots[i] != 15) {
-                    customisation.retexDst[slots[i]] = (short) stream.readUnsignedShort();
+                    customisation.retexDst[slots[i]] = (short) stream.readUShort();
                 }
             }
         }

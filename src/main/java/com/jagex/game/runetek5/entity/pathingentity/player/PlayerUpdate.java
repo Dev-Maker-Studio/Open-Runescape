@@ -164,12 +164,12 @@ public class PlayerUpdate {
         for (int i_2 = 0; i_2 < anInt2434; i_2++) {
             int playerPtr = anIntArray2435[i_2];
             PlayerEntity player = players[playerPtr];
-            int updateMasks = buffer.readUnsignedByte();
+            int updateMasks = buffer.readUByte();
             if ((updateMasks & 0x8) != 0) {
-                updateMasks += buffer.readUnsignedByte() << 8;
+                updateMasks += buffer.readUByte() << 8;
             }
             if ((updateMasks & 0x100) != 0) {
-                updateMasks += buffer.readUnsignedByte() << 16;
+                updateMasks += buffer.readUByte() << 16;
             }
             decodePlayerUpdateMask(buffer, playerPtr, player, updateMasks);
         }
@@ -180,30 +180,30 @@ public class PlayerUpdate {
 
         if ((flags & 0x20000) != 0) {
             player.hue = stream.readByte();
-            player.saturation = stream.readByteC();
-            player.lightness = stream.read128Byte();
-            player.opacity = (byte) stream.readUnsigned128Byte();
-            player.tintStartCycle = client.cycles + stream.readUnsignedShort128();
-            player.tintEndCycle = client.cycles + stream.readUnsignedShort();
+            player.saturation = stream.readByteInverse();
+            player.lightness = stream.readByteSubtract();
+            player.opacity = (byte) stream.readUByteSubtract();
+            player.tintStartCycle = client.cycles + stream.readUShortAdd();
+            player.tintEndCycle = client.cycles + stream.readUShort();
         }
 
         if ((flags & 0x400000) != 0) {
             int count = stream.buffer[++stream.currentPosition - 1] & 0xff;
             for (int index = 0; index < count; index++) {
-                int key = stream.readShortLE();
+                int key = stream.readShortLittle();
                 int value = stream.readInt();
                 player.playerConfigs.put(key, value);
             }
         }
 
         if ((flags & 0x200) != 0) {
-            int gfxId = stream.readUnsignedShort();
-            int i_7 = stream.readIntV2();
+            int gfxId = stream.readUShort();
+            int i_7 = stream.readUIntInverseMiddle();
             if (gfxId == 65535) {
                 gfxId = -1;
             }
 
-            int i_8 = stream.readUnsigned128Byte();
+            int i_8 = stream.readUByteSubtract();
             int i_9 = i_8 & 0x7;
             int i_10 = i_8 >> 3 & 0xf;
             if (i_10 == 15) {
@@ -215,7 +215,7 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x20) != 0) {
-            player.faceDirection = stream.readUnsignedShort128();
+            player.faceDirection = stream.readUShortAdd();
             if (player.movementStepsLeft == 0) {
                 player.turn(player.faceDirection);
                 player.faceDirection = -1;
@@ -227,31 +227,31 @@ public class PlayerUpdate {
             int i_6 = stream.buffer[++stream.currentPosition - 1] & 0xff;
 
             for (int i_7 = 0; i_7 < i_6; i_7++) {
-                int i_8 = stream.readShortLE();
+                int i_8 = stream.readShortLittle();
                 int i_9 = stream.readInt();
                 player.playerConfigs.put(i_8, i_9);
             }
         }
 
         if ((flags & 0x10000) != 0) {
-            player.reduceAttackPriority = stream.readUnsigned128Byte() == 1;
+            player.reduceAttackPriority = stream.readUByteSubtract() == 1;
         }
 
         if ((flags & 0x100000) != 0) {
-            int size = stream.readUnsigned128Byte();
+            int size = stream.readUByteSubtract();
             int[] ints_14 = new int[size];
             int[] ints_15 = new int[size];
 
             for (int i_9 = 0; i_9 < size; i_9++) {
-                int i_10 = stream.readUnsignedShort128();
+                int i_10 = stream.readUShortAdd();
                 if ((i_10 & 0xc000) == 49152) {
-                    int i_19 = stream.readUnsignedShort128();
+                    int i_19 = stream.readUShortAdd();
                     ints_14[i_9] = i_10 << 16 | i_19;
                 } else {
                     ints_14[i_9] = i_10;
                 }
 
-                ints_15[i_9] = stream.readUnsignedShort();
+                ints_15[i_9] = stream.readUShort();
             }
 
             player.method15797(ints_14, ints_15);
@@ -268,7 +268,7 @@ public class PlayerUpdate {
 
         if ((flags & 0x80000) != 0) {
             String message = stream.readString();
-            int chatFlags = stream.readUnsignedByte128();
+            int chatFlags = stream.readUByteAdd();
             if ((chatFlags & 0x1) != 0) {
                 ChatBox.writeMessage(2, chatFlags, player.getUsernameWithTitle(), player.getDisplayName(), player.username, message);
             }
@@ -277,13 +277,13 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x40000) != 0) {
-            int gfxId = stream.readUnsignedShortLE128();
-            int i_7 = stream.readIntV2();
+            int gfxId = stream.readUShortAddLittle();
+            int i_7 = stream.readUIntInverseMiddle();
             if (gfxId == 65535) {
                 gfxId = -1;
             }
 
-            int i_8 = stream.readUnsignedByte128();
+            int i_8 = stream.readUByteAdd();
             int i_9 = i_8 & 0x7;
             int i_10 = i_8 >> 3 & 0xf;
             if (i_10 == 15) {
@@ -295,43 +295,43 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x8000) != 0) {
-            player.pMapdot = stream.readUnsigned128Byte() == 1;
+            player.pMapdot = stream.readUByteSubtract() == 1;
         }
 
         if ((flags & 0x40) != 0) {
-            int numHits = stream.readUnsigned128Byte();
+            int numHits = stream.readUByteSubtract();
             if (numHits > 0) {
                 for (int i_7 = 0; i_7 < numHits; i_7++) {
                     int soakHitsplatId = -1;
                     int soakText = -1;
                     int hitText = -1;
-                    int hitsplatId = stream.readUnsignedSmart();
+                    int hitsplatId = stream.readUSmart();
                     if (hitsplatId == 32767) {
-                        hitsplatId = stream.readUnsignedSmart();
-                        hitText = stream.readUnsignedSmart();
-                        soakHitsplatId = stream.readUnsignedSmart();
-                        soakText = stream.readUnsignedSmart();
+                        hitsplatId = stream.readUSmart();
+                        hitText = stream.readUSmart();
+                        soakHitsplatId = stream.readUSmart();
+                        soakText = stream.readUSmart();
                     } else if (hitsplatId == 32766) {
                         hitsplatId = -1;
-                        hitText = stream.readUnsignedByteC();
+                        hitText = stream.readUByteInverse();
                     } else {
-                        hitText = stream.readUnsignedSmart();
+                        hitText = stream.readUSmart();
                     }
 
-                    int delay = stream.readUnsignedSmart();
+                    int delay = stream.readUSmart();
                     player.applyHit(hitsplatId, hitText, soakHitsplatId, soakText, client.cycles, delay);
                 }
             }
 
-            int hitbarCount = stream.readUnsignedByte();
+            int hitbarCount = stream.readUByte();
             if (hitbarCount > 0) {
                 for (int index = 0; index < hitbarCount; index++) {
-                    int hitbarId = stream.readUnsignedSmart();
-                    int lifetimeCycles = stream.readUnsignedSmart();
+                    int hitbarId = stream.readUSmart();
+                    int lifetimeCycles = stream.readUSmart();
                     if (lifetimeCycles != 32767) {
-                        int delay = stream.readUnsignedSmart();
-                        int fromPercentage = stream.readUnsigned128Byte();
-                        int toPercentage = lifetimeCycles > 0 ? stream.readUnsignedByte128() : fromPercentage;
+                        int delay = stream.readUSmart();
+                        int fromPercentage = stream.readUByteSubtract();
+                        int toPercentage = lifetimeCycles > 0 ? stream.readUByteAdd() : fromPercentage;
                         player.displayHitbar(hitbarId, client.cycles, lifetimeCycles, delay, fromPercentage, toPercentage);
                     } else {
                         player.hideHitbar(hitbarId);
@@ -341,7 +341,7 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x1) != 0) {
-            int appearanceByteCount = stream.readUnsignedByteC();
+            int appearanceByteCount = stream.readUByteInverse();
             byte[] appearanceData = new byte[appearanceByteCount];
             Packet appearanceBuffer = new Packet(appearanceData);
             stream.readBytes(appearanceData, 0, appearanceByteCount);
@@ -356,12 +356,12 @@ public class PlayerUpdate {
                 movementAnimations[moveType] = stream.readBigSmart();
             }
 
-            int speed = stream.readUnsignedByte();
+            int speed = stream.readUByte();
             animate(player, movementAnimations, speed, false);
         }
 
         if ((flags & 0x2) != 0) {
-            int faceEntity = stream.readUnsignedShort128();
+            int faceEntity = stream.readUShortAdd();
             if (faceEntity == 65535) {
                 faceEntity = -1;
             }
@@ -370,36 +370,36 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x1000) != 0) {
-            defaultMovespeed = stream.readByteC();
+            defaultMovespeed = stream.readByteInverse();
         }
 
         if ((flags & 0x2000) != 0) {
-            int i_6 = stream.readUnsigned128Byte();
+            int i_6 = stream.readUByteSubtract();
             int[] animationIds = new int[i_6];
             int[] ints_15 = new int[i_6];
             int[] ints_17 = new int[i_6];
 
             for (int i_10 = 0; i_10 < i_6; i_10++) {
                 animationIds[i_10] = stream.readBigSmart();
-                ints_15[i_10] = stream.readUnsignedByteC();
-                ints_17[i_10] = stream.readUnsignedShortLE128();
+                ints_15[i_10] = stream.readUByteInverse();
+                ints_17[i_10] = stream.readUShortAddLittle();
             }
 
             animate(player, animationIds, ints_15, ints_17);
         }
 
         if ((flags & 0x4) != 0) {
-            PLAYER_MOVEMENT_TYPES[slot] = stream.read128Byte();
+            PLAYER_MOVEMENT_TYPES[slot] = stream.readByteSubtract();
         }
 
         if ((flags & 0x200000) != 0) {
-            int i_6 = stream.readShortLE();
-            int i_7 = stream.readIntLE();
+            int i_6 = stream.readShortLittle();
+            int i_7 = stream.readUIntLittle();
             if (i_6 == 65535) {
                 i_6 = -1;
             }
 
-            int i_8 = stream.readUnsigned128Byte();
+            int i_8 = stream.readUByteSubtract();
             int i_9 = i_8 & 0x7;
             int i_10 = i_8 >> 3 & 0xf;
             if (i_10 == 15) {
@@ -411,13 +411,13 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x800) != 0) {
-            player.forceMovementT1XOff = stream.readByteC();
-            player.forceMovementT1YOff = stream.read128Byte();
-            player.forceMovementT2XOff = stream.readByte128();
-            player.forceMovementT2YOff = stream.readByteC();
-            player.forceMovementT1Delay = stream.readUnsignedShortLE128() + client.cycles;
-            player.forceMovementT2Delay = stream.readShortLE() + client.cycles;
-            player.forceMoveDirection = stream.readUnsignedShort128();
+            player.forceMovementT1XOff = stream.readByteInverse();
+            player.forceMovementT1YOff = stream.readByteSubtract();
+            player.forceMovementT2XOff = stream.readByteAdd();
+            player.forceMovementT2YOff = stream.readByteInverse();
+            player.forceMovementT1Delay = stream.readUShortAddLittle() + client.cycles;
+            player.forceMovementT2Delay = stream.readShortLittle() + client.cycles;
+            player.forceMoveDirection = stream.readUShortAdd();
             if (player.aBool10568) {
                 player.forceMovementT1XOff += player.basePositionX;
                 player.forceMovementT1YOff += player.basePositionY;
@@ -436,13 +436,13 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x80) != 0) {
-            int spotAnimId = stream.readShortLE();
+            int spotAnimId = stream.readShortLittle();
             int flags1 = stream.readInt();
             if (spotAnimId == 65535) {
                 spotAnimId = -1;
             }
 
-            int flags2 = stream.readUnsignedByte128();
+            int flags2 = stream.readUByteAdd();
             int rotation = flags2 & 0x7;
             int i_10 = flags2 >> 3 & 0xf;
             if (i_10 == 15) {

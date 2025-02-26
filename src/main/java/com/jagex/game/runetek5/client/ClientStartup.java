@@ -531,12 +531,12 @@ public class ClientStartup {
     public static void decodeTitlescreenMusic(byte[] data) {
         Packet buffer = new Packet(data);
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
             if (opcode == 1) {
-                int titlescreenMusicArchive = buffer.readUnsignedShort();
+                int titlescreenMusicArchive = buffer.readUShort();
                 if (AreaSoundPlayer.titlescreenMusicArchive == -1) {
                     AreaSoundPlayer.titlescreenMusicArchive = titlescreenMusicArchive;
                 }

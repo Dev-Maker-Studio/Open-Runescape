@@ -18,7 +18,7 @@ public class MapSpriteType {
 
     void decode(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -30,7 +30,7 @@ public class MapSpriteType {
         if (opcode == 1) {
             this.fileId = stream.readBigSmart();
         } else if (opcode == 2) {
-            this.backgroundColor = stream.read24BitUnsignedInteger();
+            this.backgroundColor = stream.readUMedium();
         } else if (opcode == 3) {
             this.requiresUpscaling = true;
         } else if (opcode == 4) {

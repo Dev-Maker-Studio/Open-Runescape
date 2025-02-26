@@ -179,7 +179,7 @@ public class PacketDecoder {
             }
             connection.read(buffer.buffer, 0, 2);
             buffer.currentPosition = 0;
-            context.currentPacketSize = buffer.readUnsignedShort();
+            context.currentPacketSize = buffer.readUShort();
             context.read += 2;
             context.idleReadPulses = 0;
         }
@@ -198,7 +198,7 @@ public class PacketDecoder {
         
         if (context.currentPacket == ServerProt.IF_SETMODEL) {
             int componentHash = buffer.readInt();
-            int primaryModelId = buffer.readIntV2();
+            int primaryModelId = buffer.readUIntInverseMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcontentUpdate(componentHash, 1, primaryModelId, -1);
             context.currentPacket = null;
@@ -209,39 +209,39 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_INV_FULL) {
-            int itemContainer = buffer.readUnsignedShort();
-            int flags = buffer.readUnsignedByte();
+            int itemContainer = buffer.readUShort();
+            int flags = buffer.readUByte();
             boolean isNegativeKey = (flags & 0x1) == 1;
             ItemContainer.resetContainer(itemContainer, isNegativeKey);
-            int size = buffer.readUnsignedShort();
+            int size = buffer.readUShort();
             for (int slot = 0; slot < size; slot++) {
-                int amount = buffer.readUnsigned128Byte();
+                int amount = buffer.readUByteSubtract();
                 if (amount == 255) {
-                    amount = buffer.readIntV2();
+                    amount = buffer.readUIntInverseMiddle();
                 }
-                int itemId = buffer.readUnsignedShortLE128();
+                int itemId = buffer.readUShortAddLittle();
                 ItemContainer.setItemInContainer(itemContainer, slot, itemId - 1, amount, isNegativeKey);
             }
             client.RECENTLY_USED_ITEM_CONTAINERS[++client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 & 0x1f] = itemContainer;
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SET_DRAW_ORDER) {
-            int key = buffer.readUnsignedByteC();
+            int key = buffer.readUByteInverse();
             client.requestVarVerifyid();
             client.gameDrawOrder = key;
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SET_CURSOR) {
             InterfaceRenderer.translatedUptext = context.currentPacketSize > 2 ? buffer.readString() : LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE);
-            CursorManager.activeCursorId = context.currentPacketSize > 0 ? buffer.readUnsignedShort() : -1;
+            CursorManager.activeCursorId = context.currentPacketSize > 0 ? buffer.readUShort() : -1;
             if (CursorManager.activeCursorId == 65535) {
                 CursorManager.activeCursorId = -1;
             }
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CAM_FORCEANGLE) {
-            int angleY = buffer.readUnsignedShort128();
-            int angleX = buffer.readUnsignedShortLE128();
+            int angleY = buffer.readUShortAdd();
+            int angleX = buffer.readUShortAddLittle();
             client.requestVarVerifyid();
             Camera.setAngle(angleX, angleY, 0);
             context.currentPacket = null;
@@ -256,7 +256,7 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.CLANCHANNEL_FULL) {
             client.anInt7395 = client.anInt7347;
-            boolean nonGuest = buffer.readUnsignedByte() == 1;
+            boolean nonGuest = buffer.readUByte() == 1;
             if (context.currentPacketSize == 1) {
                 if (nonGuest) {
                     client.CLAN_CHANNEL = null;
@@ -273,8 +273,8 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_GE_SLOT) {
-            int key = buffer.readUnsignedByte();
-            if (buffer.readUnsignedByte() == 0) {
+            int key = buffer.readUByte();
+            if (buffer.readUByte() == 0) {
                 client.GRAND_EXCHANGE_SLOTS[key] = new GrandExchangeSlot();
             } else {
                 buffer.currentPosition--;
@@ -285,25 +285,25 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETANGLE) {
             int componentHash = buffer.readInt();
-            int pitch = buffer.readShortLE();
-            int roll = buffer.readShortLE();
-            int scale = buffer.readUnsignedShortLE128();
+            int pitch = buffer.readShortLittle();
+            int roll = buffer.readShortLittle();
+            int scale = buffer.readUShortAddLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfangleUpdate(componentHash, pitch, roll, scale);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETTEXT) {
             String text = buffer.readString();
-            int componentHash = buffer.readIntV1();
+            int componentHash = buffer.readUIntMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIftextUpdate(componentHash, text);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_OPENTOP) {
-            int key3 = buffer.readIntV1();
-            int key4 = buffer.readIntV1();
-            int interfaceId = buffer.readUnsignedShort128();
-            int type = buffer.readUnsigned128Byte();
+            int key3 = buffer.readUIntMiddle();
+            int key4 = buffer.readUIntMiddle();
+            int interfaceId = buffer.readUShortAdd();
+            int type = buffer.readUByteSubtract();
             int key2 = buffer.readInt();
             int key1 = buffer.readInt();
             client.requestVarVerifyid();
@@ -321,9 +321,9 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERMODEL_OTHER) {
-            int primaryModelId = buffer.readUnsignedShort128();
-            int componentHash = buffer.readIntV1();
-            int secondaryModelId = buffer.readIntV1();
+            int primaryModelId = buffer.readUShortAdd();
+            int componentHash = buffer.readUIntMiddle();
+            int secondaryModelId = buffer.readUIntMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcontentUpdate(componentHash, 5, primaryModelId, secondaryModelId);
             context.currentPacket = null;
@@ -335,29 +335,29 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARCSTR_SMALL) {
             String string_63 = buffer.readString();
-            int flags = buffer.readUnsignedShortLE128();
+            int flags = buffer.readUShortAddLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityVarcstringUpdate(flags, string_63);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETSCROLLPOS) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             int flags = buffer.readInt();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfscrollposUpdate(flags, key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_PRIVATE_ECHO) {
-            boolean noCrown = buffer.readUnsignedByte() == 1;
+            boolean noCrown = buffer.readUByte() == 1;
             String crownedName = buffer.readString();
             String name = crownedName;
             if (noCrown) {
                 name = buffer.readString();
             }
-            long long_28 = buffer.readUnsignedShort();
-            long long_30 = buffer.read24BitUnsignedInteger();
-            int rights = buffer.readUnsignedByte();
-            int qcMsgId = buffer.readUnsignedShort();
+            long long_28 = buffer.readUShort();
+            long long_30 = buffer.readUMedium();
+            int rights = buffer.readUByte();
+            int qcMsgId = buffer.readUShort();
             long long_13 = long_30 + (long_28 << 32);
             boolean ignore = false;
             int i_81 = 0;
@@ -389,47 +389,47 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETCOLOR) {
-            int key = buffer.readIntLE();
-            int flags = buffer.readUnsignedShort128();
+            int key = buffer.readUIntLittle();
+            int flags = buffer.readUShortAdd();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcolorUpdate(key, flags);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VORBIS_SOUND) {
-            int soundId = buffer.readUnsignedShort();
+            int soundId = buffer.readUShort();
             if (soundId == 65535) {
                 soundId = -1;
             }
-            int repeat = buffer.readUnsignedByte();
-            int delay = buffer.readUnsignedShort();
-            int volume = buffer.readUnsignedByte();
-            int sampleRate = buffer.readUnsignedShort();
+            int repeat = buffer.readUByte();
+            int delay = buffer.readUShort();
+            int volume = buffer.readUByte();
+            int sampleRate = buffer.readUShort();
             AreaSoundPlayer.playSoundVorbis(soundId, repeat, delay, volume, false, sampleRate);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.RUN_ENERGY) {
-            client.RUN_ENERGY = buffer.readUnsignedByte();
+            client.RUN_ENERGY = buffer.readUByte();
             client.anInt7397 = client.anInt7347;
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERHEAD_OTHER) {
             int key = buffer.readInt();
-            int flags = buffer.readUnsignedShortLE128();
-            int i_6 = buffer.readIntV1();
+            int flags = buffer.readUShortAddLittle();
+            int i_6 = buffer.readUIntMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcontentUpdate(i_6, 3, flags, key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SPOT_ANIM_SPECIFIC) {
-            int idk = buffer.readUnsignedByteC();
-            int reqGfxId = buffer.readUnsignedShort128();
+            int idk = buffer.readUByteInverse();
+            int reqGfxId = buffer.readUShortAdd();
             if (reqGfxId == 65535) {
                 reqGfxId = -1;
             }
-            int settings = buffer.readUnsignedByteC();
-            int speed = buffer.readUnsignedShort128();
-            int targetHash = buffer.readIntLE();
-            int height = buffer.readShortLE();
+            int settings = buffer.readUByteInverse();
+            int speed = buffer.readUShortAdd();
+            int targetHash = buffer.readUIntLittle();
+            int height = buffer.readShortLittle();
             int rotation = settings & 0x7;
             int setting1 = settings >> 3 & 0xf;
             if (setting1 == 15) {
@@ -566,26 +566,26 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CAM_LOOKAT) {
-            int viewX = buffer.readUnsignedByte();
-            int viewY = buffer.readUnsignedShort128() << 2;
-            int viewZ = buffer.readUnsignedByte128();
-            int i_7 = buffer.readUnsignedByteC();
-            int i_8 = buffer.readUnsigned128Byte();
+            int viewX = buffer.readUByte();
+            int viewY = buffer.readUShortAdd() << 2;
+            int viewZ = buffer.readUByteAdd();
+            int i_7 = buffer.readUByteInverse();
+            int i_8 = buffer.readUByteSubtract();
             client.requestVarVerifyid();
             Camera.lookat(viewX, viewZ, viewY, i_8, i_7);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.aClass3754368) {
-            int key = buffer.readUnsignedByte();
-            int flags = buffer.readUnsignedShort128();
+            int key = buffer.readUByte();
+            int flags = buffer.readUShortAdd();
             client.requestVarVerifyid();
             VorbisSoundManager.method1575(flags, key, true);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.GAME_MESSAGE) {
-            int type = buffer.readUnsignedSmart();
+            int type = buffer.readUSmart();
             int effectFlags = buffer.readInt();
-            int flags = buffer.readUnsignedByte();
+            int flags = buffer.readUByte();
             String nameSimple = "";
             String nameFormatted = nameSimple;
             if ((flags & 0x1) != 0) {
@@ -619,7 +619,7 @@ public class PacketDecoder {
                 WindowMode.requestWindowMode(PreferenceManager.preferences.fixedScreen.getValue(), -1, -1, false);
             }
             byte[] bytes = new byte[context.currentPacketSize - 1];
-            boolean bool66 = buffer.readUnsignedByte() == 1;
+            boolean bool66 = buffer.readUByte() == 1;
             buffer.readBytes(bytes, context.currentPacketSize - 1);
             Packet rsbytebuffer127 = new Packet(bytes);
             String url = rsbytebuffer127.readString();
@@ -637,11 +637,11 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CAM_SHAKE) {
-            int key = buffer.readUnsigned128Byte();
-            int flags = buffer.readUnsignedShort();
-            int i_6 = buffer.readUnsignedByteC();
-            int i_7 = buffer.readUnsignedByteC();
-            int i_8 = buffer.readUnsigned128Byte();
+            int key = buffer.readUByteSubtract();
+            int flags = buffer.readUShort();
+            int i_6 = buffer.readUByteInverse();
+            int i_7 = buffer.readUByteInverse();
+            int i_8 = buffer.readUByteSubtract();
             client.requestVarVerifyid();
             client.CAM_SHAKING[i_6] = true;
             client.anIntArray7268[i_6] = i_7;
@@ -651,13 +651,13 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_PLAYER_GROUP) {
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             String string_88 = buffer.readString();
             String str92 = string_88;
             if (bool91) {
                 str92 = buffer.readString();
             }
-            int i_7 = buffer.readUnsignedByte();
+            int i_7 = buffer.readUByte();
             boolean ignore = false;
             if (i_7 <= 1) {
                 if ((!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
@@ -681,14 +681,14 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_PLAYER_GROUP) {
-            boolean hasRights = buffer.readUnsignedByte() == 1;
+            boolean hasRights = buffer.readUByte() == 1;
             String username = buffer.readString();
             String crownedUsername = username;
             if (hasRights) {
                 crownedUsername = buffer.readString();
             }
-            int rights = buffer.readUnsignedByte();
-            int msgId = buffer.readUnsignedShort();
+            int rights = buffer.readUByte();
+            int msgId = buffer.readUShort();
             boolean ignore = rights <= 1 && IgnoreList.contains(crownedUsername);
             if (!ignore) {
                 String message = TypeLists.QUICK_CHAT_MESSAGE.listMessage(msgId).fillDynamicValues(buffer);
@@ -703,16 +703,16 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CHAT_FILTER_SETTINGS_PRIVATECHAT) {
-            ChatBox.PRIVATE_FILTER = ChatFilter.forId(buffer.readUnsignedByte());
+            ChatBox.PRIVATE_FILTER = ChatFilter.forId(buffer.readUByte());
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.ANIMATE_NPC) {
-            int npcIndex = buffer.readUnsignedShortLE128();
+            int npcIndex = buffer.readUShortAddLittle();
             int[] animationIds = new int[MovementType.values().length];
             for (int i_6 = 0; i_6 < MovementType.values().length; i_6++) {
-                animationIds[i_6] = buffer.readIntLE();
+                animationIds[i_6] = buffer.readUIntLittle();
             }
-            int speed = buffer.readUnsignedByte();
+            int speed = buffer.readUByte();
             ObjectNode class282Sub47131 = client.NPC_MAP.get(npcIndex);
             if (class282Sub47131 != null) {
                 PlayerUpdate.animate((PathingEntity) class282Sub47131.value, animationIds, speed, true);
@@ -720,9 +720,9 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETPOSITION) {
-            int y = buffer.readShort128();
-            int component = buffer.readIntV2();
-            int x = buffer.readShortLE128();
+            int y = buffer.readShortAdd();
+            int component = buffer.readUIntInverseMiddle();
+            int x = buffer.readShortAddLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfpositionUpdate(component, x, y);
             context.currentPacket = null;
@@ -746,14 +746,14 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETNPCHEAD) {
-            int key = buffer.readIntLE();
-            int flags = buffer.readIntV1();
+            int key = buffer.readUIntLittle();
+            int flags = buffer.readUIntMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcontentUpdate(key, 2, flags, -1);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_PUBLIC) {
-            int playerIndex = buffer.readUnsignedShort();
+            int playerIndex = buffer.readUShort();
             PlayerEntity player;
             if (playerIndex == PlayerUpdate.myPlayerIndex) {
                 player = PlayerUpdate.MY_PLAYER;
@@ -761,8 +761,8 @@ public class PacketDecoder {
                 player = PlayerUpdate.players[playerIndex];
             }
             if (player != null) {
-                int chatEffects = buffer.readUnsignedShort();
-                int icon = buffer.readUnsignedByte();
+                int chatEffects = buffer.readUShort();
+                int icon = buffer.readUByte();
                 boolean is0x8000 = (chatEffects & 0x8000) != 0;
                 if (player.displayName != null && player.playerAppearance != null) {
                     boolean bool69 = false;
@@ -804,9 +804,9 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.QUICK_HOP_WORLDS) {
-            int port = buffer.readUnsignedShort();
+            int port = buffer.readUShort();
             String host = buffer.readString();
-            boolean reconnecting = buffer.readUnsignedByte() == 1;
+            boolean reconnecting = buffer.readUByte() == 1;
             WorldConnection.connectionInfo = LoginManager.GAME_CONNECTION_INFO;
             WorldConnection.reconnectingWorld = reconnecting;
             LoginManager.setGameHost(port, host);
@@ -818,22 +818,22 @@ public class PacketDecoder {
             context.currentPacket = null;
             return false;
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARC_LARGE) {
-            int key = buffer.readShortLE();
-            int flags = buffer.readIntV2();
+            int key = buffer.readShortLittle();
+            int flags = buffer.readUIntInverseMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityClientvarcUpdate(key, flags);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_GROUNDITEM) {
-            int interfaceId = buffer.readIntV2();
-            int xtea3 = buffer.readIntLE();
-            int subInterfaceId = buffer.readShortLE();
+            int interfaceId = buffer.readUIntInverseMiddle();
+            int xtea3 = buffer.readUIntLittle();
+            int subInterfaceId = buffer.readShortLittle();
             int xtea4 = buffer.readInt();
-            int xtea1 = buffer.readIntV1();
-            int overlay = buffer.readUnsigned128Byte();
-            CoordGrid absolutePosition = new CoordGrid(buffer.readIntV1());
-            int xtea2 = buffer.readIntV1();
-            int itemId = buffer.readUnsignedShortLE128();
+            int xtea1 = buffer.readUIntMiddle();
+            int overlay = buffer.readUByteSubtract();
+            CoordGrid absolutePosition = new CoordGrid(buffer.readUIntMiddle());
+            int xtea2 = buffer.readUIntMiddle();
+            int itemId = buffer.readUShortAddLittle();
             client.requestVarVerifyid();
             Interface.openSub(interfaceId, new IFSubActiveGroundItem(subInterfaceId, overlay, new GroundItemFetcher(absolutePosition, itemId)),
             		new int[]{xtea1, xtea2, xtea3, xtea4}, false);
@@ -850,28 +850,28 @@ public class PacketDecoder {
                 return true;
             } else {
                 FriendsChat.FC_OWNER_NAME = buffer.readString();
-                boolean isOwner = buffer.readUnsignedByte() == 1;
+                boolean isOwner = buffer.readUByte() == 1;
                 if (isOwner) {
                     buffer.readString();
                 }
                 long encodedName = buffer.readLong();
                 FriendsChat.FC_NAME = Utils.getStringFromLong(encodedName);
                 FriendsChat.FC_MIN_RANK_CAN_KICK = buffer.readByte();
-                int playerCount = buffer.readUnsignedByte();
+                int playerCount = buffer.readUByte();
                 if (playerCount != 255) {
                     FriendsChat.FC_PLAYER_COUNT = playerCount;
                     FriendsChatPlayer[] friendsChatPlayers = new FriendsChatPlayer[100];
                     for (int index = 0; index < FriendsChat.FC_PLAYER_COUNT; index++) {
                         friendsChatPlayers[index] = new FriendsChatPlayer();
                         friendsChatPlayers[index].displayName = buffer.readString();
-                        boolean changedName = buffer.readUnsignedByte() == 1;
+                        boolean changedName = buffer.readUByte() == 1;
                         if (changedName) {
                             friendsChatPlayers[index].username = buffer.readString();
                         } else {
                             friendsChatPlayers[index].username = friendsChatPlayers[index].displayName;
                         }
                         friendsChatPlayers[index].textName = TextUtils.formatDisplayname(friendsChatPlayers[index].username);
-                        friendsChatPlayers[index].worldId = buffer.readUnsignedShort();
+                        friendsChatPlayers[index].worldId = buffer.readUShort();
                         friendsChatPlayers[index].rank = buffer.readByte();
                         friendsChatPlayers[index].worldName = buffer.readString();
                         if (friendsChatPlayers[index].username.equals(PlayerUpdate.MY_PLAYER.displayName)) {
@@ -906,7 +906,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SET_CLAN_STRING) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             String string_88 = buffer.readString();
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = new Object[TypeLists.CLAN_VAR.size];
@@ -916,9 +916,9 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MUSIC_TRACK) {
-            int key = buffer.readUnsignedByte128();
-            int flags = buffer.readUnsignedByte128();
-            int i_6 = buffer.readUnsignedShort128();
+            int key = buffer.readUByteAdd();
+            int flags = buffer.readUByteAdd();
+            int i_6 = buffer.readUShortAdd();
             if (i_6 == 65535) {
                 i_6 = -1;
             }
@@ -926,16 +926,16 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETCLICKMASK) {
-            boolean bool91 = buffer.readUnsigned128Byte() == 1;
-            int flags = buffer.readIntLE();
+            boolean bool91 = buffer.readUByteSubtract() == 1;
+            int flags = buffer.readUIntLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfclickmaskUpdate(flags, bool91);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MUSIC_EFFECT) {
-            int key = buffer.method13132();
-            int flags = buffer.readUnsigned128Byte();
-            int i_6 = buffer.readShortLE();
+            int key = buffer.readUMediumAlternateOrder();
+            int flags = buffer.readUByteSubtract();
+            int i_6 = buffer.readShortLittle();
             if (i_6 == 65535) {
                 i_6 = -1;
             }
@@ -943,8 +943,8 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CHAT_FILTER_SETTINGS) {
-            ChatBox.TRADE_FILTER = buffer.readUnsignedByteC();
-            ChatBox.PUBLIC_FILTER = buffer.readUnsignedByte128();
+            ChatBox.TRADE_FILTER = buffer.readUByteInverse();
+            ChatBox.PUBLIC_FILTER = buffer.readUByteAdd();
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CLEAR_VARPS) {
@@ -962,7 +962,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.aClass3754399) {
-            int key = buffer.readIntLE();
+            int key = buffer.readUIntLittle();
             client.requestVarVerifyid();
             if (key == -1) {
                 PingRequester.anInt5864 = -1;
@@ -1002,12 +1002,12 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_CLANCHANNEL) {
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             String string_88 = buffer.readString();
-            long long_49 = buffer.readUnsignedShort();
-            long long_51 = buffer.read24BitUnsignedInteger();
-            int i_10 = buffer.readUnsignedByte();
-            int i_11 = buffer.readUnsignedShort();
+            long long_49 = buffer.readUShort();
+            long long_51 = buffer.readUMedium();
+            int i_10 = buffer.readUByte();
+            int i_11 = buffer.readUShort();
             long long_53 = long_51 + (long_49 << 32);
             boolean bool14 = false;
             ClanChannel class282Sub4102 = bool91 ? client.CLAN_CHANNEL : client.LISTENED_CLAN_CHANNEL;
@@ -1045,7 +1045,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VARCLAN_SET_LONG) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             long long_47 = buffer.readLong();
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = new Object[TypeLists.CLAN_VAR.size];
@@ -1055,17 +1055,17 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_FRIENDS_CHAT) {
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             String string_88 = buffer.readString();
             String str92 = string_88;
             if (bool91) {
                 str92 = buffer.readString();
             }
             long long_28 = buffer.readLong();
-            long long_30 = buffer.readUnsignedShort();
-            long long_55 = buffer.read24BitUnsignedInteger();
-            int i_35 = buffer.readUnsignedByte();
-            int i_77 = buffer.readUnsignedShort();
+            long long_30 = buffer.readUShort();
+            long long_55 = buffer.readUMedium();
+            int i_35 = buffer.readUByte();
+            int i_77 = buffer.readUShort();
             long long_57 = (long_30 << 32) + long_55;
             boolean bool115 = false;
             int i_82 = 0;
@@ -1098,13 +1098,13 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_PRIVATE) {
             String string_63 = buffer.readString();
-            int flags = buffer.readUnsignedShort();
+            int flags = buffer.readUShort();
             String str92 = TypeLists.QUICK_CHAT_MESSAGE.listMessage(flags).fillDynamicValues(buffer);
             ChatBox.writeMessage(19, 0, string_63, string_63, string_63, str92, null, flags);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VARCLAN_SET_INT) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             int flags = buffer.readInt();
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = new Object[TypeLists.CLAN_VAR.size];
@@ -1114,16 +1114,16 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETTARGETPARAM) {
-            int toSlot = buffer.readUnsignedShortLE128();
+            int toSlot = buffer.readUShortAddLittle();
             if (toSlot == 65535) {
                 toSlot = -1;
             }
-            int interfaceHash = buffer.readIntV2();
-            int fromSlot = buffer.readUnsignedShort();
+            int interfaceHash = buffer.readUIntInverseMiddle();
+            int fromSlot = buffer.readUShort();
             if (fromSlot == 65535) {
                 fromSlot = -1;
             }
-            int settings = buffer.readIntLE();
+            int settings = buffer.readUIntLittle();
             client.requestVarVerifyid();
             for (int slot = fromSlot; slot <= toSlot; slot++) {
                 long slots = slot + ((long) interfaceHash << 32);
@@ -1144,13 +1144,13 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_RESETTARGETPARAM) {
-            int interfaceHash = buffer.readIntV1();
-            int interfaceId = buffer.readUnsignedShortLE128();
-            int toSlot = buffer.readUnsignedShort();
+            int interfaceHash = buffer.readUIntMiddle();
+            int interfaceId = buffer.readUShortAddLittle();
+            int toSlot = buffer.readUShort();
             if (toSlot == 65535) {
                 toSlot = -1;
             }
-            int fromSlot = buffer.readUnsignedShort128();
+            int fromSlot = buffer.readUShortAdd();
             if (fromSlot == 65535) {
                 fromSlot = -1;
             }
@@ -1174,7 +1174,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.HINT_TRAIL) {
-            int idx = buffer.readUnsignedByte();
+            int idx = buffer.readUByte();
             int modelId = buffer.readBigSmart();
             if (client.HINT_TRAILS[idx] != null) {
                 client.HINT_TRAILS[idx].removeFromScene(Resource.mapRegion.getScene());
@@ -1196,7 +1196,7 @@ public class PacketDecoder {
             TcpPacket tcpmessage111 = PacketEncoder.createPacket(ClientProt.SEND_FPS, context.isaac);
             tcpmessage111.buffer.writeIntInverseMiddle(key);
             tcpmessage111.buffer.writeIntMiddle(flags);
-            tcpmessage111.buffer.write128Byte(client.FPS);
+            tcpmessage111.buffer.writeByteSubtract(client.FPS);
             context.queuePacket(tcpmessage111);
             context.currentPacket = null;
             return true;
@@ -1205,7 +1205,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VARCLAN_SET_BYTE) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             byte b_84 = buffer.readByte();
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = new Object[TypeLists.CLAN_VAR.size];
@@ -1219,8 +1219,8 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_INV_STOP_TRANSMIT) {
-            int key = buffer.readUnsignedByteC();
-            int flags = buffer.readShortLE();
+            int key = buffer.readUByteInverse();
+            int flags = buffer.readShortLittle();
             boolean isNegativeKey = (key & 0x1) == 1;
             ItemContainer.deleteItemContainer(flags, isNegativeKey);
             client.RECENTLY_USED_ITEM_CONTAINERS[++client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 & 0x1f] = flags;
@@ -1228,9 +1228,9 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_REBOOT_TIMER) {
             if (GameState.inLobby(client.gameState)) {
-                client.REBOOT_TIMER = (int) (buffer.readUnsignedShort() * 2.5F);
+                client.REBOOT_TIMER = (int) (buffer.readUShort() * 2.5F);
             } else {
-                client.REBOOT_TIMER = buffer.readUnsignedShort() * 30;
+                client.REBOOT_TIMER = buffer.readUShort() * 30;
             }
             client.anInt7397 = client.anInt7347;
             context.currentPacket = null;
@@ -1240,25 +1240,25 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_ZONE_PARTIAL_FOLLOWS) {
-            UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByte128() << 3;
-            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUnsignedByte128();
-            UpdateZonePacket.UPDATE_ZONE_X = buffer.readByte128() << 3;
+            UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByteAdd() << 3;
+            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByteAdd();
+            UpdateZonePacket.UPDATE_ZONE_X = buffer.readByteAdd() << 3;
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_ZONE_PARTIAL_ENCLOSED) {
-            UpdateZonePacket.UPDATE_ZONE_Y = buffer.read128Byte() << 3;
-            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUnsignedByte128();
+            UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByteSubtract() << 3;
+            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByteAdd();
             UpdateZonePacket.UPDATE_ZONE_X = buffer.readByte() << 3;
             while (buffer.currentPosition < context.currentPacketSize) {
-                UpdateZonePacket tilestreampacket68 = UpdateZonePacket.values()[buffer.readUnsignedByte()];
+                UpdateZonePacket tilestreampacket68 = UpdateZonePacket.values()[buffer.readUByte()];
                 PacketDecoder.decodeTilestreamPacket(tilestreampacket68);
             }
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_ZONE_FULL_FOLLOWS) {
-            UpdateZonePacket.UPDATE_ZONE_X = buffer.read128Byte() << 3;
+            UpdateZonePacket.UPDATE_ZONE_X = buffer.readByteSubtract() << 3;
             UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByte() << 3;
-            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUnsignedByte();
+            UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByte();
             CoordGrid base = Resource.mapRegion.getBaseCoordinates();
             for (GroundItemWrapper groundItems = client.GROUND_ITEMS.first(); groundItems != null; groundItems = client.GROUND_ITEMS.next()) {
                 int plane = (int) (groundItems.pointer >> 28 & 0x3L);
@@ -1287,19 +1287,19 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SOUND_SYNTH) {
-            int soundId = buffer.readUnsignedShort();
+            int soundId = buffer.readUShort();
             if (soundId == 65535) {
                 soundId = -1;
             }
-            int flags = buffer.readUnsignedByte();
-            int i_6 = buffer.readUnsignedShort();
-            int delay = buffer.readUnsignedByte();
-            int i_8 = buffer.readUnsignedShort();
+            int flags = buffer.readUByte();
+            int i_6 = buffer.readUShort();
+            int delay = buffer.readUByte();
+            int i_8 = buffer.readUShort();
             AreaSoundPlayer.playSoundSynth(soundId, flags, i_6, delay, i_8);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SHOW_FACE_HERE) {
-            boolean showFaceHere = buffer.readUnsignedByte() == 1;
+            boolean showFaceHere = buffer.readUByte() == 1;
             client.requestVarVerifyid();
             MiniMenuBuilder.SHOW_FACE_HERE = showFaceHere;
             context.currentPacket = null;
@@ -1312,7 +1312,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.HINT_ARROW) {
-            int flags = buffer.readUnsignedByte();
+            int flags = buffer.readUByte();
             int iconIndex = flags >> 5;
             int targetType = flags & 0x1f;
             if (targetType == 0) {
@@ -1320,7 +1320,7 @@ public class PacketDecoder {
             } else {
                 HintArrow arrow = new HintArrow();
                 arrow.targetType = targetType;
-                arrow.arrowSprite = buffer.readUnsignedByte();
+                arrow.arrowSprite = buffer.readUByte();
                 if (arrow.arrowSprite >= 0 && arrow.arrowSprite < StaticMedia.hintHeadiconSprites.length) {
                     if (arrow.targetType != 1 && arrow.targetType != 10) {
                         if (arrow.targetType <= 6) {
@@ -1345,16 +1345,16 @@ public class PacketDecoder {
                                 arrow.y = 512;
                             }
                             arrow.targetType = 2;
-                            arrow.plane = buffer.readUnsignedByte();
+                            arrow.plane = buffer.readUByte();
                             CoordGrid grid = Resource.mapRegion.getBaseCoordinates();
-                            arrow.x += buffer.readUnsignedShort() - grid.x << 9;
-                            arrow.y += buffer.readUnsignedShort() - grid.y << 9;
-                            arrow.height = buffer.readUnsignedByte() << 2;
-                            arrow.distance = buffer.readUnsignedShort();
+                            arrow.x += buffer.readUShort() - grid.x << 9;
+                            arrow.y += buffer.readUShort() - grid.y << 9;
+                            arrow.height = buffer.readUByte() << 2;
+                            arrow.distance = buffer.readUShort();
                         }
                     } else {
-                        arrow.targetIndex = buffer.readUnsignedShort();
-                        arrow.denominator = buffer.readUnsignedShort();
+                        arrow.targetIndex = buffer.readUShort();
+                        arrow.denominator = buffer.readUShort();
                         buffer.currentPosition += 4;
                     }
                     arrow.modelId = buffer.readInt();
@@ -1364,23 +1364,23 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.PROJANIM_SPECIFIC) {
-            int endHeight = buffer.readUnsignedByte128() * 4;
-            int source = buffer.readShortLE128();
-            int endTime = buffer.readShortLE();
+            int endHeight = buffer.readUByteAdd() * 4;
+            int source = buffer.readShortAddLittle();
+            int endTime = buffer.readShortLittle();
             int lockOn = buffer.readShort();
-            int flags = buffer.readUnsignedByte128();
-            int y = buffer.readUnsignedShort128();
-            int slope = buffer.readUnsignedShort();
-            int startTime = buffer.readUnsignedShortLE128();
-            int spotAnimId = buffer.readUnsignedShortLE128();
-            int angle = buffer.readUnsignedByte128();
+            int flags = buffer.readUByteAdd();
+            int y = buffer.readUShortAdd();
+            int slope = buffer.readUShort();
+            int startTime = buffer.readUShortAddLittle();
+            int spotAnimId = buffer.readUShortAddLittle();
+            int angle = buffer.readUByteAdd();
             if (angle == 255) {
                 angle = -1;
             }
-            byte xDist = buffer.readByteC();
-            byte yDist = buffer.readByteC();
-            int x = buffer.readUnsignedShort128();
-            int startHeight = buffer.readUnsignedByteC();
+            byte xDist = buffer.readByteInverse();
+            byte yDist = buffer.readByteInverse();
+            int x = buffer.readUShortAdd();
+            int startHeight = buffer.readUByteInverse();
             boolean useFloorHeight = (flags & 0x1) != 0;
             boolean hasBASOffIdx = (flags & 0x2) != 0;
             int basOffIdx = hasBASOffIdx ? flags >> 2 : -1;
@@ -1407,27 +1407,27 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.WORLD_LIST) {
-            boolean refresh = buffer.readUnsignedByte() == 1;
+            boolean refresh = buffer.readUByte() == 1;
             byte[] data = new byte[context.currentPacketSize - 1];
             buffer.readBytes(data, 0, context.currentPacketSize - 1);
             decodeWorldList(refresh, data);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VARBIT_LARGE) {
-            int variable = buffer.readIntV2();
-            int varbitId = buffer.readUnsignedShort128();
+            int variable = buffer.readUIntInverseMiddle();
+            int varbitId = buffer.readUShortAdd();
             VarProviders.PLAYER_VAR_PROVIDER.setVarBitValueFromServer(varbitId, variable);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.aClass3754362) { //request packet 37?
-            int key = buffer.readUnsignedShortLE128();
+            int key = buffer.readUShortAddLittle();
             client.requestVarVerifyid();
             StaticMethods.method1563(key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CLANSETTINGS_FULL) {
             client.anInt7192 = client.anInt7347;
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             if (context.currentPacketSize == 1) {
                 if (bool91) {
                     client.CLAN_SETTINGS = null;
@@ -1444,21 +1444,21 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.aClass3754457) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             client.requestVarVerifyid();
             StaticMethods.setVorbisSound(key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_INV_PARTIAL) {
-            int key = buffer.readUnsignedShort();
-            int flags = buffer.readUnsignedByte();
+            int key = buffer.readUShort();
+            int flags = buffer.readUByte();
             int i_7, i_8, i_9;
             for (boolean isNegativeKey = (flags & 0x1) == 1; buffer.currentPosition < context.currentPacketSize; ItemContainer.setItemInContainer(key, i_7, i_8 - 1, i_9, isNegativeKey)) {
-                i_7 = buffer.readUnsignedSmart();
-                i_8 = buffer.readUnsignedShort();
+                i_7 = buffer.readUSmart();
+                i_8 = buffer.readUShort();
                 i_9 = 0;
                 if (i_8 != 0) {
-                    i_9 = buffer.readUnsignedByte();
+                    i_9 = buffer.readUByte();
                     if (i_9 == 255) {
                         i_9 = buffer.readInt();
                     }
@@ -1472,16 +1472,16 @@ public class PacketDecoder {
             return false;
         } else if (context.currentPacket == ServerProt.VARP_SMALL) {
             byte value = buffer.readByte();
-            int configIndex = buffer.readUnsignedShortLE128();
+            int configIndex = buffer.readUShortAddLittle();
             VarProviders.PLAYER_VAR_PROVIDER.setVarValueFromServer(configIndex, value);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.aClass3753828) {
-            int near = buffer.readUnsigned128Byte();
-            int volume = buffer.readUnsignedByte();
-            int far = buffer.readUnsignedByteC();
+            int near = buffer.readUByteSubtract();
+            int volume = buffer.readUByte();
+            int far = buffer.readUByteInverse();
             int musicArchive = buffer.readInt();
-            int i_8 = buffer.readIntV1();
+            int i_8 = buffer.readUIntMiddle();
             int plane = i_8 >> 28;
             int x = i_8 >> 14 & 0x3fff;
             int y = i_8 & 0x3fff;
@@ -1496,14 +1496,14 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_FRIENDCHAT_CHANNEL_SINGLEUSER) {
             String displayName = buffer.readString();
-            boolean hasPreviousName = buffer.readUnsignedByte() == 1;
+            boolean hasPreviousName = buffer.readUByte() == 1;
             String username;
             if (hasPreviousName) {
                 username = buffer.readString();
             } else {
                 username = displayName;
             }
-            int worldId = buffer.readUnsignedShort();
+            int worldId = buffer.readUShort();
             byte rank = buffer.readByte();
             boolean bool69 = rank == -128;
             int i_11;
@@ -1567,7 +1567,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETHIDE) {
-            int key = buffer.readUnsignedByte128();
+            int key = buffer.readUByteAdd();
             int flags = buffer.readInt();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfhide(flags, key);
@@ -1575,7 +1575,7 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.CLANCHANNEL_DELTA) {
             client.anInt7395 = client.anInt7347;
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             ClanChannelDelta delta = new ClanChannelDelta(buffer);
             ClanChannel clanChannel;
             if (bool91) {
@@ -1602,7 +1602,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETANIM) {
-            int key = buffer.readIntV2();
+            int key = buffer.readUIntInverseMiddle();
             int flags = buffer.readInt();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfanimUpdate(flags, key);
@@ -1613,8 +1613,8 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VARP_LARGE) {
-            int key = buffer.readIntV2();
-            int flags = buffer.readUnsignedShortLE128();
+            int key = buffer.readUIntInverseMiddle();
+            int flags = buffer.readUShortAddLittle();
             VarProviders.PLAYER_VAR_PROVIDER.setVarValueFromServer(flags, key);
             context.currentPacket = null;
             return true;
@@ -1633,8 +1633,8 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_STAT) {
             int xp = buffer.readInt();
-            int skillId = buffer.readUnsignedByte();
-            int level = buffer.readUnsignedByte();
+            int skillId = buffer.readUByte();
+            int level = buffer.readUByte();
             client.SKILL_XP[skillId] = xp;
             client.SKILL_LEVEL_VISIBLE[skillId] = level;
             client.SKILL_LEVEL_ACTUAL[skillId] = 1;
@@ -1649,7 +1649,7 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.aClass3754453) {
             byte b_100 = buffer.readByte();
-            int flags = buffer.readUnsignedByteC();
+            int flags = buffer.readUByteInverse();
             client.requestVarVerifyid();
             StaticMethods.method14501(b_100, flags);
             context.currentPacket = null;
@@ -1659,23 +1659,23 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETRECOL) {
-            int key = buffer.readIntV2();
-            int flags = buffer.readShortLE();
-            int i_6 = buffer.readShortLE();
-            int i_7 = buffer.readUnsignedByte();
+            int key = buffer.readUIntInverseMiddle();
+            int flags = buffer.readShortLittle();
+            int i_6 = buffer.readShortLittle();
+            int i_7 = buffer.readUByte();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfrecol(key, i_7, flags, i_6);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETTEXTANTIMACRO) {
-            boolean enabled = buffer.readUnsigned128Byte() == 1;
-            int componentHash = buffer.readIntV2();
+            boolean enabled = buffer.readUByteSubtract() == 1;
+            int componentHash = buffer.readUIntInverseMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.prioritySetIftextantimacro(componentHash, enabled);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CREATE_CHECK_EMAIL_REPLY) {
-            int key = buffer.readUnsignedByte();
+            int key = buffer.readUByte();
             CheckEmailRequest request = (CheckEmailRequest) Identifiable.identify(CheckEmailRequest.getValues(), key);
             if (request == null) {
                 request = CheckEmailRequest.RECEIVED_RESPONSE;
@@ -1684,26 +1684,26 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_DOB) {
-            LoginManager.PLAYER_DOB = buffer.read24BitInteger();
-            client.USERDETAIL_QUICKCHAT = buffer.readUnsignedByte() == 1;
+            LoginManager.PLAYER_DOB = buffer.readMedium();
+            client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1;
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_PLAYER) {
-            int key = buffer.readIntLE();
-            int overlay = buffer.readUnsignedByte();
-            int i_6 = buffer.readIntV1();
-            int subInterfaceId = buffer.readUnsignedShort();
+            int key = buffer.readUIntLittle();
+            int overlay = buffer.readUByte();
+            int i_6 = buffer.readUIntMiddle();
+            int subInterfaceId = buffer.readUShort();
             int i_8 = buffer.readInt();
-            int interfaceId = buffer.readIntV1();
-            int i_10 = buffer.readIntV1();
-            int playerIndex = buffer.readShortLE();
+            int interfaceId = buffer.readUIntMiddle();
+            int i_10 = buffer.readUIntMiddle();
+            int playerIndex = buffer.readShortLittle();
             client.requestVarVerifyid();
             Interface.openSub(interfaceId, new IFSubActivePlayer(subInterfaceId, overlay, playerIndex), new int[]{i_6, i_8, i_10, key}, false);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CLANSETTINGS_DELTA) {
             client.anInt7192 = client.anInt7347;
-            boolean clanSettings = buffer.readUnsignedByte() == 1;
+            boolean clanSettings = buffer.readUByte() == 1;
             ClanSettingsDelta delta = new ClanSettingsDelta(buffer);
             ClanSettings settings;
             if (clanSettings) {
@@ -1715,8 +1715,8 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MINIMAP_FLAG) {
-            int key = buffer.readUnsigned128Byte();
-            int flags = buffer.readUnsigned128Byte();
+            int key = buffer.readUByteSubtract();
+            int flags = buffer.readUByteSubtract();
             if (key == 255) {
                 key = -1;
                 flags = -1;
@@ -1725,30 +1725,30 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.BLOCK_MINIMAP_STATE) {
-            ComponentMinimap.minimapState = buffer.readUnsignedByte();
+            ComponentMinimap.minimapState = buffer.readUByte();
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.OUTDATED_SET_THEORA_STRING_SOMETHING) {
-            int key = buffer.readUnsignedShort128();
-            int flags = buffer.readIntLE();
+            int key = buffer.readUShortAdd();
+            int flags = buffer.readUIntLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityT17Update(flags, key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_OPENSUB) {
             int key = buffer.readInt();
-            int flags = buffer.readIntV2();
-            int i_6 = buffer.readIntV2();
-            int subId = buffer.readUnsignedShortLE128();
-            int i_8 = buffer.readIntLE();
+            int flags = buffer.readUIntInverseMiddle();
+            int i_6 = buffer.readUIntInverseMiddle();
+            int subId = buffer.readUShortAddLittle();
+            int i_8 = buffer.readUIntLittle();
             int topUid = buffer.readInt();
-            int overlay = buffer.readUnsignedByteC();
+            int overlay = buffer.readUByteInverse();
             client.requestVarVerifyid();
             Interface.openSub(topUid, new SubInterface(subId, overlay), new int[]{key, i_6, flags, i_8}, false);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CREATE_ACCOUNT_REPLY) {
-            int key = buffer.readUnsignedByte();
+            int key = buffer.readUByte();
             CreateAccountRequest class49496 = (CreateAccountRequest) Identifiable.identify(CreateAccountRequest.method8038(), key);
             if (class49496 == null) {
                 class49496 = CreateAccountRequest.aClass4945782;
@@ -1758,12 +1758,12 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.PLAYER_OPTION) {
             String option = buffer.readString();
-            int slot = buffer.readUnsignedByte128();
-            int cursor = buffer.readUnsignedShortLE128();
+            int slot = buffer.readUByteAdd();
+            int cursor = buffer.readUShortAddLittle();
             if (cursor == 65535) {
                 cursor = -1;
             }
-            int onTop = buffer.readUnsignedByteC();
+            int onTop = buffer.readUByteInverse();
             if (slot >= 1 && slot <= 8) {
                 if ("null".equalsIgnoreCase(option)) {
                     option = null;
@@ -1775,12 +1775,12 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETITEM) {
-            int itemId = buffer.readUnsignedShort();
+            int itemId = buffer.readUShort();
             if (itemId == 65535) {
                 itemId = -1;
             }
             int interfaceHash = buffer.readInt();
-            int amount = buffer.readIntV2();
+            int amount = buffer.readUIntInverseMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfitemUpdate(interfaceHash, itemId, amount);
             ItemType defs = TypeLists.OBJ.list(itemId);
@@ -1789,10 +1789,10 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERHEAD_IGNOREWORN) {
-            int idKit1 = buffer.readShortLE();
-            int usernameMeme = buffer.readUnsignedShort128();
-            int idKit2 = buffer.readUnsignedShort128();
-            int interfaceHash = buffer.readIntV2();
+            int idKit1 = buffer.readShortLittle();
+            int usernameMeme = buffer.readUShortAdd();
+            int idKit2 = buffer.readUShortAdd();
+            int interfaceHash = buffer.readUIntInverseMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcontentUpdate(interfaceHash, 7, idKit1 << 16 | idKit2, usernameMeme);
             context.currentPacket = null;
@@ -1802,13 +1802,13 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERMODEL) {
-            int key = buffer.readIntV1();
+            int key = buffer.readUIntMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcontentUpdate(key, 5, PlayerUpdate.myPlayerIndex, 0);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.PRELOAD_SONG) {
-            int songId = buffer.readUnsignedShortLE128();
+            int songId = buffer.readUShortAddLittle();
             if (songId == 65535) {
                 songId = -1;
             }
@@ -1816,7 +1816,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.APPLY_DEBUG) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             DebugDisplay.applyDebugOpcode(key);
             context.currentPacket = null;
             return true;
@@ -1840,13 +1840,13 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERHEAD) {
-            int key = buffer.readIntLE();
+            int key = buffer.readUIntLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfcontentUpdate(key, 3, PlayerUpdate.myPlayerIndex, 0);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.JCOINS_UPDATE) {
-            int key = buffer.readIntLE();
+            int key = buffer.readUIntLittle();
             if (key != client.JCOINS) {
                 client.JCOINS = key;
                 CS2Executor.executeTrigger(ClientTriggerType.JCOINS_CHANGED, -1, -1);
@@ -1858,21 +1858,21 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VARBIT_SMALL) {
-            int key = buffer.readUnsignedShort();
-            int flags = buffer.readUnsignedByte128();
+            int key = buffer.readUShort();
+            int flags = buffer.readUByteAdd();
             VarProviders.PLAYER_VAR_PROVIDER.setVarBitValueFromServer(key, flags);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_PRIVATE_ECHO) {
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             String string_88 = buffer.readString();
             String str92 = string_88;
             if (bool91) {
                 str92 = buffer.readString();
             }
-            long long_28 = buffer.readUnsignedShort();
-            long long_30 = buffer.read24BitUnsignedInteger();
-            int i_11 = buffer.readUnsignedByte();
+            long long_28 = buffer.readUShort();
+            long long_30 = buffer.readUMedium();
+            int i_11 = buffer.readUByte();
             long long_53 = (long_28 << 32) + long_30;
             boolean bool14 = false;
             int i_15 = 0;
@@ -1910,35 +1910,35 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARC_SMALL) {
-            byte b_100 = buffer.read128Byte();
-            int flags = buffer.readShortLE();
+            byte b_100 = buffer.readByteSubtract();
+            int flags = buffer.readShortLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityClientvarcUpdate(flags, b_100);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETTEXTFONT) {
             int key = buffer.readInt();
-            int flags = buffer.readIntV1();
+            int flags = buffer.readUIntMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIffontUpdate(flags, key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETGRAPHIC) {
-            int key = buffer.readIntV2();
-            int flags = buffer.readIntV2();
+            int key = buffer.readUIntInverseMiddle();
+            int flags = buffer.readUIntInverseMiddle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfgraphicUpdate(flags, key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.DEBUG_SERVER_TRIGGERS) {
-            int key = buffer.readUnsignedShort();
-            int flags = buffer.readUnsignedShort();
-            int i_6 = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
+            int flags = buffer.readUShort();
+            int i_6 = buffer.readUShort();
             client.requestVarVerifyid();
             int i_8;
             if (Interface.INTERFACES[key] != null) {
                 for (int i_7 = flags; i_7 < i_6; i_7++) {
-                    i_8 = buffer.read24BitUnsignedInteger();
+                    i_8 = buffer.readUMedium();
                     if (i_7 < Interface.INTERFACES[key].components.length && Interface.INTERFACES[key].components[i_7] != null) {
                         Interface.INTERFACES[key].components[i_7].serverTriggers = i_8;
                     }
@@ -1955,21 +1955,21 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CAM_MOVETO) {
-            int localY = buffer.readUnsignedByte();
-            int localX = buffer.readUnsignedByte();
-            int constantSpeed = buffer.readUnsigned128Byte();
-            int moveZ = buffer.readShortLE() << 2;
-            int variableSpeed = buffer.readUnsignedByte128();
+            int localY = buffer.readUByte();
+            int localX = buffer.readUByte();
+            int constantSpeed = buffer.readUByteSubtract();
+            int moveZ = buffer.readShortLittle() << 2;
+            int variableSpeed = buffer.readUByteAdd();
             client.requestVarVerifyid();
             Camera.moveCamera(localX, localY, moveZ, constantSpeed, variableSpeed, true);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_CLANCHANNEL) {
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             String string_88 = buffer.readString();
-            long long_49 = buffer.readUnsignedShort();
-            long long_51 = buffer.read24BitUnsignedInteger();
-            int i_10 = buffer.readUnsignedByte();
+            long long_49 = buffer.readUShort();
+            long long_51 = buffer.readUMedium();
+            int i_10 = buffer.readUByte();
             long long_55 = long_51 + (long_49 << 32);
             boolean bool112 = false;
             ClanChannel class282Sub437 = bool91 ? client.CLAN_CHANNEL : client.LISTENED_CLAN_CHANNEL;
@@ -2027,23 +2027,23 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.REDUCE_ATTACK_PRIORITY) {
-            client.REDUCE_ATTACK_PRIORITY = buffer.readUnsignedByte128() == 1;
+            client.REDUCE_ATTACK_PRIORITY = buffer.readUByteAdd() == 1;
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.FRIEND_STATUS) {
             while (buffer.currentPosition < context.currentPacketSize) {
-                boolean warnMessage = buffer.readUnsignedByte() == 1;
+                boolean warnMessage = buffer.readUByte() == 1;
                 String displayName = buffer.readString();
                 String username = buffer.readString();
-                int world = buffer.readUnsignedShort();
-                int friendchatRank = buffer.readUnsignedByte();
-                boolean referrer = buffer.readUnsignedByte() == 1;
+                int world = buffer.readUShort();
+                int friendchatRank = buffer.readUByte();
+                boolean referrer = buffer.readUByte() == 1;
                 String worldName = "";
                 int platform = -1;
                 int worldFlags = 0;
                 if (world > 0) {
                     worldName = buffer.readString();
-                    platform = buffer.readUnsignedByte();
+                    platform = buffer.readUByte();
                     worldFlags = buffer.readInt();
                 }
                 for (int index = 0; index < FriendList.FRIEND_COUNT; index++) {
@@ -2140,7 +2140,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_MOVESUB) {
-            int fromParentUid = buffer.readIntV2();
+            int fromParentUid = buffer.readUIntInverseMiddle();
             int toParentUid = buffer.readInt();
             client.requestVarVerifyid();
             SubInterface toSub = client.OPEN_INTERFACES.get(toParentUid);
@@ -2167,21 +2167,21 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CUTSCENE) {
-            int key = buffer.readUnsignedShort();
+            int key = buffer.readUShort();
             client.cycleCutsceneLoaded = -1;
             client.CURRENT_CUTSCENE = key;
             client.MAP_LOADING_STAGE = 3;
             Resource.CUTSCENE.isFileCached(client.CURRENT_CUTSCENE);
             MiniMenu.close();
             MiniMenu.resetEntries();
-            int flags = buffer.readUnsignedShort();
+            int flags = buffer.readUShort();
             MapRegion.CUTSCENE_MAP_XTEAS = new int[flags][4];
             for (int i_6 = 0; i_6 < flags; i_6++) {
                 for (int i_7 = 0; i_7 < 4; i_7++) {
                     MapRegion.CUTSCENE_MAP_XTEAS[i_6][i_7] = buffer.readInt();
                 }
             }
-            int i_6 = buffer.readUnsignedByte();
+            int i_6 = buffer.readUByte();
             CutsceneTypeList.CUTSCENE_BUFFER = new Packet(i_6);
             CutsceneTypeList.CUTSCENE_BUFFER.writeBytes(buffer.buffer, buffer.currentPosition, i_6);
             buffer.currentPosition += i_6;
@@ -2193,7 +2193,7 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.LOYALTY_UPDATE) {
             int key = buffer.readInt();
-            boolean bool66 = buffer.readUnsignedByteC() == 1;
+            boolean bool66 = buffer.readUByteInverse() == 1;
             if (bool66 != QueueIterator.LOYALTY_ENABLED || key != LoginManager.LOYALTY_BALANCE) {
                 QueueIterator.LOYALTY_ENABLED = bool66;
                 LoginManager.LOYALTY_BALANCE = key;
@@ -2202,12 +2202,12 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_NPC) {
-            int npcIndex = buffer.readUnsignedShort128();
-            int flags = buffer.readIntLE();
-            int overlay = buffer.readUnsignedByteC();
+            int npcIndex = buffer.readUShortAdd();
+            int flags = buffer.readUIntLittle();
+            int overlay = buffer.readUByteInverse();
             int interfaceId = buffer.readInt();
-            int i_8 = buffer.readIntLE();
-            int subInterfaceId = buffer.readUnsignedShortLE128();
+            int i_8 = buffer.readUIntLittle();
+            int subInterfaceId = buffer.readUShortAddLittle();
             int i_10 = buffer.readInt();
             int i_11 = buffer.readInt();
             client.requestVarVerifyid();
@@ -2215,7 +2215,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.ADD_IGNORE) {
-            int flags = buffer.readUnsignedByte();
+            int flags = buffer.readUByte();
             boolean editDisplayName = (flags & 0x1) == 1;
             String username = buffer.readString();
             String displayName = buffer.readString();
@@ -2239,7 +2239,7 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARCSTR_LARGE) {
-            int key = buffer.readShortLE();
+            int key = buffer.readShortLittle();
             String string_88 = buffer.readString();
             client.requestVarVerifyid();
             PulseEventQueue.priorityVarcstringUpdate(key, string_88);
@@ -2250,16 +2250,16 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.MESSAGE_FRIENDS_CHAT) {
-            boolean bool91 = buffer.readUnsignedByte() == 1;
+            boolean bool91 = buffer.readUByte() == 1;
             String string_88 = buffer.readString();
             String str92 = string_88;
             if (bool91) {
                 str92 = buffer.readString();
             }
             long long_28 = buffer.readLong();
-            long long_30 = buffer.readUnsignedShort();
-            long long_55 = buffer.read24BitUnsignedInteger();
-            int i_35 = buffer.readUnsignedByte();
+            long long_30 = buffer.readUShort();
+            long long_55 = buffer.readUMedium();
+            int i_35 = buffer.readUByte();
             long long_60 = (long_30 << 32) + long_55;
             boolean bool16 = false;
             int i_34 = 0;
@@ -2299,12 +2299,12 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.OBJ_ANIM_SPECIFIC) {
-            int tileHash = buffer.readIntV2();
+            int tileHash = buffer.readUIntInverseMiddle();
             int plane = tileHash >> 28 & 0x3;
             int x = tileHash >> 14 & 0x3fff;
             int y = tileHash & 0x3fff;
-            int animationId = buffer.readIntLE();
-            int objFlags = buffer.readUnsigned128Byte();
+            int animationId = buffer.readUIntLittle();
+            int objFlags = buffer.readUByteSubtract();
             int shape = objFlags >> 2;
             int rotation = objFlags & 0x3;
             int type = client.OBJECT_TYPE_SLOTS[shape];
@@ -2315,18 +2315,18 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.VORBIS_SPEECH_SOUND) {
-            int id = buffer.readUnsignedShort();
+            int id = buffer.readUShort();
             if (id == 65535) {
                 id = -1;
             }
-            int soundType = buffer.readUnsignedByte();
-            int delay = buffer.readUnsignedShort();
-            int i_7 = buffer.readUnsignedByte();
+            int soundType = buffer.readUByte();
+            int delay = buffer.readUShort();
+            int i_7 = buffer.readUByte();
             AreaSoundPlayer.playSoundVorbis(id, soundType, delay, i_7, true, 256);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_IGNORE_LIST) {
-            IgnoreList.IGNORE_COUNT = buffer.readUnsignedByte();
+            IgnoreList.IGNORE_COUNT = buffer.readUByte();
             for (int key = 0; key < IgnoreList.IGNORE_COUNT; key++) {
                 Ignore class1089 = new Ignore();
                 IgnoreList.IGNORED[key] = class1089;
@@ -2338,30 +2338,30 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_SETRETEX) {
-            int key = buffer.readShortLE();
-            int flags = buffer.readUnsignedShort();
-            int i_6 = buffer.readUnsigned128Byte();
-            int i_7 = buffer.readIntLE();
+            int key = buffer.readShortLittle();
+            int flags = buffer.readUShort();
+            int i_6 = buffer.readUByteSubtract();
+            int i_7 = buffer.readUIntLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityIfretex(i_7, i_6, flags, key);
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SET_TARGET) {
-            client.ENTITY_TARGET = buffer.method13121(); //reads same identifier as projectile (index+1 for npc and -index-1 for player)
+            client.ENTITY_TARGET = buffer.readShortLittle(); //reads same identifier as projectile (index+1 for npc and -index-1 for player)
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_OBJECT) {
-            int interfaceId = buffer.readIntV2();
-            int xtea3 = buffer.readIntV2();
-            int overlay = buffer.readUnsignedByte128();
+            int interfaceId = buffer.readUIntInverseMiddle();
+            int xtea3 = buffer.readUIntInverseMiddle();
+            int overlay = buffer.readUByteAdd();
             int xtea2 = buffer.readInt();
-            int xtea1 = buffer.readIntV1();
-            int subInterfaceId = buffer.readUnsignedShort128();
-            int bitpacked = buffer.readUnsigned128Byte();
+            int xtea1 = buffer.readUIntMiddle();
+            int subInterfaceId = buffer.readUShortAdd();
+            int bitpacked = buffer.readUByteSubtract();
             int type = bitpacked >> 2;
             int rotation = bitpacked & 0x3;
             int xtea4 = buffer.readInt();
-            CoordGrid absolutePosition = new CoordGrid(buffer.readIntV2());
+            CoordGrid absolutePosition = new CoordGrid(buffer.readUIntInverseMiddle());
             int objectId = buffer.readInt();
             client.requestVarVerifyid();
             Interface.openSub(interfaceId, new IFSubActiveObject(subInterfaceId, overlay, new IFSubObjectPosition(absolutePosition, type, objectId)),
@@ -2386,9 +2386,9 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.OUTDATED_INTERFACE_PULSE_EVENT) {
-            int key = buffer.readUnsignedShort128();
-            int flags = buffer.readIntV2();
-            int i_6 = buffer.readShortLE();
+            int key = buffer.readUShortAdd();
+            int flags = buffer.readUIntInverseMiddle();
+            int i_6 = buffer.readShortLittle();
             client.requestVarVerifyid();
             PulseEventQueue.priorityT13Update(flags, key + (i_6 << 16));
             context.currentPacket = null;
@@ -2424,15 +2424,15 @@ public class PacketDecoder {
     public static void decodeTilestreamPacket(UpdateZonePacket packet) {
         Packet.Bit buffer = client.GAME_CONNECTION_CONTEXT.receivedBuffer;
         if (packet == UpdateZonePacket.GROUND_ITEM_COUNT) {
-            int i_3 = buffer.readUnsignedByte();
+            int i_3 = buffer.readUByte();
             CoordGrid coordgrid4 = Resource.mapRegion.getBaseCoordinates();
             int i_5 = (i_3 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
             int y = i_5 + coordgrid4.y;
             int i_7 = (i_3 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int x = i_7 + coordgrid4.x;
-            int i_9 = buffer.readUnsignedShort();
-            int i_10 = buffer.readUnsignedShort();
-            int amount = buffer.readUnsignedShort();
+            int i_9 = buffer.readUShort();
+            int i_10 = buffer.readUShort();
+            int amount = buffer.readUShort();
             if (client.GROUND_ITEMS != null) {
                 GroundItemWrapper class282Sub2912 = client.GROUND_ITEMS.get((long) UpdateZonePacket.UPDATE_ZONE_PLANE << 28 | (long) y << 14 | x);
                 if (class282Sub2912 != null) {
@@ -2451,19 +2451,19 @@ public class PacketDecoder {
             }
         } else if (packet == UpdateZonePacket.OBJECT_PREFETCH) {
             int i_3 = buffer.readInt();
-            int i_21 = buffer.readUnsignedByte();
+            int i_21 = buffer.readUByte();
             Resource.mapRegion.getLoctypeList().list(i_3).isTypeCached(i_21);
         } else if (packet == UpdateZonePacket.SPOT_ANIM) {
-            int bitpacked = buffer.readUnsignedByte();
+            int bitpacked = buffer.readUByte();
             int x = (bitpacked >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int y = (bitpacked & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            int spotAnimId = buffer.readUnsignedShort();
+            int spotAnimId = buffer.readUShort();
             if (spotAnimId == 65535) {
                 spotAnimId = -1;
             }
-            int height = buffer.readUnsignedShort();
-            int speed = buffer.readUnsignedShort();
-            int rotation = buffer.readUnsignedByte();
+            int height = buffer.readUShort();
+            int speed = buffer.readUShort();
+            int rotation = buffer.readUByte();
             if (Resource.mapRegion.getLoadingType() != RegionLoadingType.CUTSCENE && x >= 0 && y >= 0 && x < Resource.mapRegion.getSceneSizeX() && y < Resource.mapRegion.getSceneSizeY()) {
                 if (spotAnimId == -1) {
                     PositionedGfx class282Sub50Sub1022 = client.ACTIVE_GFX.get((long) x << 16 | y);
@@ -2483,10 +2483,10 @@ public class PacketDecoder {
                 }
             }
         } else if (packet == UpdateZonePacket.MAP_PROJANIM_HALFSQ) {
-            int localCoordsHash = buffer.readUnsignedByte();
+            int localCoordsHash = buffer.readUByte();
             int localX = (localCoordsHash >> 4 & 0xf) + UpdateZonePacket.UPDATE_ZONE_X * 2;
             int localY = UpdateZonePacket.UPDATE_ZONE_Y * 2 + (localCoordsHash & 0xf);
-            int flags = buffer.readUnsignedByte();
+            int flags = buffer.readUByte();
             boolean adjustToTerrainHeight = (flags & 0x1) != 0;
             boolean adjustToBASAnimFrameHeight = (flags & 0x2) != 0;
             int basOffIdx = adjustToBASAnimFrameHeight ? flags >> 2 : -1;
@@ -2494,18 +2494,18 @@ public class PacketDecoder {
             int yOff = localY + buffer.readByte();
             int source = buffer.readShort();
             int lockOn = buffer.readShort();
-            int spotAnimId = buffer.readUnsignedShort();
-            int startHeight = buffer.readUnsignedByte();
+            int spotAnimId = buffer.readUShort();
+            int startHeight = buffer.readUByte();
             if (adjustToBASAnimFrameHeight) {
                 startHeight = (byte) startHeight;
             } else {
                 startHeight *= 4;
             }
-            int endHeight = buffer.readUnsignedByte() * 4;
-            int startTime = buffer.readUnsignedShort();
-            int endTime = buffer.readUnsignedShort();
-            int angle = buffer.readUnsignedByte();
-            int slope = buffer.readUnsignedShort();
+            int endHeight = buffer.readUByte() * 4;
+            int startTime = buffer.readUShort();
+            int endTime = buffer.readUShort();
+            int angle = buffer.readUByte();
+            int slope = buffer.readUShort();
             if (angle == 255) {
                 angle = -1;
             }
@@ -2520,20 +2520,20 @@ public class PacketDecoder {
                 ProjectileSpawnRequest.create(spotAnimId, source, lockOn, basOffIdx, startHeight, endHeight, localX, localY, xOff, yOff, startTime, endTime, angle, slope, adjustToTerrainHeight);
             }
         } else if (packet == UpdateZonePacket.MAP_PROJANIM) {
-            int flags = buffer.readUnsignedByte();
+            int flags = buffer.readUByte();
             boolean useFloorHeight = (flags & 0x80) != 0;
             int localX = (flags >> 3 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int localY = (flags & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
             int xOff = localX + buffer.readByte();
             int yOff = localY + buffer.readByte();
             int lockOn = buffer.readShort();
-            int spotAnimId = buffer.readUnsignedShort();
-            int startHeight = buffer.readUnsignedByte() * 4;
-            int endHeight = buffer.readUnsignedByte() * 4;
-            int startTime = buffer.readUnsignedShort();
-            int endTime = buffer.readUnsignedShort();
-            int angle = buffer.readUnsignedByte();
-            int slope = buffer.readUnsignedShort();
+            int spotAnimId = buffer.readUShort();
+            int startHeight = buffer.readUByte() * 4;
+            int endHeight = buffer.readUByte() * 4;
+            int startTime = buffer.readUShort();
+            int endTime = buffer.readUShort();
+            int angle = buffer.readUByte();
+            int slope = buffer.readUShort();
             if (angle == 255) {
                 angle = -1;
             }
@@ -2550,19 +2550,19 @@ public class PacketDecoder {
                 client.PROJECTILES.addFirst(new ProjectileSpawnRequest(p));
             }
         } else if (packet == UpdateZonePacket.MIDI_SONG_LOCATION) {
-            int i_3 = buffer.readUnsignedByte();
+            int i_3 = buffer.readUByte();
             int i_21 = (i_3 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int i_5 = (i_3 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            int i_6 = buffer.readUnsignedShort();
+            int i_6 = buffer.readUShort();
             if (i_6 == 65535) {
                 i_6 = -1;
             }
-            int i_7 = buffer.readUnsignedByte();
+            int i_7 = buffer.readUByte();
             int i_8 = i_7 >> 4 & 0xf;
             int i_9 = i_7 & 0x7;
-            int i_10 = buffer.readUnsignedByte();
-            int i_11 = buffer.readUnsignedByte();
-            int i_23 = buffer.readUnsignedShort();
+            int i_10 = buffer.readUByte();
+            int i_11 = buffer.readUByte();
+            int i_23 = buffer.readUShort();
             if (Resource.mapRegion.getLoadingType() != RegionLoadingType.CUTSCENE && i_21 >= 0 && i_5 >= 0 && i_21 < Resource.mapRegion.getSceneSizeX() && i_5 < Resource.mapRegion.getSceneSizeY()) {
                 int i_24 = i_8 + 1;
                 if (PlayerUpdate.MY_PLAYER.movementBaseX[0] >= i_21 - i_24 && PlayerUpdate.MY_PLAYER.movementBaseX[0] <= i_21 + i_24 && PlayerUpdate.MY_PLAYER.movementBaseY[0] >= i_5 - i_24 && PlayerUpdate.MY_PLAYER.movementBaseY[0] <= i_24 + i_5) {
@@ -2570,24 +2570,24 @@ public class PacketDecoder {
                 }
             }
         } else if (packet == UpdateZonePacket.DESTROY_OBJECT) {
-            int display = buffer.readUnsignedByte128();
+            int display = buffer.readUByteAdd();
             int shape = display >> 2;
             int rotation = display & 0x3;
             int type = client.OBJECT_TYPE_SLOTS[shape];
-            int coords = buffer.readUnsignedByte();
+            int coords = buffer.readUByte();
             int x = (coords >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int y = (coords & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
             if (Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations() || x >= 0 && y >= 0 && x < Resource.mapRegion.getSceneSizeX() && y < Resource.mapRegion.getSceneSizeY()) {
                 LocAction.destroyObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, -1, shape, rotation);
             }
         } else if (packet == UpdateZonePacket.REMOVE_GROUND_ITEM) {
-            int i_3 = buffer.readUnsignedByteC();
+            int i_3 = buffer.readUByteInverse();
             CoordGrid coordgrid = Resource.mapRegion.getBaseCoordinates();
             int i_5 = (i_3 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
             int i_6 = i_5 + coordgrid.y;
             int i_7 = (i_3 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int i_8 = i_7 + coordgrid.x;
-            int i_9 = buffer.readUnsignedShortLE128();
+            int i_9 = buffer.readUShortAddLittle();
             GroundItemWrapper class282Sub2939 = client.GROUND_ITEMS.get((long) UpdateZonePacket.UPDATE_ZONE_PLANE << 28 | (long) i_6 << 14 | i_8);
             if (class282Sub2939 != null) {
                 for (GroundItemNode class282Sub3426 = (GroundItemNode) class282Sub2939.groundItems.getFirst(); class282Sub3426 != null; class282Sub3426 = (GroundItemNode) class282Sub2939.groundItems.next()) {
@@ -2606,11 +2606,11 @@ public class PacketDecoder {
         } else if (packet == UpdateZonePacket.CUSTOMIZE_OBJECT) {
             int locId = buffer.readInt();
             ObjectType locType = Resource.mapRegion.getLoctypeList().list(locId);
-            int i_5 = buffer.readUnsignedByte128();
+            int i_5 = buffer.readUByteAdd();
             int locShape = i_5 >> 2;
             int type = client.OBJECT_TYPE_SLOTS[locShape];
-            int transformFlags = buffer.readUnsignedByte();
-            int coords = buffer.readUnsignedByte128();
+            int transformFlags = buffer.readUByte();
+            int coords = buffer.readUByteAdd();
             int x = (coords >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int y = (coords & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
             if (locShape == ObjectShapes.GROUND_INTERACT.shape) {
@@ -2649,45 +2649,45 @@ public class PacketDecoder {
                 if ((transformFlags & 0x4) == 4) {
                     locColorTransform = new short[recolCount];
                     for (int index = 0; index < recolCount; index++) {
-                        locColorTransform[index] = (short) buffer.readUnsignedShort();
+                        locColorTransform[index] = (short) buffer.readUShort();
                     }
                 }
                 short[] locTextureTransform = null;
                 if ((transformFlags & 0x8) == 8) {
                     locTextureTransform = new short[retexCount];
                     for (int index = 0; index < retexCount; index++) {
-                        locTextureTransform[index] = (short) buffer.readUnsignedShort();
+                        locTextureTransform[index] = (short) buffer.readUShort();
                     }
                 }
                 LocAction.customizeObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, locId, locShape, new ObjectTypeCustomisation(ObjectTypeCustomisation.locCustomisationId++, locModelTransform, locColorTransform, locTextureTransform));
             }
         } else if (packet == UpdateZonePacket.TILE_MESSAGE) {
-            buffer.readUnsignedByte();
-            int i_3 = buffer.readUnsignedByte();
+            buffer.readUByte();
+            int i_3 = buffer.readUByte();
             int i_21 = (i_3 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int i_5 = (i_3 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            int i_6 = buffer.readUnsignedShort();
-            int i_7 = buffer.readUnsignedByte();
-            int i_8 = buffer.read24BitUnsignedInteger();
+            int i_6 = buffer.readUShort();
+            int i_7 = buffer.readUByte();
+            int i_8 = buffer.readUMedium();
             String string_27 = buffer.readString();
             if (Resource.mapRegion.getLoadingType() != RegionLoadingType.CUTSCENE) {
                 TileMessage.offer(UpdateZonePacket.UPDATE_ZONE_PLANE, i_21, i_5, i_7, i_6, i_8, string_27);
             }
         } else if (packet == UpdateZonePacket.SOUND_AREA) { //sound related again
-            int flags = buffer.readUnsignedByte();
+            int flags = buffer.readUByte();
             int localX = (flags >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int localY = (flags & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            int soundId = buffer.readUnsignedShort();
+            int soundId = buffer.readUShort();
             if (soundId == 65535) {
                 soundId = -1;
             }
-            int i_7 = buffer.readUnsignedByte();
+            int i_7 = buffer.readUByte();
             int i_8 = i_7 >> 4 & 0xf;
             int timesRepeated = i_7 & 0x7;
-            int delay = buffer.readUnsignedByte();
-            int volume = buffer.readUnsignedByte();
-            int sampleRate = buffer.readUnsignedShort();
-            boolean voiceEffect = buffer.readUnsignedByte() == 1;
+            int delay = buffer.readUByte();
+            int volume = buffer.readUByte();
+            int sampleRate = buffer.readUShort();
+            boolean voiceEffect = buffer.readUByte() == 1;
             if (Resource.mapRegion.getLoadingType() != RegionLoadingType.CUTSCENE && localX >= 0 && localY >= 0
             		&& localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY()) {
                 int i_14 = i_8 + 1;
@@ -2698,27 +2698,27 @@ public class PacketDecoder {
                 }
             }
         } else if (packet == UpdateZonePacket.OBJ_ANIM) {
-            int i_3 = buffer.readUnsigned128Byte();
+            int i_3 = buffer.readUByteSubtract();
             int type = i_3 >> 2;
             int rotation = i_3 & 0x3;
             int slot = client.OBJECT_TYPE_SLOTS[type];
-            int i_7 = buffer.readUnsigned128Byte();
+            int i_7 = buffer.readUByteSubtract();
             int x = (i_7 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int y = (i_7 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            int animationId = buffer.readIntLE();
+            int animationId = buffer.readUIntLittle();
             if (Resource.mapRegion.getLoadingType() != RegionLoadingType.CUTSCENE) {
                 SceneGraph.animateObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, slot, type, rotation, animationId);
             }
         } else if (packet == UpdateZonePacket.GROUND_ITEM_REVEAL) {
-            int playerId = buffer.readUnsignedShort();
-            int i_21 = buffer.readUnsignedByte();
+            int playerId = buffer.readUShort();
+            int i_21 = buffer.readUByte();
             CoordGrid coordgrid25 = Resource.mapRegion.getBaseCoordinates();
             int localY = (i_21 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
             int y = localY + coordgrid25.y;
             int localX = (i_21 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int x = localX + coordgrid25.x;
-            int amount = buffer.readUnsignedShortLE128();
-            int id = buffer.readUnsignedShortLE128();
+            int amount = buffer.readUShortAddLittle();
+            int id = buffer.readUShortAddLittle();
             if (playerId != PlayerUpdate.myPlayerIndex) {
                 boolean withinSceneRange = localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY();
                 if (withinSceneRange || Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations()) {
@@ -2729,9 +2729,9 @@ public class PacketDecoder {
                 }
             }
         } else if (packet == UpdateZonePacket.CREATE_GROUND_ITEM) {
-            int amount = buffer.readUnsignedShortLE128();
-            int id = buffer.readUnsignedShort128();
-            int i_5 = buffer.readUnsignedByteC();
+            int amount = buffer.readUShortAddLittle();
+            int id = buffer.readUShortAdd();
+            int i_5 = buffer.readUByteInverse();
             CoordGrid coordgrid31 = Resource.mapRegion.getBaseCoordinates();
             int localY = (i_5 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
             int y = localY + coordgrid31.y;
@@ -2746,10 +2746,10 @@ public class PacketDecoder {
             }
         } else if (packet == UpdateZonePacket.CREATE_OBJECT) {
             int i_3 = buffer.readInt();
-            int i_21 = buffer.readUnsigned128Byte();
+            int i_21 = buffer.readUByteSubtract();
             int i_5 = (i_21 >> 4 & 0x7) + UpdateZonePacket.UPDATE_ZONE_X;
             int i_6 = (i_21 & 0x7) + UpdateZonePacket.UPDATE_ZONE_Y;
-            int i_7 = buffer.readUnsigned128Byte();
+            int i_7 = buffer.readUByteSubtract();
             int i_8 = i_7 >> 2;
             int i_9 = i_7 & 0x3;
             int i_10 = client.OBJECT_TYPE_SLOTS[i_8];

@@ -21,7 +21,7 @@ class Envelope {
     }
 
     void decode(Packet buffer) {
-        this.form = buffer.readUnsignedByte();
+        this.form = buffer.readUByte();
         this.start = buffer.readInt();
         this.end = buffer.readInt();
         decodeShape(buffer);
@@ -36,13 +36,13 @@ class Envelope {
     }
 
     void decodeShape(Packet buffer) {
-        this.numPhases = buffer.readUnsignedByte();
+        this.numPhases = buffer.readUByte();
         this.phaseDuration = new int[this.numPhases];
         this.phasePeak = new int[this.numPhases];
 
         for (int i = 0; i < this.numPhases; i++) {
-            this.phaseDuration[i] = buffer.readUnsignedShort();
-            this.phasePeak[i] = buffer.readUnsignedShort();
+            this.phaseDuration[i] = buffer.readUShort();
+            this.phasePeak[i] = buffer.readUShort();
         }
 
     }

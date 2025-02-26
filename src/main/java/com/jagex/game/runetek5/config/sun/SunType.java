@@ -18,7 +18,7 @@ public class SunType {
 
     public void decode(Packet stream, int opcode) {
         if (opcode == 1) {
-            this.positionOffsetStep = stream.readUnsignedShort();
+            this.positionOffsetStep = stream.readUShort();
         } else if (opcode == 2) {
             this.invertPosition = true;
         } else if (opcode == 3) {
@@ -26,11 +26,11 @@ public class SunType {
             this.positionY = stream.readShort();
             this.positionZ = stream.readShort();
         } else if (opcode == 4) {
-            this.actionType = stream.readUnsignedByte();
+            this.actionType = stream.readUByte();
         } else if (opcode == 5) {
             this.materialId = stream.readBigSmart();
         } else if (opcode == 6) {
-            this.displayColor = stream.read24BitUnsignedInteger();
+            this.displayColor = stream.readUMedium();
         } else if (opcode == 7) {
             this.rotationX = stream.readShort();
             this.rotationY = stream.readShort();
@@ -40,7 +40,7 @@ public class SunType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }

@@ -33,7 +33,7 @@ public class TextureOpMonochromeFill extends TextureOperation {
     public void decodeOpcode(int opcode, Packet stream) {
         switch (opcode) {
             case 0:
-                this.anInt9860 = (stream.readUnsignedByte() << 12) / 255;
+                this.anInt9860 = (stream.readUByte() << 12) / 255;
             default:
         }
     }

@@ -18,7 +18,7 @@ public class VarpType {
 
     public void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -31,7 +31,7 @@ public class VarpType {
         if (opcode == 1) {
             this.aChar4328 = Utils.cp1252ToChar(buffer.readByte());
         } else if (opcode == 5) {
-            this.anInt4327 = buffer.readUnsignedShort();
+            this.anInt4327 = buffer.readUShort();
         }
     }
 }

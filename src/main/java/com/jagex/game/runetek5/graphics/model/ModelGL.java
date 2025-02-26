@@ -3358,9 +3358,9 @@ public class ModelGL extends Model {
             }
         } else {
             for (i_3 = 0; i_3 < this.anInt8302; i_3++) {
-                textureBuffer.writeLEShort(this.facesA[i_3]);
-                textureBuffer.writeLEShort(this.facesB[i_3]);
-                textureBuffer.writeLEShort(this.facesC[i_3]);
+                textureBuffer.writeShortLittle(this.facesA[i_3]);
+                textureBuffer.writeShortLittle(this.facesB[i_3]);
+                textureBuffer.writeShortLittle(this.facesC[i_3]);
             }
         }
 
@@ -3466,9 +3466,9 @@ public class ModelGL extends Model {
                             }
 
                             bitBuffer.currentPosition = i_19 * entrySize;
-                            bitBuffer.put24BitInt(vertexX);
-                            bitBuffer.put24BitInt(vertexY);
-                            bitBuffer.put24BitInt(vertexZ);
+                            bitBuffer.writeIntLittle(vertexX);
+                            bitBuffer.writeIntLittle(vertexY);
+                            bitBuffer.writeIntLittle(vertexZ);
                         }
                     }
                 }

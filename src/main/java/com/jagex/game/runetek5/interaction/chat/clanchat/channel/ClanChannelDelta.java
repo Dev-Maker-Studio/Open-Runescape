@@ -18,7 +18,7 @@ public class ClanChannelDelta {
     public void decode(Packet buffer) {
         this.pointer = buffer.readLong();
         this.updateNumber = buffer.readLong();
-        for (int opcode = buffer.readUnsignedByte(); opcode != 0; opcode = buffer.readUnsignedByte()) {
+        for (int opcode = buffer.readUByte(); opcode != 0; opcode = buffer.readUByte()) {
         	AbstractClanChannelUpdate channelUpdate;
             if (opcode == 1) {
                 channelUpdate = new AddPlayer(this);

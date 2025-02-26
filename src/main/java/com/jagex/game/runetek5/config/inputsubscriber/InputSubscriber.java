@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.client.input.mouse.MouseRecord;
 
 public interface InputSubscriber {
     static InputSubscriber decode(Packet buffer) {
-        InputSubscriberType subscriberType = InputSubscriberType.forId(buffer.readUnsignedByte());
+        InputSubscriberType subscriberType = InputSubscriberType.forId(buffer.readUByte());
         if (subscriberType == InputSubscriberType.COMBINED)
             return CombinedInputSubscriber.decode(buffer);
         if (subscriberType == InputSubscriberType.KEY_PRESS)

@@ -84,9 +84,9 @@ public class TextureOpRasterizer extends TextureOperation {
     @Override
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         if (i_1 == 0) {
-            this.aClass149Array9862 = new Class149[rsbytebuffer2.readUnsignedByte()];
+            this.aClass149Array9862 = new Class149[rsbytebuffer2.readUByte()];
             for (int i_4 = 0; i_4 < this.aClass149Array9862.length; i_4++) {
-                int i_5 = rsbytebuffer2.readUnsignedByte();
+                int i_5 = rsbytebuffer2.readUByte();
                 switch (i_5) {
                     case 0:
                         this.aClass149Array9862[i_4] = Class149_Sub3.decode(rsbytebuffer2);
@@ -102,7 +102,7 @@ public class TextureOpRasterizer extends TextureOperation {
                 }
             }
         } else if (i_1 == 1) {
-            super.monochrome = rsbytebuffer2.readUnsignedByte() == 1;
+            super.monochrome = rsbytebuffer2.readUByte() == 1;
         }
     }
 

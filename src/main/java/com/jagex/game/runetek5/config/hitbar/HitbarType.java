@@ -45,17 +45,17 @@ public class HitbarType {
 
     public void decode(Packet stream, int opcode) {
         if (opcode == 1) {
-            stream.readUnsignedShort();
+            stream.readUShort();
         } else if (opcode == 2) {
-            this.anInt2446 = stream.readUnsignedByte();
+            this.anInt2446 = stream.readUByte();
         } else if (opcode == 3) {
-            this.priority = stream.readUnsignedByte();
+            this.priority = stream.readUByte();
         } else if (opcode == 4) {
             this.anInt2439 = 0;
         } else if (opcode == 5) {
-            this.anInt2443 = stream.readUnsignedShort();
+            this.anInt2443 = stream.readUShort();
         } else if (opcode == 6) {
-            stream.readUnsignedByte();
+            stream.readUByte();
         } else if (opcode == 7) {
             this.greenBarSpriteId = stream.readBigSmart();
         } else if (opcode == 8) {
@@ -65,13 +65,13 @@ public class HitbarType {
         } else if (opcode == 10) {
             this.pRedBarSpriteId = stream.readBigSmart();
         } else if (opcode == 11) {
-            this.anInt2439 = stream.readUnsignedShort();
+            this.anInt2439 = stream.readUShort();
         }
     }
 
     void decode(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }

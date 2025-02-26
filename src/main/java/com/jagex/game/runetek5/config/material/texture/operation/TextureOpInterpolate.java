@@ -81,7 +81,7 @@ public class TextureOpInterpolate extends TextureOperation {
     @Override
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         if (i_1 == 0) {
-            super.monochrome = rsbytebuffer2.readUnsignedByte() == 1;
+            super.monochrome = rsbytebuffer2.readUByte() == 1;
         }
 
     }

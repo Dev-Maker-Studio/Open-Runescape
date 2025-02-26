@@ -34,9 +34,9 @@ public class UpdatePlayer extends AbstractClanChannelUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        this.playerIndex = buffer.readUnsignedShort();
+        this.playerIndex = buffer.readUShort();
         this.rank = buffer.readByte();
-        this.world = buffer.readUnsignedShort();
+        this.world = buffer.readUShort();
         buffer.readLong();
         this.name = buffer.readString();
     }

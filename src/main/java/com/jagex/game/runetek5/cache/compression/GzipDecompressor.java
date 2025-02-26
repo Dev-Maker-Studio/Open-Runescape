@@ -10,7 +10,7 @@ public class GzipDecompressor {
 	public byte[] decompressCustomSize(byte[] compressed) {
         Packet buffer = new Packet(compressed);
         buffer.currentPosition = compressed.length - 4;
-        int size = buffer.g4();
+        int size = buffer.readUIntLittle();
         byte[] data = new byte[size];
         buffer.currentPosition = 0;
         decompress(buffer, data);

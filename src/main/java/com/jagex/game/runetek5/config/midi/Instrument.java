@@ -251,7 +251,7 @@ public class Instrument {
         this.pitch.decode(buffer);
         this.volume = new Envelope();
         this.volume.decode(buffer);
-        int option = buffer.readUnsignedByte();
+        int option = buffer.readUByte();
         if (option != 0) {
             buffer.currentPosition--;
             this.pitchModifier = new Envelope();
@@ -260,7 +260,7 @@ public class Instrument {
             this.pitchModifierAmplitude.decode(buffer);
         }
 
-        option = buffer.readUnsignedByte();
+        option = buffer.readUByte();
         if (option != 0) {
             buffer.currentPosition--;
             this.volumeMultiplier = new Envelope();
@@ -269,7 +269,7 @@ public class Instrument {
             this.volumeAmplitude.decode(buffer);
         }
 
-        option = buffer.readUnsignedByte();
+        option = buffer.readUByte();
         if (option != 0) {
             buffer.currentPosition--;
             this.release = new Envelope();
@@ -279,20 +279,20 @@ public class Instrument {
         }
 
         for (int i = 0; i < 10; i++) {
-            int volume = buffer.readUnsignedSmart();
+            int volume = buffer.readUSmart();
             if (volume == 0) {
                 break;
             }
 
             this.oscillatorVolume[i] = volume;
-            this.oscillatorPitch[i] = buffer.readSignedSmart();
-            this.oscillatorDelays[i] = buffer.readUnsignedSmart();
+            this.oscillatorPitch[i] = buffer.readSmart();
+            this.oscillatorDelays[i] = buffer.readUSmart();
         }
 
-        this.delayTime = buffer.readUnsignedSmart();
-        this.delayDecay = buffer.readUnsignedSmart();
-        this.duration = buffer.readUnsignedShort();
-        this.offset = buffer.readUnsignedShort();
+        this.delayTime = buffer.readUSmart();
+        this.delayDecay = buffer.readUSmart();
+        this.duration = buffer.readUShort();
+        this.offset = buffer.readUShort();
         this.filter = new Filter();
         this.filterEnvelope = new Envelope();
         this.filter.decode(buffer, this.filterEnvelope);

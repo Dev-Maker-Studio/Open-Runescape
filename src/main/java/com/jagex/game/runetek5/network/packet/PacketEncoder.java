@@ -71,8 +71,8 @@ public class PacketEncoder {
             tcpmessage5.buffer.writeByte(i_2);
             tcpmessage5.buffer.writeByte(bool3 ? 1 : 0);
             tcpmessage5.buffer.currentPosition += 7;
-            tcpmessage5.buffer.encryptWithXtea(AccountCreationStage.LOGIN_XTEAS, i_6, tcpmessage5.buffer.currentPosition);
-            tcpmessage5.buffer.method13281(tcpmessage5.buffer.currentPosition - i_6);
+            tcpmessage5.buffer.encryptXtea(AccountCreationStage.LOGIN_XTEAS, i_6, tcpmessage5.buffer.currentPosition);
+            tcpmessage5.buffer.writeShortLength(tcpmessage5.buffer.currentPosition - i_6);
             client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage5);
             if (i_2 < 13) {
                 client.aBool7189 = true;
@@ -109,7 +109,7 @@ public class PacketEncoder {
                 if (outgoingpacket8 != null) {
                     TcpPacket tcpmessage9 = createPacket(outgoingpacket8, client.GAME_CONNECTION_CONTEXT.isaac);
                     tcpmessage9.buffer.writeShort(ints_4[i_6]);
-                    tcpmessage9.buffer.write128Byte(0);
+                    tcpmessage9.buffer.writeByteSubtract(0);
                     client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage9);
                 }
 
@@ -131,7 +131,7 @@ public class PacketEncoder {
         tcpmessage3.buffer.writeShort(icomponentdefinitions1.containerItemId);
         tcpmessage3.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId);
         tcpmessage3.buffer.writeIntMiddle(icomponentdefinitions0.idHash);
-        tcpmessage3.buffer.writeIntLE(icomponentdefinitions1.idHash);
+        tcpmessage3.buffer.writeIntLittle(icomponentdefinitions1.idHash);
         client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
 
@@ -151,7 +151,7 @@ public class PacketEncoder {
             tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.slotId);
             tcpmessage4.buffer.writeShortLittle(client.anInt7345);
             tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId);
-            tcpmessage4.buffer.writeIntLE(icomponentdefinitions0.idHash);
+            tcpmessage4.buffer.writeIntLittle(icomponentdefinitions0.idHash);
             tcpmessage4.buffer.writeIntInverseMiddle(client.anInt56);
             tcpmessage4.buffer.writeShortLittle(client.anInt7346);
             client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage4);
@@ -195,15 +195,15 @@ public class PacketEncoder {
     }
 
     public static void method12590(TcpPacket packet, int interfaceHash, int slotId, int itemId) {
-        packet.buffer.writeIntLE(interfaceHash);
+        packet.buffer.writeIntLittle(interfaceHash);
         packet.buffer.writeShort(itemId);
         packet.buffer.writeShortAdd(slotId);
     }
 
     public static void decodePlayerCounts(Packet rsbytebuffer0) {
         for (int i_2 = 0; i_2 < WorldMeta.WORLD_LIST_SIZE; i_2++) {
-            int worldId = rsbytebuffer0.readUnsignedSmart();
-            int playerCount = rsbytebuffer0.readUnsignedShort();
+            int worldId = rsbytebuffer0.readUSmart();
+            int playerCount = rsbytebuffer0.readUShort();
             if (playerCount == 65535) {
                 playerCount = -1;
             }
@@ -241,8 +241,8 @@ public class PacketEncoder {
             int start = message.buffer.currentPosition;
             message.buffer.writeString(string_0);
             message.buffer.currentPosition += 7;
-            message.buffer.encryptWithXtea(AccountCreationStage.LOGIN_XTEAS, start, message.buffer.currentPosition);
-            message.buffer.method13281(message.buffer.currentPosition - start);
+            message.buffer.encryptXtea(AccountCreationStage.LOGIN_XTEAS, start, message.buffer.currentPosition);
+            message.buffer.writeShortLength(message.buffer.currentPosition - start);
             client.LOBBY_CONNECTION_CONTEXT.queuePacket(message);
             AccountCreationStage.checkemailRequeststatus = CheckEmailRequest.SENT_REQUEST;
         }
@@ -341,7 +341,7 @@ public class PacketEncoder {
     public static int chatMessageToBuffer(Packet buffer, String chatMessage) {
         int length = buffer.currentPosition;
         byte[] data = Utils.characterSequenceToBytearray(chatMessage);
-        buffer.writeSmartShort(data.length);
+        buffer.writeSmart(data.length);
         buffer.currentPosition += HuffmanList.HUFFMAN.decompress(data, 0, data.length, buffer.buffer, buffer.currentPosition);
         return buffer.currentPosition - length;
     }
@@ -431,7 +431,7 @@ public class PacketEncoder {
 	
 	            MouseActionServer.lastSubmitted = record.getTimeSubmitted();
 	            tcpPacket.buffer.writeByte(record.getCode());
-	            tcpPacket.buffer.write24BitInt((int) timeBetweenClicks);
+	            tcpPacket.buffer.writeMedium((int) timeBetweenClicks);
 	        }
 	
 	        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpPacket);
@@ -487,7 +487,7 @@ public class PacketEncoder {
 	                TcpPacket packet = createPacket(ClientProt.IF_ON_PLAYER, client.GAME_CONNECTION_CONTEXT.isaac);
 	                packet.buffer.writeShort(client.anInt7345);
 	                packet.buffer.writeShortLittle(indices[i]);
-	                packet.buffer.write128Byte(0);
+	                packet.buffer.writeByteSubtract(0);
 	                packet.buffer.writeIntInverseMiddle(client.anInt56);
 	                packet.buffer.writeShortLittle(client.anInt7346);
 	                client.GAME_CONNECTION_CONTEXT.queuePacket(packet);

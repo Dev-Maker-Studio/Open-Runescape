@@ -16,15 +16,15 @@ public class FluType {
     
     public void decode(Packet packet, int opcode) {
         if (opcode == 1) {
-            this.rgb = packet.read24BitUnsignedInteger();
+            this.rgb = packet.readUMedium();
             calculateHsl16(this.rgb);
         } else if (opcode == 2) {
-            this.texture = packet.readUnsignedShort();
+            this.texture = packet.readUShort();
             if (this.texture == 65535) {
                 this.texture = -1;
             }
         } else if (opcode == 3) {
-            this.scale = packet.readUnsignedShort() << 2;
+            this.scale = packet.readUShort() << 2;
         } else if (opcode == 4) {
             this.shadowed = false;
         } else if (opcode == 5) {
@@ -34,7 +34,7 @@ public class FluType {
 
     void decode(Packet packet) {
         while (true) {
-            int opcode = packet.readUnsignedByte();
+            int opcode = packet.readUByte();
             if (opcode == 0) {
                 return;
             }

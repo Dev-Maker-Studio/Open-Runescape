@@ -14,15 +14,15 @@ public class ClanVarType {
         if (opcode == 1) {
             this.aChar4832 = Utils.cp1252ToChar(buffer.readByte());
         } else if (opcode == 3) {
-            this.baseVar = buffer.readUnsignedShort();
-            this.startBit = buffer.readUnsignedByte();
-            this.endBit = buffer.readUnsignedByte();
+            this.baseVar = buffer.readUShort();
+            this.startBit = buffer.readUByte();
+            this.endBit = buffer.readUByte();
         }
     }
 
     void decodeType(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }

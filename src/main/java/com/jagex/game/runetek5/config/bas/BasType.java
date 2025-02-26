@@ -93,44 +93,44 @@ public class BasType {
         } else if (opcode == 9) {
             this.runDir1 = buffer.readBigSmart();
         } else if (opcode == 26) {
-            this.anInt2786 = (short) (buffer.readUnsignedByte() * 4);
-            this.anInt2829 = (short) (buffer.readUnsignedByte() * 4);
+            this.anInt2786 = (short) (buffer.readUByte() * 4);
+            this.anInt2829 = (short) (buffer.readUByte() * 4);
         } else if (opcode == 27) {
             if (this.objVerticeTransformations == null) {
                 this.objVerticeTransformations = new int[this.basTypeList.equipmentDefaults.customizableObjSlots.length][];
             }
-            int slot = buffer.readUnsignedByte();
+            int slot = buffer.readUByte();
             this.objVerticeTransformations[slot] = new int[6];
             for (int transformation = 0; transformation < 6; transformation++) {
                 this.objVerticeTransformations[slot][transformation] = buffer.readShort();
             }
         } else if (opcode == 28) {
-        	int slotCount = buffer.readUnsignedByte();
+        	int slotCount = buffer.readUByte();
             this.objVisibility = new int[slotCount];
             for (int index = 0; index < slotCount; index++) {
-                this.objVisibility[index] = buffer.readUnsignedByte();
+                this.objVisibility[index] = buffer.readUByte();
                 if (this.objVisibility[index] == 255) {
                     this.objVisibility[index] = -1;
                 }
             }
         } else if (opcode == 29) {
-            this.anInt2820 = buffer.readUnsignedByte();
+            this.anInt2820 = buffer.readUByte();
         } else if (opcode == 30) {
-            this.anInt2804 = buffer.readUnsignedShort();
+            this.anInt2804 = buffer.readUShort();
         } else if (opcode == 31) {
-            this.anInt2825 = buffer.readUnsignedByte();
+            this.anInt2825 = buffer.readUByte();
         } else if (opcode == 32) {
-            this.anInt2823 = buffer.readUnsignedShort();
+            this.anInt2823 = buffer.readUShort();
         } else if (opcode == 33) {
             this.anInt2824 = buffer.readShort();
         } else if (opcode == 34) {
-            this.anInt2816 = buffer.readUnsignedByte();
+            this.anInt2816 = buffer.readUByte();
         } else if (opcode == 35) {
-            this.anInt2815 = buffer.readUnsignedShort();
+            this.anInt2815 = buffer.readUShort();
         } else if (opcode == 36) {
             this.anInt2827 = buffer.readShort();
         } else if (opcode == 37) {
-            this.unused = buffer.readUnsignedByte();
+            this.unused = buffer.readUByte();
         } else if (opcode == 38) {
             this.standTurnCcwSequence = buffer.readBigSmart();
         } else if (opcode == 39) {
@@ -142,11 +142,11 @@ public class BasType {
         } else if (opcode == 42) {
             this.walkDir1 = buffer.readBigSmart();
         } else if (opcode == 43) {
-            buffer.readUnsignedShort();
+            buffer.readUShort();
         } else if (opcode == 44) {
-            buffer.readUnsignedShort();
+            buffer.readUShort();
         } else if (opcode == 45) {
-            this.anInt2798 = buffer.readUnsignedShort();
+            this.anInt2798 = buffer.readUShort();
         } else if (opcode == 46) {
             this.teleTurnCcwSequence = buffer.readBigSmart();
         } else if (opcode == 47) {
@@ -160,31 +160,31 @@ public class BasType {
         } else if (opcode == 51) {
             this.walkTurnCwSequence = buffer.readBigSmart();
         } else if (opcode == 52) {
-        	int standCount = buffer.readUnsignedByte();
+        	int standCount = buffer.readUByte();
             this.randomStandSequences = new int[standCount];
             this.randomStandSequenceChances = new int[standCount];
             for (int index = 0; index < standCount; index++) {
                 this.randomStandSequences[index] = buffer.readBigSmart();
-                int chance = buffer.readUnsignedByte();
+                int chance = buffer.readUByte();
                 this.randomStandSequenceChances[index] = chance;
                 this.totalCache += chance;
             }
         } else if (opcode == 53) {
             this.rendersShadow = false;
         } else if (opcode == 54) {
-            this.anInt2813 = buffer.readUnsignedByte() << 6;
-            this.anInt2790 = buffer.readUnsignedByte() << 6;
+            this.anInt2813 = buffer.readUByte() << 6;
+            this.anInt2790 = buffer.readUByte() << 6;
         } else if (opcode == 55) {
             if (this.turnAngleAdjustment == null) {
                 this.turnAngleAdjustment = new int[this.basTypeList.equipmentDefaults.customizableObjSlots.length];
             }
-            int i_4 = buffer.readUnsignedByte();
-            this.turnAngleAdjustment[i_4] = buffer.readUnsignedShort();
+            int i_4 = buffer.readUByte();
+            this.turnAngleAdjustment[i_4] = buffer.readUShort();
         } else if (opcode == 56) {
             if (this.projectionOffset == null) {
                 this.projectionOffset = new int[this.basTypeList.equipmentDefaults.customizableObjSlots.length][];
             }
-            int slot = buffer.readUnsignedByte();
+            int slot = buffer.readUByte();
             this.projectionOffset[slot] = new int[3];
             for (int direction = 0; direction < 3; direction++) {
                 this.projectionOffset[slot][direction] = buffer.readShort();
@@ -266,7 +266,7 @@ public class BasType {
 
     public void decode(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }

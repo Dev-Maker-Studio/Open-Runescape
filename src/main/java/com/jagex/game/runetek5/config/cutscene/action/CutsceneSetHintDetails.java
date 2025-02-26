@@ -18,10 +18,10 @@ public class CutsceneSetHintDetails extends CutsceneAction {
 
     public CutsceneSetHintDetails(Packet buffer) {
         super(buffer);
-        this.entityIndex = buffer.readUnsignedShort();
+        this.entityIndex = buffer.readUShort();
         this.text = buffer.readString();
         this.colorType = buffer.readInt();
-        this.duration = buffer.readUnsignedShort();
+        this.duration = buffer.readUShort();
     }
 
     @Override

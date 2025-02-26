@@ -22,12 +22,12 @@ public class CutsceneDirectCameraTransition extends CutsceneAction {
 
     public CutsceneDirectCameraTransition(Packet buffer) {
         super(buffer);
-        this.anInt9299 = buffer.readUnsignedShort();
-        this.anInt9300 = buffer.readUnsignedShort();
-        this.anInt9301 = buffer.readUnsignedShort();
-        this.anInt9302 = buffer.readUnsignedShort();
-        this.anInt9303 = buffer.readUnsignedShort();
-        this.anInt9304 = buffer.readUnsignedShort();
+        this.anInt9299 = buffer.readUShort();
+        this.anInt9300 = buffer.readUShort();
+        this.anInt9301 = buffer.readUShort();
+        this.anInt9302 = buffer.readUShort();
+        this.anInt9303 = buffer.readUShort();
+        this.anInt9304 = buffer.readUShort();
     }
 
     @Override

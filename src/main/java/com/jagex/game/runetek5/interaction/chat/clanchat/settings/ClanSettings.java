@@ -403,9 +403,9 @@ public class ClanSettings {
     }
 
     public void decode(Packet buffer) {
-        int version = buffer.readUnsignedByte();
+        int version = buffer.readUByte();
         if (version >= 1 && version <= 5) {
-            int attr = buffer.readUnsignedByte();
+            int attr = buffer.readUByte();
             if ((attr & 0x1) != 0) {
                 this.useHashes = true;
             }
@@ -425,13 +425,13 @@ public class ClanSettings {
             if (version <= 3 && this.anInt623 != 0) {
                 this.anInt623 += 16912800;
             }
-            this.memberCount = buffer.readUnsignedShort();
-            this.banCount = buffer.readUnsignedByte();
+            this.memberCount = buffer.readUShort();
+            this.banCount = buffer.readUByte();
             this.clanName = buffer.readString();
             if (version >= 4) {
                 buffer.readInt();
             }
-            this.allowGuests = buffer.readUnsignedByte() == 1;
+            this.allowGuests = buffer.readUByte() == 1;
             this.talkRank = buffer.readByte();
             this.kickRank = buffer.readByte();
             this.lootshareRank = buffer.readByte();
@@ -465,7 +465,7 @@ public class ClanSettings {
                         this.clanFlags[index] = buffer.readInt();
                     }
                     if (version >= 5) {
-                        this.memberJoinDays[index] = buffer.readUnsignedShort();
+                        this.memberJoinDays[index] = buffer.readUShort();
                     } else {
                         this.memberJoinDays[index] = 0;
                     }
@@ -489,7 +489,7 @@ public class ClanSettings {
                 }
             }
             if (version >= 3) {
-                int size = buffer.readUnsignedShort();
+                int size = buffer.readUShort();
                 if (size > 0) {
                     this.variables = new IterableNodeMap<>(size < 16 ? MathUtils.nextPowerOfTwo(size) : 16);
                     while (size-- > 0) {

@@ -104,94 +104,94 @@ public class ParticleProducerType {
 
     public void decode(Packet buffer, int opcode) {
         if (opcode == 1) {
-            this.minimalAngleH = (short) buffer.readUnsignedShort();
-            this.maximalAngleH = (short) buffer.readUnsignedShort();
-            this.minimumAngleV = (short) buffer.readUnsignedShort();
-            this.maximalAngleV = (short) buffer.readUnsignedShort();
+            this.minimalAngleH = (short) buffer.readUShort();
+            this.maximalAngleH = (short) buffer.readUShort();
+            this.minimumAngleV = (short) buffer.readUShort();
+            this.maximalAngleV = (short) buffer.readUShort();
             byte scale = 3;
             this.minimalAngleH <<= scale;
             this.maximalAngleH <<= scale;
             this.minimumAngleV <<= scale;
             this.maximalAngleV <<= scale;
         } else if (opcode == 2) {
-            buffer.readUnsignedByte();
+            buffer.readUByte();
         } else if (opcode == 3) {
             this.minimumSpeed = buffer.readInt();
             this.maximumSpeed = buffer.readInt();
         } else if (opcode == 4) {
-            this.speedUpdateType = buffer.readUnsignedByte();
+            this.speedUpdateType = buffer.readUByte();
             this.speedFallOffStep = buffer.readByte();
         } else if (opcode == 5) {
-            this.minimumSize = this.maximumSize = buffer.readUnsignedShort() << 12 << 2;
+            this.minimumSize = this.maximumSize = buffer.readUShort() << 12 << 2;
         } else if (opcode == 6) {
             this.minimumStartColorRgb = buffer.readInt();
             this.maximumStartColorRgb = buffer.readInt();
         } else if (opcode == 7) {
-            this.minimumLifetime = buffer.readUnsignedShort();
-            this.maximumLifetime = buffer.readUnsignedShort();
+            this.minimumLifetime = buffer.readUShort();
+            this.maximumLifetime = buffer.readUShort();
         } else if (opcode == 8) {
-            this.minimumParticleRate = buffer.readUnsignedShort();
-            this.maximumParticleRate = buffer.readUnsignedShort();
+            this.minimumParticleRate = buffer.readUShort();
+            this.maximumParticleRate = buffer.readUShort();
         } else if (opcode == 9) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.particleFileIds2 = new int[count];
             for (int i_5 = 0; i_5 < count; i_5++) {
-                this.particleFileIds2[i_5] = buffer.readUnsignedShort();
+                this.particleFileIds2[i_5] = buffer.readUShort();
             }
         } else if (opcode == 10) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.particleFileIds = new int[count];
             for (int i_5 = 0; i_5 < count; i_5++) {
-                this.particleFileIds[i_5] = buffer.readUnsignedShort();
+                this.particleFileIds[i_5] = buffer.readUShort();
             }
         } else if (opcode == 12) {
             this.lowestDisplayPlane = buffer.readByte();
         } else if (opcode == 13) {
             this.highestDisplayPlane = buffer.readByte();
         } else if (opcode == 14) {
-            this.updatesPerCycle = buffer.readUnsignedShort();
+            this.updatesPerCycle = buffer.readUShort();
         } else if (opcode == 15) {
-            this.materialId = buffer.readUnsignedShort();
+            this.materialId = buffer.readUShort();
         } else if (opcode == 16) {
-            this.activeFirst = buffer.readUnsignedByte() == 1;
-            this.anInt537 = buffer.readUnsignedShort();
-            this.lifetime = buffer.readUnsignedShort();
-            this.periodic = buffer.readUnsignedByte() == 1;
+            this.activeFirst = buffer.readUByte() == 1;
+            this.anInt537 = buffer.readUShort();
+            this.lifetime = buffer.readUShort();
+            this.periodic = buffer.readUByte() == 1;
         } else if (opcode == 17) {
-            this.nonTexturedProducerId = buffer.readUnsignedShort();
+            this.nonTexturedProducerId = buffer.readUShort();
         } else if (opcode == 18) {
             this.faceColorRgb = buffer.readInt();
         } else if (opcode == 19) {
-            this.minimumSetting = buffer.readUnsignedByte();
+            this.minimumSetting = buffer.readUByte();
         } else if (opcode == 20) {
-            this.colorFading = buffer.readUnsignedByte();
+            this.colorFading = buffer.readUByte();
         } else if (opcode == 21) {
-            this.alphaFading = buffer.readUnsignedByte();
+            this.alphaFading = buffer.readUByte();
         } else if (opcode == 22) {
             this.endSpeed = buffer.readInt();
         } else if (opcode == 23) {
-            this.speedChange = buffer.readUnsignedByte();
+            this.speedChange = buffer.readUByte();
         } else if (opcode == 24) {
             this.uniformColorVariance = false;
         } else if (opcode == 25) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.effectiveVertexUids = new int[count];
             for (int i_5 = 0; i_5 < count; i_5++) {
-                this.effectiveVertexUids[i_5] = buffer.readUnsignedShort();
+                this.effectiveVertexUids[i_5] = buffer.readUShort();
             }
         } else if (opcode == 26) {
             this.aBool572 = false;
         } else if (opcode == 27) {
-            this.endSize = buffer.readUnsignedShort() << 12 << 2;
+            this.endSize = buffer.readUShort() << 12 << 2;
         } else if (opcode == 28) {
-            this.sizeChange = buffer.readUnsignedByte();
+            this.sizeChange = buffer.readUByte();
         } else if (opcode == 29) {
             buffer.readShort();
         } else if (opcode == 30) {
             this.isTextured = true;
         } else if (opcode == 31) {
-            this.minimumSize = buffer.readUnsignedShort() << 12 << 2;
-            this.maximumSize = buffer.readUnsignedShort() << 12 << 2;
+            this.minimumSize = buffer.readUShort() << 12 << 2;
+            this.maximumSize = buffer.readUShort() << 12 << 2;
         } else if (opcode == 32) {
             this.adjustsLightIntensity = false;
         } else if (opcode == 33) {
@@ -253,7 +253,7 @@ public class ParticleProducerType {
 
     public void decode(Packet stream) {
         while (true) {
-            int opcode = stream.readUnsignedByte();
+            int opcode = stream.readUByte();
             if (opcode == 0) {
                 return;
             }

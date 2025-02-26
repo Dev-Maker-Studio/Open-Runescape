@@ -14,10 +14,10 @@ public class KeyHoldInputSubscriber implements InputSubscriber {
     }
 
     public static KeyHoldInputSubscriber decode(Packet buffer) {
-        int count = buffer.readUnsignedByte();
+        int count = buffer.readUByte();
         int[] reqKeys = new int[count];
         for (int i = 0; i < count; i++) {
-            reqKeys[i] = buffer.readUnsignedByte();
+            reqKeys[i] = buffer.readUByte();
         }
         return new KeyHoldInputSubscriber(reqKeys);
     }

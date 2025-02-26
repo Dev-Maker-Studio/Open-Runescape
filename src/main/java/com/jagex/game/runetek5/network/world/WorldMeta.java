@@ -18,27 +18,27 @@ public class WorldMeta {
 	public static int WORLD_LIST_SIZEPLUS1;
 
     public static void decodeWorldList(Packet buffer) {
-        int size = buffer.readUnsignedSmart();
+        int size = buffer.readUSmart();
         LoginManager.WORLDS = new WorldMeta[size];
         for (int i = 0; i < size; i++) {
             LoginManager.WORLDS[i] = new WorldMeta();
-            LoginManager.WORLDS[i].countryId = buffer.readUnsignedSmart();
-            LoginManager.WORLDS[i].activity = buffer.readGJString();
+            LoginManager.WORLDS[i].countryId = buffer.readUSmart();
+            LoginManager.WORLDS[i].activity = buffer.readJagString();
             if (Loader.DEBUG)
                 System.out.println("Worldlist set: " + LoginManager.WORLDS[i]);
         }
-        WorldDescriptor.WORLD_LIST_START = buffer.readUnsignedSmart();
-        WorldMeta.WORLD_LIST_SIZEPLUS1 = buffer.readUnsignedSmart();
-        WorldMeta.WORLD_LIST_SIZE = buffer.readUnsignedSmart();
+        WorldDescriptor.WORLD_LIST_START = buffer.readUSmart();
+        WorldMeta.WORLD_LIST_SIZEPLUS1 = buffer.readUSmart();
+        WorldMeta.WORLD_LIST_SIZE = buffer.readUSmart();
         WorldMeta.WORLD_LIST_DESCRIPTORS = new WorldDescriptor[WorldMeta.WORLD_LIST_SIZEPLUS1 - WorldDescriptor.WORLD_LIST_START + 1];
         for (int i = 0; i < WorldMeta.WORLD_LIST_SIZE; i++) {
-            int id = buffer.readUnsignedSmart();
+            int id = buffer.readUSmart();
             WorldDescriptor world = WorldMeta.WORLD_LIST_DESCRIPTORS[id] = new WorldDescriptor();
-            world.worldIndex = buffer.readUnsignedByte();
+            world.worldIndex = buffer.readUByte();
             world.flags = buffer.readInt();
             world.worldNumber = id + WorldDescriptor.WORLD_LIST_START;
-            world.unknown = buffer.readGJString();
-            world.ipAddress = buffer.readGJString();
+            world.unknown = buffer.readJagString();
+            world.ipAddress = buffer.readJagString();
             if (world.hasPort())
                 world.port = buffer.readInt();
             if (Loader.DEBUG)

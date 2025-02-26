@@ -31,7 +31,7 @@ public class TextureOpColorFill extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                method15378(rsbytebuffer2.read24BitUnsignedInteger());
+                method15378(rsbytebuffer2.readUMedium());
             default:
         }
     }

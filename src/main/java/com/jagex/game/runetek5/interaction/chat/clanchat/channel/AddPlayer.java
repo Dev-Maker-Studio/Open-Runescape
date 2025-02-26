@@ -33,12 +33,12 @@ public class AddPlayer extends AbstractClanChannelUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        if (buffer.readUnsignedByte() != 255) {
+        if (buffer.readUByte() != 255) {
             buffer.currentPosition--;
             buffer.readLong();
         }
         this.name = buffer.readNullString();
-        this.world = buffer.readUnsignedShort();
+        this.world = buffer.readUShort();
         this.rank = buffer.readByte();
         buffer.readLong();
     }

@@ -313,7 +313,7 @@ public class Js5ResourceProvider {
             } else {
                 containerData = DataBuffer.unpackDataBuffer(this.archives[archiveId], true);
                 Packet containerBuffer = new Packet(containerData);
-                containerBuffer.decryptXteas(xteas, containerBuffer.buffer.length);
+                containerBuffer.decryptXtea(xteas, containerBuffer.buffer.length);
             }
             byte[] archiveData = Js5Compression.decompress(containerData);
             if (this.directMemoryMode) {

@@ -128,7 +128,7 @@ public class RemoteFileRequester extends Js5NetQueue {
             try {
                 this.outgoing.currentPosition = 0;
                 this.outgoing.writeByte(6);
-                this.outgoing.write24BitInt(3);
+                this.outgoing.writeMedium(3);
                 this.outgoing.writeShort(0);
                 this.updateServerConnection.write(this.outgoing.buffer, this.outgoing.buffer.length);
             } catch (IOException ioexception) {
@@ -224,9 +224,9 @@ public class RemoteFileRequester extends Js5NetQueue {
                     if (this.incoming.currentPosition >= expectedHeaderSize) {
                         if (this.lastRemoteRequest == null) {
                             this.incoming.currentPosition = 0;
-                            int cacheIndex = this.incoming.readUnsignedByte();
+                            int cacheIndex = this.incoming.readUByte();
                             int archiveId = this.incoming.readInt();
-                            int bitpacketSettings = this.incoming.readUnsignedByte();
+                            int bitpacketSettings = this.incoming.readUByte();
                             int payloadSize = this.incoming.readInt();
                             int compressed = bitpacketSettings & 0x7f;
                             //System.out.println("Incoming file: " + cacheIndex + ", " + archiveId + ", " + bitpacketSettings + ", " + payloadSize);

@@ -14,9 +14,9 @@ public class KickPlayer extends AbstractClanChannelUpdate {
 
     @Override
     public void decode(Packet buffer) {
-        this.playerIndex = buffer.readUnsignedShort();
-        buffer.readUnsignedByte();
-        if (buffer.readUnsignedByte() != 255) {
+        this.playerIndex = buffer.readUShort();
+        buffer.readUByte();
+        if (buffer.readUByte() != 255) {
             buffer.currentPosition--;
             buffer.readLong();
         }

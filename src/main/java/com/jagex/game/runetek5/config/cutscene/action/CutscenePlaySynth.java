@@ -19,10 +19,10 @@ public class CutscenePlaySynth extends CutsceneAction {
 
     public CutscenePlaySynth(Packet rsbytebuffer1) {
         super(rsbytebuffer1);
-        this.anInt9363 = rsbytebuffer1.readUnsignedShort();
-        this.anInt9365 = rsbytebuffer1.readUnsignedByte();
-        this.anInt9364 = rsbytebuffer1.readUnsignedByte();
-        this.anInt9366 = rsbytebuffer1.readUnsignedByte();
+        this.anInt9363 = rsbytebuffer1.readUShort();
+        this.anInt9365 = rsbytebuffer1.readUByte();
+        this.anInt9364 = rsbytebuffer1.readUByte();
+        this.anInt9366 = rsbytebuffer1.readUByte();
     }
 
     @Override

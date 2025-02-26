@@ -22,29 +22,29 @@ public class EquipmentDefaultsType {
 
     public void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
             if (opcode == 1) {
-                int count = buffer.readUnsignedByte();
+                int count = buffer.readUByte();
                 this.customizableObjSlots = new int[count];
                 for (int i = 0; i < this.customizableObjSlots.length; i++) {
-                    this.customizableObjSlots[i] = buffer.readUnsignedByte();
+                    this.customizableObjSlots[i] = buffer.readUByte();
                 }
             } else if (opcode == 3) {
-                this.shieldSlot = buffer.readUnsignedByte();
+                this.shieldSlot = buffer.readUByte();
             } else if (opcode == 4) {
-                this.weaponSlot = buffer.readUnsignedByte();
+                this.weaponSlot = buffer.readUByte();
             } else if (opcode == 5) {
-                this.hiddenAnimationShieldSlots = new int[buffer.readUnsignedByte()];
+                this.hiddenAnimationShieldSlots = new int[buffer.readUByte()];
                 for (int i = 0; i < this.hiddenAnimationShieldSlots.length; i++) {
-                    this.hiddenAnimationShieldSlots[i] = buffer.readUnsignedByte();
+                    this.hiddenAnimationShieldSlots[i] = buffer.readUByte();
                 }
             } else if (opcode == 6) {
-                this.hiddenAnimationWeaponSlots = new int[buffer.readUnsignedByte()];
+                this.hiddenAnimationWeaponSlots = new int[buffer.readUByte()];
                 for (int i = 0; i < this.hiddenAnimationWeaponSlots.length; i++) {
-                    this.hiddenAnimationWeaponSlots[i] = buffer.readUnsignedByte();
+                    this.hiddenAnimationWeaponSlots[i] = buffer.readUByte();
                 }
             }
         }

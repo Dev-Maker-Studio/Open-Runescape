@@ -54,16 +54,16 @@ public class TextureOpMandelbrot extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9742 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9742 = rsbytebuffer2.readUShort();
                 break;
             case 1:
-                this.anInt9743 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9743 = rsbytebuffer2.readUShort();
                 break;
             case 2:
-                this.anInt9741 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9741 = rsbytebuffer2.readUShort();
                 break;
             case 3:
-                this.anInt9740 = rsbytebuffer2.readUnsignedShort();
+                this.anInt9740 = rsbytebuffer2.readUShort();
         }
 
     }

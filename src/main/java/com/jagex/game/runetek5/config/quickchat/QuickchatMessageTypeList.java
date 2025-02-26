@@ -70,7 +70,7 @@ public class QuickchatMessageTypeList {
 
 	public static QuickChatMessage decodeQuickchatMessage(Packet buffer) {
 	    QuickChatMessage message = new QuickChatMessage();
-	    message.id = buffer.readUnsignedShort();
+	    message.id = buffer.readUShort();
 	    message.message = TypeLists.QUICK_CHAT_MESSAGE.listMessage(message.id);
 	    return message;
 	}

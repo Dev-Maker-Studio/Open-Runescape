@@ -52,7 +52,7 @@ public class CutsceneProjectile extends CutsceneAction {
         } else {
             this.anInt9403 = -1;
             this.anInt9404 = -1;
-            this.anInt9402 = rsbytebuffer1.readUnsignedShort();
+            this.anInt9402 = rsbytebuffer1.readUShort();
         }
         if (i_3 == 0) {
             i_4 = rsbytebuffer1.readInt();
@@ -62,19 +62,19 @@ public class CutsceneProjectile extends CutsceneAction {
         } else {
             this.anInt9407 = -1;
             this.anInt9408 = -1;
-            this.anInt9400 = rsbytebuffer1.readUnsignedShort();
+            this.anInt9400 = rsbytebuffer1.readUShort();
         }
         if (i_2 == 0 && i_3 == 0) {
-            this.anInt9401 = rsbytebuffer1.readUnsignedByte();
+            this.anInt9401 = rsbytebuffer1.readUByte();
         } else {
             this.anInt9401 = -1;
         }
-        this.gfxId = rsbytebuffer1.readUnsignedShort();
-        this.anInt9405 = rsbytebuffer1.readUnsignedByte();
-        this.endHeight = rsbytebuffer1.readUnsignedByte();
-        this.anInt9409 = rsbytebuffer1.read24BitUnsignedInteger();
-        this.anInt9412 = rsbytebuffer1.readUnsignedShort();
-        this.anInt9399 = rsbytebuffer1.readUnsignedByte();
+        this.gfxId = rsbytebuffer1.readUShort();
+        this.anInt9405 = rsbytebuffer1.readUByte();
+        this.endHeight = rsbytebuffer1.readUByte();
+        this.anInt9409 = rsbytebuffer1.readUMedium();
+        this.anInt9412 = rsbytebuffer1.readUShort();
+        this.anInt9399 = rsbytebuffer1.readUByte();
     }
 
     @Override

@@ -56,7 +56,7 @@ public class MECType {
 
     void decode(Packet buffer) {
         while (true) {
-            int opcode = buffer.readUnsignedByte();
+            int opcode = buffer.readUByte();
             if (opcode == 0) {
                 return;
             }
@@ -72,13 +72,13 @@ public class MECType {
         } else if (opcode == 3) {
             this.areaName = buffer.readString();
         } else if (opcode == 4) {
-            this.defaultTextColor = buffer.read24BitUnsignedInteger();
+            this.defaultTextColor = buffer.readUMedium();
         } else if (opcode == 5) {
-            this.mouseOverTextColor = buffer.read24BitUnsignedInteger();
+            this.mouseOverTextColor = buffer.readUMedium();
         } else if (opcode == 6) {
-            this.baseTextzoom = buffer.readUnsignedByte();
+            this.baseTextzoom = buffer.readUByte();
         } else if (opcode == 7) {
-            int flags = buffer.readUnsignedByte();
+            int flags = buffer.readUByte();
             if ((flags & 0x1) == 0) {
                 this.displayedOnWorldmap = false;
             }
@@ -86,13 +86,13 @@ public class MECType {
                 this.displayedOnMinimap = true;
             }
         } else if (opcode == 8) {
-            this.hasRandomisedMinimapPosition = buffer.readUnsignedByte() == 1;
+            this.hasRandomisedMinimapPosition = buffer.readUByte() == 1;
         } else if (opcode == 9) {
-            this.primaryVarpbit = buffer.readUnsignedShort();
+            this.primaryVarpbit = buffer.readUShort();
             if (this.primaryVarpbit == 65535) {
                 this.primaryVarpbit = -1;
             }
-            this.primaryVarp = buffer.readUnsignedShort();
+            this.primaryVarp = buffer.readUShort();
             if (this.primaryVarp == 65535) {
                 this.primaryVarp = -1;
             }
@@ -101,13 +101,13 @@ public class MECType {
         } else if (opcode >= 10 && opcode <= 14) {
             this.minimenuActions[opcode - 10] = buffer.readString();
         } else if (opcode == 15) {
-            int count = buffer.readUnsignedByte();
+            int count = buffer.readUByte();
             this.offsets = new int[count * 2];
             for (int index = 0; index < count * 2; index++) {
                 this.offsets[index] = buffer.readShort();
             }
             this.lineColor = buffer.readInt();
-            int numColors = buffer.readUnsignedByte();
+            int numColors = buffer.readUByte();
             this.colors = new int[numColors];
             for (int index = 0; index < this.colors.length; index++) {
                 this.colors[index] = buffer.readInt();
@@ -123,13 +123,13 @@ public class MECType {
         } else if (opcode == 18) {
             this.spriteId = buffer.readBigSmart();
         } else if (opcode == 19) {
-            this.anInt2718 = buffer.readUnsignedShort();
+            this.anInt2718 = buffer.readUShort();
         } else if (opcode == 20) {
-            this.secondaryVarpbit = buffer.readUnsignedShort();
+            this.secondaryVarpbit = buffer.readUShort();
             if (this.secondaryVarpbit == 65535) {
                 this.secondaryVarpbit = -1;
             }
-            this.secondaryVarp = buffer.readUnsignedShort();
+            this.secondaryVarp = buffer.readUShort();
             if (this.secondaryVarp == 65535) {
                 this.secondaryVarp = -1;
             }
@@ -140,21 +140,21 @@ public class MECType {
         } else if (opcode == 22) {
             this.backgroundColor = buffer.readInt();
         } else if (opcode == 23) {
-            this.anInt2748 = buffer.readUnsignedByte();
-            this.anInt2749 = buffer.readUnsignedByte();
-            this.anInt2756 = buffer.readUnsignedByte();
+            this.anInt2748 = buffer.readUByte();
+            this.anInt2749 = buffer.readUByte();
+            this.anInt2756 = buffer.readUByte();
         } else if (opcode == 24) {
             this.anInt2750 = buffer.readShort();
             this.anInt2752 = buffer.readShort();
         } else if (opcode == 249) {
-            int numParameters = buffer.readUnsignedByte();
+            int numParameters = buffer.readUByte();
             if (this.parameters == null) {
                 int capacity = MathUtils.nextPowerOfTwo(numParameters);
                 this.parameters = new IterableNodeMap<Node<?>>(capacity);
             }
             for (int index = 0; index < numParameters; index++) {
-                boolean isString = buffer.readUnsignedByte() == 1;
-                int key = buffer.read24BitUnsignedInteger();
+                boolean isString = buffer.readUByte() == 1;
+                int key = buffer.readUMedium();
                 Node<?> value;
                 if (isString) {
                     value = new ObjectNode(buffer.readString());

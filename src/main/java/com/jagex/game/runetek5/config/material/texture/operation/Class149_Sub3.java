@@ -18,7 +18,7 @@ public class Class149_Sub3 extends Class149 {
     }
 
     public static Class149_Sub3 decode(Packet rsbytebuffer0) {
-        return new Class149_Sub3(rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.read24BitUnsignedInteger(), rsbytebuffer0.readUnsignedByte());
+        return new Class149_Sub3(rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readUMedium(), rsbytebuffer0.readUByte());
     }
 
     @Override

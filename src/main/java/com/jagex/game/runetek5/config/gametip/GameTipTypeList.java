@@ -20,17 +20,17 @@ public class GameTipTypeList {
     public GameTipTypeList(Js5ResourceProvider resourceProvider) {
         this.tipsResource = resourceProvider;
         Packet buffer = new Packet(this.tipsResource.getFile(0, 0));
-        int size = buffer.buffer != null && buffer.buffer.length >= 1 ? buffer.readUnsignedByte() : -1;
+        int size = buffer.buffer != null && buffer.buffer.length >= 1 ? buffer.readUByte() : -1;
         if (size < 4) {
         	this.tipStages = new GameTipStage[0];
             this.tipsFileId = -1;
         } else {
-            int length = buffer.readUnsignedByte();
+            int length = buffer.readUByte();
             TipRenderDetails[] tipRenderDetails = TipRenderDetails.values();
             boolean hasStages = true;
             if (tipRenderDetails.length == length) {
                 for (int index = 0; index < tipRenderDetails.length; index++) {
-                    int transformType = buffer.readUnsignedByte();
+                    int transformType = buffer.readUByte();
                     if (transformType != tipRenderDetails[index].transformType) {
                         hasStages = false;
                         break;
@@ -41,36 +41,36 @@ public class GameTipTypeList {
             }
 
             if (hasStages) {
-                int definedStageCount = buffer.readUnsignedByte();
-                int totalStageCount = buffer.readUnsignedByte();
+                int definedStageCount = buffer.readUByte();
+                int totalStageCount = buffer.readUByte();
                 this.tipsFileId = buffer.readShort();
-                int displayDurationMs = buffer.read24BitUnsignedInteger();
-                int timeBetweenUpdatesMs = buffer.readUnsignedShort();
+                int displayDurationMs = buffer.readUMedium();
+                int timeBetweenUpdatesMs = buffer.readUShort();
 
                 this.tipStages = new GameTipStage[totalStageCount + 1];
 
                 for (int stageIndex = 0; stageIndex < definedStageCount; stageIndex++) {
-                    int stage = buffer.readUnsignedByte();
-                    boolean hasUpdates = buffer.readUnsignedByte() == 1;
-                    int updateDetailCount = buffer.readUnsignedShort();
+                    int stage = buffer.readUByte();
+                    boolean hasUpdates = buffer.readUByte() == 1;
+                    int updateDetailCount = buffer.readUShort();
                     GameTipUpdateDetails[] updateDetails;
                     if (this.tipsFileId != -1) {
                         updateDetails = new GameTipUpdateDetails[updateDetailCount + 1];
                         updateDetails[0] = new GameTipUpdateDetails(this.tipsFileId, displayDurationMs, timeBetweenUpdatesMs);
 
                         for (int index = 0; index < updateDetailCount; index++) {
-                        	int file = buffer.readUnsignedShort();
-                        	int duration = buffer.read24BitUnsignedInteger();
-                        	int delay = buffer.readUnsignedShort();
+                        	int file = buffer.readUShort();
+                        	int duration = buffer.readUMedium();
+                        	int delay = buffer.readUShort();
                             updateDetails[index + 1] = new GameTipUpdateDetails(file, duration, delay);
                         }
                     } else {
                         updateDetails = new GameTipUpdateDetails[updateDetailCount];
 
                         for (int index = 0; index < updateDetailCount; index++) {
-                        	int file = buffer.readUnsignedShort();
-                        	int duration = buffer.read24BitUnsignedInteger();
-                        	int delay = buffer.readUnsignedShort();
+                        	int file = buffer.readUShort();
+                        	int duration = buffer.readUMedium();
+                        	int delay = buffer.readUShort();
                             updateDetails[index] = new GameTipUpdateDetails(file, duration, delay);
                         }
 

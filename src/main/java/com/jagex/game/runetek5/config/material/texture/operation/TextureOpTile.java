@@ -90,10 +90,10 @@ public class TextureOpTile extends TextureOperation {
     public void decodeOpcode(int i_1, Packet rsbytebuffer2) {
         switch (i_1) {
             case 0:
-                this.anInt9673 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9673 = rsbytebuffer2.readUByte();
                 break;
             case 1:
-                this.anInt9674 = rsbytebuffer2.readUnsignedByte();
+                this.anInt9674 = rsbytebuffer2.readUByte();
         }
 
     }
