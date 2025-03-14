@@ -54,7 +54,7 @@ import static com.jagex.game.runetek5.config.rsinterface.ComponentContentType.*;
 
 public class InterfaceComponentRenderer {
 
-	public static void method1170() {
+	public static void cancelInterfaceSelection() {
 	    if (client.interfaceSelectionActive) {
 	        Component component = Component.listIcomponent(client.anInt56, client.anInt7345);
 	        if (component != null && component.hookParams != null) {
@@ -73,9 +73,9 @@ public class InterfaceComponentRenderer {
 	}
 
 	public static void drawObjSprite(AbstractToolkit toolkit, Component component) {
-	    boolean created = TypeLists.OBJ.createNativeSprite(toolkit, component.containerItemId, component.itemStackSize, component.borderThickness, -16777216 | component.spriteShadow, component.renderStack, component.wearCol ? PlayerUpdate.MY_PLAYER.playerAppearance : null) == null;
+	    boolean created = TypeLists.OBJ.createNativeSprite(toolkit, component.containerItemId, component.itemStackSize, component.borderThickness, -0x1000000 | component.spriteShadow, component.renderStack, component.wearCol ? PlayerUpdate.MY_PLAYER.playerAppearance : null) == null;
 	    if (created) {
-	        Component.ITEMS.addFirst(new Item(component.containerItemId, component.itemStackSize, component.borderThickness, -16777216 | component.spriteShadow, component.renderStack, component.wearCol));
+	        Component.ITEMS.addFirst(new Item(component.containerItemId, component.itemStackSize, component.borderThickness, -0x1000000 | component.spriteShadow, component.renderStack, component.wearCol));
 	        Component.redrawComponent(component);
 	    }
 	}

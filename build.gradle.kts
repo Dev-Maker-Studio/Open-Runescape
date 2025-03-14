@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "darkan"
-version = "1.0.1"
+version = "2.0.0"
 description = "Darkan Client"
 
 application {
@@ -14,7 +14,7 @@ application {
 }
 
 java {
-	toolchain.languageVersion = JavaLanguageVersion.of(23)
+	toolchain.languageVersion = JavaLanguageVersion.of(19)
 }
 
 project.setProperty("mainClassName", "com.jagex.game.launch.Loader")

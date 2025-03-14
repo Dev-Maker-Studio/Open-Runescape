@@ -2400,7 +2400,7 @@ public class client extends GameShell {
             HookRequest hookrequest5;
             if (!MouseRecord.recorder.isMouseButtonPressed()) {
                 if (aBool7364) {
-                    InterfaceComponentRenderer.method1170();
+                    InterfaceComponentRenderer.cancelInterfaceSelection();
                     if (draggingComponent.anObjectArray1394 != null) {
                         hookrequest5 = new HookRequest();
                         hookrequest5.source = draggingComponent;

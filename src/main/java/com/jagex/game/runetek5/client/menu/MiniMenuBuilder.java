@@ -174,7 +174,7 @@ public class MiniMenuBuilder {
 	                    MiniMenu.addEntry(client.useOnType, " -> ", MiniMenu.useOnCursor, 59, -1, 0L, x, y, true, false, x | y, true);
 	                }
 	                else {
-	                    InterfaceComponentRenderer.method1170();
+	                    InterfaceComponentRenderer.cancelInterfaceSelection();
 	                }
 	            }
 	            else {

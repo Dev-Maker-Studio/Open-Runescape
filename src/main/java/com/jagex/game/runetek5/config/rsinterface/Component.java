@@ -1121,6 +1121,6 @@ public class Component {
 	}
 
     public boolean isIgnoredContentType() {
-        return contentType != ComponentContentType.MINIMAP && contentType != ComponentContentType.CONTENT_TYPE_1406 && contentType != ComponentContentType.GAME_WINDOW && contentType != ComponentContentType.CONTENT_TYPE_1403;
+        return contentType == ComponentContentType.MINIMAP || contentType == ComponentContentType.CONTENT_TYPE_1406 || contentType == ComponentContentType.GAME_WINDOW || contentType == ComponentContentType.CONTENT_TYPE_1403;
     }
 }

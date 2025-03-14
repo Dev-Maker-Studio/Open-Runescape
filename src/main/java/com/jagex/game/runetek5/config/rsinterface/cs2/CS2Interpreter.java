@@ -5508,7 +5508,7 @@ public class CS2Interpreter {
         int i_3 = executor.intStack[executor.intStackPtr + 1];
         int i_4 = executor.intStack[executor.intStackPtr + 2];
         Component icomponentdefinitions5 = Component.listIcomponent(i_2 << 16 | i_3, i_4);
-        InterfaceComponentRenderer.method1170();
+        InterfaceComponentRenderer.cancelInterfaceSelection();
         assert icomponentdefinitions5 != null;
         IFEvents class282Sub106 = client.getComponentSettings(icomponentdefinitions5);
         InterfaceRenderer.setUseOptionFlags(icomponentdefinitions5, class282Sub106.getUseOptionFlags(), class282Sub106.interfaceId);

@@ -263,7 +263,7 @@ public class MenuInteraction {
 	        if (clickType == 25) {
 	        	Component component = Component.listIcomponent(attr2, attr1);
 	            if (component != null) {
-	                InterfaceComponentRenderer.method1170();
+	                InterfaceComponentRenderer.cancelInterfaceSelection();
 	                IFEvents class282Sub1021 = client.getComponentSettings(component);
 	                InterfaceRenderer.setUseOptionFlags(component, class282Sub1021.getUseOptionFlags(), class282Sub1021.interfaceId);
 	                client.useOnType = Interface.getUseOptionString(component);
@@ -356,7 +356,7 @@ public class MenuInteraction {
 	            }
 	
 	            if (client.interfaceSelectionActive) {
-	                InterfaceComponentRenderer.method1170();
+	                InterfaceComponentRenderer.cancelInterfaceSelection();
 	            }
 	
 	            if (MenuInteraction.aClass1184825 != null && client.anInt7297 == 0) {
@@ -579,7 +579,7 @@ public class MenuInteraction {
 	            } else if (bool16) {
 	                if (MiniMenu.aCacheableNodeSub79445 == null) {
 	                    if (client.interfaceSelectionActive) {
-	                        InterfaceComponentRenderer.method1170();
+	                        InterfaceComponentRenderer.cancelInterfaceSelection();
 	                    }
 	                } else {
 	                    boolean bool19 = client.draggingComponent != null || client.menuItemCount > 0;

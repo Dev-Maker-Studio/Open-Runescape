@@ -501,7 +501,7 @@ public class PacketEncoder {
 	            ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(client.CURRENT_LANGUAGE) + string_0);
 	        }
 	        if (client.interfaceSelectionActive) {
-	            InterfaceComponentRenderer.method1170();
+	            InterfaceComponentRenderer.cancelInterfaceSelection();
 	        }
 	    }
 	}
