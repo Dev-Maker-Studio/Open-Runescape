@@ -329,7 +329,7 @@ public class client extends GameShell {
     public static boolean aBool7355;
     public static boolean aBool7285;
     public static int anInt7304;
-    public static int gameDrawOrder;
+    public static boolean prioritizePlayerDraw;
     public static int crossX;
     public static int crossY;
     public static int crossSpritePtr;
@@ -461,7 +461,7 @@ public class client extends GameShell {
         NPC_INDEX_REFERENCES = new int[502];
         anInt7304 = 0;
         ENTITY_OVERHEADS = new EntityNodeList();
-        gameDrawOrder = 0;
+        prioritizePlayerDraw = false;
         HINT_POSITION = new float[3];
         crossX = 0;
         crossY = 0;

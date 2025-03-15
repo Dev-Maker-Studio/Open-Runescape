@@ -226,9 +226,8 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SET_DRAW_ORDER) {
-            int key = buffer.readUByteInverse();
             client.requestVarVerifyid();
-            client.gameDrawOrder = key;
+            client.prioritizePlayerDraw = buffer.readUByteInverse() == 1;
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.SET_CURSOR) {

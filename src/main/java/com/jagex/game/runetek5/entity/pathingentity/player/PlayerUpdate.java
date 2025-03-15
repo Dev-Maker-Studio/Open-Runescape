@@ -999,33 +999,24 @@ public class PlayerUpdate {
 	            player5.calculatePosition();
 	            if (player5.startX >= 0 && player5.startZ >= 0 && player5.endX < Resource.mapRegion.getSceneSizeX() && player5.endZ < Resource.mapRegion.getSceneSizeY()) {
 	                player5.aBool10573 = player5.movingSequence.hasType && animate;
-	                if (player5 == MY_PLAYER) {
-	                    player5.worldPriority = Integer.MAX_VALUE;
-	                } else {
-	                    int i_8 = 0;
-	                    if (!player5.isHidden) {
-	                        ++i_8;
-	                    }
-	
-	                    if (!player5.entityHitbars.isEmpty()) {
-	                        i_8 += 2;
-	                    }
-	
-	                    i_8 += 5 - player5.getSize() << 2;
-	                    if (!player5.pMapdot && !player5.reduceAttackPriority) {
-	                        if (client.gameDrawOrder == 0) {
-	                            i_8 += 32;
-	                        } else {
-	                            i_8 += 128;
-	                        }
-	
-	                        i_8 += 256;
-	                    } else {
-	                        i_8 += 512;
-	                    }
-	
-	                    player5.worldPriority = i_8 + 1;
-	                }
+                    if (player5 == MY_PLAYER) {
+                        player5.worldPriority = Integer.MAX_VALUE;
+                    } else {
+                        int priority = 0;
+
+                        priority += player5.isHidden ? 0 : 1;
+                        priority += player5.entityHitbars.isEmpty() ? 0 : 2;
+                        priority += (5 - player5.getSize()) << 2;
+
+                        if (player5.pMapdot || player5.reduceAttackPriority) {
+                            priority += 512;
+                        } else {
+                            priority += client.prioritizePlayerDraw ? 128 : 32;
+                            priority += 256;
+                        }
+
+                        player5.worldPriority = priority + 1;
+                    }
 	            } else {
 	                player5.worldPriority = -1;
 	            }
@@ -1047,19 +1038,11 @@ public class PlayerUpdate {
 	                }
 	
 	                drawPriority += 5 - npc.getSize() << 2;
-	                if (client.gameDrawOrder == 0) {
-	                    if (npc.definitions.lowPriority) {
-	                        drawPriority += 64;
-	                    } else {
-	                        drawPriority += 128;
-	                    }
-	                } else if (client.gameDrawOrder == 1) {
-	                    if (npc.definitions.lowPriority) {
-	                        drawPriority += 32;
-	                    } else {
-	                        drawPriority += 64;
-	                    }
-	                }
+
+                    int baseValue = client.prioritizePlayerDraw ? 64 : 128;
+                    if (npc.definitions.lowPriority)
+                        baseValue /= 2;
+                    drawPriority += baseValue;
 	
 	                if (npc.definitions.highPriority) {
 	                    drawPriority += 1024;
