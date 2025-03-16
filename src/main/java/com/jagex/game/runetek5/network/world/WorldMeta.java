@@ -4,8 +4,12 @@ import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.client.login.LoginManager;
+import com.jagex.game.runetek5.network.PingRequest;
 import com.jagex.game.runetek5.network.WorldConnection;
 import com.jagex.game.runetek5.staticmethods.StaticMethods;
+
+import java.util.Iterator;
+import java.util.Map;
 
 public class WorldMeta {
 
@@ -44,41 +48,63 @@ public class WorldMeta {
             if (Loader.DEBUG)
                 System.out.println("Worldlist set: " + world);
         }
-        StaticMethods.WORLD_LIST_IDK = buffer.readInt();
+        StaticMethods.WORLD_LIST_VERSION = buffer.readInt();
         WorldMeta.WORLDS_LOADED = true;
     }
 
     public static void pingWorlds() {
-        if (WorldConnection.PING_WORLDS) {
-            if (WorldConnection.currentWorldPingIdx < WorldDescriptor.WORLD_LIST_START) {
-                WorldConnection.currentWorldPingIdx = WorldDescriptor.WORLD_LIST_START;
+        if (!WorldConnection.PING_WORLDS)
+            return;
+
+        Iterator<Map.Entry<Integer, PingRequest>> iterator = WorldConnection.WORLD_PING_REQUESTS.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, PingRequest> entry = iterator.next();
+            Integer worldIdx = entry.getKey();
+            PingRequest request = entry.getValue();
+            WorldDescriptor world = WorldDescriptor.getWorld(worldIdx);
+
+            if (world == null) {
+                iterator.remove();
+                continue;
             }
 
-            while (true) {
-                while (WorldConnection.currentWorldPingIdx < WorldMeta.WORLD_LIST_SIZEPLUS1) {
-                    WorldDescriptor world = WorldDescriptor.getWorld(WorldConnection.currentWorldPingIdx);
-                    if (world != null && world.ping == -1) {
-                        if (WorldConnection.CURRENT_WORLD_PING_REQUEST == null) {
-                            WorldConnection.CURRENT_WORLD_PING_REQUEST = client.PING_REQUESTER.createPingRequest(world.ipAddress);
-                        }
+            long elapsedTime = System.currentTimeMillis() - request.startTime;
+            boolean timedOut = elapsedTime > 5000;
 
-                        int ping = WorldConnection.CURRENT_WORLD_PING_REQUEST.ping;
-
-                        //System.out.println("Ping: " + world.ipAddress + "->" + ping);
-
-                        if (ping == -1) {
-                            return;
-                        }
-
-                        world.ping = ping;
-                        ++WorldConnection.currentWorldPingIdx;
-                        WorldConnection.CURRENT_WORLD_PING_REQUEST = null;
-                    } else {
-                        ++WorldConnection.currentWorldPingIdx;
-                    }
+            if (request.ping != -1 || timedOut) {
+                if (timedOut && request.ping == -1) {
+                    //System.out.println("Ping timeout for world " + world.ipAddress);
+                    world.ping = 1000;
+                } else {
+                    //System.out.println("Ping: " + world.getWorld().activity + " (" + world.ipAddress + ") -> " + request.ping);
+                    world.ping = request.ping;
                 }
 
-                return;
+                iterator.remove();
+            } else if (elapsedTime > 1000 && (elapsedTime % 1000) < 50) {
+                //System.out.println("Waiting on " + worldIdx + " - " + world.ipAddress + " (" + elapsedTime/1000 + "s elapsed)");
+            }
+        }
+
+        int availableSlots = 10 - WorldConnection.WORLD_PING_REQUESTS.size();
+        if (availableSlots > 0) {
+            for (int worldIdx = WorldDescriptor.WORLD_LIST_START;
+                 worldIdx < WorldMeta.WORLD_LIST_SIZEPLUS1 && availableSlots > 0;
+                 worldIdx++) {
+
+                if (WorldConnection.WORLD_PING_REQUESTS.containsKey(worldIdx))
+                    continue;
+
+                WorldDescriptor world = WorldDescriptor.getWorld(worldIdx);
+                if (world != null && world.ping == -1 && !WorldConnection.WORLD_PING_REQUESTS.containsKey(worldIdx)) {
+                    PingRequest request = client.PING_REQUESTER.createPingRequest(world.ipAddress);
+                    request.startTime = System.currentTimeMillis();
+
+                    WorldConnection.WORLD_PING_REQUESTS.put(worldIdx, request);
+                    //System.out.println("Started ping request for " + world.getWorld().activity + " (" + world.ipAddress + ")");
+                    availableSlots--;
+                }
             }
         }
     }

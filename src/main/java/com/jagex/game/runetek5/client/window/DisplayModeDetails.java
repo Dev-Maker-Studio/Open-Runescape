@@ -56,7 +56,7 @@ public class DisplayModeDetails {
             client.SUN_MATRIX.setViewPosition(0.0F, 256.0F, 0.0F);
             Renderers.activeToolkit.setSunPosition(client.SUN_MATRIX);
             Matrix44 renderMatrix = Renderers.activeToolkit.method8449();
-            renderMatrix.method6531((dimension.width / 2), (dimension.height / 2), 512.0F, 512.0F, Resource.mapRegion.getViewRangeStart(), Resource.mapRegion.getViewRangeEnd(), dimension.width, dimension.height);
+            renderMatrix.method6531((dimension.width / 2F), (dimension.height / 2F), 512.0F, 512.0F, Resource.mapRegion.getViewRangeStart(), Resource.mapRegion.getViewRangeEnd(), dimension.width, dimension.height);
             Renderers.activeToolkit.setModelMatrix(renderMatrix);
             Renderers.activeToolkit.updateSun(1.0F);
             Renderers.activeToolkit.applyLighting(16777215, 0.5F, 0.5F, 20.0F, -50.0f, 30.0F);

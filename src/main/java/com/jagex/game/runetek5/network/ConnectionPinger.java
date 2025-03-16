@@ -46,7 +46,7 @@ public class ConnectionPinger implements Runnable {
         if (this.address != null) {
             try {
                 byte[] ip = this.address.getAddress();
-                this.ping = Ping.ping(ip[0], ip[1], ip[2], ip[3], 10000L);
+                this.ping = Ping.ping(ip[0], ip[1], ip[2], ip[3], 1000L);
             } catch (Throwable throwable) {
             	// NOOP
             }

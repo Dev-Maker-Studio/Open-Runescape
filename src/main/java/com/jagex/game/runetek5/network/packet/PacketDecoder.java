@@ -2761,22 +2761,20 @@ public class PacketDecoder {
     }
 
     public static void decodeWorldList(boolean refresh, byte[] data) {
-        if (WorldMeta.WORLD_LIST_BUFFER == null) {
+        if (WorldMeta.WORLD_LIST_BUFFER == null)
             WorldMeta.WORLD_LIST_BUFFER = new Packet(20000);
-        }
         WorldMeta.WORLD_LIST_BUFFER.writeBytes(data, 0, data.length);
         if (refresh) {
             WorldDescriptor.decodeWorldList(WorldMeta.WORLD_LIST_BUFFER.buffer);
             WorldConnection.WORLD_DESCRIPTORS_BYID = new WorldDescriptor[WorldMeta.WORLD_LIST_SIZE];
-            int i_3 = 0;
-            for (int i_4 = WorldDescriptor.WORLD_LIST_START; i_4 <= WorldMeta.WORLD_LIST_SIZEPLUS1; i_4++) {
-                WorldDescriptor world = WorldDescriptor.getWorld(i_4);
-                if (world != null) {
-                    WorldConnection.WORLD_DESCRIPTORS_BYID[i_3++] = world;
-                }
+            int worldNumber = 0;
+            for (int worldIndex = WorldDescriptor.WORLD_LIST_START; worldIndex <= WorldMeta.WORLD_LIST_SIZEPLUS1; worldIndex++) {
+                WorldDescriptor world = WorldDescriptor.getWorld(worldIndex);
+                if (world != null)
+                    WorldConnection.WORLD_DESCRIPTORS_BYID[worldNumber++] = world;
             }
-            WorldConnection.aBool5422 = false;
-            WorldConnection.aLong5425 = Utils.time();
+            WorldConnection.requestingWorldList = false;
+            WorldConnection.worldListReceivedTime = Utils.time();
             WorldMeta.WORLD_LIST_BUFFER = null;
         }
     }

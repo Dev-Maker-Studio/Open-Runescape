@@ -4,21 +4,23 @@ import com.jagex.game.runetek5.client.GameState;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.network.world.WorldDescriptor;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class WorldConnection {
 
     public static ConnectionInfo GAME_CONNECTION;
     public static ConnectionInfo CONNECTION_INFO;
     public static ConnectionInfo LOBBY_CONNECTION_INFO;
-    public static long aLong5425;
+    public static long worldListReceivedTime;
     public static boolean reconnectingWorld;
     public static ConnectionInfo connectionInfo;
-    public static boolean aBool5422;
+    public static boolean requestingWorldList;
     public static boolean PING_WORLDS;
     public static WorldDescriptor[] WORLD_DESCRIPTORS_BYID = new WorldDescriptor[0];
     public static int CURRENT_WORLD = 1000336;
-    public static int currentWorldPingIdx;
-    public static PingRequest CURRENT_WORLD_PING_REQUEST;
 	public static Connection gameConnection;
+	public static Map<Integer, PingRequest> WORLD_PING_REQUESTS = new ConcurrentHashMap<>();
 
     WorldConnection() {
         throw new Error();
@@ -67,8 +69,7 @@ public class WorldConnection {
 
 	public static void method6299(int i_0, boolean bool1, int i_2, boolean bool3) {
 	    quicksort(0, WORLD_DESCRIPTORS_BYID.length - 1, i_0, bool1, i_2, bool3);
-	    currentWorldPingIdx = 0;
-	    CURRENT_WORLD_PING_REQUEST = null;
+		WORLD_PING_REQUESTS.clear();
 	}
 
 	public static WorldDescriptor getNextWorldDescriptor() {

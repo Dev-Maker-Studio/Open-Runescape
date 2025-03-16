@@ -3411,9 +3411,8 @@ public class CS2Interpreter {
     }
 
     public static void setPingWorlds(CS2Executor executor) {
-        if (client.gameState == GameState.UNK_0) {
+        if (client.gameState == GameState.UNK_0)
             WorldConnection.PING_WORLDS = executor.intStack[--executor.intStackPtr] == 1;
-        }
     }
 
     public static void method8714(CS2Executor executor) {
@@ -7338,14 +7337,15 @@ public class CS2Interpreter {
 
     public static void method15437(CS2Executor executor) {
         if (client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
-            if (WorldConnection.aBool5422) {
+            if (WorldConnection.requestingWorldList) {
                 executor.intStack[++executor.intStackPtr - 1] = 0;
-            } else if (WorldConnection.aLong5425 > Utils.time() - 1000L) {
+            } else if (WorldConnection.worldListReceivedTime > Utils.time() - 1000L) {
                 executor.intStack[++executor.intStackPtr - 1] = 1;
             } else {
-                WorldConnection.aBool5422 = true;
+                System.out.println("Requesting worldlist:");
+                WorldConnection.requestingWorldList = true;
                 TcpPacket tcpmessage2 = PacketEncoder.createPacket(ClientProt.REQUEST_WORLD_LIST, client.LOBBY_CONNECTION_CONTEXT.isaac);
-                tcpmessage2.buffer.writeInt(StaticMethods.WORLD_LIST_IDK);
+                tcpmessage2.buffer.writeInt(StaticMethods.WORLD_LIST_VERSION);
                 client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage2);
                 executor.intStack[++executor.intStackPtr - 1] = 0;
             }

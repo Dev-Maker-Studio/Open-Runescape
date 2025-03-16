@@ -56,7 +56,7 @@ public class StaticMethods {
     public static final float[] aFloatArray194 = new float[4];
     public static final Matrix44 aClass384185 = new Matrix44();
     public static final IterableNodeMap<VorbisNode> INDEX36_FILE_CACHE = new IterableNodeMap<VorbisNode>(4);
-    public static int WORLD_LIST_IDK;
+    public static int WORLD_LIST_VERSION;
     public static int anInt2982;
     public static NativeSprite aNativeSprite4110;
     public static FontCombo initializedFontcombos;

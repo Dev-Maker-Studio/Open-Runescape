@@ -4,9 +4,11 @@ public class PingRequest {
 
     public volatile int ping = -1;
     public final String ip;
+    public long startTime;
 
     public PingRequest(String ip) {
         this.ip = ip;
+        this.startTime = System.currentTimeMillis();
     }
 
 }
