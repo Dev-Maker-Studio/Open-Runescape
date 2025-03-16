@@ -15,7 +15,7 @@ import com.jagex.game.runetek5.graphics.texture.GlElementsArrayBuffer;
 import com.jagex.game.runetek5.imageproducer.AbstractDisplay;
 import com.jagex.game.runetek5.scene.tile.WaterTile;
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit;
-import com.jagex.game.runetek5.toolkit.opengl.GoundMaterialGL;
+import com.jagex.game.runetek5.toolkit.opengl.GroundMaterialGL;
 import com.jagex.game.runetek5.toolkit.opengl.buffer.GlVboArrayBuffer;
 import com.jagex.game.runetek5.toolkit.opengl.buffer.OpenGlArrayDrawBuffer;
 import com.jagex.game.runetek5.toolkit.opengl.buffer.GlBitBuffer;
@@ -40,7 +40,7 @@ public class GroundGL extends Ground {
     public int[][][] anIntArrayArrayArray8662;
     public int[][][] tileBlendColors;
     public int[][][] anIntArrayArrayArray8649;
-    public GoundMaterialGL[][][] materials;
+    public GroundMaterialGL[][][] materials;
     public byte[][] shadowing;
     public HashTable materialTable;
     public float[][] lightingZ;
@@ -73,7 +73,7 @@ public class GroundGL extends Ground {
         this.floorFunctionMask = floorFunctionMask;
         this.waterFunctionMask = waterFunctionMask;
         this.anIntArrayArrayArray8649 = new int[regionSizeX][regionSizeY][];
-        this.materials = new GoundMaterialGL[regionSizeX][regionSizeY][];
+        this.materials = new GroundMaterialGL[regionSizeX][regionSizeY][];
         this.tileOffsetsX = new int[regionSizeX][regionSizeY][];
         this.tileOffsetsZ = new int[regionSizeX][regionSizeY][];
         this.tileColors = new int[regionSizeX][regionSizeY][];
@@ -262,7 +262,7 @@ public class GroundGL extends Ground {
             this.activeToolkit.setLightingEnabled((this.waterFunctionMask & GroundFunctionMask.HD_LIGHT) != 0);
 
             for (int i_16 = 0; i_16 < this.goundMaterialNodes.length; i_16++) {
-                ((GoundMaterialGL) this.goundMaterialNodes[i_16]).method12085(ints_15, i_14);
+                ((GroundMaterialGL) this.goundMaterialNodes[i_16]).method12085(ints_15, i_14);
             }
 
             if (!this.activeLights.isEmpty()) {
@@ -317,7 +317,7 @@ public class GroundGL extends Ground {
             this.goundMaterialNodes = new Node[this.materialTable.nodeCount()];
             this.materialTable.values(this.goundMaterialNodes);
             for (int nodeIndex = 0; nodeIndex < this.goundMaterialNodes.length; nodeIndex++) {
-                ((GoundMaterialGL) this.goundMaterialNodes[nodeIndex]).generateNativeBuffer(this.currentColorCount);
+                ((GroundMaterialGL) this.goundMaterialNodes[nodeIndex]).generateNativeBuffer(this.currentColorCount);
             }
             int bufferEntrySize = 24;
             if (this.anIntArrayArrayArray8662 != null) {
@@ -328,18 +328,18 @@ public class GroundGL extends Ground {
             }
             NativeHeapBuffer nativeHeapBuffer = this.activeToolkit.nativeHeap.createBuffer(bufferEntrySize * this.currentColorCount, false);
             Stream nativeStream = new Stream(nativeHeapBuffer);
-            GoundMaterialGL[] materialsByVertice = new GoundMaterialGL[this.currentColorCount];
+            GroundMaterialGL[] materialsByVertice = new GroundMaterialGL[this.currentColorCount];
             int furthestBitValue = MathUtils.furtestBitValue(this.currentColorCount / 4);
             if (furthestBitValue < 1) {
                 furthestBitValue = 1;
             }
 
             HashTable hashTable = new HashTable(furthestBitValue);
-            GoundMaterialGL[] someMaterialArray = new GoundMaterialGL[this.maxColorCount];
+            GroundMaterialGL[] someMaterialArray = new GroundMaterialGL[this.maxColorCount];
             for (int x = 0; x < super.width; x++) {
                 for (int y = 0; y < super.length; y++) {
                     if (this.tileColors[x][y] != null) {
-                        GoundMaterialGL[] arr_65 = this.materials[x][y];
+                        GroundMaterialGL[] arr_65 = this.materials[x][y];
                         int[] offsetsX = this.tileOffsetsX[x][y];
                         int[] offsetsZ = this.tileOffsetsZ[x][y];
                         int[] blendingColors = this.tileBlendColors[x][y];
@@ -369,7 +369,7 @@ public class GroundGL extends Ground {
 
                         label439:
                         for (int colorIndex = 0; colorIndex < mainColors.length; colorIndex++) {
-                            GoundMaterialGL currentMaterialNode = arr_65[colorIndex];
+                            GroundMaterialGL currentMaterialNode = arr_65[colorIndex];
                             for (int index = 0; index < i_34; index++) {
                                 if (currentMaterialNode == someMaterialArray[index]) {
                                     continue label439;
@@ -558,7 +558,7 @@ public class GroundGL extends Ground {
             }
 
             for (int i_9 = 0; i_9 < this.totalMaterializedTiles; i_9++) {
-                GoundMaterialGL class282Sub310 = materialsByVertice[i_9];
+                GroundMaterialGL class282Sub310 = materialsByVertice[i_9];
                 if (class282Sub310 != null) {
                     class282Sub310.appendToNativeStream(i_9);
                 }
@@ -573,10 +573,10 @@ public class GroundGL extends Ground {
                             int faceA = vertices[verticeCount++] & 0xffff;
                             int faceB = vertices[verticeCount++] & 0xffff;
                             int faceC = vertices[verticeCount++] & 0xffff;
-                            GoundMaterialGL texturedFaceA = materialsByVertice[faceA];
-                            GoundMaterialGL texturedFaceB = materialsByVertice[faceB];
-                            GoundMaterialGL texturedFaceC = materialsByVertice[faceC];
-                            GoundMaterialGL texturedFaceD = null;
+                            GroundMaterialGL texturedFaceA = materialsByVertice[faceA];
+                            GroundMaterialGL texturedFaceB = materialsByVertice[faceB];
+                            GroundMaterialGL texturedFaceC = materialsByVertice[faceC];
+                            GroundMaterialGL texturedFaceD = null;
                             if (texturedFaceA != null) {
                                 texturedFaceA.generateFunctionMask(x, y, faceCount);
                                 texturedFaceD = texturedFaceA;
@@ -632,7 +632,7 @@ public class GroundGL extends Ground {
             long[] pointers = new long[this.goundMaterialNodes.length];
 
             for (int nodeIndex = 0; nodeIndex < this.goundMaterialNodes.length; nodeIndex++) {
-                GoundMaterialGL materialNode = (GoundMaterialGL) this.goundMaterialNodes[nodeIndex];
+                GroundMaterialGL materialNode = (GroundMaterialGL) this.goundMaterialNodes[nodeIndex];
                 pointers[nodeIndex] = materialNode.pointer;
                 materialNode.createDataArrayBuffer(this.totalMaterializedTiles);
             }
@@ -822,7 +822,7 @@ public class GroundGL extends Ground {
         if (this.anIntArrayArrayArray8649 != null) {
             this.anIntArrayArrayArray8649[tileX][tileY] = lightGroundOffsetsA;
         }
-        GoundMaterialGL[] groundMaterial = this.materials[tileX][tileY] = new GoundMaterialGL[mainColors.length];
+        GroundMaterialGL[] groundMaterial = this.materials[tileX][tileY] = new GroundMaterialGL[mainColors.length];
         for (int index = 0; index < mainColors.length; index++) {
             int materialId = waterMaterials[index];
             int scaling = waterScaling[index];
@@ -833,16 +833,16 @@ public class GroundGL extends Ground {
             long uid = (long) waterTile.intensity << 48 | (long) waterTile.scale << 42 | (long) waterTile.color << 28 | ((long) scaling << 14) | materialId;
             Node activeGroundMaterial;
             for (activeGroundMaterial = this.materialTable.get(uid); activeGroundMaterial != null; activeGroundMaterial = this.materialTable.nextInBucket()) {
-                GoundMaterialGL openglGroundMaterial = (GoundMaterialGL) activeGroundMaterial;
+                GroundMaterialGL openglGroundMaterial = (GroundMaterialGL) activeGroundMaterial;
                 if (materialId == openglGroundMaterial.materialId && openglGroundMaterial.textureScale == scaling && openglGroundMaterial.waterTile.equals(waterTile)) {
                     break;
                 }
             }
             if (activeGroundMaterial == null) {
-                groundMaterial[index] = new GoundMaterialGL(this, materialId, scaling, waterTile);
+                groundMaterial[index] = new GroundMaterialGL(this, materialId, scaling, waterTile);
                 this.materialTable.put(groundMaterial[index], uid);
             } else {
-                groundMaterial[index] = (GoundMaterialGL) activeGroundMaterial;
+                groundMaterial[index] = (GroundMaterialGL) activeGroundMaterial;
             }
         }
         if (hasShadows) {

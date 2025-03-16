@@ -19,8 +19,7 @@ import static com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*;
 
 import com.jagex.game.runetek5.buffer.ArrayBufferGL;
 
-public class GoundMaterialGL extends Node {
-
+public class GroundMaterialGL extends Node {
     public OpenGlArrayDrawBuffer arrayBufferPointer;
     public NativeHeapBuffer nativeHeapBuffer;
     public Stream nativeStream;
@@ -32,7 +31,7 @@ public class GoundMaterialGL extends Node {
     public final int[] groundFunctionMask;
     public final GlElementsArrayBuffer texture2d;
 
-    public GoundMaterialGL(GroundGL ground, int materialId, int scaling, WaterTile waterTile) {
+    public GroundMaterialGL(GroundGL ground, int materialId, int scaling, WaterTile waterTile) {
         this.ground = ground;
         this.toolkit = ground.activeToolkit;
         this.materialId = materialId;
@@ -56,7 +55,7 @@ public class GoundMaterialGL extends Node {
             MaterialType material = this.toolkit.materialProvider.getMaterial(this.materialId);
             int contrast = material.alpha & 0xff;
             if (contrast != 0 && material.effectId != 4) {
-            	int i_7;
+                int i_7;
                 if (lightness < 0) {
                     i_7 = 0;
                 } else if (lightness > 127) {
@@ -126,12 +125,12 @@ public class GoundMaterialGL extends Node {
         textureBuffer.currentPosition = 0;
         if (this.toolkit.bigEndianess) {
             for (int i_5 = 0; i_5 < i_2; i_5++) {
-            	int i_6 = ints_1[i_5];
-            	short[] materialsByTriangle = this.ground.materialIndices[i_6];
+                int i_6 = ints_1[i_5];
+                short[] materialsByTriangle = this.ground.materialIndices[i_6];
                 int functionMask = this.groundFunctionMask[i_6];
                 if (functionMask != 0 && materialsByTriangle != null) {
-                	int loops = 0;
-                	int verticeCount = 0;
+                    int loops = 0;
+                    int verticeCount = 0;
                     while (verticeCount < materialsByTriangle.length) {
                         if ((functionMask & 1 << loops++) != 0) {
                             textureBuffer.writeShort(materialsByTriangle[verticeCount++] & 0xffff);
@@ -148,12 +147,12 @@ public class GoundMaterialGL extends Node {
             }
         } else {
             for (int i_5 = 0; i_5 < i_2; i_5++) {
-            	int i_6 = ints_1[i_5];
-            	short[] materialsByTriangle = this.ground.materialIndices[i_6];
+                int i_6 = ints_1[i_5];
+                short[] materialsByTriangle = this.ground.materialIndices[i_6];
                 int functionMask = this.groundFunctionMask[i_6];
                 if (functionMask != 0 && materialsByTriangle != null) {
-                	int loops = 0;
-                	int verticeCount = 0;
+                    int loops = 0;
+                    int verticeCount = 0;
 
                     while (verticeCount < materialsByTriangle.length) {
                         if ((functionMask & 1 << loops++) != 0) {
