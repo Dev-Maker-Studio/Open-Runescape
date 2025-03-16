@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.entity.pathingentity.player;
 
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode;
+import com.jagex.game.runetek5.client.ChatMessageType;
 import com.jagex.game.runetek5.client.PreferenceManager;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Identifiable;
@@ -260,7 +261,7 @@ public class PlayerUpdate {
         if ((flags & 0x4000) != 0) {
             String message = stream.readString();
             if (player == MY_PLAYER) {
-                ChatBox.writeMessage(2, 0, player.getUsernameWithTitle(), player.getDisplayName(), player.username, message);
+                ChatBox.writeMessage(ChatMessageType.PUBLIC_CHAT, 0, player.getUsernameWithTitle(), player.getDisplayName(), player.username, message);
             }
 
             player.sendChat(message, 0, 0);
@@ -270,7 +271,7 @@ public class PlayerUpdate {
             String message = stream.readString();
             int chatFlags = stream.readUByteAdd();
             if ((chatFlags & 0x1) != 0) {
-                ChatBox.writeMessage(2, chatFlags, player.getUsernameWithTitle(), player.getDisplayName(), player.username, message);
+                ChatBox.writeMessage(ChatMessageType.PUBLIC_CHAT, chatFlags, player.getUsernameWithTitle(), player.getDisplayName(), player.username, message);
             }
 
             player.sendChat(message, 0, 0);

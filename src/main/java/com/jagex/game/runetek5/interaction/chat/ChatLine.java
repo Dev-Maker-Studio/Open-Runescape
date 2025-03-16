@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.interaction.chat;
 
+import com.jagex.game.runetek5.client.ChatMessageType;
 import com.jagex.game.runetek5.client.client;
 
 /**
@@ -11,7 +12,7 @@ public class ChatLine {
 
     public int identifier = ChatBox.getChatlineIdentifier();
     public int time;
-    public int type;
+    public ChatMessageType type;
     public int effectFlags;
     public String crownedName;
     public String name;
@@ -20,7 +21,7 @@ public class ChatLine {
     public int quickchatMessageId;
     public String message;
     
-	public ChatLine(int type, int effectFlags, String crownedName, String name, String nameSimple, String clan, int quickchatMessageId, String message) {
+	public ChatLine(ChatMessageType type, int effectFlags, String crownedName, String name, String nameSimple, String clan, int quickchatMessageId, String message) {
     	this.time = client.cycles;
         this.type = type;
         this.effectFlags = effectFlags;
@@ -32,7 +33,7 @@ public class ChatLine {
         this.message = message;
     }
 
-    public void set(int type, int effectFlags, String crownedName, String name, String simpleName, String clan, int quickchatMessageId, String message) {
+    public void set(ChatMessageType type, int effectFlags, String crownedName, String name, String simpleName, String clan, int quickchatMessageId, String message) {
     	this.identifier = ChatBox.getChatlineIdentifier();
         this.time = client.cycles;
         this.type = type;

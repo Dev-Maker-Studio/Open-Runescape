@@ -198,7 +198,7 @@ public class client extends GameShell {
     public static final int[] HINT_WIDTH;
     public static final HintDetails[] HINT_DETAILS;
     public static final int[] anIntArray7148;
-    public static final long[] aLongArray7424;
+    public static final long[] CHAT_MESSAGE_UNIQUE_HASHES;
     public static final boolean[] CAM_SHAKING;
     public static final int[] anIntArray7268;
     public static final int[] CUSTOM_LOWEST_YAW;
@@ -587,7 +587,7 @@ public class client extends GameShell {
         HINT_WIDTH = new int[MAX_HINTS];
         HINT_DETAILS = new HintDetails[MAX_HINTS];
         anIntArray7148 = new int[]{16776960, 16711680, 65280, 65535, 16711935, 16777215};
-        aLongArray7424 = new long[100];
+        CHAT_MESSAGE_UNIQUE_HASHES = new long[100];
         anInt7389 = 0;
         FriendsChat.FC_NAME = null;
         FriendsChat.FC_OWNER_NAME = null;
@@ -1020,10 +1020,10 @@ public class client extends GameShell {
                                                             for (LoginStateUpdate loginStateUpdate = (LoginStateUpdate) PLAYER_LOGINSTATE_UPDATES.getFirst(); loginStateUpdate != null; loginStateUpdate = (LoginStateUpdate) PLAYER_LOGINSTATE_UPDATES.getNext()) {
                                                                 if (loginStateUpdate.time < Utils.time() / 1000L - 5L) {
                                                                     if (loginStateUpdate.actionType > 0) {
-                                                                        ChatBox.writeMessage(5, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_IN.translate(CURRENT_LANGUAGE));
+                                                                        ChatBox.writeMessage(ChatMessageType.FRIENDS_STATUS, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_IN.translate(CURRENT_LANGUAGE));
                                                                     }
                                                                     if (loginStateUpdate.actionType == 0) {
-                                                                        ChatBox.writeMessage(5, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_OUT.translate(CURRENT_LANGUAGE));
+                                                                        ChatBox.writeMessage(ChatMessageType.FRIENDS_STATUS, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_OUT.translate(CURRENT_LANGUAGE));
                                                                     }
                                                                     loginStateUpdate.unlinkNode();
                                                                 }
@@ -2049,11 +2049,11 @@ public class client extends GameShell {
                                             for (LoginStateUpdate loginStateUpdate = (LoginStateUpdate) PLAYER_LOGINSTATE_UPDATES.getFirst(); loginStateUpdate != null; loginStateUpdate = (LoginStateUpdate) PLAYER_LOGINSTATE_UPDATES.getNext()) {
                                                 if (loginStateUpdate.time < Utils.time() / 1000L - 5L) {
                                                     if (loginStateUpdate.actionType > 0) {
-                                                        ChatBox.writeMessage(5, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_IN.translate(CURRENT_LANGUAGE));
+                                                        ChatBox.writeMessage(ChatMessageType.FRIENDS_STATUS, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_IN.translate(CURRENT_LANGUAGE));
                                                     }
 
                                                     if (loginStateUpdate.actionType == 0) {
-                                                        ChatBox.writeMessage(5, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_OUT.translate(CURRENT_LANGUAGE));
+                                                        ChatBox.writeMessage(ChatMessageType.FRIENDS_STATUS, 0, "", "", "", loginStateUpdate.username + LocalizedText.HAS_LOGGED_OUT.translate(CURRENT_LANGUAGE));
                                                     }
 
                                                     loginStateUpdate.unlinkNode();

@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.interaction.chat;
 
 import com.jagex.game.runetek5.cache.node.lru.LRUCache;
+import com.jagex.game.runetek5.client.ChatMessageType;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
@@ -33,7 +34,7 @@ public class ChatBox {
 	public static ChatFilter PRIVATE_FILTER;
 	public static int TRADE_FILTER = 0;
 
-	public static void writeMessage(int type, int effectFlags, String crownedName, String name, String simpleName, String message, String clan, int quickchatMessageId) {
+	public static void writeMessage(ChatMessageType type, int effectFlags, String crownedName, String name, String simpleName, String message, String clan, int quickchatMessageId) {
 	    ChatLine line = ChatBox.CHAT_LINES[99];
 	    System.arraycopy(ChatBox.CHAT_LINES, 0, ChatBox.CHAT_LINES, 1, 99);
 	    if (line == null) {
@@ -47,14 +48,14 @@ public class ChatBox {
 	}
 	
 	public static void writeGameMessage(String message) {
-	    ChatBox.writeMessage(4, 0, "", "", "", message);
+	    ChatBox.writeMessage(ChatMessageType.GAME, 0, "", "", "", message);
 	}
 
-	public static void writeScriptMessage(String message) {
-	    ChatBox.writeMessage(0, 0, "", "", "", message);
+	public static void writeUnfilterableMessage(String message) {
+	    ChatBox.writeMessage(ChatMessageType.UNFILTERABLE, 0, "", "", "", message);
 	}
 
-	public static void writeMessage(int type, int effectFlags, String crownedName, String name, String nameSimple, String message) {
+	public static void writeMessage(ChatMessageType type, int effectFlags, String crownedName, String name, String nameSimple, String message) {
 	    ChatBox.writeMessage(type, effectFlags, crownedName, name, nameSimple, message, null, -1);
 	}
 

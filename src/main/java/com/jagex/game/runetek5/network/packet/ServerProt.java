@@ -14,7 +14,7 @@ public enum ServerProt {
     IF_SETTEXTFONT(7, 8),
     VARP_LARGE(8, 6),
     LOGOUT_LOBBY(9, 0),
-    MESSAGE_PRIVATE_ECHO(10, -2),
+    MESSAGE_PRIVATE(10, -2),
     aClass3754362(11, 2), //vorbis preload sound related with sending packet 37 as response
     CLIENT_SETVARC_LARGE(12, 6),
     IF_MOVESUB(13, 8),
@@ -26,7 +26,7 @@ public enum ServerProt {
     UPDATE_FRIENDCHAT_CHANNEL_SINGLEUSER(19, -1),
     OUTDATED_SET_THEORA_STRING_SOMETHING(20, 6), //OUTDATED gets a string from some linkedlist populated from index 36 theora?
     SHOW_FACE_HERE(21, 1),
-    MESSAGE_QUICKCHAT_PRIVATE(22, -1),
+    MESSAGE_QUICKCHAT_PRIVATE_ECHO(22, -1),
     IF_OPENSUB_ACTIVE_OBJECT(23, 32),
     CAM_LOOKAT(24, 6),
     MESSAGE_FRIENDS_CHAT(25, -1),
@@ -35,7 +35,7 @@ public enum ServerProt {
     CLANCHANNEL_DELTA(28, -2),
     PING(29, 0),
     CHAT_FILTER_SETTINGS(30, 2),
-    MESSAGE_QUICKCHAT_PRIVATE_ECHO(31, -1),
+    MESSAGE_QUICKCHAT_PRIVATE(31, -1),
     LOYALTY_UPDATE(32, 5),
     IF_SETHIDE(33, 5),
     IF_OPENSUB_ACTIVE_NPC(34, 25),
@@ -96,7 +96,7 @@ public enum ServerProt {
     CAM_RESET(89, 0),
     UPDATE_UID192(90, 28),
     UPDATE_SITESETTINGS_COOKIE(91, -1),
-    SEND_PRIVATE_MESSAGE(92, -2),
+    MESSAGE_PRIVATE_ECHO(92, -2),
     aClass3753828(93, 11), //play sound song but with specific volume or something?
     VARCLAN_DISABLE(94, 0),
     MAP_PROJANIM_HALFSQ(95, 17),

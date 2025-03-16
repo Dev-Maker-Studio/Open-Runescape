@@ -3309,7 +3309,7 @@ public class CS2Interpreter {
         ChatLine chatLine = ChatBox.getLine(index);
         int type = -1;
         if (chatLine != null) {
-            type = chatLine.type;
+            type = chatLine.type.getValue();
         }
         executor.intStack[++executor.intStackPtr - 1] = type;
     }
@@ -7846,12 +7846,12 @@ public class CS2Interpreter {
 
     public static void appendTypedMessage(CS2Executor executor) {
         executor.intStackPtr -= 2;
-        int type = executor.intStack[executor.intStackPtr];
+        ChatMessageType type = ChatMessageType.forId(executor.intStack[executor.intStackPtr]);
         int effectFlags = executor.intStack[executor.intStackPtr + 1];
         String message = (String) executor.stringStack[--executor.stringStackPtr];
-        if (type == 99) {
+        if (type == ChatMessageType.DEV_CONSOLE) {
             Console.writeLine(message);
-        } else if (type == 98) {
+        } else if (type == ChatMessageType.DEV_CONSOLE_CLEAR) {
             Console.setConsoleText(message);
         } else {
             ChatBox.writeMessage(type, effectFlags, "", "", "", message);
@@ -8470,7 +8470,7 @@ public class CS2Interpreter {
 
     public static void sendMessage(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        ChatBox.writeScriptMessage(string_2);
+        ChatBox.writeUnfilterableMessage(string_2);
     }
 
     public static void method3340(CS2Executor executor) {
