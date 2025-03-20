@@ -1734,7 +1734,7 @@ public class client extends GameShell {
 
             if (updateStage == 1) {
                 Connection.updateConnection = AsyncConnection.createAsyncConnection(clientSocket, 125000);
-                int length = 13 + aString7164.length();
+                int length = 9 + aString7164.length();
                 Packet stream = new Packet(length + 4);
                 stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id);
                 stream.writeByte(length);
