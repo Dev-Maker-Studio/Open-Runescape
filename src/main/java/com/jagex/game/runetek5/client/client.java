@@ -1738,7 +1738,6 @@ public class client extends GameShell {
                 Packet stream = new Packet(length + 4);
                 stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id);
                 stream.writeByte(length);
-                stream.writeInt(Loader.CLIENT_BUILD);
                 stream.writeInt(Loader.MAJOR_BUILD);
                 stream.writeInt(Loader.MINOR_BUILD);
                 stream.writeString(aString7164);

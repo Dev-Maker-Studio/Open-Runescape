@@ -20,7 +20,6 @@ public class Loader extends Panel {
 
     public static final int MAJOR_BUILD = 727;
     public static final int MINOR_BUILD = 1;
-    public static final int CLIENT_BUILD = 6;
     public static final int WORLD_PORT = 43595;
     public static int LOBBY_PORT = 43594;
     public static final int LOBBY_WORLD = 1115;

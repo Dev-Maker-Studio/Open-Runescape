@@ -613,9 +613,8 @@ public class PacketDecoder {
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.OPEN_URL) {
-            if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
+            if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null)
                 WindowMode.requestWindowMode(PreferenceManager.preferences.fixedScreen.getValue(), -1, -1, false);
-            }
             byte[] bytes = new byte[context.currentPacketSize - 1];
             boolean bool66 = buffer.readUByte() == 1;
             buffer.readBytes(bytes, context.currentPacketSize - 1);
@@ -623,15 +622,12 @@ public class PacketDecoder {
             String url = rsbytebuffer127.readString();
             if (bool66) {
                 String string_137 = rsbytebuffer127.readString();
-                if (string_137.isEmpty()) {
+                if (string_137.isEmpty())
                     string_137 = url;
-                }
-                if (!client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) {
+                if (!client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName()))
                     Browser.openOpenjs(string_137, true, client.aBool7158);
-                }
-            } else {
+            } else
                 Browser.openOpenjs(url, true, client.aBool7158);
-            }
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.CAM_SHAKE) {

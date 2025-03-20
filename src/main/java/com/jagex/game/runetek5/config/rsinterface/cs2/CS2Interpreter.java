@@ -7342,7 +7342,6 @@ public class CS2Interpreter {
             } else if (WorldConnection.worldListReceivedTime > Utils.time() - 1000L) {
                 executor.intStack[++executor.intStackPtr - 1] = 1;
             } else {
-                System.out.println("Requesting worldlist:");
                 WorldConnection.requestingWorldList = true;
                 TcpPacket tcpmessage2 = PacketEncoder.createPacket(ClientProt.REQUEST_WORLD_LIST, client.LOBBY_CONNECTION_CONTEXT.isaac);
                 tcpmessage2.buffer.writeInt(StaticMethods.WORLD_LIST_VERSION);
