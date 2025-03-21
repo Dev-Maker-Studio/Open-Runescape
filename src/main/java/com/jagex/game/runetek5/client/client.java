@@ -1773,9 +1773,8 @@ public class client extends GameShell {
                     Packet buffer = new Packet(byteCount);
                     Connection.updateConnection.read(buffer.buffer, 0, buffer.buffer.length);
 
-                    for (int index = 0; index < dependencies.length; index++) {
-                        dependencies[index].setArchiveCount(buffer.readInt());
-                    }
+                    for (Dependency dependency : dependencies)
+                        dependency.setArchiveCount(buffer.readInt());
 
                     boolean loggedOut = GameState.isOnloginScreen(gameState) || GameState.isLoggedOut(gameState) || GameState.inLobby(gameState);
                     Resource.remoteFileRequesterJs5.init(Connection.updateConnection, !loggedOut);
