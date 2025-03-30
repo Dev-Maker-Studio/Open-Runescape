@@ -7,6 +7,6 @@ public class Friend {
     public String worldName;
     public int friendsChatRank;
     public int platform;
-    public String username;
+    public String previousDisplayName;
     public int worldFlags;
 }

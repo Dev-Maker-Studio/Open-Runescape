@@ -33,8 +33,8 @@ public class FriendList {
 	                        ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_ON_FRIENDS_LIST.translate(client.CURRENT_LANGUAGE));
 	                        return;
 	                    }
-	                    if (friend.username != null) {
-	                        String friendFormattedUsername = TextUtils.formatDisplayname(friend.username);
+	                    if (friend.previousDisplayName != null) {
+	                        String friendFormattedUsername = TextUtils.formatDisplayname(friend.previousDisplayName);
 	                        if (friendFormattedUsername != null && friendFormattedUsername.equals(formattedDisplayName)) {
 	                            ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_ON_FRIENDS_LIST.translate(client.CURRENT_LANGUAGE));
 	                            return;

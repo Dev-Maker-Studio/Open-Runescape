@@ -369,6 +369,7 @@ public class LoginManager {
 	                }
 	                LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().read(LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, 1);
 	                int i_10 = LoginManager.CURRENT_CONNECTION_CONTEXT.receivedBuffer.buffer[0] & 0xff;
+					System.out.println("Login response: " + i_10);
 	                if (i_10 == 21) {
 	                    LoginManager.loginStage = LoginStage.UNK_128;
 	                } else if (i_10 != 29 && i_10 != 45) {

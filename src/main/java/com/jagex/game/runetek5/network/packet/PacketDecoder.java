@@ -2028,7 +2028,7 @@ public class PacketDecoder {
             while (buffer.currentPosition < context.currentPacketSize) {
                 boolean warnMessage = buffer.readUByte() == 1;
                 String displayName = buffer.readString();
-                String username = buffer.readString();
+                String previousDisplayName = buffer.readString();
                 int world = buffer.readUShort();
                 int friendchatRank = buffer.readUByte();
                 boolean referrer = buffer.readUByte() == 1;
@@ -2062,7 +2062,7 @@ public class PacketDecoder {
                                 }
                                 friend.worldId = world;
                             }
-                            friend.username = username;
+                            friend.previousDisplayName = previousDisplayName;
                             friend.worldName = worldName;
                             friend.friendsChatRank = friendchatRank;
                             friend.platform = platform;
@@ -2071,9 +2071,9 @@ public class PacketDecoder {
                             displayName = null;
                             break;
                         }
-                    } else if (username.equals(friend.displayName)) {
+                    } else if (previousDisplayName.equals(friend.displayName)) {
                         friend.displayName = displayName;
-                        friend.username = username;
+                        friend.previousDisplayName = previousDisplayName;
                         displayName = null;
                         break;
                     }
@@ -2082,7 +2082,7 @@ public class PacketDecoder {
                     Friend friend = new Friend();
                     FriendList.FRIENDS[FriendList.FRIEND_COUNT] = friend;
                     friend.displayName = displayName;
-                    friend.username = username;
+                    friend.previousDisplayName = previousDisplayName;
                     friend.worldId = world;
                     friend.worldName = worldName;
                     friend.friendsChatRank = friendchatRank;

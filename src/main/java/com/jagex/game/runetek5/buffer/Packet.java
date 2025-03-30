@@ -412,7 +412,7 @@ public class Packet extends Node {
 
     public String readJagString() {
         byte firstByte = readByte();
-        if (firstByte != 0) throw new IllegalStateException("First byte in JagString must be 0");
+        if (firstByte != 0) throw new IllegalStateException("First byte in JagString must be 0 " + firstByte);
         int start = this.currentPosition;
         while (readByte() != 0) {}
         int length = this.currentPosition - start - 1;

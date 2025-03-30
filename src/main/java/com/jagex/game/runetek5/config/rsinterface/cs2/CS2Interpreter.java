@@ -6699,8 +6699,8 @@ public class CS2Interpreter {
         if (FriendList.LOADED == 2 && i_2 < FriendList.FRIEND_COUNT) {
             Friend class63 = FriendList.FRIENDS[i_2];
             executor.stringStack[++executor.stringStackPtr - 1] = class63.displayName;
-            if (class63.username != null) {
-                executor.stringStack[++executor.stringStackPtr - 1] = class63.username;
+            if (class63.previousDisplayName != null) {
+                executor.stringStack[++executor.stringStackPtr - 1] = class63.previousDisplayName;
             } else {
                 executor.stringStack[++executor.stringStackPtr - 1] = "";
             }

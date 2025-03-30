@@ -50,8 +50,8 @@ public class IgnoreList {
 	                        		+ LocalizedText.FROM_FRIENDS_FIRST.translate(client.CURRENT_LANGUAGE));
 	                        return;
 	                    }
-	                    if (friend.username != null) {
-	                        String formattedFriendUsername = TextUtils.formatDisplayname(friend.username);
+	                    if (friend.previousDisplayName != null) {
+	                        String formattedFriendUsername = TextUtils.formatDisplayname(friend.previousDisplayName);
 	                        if (formattedFriendUsername != null && formattedFriendUsername.equals(formattedDisplayName)) {
 	                            ChatBox.writeGameMessage(LocalizedText.PLEASE_REMOVE.translate(client.CURRENT_LANGUAGE) + displayName
 	                            		+ LocalizedText.FROM_FRIENDS_FIRST.translate(client.CURRENT_LANGUAGE));
