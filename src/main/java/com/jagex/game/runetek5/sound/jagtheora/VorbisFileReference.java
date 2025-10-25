@@ -8,8 +8,8 @@ public class VorbisFileReference extends JagTheoraManager {
     public int[] values;
     public int anInt8115;
     public final byte[][] aByteArrayArray8111 = new byte[10][];
-    public final Packet aNodeSub358112 = new Packet(null);
-    public final Packet byteBuffer = new Packet(null);
+    public final Packet aNodeSub358112 = new Packet();
+    public final Packet byteBuffer = new Packet();
     public final Js5ResourceProvider resourceProvider;
     public final int fileId;
 
@@ -44,12 +44,12 @@ public class VorbisFileReference extends JagTheoraManager {
         this.byteBuffer.currentPosition = 0;
         do {
             if (this.byteBuffer.currentPosition >= this.byteBuffer.buffer.length) {
-                this.byteBuffer.buffer = null;
+                this.byteBuffer.buffer = new byte[0];
                 return bytes_1.length;
             }
-            if (this.aNodeSub358112.buffer == null) {
+            if (this.aNodeSub358112.buffer.length == 0) {
                 if (this.aByteArrayArray8111[0] == null) {
-                    this.byteBuffer.buffer = null;
+                    this.byteBuffer.buffer = new byte[0];
                     return this.byteBuffer.currentPosition;
                 }
                 this.aNodeSub358112.buffer = this.aByteArrayArray8111[0];
@@ -58,17 +58,17 @@ public class VorbisFileReference extends JagTheoraManager {
             int len = this.aNodeSub358112.buffer.length - this.aNodeSub358112.currentPosition;
             if (i_6 < len) {
                 this.aNodeSub358112.readBytes(this.byteBuffer.buffer, this.byteBuffer.currentPosition, i_6);
-                this.byteBuffer.buffer = null;
+                this.byteBuffer.buffer = new byte[0];
                 return bytes_1.length;
             }
             this.byteBuffer.writeBytes(this.aNodeSub358112.buffer, this.aNodeSub358112.currentPosition, len);
-            this.aNodeSub358112.buffer = null;
+            this.aNodeSub358112.buffer = new byte[0];
             this.aNodeSub358112.currentPosition = 0;
             ++this.anInt8115;
             System.arraycopy(this.aByteArrayArray8111, 1, this.aByteArrayArray8111, 0, 9);
             this.aByteArrayArray8111[9] = null;
         } while (this.anInt8115 < this.values.length);
-        this.byteBuffer.buffer = null;
+        this.byteBuffer.buffer = new byte[0];
         return this.byteBuffer.currentPosition;
     }
 

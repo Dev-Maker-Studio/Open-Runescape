@@ -1,8 +1,11 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.0"
+    id("com.gradleup.shadow") version "9.2.0"
     id("maven-publish")
     java
     application
+    kotlin("jvm") version "2.2.21"
 }
 
 group = "darkan"
@@ -15,9 +18,27 @@ application {
 
 java {
 	toolchain.languageVersion = JavaLanguageVersion.of(19)
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
-project.setProperty("mainClassName", "com.jagex.game.launch.Loader")
+kotlin {
+	compilerOptions {
+		//jvmTarget.set(JvmTarget.JVM_1_8)
+        jvmTarget.set(JvmTarget.JVM_17)
+	}
+}
+
+sourceSets {
+	main {
+		java {
+			setSrcDirs(listOf("src/main/java", "src/main/kotlin"))
+		}
+		kotlin {
+			setSrcDirs(listOf("src/main/java", "src/main/kotlin"))
+		}
+	}
+}
 
 repositories {
     mavenLocal()
@@ -25,7 +46,7 @@ repositories {
 }
 
 dependencies {
-
+	implementation(kotlin("stdlib-jdk8"))
 }
 
 publishing {

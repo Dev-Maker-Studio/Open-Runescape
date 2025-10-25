@@ -107,8 +107,7 @@ public class PacketDecoder {
 	
 	public static boolean decodePacketFromStream(BufferedConnectionContext connectionContext) {
 	    try {
-	        boolean success = decode(connectionContext);
-	        return success;
+            return decode(connectionContext);
 	    } catch (IOException ioexception) {
 	    	ioexception.printStackTrace();
 	        if (client.gameState == GameState.UNK_7) {
@@ -1044,7 +1043,7 @@ public class PacketDecoder {
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = new Object[TypeLists.CLAN_VAR.size];
             }
-            ClanVarTypeList.CLAN_VARS[key] = Long.valueOf(long_47);
+            ClanVarTypeList.CLAN_VARS[key] = long_47;
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 & 0x1f] = key;
             context.currentPacket = null;
             return true;
@@ -1103,7 +1102,7 @@ public class PacketDecoder {
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = new Object[TypeLists.CLAN_VAR.size];
             }
-            ClanVarTypeList.CLAN_VARS[key] = Integer.valueOf(flags);
+            ClanVarTypeList.CLAN_VARS[key] = flags;
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 & 0x1f] = key;
             context.currentPacket = null;
             return true;
@@ -1204,7 +1203,7 @@ public class PacketDecoder {
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = new Object[TypeLists.CLAN_VAR.size];
             }
-            ClanVarTypeList.CLAN_VARS[key] = Integer.valueOf(b_84);
+            ClanVarTypeList.CLAN_VARS[key] = (int) b_84;
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 & 0x1f] = key;
             context.currentPacket = null;
             return true;

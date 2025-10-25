@@ -18,7 +18,7 @@ public class MidiFileReader {
     public int[] startPositionTrackBuffer;
     public int[] trackLengths;
     public int[] anIntArray796;
-    public final Packet buffer = new Packet(null);
+    public final Packet buffer = new Packet();
 
     public MidiFileReader(byte[] bytes_1) {
         decode(bytes_1);
@@ -74,7 +74,7 @@ public class MidiFileReader {
     }
 
     public void clear() {
-        this.buffer.buffer = null;
+        this.buffer.buffer = new byte[0];
         this.trackStarts = null;
         this.startPositionTrackBuffer = null;
         this.trackLengths = null;
@@ -133,7 +133,7 @@ public class MidiFileReader {
     }
 
     public boolean dataLoaded() {
-        return this.buffer.buffer != null;
+        return this.buffer.buffer.length > 0;
     }
 
     public int decodeTrackFlags(int track, int initialFlags) {
