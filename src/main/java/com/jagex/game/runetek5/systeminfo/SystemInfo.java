@@ -22,11 +22,11 @@ public class SystemInfo extends Node {
     public final int javaBuild;
     public final int javaUpdate;
     public int ram;
-    public String aString8157;
+    public String gpuModel;
     public String aString8160;
     public String dwDirectxVersion;
     public String aString8153;
-    public final int[] rawCPUInformationData = new int[3];
+    public final int[] cpuFeatureFlags = new int[3];
     public final int operatingSystemType;
     public final boolean x64os;
     public int osVendor;
@@ -38,8 +38,8 @@ public class SystemInfo extends Node {
     public int cpuCores;
     public int cpuClock;
     public String cpuType;
-    public int rawCPUInformation2;
-    public int rawCPUInformation;
+    public int cpuModelInfo;
+    public int cpuFamilyId;
     public String cpuData;
     public int dxDriverMonth;
     public int dxDriverYear;
@@ -179,37 +179,37 @@ public class SystemInfo extends Node {
                     int i_11 = rawCpuInfo[i_7 * 5 + 3];
                     int i_12 = rawCpuInfo[i_7 * 5 + 4];
                     RawCpuInfo class43013 = new RawCpuInfo(i_8, i_9, i_10, i_11, i_12);
-                    hashmap6.put(Integer.valueOf(i_8), class43013);
+                    hashmap6.put(i_8, class43013);
                 }
-                RawCpuInfo class43015 = hashmap6.get(Integer.valueOf(0));
+                RawCpuInfo class43015 = hashmap6.get(0);
                 if (class43015 != null) {
                     Packet rsbytebuffer16 = new Packet(13);
-                    rsbytebuffer16.writeIntLittle(class43015.anInt5137);
-                    rsbytebuffer16.writeIntLittle(class43015.anInt5136);
-                    rsbytebuffer16.writeIntLittle(class43015.anInt5138);
+                    rsbytebuffer16.writeIntLittle(class43015.resultEBX);
+                    rsbytebuffer16.writeIntLittle(class43015.resultEDX);
+                    rsbytebuffer16.writeIntLittle(class43015.resultECX);
                     rsbytebuffer16.currentPosition = 0;
                     this.cpuType = rsbytebuffer16.readString();
                 }
-                RawCpuInfo class43027 = hashmap6.get(Integer.valueOf(1));
+                RawCpuInfo class43027 = hashmap6.get(1);
                 if (class43027 != null) {
-                    this.rawCPUInformation2 = class43027.anInt5139;
-                    int i_9 = class43027.anInt5137;
-                    this.rawCPUInformation = i_9 >> 16 & 0xff;
-                    this.rawCPUInformationData[0] = class43027.anInt5138;
-                    this.rawCPUInformationData[1] = class43027.anInt5136;
+                    this.cpuModelInfo = class43027.resultEAX;
+                    int i_9 = class43027.resultEBX;
+                    this.cpuFamilyId = i_9 >> 16 & 0xff;
+                    this.cpuFeatureFlags[0] = class43027.resultECX;
+                    this.cpuFeatureFlags[1] = class43027.resultEDX;
                 }
                 RawCpuInfo class43017 = hashmap6.get(Integer.valueOf(-2147483647));
                 if (class43017 != null) {
-                    this.rawCPUInformationData[2] = class43017.anInt5136;
+                    this.cpuFeatureFlags[2] = class43017.resultEDX;
                 }
                 Packet rsbytebuffer18 = new Packet(49);
                 for (int i_11 = -2147483646; i_11 <= -2147483644; i_11++) {
                     RawCpuInfo class43019 = hashmap6.get(Integer.valueOf(i_11));
                     if (class43019 != null) {
-                        rsbytebuffer18.writeIntLittle(class43019.anInt5139);
-                        rsbytebuffer18.writeIntLittle(class43019.anInt5137);
-                        rsbytebuffer18.writeIntLittle(class43019.anInt5138);
-                        rsbytebuffer18.writeIntLittle(class43019.anInt5136);
+                        rsbytebuffer18.writeIntLittle(class43019.resultEAX);
+                        rsbytebuffer18.writeIntLittle(class43019.resultEBX);
+                        rsbytebuffer18.writeIntLittle(class43019.resultECX);
+                        rsbytebuffer18.writeIntLittle(class43019.resultEDX);
                     }
                 }
                 rsbytebuffer18.currentPosition = 0;
@@ -219,7 +219,7 @@ public class SystemInfo extends Node {
             if (dxdiagDisplaydeviceProps != null && dxdiagDisplaydeviceProps.length > 0 && dxdiagDisplaydeviceProps[0] != null) {
                 for (int i_7 = 0; i_7 < dxdiagDisplaydeviceProps[0].length; i_7 += 2) {
                     if ("szDescription".equalsIgnoreCase(dxdiagDisplaydeviceProps[0][i_7])) {
-                        this.aString8157 = dxdiagDisplaydeviceProps[0][i_7 + 1];
+                        this.gpuModel = dxdiagDisplaydeviceProps[0][i_7 + 1];
                     } else if ("szDriverDateEnglish".equalsIgnoreCase(dxdiagDisplaydeviceProps[0][i_7])) {
                         String string_28 = dxdiagDisplaydeviceProps[0][i_7 + 1];
                         try {
@@ -252,8 +252,8 @@ public class SystemInfo extends Node {
         } catch (Throwable throwable) {
             this.ram = 0;
         }
-        if (this.aString8157 == null) {
-            this.aString8157 = "";
+        if (this.gpuModel == null) {
+            this.gpuModel = "";
         }
         this.aString8160 = "";
         if (this.dwDirectxVersion == null) {
@@ -271,7 +271,7 @@ public class SystemInfo extends Node {
 
     public int encode() {
         byte b_2 = 38;
-        int i_3 = b_2 + Utils.stringLengthPlus2(this.aString8157);
+        int i_3 = b_2 + Utils.stringLengthPlus2(this.gpuModel);
         i_3 += Utils.stringLengthPlus2(this.aString8160);
         i_3 += Utils.stringLengthPlus2(this.dwDirectxVersion);
         i_3 += Utils.stringLengthPlus2(this.aString8153);
@@ -281,8 +281,8 @@ public class SystemInfo extends Node {
     }
 
     public void method13455() {
-        if (this.aString8157.length() > 40) {
-            this.aString8157 = this.aString8157.substring(0, 40);
+        if (this.gpuModel.length() > 40) {
+            this.gpuModel = this.gpuModel.substring(0, 40);
         }
         if (this.aString8160.length() > 40) {
             this.aString8160 = this.aString8160.substring(0, 40);
@@ -309,7 +309,7 @@ public class SystemInfo extends Node {
         machineInfoBuffer.writeByte(this.processors);
         machineInfoBuffer.writeMedium(this.ram);
         machineInfoBuffer.writeShort(this.cpuClock);
-        machineInfoBuffer.writeJagString(this.aString8157);
+        machineInfoBuffer.writeJagString(this.gpuModel);
         machineInfoBuffer.writeJagString(this.aString8160);
         machineInfoBuffer.writeJagString(this.dwDirectxVersion);
         machineInfoBuffer.writeJagString(this.aString8153);
@@ -318,11 +318,11 @@ public class SystemInfo extends Node {
         machineInfoBuffer.writeJagString(this.cpuType);
         machineInfoBuffer.writeJagString(this.cpuData);
         machineInfoBuffer.writeByte(this.cpuCores);
-        machineInfoBuffer.writeByte(this.rawCPUInformation);
-        for (int i_3 = 0; i_3 < this.rawCPUInformationData.length; i_3++) {
-            machineInfoBuffer.writeInt(this.rawCPUInformationData[i_3]);
+        machineInfoBuffer.writeByte(this.cpuFamilyId);
+        for (int i_3 = 0; i_3 < this.cpuFeatureFlags.length; i_3++) {
+            machineInfoBuffer.writeInt(this.cpuFeatureFlags[i_3]);
         }
-        machineInfoBuffer.writeInt(this.rawCPUInformation2);
+        machineInfoBuffer.writeInt(this.cpuModelInfo);
     }
 
 	public static String getCacheCompletionPercent(long percentage, int i_2, boolean bool3, Language language) {

@@ -1300,9 +1300,8 @@ public class PacketDecoder {
             return true;
         } else if (context.currentPacket == ServerProt.UPDATE_UID192) {
             buffer.currentPosition += 28;
-            if (buffer.checkCrc()) {
+            if (buffer.checkCrc())
                 GameShell.updateRandomDatUID192(buffer, buffer.currentPosition - 28);
-            }
             context.currentPacket = null;
             return true;
         } else if (context.currentPacket == ServerProt.HINT_ARROW) {
