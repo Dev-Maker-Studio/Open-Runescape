@@ -851,7 +851,7 @@ public class client extends GameShell {
             if (!MiniMenu.isOpen) {
                 MiniMenu.resetEntries();
             }
-            for (int i_1 = 0; i_1 < 100 && PacketDecoder.decodePacketFromStream(GAME_CONNECTION_CONTEXT); i_1++) {
+            for (int i_1 = 0; i_1 < 100 && PacketDecoder.INSTANCE.decodePacketFromStream(GAME_CONNECTION_CONTEXT); i_1++) {
             }
             if (gameState == GameState.LOGGED_INGAME) {
                 while (ReflectionCheckManager.hasPendingChecks()) {
@@ -1937,7 +1937,7 @@ public class client extends GameShell {
                 MiniMenu.resetEntries();
             }
 
-            for (int packetLoop = 0; packetLoop < 100 && PacketDecoder.decodePacketFromStream(LOBBY_CONNECTION_CONTEXT); packetLoop++) { }
+            for (int packetLoop = 0; packetLoop < 100 && PacketDecoder.INSTANCE.decodePacketFromStream(LOBBY_CONNECTION_CONTEXT); packetLoop++) { }
         }
 
         PulseEventHandler.processPulseEvents();

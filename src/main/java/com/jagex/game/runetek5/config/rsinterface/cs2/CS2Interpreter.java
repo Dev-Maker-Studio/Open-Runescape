@@ -5899,9 +5899,7 @@ public class CS2Interpreter {
 
     public static void method4774(CS2Executor executor) {
         String string_2 = null;
-        if (PacketDecoder.HOSTNAME_IDENTIFIER != null) {
-            string_2 = PacketDecoder.HOSTNAME_IDENTIFIER.getHostName();
-        }
+        string_2 = PacketDecoder.HOSTNAME_IDENTIFIER.getHostName();
         if (string_2 == null) {
             string_2 = "";
         }

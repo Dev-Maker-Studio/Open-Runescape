@@ -179,6 +179,14 @@ open class Packet : Node<Packet> {
         writeByte(flags and 0x7f)
     }
 
+    fun writeFlagsMaybeBetter(flags: Int) {
+        if (flags and 0xF0000000.toInt() != 0) writeByte((flags ushr 28) or 0x80)
+        if (flags and 0xFFE00000.toInt() != 0) writeByte((flags ushr 21) or 0x80)
+        if (flags and 0xFFFFC000.toInt() != 0) writeByte((flags ushr 14) or 0x80)
+        if (flags and 0xFFFFFF80.toInt() != 0) writeByte((flags ushr 7) or 0x80)
+        writeByte(flags and 0x7F)
+    }
+
     fun writeSmart(data: Int) {
         when (data) {
             in 0 until 128 -> writeByte(data)
