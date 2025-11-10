@@ -1,0 +1,29 @@
+package com.darkan.bot.utils
+
+enum class Skill {
+    ATTACK,
+    DEFENSE,
+    STRENGTH,
+    CONSTITUTION,
+    RANGED,
+    PRAYER,
+    MAGIC,
+    COOKING,
+    WOODCUTTING,
+    FLETCHING,
+    FISHING,
+    FIREMAKING,
+    CRAFTING,
+    SMITHING,
+    MINING,
+    HERBLORE,
+    AGILITY,
+    THIEVING,
+    SLAYER,
+    FARMING,
+    RUNECRAFTING,
+    HUNTER,
+    CONSTRUCTION,
+    SUMMONING,
+    DUNGEONEERING
+}

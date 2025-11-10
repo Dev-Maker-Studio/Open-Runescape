@@ -5,6 +5,7 @@ plugins {
     id("maven-publish")
     java
     application
+    kotlin("plugin.serialization") version "2.2.21"
     kotlin("jvm") version "2.2.21"
 }
 
@@ -46,7 +47,10 @@ repositories {
 }
 
 dependencies {
-	implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    implementation("io.github.classgraph:classgraph:4.8.177")
+    implementation("com.github.weisj:darklaf-core:3.0.2")
 }
 
 publishing {
