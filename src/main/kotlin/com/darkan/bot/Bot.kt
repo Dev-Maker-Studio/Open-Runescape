@@ -6,28 +6,33 @@ import com.jagex.game.launch.Loader
 import com.jagex.game.runetek5.cache.node.HashTableIterator
 import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.input.console.Console
 import com.jagex.game.runetek5.client.input.keyboard.KeyDownCommand
+import com.jagex.game.runetek5.client.login.LoginManager
+import com.jagex.game.runetek5.config.Identifiable
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
+import com.jagex.game.runetek5.config.`object`.ObjectShapes
 import com.jagex.game.runetek5.config.rsinterface.SubInterface
 import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer
+import com.jagex.game.runetek5.entity.gameobject.GameObject
 import com.jagex.game.runetek5.entity.grounditem.GroundItemNode
-import com.jagex.game.runetek5.entity.grounditem.GroundItemWrapper
 import com.jagex.game.runetek5.entity.pathingentity.EntityHitbar
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
-import com.jagex.game.runetek5.graphics.model.normal.VertexNormal
 import com.jagex.game.runetek5.movement.pathfinding.RouteFinder
 import com.jagex.game.runetek5.movement.pathfinding.RouteStrategies
 import com.jagex.game.runetek5.movement.pathfinding.RouteStrategy
-import com.jagex.game.runetek5.network.BufferedConnectionContext
 import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
-import com.jagex.game.runetek5.scene.MapRegion
+import com.jagex.game.runetek5.staticmethods.StaticMethods
+import com.jagex.game.runetek5.vardomain.VarProviders
 import java.text.NumberFormat
 import java.util.*
+import kotlin.math.floor
+import kotlin.math.pow
 
 object Bot {
 
@@ -115,7 +120,7 @@ object Bot {
 
     fun getTimeSinceLastAnimation() = System.currentTimeMillis() - lastAnimated
 
-    fun getMyPlayerPosition() = Tile(getMyPlayerX(), getMyPlayerY(), getMyPlayer().plane)
+    fun getMyPlayerPosition() = Tile(getMyPlayerX(), getMyPlayerY(), getMyPlayer().plane.toInt())
 
     fun getCurrentAnimation() = getMyPlayer().currentAnimations?.get(0) ?: -1
 
@@ -359,7 +364,7 @@ object Bot {
 
         val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShort(getPlayerPid(username))
-        packet.buffer.write128Byte(0)
+        packet.buffer.writeByteSubtract(0)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
@@ -379,7 +384,7 @@ object Bot {
 
     fun clearResponsePlayers() = responsePlayers.clear()
 
-    fun sendConsoleMessage(string: String) = Class209.printConsoleMessage(string)
+    fun sendConsoleMessage(string: String) = Console.writeLine(string)
 
     fun sendItemOnObject(item: String, obj: WorldObject) {
         val itemId = inventory.getItem(inventory.getSlotByItem(item))
@@ -396,20 +401,20 @@ object Bot {
 
     fun sendItemOnObject(itemId: Int, objectId: Int, x: Int, y: Int) {
         val packet = PacketEncoder.createPacket(ClientProt.IF_ON_OBJECT, client.GAME_CONNECTION_CONTEXT.isaac)
-        packet.buffer.writeShortLE128(x)
-        packet.buffer.write128Byte(if (KeyDownCommand.runKeyDown()) 1 else 0)
-        packet.buffer.writeIntV1(objectId)
+        packet.buffer.writeShortAddLittle(x)
+        packet.buffer.writeByteSubtract(if (KeyDownCommand.runKeyDown()) 1 else 0)
+        packet.buffer.writeIntMiddle(objectId)
         packet.buffer.writeInt(44498944)
-        packet.buffer.writeShortLE(itemId)
-        packet.buffer.writeShort128(inventory.getSlotByItem(itemId))
-        packet.buffer.writeShortLE(y)
+        packet.buffer.writeShortLittle(itemId)
+        packet.buffer.writeShortAdd(inventory.getSlotByItem(itemId))
+        packet.buffer.writeShortLittle(y)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun clickDialogue(id: Int) {
         val packet = PacketEncoder.createPacket(ClientProt.IF_CONTINUE, client.GAME_CONNECTION_CONTEXT.isaac)
-        packet.buffer.writeIntV1(id)
-        packet.buffer.writeShortLE128(-1)
+        packet.buffer.writeIntMiddle(id)
+        packet.buffer.writeShortAddLittle(-1)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
@@ -449,12 +454,12 @@ object Bot {
 
     fun interfaceOnInterface(fromIf: Int, toIf: Int, fromSlot: Int, toSlot: Int, fromItem: Int, toItem: Int) {
         val packet = PacketEncoder.createPacket(ClientProt.IF_ON_IF, client.GAME_CONNECTION_CONTEXT.isaac)
-        packet.buffer.writeShortLE128(toSlot)
-        packet.buffer.writeShortLE(fromSlot)
-        packet.buffer.writeShortLE128(toItem)
-        packet.buffer.writeIntLE(fromIf)
-        packet.buffer.writeIntV2(toIf)
-        packet.buffer.writeShortLE(fromItem)
+        packet.buffer.writeShortAddLittle(toSlot)
+        packet.buffer.writeShortLittle(fromSlot)
+        packet.buffer.writeShortAddLittle(toItem)
+        packet.buffer.writeIntLittle(fromIf)
+        packet.buffer.writeIntInverseMiddle(toIf)
+        packet.buffer.writeShortLittle(fromItem)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
@@ -578,7 +583,7 @@ object Bot {
         }
     }
 
-    fun closeInterfaces() = LinkedNodeList.closeInterfaces()
+    fun closeInterfaces() = PacketEncoder.closeInterface()
 
     fun bankEquipment() = clickButton(49938469, -1, -1, 1)
 
@@ -609,8 +614,8 @@ object Bot {
             else -> return
         }
 
-        val packet = PacketEncoder.createPacket(prot, context.outKeys)
-        Class350_Sub3.method12590(packet, interfaceHash, slotId, slotId2)
+        val packet = PacketEncoder.createPacket(prot, context.isaac)
+        PacketEncoder.method12590(packet, interfaceHash, slotId, slotId2)
         context.queuePacket(packet)
     }
 
@@ -656,25 +661,25 @@ object Bot {
     }
 
     fun walkTo(tile: Tile) {
-        val packet = CutsceneArea.method12078(tile.x - getBaseX(), tile.y - getBaseY(), 0)
+        val packet = PacketEncoder.walkToTile(tile.x - getBaseX(), tile.y - getBaseY(), 0)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
-        MapRegion.routeTo(
+        RouteFinder.calculateRoute(
             tile.x - getBaseX(),
             tile.y - getBaseY(),
             true,
-            SunDefinitions.method853(tile.x - getBaseX(), tile.y - getBaseY())
+            RouteStrategies.forFixedTile(tile.x - getBaseX(), tile.y - getBaseY())
         )
     }
 
     fun getDistanceTo(strategy: RouteStrategy, alt: Boolean = false): Int {
         return Utils.findRouteDistance(
-            getMyPlayer().movementBaseX[0],
-            getMyPlayer().movementBaseY[0], PlayerUpdate.MY_PLAYER.size,
+            getMyPlayer().endX.toInt(),
+            getMyPlayer().endZ.toInt(), PlayerUpdate.MY_PLAYER.size,
             strategy,
-            IndexLoaders.MAP_REGION_DECODER.getClipMap(PlayerUpdate.MY_PLAYER.plane),
+            Resource.mapRegion.getCollisionMap(PlayerUpdate.MY_PLAYER.plane.toInt()),
             alt,
-            client.walkStepsX,
-            client.walkStepsY
+            client.WALKING_STEPS_X,
+            client.WALKING_STEPS_Y
         )
     }
 
@@ -690,7 +695,7 @@ object Bot {
         return false
     }
 
-    fun facingMe(entity: PathingEntity) = (entity.faceEntity - 32768) == getMyPlayer().index
+    fun facingMe(entity: PathingEntity) = (entity.faceEntity - 32768) == getMyPlayer().playerIndex
 
     fun getHitbarValue(entity: PathingEntity?, hitbarIndex: Int): Int {
         if (entity == null) return -1
@@ -699,7 +704,7 @@ object Bot {
             val bar = hitbar as? EntityHitbar ?: continue
             if (bar.hitbarType != hitbarDef) continue
             val update = bar.method12600(client.cycles)
-            if (update != null) return update.barValEnd
+            if (update != null) return update.toPercentage
         }
         return -1
     }
@@ -708,16 +713,16 @@ object Bot {
         if (entity.faceEntity == -1) return null
         return when {
             entity.faceEntity < 32768 -> {
-                val node = client.NPC_MAP.get(entity.faceEntity) as? ObjectNode
-                node?.anObject8068 as? NPCEntity
+                val node = client.NPC_MAP.get(entity.faceEntity.toLong())
+                node?.value as? NpcEntity
             }
-            else -> client.players[entity.faceEntity - 32768]
+            else -> PlayerUpdate.players[entity.faceEntity - 32768]
         }
     }
 
     fun getClosestOutOfCombatNPC(id: String) =
         getClosestEntity(getFilteredNPCs(id).filter { !inCombat(it) }) {
-            Utils.distance(getMyPlayerPosition(), Tile(it.localX + getBaseX(), it.localY + getBaseY()))
+            Utils.distance(getMyPlayerPosition(), Tile(it.endX + getBaseX(), it.endZ + getBaseY()))
         }
 
     fun getClosestOutOfCombatNPCContaining(id: String) =
@@ -736,39 +741,39 @@ object Bot {
         getClosestEntity(getFilteredNPCs(id)) { getDistanceTo(it) }
 
     fun getDistanceTo(obj: WorldObject): Int {
-        val objType = Class386.identify(ObjectType.values(), obj.type) as ObjectType
+        val locShape: ObjectShapes = Identifiable.identify(ObjectShapes.entries.toTypedArray(), obj.type) as ObjectShapes? ?: return Int.MAX_VALUE
         val strategy: RouteStrategy = when {
-            objType == ObjectType.SCENERY_INTERACT || objType == ObjectType.GROUND_INTERACT || objType == ObjectType.GROUND_DECORATION -> {
-                val defs = IndexLoaders.MAP_REGION_DECODER.method4436().getObjectDefs(obj.id)
+            locShape == ObjectShapes.SCENERY_INTERACT || locShape == ObjectShapes.GROUND_INTERACT || locShape == ObjectShapes.GROUND_DECORATION -> {
+                val defs = TypeLists.LOC.list(obj.id)
                 val (sizeX, sizeY) = if (obj.rotation == 0 || obj.rotation == 2) {
                     defs.sizeX to defs.sizeY
                 } else {
                     defs.sizeY to -defs.sizeX
                 }
-                JS5CacheFile.createWallObjectStrategy(
+                RouteStrategies.forWallObject(
                     obj.x - getBaseX(),
                     obj.y - getBaseY(),
                     sizeX,
                     sizeY,
-                    ObjectType.WALL_STRAIGHT,
+                    ObjectShapes.WALL_STRAIGHT,
                     0
                 )
             }
-            Class308.isWall(objType.id) -> {
-                JS5CacheFile.createWallObjectStrategy(
+            ObjectShapes.isWall(locShape.shape) -> {
+                RouteStrategies.forWallObject(
                     obj.x - getBaseX(),
                     obj.y - getBaseY(),
                     0,
                     0,
-                    objType,
+                    locShape,
                     obj.rotation
                 )
             }
             else -> {
-                Class148.createNormalObjectStrategy(
+                RouteStrategies.forInteractiveObject(
                     obj.x - getBaseX(),
                     obj.y - getBaseY(),
-                    objType,
+                    locShape,
                     obj.rotation
                 )
             }
@@ -803,35 +808,35 @@ object Bot {
         packet.buffer.writeShort(tile.y)
         packet.buffer.writeShort(tile.x)
         packet.buffer.writeInt(objectId)
-        packet.buffer.writeByte128(if (KeyDownCommand.runKeyDown()) 1 else 0)
+        packet.buffer.writeByteAdd(if (KeyDownCommand.runKeyDown()) 1 else 0)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
-    fun getBaseX() = IndexLoaders.MAP_REGION_DECODER.getBase().x
-    fun getBaseY() = IndexLoaders.MAP_REGION_DECODER.getBase().y
-    fun getMyPlayerX() = getMyPlayer().localX + getBaseX()
-    fun getMyPlayerY() = getMyPlayer().localY + getBaseY()
+    fun getBaseX() = Resource.mapRegion.getBaseCoordinates().x
+    fun getBaseY() = Resource.mapRegion.getBaseCoordinates().y
+    fun getMyPlayerX() = getMyPlayer().endX.toInt() + getBaseX()
+    fun getMyPlayerY() = getMyPlayer().endZ.toInt() + getBaseY()
 
     fun getNpcIndexByName(name: String): Int {
-        for (i in 0 until client.anInt7216) {
-            val index = client.anIntArray7421[i]
-            val node = client.NPC_MAP.get(index) as? ObjectNode
-            val npc = node?.anObject8068 as? NpcEntity
+        for (i in 0 until client.npcCount) {
+            val index = client.NPC_INDICES[i].toLong()
+            val node = client.NPC_MAP.get(index)
+            val npc = node?.value as? NpcEntity
             if (npc?.definitions?.name?.equals(name, ignoreCase = true) == true) {
-                return npc.index
+                return npc.playerIndex
             }
         }
         return -1
     }
 
-    fun getPid(entity: PathingEntity) = entity.index
+    fun getPid(entity: PathingEntity) = entity.playerIndex
 
     fun getNPCByIndexExcluding(index: Int, exclude: Int): NpcEntity? {
-        for (i in 0 until client.anInt7216 * -423388407) {
-            val idx = client.anIntArray7421[i]
-            val node = client.NPC_MAP.get(idx) as? ObjectNode
-            val npc = node?.anObject8068 as? NpcEntity
-            if (npc != null && getPid(npc) != exclude && npc.index == index) {
+        for (i in 0 until client.npcCount) {
+            val idx = client.NPC_INDICES[i].toLong()
+            val node = client.NPC_MAP.get(idx)
+            val npc = node?.value as? NpcEntity
+            if (npc != null && getPid(npc) != exclude && npc.playerIndex == index) {
                 return npc
             }
         }
@@ -839,21 +844,21 @@ object Bot {
     }
 
     fun getNPCByIndex(index: Int): NpcEntity? {
-        for (i in 0 until client.anInt7216 * -423388407) {
-            val idx = client.anIntArray7421[i]
-            val node = client.NPC_MAP.get(idx) as? ObjectNode
-            val npc = node?.anObject8068 as? NpcEntity
-            if (npc?.index == index) return npc
+        for (i in 0 until client.npcCount) {
+            val idx = client.NPC_INDICES[i].toLong()
+            val node = client.NPC_MAP.get(idx)
+            val npc = node?.value as? NpcEntity
+            if (npc?.playerIndex == index) return npc
         }
         return null
     }
 
     fun getNpcIndexById(id: Int): Int {
-        for (i in 0 until client.anInt7216 * -423388407) {
-            val idx = client.anIntArray7421[i]
-            val node = client.NPC_MAP.get(idx) as? ObjectNode
-            val npc = node?.anObject8068 as? NpcEntity
-            if (npc?.definitions?.id == id) return npc.index
+        for (i in 0 until client.npcCount) {
+            val idx = client.NPC_INDICES[i].toLong()
+            val node = client.NPC_MAP.get(idx)
+            val npc = node?.value as? NpcEntity
+            if (npc?.definitions?.type == id) return npc.playerIndex
         }
         return -1
     }
@@ -861,11 +866,11 @@ object Bot {
     fun buy500ShopItem(slot: Int) = clickButton(1265, 20, slot, 6)
 
     fun clickNPC(npc: NpcEntity?, option: Int) {
-        npc?.let { npcOption(it.index, option) }
+        npc?.let { npcOption(it.playerIndex, option) }
     }
 
     fun clickNPC(npc: NpcEntity?, option: String) {
-        npc?.let { npcOption(it.index, Utils.stringContainsIgnoreCase(it.definitions.options, option)) }
+        npc?.let { npcOption(it.playerIndex, Utils.stringContainsIgnoreCase(it.definitions.actions, option)) }
     }
 
     fun clickNpc(name: String, option: Int) {
@@ -875,7 +880,7 @@ object Bot {
     fun clickNPCWithNearestOption(name: String, optionRequired: String, action: String) {
         val nearestNPC = getNPCs().firstOrNull { npc ->
             npc.definitions.name.equals(name, ignoreCase = true) &&
-            npc.definitions.options.any { it?.contains(optionRequired) == true }
+            npc.definitions.actions.any { it?.contains(optionRequired) == true }
         }
         clickNPC(nearestNPC, action)
     }
@@ -883,7 +888,7 @@ object Bot {
     fun clickObjectWithNearestOption(name: String, optionRequired: String, action: String) {
         val nearestObject = getNearbyObjects().firstOrNull { obj ->
             obj.getDefinitions().name.equals(name, ignoreCase = true) &&
-            optionRequired in obj.getDefinitions().options
+            optionRequired in obj.getDefinitions().actions
         }
         nearestObject?.let {
             sendConsoleMessage("Clicking ${it.getDefinitions().name}")
@@ -906,19 +911,14 @@ object Bot {
             else -> return
         }
 
-        val node = client.NPC_MAP.get(index) as? ObjectNode ?: return
-        val npc = node.anObject8068 as? NpcEntity ?: return
+        val node = client.NPC_MAP.get(index.toLong()) ?: return
+        val npc = node.value as? NpcEntity ?: return
 
         val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShort(index)
         packet.buffer.writeByte(if (KeyDownCommand.runKeyDown()) 1 else 0)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
-        MapRegion.routeTo(
-            npc.regionBaseX[0],
-            npc.regionBaseY[0],
-            true,
-            Class344.method6115(npc.regionBaseX[0], npc.regionBaseY[0], npc.getSize(), npc.getSize())
-        )
+        RouteFinder.calculateRoute(npc.movementBaseX[0], npc.movementBaseY[0], true, RouteStrategies.forPlayer(npc.movementBaseX[0], npc.movementBaseY[0], npc.getSize(), npc.getSize()));
     }
 
     fun dropAllExceptExact(vararg itemNames: String) {
@@ -946,7 +946,7 @@ object Bot {
         }
     }
 
-    fun isLoggedOut() = GameState.isLoggedOut(client.GAME_STATE)
+    fun isLoggedOut() = GameState.isLoggedOut(client.gameState)
 
     fun getGroundItems(): List<Item> {
         val items = mutableListOf<Item>()
@@ -970,29 +970,25 @@ object Bot {
         for (x in 0 until 104) {
             for (y in 0 until 104) {
                 val plane = getMyPlayer().plane.toInt()
-                var obj: WorldObject? = Resource.mapRegion.getScene()
-                    .getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
+                var obj: GameObject? = Resource.mapRegion.getScene().getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
 
                 if (obj == null)
-                    obj = Resource.mapRegion.getScene()
-                        .getGroundDecoration(plane, x, y) as? WorldObject
+                    obj = Resource.mapRegion.getScene().getGroundDecoration(plane, x, y) as GameObject?
 
                 if (obj == null)
-                    obj = Resource.mapRegion.getScene()
-                        .getWall(plane, x, y) as? WorldObject
+                    obj = Resource.mapRegion.getScene().getWall(plane, x, y) as GameObject?
 
                 if (obj == null)
-                    obj = Resource.mapRegion.getScene()
-                        .getWallDecoration(plane, x, y) as? WorldObject
+                    obj = Resource.mapRegion.getScene().getPrimaryWallDecoration(plane, x, y) as GameObject?
 
                 obj?.let {
                     objects.add(WorldObject(
-                        it.getId(),
-                        it.method92(),
-                        it.method89(),
+                        it.id,
+                        it.rotation,
+                        it.shape,
                         x + getBaseX(),
                         y + getBaseY(),
-                        IndexLoaders.MAP_REGION_DECODER.method4436().getObjectDefs(it.getId()).options
+                        TypeLists.LOC.list(it.getId()).actions
                     ))
                 }
             }
@@ -1037,19 +1033,19 @@ object Bot {
             }
             cmd[0].startsWith("crash") -> chat("Bank sale.", -1, -1)
             cmd[0].startsWith("pos") -> sendConsoleMessage(
-                "x: $getMyPlayerX y: $getMyPlayerY (${getMyPlayer().localX}, ${getMyPlayer().localY})"
+                "x: ${getMyPlayerX()} y: ${getMyPlayerY()} (${getMyPlayer().endX.toInt()}, ${getMyPlayer().endZ.toInt()})"
             )
             cmd[0].startsWith("localpos") -> sendConsoleMessage(
-                "x: ${getMyPlayer().localX} y: ${getMyPlayer().localY}"
+                "x: ${getMyPlayer().endX.toInt()} y: ${getMyPlayer().endZ.toInt()}"
             )
             cmd[0].startsWith("closebank") -> closeInterfaces()
             cmd[0].startsWith("add") -> addResponsePlayer(cmd[1].replace("_", " "))
             cmd[0].startsWith("remove") -> removeResponsePlayer(cmd[1].replace("_", " "))
             cmd[0].startsWith("withdrawcustom") -> withdrawCustomItem(995)
             cmd[0] == "iswalking" -> {
-                sendConsoleMessage("$isWalking()")
-                sendConsoleMessage("${getMyPlayer().walkTypes.contentToString()}")
-                sendConsoleMessage("${getMyPlayer().aAnimation_Sub3_10337.getDefs().id}")
+                sendConsoleMessage("${isWalking()}")
+                sendConsoleMessage(getMyPlayer().movementTypes.contentToString())
+                sendConsoleMessage("${getMyPlayer().movingSequence.type.id}")
             }
             cmd[0] == "healthpray" -> println("Health: ${getHealth()} Prayer: ${getPrayer()}")
             cmd[0] == "b" -> {
@@ -1074,27 +1070,27 @@ object Bot {
             }
             cmd[0] == "objonme" -> {
                 val obj = Resource.mapRegion.getScene()
-                    .getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().localX, getMyPlayer().localY, client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
-                println(obj?.getId())
+                    .getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
+                println(obj?.id)
             }
             cmd[0] == "objtest" -> {
                 for (x in 0 until 104) {
                     for (y in 0 until 104) {
                         val plane = getMyPlayer().plane.toInt()
-                        var obj: WorldObject? = Resource.mapRegion.getScene()
-                            .getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
+                        var obj: GameObject? = Resource.mapRegion.getScene()
+                            .getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
 
                         if (obj == null)
                             obj = Resource.mapRegion.getScene()
-                                .getGroundDecoration(plane, x, y) as? WorldObject
+                                .getGroundDecoration(plane, x, y) as? GameObject
 
                         if (obj == null)
                             obj = Resource.mapRegion.getScene()
-                                .getWall(plane, x, y) as? WorldObject
+                                .getWall(plane, x, y) as? GameObject
 
                         if (obj == null)
                             obj = Resource.mapRegion.getScene()
-                                .getWallDecoration(plane, x, y) as? WorldObject
+                                .getPrimaryWallDecoration(plane, x, y) as? GameObject
 
                         obj?.let { println("Object type: ${it.javaClass.name}") }
                     }
@@ -1153,57 +1149,57 @@ object Bot {
     }
 
     fun isWalking(): Boolean {
-        val animId = getMyPlayer().aAnimation_Sub3_10337.getDefs().id
-        return animId != 11975 || animId == 11976
+        val animId = getMyPlayer().movingSequence.type.id
+        return animId != 11975
     }
 
     fun getXp(skillId: Int) = client.SKILL_XP[skillId]
     fun getLevel(skillId: Int) = client.SKILL_LEVEL_VISIBLE[skillId]
 
     fun sendLogout(lobby: Boolean) {
-        CursorIndexLoader.killConnections(if (lobby) Class9.aBool71 else false)
+        client.logout(if (lobby) LoginManager.currentlyInLobby else false)
     }
 
     fun getXPForLevel(level: Int): Int {
         var points = 0.0
         var output = 0
         for (lvl in 1..level) {
-            points += Math.floor(lvl + 300.0 * Math.pow(2.0, lvl / 7.0))
+            points += floor(lvl + 300.0 * 2.0.pow(lvl / 7.0))
             if (lvl >= level) return output
-            output = Math.floor(points / 4).toInt()
+            output = floor(points / 4).toInt()
         }
         return 0
     }
 
     fun getNPCs(): List<NpcEntity> {
         val npcs = mutableListOf<NpcEntity>()
-        for (i in 0 until client.anInt7210) {
-            val npcNode = client.NPC_ARRAY[i] as? ObjectNode
-            npcNode?.anObject8068?.let { npcs.add(it as NpcEntity) }
+        for (i in 0 until client.npcCount) {
+            val npcNode = client.NPC_ARRAY[i]
+            npcNode?.value?.let { npcs.add(it as NpcEntity) }
         }
         return npcs
     }
 
     fun getFilteredNPCs(id: Int) =
-        getNPCs().filter { it.definitions.id == id }
+        getNPCs().filter { it.definitions.type == id }
 
     fun getFilteredNPCs(id: String) =
         getNPCs().filter { it.definitions.name.equals(id, ignoreCase = true) }
 
     fun getFilteredNPCsByOption(id: String) =
-        getNPCs().filter { id in it.definitions.options }
+        getNPCs().filter { id in it.definitions.actions }
 
     fun getFilteredNPCsContaining(id: String) =
         getNPCs().filter { it.definitions.name.contains(id, ignoreCase = true) }
 
     fun getClosestNPCNoClip(id: String) =
         getClosestEntity(getFilteredNPCs(id)) {
-            Utils.distance(getMyPlayerPosition(), Tile(it.localX + getBaseX(), it.localY + getBaseY()))
+            Utils.distance(getMyPlayerPosition(), Tile(it.endX.toInt() + getBaseX(), it.endZ.toInt() + getBaseY()))
         }
 
     fun getClosestNPCNoClip(id: Int) =
         getClosestEntity(getFilteredNPCs(id)) {
-            Utils.distance(getMyPlayerPosition(), Tile(it.localX + getBaseX(), it.localY + getBaseY()))
+            Utils.distance(getMyPlayerPosition(), Tile(it.endX.toInt() + getBaseX(), it.endZ.toInt() + getBaseY()))
         }
 
     fun getTimeToLevel(skillId: Int, startXP: Int, startTime: Long, level: Int): String {
@@ -1250,13 +1246,13 @@ object Bot {
 
     fun myPlayerInCombat() = inCombat(getMyPlayer())
 
-    fun getHealth() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVarBit(7198).toDouble()
+    fun getHealth() = VarProviders.PLAYER_VAR_PROVIDER.getVarBitValue(7198).toDouble()
     fun getHealthPercent() = (getHealth() / (getLevel(HITPOINTS) * 10)) * 100.0
-    fun usingSpec() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(301) == 1
-    fun specPercent() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(300) / 10.0
-    fun getPrayer() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(2382).toDouble()
-    fun getVar(varId: Int) = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(varId)
-    fun getVarBit(varBit: Int) = Class158_Sub1.PLAYER_VAR_PROVIDER.getVarBit(varBit)
+    fun usingSpec() = VarProviders.PLAYER_VAR_PROVIDER.getVarValue(301) == 1
+    fun specPercent() = VarProviders.PLAYER_VAR_PROVIDER.getVarValue(300) / 10.0
+    fun getPrayer() = VarProviders.PLAYER_VAR_PROVIDER.getVarValue(2382).toDouble()
+    fun getVar(varId: Int) = VarProviders.PLAYER_VAR_PROVIDER.getVarValue(varId)
+    fun getVarBit(varBit: Int) = VarProviders.PLAYER_VAR_PROVIDER.getVarBitValue(varBit)
 
     fun hasntAnimatedFor(time: Int) = getTimeSinceLastAnimation() > time
 
@@ -1270,11 +1266,11 @@ object Bot {
 
     fun sendClick() {
         val packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, client.GAME_CONNECTION_CONTEXT.isaac)
-        packet.buffer.writeIntLE(Utils.random(0, 400) or (Utils.random(0, 400) shl 16))
+        packet.buffer.writeIntLittle(Utils.random(0, 400) or (Utils.random(0, 400) shl 16))
         packet.buffer.writeShort(5 or (10 shl 0))
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
-    fun loginLobby(un: String, pw: String) = MaterialProp35.lobbyLogin(un, pw)
-    fun loginWorld() = ParticleArchive1Def.worldLogin(Class9.aString99, Class9.aString102)
+    fun loginLobby(un: String, pw: String) = LoginManager.lobbyLogin(un, pw)
+    fun loginWorld() = LoginManager.worldLogin(StaticMethods.aString99, StaticMethods.aString102)
 }

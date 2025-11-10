@@ -1,10 +1,13 @@
 package com.jagex.game.runetek5.entity;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 /**
  * Needs better naming...
  *
  */
-public class EntityNodeList {
+public class EntityNodeList implements Iterable<EntityNode> {
 
     public final EntityNode head = new EntityNode();
     public EntityNode pointer;
@@ -76,5 +79,34 @@ public class EntityNodeList {
 
     public boolean isEmpty() {
         return this.head.next == this.head;
+    }
+
+    @Override
+    public Iterator<EntityNode> iterator() {
+        return new EntityNodeIterator();
+    }
+
+    private class EntityNodeIterator implements Iterator<EntityNode> {
+        private EntityNode current = head.next;
+
+        @Override
+        public boolean hasNext() {
+            return current != head;
+        }
+
+        @Override
+        public EntityNode next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            EntityNode node = current;
+            current = current.next;
+            return node;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove not supported");
+        }
     }
 }

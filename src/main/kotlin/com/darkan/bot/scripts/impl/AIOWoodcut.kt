@@ -1,6 +1,11 @@
 package com.darkan.bot.scripts.impl
 
-import com.darkan.bot.Bot.*
+import com.darkan.bot.Bot.clickClosestObject
+import com.darkan.bot.Bot.depositAllExcept
+import com.darkan.bot.Bot.interfaceOpen
+import com.darkan.bot.Bot.inventory
+import com.darkan.bot.Bot.isAnimating
+import com.darkan.bot.Bot.openClosestBank
 import com.darkan.bot.scripts.ConfigurableScript
 import com.darkan.bot.scripts.Script
 import com.darkan.bot.scripts.ScriptDescription
