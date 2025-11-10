@@ -1,0 +1,1280 @@
+package com.darkan.bot
+
+import com.darkan.bot.scripts.ScriptExecutor
+import com.darkan.bot.utils.*
+import com.jagex.game.launch.Loader
+import com.jagex.game.runetek5.cache.node.HashTableIterator
+import com.jagex.game.runetek5.client.GameState
+import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.input.keyboard.KeyDownCommand
+import com.jagex.game.runetek5.config.Resource
+import com.jagex.game.runetek5.config.TypeLists
+import com.jagex.game.runetek5.config.rsinterface.SubInterface
+import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer
+import com.jagex.game.runetek5.entity.grounditem.GroundItemNode
+import com.jagex.game.runetek5.entity.grounditem.GroundItemWrapper
+import com.jagex.game.runetek5.entity.pathingentity.EntityHitbar
+import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
+import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
+import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
+import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
+import com.jagex.game.runetek5.graphics.model.normal.VertexNormal
+import com.jagex.game.runetek5.movement.pathfinding.RouteFinder
+import com.jagex.game.runetek5.movement.pathfinding.RouteStrategies
+import com.jagex.game.runetek5.movement.pathfinding.RouteStrategy
+import com.jagex.game.runetek5.network.BufferedConnectionContext
+import com.jagex.game.runetek5.network.packet.ClientProt
+import com.jagex.game.runetek5.network.packet.PacketEncoder
+import com.jagex.game.runetek5.scene.MapRegion
+import java.text.NumberFormat
+import java.util.*
+
+object Bot {
+
+    var IP = "prod.darkan.org"
+    var PROXY_IP = "147.135.15.128"
+    var PROXY_PORT = -1
+
+    const val ATTACK = 0
+    const val DEFENCE = 1
+    const val STRENGTH = 2
+    const val HITPOINTS = 3
+    const val RANGE = 4
+    const val PRAYER = 5
+    const val MAGIC = 6
+    const val COOKING = 7
+    const val WOODCUTTING = 8
+    const val FLETCHING = 9
+    const val FISHING = 10
+    const val FIREMAKING = 11
+    const val CRAFTING = 12
+    const val SMITHING = 13
+    const val MINING = 14
+    const val HERBLORE = 15
+    const val AGILITY = 16
+    const val THIEVING = 17
+    const val SLAYER = 18
+    const val FARMING = 19
+    const val RUNECRAFTING = 20
+    const val HUNTER = 21
+    const val CONSTRUCTION = 22
+    const val SUMMONING = 23
+    const val DUNGEONEERING = 24
+
+    const val randomMac = true
+
+    var TRIVIA_ENABLED = false
+    var disableInterfaces = false
+    var disableIncomingPackets = false
+    var usingSmartResponse = false
+    var safetyLogout = false
+
+    var currentTarget: NpcEntity? = null
+
+    val responsePlayers = mutableListOf<String>()
+
+    var storedResponse = ""
+    var userspam = ""
+
+    var inventory = ContainerWrapper(ItemContainer())
+    var bank = ContainerWrapper(ItemContainer())
+
+    var username = ""
+    var password = ""
+
+    var lastAnimated = System.currentTimeMillis()
+
+    var targetNpc: String? = null
+    var uN: String? = null
+    var uP: String? = null
+
+    val optionsDialogue = arrayOfNulls<String>(5)
+
+    var moneyPouch: Int = 0
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        ScriptExecutor.loadScripts()
+        initializeUI()
+        Loader.main(args)
+    }
+
+    fun pulse() {
+        try {
+            ScriptExecutor.mainLogic()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+    }
+
+    fun bankIsOpen() = interfaceOpen(762)
+
+    fun refreshLastAnimated() {
+        lastAnimated = System.currentTimeMillis()
+    }
+
+    fun getTimeSinceLastAnimation() = System.currentTimeMillis() - lastAnimated
+
+    fun getMyPlayerPosition() = Tile(getMyPlayerX(), getMyPlayerY(), getMyPlayer().plane)
+
+    fun getCurrentAnimation() = getMyPlayer().currentAnimations?.get(0) ?: -1
+
+    fun millisElapsed(startTime: Long) = System.currentTimeMillis() - startTime
+
+    fun secondsElapsed(startTime: Long) = millisElapsed(startTime) / 1000f
+
+    fun minutesElapsed(startTime: Long) = secondsElapsed(startTime) / 60f
+
+    fun hoursElapsed(startTime: Long) = minutesElapsed(startTime) / 60f
+
+    fun getXpPerHour(skillId: Int, startingXp: Int, startTime: Long) =
+        ((getXp(skillId) - startingXp) / hoursElapsed(startTime)).toInt()
+
+    fun getFormattedXpPerHour(skillId: Int, startingXp: Int, startTime: Long) =
+        format(getXpPerHour(skillId, startingXp, startTime))
+
+    fun format(number: Int) = NumberFormat.getNumberInstance(Locale.US).format(number)
+
+    fun isAnimating() = getCurrentAnimation() != -1
+
+    fun tradePlayer(username: String) = playerOption(username, 4)
+
+    fun continueDialogue() = clickDialogue(1184, 18)
+
+    fun interfaceOpen(id: Int): Boolean {
+        val iterator = HashTableIterator<SubInterface>(client.OPEN_INTERFACES)
+        for (inter in iterator) {
+            if (inter?.subInterfaceId == id) return true
+        }
+        return false
+    }
+
+    fun setRunning(on: Boolean) {
+        if (getVar(173) == 0 && on)
+            clickButton(750, 4)
+    }
+
+    fun alchItem(replaceAll: String) {
+        // TODO
+    }
+
+    fun append(bytes: ByteArray): String {
+        val chars = charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
+        val result = CharArray(bytes.size * 2)
+        var index = 0
+        for (byte in bytes) {
+            result[index++] = chars[byte.toInt() shr 4 and 0xf]
+            result[index++] = chars[byte.toInt() and 0xf]
+        }
+        return String(result)
+    }
+
+    fun clickDialogueOption(option: Int) {
+        clickDialogue(1188, if (option == 1) 11 else (12 + option - 1))
+    }
+
+    fun clickDialogueOption(option: String) {
+        val op = optionsDialogue.indexOfFirst {
+            it?.contains(option, ignoreCase = true) == true
+        }
+        if (op != -1) {
+            clickDialogue(1188, if (op == 0) 11 else (12 + op))
+        }
+    }
+
+    fun getPlayerPid(username: String): Int {
+        for (i in 0 until PlayerUpdate.NUM_OUT_PLAYER_INDICES) {
+            val player = PlayerUpdate.players[PlayerUpdate.OUT_PLAYER_INDICES[i]] ?: continue
+            if (player.username?.equals(username, ignoreCase = true) == true) {
+                return PlayerUpdate.OUT_PLAYER_INDICES[i]
+            }
+        }
+        return -1
+    }
+
+    fun getPlayer(username: String): PlayerEntity? {
+        for (i in 0 until PlayerUpdate.NUM_OUT_PLAYER_INDICES) {
+            val player = PlayerUpdate.players[PlayerUpdate.OUT_PLAYER_INDICES[i]] ?: continue
+            if (player.username?.equals(username, ignoreCase = true) == true) {
+                return player
+            }
+        }
+        return null
+    }
+
+    fun getClosestGroundItem(): Item? {
+        return getGroundItems()
+            .mapNotNull { item ->
+                val distance = getDistanceTo(item.position)
+                if (distance != -1) distance to item else null
+            }
+            .minByOrNull { it.first }
+            ?.second
+    }
+
+    private inline fun <T> getClosestEntity(
+        entities: List<T>,
+        distanceCalculator: (T) -> Int
+    ): T? {
+        return entities
+            .mapNotNull { entity ->
+                val distance = distanceCalculator(entity)
+                if (distance != -1) distance to entity else null
+            }
+            .minByOrNull { it.first }
+            ?.second
+    }
+
+    fun getClosestObjectWithOption(option: String) =
+        getClosestEntity(getNearbyObjectsWithOption(option)) { getDistanceTo(it) }
+
+    fun getClosestObjectNoClip(id: String) =
+        getClosestEntity(getObjectsNearby(id)) { Utils.distance(getMyPlayerPosition(), it) }
+
+    fun getClosestObjectExact(id: String) =
+        getClosestEntity(getObjectsNearbyExact(id)) { getDistanceTo(it) }
+
+    fun getClosestObject(id: String) =
+        getClosestEntity(getObjectsNearby(id)) { getDistanceTo(it) }
+
+    fun getClosestObject(vararg ids: Int): WorldObject? {
+        val allObjects = ids.flatMap { getObjectsNearby(it) }
+        return getClosestEntity(allObjects) { getDistanceTo(it) }
+    }
+
+    fun getClosestObject(id: Int) =
+        getClosestEntity(getObjectsNearby(id)) { getDistanceTo(it) }
+
+    fun getClosestObject(id: String, option: String) =
+        getClosestEntity(getObjectsNearby(id, option)) { getDistanceTo(it) }
+
+    fun getClosestObject(id: Int, option: String) =
+        getClosestEntity(getObjectsNearby(id, option)) { getDistanceTo(it) }
+
+    operator fun Array<String?>.contains(option: String) =
+        any { it?.equals(option, ignoreCase = true) == true }
+
+    fun getObjectAt(tile: Tile) =
+        getNearbyObjects().find { it.x == tile.x && it.y == tile.y }
+
+    fun getObjectsNearby(id: Int, option: String) =
+        getNearbyObjects().filter { it.id == id && option in it.getDefinitions().actions }
+
+    fun getObjectsNearby(id: String, option: String) =
+        getNearbyObjects().filter {
+            it.getDefinitions().name.contains(id, ignoreCase = true) &&
+            option in it.getDefinitions().actions
+        }
+
+    fun getObjectsNearby(id: Int) =
+        getNearbyObjects().filter { it.id == id }
+
+    fun getNearbyObjectsWithOption(option: String) =
+        getNearbyObjects().filter { option in it.getDefinitions().actions }
+
+    fun getObjectsNearby(id: String) =
+        getNearbyObjects().filter { it.getDefinitions().name.contains(id, ignoreCase = true) }
+
+    fun getObjectsNearbyExact(id: String) =
+        getNearbyObjects().filter { it.getDefinitions().name.equals(id, ignoreCase = true) }
+
+    fun openClosestDepositBox(): Boolean {
+        getClosestObjectWithOption("deposit")?.let {
+            clickObject(it, "deposit")
+            return true
+        }
+        getClosestObjectWithOption("bank")?.let {
+            clickObject(it, "bank")
+            return true
+        }
+        getClosestObject("bank chest")?.let {
+            clickObject(it, "use")
+            return true
+        }
+        getClosestNPC("banker")?.let {
+            clickNPC(it, "bank")
+            return true
+        }
+        return false
+    }
+
+    fun openClosestBank(): Boolean {
+        if (inventory.contains(5733, 1)) {
+            clickItem("rotten potato", 2)
+            return true
+        }
+        getClosestObjectWithOption("bank")?.let {
+            clickObject(it, "bank")
+            return true
+        }
+        getClosestObject("bank chest")?.let {
+            clickObject(it, "use")
+            return true
+        }
+        getClosestNPC("banker")?.let {
+            clickNPC(it, "bank")
+            return true
+        }
+        return false
+    }
+
+    fun clickClosestObject(name: Int, action: String) {
+        getClosestObject(name, action)?.let { clickObject(it, it.containsOption(action)) }
+    }
+
+    fun clickClosestObject(name: String, action: String) {
+        getClosestObject(name, action)?.let { clickObject(it, it.containsOption(action)) }
+    }
+
+    fun clickClosestObject(name: Int, action: Int) {
+        getClosestObject(name)?.let { clickObject(it, action) }
+    }
+
+    fun clickClosestObject(name: IntArray, action: Int) {
+        getClosestObject(*name)?.let { clickObject(it, action) }
+    }
+
+    fun clickClosestObject(name: String, action: Int) {
+        getClosestObject(name)?.let { clickObject(it, action) }
+    }
+
+    fun clickClosestObject(name: Int) {
+        getClosestObject(name)?.let { clickObject(it) }
+    }
+
+    fun clickClosestObject(name: String) {
+        getClosestObject(name)?.let { clickObject(it) }
+    }
+
+    fun playerOption(username: String, option: Int) {
+        val prot = when (option) {
+            1 -> ClientProt.PLAYER_OP1
+            4 -> ClientProt.PLAYER_OP4
+            5 -> ClientProt.PLAYER_OP5
+            6 -> ClientProt.PLAYER_OP6
+            7 -> ClientProt.PLAYER_OP7
+            9 -> ClientProt.PLAYER_OP9
+            else -> null
+        } ?: return
+
+        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeShort(getPlayerPid(username))
+        packet.buffer.write128Byte(0)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+    }
+
+    fun sendText(string: String) {
+        val packet = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeByte(string.length + 1)
+        packet.buffer.writeString(string)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+    }
+
+    fun addResponsePlayer(username: String) {
+        if (!playerInList(username))
+            responsePlayers.add(username)
+    }
+
+    fun removeResponsePlayer(username: String) = responsePlayers.remove(username)
+
+    fun clearResponsePlayers() = responsePlayers.clear()
+
+    fun sendConsoleMessage(string: String) = Class209.printConsoleMessage(string)
+
+    fun sendItemOnObject(item: String, obj: WorldObject) {
+        val itemId = inventory.getItem(inventory.getSlotByItem(item))
+        sendItemOnObject(itemId, obj.id, obj.x, obj.y)
+    }
+
+    fun sendItemOnObject(item: String, id: Int) {
+        getClosestObject(id)?.let { sendItemOnObject(item, it) }
+    }
+
+    fun sendItemOnObject(item: String, objectName: String) {
+        getClosestObject(objectName)?.let { sendItemOnObject(item, it) }
+    }
+
+    fun sendItemOnObject(itemId: Int, objectId: Int, x: Int, y: Int) {
+        val packet = PacketEncoder.createPacket(ClientProt.IF_ON_OBJECT, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeShortLE128(x)
+        packet.buffer.write128Byte(if (KeyDownCommand.runKeyDown()) 1 else 0)
+        packet.buffer.writeIntV1(objectId)
+        packet.buffer.writeInt(44498944)
+        packet.buffer.writeShortLE(itemId)
+        packet.buffer.writeShort128(inventory.getSlotByItem(itemId))
+        packet.buffer.writeShortLE(y)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+    }
+
+    fun clickDialogue(id: Int) {
+        val packet = PacketEncoder.createPacket(ClientProt.IF_CONTINUE, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeIntV1(id)
+        packet.buffer.writeShortLE128(-1)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+    }
+
+    fun clickSkillDialogue(option: Int) = clickDialogue(905, option + 13)
+
+    fun clickDialogue(interfaceId: Int, componentId: Int) =
+        clickDialogue(interfaceId shl 16 or componentId)
+
+    fun playerInList(username: String) =
+        responsePlayers.any { it.equals(username, ignoreCase = true) }
+
+    fun getMyPlayer(): PlayerEntity = PlayerUpdate.MY_PLAYER
+
+    fun itemOnItem(item1: String, item2: String) {
+        itemOnItem(
+            inventory.getItem(inventory.getSlotByItem(item1)),
+            inventory.getItem(inventory.getSlotByItem(item2))
+        )
+    }
+
+    fun itemOnItem(itemId: Int, item: String) {
+        itemOnItem(
+            itemId,
+            inventory.getSlotByItem(itemId),
+            inventory.getItem(inventory.getSlotByItem(item)),
+            inventory.getSlotByItem(item)
+        )
+    }
+
+    fun itemOnItem(itemId: Int, itemId2: Int) {
+        itemOnItem(itemId, inventory.getSlotByItem(itemId), itemId2, inventory.getSlotByItem(itemId2))
+    }
+
+    fun itemOnItem(fromItem: Int, fromSlot: Int, toItem: Int, toSlot: Int) {
+        interfaceOnInterface(44498944, 44498944, fromSlot, toSlot, fromItem, toItem)
+    }
+
+    fun interfaceOnInterface(fromIf: Int, toIf: Int, fromSlot: Int, toSlot: Int, fromItem: Int, toItem: Int) {
+        val packet = PacketEncoder.createPacket(ClientProt.IF_ON_IF, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeShortLE128(toSlot)
+        packet.buffer.writeShortLE(fromSlot)
+        packet.buffer.writeShortLE128(toItem)
+        packet.buffer.writeIntLE(fromIf)
+        packet.buffer.writeIntV2(toIf)
+        packet.buffer.writeShortLE(fromItem)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+    }
+
+    fun activateQuickprayers() = clickButton(749, 4)
+
+    fun depositItem(itemId: Int) {
+        val (ifId, compId, option) = if (interfaceOpen(11))
+            Triple(11, 17, 1)
+        else
+            Triple(763, 0, 1)
+        clickButton(ifId, compId, inventory.getSlotByItem(itemId), itemId, option)
+    }
+
+    fun depositAllOfItem(itemId: Int) {
+        val (ifId, compId, option) = if (interfaceOpen(11))
+            Triple(11, 17, 4)
+        else
+            Triple(763, 0, 6)
+        clickButton(ifId, compId, inventory.getSlotByItem(itemId), itemId, option)
+    }
+
+    fun depositAllOfItem(itemName: String) {
+        val (ifId, compId, option) = if (interfaceOpen(11))
+            Triple(11, 17, 4)
+        else
+            Triple(763, 0, 6)
+        clickButton(ifId, compId, inventory.getSlotByItem(itemName), inventory.getItemId(itemName), option)
+    }
+
+    fun depositAllOfItemBySlot(slot: Int) {
+        val (ifId, compId, option) = if (interfaceOpen(11))
+            Triple(11, 17, 4)
+        else
+            Triple(763, 0, 6)
+        clickButton(ifId, compId, slot, inventory.getItem(slot), option)
+    }
+
+    fun depositAllExcept(vararg itemIds: Int) {
+        for (i in 0 until 28) {
+            val item = inventory.getItem(i)
+            if (item == -1 || item in itemIds) continue
+            val (ifId, compId, option) = if (interfaceOpen(11))
+                Triple(11, 17, 4)
+            else
+                Triple(763, 0, 6)
+            clickButton(ifId, compId, i, item, option)
+        }
+    }
+
+    fun withdrawOneItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 1)
+    fun withdraw5Item(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 2)
+    fun withdraw10Item(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 3)
+    fun withdrawCustomItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 4)
+    fun withdrawAllButOneItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 7)
+    fun withdrawAllOfItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 6)
+
+    fun withdrawAllOfItem(name: String) {
+        val slot = bank.getSlotByItem(name)
+        clickButton(762, 95, slot, bank.getItem(slot), 6)
+    }
+
+    fun withdrawOneItem(name: String) {
+        val slot = bank.getSlotByItem(name)
+        clickButton(762, 95, slot, bank.getItem(slot), 1)
+    }
+
+    fun withdraw5Item(name: String) {
+        val slot = bank.getSlotByItem(name)
+        clickButton(762, 95, slot, bank.getItem(slot), 2)
+    }
+
+    fun withdraw10Item(name: String) {
+        val slot = bank.getSlotByItem(name)
+        clickButton(762, 95, slot, bank.getItem(slot), 3)
+    }
+
+    fun withdrawCustomItem(name: String) {
+        val slot = bank.getSlotByItem(name)
+        clickButton(762, 95, slot, bank.getItem(slot), 4)
+    }
+
+    fun withdrawAllButOneItem(name: String) {
+        val slot = bank.getSlotByItemOfGreaterAmount(name, 1)
+        clickButton(762, 95, slot, bank.getItem(slot), 7)
+    }
+
+    fun equipItem(itemId: Int, slot: Int) = clickButton(679, 0, slot, itemId, 2)
+    fun clickItem(itemId: Int, slot: Int) = clickButton(679, 0, slot, itemId, 1)
+    fun clickItem(itemId: Int, slot: Int, option: Int) = clickButton(679, 0, slot, itemId, option)
+    fun clickItem(itemId: Int) = clickButton(679, 0, inventory.getSlotByItem(itemId), itemId, 1)
+
+    fun clickItem(name: String) {
+        val slot = inventory.getSlotByItem(name)
+        clickButton(679, 0, slot, inventory.getItem(slot), 1)
+    }
+
+    fun clickItem(name: String, option: Int) {
+        val slot = inventory.getSlotByItem(name)
+        clickButton(679, 0, slot, inventory.getItem(slot), option)
+    }
+
+    fun dropItem(itemId: Int, slot: Int) = clickButton(679, 0, slot, itemId, 8)
+
+    fun bankAll() {
+        if (inventory.contains(5733, 1))
+            depositAllExcept(5733)
+        else
+            clickButton(762, 33)
+    }
+
+    fun bankAllInDepositBox() = clickButton(11, 18)
+
+    fun bankAllExcept(id: Int) {
+        clickButton(762, 33)
+        withdrawOneItem(id)
+    }
+
+    fun getNearbyGroundItemsWithIds(vararg ids: Int): List<Item> {
+        return getGroundItems().filter { item ->
+            Utils.distance(getMyPlayerPosition(), item.position) < 7 && item.id in ids
+        }
+    }
+
+    fun closeInterfaces() = LinkedNodeList.closeInterfaces()
+
+    fun bankEquipment() = clickButton(49938469, -1, -1, 1)
+
+    fun clickButton(interfaceId: Int, componentId: Int) =
+        clickButton(interfaceId, componentId, -1, -1, 1)
+
+    fun clickButton(interfaceId: Int, componentId: Int, clickType: Int) =
+        clickButton(interfaceId, componentId, -1, -1, clickType)
+
+    fun clickButton(interfaceId: Int, componentId: Int, slotId: Int, clickType: Int) =
+        clickButton(interfaceId, componentId, slotId, -1, clickType)
+
+    fun clickButton(interfaceId: Int, componentId: Int, slotId: Int, slotId2: Int, clickType: Int) {
+        val interfaceHash = interfaceId shl 16 or componentId
+        val context = client.getConnectionContext()
+
+        val prot = when (clickType) {
+            1 -> ClientProt.IF_OP1
+            2 -> ClientProt.IF_OP2
+            3 -> ClientProt.IF_OP3
+            4 -> ClientProt.IF_OP4
+            5 -> ClientProt.IF_OP5
+            6 -> ClientProt.IF_OP6
+            7 -> ClientProt.IF_OP7
+            8 -> ClientProt.IF_OP8
+            9 -> ClientProt.IF_OP9
+            10 -> ClientProt.IF_OP10
+            else -> return
+        }
+
+        val packet = PacketEncoder.createPacket(prot, context.outKeys)
+        Class350_Sub3.method12590(packet, interfaceHash, slotId, slotId2)
+        context.queuePacket(packet)
+    }
+
+    fun closeMainInterface() {
+        // Class108.method1150(true, 1)
+    }
+
+    fun takeGroundItem(item: Item) = clickGroundItem(item, 3)
+    fun takeGroundItem(itemId: Int, tile: Tile) = clickGroundItem(Item(itemId, tile), 3)
+
+    fun clickGroundItem(item: Item, op: Int) {
+        val prot = when (op) {
+            1 -> ClientProt.GROUND_ITEM_OP1
+            2 -> ClientProt.GROUND_ITEM_OP2
+            3 -> ClientProt.GROUND_ITEM_OP3
+            4 -> ClientProt.GROUND_ITEM_OP4
+            5 -> ClientProt.GROUND_ITEM_OP5
+            6 -> ClientProt.GROUND_ITEM_EXAMINE
+            else -> return
+        }
+
+        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeShortAddLittle(item.id)
+        packet.buffer.writeByteInverse(if (KeyDownCommand.runKeyDown()) 1 else 0)
+        packet.buffer.writeShort(item.position.y)
+        packet.buffer.writeShortAdd(item.position.x)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        RouteFinder.routeToGrounditem(item.position.x, item.position.y)
+    }
+
+    fun command(message: String) = chat(";;$message", 0, 0)
+
+    fun chat(message: String, color: Int, effect: Int) {
+        val context = client.getConnectionContext()
+        val packet = PacketEncoder.createPacket(ClientProt.CHAT, context.isaac)
+        packet.buffer.writeByte(0)
+        val startIndex = packet.buffer.currentPosition
+        packet.buffer.writeByte(color)
+        packet.buffer.writeByte(effect)
+        PacketEncoder.chatMessageToBuffer(packet.buffer, message)
+        packet.buffer.writeIndex(packet.buffer.currentPosition - startIndex)
+        context.queuePacket(packet)
+    }
+
+    fun walkTo(tile: Tile) {
+        val packet = CutsceneArea.method12078(tile.x - getBaseX(), tile.y - getBaseY(), 0)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        MapRegion.routeTo(
+            tile.x - getBaseX(),
+            tile.y - getBaseY(),
+            true,
+            SunDefinitions.method853(tile.x - getBaseX(), tile.y - getBaseY())
+        )
+    }
+
+    fun getDistanceTo(strategy: RouteStrategy, alt: Boolean = false): Int {
+        return Utils.findRouteDistance(
+            getMyPlayer().movementBaseX[0],
+            getMyPlayer().movementBaseY[0], PlayerUpdate.MY_PLAYER.size,
+            strategy,
+            IndexLoaders.MAP_REGION_DECODER.getClipMap(PlayerUpdate.MY_PLAYER.plane),
+            alt,
+            client.walkStepsX,
+            client.walkStepsY
+        )
+    }
+
+    fun getDistanceTo(npc: NpcEntity) =
+        getDistanceTo(RouteStrategies.forNpc(npc.movementBaseX[0], npc.movementBaseY[0], npc.size, npc.size))
+
+    fun getDistanceTo(tile: Tile) =
+        getDistanceTo(RouteStrategies.forFixedTile(tile.x - getBaseX(), tile.y - getBaseY()))
+
+    fun inCombat(entity: PathingEntity): Boolean {
+        if (entity.faceEntity != -1 && !facingMe(entity) && getHitbarValue(getFacing(entity), 0) <= 0)
+            return true
+        return false
+    }
+
+    fun facingMe(entity: PathingEntity) = (entity.faceEntity - 32768) == getMyPlayer().index
+
+    fun getHitbarValue(entity: PathingEntity?, hitbarIndex: Int): Int {
+        if (entity == null) return -1
+        val hitbarDef = TypeLists.HITBAR.list(hitbarIndex)
+        for (hitbar in entity.entityHitbars) {
+            val bar = hitbar as? EntityHitbar ?: continue
+            if (bar.hitbarType != hitbarDef) continue
+            val update = bar.method12600(client.cycles)
+            if (update != null) return update.barValEnd
+        }
+        return -1
+    }
+
+    fun getFacing(entity: PathingEntity): PathingEntity? {
+        if (entity.faceEntity == -1) return null
+        return when {
+            entity.faceEntity < 32768 -> {
+                val node = client.NPC_MAP.get(entity.faceEntity) as? ObjectNode
+                node?.anObject8068 as? NPCEntity
+            }
+            else -> client.players[entity.faceEntity - 32768]
+        }
+    }
+
+    fun getClosestOutOfCombatNPC(id: String) =
+        getClosestEntity(getFilteredNPCs(id).filter { !inCombat(it) }) {
+            Utils.distance(getMyPlayerPosition(), Tile(it.localX + getBaseX(), it.localY + getBaseY()))
+        }
+
+    fun getClosestOutOfCombatNPCContaining(id: String) =
+        getClosestEntity(getFilteredNPCsContaining(id).filter { !inCombat(it) }) { getDistanceTo(it) }
+
+    fun getClosestOutOfCombatNPC(id: Int) =
+        getClosestEntity(getFilteredNPCs(id).filter { !inCombat(it) }) { getDistanceTo(it) }
+
+    fun getClosestNPCWithOption(option: String) =
+        getClosestEntity(getFilteredNPCsByOption(option)) { getDistanceTo(it) }
+
+    fun getClosestNPC(id: String) =
+        getClosestEntity(getFilteredNPCs(id)) { getDistanceTo(it) }
+
+    fun getClosestNPC(id: Int) =
+        getClosestEntity(getFilteredNPCs(id)) { getDistanceTo(it) }
+
+    fun getDistanceTo(obj: WorldObject): Int {
+        val objType = Class386.identify(ObjectType.values(), obj.type) as ObjectType
+        val strategy: RouteStrategy = when {
+            objType == ObjectType.SCENERY_INTERACT || objType == ObjectType.GROUND_INTERACT || objType == ObjectType.GROUND_DECORATION -> {
+                val defs = IndexLoaders.MAP_REGION_DECODER.method4436().getObjectDefs(obj.id)
+                val (sizeX, sizeY) = if (obj.rotation == 0 || obj.rotation == 2) {
+                    defs.sizeX to defs.sizeY
+                } else {
+                    defs.sizeY to -defs.sizeX
+                }
+                JS5CacheFile.createWallObjectStrategy(
+                    obj.x - getBaseX(),
+                    obj.y - getBaseY(),
+                    sizeX,
+                    sizeY,
+                    ObjectType.WALL_STRAIGHT,
+                    0
+                )
+            }
+            Class308.isWall(objType.id) -> {
+                JS5CacheFile.createWallObjectStrategy(
+                    obj.x - getBaseX(),
+                    obj.y - getBaseY(),
+                    0,
+                    0,
+                    objType,
+                    obj.rotation
+                )
+            }
+            else -> {
+                Class148.createNormalObjectStrategy(
+                    obj.x - getBaseX(),
+                    obj.y - getBaseY(),
+                    objType,
+                    obj.rotation
+                )
+            }
+        }
+        return getDistanceTo(strategy)
+    }
+
+    fun clickObject(obj: WorldObject?, action: String) {
+        obj?.let { clickObject(it, it.containsOption(action)) }
+    }
+
+    fun clickObject(obj: WorldObject?, option: Int) {
+        obj?.let { clickObject(it.id, it, option) }
+    }
+
+    fun clickObject(obj: WorldObject?) {
+        obj?.let { clickObject(it.id, it, 2) }
+    }
+
+    fun clickObject(objectId: Int, tile: Tile, option: Int, walk: Boolean = true) {
+        val prot = when (option) {
+            1 -> ClientProt.OBJECT_OP1
+            2 -> ClientProt.OBJECT_OP2
+            3 -> ClientProt.OBJECT_OP3
+            4 -> ClientProt.OBJECT_OP4
+            5 -> ClientProt.OBJECT_OP5
+            6 -> ClientProt.OBJECT_EXAMINE
+            else -> return
+        }
+
+        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeShort(tile.y)
+        packet.buffer.writeShort(tile.x)
+        packet.buffer.writeInt(objectId)
+        packet.buffer.writeByte128(if (KeyDownCommand.runKeyDown()) 1 else 0)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+    }
+
+    fun getBaseX() = IndexLoaders.MAP_REGION_DECODER.getBase().x
+    fun getBaseY() = IndexLoaders.MAP_REGION_DECODER.getBase().y
+    fun getMyPlayerX() = getMyPlayer().localX + getBaseX()
+    fun getMyPlayerY() = getMyPlayer().localY + getBaseY()
+
+    fun getNpcIndexByName(name: String): Int {
+        for (i in 0 until client.anInt7216) {
+            val index = client.anIntArray7421[i]
+            val node = client.NPC_MAP.get(index) as? ObjectNode
+            val npc = node?.anObject8068 as? NpcEntity
+            if (npc?.definitions?.name?.equals(name, ignoreCase = true) == true) {
+                return npc.index
+            }
+        }
+        return -1
+    }
+
+    fun getPid(entity: PathingEntity) = entity.index
+
+    fun getNPCByIndexExcluding(index: Int, exclude: Int): NpcEntity? {
+        for (i in 0 until client.anInt7216 * -423388407) {
+            val idx = client.anIntArray7421[i]
+            val node = client.NPC_MAP.get(idx) as? ObjectNode
+            val npc = node?.anObject8068 as? NpcEntity
+            if (npc != null && getPid(npc) != exclude && npc.index == index) {
+                return npc
+            }
+        }
+        return null
+    }
+
+    fun getNPCByIndex(index: Int): NpcEntity? {
+        for (i in 0 until client.anInt7216 * -423388407) {
+            val idx = client.anIntArray7421[i]
+            val node = client.NPC_MAP.get(idx) as? ObjectNode
+            val npc = node?.anObject8068 as? NpcEntity
+            if (npc?.index == index) return npc
+        }
+        return null
+    }
+
+    fun getNpcIndexById(id: Int): Int {
+        for (i in 0 until client.anInt7216 * -423388407) {
+            val idx = client.anIntArray7421[i]
+            val node = client.NPC_MAP.get(idx) as? ObjectNode
+            val npc = node?.anObject8068 as? NpcEntity
+            if (npc?.definitions?.id == id) return npc.index
+        }
+        return -1
+    }
+
+    fun buy500ShopItem(slot: Int) = clickButton(1265, 20, slot, 6)
+
+    fun clickNPC(npc: NpcEntity?, option: Int) {
+        npc?.let { npcOption(it.index, option) }
+    }
+
+    fun clickNPC(npc: NpcEntity?, option: String) {
+        npc?.let { npcOption(it.index, Utils.stringContainsIgnoreCase(it.definitions.options, option)) }
+    }
+
+    fun clickNpc(name: String, option: Int) {
+        getClosestNPC(name)?.let { clickNPC(it, option) }
+    }
+
+    fun clickNPCWithNearestOption(name: String, optionRequired: String, action: String) {
+        val nearestNPC = getNPCs().firstOrNull { npc ->
+            npc.definitions.name.equals(name, ignoreCase = true) &&
+            npc.definitions.options.any { it?.contains(optionRequired) == true }
+        }
+        clickNPC(nearestNPC, action)
+    }
+
+    fun clickObjectWithNearestOption(name: String, optionRequired: String, action: String) {
+        val nearestObject = getNearbyObjects().firstOrNull { obj ->
+            obj.getDefinitions().name.equals(name, ignoreCase = true) &&
+            optionRequired in obj.getDefinitions().options
+        }
+        nearestObject?.let {
+            sendConsoleMessage("Clicking ${it.getDefinitions().name}")
+            clickObject(it, action)
+        }
+    }
+
+    fun clickNpc(npcId: Int, option: Int) {
+        getClosestNPC(npcId)?.let { clickNPC(it, option) }
+    }
+
+    fun npcOption(index: Int, option: Int) {
+        val prot = when (option) {
+            1 -> ClientProt.NPC_OP1
+            2 -> ClientProt.NPC_OP2
+            3 -> ClientProt.NPC_OP3
+            4 -> ClientProt.NPC_OP4
+            5 -> ClientProt.NPC_OP5
+            6 -> ClientProt.NPC_EXAMINE
+            else -> return
+        }
+
+        val node = client.NPC_MAP.get(index) as? ObjectNode ?: return
+        val npc = node.anObject8068 as? NpcEntity ?: return
+
+        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeShort(index)
+        packet.buffer.writeByte(if (KeyDownCommand.runKeyDown()) 1 else 0)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        MapRegion.routeTo(
+            npc.regionBaseX[0],
+            npc.regionBaseY[0],
+            true,
+            Class344.method6115(npc.regionBaseX[0], npc.regionBaseY[0], npc.getSize(), npc.getSize())
+        )
+    }
+
+    fun dropAllExceptExact(vararg itemNames: String) {
+        for (i in 0 until 28) {
+            val itemName = TypeLists.OBJ.list(inventory.getItem(i)).name
+            if (itemNames.any { it.equals(itemName, ignoreCase = true) }) continue
+            dropItem(inventory.getItem(i), i)
+            clickDialogue(77529097)
+        }
+    }
+
+    fun dropAllExcept(vararg itemNames: String) {
+        for (i in 0 until 28) {
+            val itemName = TypeLists.OBJ.list(inventory.getItem(i)).name
+            if (itemNames.any { itemName.contains(it, ignoreCase = true) }) continue
+            dropItem(inventory.getItem(i), i)
+            clickDialogue(77529097)
+        }
+    }
+
+    fun dropWholeInventory() {
+        for (i in 0 until 28) {
+            dropItem(inventory.getItem(i), i)
+            clickDialogue(77529097)
+        }
+    }
+
+    fun isLoggedOut() = GameState.isLoggedOut(client.GAME_STATE)
+
+    fun getGroundItems(): List<Item> {
+        val items = mutableListOf<Item>()
+        for (x in 0 until 104) {
+            for (y in 0 until 104) {
+                val positionHash = (getMyPlayer().plane.toLong() shl 28 or
+                                   ((y + getBaseY()).toLong() shl 14) or
+                                   (x + getBaseX()).toLong())
+                val deque = client.GROUND_ITEMS.get(positionHash) ?: continue
+                for (groundItems in deque.groundItems) {
+                    val gi = groundItems as? GroundItemNode ?: continue
+                    items.add(Item(gi.id, gi.amount, Tile(x + getBaseX(), y + getBaseY(), getMyPlayer().plane.toInt())))
+                }
+            }
+        }
+        return items
+    }
+
+    fun getNearbyObjects(): List<WorldObject> {
+        val objects = mutableListOf<WorldObject>()
+        for (x in 0 until 104) {
+            for (y in 0 until 104) {
+                val plane = getMyPlayer().plane.toInt()
+                var obj: WorldObject? = Resource.mapRegion.getScene()
+                    .getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
+
+                if (obj == null)
+                    obj = Resource.mapRegion.getScene()
+                        .getGroundDecoration(plane, x, y) as? WorldObject
+
+                if (obj == null)
+                    obj = Resource.mapRegion.getScene()
+                        .getWall(plane, x, y) as? WorldObject
+
+                if (obj == null)
+                    obj = Resource.mapRegion.getScene()
+                        .getWallDecoration(plane, x, y) as? WorldObject
+
+                obj?.let {
+                    objects.add(WorldObject(
+                        it.getId(),
+                        it.method92(),
+                        it.method89(),
+                        x + getBaseX(),
+                        y + getBaseY(),
+                        IndexLoaders.MAP_REGION_DECODER.method4436().getObjectDefs(it.getId()).options
+                    ))
+                }
+            }
+        }
+        return objects
+    }
+
+    fun handleConsoleCommand(cmd: Array<String>) {
+        when {
+            cmd[0].startsWith("walk") -> walkTo(Tile(cmd[1].toInt(), cmd[2].toInt(), 0))
+            cmd[0].startsWith("clickbutton") -> clickButton(
+                cmd[1].toInt(), cmd[2].toInt(), cmd[3].toInt(), cmd[4].toInt()
+            )
+            cmd[0].startsWith("itemtest") -> {
+                getGroundItems().forEach { println(it.toString()) }
+            }
+            cmd[0].startsWith("test") -> clickButton(374 shl 16 or 5, -1, -1, 1)
+            cmd[0].startsWith("bankall") -> bankAll()
+            cmd[0].startsWith("withdraw") -> withdrawOneItem(1333)
+            cmd[0].startsWith("trade") -> tradePlayer(cmd[1].replace("_", " "))
+            cmd[0].startsWith("banticket") -> command("banticket ${cmd[1].replace("_", " ")}")
+            cmd[0].equals("empty", ignoreCase = true) -> command("empty")
+            cmd[0].equals("drop", ignoreCase = true) -> dropWholeInventory()
+            cmd[0].startsWith("food") -> withdraw10Item(15272)
+            cmd[0].startsWith("pray") -> withdraw5Item(139)
+            cmd[0].equals("buy", ignoreCase = true) -> {
+                repeat(20) { clickButton(82903060, -1, cmd[1].toInt(), 6) }
+            }
+            cmd[0].startsWith("useon") -> {
+                for (i in 0 until 14) {
+                    itemOnItem(inventory.getItem(i), i, inventory.getItem(i + 14), i + 14)
+                }
+            }
+            cmd[0].startsWith("string") -> sendText(cmd[1])
+            cmd[0].startsWith("togglepackets") -> {
+                disableIncomingPackets = !disableIncomingPackets
+                sendConsoleMessage("Disabled packets: $disableIncomingPackets")
+            }
+            cmd[0].startsWith("toggleinterfaces") -> {
+                disableInterfaces = !disableInterfaces
+                sendConsoleMessage("Disabled interfaces: $disableInterfaces")
+            }
+            cmd[0].startsWith("crash") -> chat("Bank sale.", -1, -1)
+            cmd[0].startsWith("pos") -> sendConsoleMessage(
+                "x: $getMyPlayerX y: $getMyPlayerY (${getMyPlayer().localX}, ${getMyPlayer().localY})"
+            )
+            cmd[0].startsWith("localpos") -> sendConsoleMessage(
+                "x: ${getMyPlayer().localX} y: ${getMyPlayer().localY}"
+            )
+            cmd[0].startsWith("closebank") -> closeInterfaces()
+            cmd[0].startsWith("add") -> addResponsePlayer(cmd[1].replace("_", " "))
+            cmd[0].startsWith("remove") -> removeResponsePlayer(cmd[1].replace("_", " "))
+            cmd[0].startsWith("withdrawcustom") -> withdrawCustomItem(995)
+            cmd[0] == "iswalking" -> {
+                sendConsoleMessage("$isWalking()")
+                sendConsoleMessage("${getMyPlayer().walkTypes.contentToString()}")
+                sendConsoleMessage("${getMyPlayer().aAnimation_Sub3_10337.getDefs().id}")
+            }
+            cmd[0] == "healthpray" -> println("Health: ${getHealth()} Prayer: ${getPrayer()}")
+            cmd[0] == "b" -> {
+                command("bank")
+                bankAll()
+            }
+            cmd[0].startsWith("clear") -> clearResponsePlayers()
+            cmd[0] == "npcnext" -> {
+                println(getClosestNPC("fishing spot"))
+                getNPCs().forEach { println(it.definitions.name) }
+            }
+            cmd[0] == "objnext" -> {
+                println(getClosestObject("Fur stall"))
+                println("Number found: ${getObjectsNearby("Fur stall").size}")
+                clickClosestObject("Fur stall")
+            }
+            cmd[0] == "nearbyobjects" -> {
+                sendConsoleMessage("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: ")
+                getObjectsNearby(cmd[1]).forEach {
+                    sendConsoleMessage("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}")
+                }
+            }
+            cmd[0] == "objonme" -> {
+                val obj = Resource.mapRegion.getScene()
+                    .getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().localX, getMyPlayer().localY, client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
+                println(obj?.getId())
+            }
+            cmd[0] == "objtest" -> {
+                for (x in 0 until 104) {
+                    for (y in 0 until 104) {
+                        val plane = getMyPlayer().plane.toInt()
+                        var obj: WorldObject? = Resource.mapRegion.getScene()
+                            .getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
+
+                        if (obj == null)
+                            obj = Resource.mapRegion.getScene()
+                                .getGroundDecoration(plane, x, y) as? WorldObject
+
+                        if (obj == null)
+                            obj = Resource.mapRegion.getScene()
+                                .getWall(plane, x, y) as? WorldObject
+
+                        if (obj == null)
+                            obj = Resource.mapRegion.getScene()
+                                .getWallDecoration(plane, x, y) as? WorldObject
+
+                        obj?.let { println("Object type: ${it.javaClass.name}") }
+                    }
+                }
+            }
+            cmd[0].startsWith("yell") -> {
+                val yell = cmd.drop(1).joinToString(" ")
+                command("yell $yell")
+            }
+            cmd[0].startsWith("bid") -> command("ah bid")
+            cmd[0].startsWith("1b") -> clickButton(85983267, -1, -1, 1)
+            cmd[0].startsWith("teleto") -> {
+                val teleto = cmd.drop(1).joinToString(" ")
+                command("teleto $teleto")
+            }
+            cmd[0].startsWith("dicebag") -> {
+                val dicebag = cmd.drop(1).joinToString(" ")
+                command("dicebag $dicebag")
+            }
+            cmd[0].startsWith("ticket") -> {
+                val ticket = cmd.drop(1).joinToString(" ")
+                command("ticket $ticket")
+            }
+            cmd[0].startsWith("bank") -> {
+                val bank = cmd.drop(1).joinToString(" ")
+                command("bank $bank")
+            }
+            cmd[0].startsWith("log") -> sendLogout(true)
+            cmd[0].startsWith("resettask") -> {
+                val resettask = cmd.drop(1).joinToString(" ")
+                command("resettask $resettask")
+            }
+            cmd[0].startsWith("chet") -> {
+                val chat = cmd.drop(1).joinToString(" ")
+                chat(chat, 2, 4)
+            }
+            cmd[0].startsWith("curemote") -> sendConsoleMessage("Emote: ${getCurrentAnimation()}")
+            else -> sendConsoleMessage("Unknown command.")
+        }
+    }
+
+    fun findGroundItem(id: String, distance: Int = 15): Tile? {
+        return getGroundItems().firstOrNull { item ->
+            Utils.distance(getMyPlayerPosition(), item.position) < distance &&
+            getDistanceTo(item.position) != -1 &&
+            item.getName().contains(id, ignoreCase = true)
+        }?.let { Tile(it.position.x, it.position.y, it.id) }
+    }
+
+    fun findGroundItem(id: Int, distance: Int = 10): Tile? {
+        return getGroundItems().firstOrNull { item ->
+            Utils.distance(getMyPlayerPosition(), item.position) < distance &&
+            getDistanceTo(item.position) != -1 &&
+            item.id == id
+        }?.let { Tile(it.position.x, it.position.y, it.id) }
+    }
+
+    fun isWalking(): Boolean {
+        val animId = getMyPlayer().aAnimation_Sub3_10337.getDefs().id
+        return animId != 11975 || animId == 11976
+    }
+
+    fun getXp(skillId: Int) = client.SKILL_XP[skillId]
+    fun getLevel(skillId: Int) = client.SKILL_LEVEL_VISIBLE[skillId]
+
+    fun sendLogout(lobby: Boolean) {
+        CursorIndexLoader.killConnections(if (lobby) Class9.aBool71 else false)
+    }
+
+    fun getXPForLevel(level: Int): Int {
+        var points = 0.0
+        var output = 0
+        for (lvl in 1..level) {
+            points += Math.floor(lvl + 300.0 * Math.pow(2.0, lvl / 7.0))
+            if (lvl >= level) return output
+            output = Math.floor(points / 4).toInt()
+        }
+        return 0
+    }
+
+    fun getNPCs(): List<NpcEntity> {
+        val npcs = mutableListOf<NpcEntity>()
+        for (i in 0 until client.anInt7210) {
+            val npcNode = client.NPC_ARRAY[i] as? ObjectNode
+            npcNode?.anObject8068?.let { npcs.add(it as NpcEntity) }
+        }
+        return npcs
+    }
+
+    fun getFilteredNPCs(id: Int) =
+        getNPCs().filter { it.definitions.id == id }
+
+    fun getFilteredNPCs(id: String) =
+        getNPCs().filter { it.definitions.name.equals(id, ignoreCase = true) }
+
+    fun getFilteredNPCsByOption(id: String) =
+        getNPCs().filter { id in it.definitions.options }
+
+    fun getFilteredNPCsContaining(id: String) =
+        getNPCs().filter { it.definitions.name.contains(id, ignoreCase = true) }
+
+    fun getClosestNPCNoClip(id: String) =
+        getClosestEntity(getFilteredNPCs(id)) {
+            Utils.distance(getMyPlayerPosition(), Tile(it.localX + getBaseX(), it.localY + getBaseY()))
+        }
+
+    fun getClosestNPCNoClip(id: Int) =
+        getClosestEntity(getFilteredNPCs(id)) {
+            Utils.distance(getMyPlayerPosition(), Tile(it.localX + getBaseX(), it.localY + getBaseY()))
+        }
+
+    fun getTimeToLevel(skillId: Int, startXP: Int, startTime: Long, level: Int): String {
+        val xpPh = getXpPerHour(skillId, startXP, startTime)
+        val xpPs = xpPh / 3600f
+
+        val secondsToLevel = (getXPToLevel(skillId, level) / xpPs).toInt()
+        val minutesToLevel = secondsToLevel / 60
+        val hoursToLevel = minutesToLevel / 60
+        val formatMinutesToLevel = minutesToLevel - (hoursToLevel * 60)
+        val formatSecondsToLevel = secondsToLevel - (minutesToLevel * 60)
+
+        return buildString {
+            append(if (hoursToLevel < 10) "0$hoursToLevel:" else "$hoursToLevel:")
+            append(if (formatMinutesToLevel < 10) "0$formatMinutesToLevel:" else "$formatMinutesToLevel:")
+            append(if (formatSecondsToLevel < 10) "0$formatSecondsToLevel" else "$formatSecondsToLevel")
+        }
+    }
+
+    fun getXPToLevel(skillId: Int, level: Int): Int {
+        if (level == 126) return 200000000 - getXp(skillId)
+        return getXPForLevel(level) - getXp(skillId)
+    }
+
+    fun getXPToNextLevel(skillId: Int) = getXPForLevel(getLevel(skillId) + 1) - getXp(skillId)
+
+    fun getScriptTime(currTime: Long, startTime: Long): String {
+        val ms = currTime - startTime
+        val totalSecs = ms / 1000
+        val hours = totalSecs / 3600
+        val mins = (totalSecs / 60) % 60
+        val secs = totalSecs % 60
+
+        fun format(value: Long) = if (value == 0L) "00" else if (value < 10) "0$value" else "$value"
+
+        return "${format(hours)}:${format(mins)}:${format(secs)}"
+    }
+
+    fun getLootPerHour(itemAmount: Int, startingAmount: Int, startTime: Long) =
+        ((itemAmount - startingAmount) / hoursElapsed(startTime)).toInt()
+
+    fun getFormattedLootPerHour(itemAmount: Int, startingAmount: Int, startTime: Long) =
+        format(getLootPerHour(itemAmount, startingAmount, startTime))
+
+    fun myPlayerInCombat() = inCombat(getMyPlayer())
+
+    fun getHealth() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVarBit(7198).toDouble()
+    fun getHealthPercent() = (getHealth() / (getLevel(HITPOINTS) * 10)) * 100.0
+    fun usingSpec() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(301) == 1
+    fun specPercent() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(300) / 10.0
+    fun getPrayer() = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(2382).toDouble()
+    fun getVar(varId: Int) = Class158_Sub1.PLAYER_VAR_PROVIDER.getVar(varId)
+    fun getVarBit(varBit: Int) = Class158_Sub1.PLAYER_VAR_PROVIDER.getVarBit(varBit)
+
+    fun hasntAnimatedFor(time: Int) = getTimeSinceLastAnimation() > time
+
+    fun dropAll(vararg ids: Int) {
+        for (i in 0 until 28) {
+            if (inventory.getItem(i) in ids) {
+                dropItem(inventory.getItem(i), i)
+            }
+        }
+    }
+
+    fun sendClick() {
+        val packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeIntLE(Utils.random(0, 400) or (Utils.random(0, 400) shl 16))
+        packet.buffer.writeShort(5 or (10 shl 0))
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+    }
+
+    fun loginLobby(un: String, pw: String) = MaterialProp35.lobbyLogin(un, pw)
+    fun loginWorld() = ParticleArchive1Def.worldLogin(Class9.aString99, Class9.aString102)
+}
