@@ -48,31 +48,10 @@ object Bot {
     var PROXY_IP = "147.135.15.128"
     var PROXY_PORT = -1
 
-    const val ATTACK = 0
-    const val DEFENCE = 1
-    const val STRENGTH = 2
-    const val HITPOINTS = 3
-    const val RANGE = 4
-    const val PRAYER = 5
-    const val MAGIC = 6
-    const val COOKING = 7
-    const val WOODCUTTING = 8
-    const val FLETCHING = 9
-    const val FISHING = 10
-    const val FIREMAKING = 11
-    const val CRAFTING = 12
-    const val SMITHING = 13
-    const val MINING = 14
-    const val HERBLORE = 15
-    const val AGILITY = 16
-    const val THIEVING = 17
-    const val SLAYER = 18
-    const val FARMING = 19
-    const val RUNECRAFTING = 20
-    const val HUNTER = 21
-    const val CONSTRUCTION = 22
-    const val SUMMONING = 23
-    const val DUNGEONEERING = 24
+    // Interface IDs
+    private const val BANK_INTERFACE = 762
+    private const val DEPOSIT_BOX_INTERFACE = 11
+    private const val INVENTORY_INTERFACE = 679
 
     const val randomMac = true
 
@@ -163,21 +142,6 @@ object Bot {
     fun setRunning(on: Boolean) {
         if (getVar(173) == 0 && on)
             clickButton(750, 4)
-    }
-
-    fun alchItem(replaceAll: String) {
-        // TODO
-    }
-
-    fun append(bytes: ByteArray): String {
-        val chars = charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
-        val result = CharArray(bytes.size * 2)
-        var index = 0
-        for (byte in bytes) {
-            result[index++] = chars[byte.toInt() shr 4 and 0xf]
-            result[index++] = chars[byte.toInt() and 0xf]
-        }
-        return String(result)
     }
 
     fun clickDialogueOption(option: Int) {
@@ -329,33 +293,26 @@ object Bot {
         return false
     }
 
-    fun clickClosestObject(name: Int, action: String) {
+    fun clickClosestObject(name: Int, action: String) =
         getClosestObject(name, action)?.let { clickObject(it, it.containsOption(action)) }
-    }
 
-    fun clickClosestObject(name: String, action: String) {
+    fun clickClosestObject(name: String, action: String) =
         getClosestObject(name, action)?.let { clickObject(it, it.containsOption(action)) }
-    }
 
-    fun clickClosestObject(name: Int, action: Int) {
+    fun clickClosestObject(name: Int, action: Int) =
         getClosestObject(name)?.let { clickObject(it, action) }
-    }
 
-    fun clickClosestObject(name: IntArray, action: Int) {
+    fun clickClosestObject(name: IntArray, action: Int) =
         getClosestObject(*name)?.let { clickObject(it, action) }
-    }
 
-    fun clickClosestObject(name: String, action: Int) {
+    fun clickClosestObject(name: String, action: Int) =
         getClosestObject(name)?.let { clickObject(it, action) }
-    }
 
-    fun clickClosestObject(name: Int) {
+    fun clickClosestObject(name: Int) =
         getClosestObject(name)?.let { clickObject(it) }
-    }
 
-    fun clickClosestObject(name: String) {
+    fun clickClosestObject(name: String) =
         getClosestObject(name)?.let { clickObject(it) }
-    }
 
     fun playerOption(username: String, option: Int) {
         val prot = when (option) {
@@ -432,28 +389,24 @@ object Bot {
 
     fun getMyPlayer(): PlayerEntity = PlayerUpdate.MY_PLAYER
 
+    fun itemOnItem(fromItem: Int, fromSlot: Int, toItem: Int, toSlot: Int) {
+        interfaceOnInterface(44498944, 44498944, fromSlot, toSlot, fromItem, toItem)
+    }
+
     fun itemOnItem(item1: String, item2: String) {
-        itemOnItem(
-            inventory.getItem(inventory.getSlotByItem(item1)),
-            inventory.getItem(inventory.getSlotByItem(item2))
-        )
+        val slot1 = inventory.getSlotByItem(item1)
+        val slot2 = inventory.getSlotByItem(item2)
+        itemOnItem(inventory.getItem(slot1), slot1, inventory.getItem(slot2), slot2)
     }
 
     fun itemOnItem(itemId: Int, item: String) {
-        itemOnItem(
-            itemId,
-            inventory.getSlotByItem(itemId),
-            inventory.getItem(inventory.getSlotByItem(item)),
-            inventory.getSlotByItem(item)
-        )
+        val slot1 = inventory.getSlotByItem(itemId)
+        val slot2 = inventory.getSlotByItem(item)
+        itemOnItem(itemId, slot1, inventory.getItem(slot2), slot2)
     }
 
     fun itemOnItem(itemId: Int, itemId2: Int) {
         itemOnItem(itemId, inventory.getSlotByItem(itemId), itemId2, inventory.getSlotByItem(itemId2))
-    }
-
-    fun itemOnItem(fromItem: Int, fromSlot: Int, toItem: Int, toSlot: Int) {
-        interfaceOnInterface(44498944, 44498944, fromSlot, toSlot, fromItem, toItem)
     }
 
     fun interfaceOnInterface(fromIf: Int, toIf: Int, fromSlot: Int, toSlot: Int, fromItem: Int, toItem: Int) {
@@ -469,115 +422,111 @@ object Bot {
 
     fun activateQuickprayers() = clickButton(749, 4)
 
+    private fun getDepositInterfaceInfo(option: Int): Triple<Int, Int, Int> {
+        return if (interfaceOpen(DEPOSIT_BOX_INTERFACE)) {
+            Triple(DEPOSIT_BOX_INTERFACE, 17, if (option == 1) 1 else 4)
+        } else {
+            Triple(763, 0, option)
+        }
+    }
+
     fun depositItem(itemId: Int) {
-        val (ifId, compId, option) = if (interfaceOpen(11))
-            Triple(11, 17, 1)
-        else
-            Triple(763, 0, 1)
+        val (ifId, compId, option) = getDepositInterfaceInfo(1)
         clickButton(ifId, compId, inventory.getSlotByItem(itemId), itemId, option)
     }
 
     fun depositAllOfItem(itemId: Int) {
-        val (ifId, compId, option) = if (interfaceOpen(11))
-            Triple(11, 17, 4)
-        else
-            Triple(763, 0, 6)
+        val (ifId, compId, option) = getDepositInterfaceInfo(6)
         clickButton(ifId, compId, inventory.getSlotByItem(itemId), itemId, option)
     }
 
     fun depositAllOfItem(itemName: String) {
-        val (ifId, compId, option) = if (interfaceOpen(11))
-            Triple(11, 17, 4)
-        else
-            Triple(763, 0, 6)
+        val (ifId, compId, option) = getDepositInterfaceInfo(6)
         clickButton(ifId, compId, inventory.getSlotByItem(itemName), inventory.getItemId(itemName), option)
     }
 
     fun depositAllOfItemBySlot(slot: Int) {
-        val (ifId, compId, option) = if (interfaceOpen(11))
-            Triple(11, 17, 4)
-        else
-            Triple(763, 0, 6)
+        val (ifId, compId, option) = getDepositInterfaceInfo(6)
         clickButton(ifId, compId, slot, inventory.getItem(slot), option)
     }
 
     fun depositAllExcept(vararg itemIds: Int) {
+        val (ifId, compId, option) = getDepositInterfaceInfo(6)
         for (i in 0 until 28) {
             val item = inventory.getItem(i)
             if (item == -1 || item in itemIds) continue
-            val (ifId, compId, option) = if (interfaceOpen(11))
-                Triple(11, 17, 4)
-            else
-                Triple(763, 0, 6)
             clickButton(ifId, compId, i, item, option)
         }
     }
 
-    fun withdrawOneItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 1)
-    fun withdraw5Item(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 2)
-    fun withdraw10Item(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 3)
-    fun withdrawCustomItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 4)
-    fun withdrawAllButOneItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 7)
-    fun withdrawAllOfItem(itemId: Int) = clickButton(762, 95, bank.getSlotByItem(itemId), itemId, 6)
+    private fun withdrawItem(slot: Int, itemId: Int, option: Int) =
+        clickButton(BANK_INTERFACE, 95, slot, itemId, option)
+
+    fun withdrawOneItem(itemId: Int) = withdrawItem(bank.getSlotByItem(itemId), itemId, 1)
+    fun withdraw5Item(itemId: Int) = withdrawItem(bank.getSlotByItem(itemId), itemId, 2)
+    fun withdraw10Item(itemId: Int) = withdrawItem(bank.getSlotByItem(itemId), itemId, 3)
+    fun withdrawCustomItem(itemId: Int) = withdrawItem(bank.getSlotByItem(itemId), itemId, 4)
+    fun withdrawAllButOneItem(itemId: Int) = withdrawItem(bank.getSlotByItem(itemId), itemId, 7)
+    fun withdrawAllOfItem(itemId: Int) = withdrawItem(bank.getSlotByItem(itemId), itemId, 6)
 
     fun withdrawAllOfItem(name: String) {
         val slot = bank.getSlotByItem(name)
-        clickButton(762, 95, slot, bank.getItem(slot), 6)
+        withdrawItem(slot, bank.getItem(slot), 6)
     }
 
     fun withdrawOneItem(name: String) {
         val slot = bank.getSlotByItem(name)
-        clickButton(762, 95, slot, bank.getItem(slot), 1)
+        withdrawItem(slot, bank.getItem(slot), 1)
     }
 
     fun withdraw5Item(name: String) {
         val slot = bank.getSlotByItem(name)
-        clickButton(762, 95, slot, bank.getItem(slot), 2)
+        withdrawItem(slot, bank.getItem(slot), 2)
     }
 
     fun withdraw10Item(name: String) {
         val slot = bank.getSlotByItem(name)
-        clickButton(762, 95, slot, bank.getItem(slot), 3)
+        withdrawItem(slot, bank.getItem(slot), 3)
     }
 
     fun withdrawCustomItem(name: String) {
         val slot = bank.getSlotByItem(name)
-        clickButton(762, 95, slot, bank.getItem(slot), 4)
+        withdrawItem(slot, bank.getItem(slot), 4)
     }
 
     fun withdrawAllButOneItem(name: String) {
         val slot = bank.getSlotByItemOfGreaterAmount(name, 1)
-        clickButton(762, 95, slot, bank.getItem(slot), 7)
+        withdrawItem(slot, bank.getItem(slot), 7)
     }
 
-    fun equipItem(itemId: Int, slot: Int) = clickButton(679, 0, slot, itemId, 2)
-    fun clickItem(itemId: Int, slot: Int) = clickButton(679, 0, slot, itemId, 1)
-    fun clickItem(itemId: Int, slot: Int, option: Int) = clickButton(679, 0, slot, itemId, option)
-    fun clickItem(itemId: Int) = clickButton(679, 0, inventory.getSlotByItem(itemId), itemId, 1)
+    fun equipItem(itemId: Int, slot: Int) = clickButton(INVENTORY_INTERFACE, 0, slot, itemId, 2)
+    fun clickItem(itemId: Int, slot: Int) = clickButton(INVENTORY_INTERFACE, 0, slot, itemId, 1)
+    fun clickItem(itemId: Int, slot: Int, option: Int) = clickButton(INVENTORY_INTERFACE, 0, slot, itemId, option)
+    fun clickItem(itemId: Int) = clickButton(INVENTORY_INTERFACE, 0, inventory.getSlotByItem(itemId), itemId, 1)
 
     fun clickItem(name: String) {
         val slot = inventory.getSlotByItem(name)
-        clickButton(679, 0, slot, inventory.getItem(slot), 1)
+        clickButton(INVENTORY_INTERFACE, 0, slot, inventory.getItem(slot), 1)
     }
 
     fun clickItem(name: String, option: Int) {
         val slot = inventory.getSlotByItem(name)
-        clickButton(679, 0, slot, inventory.getItem(slot), option)
+        clickButton(INVENTORY_INTERFACE, 0, slot, inventory.getItem(slot), option)
     }
 
-    fun dropItem(itemId: Int, slot: Int) = clickButton(679, 0, slot, itemId, 8)
+    fun dropItem(itemId: Int, slot: Int) = clickButton(INVENTORY_INTERFACE, 0, slot, itemId, 8)
 
     fun bankAll() {
         if (inventory.contains(5733, 1))
             depositAllExcept(5733)
         else
-            clickButton(762, 33)
+            clickButton(BANK_INTERFACE, 33)
     }
 
-    fun bankAllInDepositBox() = clickButton(11, 18)
+    fun bankAllInDepositBox() = clickButton(DEPOSIT_BOX_INTERFACE, 18)
 
     fun bankAllExcept(id: Int) {
-        clickButton(762, 33)
+        clickButton(BANK_INTERFACE, 33)
         withdrawOneItem(id)
     }
 
@@ -821,51 +770,29 @@ object Bot {
     fun getMyPlayerX() = getMyPlayer().endX.toInt() + getBaseX()
     fun getMyPlayerY() = getMyPlayer().endZ.toInt() + getBaseY()
 
-    fun getNpcIndexByName(name: String): Int {
-        for (i in 0 until client.npcCount) {
-            val index = client.NPC_INDICES[i].toLong()
-            val node = client.NPC_MAP.get(index)
-            val npc = node?.value as? NpcEntity
-            if (npc?.definitions?.name?.equals(name, ignoreCase = true) == true) {
-                return npc.playerIndex
-            }
-        }
-        return -1
-    }
+    fun getNpcIndexByName(name: String): Int =
+        findNPC { it.definitions.name.equals(name, ignoreCase = true) }?.playerIndex ?: -1
 
     fun getPid(entity: PathingEntity) = entity.playerIndex
 
-    fun getNPCByIndexExcluding(index: Int, exclude: Int): NpcEntity? {
+    private inline fun findNPC(predicate: (NpcEntity) -> Boolean): NpcEntity? {
         for (i in 0 until client.npcCount) {
             val idx = client.NPC_INDICES[i].toLong()
-            val node = client.NPC_MAP.get(idx)
-            val npc = node?.value as? NpcEntity
-            if (npc != null && getPid(npc) != exclude && npc.playerIndex == index) {
-                return npc
-            }
+            val node = client.NPC_MAP.get(idx) ?: continue
+            val npc = node.value as? NpcEntity ?: continue
+            if (predicate(npc)) return npc
         }
         return null
     }
 
-    fun getNPCByIndex(index: Int): NpcEntity? {
-        for (i in 0 until client.npcCount) {
-            val idx = client.NPC_INDICES[i].toLong()
-            val node = client.NPC_MAP.get(idx)
-            val npc = node?.value as? NpcEntity
-            if (npc?.playerIndex == index) return npc
-        }
-        return null
-    }
+    fun getNPCByIndexExcluding(index: Int, exclude: Int): NpcEntity? =
+        findNPC { it.playerIndex == index && it.playerIndex != exclude }
 
-    fun getNpcIndexById(id: Int): Int {
-        for (i in 0 until client.npcCount) {
-            val idx = client.NPC_INDICES[i].toLong()
-            val node = client.NPC_MAP.get(idx)
-            val npc = node?.value as? NpcEntity
-            if (npc?.definitions?.type == id) return npc.playerIndex
-        }
-        return -1
-    }
+    fun getNPCByIndex(index: Int): NpcEntity? =
+        findNPC { it.playerIndex == index }
+
+    fun getNpcIndexById(id: Int): Int =
+        findNPC { it.definitions.type == id }?.playerIndex ?: -1
 
     fun buy500ShopItem(slot: Int) = clickButton(1265, 20, slot, 6)
 
@@ -877,9 +804,8 @@ object Bot {
         npc?.let { npcOption(it.playerIndex, Utils.stringContainsIgnoreCase(it.definitions.actions, option)) }
     }
 
-    fun clickNpc(name: String, option: Int) {
+    fun clickNpc(name: String, option: Int) =
         getClosestNPC(name)?.let { clickNPC(it, option) }
-    }
 
     fun clickNPCWithNearestOption(name: String, optionRequired: String, action: String) {
         val nearestNPC = getNPCs().firstOrNull { npc ->
@@ -900,9 +826,8 @@ object Bot {
         }
     }
 
-    fun clickNpc(npcId: Int, option: Int) {
+    fun clickNpc(npcId: Int, option: Int) =
         getClosestNPC(npcId)?.let { clickNPC(it, option) }
-    }
 
     fun npcOption(index: Int, option: Int) {
         val prot = when (option) {
@@ -1000,139 +925,87 @@ object Bot {
         return objects
     }
 
+    private fun joinArgs(cmd: Array<String>, startIndex: Int = 1) =
+        cmd.drop(startIndex).joinToString(" ").replace("_", " ")
+
     @JvmStatic
     fun handleConsoleCommand(cmd: Array<String>) {
-        when {
-            cmd[0].startsWith("walk") -> walkTo(Tile(cmd[1].toInt(), cmd[2].toInt(), 0))
-            cmd[0].startsWith("clickbutton") -> clickButton(
-                cmd[1].toInt(), cmd[2].toInt(), cmd[3].toInt(), cmd[4].toInt()
-            )
-            cmd[0].startsWith("itemtest") -> {
-                getGroundItems().forEach { println(it.toString()) }
-            }
-            cmd[0].startsWith("test") -> clickButton(374 shl 16 or 5, -1, -1, 1)
-            cmd[0].startsWith("bankall") -> bankAll()
-            cmd[0].startsWith("withdraw") -> withdrawOneItem(1333)
-            cmd[0].startsWith("trade") -> tradePlayer(cmd[1].replace("_", " "))
-            cmd[0].startsWith("banticket") -> command("banticket ${cmd[1].replace("_", " ")}")
-            cmd[0].equals("empty", ignoreCase = true) -> command("empty")
-            cmd[0].equals("drop", ignoreCase = true) -> dropWholeInventory()
-            cmd[0].startsWith("food") -> withdraw10Item(15272)
-            cmd[0].startsWith("pray") -> withdraw5Item(139)
-            cmd[0].equals("buy", ignoreCase = true) -> {
-                repeat(20) { clickButton(82903060, -1, cmd[1].toInt(), 6) }
-            }
-            cmd[0].startsWith("useon") -> {
-                for (i in 0 until 14) {
-                    itemOnItem(inventory.getItem(i), i, inventory.getItem(i + 14), i + 14)
-                }
-            }
-            cmd[0].startsWith("string") -> sendText(cmd[1])
-            cmd[0].startsWith("togglepackets") -> {
-                disableIncomingPackets = !disableIncomingPackets
-                Console.writeLine("Disabled packets: $disableIncomingPackets")
-            }
-            cmd[0].startsWith("toggleinterfaces") -> {
-                disableInterfaces = !disableInterfaces
-                Console.writeLine("Disabled interfaces: $disableInterfaces")
-            }
-            cmd[0].startsWith("crash") -> chat("Bank sale.", -1, -1)
-            cmd[0].startsWith("pos") -> Console.writeLine(
-                "x: ${getMyPlayerX()} y: ${getMyPlayerY()} (${getMyPlayer().endX.toInt()}, ${getMyPlayer().endZ.toInt()})"
-            )
-            cmd[0].startsWith("localpos") -> Console.writeLine(
-                "x: ${getMyPlayer().endX.toInt()} y: ${getMyPlayer().endZ.toInt()}"
-            )
-            cmd[0].startsWith("closebank") -> closeInterfaces()
-            cmd[0].startsWith("add") -> addResponsePlayer(cmd[1].replace("_", " "))
-            cmd[0].startsWith("remove") -> removeResponsePlayer(cmd[1].replace("_", " "))
-            cmd[0].startsWith("withdrawcustom") -> withdrawCustomItem(995)
-            cmd[0] == "iswalking" -> {
-                Console.writeLine("${isWalking()}")
-                Console.writeLine(getMyPlayer().movementTypes.contentToString())
-                Console.writeLine("${getMyPlayer().movingSequence.type.id}")
-            }
-            cmd[0] == "healthpray" -> println("Health: ${getHealth()} Prayer: ${getPrayer()}")
-            cmd[0] == "b" -> {
-                command("bank")
-                bankAll()
-            }
-            cmd[0].startsWith("clear") -> clearResponsePlayers()
-            cmd[0] == "npcnext" -> {
-                println(getClosestNPC("fishing spot"))
-                getNPCs().forEach { println(it.definitions.name) }
-            }
-            cmd[0] == "objnext" -> {
-                println(getClosestObject("Fur stall"))
-                println("Number found: ${getObjectsNearby("Fur stall").size}")
-                clickClosestObject("Fur stall")
-            }
-            cmd[0] == "nearbyobjects" -> {
-                Console.writeLine("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: ")
-                getObjectsNearby(cmd[1]).forEach {
-                    Console.writeLine("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}")
-                }
-            }
-            cmd[0] == "objonme" -> {
-                val obj = Resource.mapRegion.getScene()
-                    .getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), client.INTERACTIVE_OBJECT_COMPARABLE) as? WorldObject
-                println(obj?.id)
-            }
-            cmd[0] == "objtest" -> {
+        when (cmd[0]) {
+            // Movement & Position
+            "walk" -> walkTo(Tile(cmd[1].toInt(), cmd[2].toInt(), 0))
+            "pos" -> Console.writeLine("x: ${getMyPlayerX()} y: ${getMyPlayerY()} (${getMyPlayer().endX.toInt()}, ${getMyPlayer().endZ.toInt()})")
+            "localpos" -> Console.writeLine("x: ${getMyPlayer().endX.toInt()} y: ${getMyPlayer().endZ.toInt()}")
+
+            // Banking & Inventory
+            "bankall" -> bankAll()
+            "withdraw" -> withdrawOneItem(1333)
+            "food" -> withdraw10Item(15272)
+            "pray" -> withdraw5Item(139)
+            "withdrawcustom" -> withdrawCustomItem(995)
+            "empty" -> command("empty")
+            "drop" -> dropWholeInventory()
+            "closebank" -> closeInterfaces()
+            "b" -> { command("bank"); bankAll() }
+
+            // Trading & Players
+            "trade" -> tradePlayer(cmd[1].replace("_", " "))
+            "add" -> addResponsePlayer(cmd[1].replace("_", " "))
+            "remove" -> removeResponsePlayer(cmd[1].replace("_", " "))
+            "clear" -> clearResponsePlayers()
+
+            // Game Commands
+            "yell" -> command("yell ${joinArgs(cmd)}")
+            "teleto" -> command("teleto ${joinArgs(cmd)}")
+            "dicebag" -> command("dicebag ${joinArgs(cmd)}")
+            "ticket" -> command("ticket ${joinArgs(cmd)}")
+            "bank" -> command("bank ${joinArgs(cmd)}")
+            "banticket" -> command("banticket ${joinArgs(cmd, 1)}")
+            "resettask" -> command("resettask ${joinArgs(cmd)}")
+            "bid" -> command("ah bid")
+
+            // Interface & Buttons
+            "clickbutton" -> clickButton(cmd[1].toInt(), cmd[2].toInt(), cmd[3].toInt(), cmd[4].toInt())
+            "test" -> clickButton(374 shl 16 or 5, -1, -1, 1)
+            "buy" -> repeat(20) { clickButton(82903060, -1, cmd[1].toInt(), 6) }
+            "1b" -> clickButton(85983267, -1, -1, 1)
+
+            // Items & Objects
+            "itemtest" -> getGroundItems().forEach { println(it) }
+            "useon" -> for (i in 0 until 14) itemOnItem(inventory.getItem(i), i, inventory.getItem(i + 14), i + 14)
+
+            // NPCs & Objects
+            "npcnext" -> { println(getClosestNPC("fishing spot")); getNPCs().forEach { println(it.definitions.name) } }
+            "objnext" -> { println(getClosestObject("Fur stall")); println("Number found: ${getObjectsNearby("Fur stall").size}"); clickClosestObject("Fur stall") }
+            "nearbyobjects" -> { Console.writeLine("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: "); getObjectsNearby(cmd[1]).forEach { Console.writeLine("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}") } }
+            "objonme" -> println((Resource.mapRegion.getScene().getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject)?.id)
+
+            // Debug & Toggles
+            "togglepackets" -> { disableIncomingPackets = !disableIncomingPackets; Console.writeLine("Disabled packets: $disableIncomingPackets") }
+            "toggleinterfaces" -> { disableInterfaces = !disableInterfaces; Console.writeLine("Disabled interfaces: $disableInterfaces") }
+            "iswalking" -> { Console.writeLine("${isWalking()}"); Console.writeLine(getMyPlayer().movementTypes.contentToString()); Console.writeLine("${getMyPlayer().movingSequence.type.id}") }
+            "healthpray" -> println("Health: ${getHealth()} Prayer: ${getPrayer()}")
+            "curemote" -> Console.writeLine("Emote: ${getCurrentAnimation()}")
+
+            // Other
+            "string" -> sendText(cmd[1])
+            "crash" -> chat("Bank sale.", -1, -1)
+            "log" -> sendLogout(true)
+            "chet" -> chat(joinArgs(cmd), 2, 4)
+
+            // Complex commands that need their original form
+            "objtest" -> {
                 for (x in 0 until 104) {
                     for (y in 0 until 104) {
                         val plane = getMyPlayer().plane.toInt()
-                        var obj: GameObject? = Resource.mapRegion.getScene()
-                            .getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
-
-                        if (obj == null)
-                            obj = Resource.mapRegion.getScene()
-                                .getGroundDecoration(plane, x, y) as? GameObject
-
-                        if (obj == null)
-                            obj = Resource.mapRegion.getScene()
-                                .getWall(plane, x, y) as? GameObject
-
-                        if (obj == null)
-                            obj = Resource.mapRegion.getScene()
-                                .getPrimaryWallDecoration(plane, x, y) as? GameObject
-
+                        var obj: GameObject? = Resource.mapRegion.getScene().getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+                        if (obj == null) obj = Resource.mapRegion.getScene().getGroundDecoration(plane, x, y) as? GameObject
+                        if (obj == null) obj = Resource.mapRegion.getScene().getWall(plane, x, y) as? GameObject
+                        if (obj == null) obj = Resource.mapRegion.getScene().getPrimaryWallDecoration(plane, x, y) as? GameObject
                         obj?.let { println("Object type: ${it.javaClass.name}") }
                     }
                 }
             }
-            cmd[0].startsWith("yell") -> {
-                val yell = cmd.drop(1).joinToString(" ")
-                command("yell $yell")
-            }
-            cmd[0].startsWith("bid") -> command("ah bid")
-            cmd[0].startsWith("1b") -> clickButton(85983267, -1, -1, 1)
-            cmd[0].startsWith("teleto") -> {
-                val teleto = cmd.drop(1).joinToString(" ")
-                command("teleto $teleto")
-            }
-            cmd[0].startsWith("dicebag") -> {
-                val dicebag = cmd.drop(1).joinToString(" ")
-                command("dicebag $dicebag")
-            }
-            cmd[0].startsWith("ticket") -> {
-                val ticket = cmd.drop(1).joinToString(" ")
-                command("ticket $ticket")
-            }
-            cmd[0].startsWith("bank") -> {
-                val bank = cmd.drop(1).joinToString(" ")
-                command("bank $bank")
-            }
-            cmd[0].startsWith("log") -> sendLogout(true)
-            cmd[0].startsWith("resettask") -> {
-                val resettask = cmd.drop(1).joinToString(" ")
-                command("resettask $resettask")
-            }
-            cmd[0].startsWith("chet") -> {
-                val chat = cmd.drop(1).joinToString(" ")
-                chat(chat, 2, 4)
-            }
-            cmd[0].startsWith("curemote") -> Console.writeLine("Emote: ${getCurrentAnimation()}")
+
             else -> Console.writeLine("Unknown command.")
         }
     }
@@ -1207,6 +1080,8 @@ object Bot {
             Utils.distance(getMyPlayerPosition(), Tile(it.endX.toInt() + getBaseX(), it.endZ.toInt() + getBaseY()))
         }
 
+    private fun formatTimeUnit(value: Long) = if (value < 10) "0$value" else "$value"
+
     fun getTimeToLevel(skillId: Int, startXP: Int, startTime: Long, level: Int): String {
         val xpPh = getXpPerHour(skillId, startXP, startTime)
         val xpPs = xpPh / 3600f
@@ -1217,11 +1092,7 @@ object Bot {
         val formatMinutesToLevel = minutesToLevel - (hoursToLevel * 60)
         val formatSecondsToLevel = secondsToLevel - (minutesToLevel * 60)
 
-        return buildString {
-            append(if (hoursToLevel < 10) "0$hoursToLevel:" else "$hoursToLevel:")
-            append(if (formatMinutesToLevel < 10) "0$formatMinutesToLevel:" else "$formatMinutesToLevel:")
-            append(if (formatSecondsToLevel < 10) "0$formatSecondsToLevel" else "$formatSecondsToLevel")
-        }
+        return "${formatTimeUnit(hoursToLevel.toLong())}:${formatTimeUnit(formatMinutesToLevel.toLong())}:${formatTimeUnit(formatSecondsToLevel.toLong())}"
     }
 
     fun getXPToLevel(skillId: Int, level: Int): Int {
@@ -1238,9 +1109,7 @@ object Bot {
         val mins = (totalSecs / 60) % 60
         val secs = totalSecs % 60
 
-        fun format(value: Long) = if (value == 0L) "00" else if (value < 10) "0$value" else "$value"
-
-        return "${format(hours)}:${format(mins)}:${format(secs)}"
+        return "${formatTimeUnit(hours)}:${formatTimeUnit(mins)}:${formatTimeUnit(secs)}"
     }
 
     fun getLootPerHour(itemAmount: Int, startingAmount: Int, startTime: Long) =
@@ -1252,7 +1121,7 @@ object Bot {
     fun myPlayerInCombat() = inCombat(getMyPlayer())
 
     fun getHealth() = VarProviders.PLAYER_VAR_PROVIDER.getVarBitValue(7198).toDouble()
-    fun getHealthPercent() = (getHealth() / (getLevel(HITPOINTS) * 10)) * 100.0
+    fun getHealthPercent() = (getHealth() / (getLevel(Skill.CONSTITUTION.ordinal) * 10)) * 100.0
     fun usingSpec() = VarProviders.PLAYER_VAR_PROVIDER.getVarValue(301) == 1
     fun specPercent() = VarProviders.PLAYER_VAR_PROVIDER.getVarValue(300) / 10.0
     fun getPrayer() = VarProviders.PLAYER_VAR_PROVIDER.getVarValue(2382).toDouble()
