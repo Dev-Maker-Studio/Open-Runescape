@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 
 import javax.imageio.ImageIO;
 
+import com.darkan.bot.Bot;
 import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.client.*;
 import com.jagex.game.runetek5.client.input.camera.Camera;
@@ -47,6 +48,11 @@ public class CommandExecutor {
 	    try {
 	        label381:
 	        {
+                try {
+                    Bot.handleConsoleCommand(command.split(" "));
+                } catch(Throwable e) {
+                    e.printStackTrace();
+                }
 	            if (!"commands".equalsIgnoreCase(command) && !"help".equalsIgnoreCase(command)) {
 	                if ("cls".equalsIgnoreCase(command)) {
 	                    Console.consoleMessageCount = 0;

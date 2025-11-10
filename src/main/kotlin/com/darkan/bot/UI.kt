@@ -179,14 +179,15 @@ class CheddarCheeseUI : JFrame("Cheddar Cheese") {
     }
 
     private fun createScriptRenderer(): ListCellRenderer<ScriptMetadata> {
-        return object : DefaultListCellRenderer(), ListCellRenderer<ScriptMetadata> {
-            override fun getListCellRendererComponent(list: JList<out ScriptMetadata?>?, value: ScriptMetadata?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
+        return object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                text = value?.toString() ?: "Select a script"
-                toolTipText = value?.description
+                val scriptValue = value as? ScriptMetadata
+                text = scriptValue?.toString() ?: "Select a script"
+                toolTipText = scriptValue?.description
                 return this
             }
-        }
+        } as ListCellRenderer<ScriptMetadata>
     }
 
     private fun startScript() {

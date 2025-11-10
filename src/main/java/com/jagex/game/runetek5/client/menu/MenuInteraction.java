@@ -1,5 +1,7 @@
 package com.jagex.game.runetek5.client.menu;
 
+import com.darkan.bot.Bot;
+import com.darkan.bot.UtilKt;
 import com.jagex.game.runetek5.cache.node.NodeIterator;
 import com.jagex.game.runetek5.cache.node.QueueIterator;
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode;
@@ -7,6 +9,7 @@ import com.jagex.game.runetek5.client.GameShell;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.client.input.camera.Camera;
 import com.jagex.game.runetek5.client.input.console.CommandExecutor;
+import com.jagex.game.runetek5.client.input.console.Console;
 import com.jagex.game.runetek5.client.input.keyboard.KeyDownCommand;
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord;
 import com.jagex.game.runetek5.config.Resource;
@@ -127,7 +130,8 @@ public class MenuInteraction {
 	            client.crossType = 2;
 	            client.crossSpritePtr = 0;
 	            packet = PacketEncoder.createPacket(ClientProt.IF_ON_OBJECT, client.GAME_CONNECTION_CONTEXT.isaac);
-	            packet.buffer.writeShortAddLittle(attr1 + baseCoordinates.x);
+                Console.writeLine("IF_ON_OBJECT [" + UtilKt.interfaceIdFromHash(client.anInt56) + ", " + UtilKt.componentIdFromHash(client.anInt56) + ", " + client.anInt7345 + ", " + client.anInt7346 + "] -> [" + ((int) (bitpackedEntity >>> 32) & 0x7fffffff) + ", (" + (attr1 + baseCoordinates.x) + ", " + (attr2 + baseCoordinates.y) + ", " + Bot.getMyPlayerPosition().getZ() + ")]");
+                packet.buffer.writeShortAddLittle(attr1 + baseCoordinates.x);
 	            packet.buffer.writeByteSubtract(KeyDownCommand.runKeyDown() ? 1 : 0);
 	            packet.buffer.writeIntMiddle((int) (bitpackedEntity >>> 32) & 0x7fffffff);
 	            packet.buffer.writeInt(client.anInt56);
@@ -161,6 +165,7 @@ public class MenuInteraction {
 	                client.crossY = y;
 	                client.crossType = 2;
 	                client.crossSpritePtr = 0;
+                    Console.writeLine(npcInteract + " index: " + uid + " npcId: " + npc.definitions.type);
 	                TcpPacket npcInteractPacket = PacketEncoder.createPacket(npcInteract, client.GAME_CONNECTION_CONTEXT.isaac);
 	                npcInteractPacket.buffer.writeShort(uid);
 	                npcInteractPacket.buffer.writeByte(KeyDownCommand.runKeyDown() ? 1 : 0);
@@ -342,7 +347,8 @@ public class MenuInteraction {
 	                client.crossY = y;
 	                client.crossType = 2;
 	                client.crossSpritePtr = 0;
-	                TcpPacket locInteractPacket = PacketEncoder.createPacket(locInteract, client.GAME_CONNECTION_CONTEXT.isaac);
+                    Console.writeLine(locInteract + " id: " + ((int) (bitpackedEntity >>> 32) & 0x7fffffff) + " coords: (" + (attr1 + baseCoordinates.x) + ", " + (attr2 + baseCoordinates.y) + ", " + Bot.getMyPlayerPosition().getZ() + ")");
+                    TcpPacket locInteractPacket = PacketEncoder.createPacket(locInteract, client.GAME_CONNECTION_CONTEXT.isaac);
 	                locInteractPacket.buffer.writeShort(attr2 + baseCoordinates.y);
 	                locInteractPacket.buffer.writeShort(attr1 + baseCoordinates.x);
 	                locInteractPacket.buffer.writeInt((int) (bitpackedEntity >>> 32) & 0x7fffffff);

@@ -3,6 +3,8 @@ package com.jagex.game.runetek5.network.packet;
 import java.io.DataInputStream;
 import java.net.URL;
 
+import com.darkan.bot.Bot;
+import com.darkan.bot.UtilKt;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.JFS32;
 import com.jagex.game.runetek5.client.GameShell;
@@ -10,6 +12,7 @@ import com.jagex.game.runetek5.client.GameState;
 import com.jagex.game.runetek5.client.PreferenceManager;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.client.input.camera.Camera;
+import com.jagex.game.runetek5.client.input.console.Console;
 import com.jagex.game.runetek5.client.input.keyboard.KeyDownCommand;
 import com.jagex.game.runetek5.client.input.keyboard.KeyRecord;
 import com.jagex.game.runetek5.client.input.mouse.MouseActionServer;
@@ -148,6 +151,7 @@ public class PacketEncoder {
                 }
             }
             TcpPacket tcpmessage4 = createPacket(ClientProt.IF_ON_IF, client.GAME_CONNECTION_CONTEXT.isaac);
+            Console.writeLine("IF_ON_IF: [" + UtilKt.interfaceIdFromHash(client.anInt56) + ", " + UtilKt.componentIdFromHash(client.anInt56) + ", " + client.anInt7345 + ", " + client.anInt7346 + "] -> [" + UtilKt.interfaceIdFromHash(icomponentdefinitions0.idHash) + ", " + UtilKt.componentIdFromHash(icomponentdefinitions0.idHash) + ", " + icomponentdefinitions0.slotId + ", " + icomponentdefinitions0.containerItemId + "]");
             tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.slotId);
             tcpmessage4.buffer.writeShortLittle(client.anInt7345);
             tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId);
@@ -195,6 +199,7 @@ public class PacketEncoder {
     }
 
     public static void method12590(TcpPacket packet, int interfaceHash, int slotId, int itemId) {
+        Console.writeLine(packet.packet + ": interfaceId: " + UtilKt.interfaceIdFromHash(interfaceHash) + " componentId: " + UtilKt.componentIdFromHash(interfaceHash) + " slotId: " + slotId + " itemId: " + itemId);
         packet.buffer.writeIntLittle(interfaceHash);
         packet.buffer.writeShort(itemId);
         packet.buffer.writeShortAdd(slotId);
@@ -470,6 +475,7 @@ public class PacketEncoder {
 	}
 
 	public static void continueInterfacePressed(int i_0, int i_1) {
+        Console.writeLine("IF_CONTINUE interfaceId: " + UtilKt.interfaceIdFromHash(i_0) + " componentId: " + UtilKt.componentIdFromHash(i_0) + " slotId: " + i_1);
 	    TcpPacket packet = createPacket(ClientProt.IF_CONTINUE, client.GAME_CONNECTION_CONTEXT.isaac);
 	    packet.buffer.writeIntMiddle(i_0);
 	    packet.buffer.writeShortAddLittle(i_1);

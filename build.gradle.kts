@@ -14,7 +14,7 @@ version = "2.0.0"
 description = "Darkan Client"
 
 application {
-    mainClass.set("com.jagex.game.launch.Loader")
+    mainClass.set("com.darkan.bot.BotKt")
 }
 
 java {
@@ -81,7 +81,7 @@ tasks {
 
     jar {
         manifest {
-            attributes(mutableMapOf("Main-Class" to "com.jagex.game.launch.Loader"))
+            attributes(mutableMapOf("Main-Class" to "com.darkan.bot.BotKt"))
         }
     }
 

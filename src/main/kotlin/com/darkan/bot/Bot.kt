@@ -34,8 +34,16 @@ import java.util.*
 import kotlin.math.floor
 import kotlin.math.pow
 
+fun main(args: Array<String>) {
+    ScriptExecutor.loadScripts()
+    initializeUI()
+    Loader.main(args)
+}
+
 object Bot {
 
+    @JvmField
+    var PROD: Boolean = true
     var IP = "prod.darkan.org"
     var PROXY_IP = "147.135.15.128"
     var PROXY_PORT = -1
@@ -81,7 +89,9 @@ object Bot {
     var storedResponse = ""
     var userspam = ""
 
+    @JvmField
     var inventory = ContainerWrapper(ItemContainer())
+    @JvmField
     var bank = ContainerWrapper(ItemContainer())
 
     var username = ""
@@ -98,12 +108,6 @@ object Bot {
     var moneyPouch: Int = 0
 
     @JvmStatic
-    fun main(args: Array<String>) {
-        ScriptExecutor.loadScripts()
-        initializeUI()
-        Loader.main(args)
-    }
-
     fun pulse() {
         try {
             ScriptExecutor.mainLogic()
@@ -114,12 +118,14 @@ object Bot {
 
     fun bankIsOpen() = interfaceOpen(762)
 
+    @JvmStatic
     fun refreshLastAnimated() {
         lastAnimated = System.currentTimeMillis()
     }
 
     fun getTimeSinceLastAnimation() = System.currentTimeMillis() - lastAnimated
 
+    @JvmStatic
     fun getMyPlayerPosition() = Tile(getMyPlayerX(), getMyPlayerY(), getMyPlayer().plane.toInt())
 
     fun getCurrentAnimation() = getMyPlayer().currentAnimations?.get(0) ?: -1
@@ -383,8 +389,6 @@ object Bot {
     fun removeResponsePlayer(username: String) = responsePlayers.remove(username)
 
     fun clearResponsePlayers() = responsePlayers.clear()
-
-    fun sendConsoleMessage(string: String) = Console.writeLine(string)
 
     fun sendItemOnObject(item: String, obj: WorldObject) {
         val itemId = inventory.getItem(inventory.getSlotByItem(item))
@@ -891,7 +895,7 @@ object Bot {
             optionRequired in obj.getDefinitions().actions
         }
         nearestObject?.let {
-            sendConsoleMessage("Clicking ${it.getDefinitions().name}")
+            Console.writeLine("Clicking ${it.getDefinitions().name}")
             clickObject(it, action)
         }
     }
@@ -996,6 +1000,7 @@ object Bot {
         return objects
     }
 
+    @JvmStatic
     fun handleConsoleCommand(cmd: Array<String>) {
         when {
             cmd[0].startsWith("walk") -> walkTo(Tile(cmd[1].toInt(), cmd[2].toInt(), 0))
@@ -1025,17 +1030,17 @@ object Bot {
             cmd[0].startsWith("string") -> sendText(cmd[1])
             cmd[0].startsWith("togglepackets") -> {
                 disableIncomingPackets = !disableIncomingPackets
-                sendConsoleMessage("Disabled packets: $disableIncomingPackets")
+                Console.writeLine("Disabled packets: $disableIncomingPackets")
             }
             cmd[0].startsWith("toggleinterfaces") -> {
                 disableInterfaces = !disableInterfaces
-                sendConsoleMessage("Disabled interfaces: $disableInterfaces")
+                Console.writeLine("Disabled interfaces: $disableInterfaces")
             }
             cmd[0].startsWith("crash") -> chat("Bank sale.", -1, -1)
-            cmd[0].startsWith("pos") -> sendConsoleMessage(
+            cmd[0].startsWith("pos") -> Console.writeLine(
                 "x: ${getMyPlayerX()} y: ${getMyPlayerY()} (${getMyPlayer().endX.toInt()}, ${getMyPlayer().endZ.toInt()})"
             )
-            cmd[0].startsWith("localpos") -> sendConsoleMessage(
+            cmd[0].startsWith("localpos") -> Console.writeLine(
                 "x: ${getMyPlayer().endX.toInt()} y: ${getMyPlayer().endZ.toInt()}"
             )
             cmd[0].startsWith("closebank") -> closeInterfaces()
@@ -1043,9 +1048,9 @@ object Bot {
             cmd[0].startsWith("remove") -> removeResponsePlayer(cmd[1].replace("_", " "))
             cmd[0].startsWith("withdrawcustom") -> withdrawCustomItem(995)
             cmd[0] == "iswalking" -> {
-                sendConsoleMessage("${isWalking()}")
-                sendConsoleMessage(getMyPlayer().movementTypes.contentToString())
-                sendConsoleMessage("${getMyPlayer().movingSequence.type.id}")
+                Console.writeLine("${isWalking()}")
+                Console.writeLine(getMyPlayer().movementTypes.contentToString())
+                Console.writeLine("${getMyPlayer().movingSequence.type.id}")
             }
             cmd[0] == "healthpray" -> println("Health: ${getHealth()} Prayer: ${getPrayer()}")
             cmd[0] == "b" -> {
@@ -1063,9 +1068,9 @@ object Bot {
                 clickClosestObject("Fur stall")
             }
             cmd[0] == "nearbyobjects" -> {
-                sendConsoleMessage("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: ")
+                Console.writeLine("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: ")
                 getObjectsNearby(cmd[1]).forEach {
-                    sendConsoleMessage("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}")
+                    Console.writeLine("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}")
                 }
             }
             cmd[0] == "objonme" -> {
@@ -1127,8 +1132,8 @@ object Bot {
                 val chat = cmd.drop(1).joinToString(" ")
                 chat(chat, 2, 4)
             }
-            cmd[0].startsWith("curemote") -> sendConsoleMessage("Emote: ${getCurrentAnimation()}")
-            else -> sendConsoleMessage("Unknown command.")
+            cmd[0].startsWith("curemote") -> Console.writeLine("Emote: ${getCurrentAnimation()}")
+            else -> Console.writeLine("Unknown command.")
         }
     }
 

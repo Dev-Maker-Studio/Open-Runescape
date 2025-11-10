@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.entity.pathingentity.player;
 
+import com.darkan.bot.Bot;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode;
 import com.jagex.game.runetek5.client.ChatMessageType;
@@ -356,7 +357,7 @@ public class PlayerUpdate {
             for (int moveType = 0; moveType < MovementType.values().length; moveType++) {
                 movementAnimations[moveType] = stream.readBigSmart();
             }
-
+            Bot.refreshLastAnimated();
             int speed = stream.readUByte();
             animate(player, movementAnimations, speed, false);
         }

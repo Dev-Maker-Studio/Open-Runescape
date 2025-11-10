@@ -59,13 +59,16 @@ public class LegacyAssetLoadingScreen implements LoginScreenComponent {
 
     public Image getImageFromResource(String resourceName) {
         try {
-            InputStream inputstream = GameShell.suppliedApplet.getClass().getClassLoader().getResourceAsStream(resourceName);
-            byte[] buffer = new byte[4000];
-            int data;
-            assert inputstream != null;
-            for (int index = 0; (data = inputstream.read()) != -1; buffer[index++] = (byte) data) {}
-            Image image = Toolkit.getDefaultToolkit().createImage(buffer);
-            return image;
+            byte[] buffer;
+            try (InputStream inputstream = GameShell.suppliedApplet.getClass().getClassLoader().getResourceAsStream(resourceName)) {
+                buffer = new byte[4000];
+                int data;
+                if (inputstream == null) return null;
+                assert inputstream != null;
+                for (int index = 0; (data = inputstream.read()) != -1; buffer[index++] = (byte) data) {
+                }
+            }
+            return Toolkit.getDefaultToolkit().createImage(buffer);
         } catch (Exception exception) {
             return null;
         }

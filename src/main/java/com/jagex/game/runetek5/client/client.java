@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.client;
 
+import com.darkan.bot.Bot;
 import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.botdetection.*;
 import com.jagex.game.runetek5.buffer.Packet;
@@ -119,6 +120,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.Socket;
 import java.util.*;
+
+import static com.darkan.bot.Bot.PROD;
 
 public class client extends GameShell {
 
@@ -1454,7 +1457,7 @@ public class client extends GameShell {
             InterfaceComponentRenderer.renderItems(Renderers.activeToolkit);
             MOUSE_MOVEMENTS.popHead();
         }
-
+        Bot.pulse();
     }
 
     public void redraw() {
@@ -1734,14 +1737,26 @@ public class client extends GameShell {
 
             if (updateStage == 1) {
                 Connection.updateConnection = AsyncConnection.createAsyncConnection(clientSocket, 125000);
-                int length = 9 + aString7164.length();
-                Packet stream = new Packet(length + 4);
-                stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id);
-                stream.writeByte(length);
-                stream.writeInt(Loader.MAJOR_BUILD);
-                stream.writeInt(Loader.MINOR_BUILD);
-                stream.writeString(aString7164);
-                Connection.updateConnection.write(stream.buffer, length + 2);
+                if (Bot.PROD) {
+                    int length = 13 + aString7164.length();
+                    Packet stream = new Packet(length + 4);
+                    stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id);
+                    stream.writeByte(length);
+                    stream.writeInt(6);
+                    stream.writeInt(Loader.MAJOR_BUILD);
+                    stream.writeInt(Loader.MINOR_BUILD);
+                    stream.writeString(aString7164);
+                    Connection.updateConnection.write(stream.buffer, length + 2);
+                } else {
+                    int length = 9 + aString7164.length();
+                    Packet stream = new Packet(length + 4);
+                    stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id);
+                    stream.writeByte(length);
+                    stream.writeInt(Loader.MAJOR_BUILD);
+                    stream.writeInt(Loader.MINOR_BUILD);
+                    stream.writeString(aString7164);
+                    Connection.updateConnection.write(stream.buffer, length + 2);
+                }
                 updateStage++;
                 js5ConnectTime = Utils.time();
             }

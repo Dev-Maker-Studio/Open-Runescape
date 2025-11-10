@@ -1,5 +1,7 @@
 package com.jagex.game.runetek5.config.rsinterface.itemcontainer;
 
+import com.darkan.bot.Bot;
+import com.darkan.bot.utils.ContainerWrapper;
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;
 import com.jagex.game.runetek5.cache.node.Node;
 import com.jagex.game.runetek5.cache.node.lru.LRUCache;
@@ -76,6 +78,11 @@ public class ItemContainer extends Node {
 
         container.itemIds[slot] = itemId;
         container.amounts[slot] = amount;
+        if (key == 93L) {
+            Bot.inventory = new ContainerWrapper(container);
+        } else if (key == 95L) {
+            Bot.bank = new ContainerWrapper(container);
+        }
     }
     
 	public static void resetContainerMap() {
