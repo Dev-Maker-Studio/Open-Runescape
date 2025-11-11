@@ -1074,6 +1074,11 @@ object Bot {
             Utils.distance(getMyPlayerPosition(), Tile(it.endX.toInt() + getBaseX(), it.endZ.toInt() + getBaseY()))
         }
 
+    fun getClosestNPCNoClipContaining(id: String) =
+        getClosestEntity(getFilteredNPCsContaining(id)) {
+            Utils.distance(getMyPlayerPosition(), Tile(it.endX.toInt() + getBaseX(), it.endZ.toInt() + getBaseY()))
+        }
+
     fun getClosestNPCNoClip(id: Int) =
         getClosestEntity(getFilteredNPCs(id)) {
             Utils.distance(getMyPlayerPosition(), Tile(it.endX.toInt() + getBaseX(), it.endZ.toInt() + getBaseY()))

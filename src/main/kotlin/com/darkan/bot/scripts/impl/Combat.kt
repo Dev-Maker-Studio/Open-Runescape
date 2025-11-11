@@ -25,7 +25,7 @@ class Combat : Script(), ConfigurableScript {
 
     override suspend fun loop() {
         if (!Bot.myPlayerInCombat()) {
-            Bot.clickNPC(Bot.getClosestNPCNoClip(target.value), "attack")
+            Bot.clickNPC(Bot.getClosestNPCNoClipContaining(target.value), "attack")
             waitThenDelayUntil(1200, 6000) { !Bot.myPlayerInCombat() }
         }
     }
