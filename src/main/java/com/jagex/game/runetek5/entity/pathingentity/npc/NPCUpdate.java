@@ -271,8 +271,8 @@ public class NPCUpdate {
                 npc.forceMovementT1YOff = buffer.readByteAdd();
                 npc.forceMovementT2XOff = buffer.readByteInverse();
                 npc.forceMovementT2YOff = buffer.readByteAdd();
-                npc.forceMovementT1Delay = buffer.readShortLittle() + client.cycles;
-                npc.forceMovementT2Delay = buffer.readShortLittle() + client.cycles;
+                npc.forceMovementT1Delay = buffer.readUShortLittle() + client.cycles;
+                npc.forceMovementT2Delay = buffer.readUShortLittle() + client.cycles;
                 npc.forceMoveDirection = buffer.readUShortAddLittle();
                 npc.forceMovementT1XOff += npc.movementBaseX[0];
                 npc.forceMovementT1YOff += npc.movementBaseY[0];
@@ -311,7 +311,7 @@ public class NPCUpdate {
                 npc.playSpotAnimation(i_14, i_6, i_8, i_9, bool24, 3);
             }
             if ((updateFlag & FACE_ENTITY) != 0) {
-                npc.faceEntity = buffer.readShortLittle();
+                npc.faceEntity = buffer.readUShortLittle();
                 if (npc.faceEntity == 65535) {
                     npc.faceEntity = -1;
                 }
@@ -325,12 +325,12 @@ public class NPCUpdate {
                     int sequence = buffer.readBigSmart();
                     sequences[index] = sequence;
                     ints_16[index] = buffer.readUByte();
-                    ints_17[index] = buffer.readShortLittle();
+                    ints_17[index] = buffer.readUShortLittle();
                 }
                 PlayerUpdate.animate(npc, sequences, ints_16, ints_17);
             }
             if ((updateFlag & 0x800) != 0) {
-                int gfxId = buffer.readShortLittle();
+                int gfxId = buffer.readUShortLittle();
                 int i_6 = buffer.readInt();
                 if (gfxId == 0xffff) {
                     gfxId = -1;
@@ -398,7 +398,7 @@ public class NPCUpdate {
                 }
             }
             if ((updateFlag & 0x2000000) != 0) {
-                int spotanimId = buffer.readShortLittle();
+                int spotanimId = buffer.readUShortLittle();
                 int flags = buffer.readUIntLittle();
                 if (spotanimId == 65535) {
                     spotanimId = -1;
@@ -472,14 +472,14 @@ public class NPCUpdate {
             }
             if ((updateFlag & 0x4) != 0) {
                 npc.faceX = buffer.readUShortAddLittle();
-                npc.faceY = buffer.readShortLittle();
+                npc.faceY = buffer.readUShortLittle();
             }
             if ((updateFlag & 0x20000) != 0) {
                 npc.hue = buffer.readByteSubtract();
                 npc.saturation = buffer.readByte();
                 npc.lightness = buffer.readByte();
                 npc.opacity = (byte) buffer.readUByteSubtract();
-                npc.tintStartCycle = client.cycles + buffer.readShortLittle();
+                npc.tintStartCycle = client.cycles + buffer.readUShortLittle();
                 npc.tintEndCycle = client.cycles + buffer.readUShort();
             }
             if ((updateFlag & 0x800000) != 0) {

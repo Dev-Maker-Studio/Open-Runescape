@@ -192,7 +192,7 @@ public class PlayerUpdate {
         if ((flags & 0x400000) != 0) {
             int count = stream.buffer[++stream.currentPosition - 1] & 0xff;
             for (int index = 0; index < count; index++) {
-                int key = stream.readShortLittle();
+                int key = stream.readUShortLittle();
                 int value = stream.readInt();
                 player.playerConfigs.put(key, value);
             }
@@ -229,7 +229,7 @@ public class PlayerUpdate {
             int i_6 = stream.buffer[++stream.currentPosition - 1] & 0xff;
 
             for (int i_7 = 0; i_7 < i_6; i_7++) {
-                int i_8 = stream.readShortLittle();
+                int i_8 = stream.readUShortLittle();
                 int i_9 = stream.readInt();
                 player.playerConfigs.put(i_8, i_9);
             }
@@ -395,7 +395,7 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x200000) != 0) {
-            int i_6 = stream.readShortLittle();
+            int i_6 = stream.readUShortLittle();
             int i_7 = stream.readUIntLittle();
             if (i_6 == 65535) {
                 i_6 = -1;
@@ -418,7 +418,7 @@ public class PlayerUpdate {
             player.forceMovementT2XOff = stream.readByteAdd();
             player.forceMovementT2YOff = stream.readByteInverse();
             player.forceMovementT1Delay = stream.readUShortAddLittle() + client.cycles;
-            player.forceMovementT2Delay = stream.readShortLittle() + client.cycles;
+            player.forceMovementT2Delay = stream.readUShortLittle() + client.cycles;
             player.forceMoveDirection = stream.readUShortAdd();
             if (player.aBool10568) {
                 player.forceMovementT1XOff += player.basePositionX;
@@ -438,7 +438,7 @@ public class PlayerUpdate {
         }
 
         if ((flags & 0x80) != 0) {
-            int spotAnimId = stream.readShortLittle();
+            int spotAnimId = stream.readUShortLittle();
             int flags1 = stream.readInt();
             if (spotAnimId == 65535) {
                 spotAnimId = -1;

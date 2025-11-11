@@ -274,8 +274,8 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.IF_SETANGLE) {
             val componentHash = buffer.readInt()
-            val pitch = buffer.readShortLittle()
-            val roll = buffer.readShortLittle()
+            val pitch = buffer.readUShortLittle()
+            val roll = buffer.readUShortLittle()
             val scale = buffer.readUShortAddLittle()
             client.requestVarVerifyid()
             PulseEventQueue.priorityIfangleUpdate(componentHash, pitch, roll, scale)
@@ -416,7 +416,7 @@ object PacketDecoder {
             val settings = buffer.readUByteInverse()
             val speed = buffer.readUShortAdd()
             val targetHash = buffer.readUIntLittle()
-            val height = buffer.readShortLittle()
+            val height = buffer.readUShortLittle()
             val rotation = settings and 0x7
             var setting1 = settings shr 3 and 0xf
             if (setting1 == 15) {
@@ -797,7 +797,7 @@ object PacketDecoder {
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARC_LARGE) {
-            val key = buffer.readShortLittle()
+            val key = buffer.readUShortLittle()
             val flags = buffer.readUIntInverseMiddle()
             client.requestVarVerifyid()
             PulseEventQueue.priorityClientvarcUpdate(key, flags)
@@ -806,7 +806,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_GROUNDITEM) {
             val interfaceId = buffer.readUIntInverseMiddle()
             val xtea3 = buffer.readUIntLittle()
-            val subInterfaceId = buffer.readShortLittle()
+            val subInterfaceId = buffer.readUShortLittle()
             val xtea4 = buffer.readInt()
             val xtea1 = buffer.readUIntMiddle()
             val overlay = buffer.readUByteSubtract()
@@ -913,7 +913,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.MUSIC_EFFECT) {
             val key = buffer.readUMediumAlternateOrder()
             val flags = buffer.readUByteSubtract()
-            var i_6 = buffer.readShortLittle()
+            var i_6 = buffer.readUShortLittle()
             if (i_6 == 65535) {
                 i_6 = -1
             }
@@ -1194,7 +1194,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_INV_STOP_TRANSMIT) {
             val key = buffer.readUByteInverse()
-            val flags = buffer.readShortLittle()
+            val flags = buffer.readUShortLittle()
             val isNegativeKey = (key and 0x1) == 1
             ItemContainer.deleteItemContainer(flags, isNegativeKey)
             client.RECENTLY_USED_ITEM_CONTAINERS[++client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = flags
@@ -1344,7 +1344,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.PROJANIM_SPECIFIC) {
             var endHeight = buffer.readUByteAdd() * 4
             val source = buffer.readShortAddLittle()
-            val endTime = buffer.readShortLittle()
+            val endTime = buffer.readUShortLittle()
             val lockOn = buffer.readShort()
             val flags = buffer.readUByteAdd()
             val y = buffer.readUShortAdd()
@@ -1645,8 +1645,8 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.IF_SETRECOL) {
             val key = buffer.readUIntInverseMiddle()
-            val flags = buffer.readShortLittle()
-            val i_6 = buffer.readShortLittle()
+            val flags = buffer.readUShortLittle()
+            val i_6 = buffer.readUShortLittle()
             val i_7 = buffer.readUByte()
             client.requestVarVerifyid()
             PulseEventQueue.priorityIfrecol(key, i_7, flags, i_6)
@@ -1681,7 +1681,7 @@ object PacketDecoder {
             val i_8 = buffer.readInt()
             val interfaceId = buffer.readUIntMiddle()
             val i_10 = buffer.readUIntMiddle()
-            val playerIndex = buffer.readShortLittle()
+            val playerIndex = buffer.readUShortLittle()
             client.requestVarVerifyid()
             Interface.openSub(interfaceId, IFSubActivePlayer(subInterfaceId, overlay, playerIndex), intArrayOf(i_6, i_8, i_10, key), false)
             context.currentPacket = null
@@ -1774,7 +1774,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERHEAD_IGNOREWORN) {
-            val idKit1 = buffer.readShortLittle()
+            val idKit1 = buffer.readUShortLittle()
             val usernameMeme = buffer.readUShortAdd()
             val idKit2 = buffer.readUShortAdd()
             val interfaceHash = buffer.readUIntInverseMiddle()
@@ -1896,7 +1896,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARC_SMALL) {
             val b_100 = buffer.readByteSubtract()
-            val flags = buffer.readShortLittle()
+            val flags = buffer.readUShortLittle()
             client.requestVarVerifyid()
             PulseEventQueue.priorityClientvarcUpdate(flags, b_100.toInt())
             context.currentPacket = null
@@ -1943,7 +1943,7 @@ object PacketDecoder {
             val localY = buffer.readUByte()
             val localX = buffer.readUByte()
             val constantSpeed = buffer.readUByteSubtract()
-            val moveZ = buffer.readShortLittle() shl 2
+            val moveZ = buffer.readUShortLittle() shl 2
             val variableSpeed = buffer.readUByteAdd()
             client.requestVarVerifyid()
             Camera.moveCamera(localX, localY, moveZ, constantSpeed, variableSpeed, true)
@@ -2221,7 +2221,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARCSTR_LARGE) {
-            val key = buffer.readShortLittle()
+            val key = buffer.readUShortLittle()
             val string_88 = buffer.readString()
             client.requestVarVerifyid()
             PulseEventQueue.priorityVarcstringUpdate(key, string_88)
@@ -2320,7 +2320,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETRETEX) {
-            val key = buffer.readShortLittle()
+            val key = buffer.readUShortLittle()
             val flags = buffer.readUShort()
             val i_6 = buffer.readUByteSubtract()
             val i_7 = buffer.readUIntLittle()
@@ -2369,7 +2369,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.OUTDATED_INTERFACE_PULSE_EVENT) {
             val key = buffer.readUShortAdd()
             val flags = buffer.readUIntInverseMiddle()
-            val i_6 = buffer.readShortLittle()
+            val i_6 = buffer.readUShortLittle()
             client.requestVarVerifyid()
             PulseEventQueue.priorityT13Update(flags, key + (i_6 shl 16))
             context.currentPacket = null
