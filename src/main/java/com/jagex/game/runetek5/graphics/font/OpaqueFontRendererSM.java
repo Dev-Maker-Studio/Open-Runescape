@@ -76,9 +76,9 @@ public class OpaqueFontRendererSM extends AbstractFontRenderer {
             }
 
             if (i_6 > 0 && i_7 > 0) {
-                if ((i_4 & -16777216) == -16777216) {
+                if ((i_4 & ~0xffffff) == ~0xffffff) {
                     method13771(this.spritePixels[var_1], this.toolkit.colourBuffer, i_4, i_12, i_9, i_6, i_7, i_10, i_11);
-                } else if ((i_4 & -16777216) != 0) {
+                } else if ((i_4 & ~0xffffff) != 0) {
                     blendImage(this.spritePixels[var_1], this.toolkit.colourBuffer, i_4, i_12, i_9, i_6, i_7, i_10, i_11);
                 }
             }
@@ -134,7 +134,7 @@ public class OpaqueFontRendererSM extends AbstractFontRenderer {
                 }
 
                 if (i_9 > 0 && i_10 > 0) {
-                    if ((i_4 & -16777216) == -16777216) {
+                    if ((i_4 & ~0xffffff) == ~0xffffff) {
                         drawImage(this.spritePixels[var_1], this.toolkit.colourBuffer, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], class4556, i_7, i_8);
                     } else {
                         method13774(this.spritePixels[var_1], this.toolkit.colourBuffer, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], class4556, i_7, i_8);

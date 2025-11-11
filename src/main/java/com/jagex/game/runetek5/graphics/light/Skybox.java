@@ -140,9 +140,9 @@ public class Skybox {
 
     private void drawTransitioningBackground(AbstractToolkit toolkit, int x, int y, int width, int height, int xOffset, int yOffset, int invertedAlpha, int combineMode) {
         this.backgroundSprite.drawCircle(x + xOffset, y + yOffset, height, height, 0, invertedAlpha << 24 | 0xffffff, combineMode);
-        if ((this.srcBackgroundColor & -16777216) != 0)
+        if ((this.srcBackgroundColor & ~0xffffff) != 0)
             toolkit.clearPixels(0, 0, width, yOffset + y + 1, this.srcBackgroundColor);
-        if ((this.dstBackgroundColor & -16777216) != 0)
+        if ((this.dstBackgroundColor & ~0xffffff) != 0)
             toolkit.clearPixels(0, yOffset + y + height, width, height - (yOffset + y + height), this.dstBackgroundColor);
     }
 

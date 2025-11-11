@@ -439,7 +439,7 @@ public class Component {
             spriteType.drawThickBorder(16777215);
         }
         if (this.spriteShadow != 0) {
-            spriteType.outline(-16777216 | this.spriteShadow);
+            spriteType.outline(~0xffffff | this.spriteShadow);
         }
         nativeSprite = toolkit.generateSprite(spriteType, true);
         NATIVE_SPRITE_CACHE.put(nativeSprite, spriteHash, nativeSprite.getWidth() * nativeSprite.getHeight() * 4);

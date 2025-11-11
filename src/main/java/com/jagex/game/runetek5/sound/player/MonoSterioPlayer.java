@@ -62,7 +62,7 @@ public class MonoSterioPlayer extends PcmPlayer {
 
         for (int index = 0; index < byteCount; index++) {
             int data = super.bitpackedSoundData[index];
-            if ((data + 8388608 & -16777216) != 0) {
+            if ((data + 8388608 & ~0xffffff) != 0) {
                 data = 0x7fffff ^ data >> 31;
             }
 

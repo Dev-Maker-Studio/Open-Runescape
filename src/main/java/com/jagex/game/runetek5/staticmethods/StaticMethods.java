@@ -127,7 +127,7 @@ public class StaticMethods {
                 msg.unlinkNode();
             } else {
                 HintRenderer.calculateHintArrowPlacement(msg.plane, (msg.absoluteX << 9) + 256, (msg.absoluteY << 9) + 256, msg.tileHeight * 2);
-                MiniMenu.minimenuHeader.renderCentered(msg.minimenuText, (int) (x + client.HINT_POSITION[0]), (int) (y + client.HINT_POSITION[1]), -16777216 | msg.minimenuColor, 0);
+                MiniMenu.minimenuHeader.renderCentered(msg.minimenuText, (int) (x + client.HINT_POSITION[0]), (int) (y + client.HINT_POSITION[1]), ~0xffffff | msg.minimenuColor, 0);
             }
         }
     }

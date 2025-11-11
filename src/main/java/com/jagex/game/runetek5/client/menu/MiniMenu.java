@@ -671,7 +671,7 @@ public class MiniMenu {
 	        i_12 = 0;
 	        for (class282Sub50Sub713 = (MiniMenuEntry) aClass482171.getFirst(); class282Sub50Sub713 != null; class282Sub50Sub713 = (MiniMenuEntry) aClass482171.next()) {
 	            i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * anInt178 + fontmetrics8.topPadding + 1;
-	            MiniMenu.method12400(i_10, i_11, i_2, i_4, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | -16777216, StaticMethods.anInt1005 | -16777216);
+	            MiniMenu.method12400(i_10, i_11, i_2, i_4, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | ~0xffffff, StaticMethods.anInt1005 | ~0xffffff);
 	            ++i_12;
 	        }
 	    } else {
@@ -679,9 +679,9 @@ public class MiniMenu {
 	        for (class282Sub50Sub1516 = (ColoredMiniMenuEntry) aClass477182.getNext(); class282Sub50Sub1516 != null; class282Sub50Sub1516 = (ColoredMiniMenuEntry) aClass477182.getDirectNext()) {
 	            i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + StaticMethods.anInt2300 + 1;
 	            if (class282Sub50Sub1516.queueSize == 1) {
-	                MiniMenu.method12400(i_10, i_11, StaticMethods.anInt3555, MiniMenu.anInt8975, i_14, (MiniMenuEntry) class282Sub50Sub1516.nodeQueue.current.next, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | -16777216, StaticMethods.anInt1005 | -16777216);
+	                MiniMenu.method12400(i_10, i_11, StaticMethods.anInt3555, MiniMenu.anInt8975, i_14, (MiniMenuEntry) class282Sub50Sub1516.nodeQueue.current.next, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | ~0xffffff, StaticMethods.anInt1005 | ~0xffffff);
 	            } else {
-	                StaticMethods.method1630(i_10, i_11, StaticMethods.anInt3555, MiniMenu.anInt8975, i_14, class282Sub50Sub1516, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | -16777216, StaticMethods.anInt1005 | -16777216);
+	                StaticMethods.method1630(i_10, i_11, StaticMethods.anInt3555, MiniMenu.anInt8975, i_14, class282Sub50Sub1516, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | ~0xffffff, StaticMethods.anInt1005 | ~0xffffff);
 	            }
 	            ++i_12;
 	        }
@@ -689,7 +689,7 @@ public class MiniMenu {
 	            i_12 = 0;
 	            for (class282Sub50Sub713 = (MiniMenuEntry) aCacheableNodeSub15163.nodeQueue.getNext(); class282Sub50Sub713 != null; class282Sub50Sub713 = (MiniMenuEntry) aCacheableNodeSub15163.nodeQueue.getDirectNext()) {
 	                i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + anInt9471 + 1;
-	                MiniMenu.method12400(i_10, i_11, anInt3996, MiniMenu.anInt8518, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | -16777216, StaticMethods.anInt1005 | -16777216);
+	                MiniMenu.method12400(i_10, i_11, anInt3996, MiniMenu.anInt8518, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, MiniMenu.anInt4722 | ~0xffffff, StaticMethods.anInt1005 | ~0xffffff);
 	                ++i_12;
 	            }
 	        }

@@ -19,7 +19,7 @@ public class WorldMapOverview {
 	 */
 	public static void drawWorldmapOverview(AbstractToolkit toolkit, int x, int y, int width, int height) {
 	    toolkit.setClipping(x, y, width + x, y + height);
-	    toolkit.clearPixels(x, y, width, height, -16777216);
+	    toolkit.clearPixels(x, y, width, height, ~0xffffff);
 	    if (ComponentMinimap.mapAssetLoadingPercentage >= 100) {
 	        float f_6 = (float) WorldMapSub1.mapSizeY / WorldMapSub1.mapSizeX;
 	        int Width = width;

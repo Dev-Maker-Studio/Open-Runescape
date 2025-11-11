@@ -127,7 +127,7 @@ public class LappingWaterEffect extends MaterialEffectGL {
         this.listUtils = new GlListUtils(2);
         this.listUtils.newList(0);
         super.glToolkit.activateTexture(1);
-        super.glToolkit.setTextureEnvColor(-16777216);
+        super.glToolkit.setTextureEnvColor(~0xffffff);
         super.glToolkit.loadTextureCombineMode(GL_ADD, GL_REPLACE);
         super.glToolkit.setTextureTransparency(0, GL_CONSTANT);
         super.glToolkit.activateTexture(0);

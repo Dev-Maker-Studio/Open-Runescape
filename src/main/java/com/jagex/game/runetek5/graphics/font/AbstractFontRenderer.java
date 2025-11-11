@@ -117,32 +117,32 @@ public abstract class AbstractFontRenderer {
     public void updateTextEffects(String effectString) {
         try {
             if (effectString.startsWith("col=")) {
-                argbColorEffect = argbColorEffect & -16777216 | Utils.parse_int(effectString.substring(4)) & 0xffffff;
+                argbColorEffect = argbColorEffect & ~0xffffff | Utils.parse_int(effectString.substring(4)) & 0xffffff;
             } else if ("/col".equals(effectString)) {
-                argbColorEffect = argbColorEffect & -16777216 | colorArgb & 0xffffff;
+                argbColorEffect = argbColorEffect & ~0xffffff | colorArgb & 0xffffff;
             }
             if ("argb=".startsWith(effectString)) {
                 argbColorEffect = Utils.parse_int(effectString.substring(5));
             } else if ("/argb".equals(effectString)) {
                 argbColorEffect = colorArgb;
             } else if ("str=".startsWith(effectString)) {
-                strikeThroughEffect = argbColorEffect & -16777216 | Utils.parse_int(effectString.substring(4));
+                strikeThroughEffect = argbColorEffect & ~0xffffff | Utils.parse_int(effectString.substring(4));
             } else if ("str".equals(effectString)) {
-                strikeThroughEffect = argbColorEffect & -16777216 | 0x800000;
+                strikeThroughEffect = argbColorEffect & ~0xffffff | 0x800000;
             } else if ("/str".equals(effectString)) {
                 strikeThroughEffect = -1;
             } else if ("u=".startsWith(effectString)) {
-                underlineEffect = argbColorEffect & -16777216 | Utils.parse_int(effectString.substring(2));
+                underlineEffect = argbColorEffect & ~0xffffff | Utils.parse_int(effectString.substring(2));
             } else if ("u".equals(effectString)) {
-                underlineEffect = argbColorEffect & -16777216;
+                underlineEffect = argbColorEffect & ~0xffffff;
             } else if ("/u".equals(effectString)) {
                 underlineEffect = -1;
             } else if ("shad=-1".equalsIgnoreCase(effectString)) {
                 shadingEffect = 0;
             } else if ("shad=".startsWith(effectString)) {
-                shadingEffect = argbColorEffect & -16777216 | Utils.parse_int(effectString.substring(5));
+                shadingEffect = argbColorEffect & ~0xffffff | Utils.parse_int(effectString.substring(5));
             } else if ("shad".equals(effectString)) {
-                shadingEffect = argbColorEffect & -16777216;
+                shadingEffect = argbColorEffect & ~0xffffff;
             } else if ("/shad".equals(effectString)) {
                 shadingEffect = anInt65;
             } else if ("br".equals(effectString)) {
@@ -205,10 +205,10 @@ public abstract class AbstractFontRenderer {
                                     int spriteIndex = Utils.parseInt(string_15.substring(4));
                                     NativeSprite sprite = sprites[spriteIndex];
                                     int spriteHeight = spriteHeights != null ? spriteHeights[spriteIndex] : sprite.getSpriteHeight();
-                                    if ((argbColorEffect & -16777216) == -16777216) {
+                                    if ((argbColorEffect & ~0xffffff) == ~0xffffff) {
                                         sprite.draw(x, y + this.fontMetrics.verticalSpacing - spriteHeight, 1, 0, 1);
                                     } else {
-                                        sprite.draw(x, y + this.fontMetrics.verticalSpacing - spriteHeight, 0, argbColorEffect & -16777216 | 0xffffff, 1);
+                                        sprite.draw(x, y + this.fontMetrics.verticalSpacing - spriteHeight, 0, argbColorEffect & ~0xffffff | 0xffffff, 1);
                                     }
                                     x += sprites[spriteIndex].getSpriteWidth();
                                     prevChar = -1;
@@ -228,13 +228,13 @@ public abstract class AbstractFontRenderer {
                     }
                     if (ch != 32) {
                         if (dimensions == null) {
-                            if ((shadingEffect & -16777216) != 0) {
-                                drawChar(ch, x + 1, y + 1, shadingEffect, true);
+                            if ((this.shadingEffect & ~0xffffff) != 0) {
+                                drawChar(ch, x + 1, y + 1, this.shadingEffect, true);
                             }
                             drawChar(ch, x, y, argbColorEffect, false);
                         } else {
-                            if ((shadingEffect & -16777216) != 0) {
-                                drawChar(ch, x + 1, y + 1, shadingEffect, true, dimensions, shadingEffect, colorEffect);
+                            if ((this.shadingEffect & ~0xffffff) != 0) {
+                                drawChar(ch, x + 1, y + 1, this.shadingEffect, true, dimensions, shadingEffect, colorEffect);
                             }
                             drawChar(ch, x, y, argbColorEffect, false, dimensions, shadingEffect, colorEffect);
                         }
@@ -337,7 +337,7 @@ public abstract class AbstractFontRenderer {
                     }
                     ++imageIndex;
                     if (reference != 32) {
-                        if ((shadingEffect & -16777216) != 0) {
+                        if ((shadingEffect & ~0xffffff) != 0) {
                             drawChar(reference, w + drawX + 1, drawY + h + 1, shadingEffect, true);
                         }
                         drawChar(reference, w + drawX, drawY + h, argbColorEffect, false);
@@ -435,7 +435,7 @@ public abstract class AbstractFontRenderer {
 
     public void renderCenteredShake(String text, int x, int y, int color, int i_6, int i_7) {
         if (text != null) {
-            calibrate(color, -16777216);
+            calibrate(color, ~0xffffff);
             double step = 7.0D - i_7 / 8.0D;
             if (step < 0.0D) {
                 step = 0.0D;
@@ -472,7 +472,7 @@ public abstract class AbstractFontRenderer {
     // Only vertical
     public void renderCenteredWave(String text, int x, int y, int color, int waveSeed) {
         if (text != null) {
-            calibrate(color, -16777216);
+            calibrate(color, ~0xffffff);
             int length = text.length();
             int[] waveOffsetsY = new int[length];
             for (int i = 0; i < length; i++) {
@@ -485,7 +485,7 @@ public abstract class AbstractFontRenderer {
     // Horizontal & vertical
     public void renderCenteredWave2(String text, int x, int y, int color, int waveSeed) {
         if (text != null) {
-            calibrate(color, -16777216);
+            calibrate(color, ~0xffffff);
             int length = text.length();
             int[] waveOffsetsX = new int[length];
             int[] waveOffsetsY = new int[length];

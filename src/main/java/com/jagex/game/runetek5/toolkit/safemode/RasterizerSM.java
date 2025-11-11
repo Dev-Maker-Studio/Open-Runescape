@@ -488,7 +488,7 @@ public class RasterizerSM {
             if (this.texturePixelsA == null) {
                 this.blendingAlpha = 255 - (floorColorA >> 24 & 0xff);
                 int materialColorRgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialA)) & 0xffff];
-                int tmp2 = -16777216 | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
+                int tmp2 = ~0xffffff | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
                 drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC));
                 return;
             }
@@ -505,7 +505,7 @@ public class RasterizerSM {
             if (this.texturePixelsB == null) {
                 this.blendingAlpha = 255 - (floorColorA >> 24 & 0xff);
                 int materialColorRgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialB)) & 0xffff];
-                int tmp2 = -16777216 | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
+                int tmp2 = ~0xffffff | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
                 drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC));
                 return;
             }
@@ -521,7 +521,7 @@ public class RasterizerSM {
             if (this.texturePixelsC == null) {
                 this.blendingAlpha = 255 - (floorColorA >> 24 & 0xff);
                 int materialColorRgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialC)) & 0xffff];
-                int tmp2 = -16777216 | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
+                int tmp2 = ~0xffffff | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
                 drawTriangle(true, true, false, ((int) yA), ((int) yB), ((int) yC), ((int) xA), ((int) xB), ((int) xC), ((int) zNearA), ((int) zNearB), ((int) zNearC), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC));
                 return;
             }
@@ -1035,7 +1035,7 @@ public class RasterizerSM {
                     if (this.blendingAlpha == 0) {
                         if (x > 0) {
                             do {
-                                colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                 red += slopeRed;
                                 green += slopeGreen;
                                 blue += slopeBlue;
@@ -1047,7 +1047,7 @@ public class RasterizerSM {
                         }
                         x = xB - xA & 0x3;
                         if (x > 0) {
-                            colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                            colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                             do {
                                 pixels[bufferOffset++] = colorRgb;
                             } while (--x > 0);
@@ -1057,7 +1057,7 @@ public class RasterizerSM {
                         invertedAlpha = 256 - this.blendingAlpha;
                         if (x > 0) {
                             do {
-                                colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                 red += slopeRed;
                                 green += slopeGreen;
                                 blue += slopeBlue;
@@ -1084,7 +1084,7 @@ public class RasterizerSM {
                         }
                         x = xB - xA & 0x3;
                         if (x > 0) {
-                            colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                            colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                             colorRgb = (invertedAlpha * (colorRgb & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (colorRgb & 0xff00) >> 8 & 0xff00);
                             do {
                                 pixel = pixels[bufferOffset];
@@ -1107,25 +1107,25 @@ public class RasterizerSM {
                                 int i_20 = colorRgb + i_21;
                                 int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                 i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                pixels[invertedAlpha] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                pixels[invertedAlpha] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                 i_20 = bufferOffset++;
                                 int i_23 = pixels[i_20];
                                 int i_24 = colorRgb + i_23;
                                 int i_25 = (i_23 & 0xff00ff) + (colorRgb & 0xff00ff);
                                 i_23 = (i_25 & 0x1000100) + (i_24 - i_25 & 0x10000);
-                                pixels[i_20] = -16777216 | i_24 - i_23 | i_23 - (i_23 >>> 8);
+                                pixels[i_20] = ~0xffffff | i_24 - i_23 | i_23 - (i_23 >>> 8);
                                 i_24 = bufferOffset++;
                                 int i_26 = pixels[i_24];
                                 int i_27 = colorRgb + i_26;
                                 int i_28 = (i_26 & 0xff00ff) + (colorRgb & 0xff00ff);
                                 i_26 = (i_28 & 0x1000100) + (i_27 - i_28 & 0x10000);
-                                pixels[i_24] = -16777216 | i_27 - i_26 | i_26 - (i_26 >>> 8);
+                                pixels[i_24] = ~0xffffff | i_27 - i_26 | i_26 - (i_26 >>> 8);
                                 i_27 = bufferOffset++;
                                 int i_29 = pixels[i_27];
                                 int i_30 = colorRgb + i_29;
                                 int i_31 = (i_29 & 0xff00ff) + (colorRgb & 0xff00ff);
                                 i_29 = (i_31 & 0x1000100) + (i_30 - i_31 & 0x10000);
-                                pixels[i_27] = -16777216 | i_30 - i_29 | i_29 - (i_29 >>> 8);
+                                pixels[i_27] = ~0xffffff | i_30 - i_29 | i_29 - (i_29 >>> 8);
                             } while (--x > 0);
                         }
                         x = xB - xA & 0x3;
@@ -1137,7 +1137,7 @@ public class RasterizerSM {
                                 int i_20 = colorRgb + i_21;
                                 int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                 i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                pixels[invertedAlpha] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                pixels[invertedAlpha] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                             } while (--x > 0);
                         }
                     }
@@ -1145,7 +1145,7 @@ public class RasterizerSM {
                     x = xB - xA;
                     if (this.blendingAlpha == 0) {
                         do {
-                            pixels[bufferOffset++] = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                            pixels[bufferOffset++] = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                             red += slopeRed;
                             green += slopeGreen;
                             blue += slopeBlue;
@@ -1154,7 +1154,7 @@ public class RasterizerSM {
                         alpha = this.blendingAlpha;
                         invertedAlpha = 256 - this.blendingAlpha;
                         do {
-                            colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                            colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                             red += slopeRed;
                             green += slopeGreen;
                             blue += slopeBlue;
@@ -1174,7 +1174,7 @@ public class RasterizerSM {
                             int i_20 = pixel + i_21;
                             int i_22 = (pixel & 0xff00ff) + (i_21 & 0xff00ff);
                             i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                            pixels[invertedAlpha] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                            pixels[invertedAlpha] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                             red += slopeRed;
                             green += slopeGreen;
                             blue += slopeBlue;
@@ -1196,7 +1196,7 @@ public class RasterizerSM {
                         if (this.blendingAlpha == 0) {
                             if (x > 0) {
                                 do {
-                                    colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                    colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                     red += slopeRed;
                                     green += slopeGreen;
                                     blue += slopeBlue;
@@ -1236,7 +1236,7 @@ public class RasterizerSM {
                             }
                             x = xB - xA & 0x3;
                             if (x > 0) {
-                                colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                 do {
                                     bufferOffset++;
                                     if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
@@ -1253,7 +1253,7 @@ public class RasterizerSM {
                             invertedAlpha = 256 - this.blendingAlpha;
                             if (x > 0) {
                                 do {
-                                    colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                    colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                     red += slopeRed;
                                     green += slopeGreen;
                                     blue += slopeBlue;
@@ -1314,7 +1314,7 @@ public class RasterizerSM {
                             }
                             x = xB - xA & 0x3;
                             if (x > 0) {
-                                colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                 colorRgb = (invertedAlpha * (colorRgb & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (colorRgb & 0xff00) >> 8 & 0xff00);
                                 do {
                                     bufferOffset++;
@@ -1345,7 +1345,7 @@ public class RasterizerSM {
                                     	int i_20 = colorRgb + i_21;
                                     	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                         i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                        pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                        pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                         if (writeDepth) {
                                             this.depthBuffer[bufferOffset] = depth;
                                         }
@@ -1357,7 +1357,7 @@ public class RasterizerSM {
                                     	int i_20 = colorRgb + i_21;
                                     	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                         i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                        pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                        pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                         if (writeDepth) {
                                             this.depthBuffer[bufferOffset] = depth;
                                         }
@@ -1369,7 +1369,7 @@ public class RasterizerSM {
                                     	int i_20 = colorRgb + i_21;
                                     	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                         i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                        pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                        pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                         if (writeDepth) {
                                             this.depthBuffer[bufferOffset] = depth;
                                         }
@@ -1381,7 +1381,7 @@ public class RasterizerSM {
                                     	int i_20 = colorRgb + i_21;
                                     	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                         i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                        pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                        pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                         if (writeDepth) {
                                             this.depthBuffer[bufferOffset] = depth;
                                         }
@@ -1399,7 +1399,7 @@ public class RasterizerSM {
                                     	int i_20 = colorRgb + i_21;
                                     	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                         i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                        pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                        pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                         if (writeDepth) {
                                             this.depthBuffer[bufferOffset] = depth;
                                         }
@@ -1420,7 +1420,7 @@ public class RasterizerSM {
                                         int i_20 = pixel + i_21;
                                         int i_22 = (pixel & 0xff00ff) + (i_21 & 0xff00ff);
                                         i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                        pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                        pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                         if (writeDepth) {
                                             this.depthBuffer[bufferOffset] = depth;
                                         }
@@ -1436,7 +1436,7 @@ public class RasterizerSM {
                                 do {
                                     bufferOffset++;
                                     if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                                        colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                        colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                         colorRgb = (invertedAlpha * (colorRgb & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (colorRgb & 0xff00) >> 8 & 0xff00);
                                         pixel = pixels[bufferOffset];
                                         if (transparent) {
@@ -1459,7 +1459,7 @@ public class RasterizerSM {
                             do {
                                 bufferOffset++;
                                 if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                                    pixels[bufferOffset] = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                    pixels[bufferOffset] = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                     if (writeDepth) {
                                         this.depthBuffer[bufferOffset] = depth;
                                     }
@@ -1479,7 +1479,7 @@ public class RasterizerSM {
                     if (this.blendingAlpha == 0) {
                         if (x > 0) {
                             do {
-                                colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                 red += slopeRed;
                                 green += slopeGreen;
                                 blue += slopeBlue;
@@ -1507,7 +1507,7 @@ public class RasterizerSM {
                         }
                         x = xB - xA & 0x3;
                         if (x > 0) {
-                            colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                            colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                             do {
                                 bufferOffset++;
                                 if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
@@ -1521,7 +1521,7 @@ public class RasterizerSM {
                         invertedAlpha = 256 - this.blendingAlpha;
                         if (x > 0) {
                             do {
-                                colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                 red += slopeRed;
                                 green += slopeGreen;
                                 blue += slopeBlue;
@@ -1570,7 +1570,7 @@ public class RasterizerSM {
                         }
                         x = xB - xA & 0x3;
                         if (x > 0) {
-                            colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                            colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                             colorRgb = (invertedAlpha * (colorRgb & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (colorRgb & 0xff00) >> 8 & 0xff00);
                             do {
                                 bufferOffset++;
@@ -1598,7 +1598,7 @@ public class RasterizerSM {
                                 	int i_20 = colorRgb + i_21;
                                 	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                     i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                    pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                    pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                 }
                                 depth += slopeDepth;
                                 bufferOffset++;
@@ -1607,7 +1607,7 @@ public class RasterizerSM {
                                 	int i_20 = colorRgb + i_21;
                                 	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                     i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                    pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                    pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                 }
                                 depth += slopeDepth;
                                 bufferOffset++;
@@ -1616,7 +1616,7 @@ public class RasterizerSM {
                                 	int i_20 = colorRgb + i_21;
                                 	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                     i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                    pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                    pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                 }
                                 depth += slopeDepth;
                                 bufferOffset++;
@@ -1625,7 +1625,7 @@ public class RasterizerSM {
                                 	int i_20 = colorRgb + i_21;
                                 	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                     i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                    pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                    pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                 }
                                 depth += slopeDepth;
                             } while (--x > 0);
@@ -1640,7 +1640,7 @@ public class RasterizerSM {
                                 	int i_20 = colorRgb + i_21;
                                 	int i_22 = (i_21 & 0xff00ff) + (colorRgb & 0xff00ff);
                                     i_21 = (i_22 & 0x1000100) + (i_20 - i_22 & 0x10000);
-                                    pixels[bufferOffset] = -16777216 | i_20 - i_21 | i_21 - (i_21 >>> 8);
+                                    pixels[bufferOffset] = ~0xffffff | i_20 - i_21 | i_21 - (i_21 >>> 8);
                                 }
 
                                 depth += slopeDepth;
@@ -1659,7 +1659,7 @@ public class RasterizerSM {
                                     int pixelSum = pixel + currentPixel;
                                     int i_22 = (pixel & 0xff00ff) + (currentPixel & 0xff00ff);
                                     currentPixel = (i_22 & 0x1000100) + (pixelSum - i_22 & 0x10000);
-                                    pixels[bufferOffset] = -16777216 | pixelSum - currentPixel | currentPixel - (currentPixel >>> 8);
+                                    pixels[bufferOffset] = ~0xffffff | pixelSum - currentPixel | currentPixel - (currentPixel >>> 8);
                                 }
                                 depth += slopeDepth;
                                 red += slopeRed;
@@ -1672,7 +1672,7 @@ public class RasterizerSM {
                             do {
                                 bufferOffset++;
                                 if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                                    colorRgb = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                    colorRgb = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                                     colorRgb = (invertedAlpha * (colorRgb & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (colorRgb & 0xff00) >> 8 & 0xff00);
                                     pixel = pixels[bufferOffset];
                                     if (transparent) {
@@ -1691,7 +1691,7 @@ public class RasterizerSM {
                         do {
                             bufferOffset++;
                             if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                                pixels[bufferOffset] = -16777216 | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
+                                pixels[bufferOffset] = ~0xffffff | (int) red & 0xff0000 | (int) green & 0xff00 | (int) blue & 0xff;
                             }
                             depth += slopeDepth;
                             red += slopeRed;
@@ -1713,7 +1713,7 @@ public class RasterizerSM {
                 if (this.texturePixelsA == null) {
                     this.blendingAlpha = 255 - (colorA >> 24 & 0xff);
                     int materialARgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialId)) & 0xffff];
-                    int centerColour = -16777216 | (materialARgb >> 16 & 0xff) * (colorA >> 16 & 0xff) << 8 & 0xff0000 | (colorA >> 8 & 0xff) * (materialARgb >> 8 & 0xff) & 0xff00 | (materialARgb & 0xff) * (colorA & 0xff) >> 8;
+                    int centerColour = ~0xffffff | (materialARgb >> 16 & 0xff) * (colorA >> 16 & 0xff) << 8 & 0xff0000 | (colorA >> 8 & 0xff) * (materialARgb >> 8 & 0xff) & 0xff00 | (materialARgb & 0xff) * (colorA & 0xff) >> 8;
                     drawTriangle(true, depthWrite, transparent, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityC));
                     return;
                 }
@@ -2189,9 +2189,9 @@ public class RasterizerSM {
         if (!colorWrite) {
             drawFlatTriangle(false, depthWrite, transparency, yA, yB, yC, xA, xB, xC, zA, zB, zC, 0);
         } else if (this.wireframeMode) {
-            this.safemodeToolkit.drawOpaqueLine((int) xA, (int) yA, (int) xB, (int) yB, -16777216 | colorA);
-            this.safemodeToolkit.drawOpaqueLine((int) xB, (int) yB, (int) xC, (int) yC, -16777216 | colorA);
-            this.safemodeToolkit.drawOpaqueLine((int) xC, (int) yC, (int) xA, (int) yA, -16777216 | colorA);
+            this.safemodeToolkit.drawOpaqueLine((int) xA, (int) yA, (int) xB, (int) yB, ~0xffffff | colorA);
+            this.safemodeToolkit.drawOpaqueLine((int) xB, (int) yB, (int) xC, (int) yC, ~0xffffff | colorA);
+            this.safemodeToolkit.drawOpaqueLine((int) xC, (int) yC, (int) xA, (int) yA, ~0xffffff | colorA);
         } else {
             float slopeXBa = xB - xA;
             float slopeYBa = yB - yA;
@@ -3172,11 +3172,11 @@ public class RasterizerSM {
                     int texturePixelC = this.texturePixelsC[textureUA + textureVA * this.textureSizeC];
                     /** Mix texture colors **/
                     float texturePercentC = 1.0F - (textureAPercentageA + textureBPercentageA);
-                    texturePixelA = -16777216 | (int) (textureAPercentageA * (texturePixelA >> 16 & 0xff)) << 16 | (int) (textureAPercentageA * (texturePixelA >> 8 & 0xff)) << 8 | (int) (textureAPercentageA * (texturePixelA & 0xff));
-                    texturePixelB = -16777216 | (int) (textureBPercentageA * (texturePixelB >> 16 & 0xff)) << 16 | (int) (textureBPercentageA * (texturePixelB >> 8 & 0xff)) << 8 | (int) (textureBPercentageA * (texturePixelB & 0xff));
-                    texturePixelC = -16777216 | (int) (texturePercentC * (texturePixelC >> 16 & 0xff)) << 16 | (int) (texturePercentC * (texturePixelC >> 8 & 0xff)) << 8 | (int) (texturePercentC * (texturePixelC & 0xff));
+                    texturePixelA = ~0xffffff | (int) (textureAPercentageA * (texturePixelA >> 16 & 0xff)) << 16 | (int) (textureAPercentageA * (texturePixelA >> 8 & 0xff)) << 8 | (int) (textureAPercentageA * (texturePixelA & 0xff));
+                    texturePixelB = ~0xffffff | (int) (textureBPercentageA * (texturePixelB >> 16 & 0xff)) << 16 | (int) (textureBPercentageA * (texturePixelB >> 8 & 0xff)) << 8 | (int) (textureBPercentageA * (texturePixelB & 0xff));
+                    texturePixelC = ~0xffffff | (int) (texturePercentC * (texturePixelC >> 16 & 0xff)) << 16 | (int) (texturePercentC * (texturePixelC >> 8 & 0xff)) << 8 | (int) (texturePercentC * (texturePixelC & 0xff));
                     int colorSum = texturePixelA + texturePixelB + texturePixelC;
-                    int blendColor = -16777216 | (int) (redA * (colorSum >> 16 & 0xff)) << 8 & 0xff0000 | (int) (greenA * (colorSum >> 8 & 0xff)) & 0xff00 | (int) (blueA * (colorSum & 0xff)) >> 8;
+                    int blendColor = ~0xffffff | (int) (redA * (colorSum >> 16 & 0xff)) << 8 & 0xff0000 | (int) (greenA * (colorSum >> 8 & 0xff)) & 0xff00 | (int) (blueA * (colorSum & 0xff)) >> 8;
                     /** Blend fog into final color **/
                     if (fogDensityA != 0.0F) {
                         int fogTransparency = (int) (255.0F - fogDensityA);
@@ -3624,7 +3624,7 @@ public class RasterizerSM {
                     
                     if (alpha != 0) {
                         if (alpha != 255) {
-                        	int pixel = -16777216 | (int) (redA * (texel >> 16 & 0xff)) << 8 & 0xff0000 | (int) (greenA * (texel >> 8 & 0xff)) & 0xff00 | (int) (blueA * (texel & 0xff)) >> 8;
+                        	int pixel = ~0xffffff | (int) (redA * (texel >> 16 & 0xff)) << 8 & 0xff0000 | (int) (greenA * (texel >> 8 & 0xff)) & 0xff00 | (int) (blueA * (texel & 0xff)) >> 8;
                             if (fogDensityA != 0.0F) {
                             	int fogTransparency = (int) (255.0F - fogDensityA);
                             	int blendedFogColor = ((this.fogColour & 0xff00ff) * (int) fogDensityA & -16711936 | (this.fogColour & 0xff00) * (int) fogDensityA & 0xff0000) >>> 8;
@@ -3639,7 +3639,7 @@ public class RasterizerSM {
                                 pixels[bufferOffset] = pixel;
                             }
                         } else {
-                        	int pixel = -16777216 | (int) (redA * (texel >> 16 & 0xff)) << 8 & 0xff0000 | (int) (greenA * (texel >> 8 & 0xff)) & 0xff00 | (int) (blueA * (texel & 0xff)) >> 8;
+                        	int pixel = ~0xffffff | (int) (redA * (texel >> 16 & 0xff)) << 8 & 0xff0000 | (int) (greenA * (texel >> 8 & 0xff)) & 0xff00 | (int) (blueA * (texel & 0xff)) >> 8;
                             if (fogDensityA != 0.0F) {
                             	int fogTransparency = (int) (255.0F - fogDensityA);
                             	int blendedFogColor = ((this.fogColour & 0xff00ff) * (int) fogDensityA & -16711936 | (this.fogColour & 0xff00) * (int) fogDensityA & 0xff0000) >>> 8;

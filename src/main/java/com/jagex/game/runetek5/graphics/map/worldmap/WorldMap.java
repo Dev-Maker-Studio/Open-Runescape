@@ -165,7 +165,7 @@ public class WorldMap {
                             if (i_16 >= 0 && i_16 < mapSizeY) {
                                 underlayColor = (underlayRgbColors[tileIndex] & 0xff) << 16 | aShortArray3479[tileIndex] & 0xffff;
                                 if (underlayColor != 0) {
-                                    underlayColor |= -16777216;
+                                    underlayColor |= ~0xffffff;
                                 }
 
                                 overlayId = overlayIds[tileIndex] & 0xff;
@@ -174,7 +174,7 @@ public class WorldMap {
 
                             if (underlayColor == 0 && overlayId == 0 && drawnTile == null) {
                                 if (staticElement.color != -1) {
-                                    underlayColor = -16777216 | staticElement.color;
+                                    underlayColor = ~0xffffff | staticElement.color;
                                 } else if ((i_7 + anInt3485 & 0x4) != (i_12 + anInt3486 & 0x4)) {
                                     underlayColor = -11840664;
                                 } else {
@@ -182,7 +182,7 @@ public class WorldMap {
                                 }
 
                                 if (underlayColor == 0) {
-                                    underlayColor = -16777216;
+                                    underlayColor = ~0xffffff;
                                 }
 
                                 toolkit.drawFilledRectangle(startX, startY, width, height, underlayColor, 0);
@@ -210,7 +210,7 @@ public class WorldMap {
                         int i_15 = i_14 - i_13;
                         int overlayFloorColor;
                         if (staticElement.color != -1) {
-                            overlayFloorColor = -16777216 | staticElement.color;
+                            overlayFloorColor = ~0xffffff | staticElement.color;
                         } else if ((i_7 + anInt3485 & 0x4) != (i_12 + anInt3486 & 0x4)) {
                             overlayFloorColor = -11840664;
                         } else {
@@ -218,7 +218,7 @@ public class WorldMap {
                         }
 
                         if (overlayFloorColor == 0) {
-                            overlayFloorColor = -16777216;
+                            overlayFloorColor = ~0xffffff;
                         }
 
                         toolkit.drawFilledRectangle(startX, i_13, width, i_15, overlayFloorColor, 0);
@@ -742,9 +742,9 @@ public class WorldMap {
             }
 
             modifiedHsl = lightness + (colorHsl + hueRandomisation & 0xfc00) + (colorHsl & 0x380);
-            finalFloorColor = -16777216 | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
+            finalFloorColor = ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
         } else if (textureId >= 0) {
-            finalFloorColor = -16777216 | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(materialProvider.getMaterial(textureId).colorHsl, 96)) & 0xffff];
+            finalFloorColor = ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(materialProvider.getMaterial(textureId).colorHsl, 96)) & 0xffff];
         } else if (overlay.tileColorHsl == -1) {
             finalFloorColor = 0;
         } else {
@@ -757,7 +757,7 @@ public class WorldMap {
             }
 
             modifiedHsl = lightness + (colorHsl + hueRandomisation & 0xfc00) + (colorHsl & 0x380);
-            finalFloorColor = -16777216 | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
+            finalFloorColor = ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
         }
 
         return finalFloorColor;
@@ -790,7 +790,7 @@ public class WorldMap {
 
                         if (i_12 != 0 && i_13 != 0) {
                             if (mapspriteType.backgroundColor != 0) {
-                                nativeSprite.drawCircle(i_1, i_4 + (i_2 - i_13), i_12, i_13, 0, -16777216 | mapspriteType.backgroundColor, 1);
+                                nativeSprite.drawCircle(i_1, i_4 + (i_2 - i_13), i_12, i_13, 0, ~0xffffff | mapspriteType.backgroundColor, 1);
                             } else {
                                 nativeSprite.drawCircle(i_1, i_4 + (i_2 - i_13), i_12, i_13);
                             }
@@ -907,7 +907,7 @@ public class WorldMap {
                                 int i_16 = i_11 * 64 + class26921.mapsquarePosX + (i_12 * 64 + class26921.mapsquarePosY) * mapSizeX;
                                 class26921.underlayIdOrColor = (underlayRgbColors[i_16] & 0xff) << 16 | aShortArray3479[i_16] & 0xffff;
                                 if (class26921.underlayIdOrColor != 0) {
-                                    class26921.underlayIdOrColor |= -16777216;
+                                    class26921.underlayIdOrColor |= ~0xffffff;
                                 }
                             }
                         }
@@ -1050,7 +1050,7 @@ public class WorldMap {
 	        byte b_7 = 20;
 	        int centerX = width / 2 + left;
 	        int centerY = top + height / 2 - 18 - b_7;
-	        toolkit.drawFilledRectangle(left, top, width, height, -16777216, 0);
+	        toolkit.drawFilledRectangle(left, top, width, height, ~0xffffff, 0);
 	        toolkit.drawRectangleOutline(centerX - 152, centerY, 304, 34, client.DEBUG_BG_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX].getRGB(), 0);
 	        toolkit.drawFilledRectangle(centerX - 150, centerY + 2, ComponentMinimap.mapAssetLoadingPercentage * 3, 30, client.DEBUG_LOAD_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX].getRGB(), 0);
 	        MiniMenu.minimenuHeader.renderCentered(LocalizedText.LOADING.translate(client.CURRENT_LANGUAGE), centerX, b_7 + centerY, client.aColorArray7200[client.DEBUG_DISPLAY_COLOR_INDEX].getRGB(), -1);

@@ -306,7 +306,7 @@ public class Scene {
 
     public void addWater(int x, int y, int waterColor, int waterScale, int waterIntensity, int opcode20, int opcode21, int opcode22) {
         if (this.colors != null) {
-        	this.colors[x][y] = -16777216 | waterColor;
+        	this.colors[x][y] = ~0xffffff | waterColor;
         }
         if (this.scales != null) {
         	this.scales[x][y] = (short) waterScale;
@@ -459,7 +459,7 @@ public class Scene {
                             }
                             emptyChild.child = wrapper;
                         }
-                        if (isUnderwater && (this.colors[x][y] & -16777216) != 0) {
+                        if (isUnderwater && (this.colors[x][y] & ~0xffffff) != 0) {
                             color = this.colors[x][y];
                             scale = this.scales[x][y];
                             intensity = this.intensities[x][y];
@@ -470,10 +470,10 @@ public class Scene {
                     }
                 }
             }
-            if (isUnderwater && (color & -16777216) != 0) {
+            if (isUnderwater && (color & ~0xffffff) != 0) {
                 for (int x = node.startX; x <= node.endX; x++) {
                     for (int y = node.startZ; y <= node.endZ; y++) {
-                        if ((this.colors[x][y] & -16777216) == 0) {
+                        if ((this.colors[x][y] & ~0xffffff) == 0) {
                             this.colors[x][y] = color;
                             this.scales[x][y] = scale;
                             this.intensities[x][y] = intensity;

@@ -136,7 +136,7 @@ public class MessageBox {
 	            outlineStraightSideSprite.rotate90DegLeft();
 	            toolkit.generateSprite(outlineStraightSideSprite, true).method2756(drawX + outlineCornerSprite.width, textH + drawY - i_15, textW - outlineCornerSprite.width * 2, i_15);
 	            outlineStraightSideSprite.rotate90DegLeft();
-	            boxRenderer.drawText(text, drawX + i_10, drawY + i_10, textW - i_10 * 2, textH - i_10 * 2, textColor | -16777216, -1, 1, 1, 0, null, null, null, 0, 0);
+	            boxRenderer.drawText(text, drawX + i_10, drawY + i_10, textW - i_10 * 2, textH - i_10 * 2, textColor | ~0xffffff, -1, 1, 1, 0, null, null, null, 0, 0);
 	            InterfaceComponentRenderer.inboundsComponentToTop(drawX, drawY, textW, textH);
 	        } else {
 	            int i_7 = boxMetrics.getTextWidthMultiline(text, 250, null);
@@ -144,7 +144,7 @@ public class MessageBox {
 	            byte b_9 = 4;
 	            int i_10 = b_9 + 6;
 	            int i_11 = b_9 + 6;
-	            toolkit.drawFilledRectangle(i_10 - b_9, i_11 - b_9, b_9 + i_7 + b_9, i_8 + b_9 + b_9, -16777216, 0);
+	            toolkit.drawFilledRectangle(i_10 - b_9, i_11 - b_9, b_9 + i_7 + b_9, i_8 + b_9 + b_9, ~0xffffff, 0);
 	            toolkit.drawRectangleOutline(i_10 - b_9, i_11 - b_9, b_9 + i_7 + b_9, b_9 + i_8 + b_9, -1, 0);
 	            boxRenderer.drawText(text, i_10, i_11, i_7, i_8, -1, -1, 1, 1, 0, null, null, null, 0, 0);
 	            InterfaceComponentRenderer.inboundsComponentToTop(i_10 - b_9, i_11 - b_9, b_9 + i_7 + b_9, b_9 + i_8 + b_9);

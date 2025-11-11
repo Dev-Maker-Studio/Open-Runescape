@@ -299,7 +299,7 @@ public class ComponentMinimap {
 	            }
 	            
 	            if (mapspriteType.backgroundColor != 0) {
-	                nativeSprite.drawCircle(drawPositionX, drawPositionY - (sizeY - 1) * 4, upscaledSizeX, upscaledSizeY, 0, -16777216 | mapspriteType.backgroundColor, 1);
+	                nativeSprite.drawCircle(drawPositionX, drawPositionY - (sizeY - 1) * 4, upscaledSizeX, upscaledSizeY, 0, ~0xffffff | mapspriteType.backgroundColor, 1);
 	            } else {
 	                nativeSprite.drawCircle(drawPositionX, drawPositionY - (sizeY - 1) * 4, upscaledSizeX, upscaledSizeY);
 	            }

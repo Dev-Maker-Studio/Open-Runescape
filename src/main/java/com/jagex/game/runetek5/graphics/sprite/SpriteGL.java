@@ -73,7 +73,7 @@ public class SpriteGL extends NativeSprite {
             int[] pixels = this.toolkit.copyPixelRectangle(x, y, width, height);
             if (pixels != null) {
                 for (int i = 0; i < pixels.length; i++) {
-                    pixels[i] |= -16777216;
+                    pixels[i] |= ~0xffffff;
                 }
 
                 method14414(offsetX, offsetY, width, height, pixels, width);

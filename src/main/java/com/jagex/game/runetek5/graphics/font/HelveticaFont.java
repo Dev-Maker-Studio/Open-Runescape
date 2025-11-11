@@ -58,12 +58,12 @@ public class HelveticaFont {
     public void drawText(String text, int drawX, int drawY, int color) {
         boolean hasColor = color != 0;
 
-        color |= -16777216;
+        color |= ~0xffffff;
 
         for (int index = 0; index < text.length(); index++) {
             int c = VALID_CHARACTERS[text.charAt(index)];
             if (hasColor) {
-                this.nativeSprites[c].draw(drawX + 1, drawY + 1, 0, -16777216, 1);
+                this.nativeSprites[c].draw(drawX + 1, drawY + 1, 0, ~0xffffff, 1);
             }
 
             this.nativeSprites[c].draw(drawX, drawY, 0, color, 1);

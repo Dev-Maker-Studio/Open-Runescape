@@ -119,7 +119,7 @@ public class Sun {
                         alpha = 255;
                     }
                     int halvedAlpha = alpha / 2;
-                    sunColor[offsetA + offsetB] = sunColor[offsetA + offsetD] = sunColor[offsetC + offsetB] = sunColor[offsetC + offsetD] = -16777216 | alpha << 16;
+                    sunColor[offsetA + offsetB] = sunColor[offsetA + offsetD] = sunColor[offsetC + offsetB] = sunColor[offsetC + offsetD] = ~0xffffff | alpha << 16;
                     antiSunColor[offsetA + offsetB] = antiSunColor[offsetA + offsetD] = antiSunColor[offsetC + offsetB] = antiSunColor[offsetC + offsetD] = 127 - halvedAlpha << 24 | 0xffffff;
                 }
             }
@@ -266,7 +266,7 @@ public class Sun {
         toolkit.getClipping(SUN_CLIPPING);
         toolkit.setClipping(0, 0, this.sunUseDimension, this.sunUseDimension);
         toolkit.applyClearFlags(2, 0);
-        toolkit.drawFilledRectangle(0, 0, this.sunUseDimension, this.sunUseDimension, -16777216 | this.sunColor, 0);
+        toolkit.drawFilledRectangle(0, 0, this.sunUseDimension, this.sunUseDimension, ~0xffffff | this.sunColor, 0);
         int positionX = 0;
         int positionY = 0;
         int positionZ = 256;
@@ -313,7 +313,7 @@ public class Sun {
         copiedSunModel.drawMatrixThreaded(sunProjectionMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES);
         int useDimension = this.sunUseDimension * 13 / 16;
         int position = (this.sunUseDimension - useDimension) / 2;
-        activeAntiSun.drawCircle(position, position, useDimension, useDimension, 0, -16777216 | this.sunColor, 1);
+        activeAntiSun.drawCircle(position, position, useDimension, useDimension, 0, ~0xffffff | this.sunColor, 1);
         this.sunSprite = toolkit.createNativeSprite(0, 0, this.sunUseDimension, this.sunUseDimension, true);
         toolkit.applyClearFlags(2, 0);
         toolkit.drawFilledRectangle(0, 0, this.sunUseDimension, this.sunUseDimension, 0, 0);

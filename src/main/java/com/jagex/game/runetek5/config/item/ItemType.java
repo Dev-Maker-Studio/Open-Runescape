@@ -512,7 +512,7 @@ public class ItemType {
             if ((pixels[pixelIndex] & 0xffffff) == 0) {
                 pixels[pixelIndex] = 0;
             } else {
-                pixels[pixelIndex] |= -16777216;
+                pixels[pixelIndex] |= ~0xffffff;
             }
         }
         return pixels;      

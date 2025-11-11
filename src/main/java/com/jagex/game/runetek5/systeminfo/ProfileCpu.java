@@ -24,7 +24,7 @@ public class ProfileCpu {
             toolkit.benchmark();
         }
         int executionTime = (int) (Utils.time() - timeBeforeBenchmark);
-        toolkit.clearPixels(0, 0, 100, 100, -16777216);
+        toolkit.clearPixels(0, 0, 100, 100, ~0xffffff);
         toolkit.cleanupAndShutdown();
         return executionTime;
     }

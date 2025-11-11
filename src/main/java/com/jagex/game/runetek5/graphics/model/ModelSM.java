@@ -1659,7 +1659,7 @@ public class ModelSM extends Model {
 					for (int billboardIndex = 0; billboardIndex < this.numBillboards; billboardIndex++) {
 						BillboardEffect effect = this.billboardEffects[billboardIndex];
 						BillboardSurface surface = this.billboardSurfaces[billboardIndex];
-						surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
+						surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
 					}
 				}
 			}
@@ -2104,7 +2104,7 @@ public class ModelSM extends Model {
 					for (int billboardIndex = 0; billboardIndex < this.numBillboards; billboardIndex++) {
 						BillboardEffect effect = this.billboardEffects[billboardIndex];
 						BillboardSurface surface = this.billboardSurfaces[billboardIndex];
-						surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hsvToRgbTable[ColorUtil
+						surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil
 								.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
 					}
 				}
@@ -2264,7 +2264,7 @@ public class ModelSM extends Model {
 				for (int faceIndex = 0; faceIndex < this.numBillboards; faceIndex++) {
 					BillboardEffect effect = this.billboardEffects[faceIndex];
 					BillboardSurface surface = this.billboardSurfaces[faceIndex];
-					surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hsvToRgbTable[ColorUtil
+					surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil
 							.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
 				}
 			}
@@ -2684,7 +2684,7 @@ public class ModelSM extends Model {
                         this.rasterizer.blendingAlpha = this.facesAlpha[faceIndex] & 0xff;
                     }
                     if (this.facesMaterial != null && this.facesMaterial[faceIndex] != -1) {
-                        int transparency = -16777216;
+                        int transparency = ~0xffffff;
                         if (this.facesAlpha != null) {
                             transparency = 255 - (this.facesAlpha[faceIndex] & 0xff) << 24;
                         }
@@ -2730,7 +2730,7 @@ public class ModelSM extends Model {
                 this.rasterizer.blendingAlpha = this.facesAlpha[faceIndex] & 0xff;
             }
             if (this.facesMaterial != null && this.facesMaterial[faceIndex] != -1) {
-                int transparency = -16777216;
+                int transparency = ~0xffffff;
                 if (this.facesAlpha != null) {
                     transparency = 255 - (this.facesAlpha[faceIndex] & 0xff) << 24;
                 }
@@ -2941,7 +2941,7 @@ public class ModelSM extends Model {
             for (int index = 0; index < this.numBillboards; index++) {
                 BillboardEffect effect = this.billboardEffects[index];
                 BillboardSurface surface = this.billboardSurfaces[index];
-                surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace]) & 0xffff] & 0xffffff;
+                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace]) & 0xffff] & 0xffffff;
             }
         }
         if (this.appearanceUpdateStage == 2) {
@@ -2998,7 +2998,7 @@ public class ModelSM extends Model {
             for (int faceIndex = 0; faceIndex < this.numBillboards; faceIndex++) {
                 BillboardEffect effect = this.billboardEffects[faceIndex];
                 BillboardSurface surface = this.billboardSurfaces[faceIndex];
-                surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
+                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
             }
         }
         if (this.appearanceUpdateStage == 2) {
@@ -3053,7 +3053,7 @@ public class ModelSM extends Model {
         short b = this.facesB[faceIndex];
         short c = this.facesC[faceIndex];
         if (this.facesMaterial != null && this.facesMaterial[faceIndex] != -1) {
-            int alpha = -16777216;
+            int alpha = ~0xffffff;
             if (this.facesAlpha != null) {
                 alpha = 255 - (this.facesAlpha[faceIndex] & 0xff) << 24;
             }

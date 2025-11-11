@@ -126,7 +126,7 @@ public class PaletteSpriteSM extends SpriteSM {
 
                             for (i_25 = -i_34; i_25 < 0; i_25++) {
                                 i_26 = this.spritePalette[this.spritePixels[i_24 + (i_10 >> 16)] & 0xff];
-                                i_27 = i_19 * (i_26 & 0xff0000) & -16777216;
+                                i_27 = i_19 * (i_26 & 0xff0000) & ~0xffffff;
                                 i_28 = i_20 * (i_26 & 0xff00) & 0xff0000;
                                 i_29 = (i_26 & 0xff) * i_21 & 0xff00;
                                 ints_9[i_17++] = (i_27 | i_28 | i_29) >>> 8;
@@ -256,14 +256,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                             if (b_36 != 0) {
                                                 i_29 = this.spritePalette[b_36 & 0xff];
                                                 if (i_23 != 255) {
-                                                    i_30 = i_20 * (i_29 & 0xff0000) & -16777216;
+                                                    i_30 = i_20 * (i_29 & 0xff0000) & ~0xffffff;
                                                     i_31 = i_21 * (i_29 & 0xff00) & 0xff0000;
                                                     i_32 = (i_29 & 0xff) * i_22 & 0xff00;
                                                     i_29 = (i_30 | i_31 | i_32) >>> 8;
                                                     i_33 = ints_9[i_17];
                                                     ints_9[i_17++] = ((i_29 & 0xff00ff) * i_23 + (i_33 & 0xff00ff) * i_24 & -16711936) + (i_23 * (i_29 & 0xff00) + i_24 * (i_33 & 0xff00) & 0xff0000) >> 8;
                                                 } else {
-                                                    i_30 = i_20 * (i_29 & 0xff0000) & -16777216;
+                                                    i_30 = i_20 * (i_29 & 0xff0000) & ~0xffffff;
                                                     i_31 = i_21 * (i_29 & 0xff00) & 0xff0000;
                                                     i_32 = (i_29 & 0xff) * i_22 & 0xff00;
                                                     ints_9[i_17++] = (i_30 | i_31 | i_32) >>> 8;
@@ -388,7 +388,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     byte b_38 = this.spritePixels[i_24 + (i_10 >> 16)];
                                     if (b_38 != 0) {
                                         i_27 = this.spritePalette[b_38 & 0xff];
-                                        i_28 = i_20 * (i_27 & 0xff0000) & -16777216;
+                                        i_28 = i_20 * (i_27 & 0xff0000) & ~0xffffff;
                                         i_29 = i_21 * (i_27 & 0xff00) & 0xff0000;
                                         i_30 = (i_27 & 0xff) * i_22 & 0xff00;
                                         i_27 = (i_28 | i_29 | i_30) >>> 8;
@@ -560,7 +560,7 @@ public class PaletteSpriteSM extends SpriteSM {
                             for (i_17 = -i_10; i_17 < 0; i_17++) {
                                 for (i_18 = -i_11; i_18 < 0; i_18++) {
                                     i_19 = this.spritePalette[this.spritePixels[i_9++] & 0xff];
-                                    i_20 = i_14 * (i_19 & 0xff0000) & -16777216;
+                                    i_20 = i_14 * (i_19 & 0xff0000) & ~0xffffff;
                                     i_21 = i_15 * (i_19 & 0xff00) & 0xff0000;
                                     i_22 = (i_19 & 0xff) * i_16 & 0xff00;
                                     ints_6[i_8++] = (i_20 | i_21 | i_22) >>> 8;
@@ -618,7 +618,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     for (i_15 = -i_11; i_15 < 0; i_15++) {
                                         b_27 = this.spritePixels[i_9++];
                                         if (b_27 != 0) {
-                                            i_17 = this.spritePalette[b_27 & 0xff] | -16777216;
+                                            i_17 = this.spritePalette[b_27 & 0xff] | ~0xffffff;
                                             short s_28 = 255;
                                             byte b_30 = 0;
                                             i_20 = ints_6[i_8];
@@ -666,14 +666,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                                 if (b_31 != 0) {
                                                     i_22 = this.spritePalette[b_31 & 0xff];
                                                     if (i_17 != 255) {
-                                                        i_23 = i_14 * (i_22 & 0xff0000) & -16777216;
+                                                        i_23 = i_14 * (i_22 & 0xff0000) & ~0xffffff;
                                                         i_24 = i_15 * (i_22 & 0xff00) & 0xff0000;
                                                         i_25 = (i_22 & 0xff) * i_16 & 0xff00;
                                                         i_22 = (i_23 | i_24 | i_25) >>> 8;
                                                         i_26 = ints_6[i_8];
                                                         ints_6[i_8++] = ((i_22 & 0xff00ff) * i_17 + (i_26 & 0xff00ff) * i_18 & -16711936) + (i_17 * (i_22 & 0xff00) + i_18 * (i_26 & 0xff00) & 0xff0000) >> 8;
                                                     } else {
-                                                        i_23 = i_14 * (i_22 & 0xff0000) & -16777216;
+                                                        i_23 = i_14 * (i_22 & 0xff0000) & ~0xffffff;
                                                         i_24 = i_15 * (i_22 & 0xff00) & 0xff0000;
                                                         i_25 = (i_22 & 0xff) * i_16 & 0xff00;
                                                         ints_6[i_8++] = (i_23 | i_24 | i_25) >>> 8;
@@ -774,7 +774,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         byte b_33 = this.spritePixels[i_9++];
                                         if (b_33 != 0) {
                                             i_20 = this.spritePalette[b_33 & 0xff];
-                                            i_21 = i_14 * (i_20 & 0xff0000) & -16777216;
+                                            i_21 = i_14 * (i_20 & 0xff0000) & ~0xffffff;
                                             i_22 = i_15 * (i_20 & 0xff00) & 0xff0000;
                                             i_23 = (i_20 & 0xff) * i_16 & 0xff00;
                                             i_20 = (i_21 | i_22 | i_23) >>> 8;
@@ -970,7 +970,7 @@ public class PaletteSpriteSM extends SpriteSM {
                             if (!bool2 || f_6 < floats_39[i_20]) {
                                 if (bool1) {
                                     i_31 = this.spritePalette[this.spritePixels[i_29 + (i_14 >> 16)] & 0xff];
-                                    i_32 = i_24 * (i_31 & 0xff0000) & -16777216;
+                                    i_32 = i_24 * (i_31 & 0xff0000) & ~0xffffff;
                                     i_33 = i_25 * (i_31 & 0xff00) & 0xff0000;
                                     i_34 = (i_31 & 0xff) * i_26 & 0xff00;
                                     ints_23[i_20] = (i_32 | i_33 | i_34) >>> 8;
@@ -1144,7 +1144,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                                 i_34 = this.spritePalette[b_42 & 0xff];
                                                 if (i_28 != 255) {
                                                     if (bool1) {
-                                                        i_35 = i_25 * (i_34 & 0xff0000) & -16777216;
+                                                        i_35 = i_25 * (i_34 & 0xff0000) & ~0xffffff;
                                                         i_36 = i_26 * (i_34 & 0xff00) & 0xff0000;
                                                         i_37 = (i_34 & 0xff) * i_27 & 0xff00;
                                                         i_34 = (i_35 | i_36 | i_37) >>> 8;
@@ -1154,7 +1154,7 @@ public class PaletteSpriteSM extends SpriteSM {
 
                                                 } else {
                                                     if (bool1) {
-                                                        i_35 = i_25 * (i_34 & 0xff0000) & -16777216;
+                                                        i_35 = i_25 * (i_34 & 0xff0000) & ~0xffffff;
                                                         i_36 = i_26 * (i_34 & 0xff00) & 0xff0000;
                                                         i_37 = (i_34 & 0xff) * i_27 & 0xff00;
                                                         ints_23[i_20] = (i_35 | i_36 | i_37) >>> 8;
@@ -1310,7 +1310,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     if (b_44 != 0) {
                                         if (bool1) {
                                             i_32 = this.spritePalette[b_44 & 0xff];
-                                            i_33 = i_25 * (i_32 & 0xff0000) & -16777216;
+                                            i_33 = i_25 * (i_32 & 0xff0000) & ~0xffffff;
                                             i_34 = i_26 * (i_32 & 0xff00) & 0xff0000;
                                             i_35 = (i_32 & 0xff) * i_27 & 0xff00;
                                             i_32 = (i_33 | i_34 | i_35) >>> 8;
@@ -1459,7 +1459,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         ints_3[i_10] = this.spritePalette[this.spritePixels[i_9] & 0xff];
                                     } else if (i_1 == 0) {
                                         i_11 = this.spritePalette[this.spritePixels[i_9] & 0xff];
-                                        i_12 = anInt8880 * (i_11 & 0xff0000) & -16777216;
+                                        i_12 = anInt8880 * (i_11 & 0xff0000) & ~0xffffff;
                                         i_13 = (i_11 & 0xff00) * anInt8852 & 0xff0000;
                                         i_14 = (i_11 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_10] = (i_12 | i_13 | i_14) >>> 8;
@@ -1498,14 +1498,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                                     i_15 = ints_3[i_10];
                                                     ints_3[i_10] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                                 } else if (anInt8878 != 255) {
-                                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                     i_12 = (i_13 | i_14 | i_15) >>> 8;
                                                     i_16 = ints_3[i_10];
                                                     ints_3[i_10] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                                 } else {
-                                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                     ints_3[i_10] = (i_13 | i_14 | i_15) >>> 8;
@@ -1558,7 +1558,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                             b_20 = this.spritePixels[i_9];
                                             if (b_20 != 0) {
                                                 i_12 = this.spritePalette[b_20 & 0xff];
-                                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                 i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -1630,7 +1630,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                                     } else if (i_1 == 0) {
                                         i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -1667,14 +1667,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                                 i_16 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                             } else if (anInt8878 != 255) {
-                                                i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                                i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                                 i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                                 i_13 = (i_14 | i_15 | i_16) >>> 8;
                                                 i_17 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                             } else {
-                                                i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                                i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                                 i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                                 ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -1727,7 +1727,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         b_21 = this.spritePixels[i_10];
                                         if (b_21 != 0) {
                                             i_13 = this.spritePalette[b_21 & 0xff];
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             i_13 = (i_14 | i_15 | i_16) >>> 8;
@@ -1802,7 +1802,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                                     } else if (i_1 == 0) {
                                         i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -1839,14 +1839,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                                 i_16 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                             } else if (anInt8878 != 255) {
-                                                i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                                i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                                 i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                                 i_13 = (i_14 | i_15 | i_16) >>> 8;
                                                 i_17 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                             } else {
-                                                i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                                i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                                 i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                                 ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -1899,7 +1899,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         b_21 = this.spritePixels[i_10];
                                         if (b_21 != 0) {
                                             i_13 = this.spritePalette[b_21 & 0xff];
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             i_13 = (i_14 | i_15 | i_16) >>> 8;
@@ -1976,7 +1976,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                                     } else if (i_1 == 0) {
                                         i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2013,14 +2013,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                                 i_16 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                             } else if (anInt8878 != 255) {
-                                                i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                                i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                                 i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                                 i_13 = (i_14 | i_15 | i_16) >>> 8;
                                                 i_17 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                             } else {
-                                                i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                                i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                                 i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                                 ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -2073,7 +2073,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                         b_21 = this.spritePixels[i_10];
                                         if (b_21 != 0) {
                                             i_13 = this.spritePalette[b_21 & 0xff];
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             i_13 = (i_14 | i_15 | i_16) >>> 8;
@@ -2160,7 +2160,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                                 } else if (i_1 == 0) {
                                     i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2197,14 +2197,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                             i_16 = ints_3[i_11];
                                             ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                         } else if (anInt8878 != 255) {
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             i_13 = (i_14 | i_15 | i_16) >>> 8;
                                             i_17 = ints_3[i_11];
                                             ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                         } else {
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -2257,7 +2257,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     b_21 = this.spritePixels[i_10];
                                     if (b_21 != 0) {
                                         i_13 = this.spritePalette[b_21 & 0xff];
-                                        i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                        i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                         i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                         i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                         i_13 = (i_14 | i_15 | i_16) >>> 8;
@@ -2345,7 +2345,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                                 } else if (i_1 == 0) {
                                     i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2382,14 +2382,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                             i_16 = ints_3[i_11];
                                             ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                         } else if (anInt8878 != 255) {
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             i_13 = (i_14 | i_15 | i_16) >>> 8;
                                             i_17 = ints_3[i_11];
                                             ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                         } else {
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -2442,7 +2442,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     b_21 = this.spritePixels[i_10];
                                     if (b_21 != 0) {
                                         i_13 = this.spritePalette[b_21 & 0xff];
-                                        i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                        i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                         i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                         i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                         i_13 = (i_14 | i_15 | i_16) >>> 8;
@@ -2519,7 +2519,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                                 } else if (i_1 == 0) {
                                     i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2556,14 +2556,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                             i_16 = ints_3[i_11];
                                             ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                         } else if (anInt8878 != 255) {
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             i_13 = (i_14 | i_15 | i_16) >>> 8;
                                             i_17 = ints_3[i_11];
                                             ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                         } else {
-                                            i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                            i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                             i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                             i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                             ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -2616,7 +2616,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                     b_21 = this.spritePixels[i_10];
                                     if (b_21 != 0) {
                                         i_13 = this.spritePalette[b_21 & 0xff];
-                                        i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                        i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                         i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                         i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                         i_13 = (i_14 | i_15 | i_16) >>> 8;
@@ -2704,7 +2704,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                 ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                             } else if (i_1 == 0) {
                                 i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                 ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2741,14 +2741,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                         i_16 = ints_3[i_11];
                                         ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                     } else if (anInt8878 != 255) {
-                                        i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                        i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                         i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                         i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                         i_13 = (i_14 | i_15 | i_16) >>> 8;
                                         i_17 = ints_3[i_11];
                                         ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                     } else {
-                                        i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                        i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                         i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                         i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -2801,7 +2801,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                 b_21 = this.spritePixels[i_10];
                                 if (b_21 != 0) {
                                     i_13 = this.spritePalette[b_21 & 0xff];
-                                    i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                    i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                     i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                     i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                     i_13 = (i_14 | i_15 | i_16) >>> 8;
@@ -2889,7 +2889,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                 ints_3[i_11] = this.spritePalette[this.spritePixels[i_10] & 0xff];
                             } else if (i_1 == 0) {
                                 i_12 = this.spritePalette[this.spritePixels[i_10] & 0xff];
-                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                 ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2926,14 +2926,14 @@ public class PaletteSpriteSM extends SpriteSM {
                                         i_16 = ints_3[i_11];
                                         ints_3[i_11] = ((i_13 & 0xff00ff) * i_14 + (i_16 & 0xff00ff) * i_15 & -16711936) + (i_14 * (i_13 & 0xff00) + i_15 * (i_16 & 0xff00) & 0xff0000) >> 8;
                                     } else if (anInt8878 != 255) {
-                                        i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                        i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                         i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                         i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                         i_13 = (i_14 | i_15 | i_16) >>> 8;
                                         i_17 = ints_3[i_11];
                                         ints_3[i_11] = ((i_13 & 0xff00ff) * anInt8878 + (i_17 & 0xff00ff) * anInt8879 & -16711936) + ((i_13 & 0xff00) * anInt8878 + (i_17 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                     } else {
-                                        i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                        i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                         i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                         i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_14 | i_15 | i_16) >>> 8;
@@ -2986,7 +2986,7 @@ public class PaletteSpriteSM extends SpriteSM {
                                 b_21 = this.spritePixels[i_10];
                                 if (b_21 != 0) {
                                     i_13 = this.spritePalette[b_21 & 0xff];
-                                    i_14 = anInt8880 * (i_13 & 0xff0000) & -16777216;
+                                    i_14 = anInt8880 * (i_13 & 0xff0000) & ~0xffffff;
                                     i_15 = (i_13 & 0xff00) * anInt8852 & 0xff0000;
                                     i_16 = (i_13 & 0xff) * anInt8882 & 0xff00;
                                     i_13 = (i_14 | i_15 | i_16) >>> 8;

@@ -74,7 +74,7 @@ public class NativeSpriteShaderHd extends AbstractSpriteShader {
                 this.addColour.unpack(0);
                 break;
             case 3:
-                this.mulColour.unpack(0xffffff | value & -16777216);
+                this.mulColour.unpack(0xffffff | value & ~0xffffff);
                 this.addColour.unpack(value & 0xffffff);
                 break;
             case 4:

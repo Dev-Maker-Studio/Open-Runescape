@@ -592,9 +592,9 @@ public class GroundDX extends Ground {
                                 }
 
                                 if (this.activeToolkit.endiannessType == 0) {
-                                    stream7.method2921(-16777216 | i_87);
+                                    stream7.method2921(~0xffffff | i_87);
                                 } else {
-                                    stream7.method2922(-16777216 | i_87);
+                                    stream7.method2922(~0xffffff | i_87);
                                 }
 
                                 i_86 = this.anInt8525++;

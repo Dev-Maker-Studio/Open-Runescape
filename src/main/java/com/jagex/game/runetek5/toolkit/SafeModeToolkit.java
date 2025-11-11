@@ -2236,7 +2236,7 @@ public class SafeModeToolkit extends AbstractToolkit {
                     i_12 += i_10;
 
                     for (int i_14 = -i_13; i_14 < 0; i_14++) {
-                        this.colourBuffer[i_12++] = -16777216;
+                        this.colourBuffer[i_12++] = ~0xffffff;
                     }
 
                     i_10 += this.viewportWidth;
@@ -2323,7 +2323,7 @@ public class SafeModeToolkit extends AbstractToolkit {
                     int currentPos = h * spriteWidth;
                     for (int w = 0; w < spriteWidth; w++) {
                         int i_13 = spritePalette[spritePixels[w + currentPos] & 0xff];
-                        spriteTransparentPixels[currentPos + w] = i_13 != 0 ? -16777216 | i_13 : 0;
+                        spriteTransparentPixels[currentPos + w] = i_13 != 0 ? ~0xffffff | i_13 : 0;
                     }
                 }
                 safeModeSprite = new OpaqueSpriteSM(this, spriteTransparentPixels, spriteWidth, spriteHeight);

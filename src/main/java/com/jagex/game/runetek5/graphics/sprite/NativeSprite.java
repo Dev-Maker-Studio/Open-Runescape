@@ -70,7 +70,7 @@ public abstract class NativeSprite implements Sprite {
             StaticMethods.aNativeSprite612.draw(width + x - StaticMethods.aNativeSprite612.getWidth(), y);
         }
 
-        fontrenderer.renderPlain(string_8, x + 3, (20 - fontmetrics.topPadding) / 2 + y + fontmetrics.topPadding, MiniMenu.anInt4722 | -16777216, -1);
+        fontrenderer.renderPlain(string_8, x + 3, (20 - fontmetrics.topPadding) / 2 + y + fontmetrics.topPadding, MiniMenu.anInt4722 | ~0xffffff, -1);
         toolkit.drawFilledRectangle(x, height + y, width, i_4 - height, i_10 << 24 | TextureOpIrregularBricks.anInt9792, 1);
     }
 

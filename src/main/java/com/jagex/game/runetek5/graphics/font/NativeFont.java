@@ -121,7 +121,7 @@ public class NativeFont extends AbstractFontRenderer {
                         for (i_20 = 0; i_20 < i_14; i_20++) {
                             byte b_21;
                             if ((b_21 = bytes_26[i_18++]) != 0) {
-                                ints_29[i_17++] = -16777216 | ints_24[b_21 & 0xff];
+                                ints_29[i_17++] = ~0xffffff | ints_24[b_21 & 0xff];
                             } else {
                                 ++i_17;
                             }

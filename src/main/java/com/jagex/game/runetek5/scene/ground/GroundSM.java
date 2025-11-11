@@ -349,7 +349,7 @@ public class GroundSM extends Ground {
                             }
                         }
 
-                        int baseColor = -16777216;
+                        int baseColor = ~0xffffff;
                         if (materialIds[vertice] != -1 && flagMatch(this.toolkit.materialProvider.getMaterial(materialIds[vertice]).effectId)) {
                             baseColor = -1694498816;
                         }
@@ -371,7 +371,7 @@ public class GroundSM extends Ground {
                 for (int face = 0; face < blendedTexturedTile.faceCount; face++) {
                 	int vertice = face * 3;
                     if (materialColors != null && materialColors[vertice] != 0) {
-                        blendedTexturedTile.materialColors[face] = -16777216 | materialColors[vertice] >> 8;
+                        blendedTexturedTile.materialColors[face] = ~0xffffff | materialColors[vertice] >> 8;
                     }
                 }
 
@@ -1038,7 +1038,7 @@ public class GroundSM extends Ground {
                     if (f_60 < 3.0F) {
                         if (f_60 > 0.0F) {
                             if (class17712.materialId >= 0) {
-                                i_39 = -16777216;
+                                i_39 = ~0xffffff;
                                 if (bool59) {
                                     i_39 = -1694498816;
                                 }
@@ -1053,7 +1053,7 @@ public class GroundSM extends Ground {
                                 rasterizer.blendingAlpha = 0;
                             }
                         } else if (class17712.materialId >= 0) {
-                            i_39 = -16777216;
+                            i_39 = ~0xffffff;
                             if (bool59) {
                                 i_39 = -1694498816;
                             }
@@ -1082,7 +1082,7 @@ public class GroundSM extends Ground {
 
                         if (f_60 > 0.0F) {
                             if (class17712.materialId >= 0) {
-                                i_39 = -16777216;
+                                i_39 = ~0xffffff;
                                 if (bool59) {
                                     i_39 = -1694498816;
                                 }
@@ -1097,7 +1097,7 @@ public class GroundSM extends Ground {
                                 rasterizer.blendingAlpha = 0;
                             }
                         } else if (class17712.materialId >= 0) {
-                            i_39 = -16777216;
+                            i_39 = ~0xffffff;
                             if (bool59) {
                                 i_39 = -1694498816;
                             }
@@ -1193,7 +1193,7 @@ public class GroundSM extends Ground {
                                 int i_58;
                                 if (f_24 > 0.0F) {
                                     if (materialId != -1) {
-                                        i_58 = -16777216;
+                                        i_58 = ~0xffffff;
                                         if (flagMatch(this.toolkit.materialProvider.getMaterial(materialId).effectId)) {
                                             i_58 = -1694498816;
                                         }
@@ -1204,7 +1204,7 @@ public class GroundSM extends Ground {
                                         rasterizer.blendingAlpha = 0;
                                     }
                                 } else if (materialId != -1) {
-                                    i_58 = -16777216;
+                                    i_58 = ~0xffffff;
                                     if (flagMatch(this.toolkit.materialProvider.getMaterial(materialId).effectId)) {
                                         i_58 = -1694498816;
                                     }
@@ -1312,8 +1312,8 @@ public class GroundSM extends Ground {
                                 rasterizer.drawTriangle(true, true, false, offsetY, offsetY, (offsetY - baseOffset), offsetX, (offsetX + baseOffset), offsetX, 100.0F, 100.0F, 100.0F, plainTileBlended.colorSouthWest, plainTileBlended.colorSouthEast, plainTileBlended.colorNorthWest);
                             } else {
                             	int materialColor = plainTileBlended.materialColor;
-                                rasterizer.drawTriangle(true, true, false, (offsetY - baseOffset), (offsetY - baseOffset), offsetY, (offsetX + baseOffset), offsetX, (offsetX + baseOffset), 100.0F, 100.0F, 100.0F, ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorNorthEast & -16777216), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorNorthWest & -16777216), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorSouthEast & -16777216));
-                                rasterizer.drawTriangle(true, true, false, offsetY, offsetY, (offsetY - baseOffset), offsetX, (offsetX + baseOffset), offsetX, 100.0F, 100.0F, 100.0F, ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorSouthWest & -16777216), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorSouthEast & -16777216), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorNorthWest & -16777216));
+                                rasterizer.drawTriangle(true, true, false, (offsetY - baseOffset), (offsetY - baseOffset), offsetY, (offsetX + baseOffset), offsetX, (offsetX + baseOffset), 100.0F, 100.0F, 100.0F, ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorNorthEast & ~0xffffff), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorNorthWest & ~0xffffff), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorSouthEast & ~0xffffff));
+                                rasterizer.drawTriangle(true, true, false, offsetY, offsetY, (offsetY - baseOffset), offsetX, (offsetX + baseOffset), offsetX, 100.0F, 100.0F, 100.0F, ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorSouthWest & ~0xffffff), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorSouthEast & ~0xffffff), ColorUtil.blendMaterialColor(materialColor, plainTileBlended.colorNorthWest & ~0xffffff));
                             }
                         } else if (this.shapedBlendedTiles[x][y] != null) {
                             ShapedTileBlended shapedBlendedTile = this.shapedBlendedTiles[x][y];
@@ -1340,7 +1340,7 @@ public class GroundSM extends Ground {
                                     }
                                 } else {
                                 	int materialColor = shapedBlendedTile.materialColors[face];
-                                    rasterizer.drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, 100.0F, 100.0F, 100.0F, ColorUtil.blendMaterialColor(materialColor, -16777216 - (shapedBlendedTile.colors[a] & -16777216)), ColorUtil.blendMaterialColor(materialColor, -16777216 - (shapedBlendedTile.colors[b] & -16777216)), ColorUtil.blendMaterialColor(materialColor, -16777216 - (shapedBlendedTile.colors[c] & -16777216)));
+                                    rasterizer.drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, 100.0F, 100.0F, 100.0F, ColorUtil.blendMaterialColor(materialColor, ~0xffffff - (shapedBlendedTile.colors[a] & ~0xffffff)), ColorUtil.blendMaterialColor(materialColor, ~0xffffff - (shapedBlendedTile.colors[b] & ~0xffffff)), ColorUtil.blendMaterialColor(materialColor, ~0xffffff - (shapedBlendedTile.colors[c] & ~0xffffff)));
                                 }
                             }
                         }
@@ -1722,7 +1722,7 @@ public class GroundSM extends Ground {
                 if ((xA - XC) * (YB - YC) - (yA - YC) * (XB - XC) > 0.0F) {
                     rasterizer.clipEdges = xA < 0.0F || XC < 0.0F || XB < 0.0F || xA > rasterizer.clipWidth || XC > rasterizer.clipWidth || XB > rasterizer.clipWidth;
                     if (plainTile.materialId >= 0) {
-                        rasterizer.drawMaterializedTriangle(true, true, false, yA, YC, YB, xA, XC, XB, zA, ZC, ZB, farZC, farZD, farZB, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, -16777216 | ColorUtil.hsvToRgbTable[plainTile.colorNorthEast & 0xffff] & 0xffffff, -16777216 | ColorUtil.hsvToRgbTable[plainTile.colorNorthWest & 0xffff] & 0xffffff, -16777216 | ColorUtil.hsvToRgbTable[plainTile.colorSouthEast & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
+                        rasterizer.drawMaterializedTriangle(true, true, false, yA, YC, YB, xA, XC, XB, zA, ZC, ZB, farZC, farZD, farZB, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorNorthEast & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorNorthWest & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorSouthEast & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
                     } else {
                         rasterizer.drawShadedTriangle(true, true, false, yA, YC, YB, xA, XC, XB, zA, ZC, ZB, (plainTile.colorNorthEast & 0xffff), (plainTile.colorNorthWest & 0xffff), (plainTile.colorSouthEast & 0xffff));
                     }
@@ -1731,7 +1731,7 @@ public class GroundSM extends Ground {
                 if ((XA - XB) * (YC - YB) - (YA - YB) * (XC - XB) > 0.0F) {
                     rasterizer.clipEdges = XA < 0.0F || XB < 0.0F || XC < 0.0F || XA > rasterizer.clipWidth || XB > rasterizer.clipWidth || XC > rasterizer.clipWidth;
                     if (plainTile.materialId >= 0) {
-                        rasterizer.drawMaterializedTriangle(true, true, false, YA, YB, YC, XA, XB, XC, ZA, ZB, ZC, farZA, farZB, farZD, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, -16777216 | ColorUtil.hsvToRgbTable[plainTile.colorSouthWest & 0xffff] & 0xffffff, -16777216 | ColorUtil.hsvToRgbTable[plainTile.colorSouthEast & 0xffff] & 0xffffff, -16777216 | ColorUtil.hsvToRgbTable[plainTile.colorNorthWest & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
+                        rasterizer.drawMaterializedTriangle(true, true, false, YA, YB, YC, XA, XB, XC, ZA, ZB, ZC, farZA, farZB, farZD, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorSouthWest & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorSouthEast & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorNorthWest & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
                     } else {
                         rasterizer.drawShadedTriangle(true, true, false, YA, YB, YC, XA, XB, XC, ZA, ZB, ZC, (plainTile.colorSouthWest & 0xffff), (plainTile.colorSouthEast & 0xffff), (plainTile.colorNorthWest & 0xffff));
                     }
@@ -1783,7 +1783,7 @@ public class GroundSM extends Ground {
                             rasterizer.clipEdges = xA < 0.0F || xB < 0.0F || xC < 0.0F || xA > rasterizer.clipWidth || xB > rasterizer.clipWidth || xC > rasterizer.clipWidth;
                             short materialA = shapedTile.primaryMaterialIds[triangleIndex];
                             if (materialA != -1) {
-                                rasterizer.drawMaterializedTriangle(true, true, false, yA, yB, yC, xA, xB, xC, perspectiveZNear[a], perspectiveZNear[b], perspectiveZNear[c], perspectiveZFar[a], perspectiveZFar[b], perspectiveZFar[c], (float) shapedTile.offsetX[a] / super.tileUnits, (float) shapedTile.offsetX[b] / super.tileUnits, (float) shapedTile.offsetX[c] / super.tileUnits, (float) shapedTile.offsetY[a] / super.tileUnits, (float) shapedTile.offsetY[b] / super.tileUnits, (float) shapedTile.offsetY[c] / super.tileUnits, -16777216 | ColorUtil.hsvToRgbTable[shapedTile.light[a] & 0xffff] & 0xffffff, -16777216 | ColorUtil.hsvToRgbTable[shapedTile.light[b] & 0xffff] & 0xffffff, -16777216 | ColorUtil.hsvToRgbTable[shapedTile.light[c] & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, materialA);
+                                rasterizer.drawMaterializedTriangle(true, true, false, yA, yB, yC, xA, xB, xC, perspectiveZNear[a], perspectiveZNear[b], perspectiveZNear[c], perspectiveZFar[a], perspectiveZFar[b], perspectiveZFar[c], (float) shapedTile.offsetX[a] / super.tileUnits, (float) shapedTile.offsetX[b] / super.tileUnits, (float) shapedTile.offsetX[c] / super.tileUnits, (float) shapedTile.offsetY[a] / super.tileUnits, (float) shapedTile.offsetY[b] / super.tileUnits, (float) shapedTile.offsetY[c] / super.tileUnits, ~0xffffff | ColorUtil.hsvToRgbTable[shapedTile.light[a] & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[shapedTile.light[b] & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[shapedTile.light[c] & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, materialA);
                             } else {
                                 int primaryColor = shapedTile.primaryColors[triangleIndex];
                                 if (primaryColor != -1) {

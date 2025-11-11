@@ -124,8 +124,8 @@ public abstract class AbstractToolkit implements AutoCloseable {
 
     public static void drawOutlinedFilledOpaqueRectangle(AbstractToolkit toolkit, int x, int y, int width, int height, int colorArgb) {
         toolkit.clearPixels(x, y, width, height, colorArgb);
-        toolkit.clearPixels(x + 1, y + 1, width - 2, 16, -16777216);
-        toolkit.drawOpaqueRectangle(x + 1, y + 18, width - 2, height - 19, -16777216);
+        toolkit.clearPixels(x + 1, y + 1, width - 2, 16, ~0xffffff);
+        toolkit.drawOpaqueRectangle(x + 1, y + 18, width - 2, height - 19, ~0xffffff);
     }
 
     public abstract RenderInfo getRenderInfo();
@@ -523,8 +523,8 @@ public abstract class AbstractToolkit implements AutoCloseable {
 	            i_10 = (w - i_9) / 2;
 	            if (resetPixels) {
 	                Renderers.activeToolkit.resetClipping();
-	                Renderers.activeToolkit.clearPixels(x, y, i_10, h, -16777216);
-	                Renderers.activeToolkit.clearPixels(x + w - i_10, y, i_10, h, -16777216);
+	                Renderers.activeToolkit.clearPixels(x, y, i_10, h, ~0xffffff);
+	                Renderers.activeToolkit.clearPixels(x + w - i_10, y, i_10, h, ~0xffffff);
 	            }
 	            x += i_10;
 	            w -= i_10 * 2;
@@ -538,8 +538,8 @@ public abstract class AbstractToolkit implements AutoCloseable {
 	            i_10 = (h - i_9) / 2;
 	            if (resetPixels) {
 	                Renderers.activeToolkit.resetClipping();
-	                Renderers.activeToolkit.clearPixels(x, y, w, i_10, -16777216);
-	                Renderers.activeToolkit.clearPixels(x, h + y - i_10, w, i_10, -16777216);
+	                Renderers.activeToolkit.clearPixels(x, y, w, i_10, ~0xffffff);
+	                Renderers.activeToolkit.clearPixels(x, h + y - i_10, w, i_10, ~0xffffff);
 	            }
 	            y += i_10;
 	            h -= i_10 * 2;

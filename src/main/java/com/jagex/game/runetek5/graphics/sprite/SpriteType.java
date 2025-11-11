@@ -390,7 +390,7 @@ public class SpriteType {
                 for (int x = 0; x < this.width; x++) {
                     int color = this.pallete[this.pixels[palettePixelIndex++] & 0xff];
                     if (color != 0) {
-                        pixelBuffer[pixelCount++] = -16777216 | color;
+                        pixelBuffer[pixelCount++] = ~0xffffff | color;
                     } else {
                         pixelBuffer[pixelCount++] = 0;
                     }

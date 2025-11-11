@@ -40,7 +40,7 @@ public class Class455_Sub1 extends ComponentSurface {
             	int pixelPtr = ints_3[index] + index * width;
 
                 for (int i_8 = 0; i_8 < ints_4[index]; i_8++) {
-                    pixels[pixelPtr++] = -16777216;
+                    pixels[pixelPtr++] = ~0xffffff;
                 }
             }
 

@@ -2374,7 +2374,7 @@ public class ModelGL extends Model {
                                 for (int i_10 = 0; i_10 < this.billboardCount; i_10++) {
                                     class16254 = this.billboardEffects[i_10];
                                     class14556 = this.billboardSurfaces[i_10];
-                                    class14556.diffuseColor = class14556.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[class16254.appliesOnFace] & 0xffff] & 0xffffff;
+                                    class14556.diffuseColor = class14556.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class16254.appliesOnFace] & 0xffff] & 0xffffff;
                                 }
                             }
                         }
@@ -2559,7 +2559,7 @@ public class ModelGL extends Model {
                 for (int b = 0; b < this.billboardCount; b++) {
                 	BillboardEffectGL effect = this.billboardEffects[b];
                     BillboardSurfaceGL surface = this.billboardSurfaces[b];
-                    surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                    surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                 }
             }
         } else if (transformationType == 8) {
@@ -2860,7 +2860,7 @@ public class ModelGL extends Model {
                     for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                     	BillboardEffectGL effect = this.billboardEffects[billboard];
                         BillboardSurfaceGL surface = this.billboardSurfaces[billboard];
-                        surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                        surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                     }
                 }
             }
@@ -3867,7 +3867,7 @@ public class ModelGL extends Model {
             for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                 BillboardEffectGL effect = this.billboardEffects[billboard];
                 BillboardSurfaceGL suraface = this.billboardSurfaces[billboard];
-                suraface.diffuseColor = suraface.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                suraface.diffuseColor = suraface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 
@@ -3888,7 +3888,7 @@ public class ModelGL extends Model {
             for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                 BillboardEffectGL effect = this.billboardEffects[billboard];
                 BillboardSurfaceGL surface = this.billboardSurfaces[billboard];
-                surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 
@@ -3946,7 +3946,7 @@ public class ModelGL extends Model {
                 for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                     BillboardEffectGL effect = this.billboardEffects[billboard];
                     BillboardSurfaceGL surface = this.billboardSurfaces[billboard];
-                    surface.diffuseColor = surface.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                    surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                 }
             }
 

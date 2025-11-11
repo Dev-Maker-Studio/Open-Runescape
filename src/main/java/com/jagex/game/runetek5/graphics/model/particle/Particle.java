@@ -219,9 +219,9 @@ public class Particle extends PointEntity {
                         blue = 0xffff;
                     }
 
-                    this.colorArgb &= -16777216;
+                    this.colorArgb &= ~0xffffff;
                     this.colorArgb |= (green & 0xff00) + ((blue & 0xff00) >> 8) + ((red & 0xff00) << 8);
-                    this.intermediateColor &= -16777216;
+                    this.intermediateColor &= ~0xffffff;
                     this.intermediateColor |= (blue & 0xff) + ((red & 0xff) << 16) + ((green & 0xff) << 8);
                 }
 

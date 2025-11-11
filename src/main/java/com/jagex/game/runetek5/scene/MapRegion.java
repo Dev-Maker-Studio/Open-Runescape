@@ -67,7 +67,7 @@ public class MapRegion {
 	/**
 	 * The color behind the scene / the default background pixel color
 	 */
-	public static final int BACKGROUND_COLOR = -16777216;
+	public static final int BACKGROUND_COLOR = ~0xffffff;
 	
     public static boolean requiresClippingReset;
     public static boolean requiresDisplayResize;

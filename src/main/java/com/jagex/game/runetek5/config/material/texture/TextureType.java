@@ -127,7 +127,7 @@ public class TextureType extends CacheableNode {
                 blue = TextureTypeList.BRIGHTNESS_TABLE[blue];
                 int pixel = blue + (green << 8) + (red << 16);
                 if (pixel != 0) {
-                    pixel |= -16777216;
+                    pixel |= ~0xffffff;
                 }
                 texturePixels[writePosition++] = pixel;
                 if (writeReversed) {

@@ -279,14 +279,14 @@ public class Console {
 	            for (int i_9 = 0; i_9 < arr_7.length; i_9++) {
 	                int i_10 = i_9 * i_8 + 8;
 	                toolkit.setClipping(i_10, 0, i_8 + i_10 - 8, 350);
-	                FontManager.debugOverlayFont.renderPlain(Console.formatCommand(arr_7[i_9]), i_10, 350 - anInt2230 - 2 - FontManager.messageboxFont.bottomPadding - (i_6 - anInt2223) * anInt2222, -1, -16777216);
+	                FontManager.debugOverlayFont.renderPlain(Console.formatCommand(arr_7[i_9]), i_10, 350 - anInt2230 - 2 - FontManager.messageboxFont.bottomPadding - (i_6 - anInt2223) * anInt2222, -1, ~0xffffff);
 	            }
 	        }
 	    }
-	    Renderers.FONT_RENDERER.renderLeftAligned("727 1", GameShell.screenCanvasWidth - 25, 330, -1, -16777216);
+	    Renderers.FONT_RENDERER.renderLeftAligned("727 1", GameShell.screenCanvasWidth - 25, 330, -1, ~0xffffff);
 	    toolkit.setClipping(0, 0, GameShell.screenCanvasWidth, 350);
 	    toolkit.drawOpaqueHorizontalLine(0, 350 - anInt2230, GameShell.screenCanvasWidth, -1);
-	    MiniMenu.minimenuHeader.renderPlain("--> " + Console.formatCommand(Console.commandString), 10, 350 - FontMetrics.aClass4143438.bottomPadding - 1, -1, -16777216);
+	    MiniMenu.minimenuHeader.renderPlain("--> " + Console.formatCommand(Console.commandString), 10, 350 - FontMetrics.aClass4143438.bottomPadding - 1, -1, ~0xffffff);
 	    if (GameShell.appletHasFocus) {
 	        int lineColor = -1;
 	        if (client.cycles % 30 > 15) {

@@ -626,7 +626,7 @@ public class EntityUpdating {
                                     if (nativesprite108 != null) {
                                         nativesprite108.draw(i_70 + i_79 - i_34, i_80);
                                     }
-                                    fontrenderer109.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color | -16777216, 0);
+                                    fontrenderer109.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color | ~0xffffff, 0);
                                     if (soakHitsplat != null) {
                                         if (nativesprite35 != null) {
                                             nativesprite35.draw(i_79 + i_71 - i_43, i_80);
@@ -642,7 +642,7 @@ public class EntityUpdating {
                                         if (nativesprite38 != null) {
                                             nativesprite38.draw(i_74 + i_79 - i_46, i_80);
                                         }
-                                        soakFont.renderPlain(soakText, i_79 + i_75, i_86, soakHitsplat.color | -16777216, 0);
+                                        soakFont.renderPlain(soakText, i_79 + i_75, i_86, soakHitsplat.color | ~0xffffff, 0);
                                     }
                                 }
                             }
@@ -729,11 +729,11 @@ public class EntityUpdating {
                         color = 16777215 - (i_19 - 100) * 327680;
                     }
                 }
-                int drawColor = color | -16777216;
+                int drawColor = color | ~0xffffff;
                 int drawType = client.HINT_DETAILS[hintIndex].getDrawType();
                 if (drawType == 0) {
                 	// All regular text: no effects / plain color effects (red:) / cyan / flash1 / flash2 / flash3 / glow1 / glow2 / glow3
-                    MiniMenu.minimenuHeader.renderCentered(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, -16777216);
+                    MiniMenu.minimenuHeader.renderCentered(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, ~0xffffff);
                 }
                 if (drawType == 1) {
                 	// Wave effect (wave:texthere)
@@ -753,7 +753,7 @@ public class EntityUpdating {
                     int i_21 = 150 - client.HINT_DETAILS[hintIndex].getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex].getTotalTicksVisible();
                     int i_116 = i_21 * (FontMetrics.aClass4143438.getWidthNoSprites(drawnText) + 100) / 150;
                     Renderers.activeToolkit.expandClipping(clipLeft + hintX - 50, clipTop, clipLeft + hintX + 50, height + clipTop);
-                    MiniMenu.minimenuHeader.renderPlain(drawnText, clipLeft + hintX + 50 - i_116, hintY + clipTop, drawColor, -16777216);
+                    MiniMenu.minimenuHeader.renderPlain(drawnText, clipLeft + hintX + 50 - i_116, hintY + clipTop, drawColor, ~0xffffff);
                     Renderers.activeToolkit.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop);
                 }
                 if (drawType == 5) {
@@ -767,11 +767,11 @@ public class EntityUpdating {
                     }
                     int paddingY = FontMetrics.aClass4143438.topPadding + FontMetrics.aClass4143438.bottomPadding;
                     Renderers.activeToolkit.expandClipping(clipLeft, hintY + clipTop - paddingY - 1, clipLeft + width, hintY + clipTop + 5);
-                    MiniMenu.minimenuHeader.renderCentered(drawnText, clipLeft + hintX, i_116 + hintY + clipTop, drawColor, -16777216);
+                    MiniMenu.minimenuHeader.renderCentered(drawnText, clipLeft + hintX, i_116 + hintY + clipTop, drawColor, ~0xffffff);
                     Renderers.activeToolkit.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop);
                 }
             } else {
-                MiniMenu.minimenuHeader.renderCentered(drawnText, clipLeft + hintX, hintY + clipTop, -256, -16777216);
+                MiniMenu.minimenuHeader.renderCentered(drawnText, clipLeft + hintX, hintY + clipTop, -256, ~0xffffff);
             }
         }
     }

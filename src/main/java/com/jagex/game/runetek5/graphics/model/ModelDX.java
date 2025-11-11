@@ -1666,7 +1666,7 @@ public class ModelDX extends Model {
             for (i_3 = 0; i_3 < this.numBillboards; i_3++) {
                 BillboardEffectDX class564 = this.billboardEffects[i_3];
                 BillboardSurfaceDX class655 = this.billboardBackgrounds[i_3];
-                class655.diffuseColor = class655.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[class564.appliesOnFace] & 0xffff] & 0xffffff;
+                class655.diffuseColor = class655.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class564.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 
@@ -1724,7 +1724,7 @@ public class ModelDX extends Model {
                 for (int index = 0; index < this.numBillboards; index++) {
                     BillboardEffectDX effect = this.billboardEffects[index];
                     BillboardSurfaceDX background = this.billboardBackgrounds[index];
-                    background.diffuseColor = background.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                    background.diffuseColor = background.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                 }
             }
 
@@ -1918,7 +1918,7 @@ public class ModelDX extends Model {
                         for (i_5 = 0; i_5 < this.numBillboards; i_5++) {
                             class5610 = this.billboardEffects[i_5];
                             class6511 = this.billboardBackgrounds[i_5];
-                            class6511.diffuseColor = class6511.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
+                            class6511.diffuseColor = class6511.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
                         }
                     }
 
@@ -2246,7 +2246,7 @@ public class ModelDX extends Model {
                                     for (i_10 = 0; i_10 < this.numBillboards; i_10++) {
                                         effect = this.billboardEffects[i_10];
                                         background = this.billboardBackgrounds[i_10];
-                                        background.diffuseColor = background.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                                        background.diffuseColor = background.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                                     }
                                 }
 
@@ -4100,7 +4100,7 @@ public class ModelDX extends Model {
                                     for (i_11 = 0; i_11 < this.numBillboards; i_11++) {
                                         class5657 = this.billboardEffects[i_11];
                                         class6555 = this.billboardBackgrounds[i_11];
-                                        class6555.diffuseColor = class6555.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[class5657.appliesOnFace] & 0xffff] & 0xffffff;
+                                        class6555.diffuseColor = class6555.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class5657.appliesOnFace] & 0xffff] & 0xffffff;
                                     }
                                 }
 
@@ -4209,7 +4209,7 @@ public class ModelDX extends Model {
             for (int index = 0; index < this.numBillboards; index++) {
                 BillboardEffectDX class5610 = this.billboardEffects[index];
                 BillboardSurfaceDX class6511 = this.billboardBackgrounds[index];
-                class6511.diffuseColor = class6511.diffuseColor & -16777216 | ColorUtil.hslToRgb[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
+                class6511.diffuseColor = class6511.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 

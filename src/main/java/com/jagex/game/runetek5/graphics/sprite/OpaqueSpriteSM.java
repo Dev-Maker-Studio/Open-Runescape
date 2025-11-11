@@ -144,7 +144,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                             for (i_17 = -i_10; i_17 < 0; i_17++) {
                                 for (i_18 = -i_11; i_18 < 0; i_18++) {
                                     i_19 = this.pixels[i_9++];
-                                    i_20 = i_14 * (i_19 & 0xff0000) & -16777216;
+                                    i_20 = i_14 * (i_19 & 0xff0000) & ~0xffffff;
                                     i_21 = i_15 * (i_19 & 0xff00) & 0xff0000;
                                     i_22 = (i_19 & 0xff) * i_16 & 0xff00;
                                     ints_6[i_8++] = (i_20 | i_21 | i_22) >>> 8;
@@ -273,14 +273,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                             i_21 = this.pixels[i_9++];
                                             if (i_21 != 0) {
                                                 if (i_17 != 255) {
-                                                    i_22 = i_14 * (i_21 & 0xff0000) & -16777216;
+                                                    i_22 = i_14 * (i_21 & 0xff0000) & ~0xffffff;
                                                     i_23 = i_15 * (i_21 & 0xff00) & 0xff0000;
                                                     i_24 = (i_21 & 0xff) * i_16 & 0xff00;
                                                     i_21 = (i_22 | i_23 | i_24) >>> 8;
                                                     i_25 = ints_6[i_8];
                                                     ints_6[i_8++] = ((i_21 & 0xff00ff) * i_17 + (i_25 & 0xff00ff) * i_18 & -16711936) + (i_17 * (i_21 & 0xff00) + i_18 * (i_25 & 0xff00) & 0xff0000) >> 8;
                                                 } else {
-                                                    i_22 = i_14 * (i_21 & 0xff0000) & -16777216;
+                                                    i_22 = i_14 * (i_21 & 0xff0000) & ~0xffffff;
                                                     i_23 = i_15 * (i_21 & 0xff00) & 0xff0000;
                                                     i_24 = (i_21 & 0xff) * i_16 & 0xff00;
                                                     ints_6[i_8++] = (i_22 | i_23 | i_24) >>> 8;
@@ -376,7 +376,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     for (i_18 = -i_11; i_18 < 0; i_18++) {
                                         i_19 = this.pixels[i_9++];
                                         if (i_19 != 0) {
-                                            i_20 = i_14 * (i_19 & 0xff0000) & -16777216;
+                                            i_20 = i_14 * (i_19 & 0xff0000) & ~0xffffff;
                                             i_21 = i_15 * (i_19 & 0xff00) & 0xff0000;
                                             i_22 = (i_19 & 0xff) * i_16 & 0xff00;
                                             i_19 = (i_20 | i_21 | i_22) >>> 8;
@@ -668,7 +668,7 @@ public class OpaqueSpriteSM extends SpriteSM {
 
                                 for (i_25 = -i_33; i_25 < 0; i_25++) {
                                     i_26 = this.pixels[i_24 + (i_10 >> 16)];
-                                    i_27 = i_19 * (i_26 & 0xff0000) & -16777216;
+                                    i_27 = i_19 * (i_26 & 0xff0000) & ~0xffffff;
                                     i_28 = i_20 * (i_26 & 0xff00) & 0xff0000;
                                     i_29 = (i_26 & 0xff) * i_21 & 0xff00;
                                     ints_9[i_17++] = (i_27 | i_28 | i_29) >>> 8;
@@ -791,14 +791,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                             i_28 = this.pixels[i_26 + (i_10 >> 16)];
                                             if (i_28 != 0) {
                                                 if (i_23 != 255) {
-                                                    i_29 = i_20 * (i_28 & 0xff0000) & -16777216;
+                                                    i_29 = i_20 * (i_28 & 0xff0000) & ~0xffffff;
                                                     i_30 = i_21 * (i_28 & 0xff00) & 0xff0000;
                                                     i_31 = (i_28 & 0xff) * i_22 & 0xff00;
                                                     i_28 = (i_29 | i_30 | i_31) >>> 8;
                                                     i_32 = ints_9[i_17];
                                                     ints_9[i_17++] = ((i_28 & 0xff00ff) * i_23 + (i_32 & 0xff00ff) * i_24 & -16711936) + (i_23 * (i_28 & 0xff00) + i_24 * (i_32 & 0xff00) & 0xff0000) >> 8;
                                                 } else {
-                                                    i_29 = i_20 * (i_28 & 0xff0000) & -16777216;
+                                                    i_29 = i_20 * (i_28 & 0xff0000) & ~0xffffff;
                                                     i_30 = i_21 * (i_28 & 0xff00) & 0xff0000;
                                                     i_31 = (i_28 & 0xff) * i_22 & 0xff00;
                                                     ints_9[i_17++] = (i_29 | i_30 | i_31) >>> 8;
@@ -918,7 +918,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     for (i_25 = -i_33; i_25 < 0; i_25++) {
                                         i_26 = this.pixels[i_24 + (i_10 >> 16)];
                                         if (i_26 != 0) {
-                                            i_27 = i_20 * (i_26 & 0xff0000) & -16777216;
+                                            i_27 = i_20 * (i_26 & 0xff0000) & ~0xffffff;
                                             i_28 = i_21 * (i_26 & 0xff00) & 0xff0000;
                                             i_29 = (i_26 & 0xff) * i_22 & 0xff00;
                                             i_26 = (i_27 | i_28 | i_29) >>> 8;
@@ -1121,7 +1121,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                             if (!bool2 || f_6 < floats_38[i_20]) {
                                 if (bool1) {
                                     i_31 = this.pixels[i_29 + (i_14 >> 16)];
-                                    i_32 = i_24 * (i_31 & 0xff0000) & -16777216;
+                                    i_32 = i_24 * (i_31 & 0xff0000) & ~0xffffff;
                                     i_33 = i_25 * (i_31 & 0xff00) & 0xff0000;
                                     i_34 = (i_31 & 0xff) * i_26 & 0xff00;
                                     ints_23[i_20] = (i_32 | i_33 | i_34) >>> 8;
@@ -1288,7 +1288,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                         if (i_33 != 0) {
                                             if (i_28 != 255) {
                                                 if (bool1) {
-                                                    i_34 = i_25 * (i_33 & 0xff0000) & -16777216;
+                                                    i_34 = i_25 * (i_33 & 0xff0000) & ~0xffffff;
                                                     i_35 = i_26 * (i_33 & 0xff00) & 0xff0000;
                                                     i_36 = (i_33 & 0xff) * i_27 & 0xff00;
                                                     i_33 = (i_34 | i_35 | i_36) >>> 8;
@@ -1298,7 +1298,7 @@ public class OpaqueSpriteSM extends SpriteSM {
 
                                             } else {
                                                 if (bool1) {
-                                                    i_34 = i_25 * (i_33 & 0xff0000) & -16777216;
+                                                    i_34 = i_25 * (i_33 & 0xff0000) & ~0xffffff;
                                                     i_35 = i_26 * (i_33 & 0xff00) & 0xff0000;
                                                     i_36 = (i_33 & 0xff) * i_27 & 0xff00;
                                                     ints_23[i_20] = (i_34 | i_35 | i_36) >>> 8;
@@ -1449,7 +1449,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     i_31 = this.pixels[i_29 + (i_14 >> 16)];
                                     if (i_31 != 0) {
                                         if (bool1) {
-                                            i_32 = i_25 * (i_31 & 0xff0000) & -16777216;
+                                            i_32 = i_25 * (i_31 & 0xff0000) & ~0xffffff;
                                             i_33 = i_26 * (i_31 & 0xff00) & 0xff0000;
                                             i_34 = (i_31 & 0xff) * i_27 & 0xff00;
                                             i_31 = (i_32 | i_33 | i_34) >>> 8;
@@ -1594,7 +1594,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                         ints_3[i_10] = this.pixels[i_9];
                                     } else if (i_1 == 0) {
                                         i_11 = this.pixels[i_9++];
-                                        i_12 = anInt8880 * (i_11 & 0xff0000) & -16777216;
+                                        i_12 = anInt8880 * (i_11 & 0xff0000) & ~0xffffff;
                                         i_13 = (i_11 & 0xff00) * anInt8852 & 0xff0000;
                                         i_14 = (i_11 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_10] = (i_12 | i_13 | i_14) >>> 8;
@@ -1630,14 +1630,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                                 i_14 = ints_3[i_10];
                                                 ints_3[i_10] = ((i_11 & 0xff00ff) * i_12 + (i_14 & 0xff00ff) * i_13 & -16711936) + (i_12 * (i_11 & 0xff00) + i_13 * (i_14 & 0xff00) & 0xff0000) >> 8;
                                             } else if (anInt8878 != 255) {
-                                                i_12 = anInt8880 * (i_11 & 0xff0000) & -16777216;
+                                                i_12 = anInt8880 * (i_11 & 0xff0000) & ~0xffffff;
                                                 i_13 = (i_11 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_14 = (i_11 & 0xff) * anInt8882 & 0xff00;
                                                 i_11 = (i_12 | i_13 | i_14) >>> 8;
                                                 i_15 = ints_3[i_10];
                                                 ints_3[i_10] = ((i_11 & 0xff00ff) * anInt8878 + (i_15 & 0xff00ff) * anInt8879 & -16711936) + ((i_11 & 0xff00) * anInt8878 + (i_15 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                             } else {
-                                                i_12 = anInt8880 * (i_11 & 0xff0000) & -16777216;
+                                                i_12 = anInt8880 * (i_11 & 0xff0000) & ~0xffffff;
                                                 i_13 = (i_11 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_14 = (i_11 & 0xff) * anInt8882 & 0xff00;
                                                 ints_3[i_10] = (i_12 | i_13 | i_14) >>> 8;
@@ -1686,7 +1686,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     } else if (i_1 == 0) {
                                         i_11 = this.pixels[i_9];
                                         if (i_11 != 0) {
-                                            i_12 = anInt8880 * (i_11 & 0xff0000) & -16777216;
+                                            i_12 = anInt8880 * (i_11 & 0xff0000) & ~0xffffff;
                                             i_13 = (i_11 & 0xff00) * anInt8852 & 0xff0000;
                                             i_14 = (i_11 & 0xff) * anInt8882 & 0xff00;
                                             i_11 = (i_12 | i_13 | i_14) >>> 8;
@@ -1753,7 +1753,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                         ints_3[i_11] = this.pixels[i_10];
                                     } else if (i_1 == 0) {
                                         i_12 = this.pixels[i_10++];
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -1789,14 +1789,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                                 i_15 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                             } else if (anInt8878 != 255) {
-                                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                 i_12 = (i_13 | i_14 | i_15) >>> 8;
                                                 i_16 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                             } else {
-                                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                 ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -1845,7 +1845,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     } else if (i_1 == 0) {
                                         i_12 = this.pixels[i_10];
                                         if (i_12 != 0) {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -1916,7 +1916,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                         ints_3[i_11] = this.pixels[i_10];
                                     } else if (i_1 == 0) {
                                         i_12 = this.pixels[i_10++];
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -1952,14 +1952,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                                 i_15 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                             } else if (anInt8878 != 255) {
-                                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                 i_12 = (i_13 | i_14 | i_15) >>> 8;
                                                 i_16 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                             } else {
-                                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                 ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2008,7 +2008,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     } else if (i_1 == 0) {
                                         i_12 = this.pixels[i_10];
                                         if (i_12 != 0) {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -2081,7 +2081,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                         ints_3[i_11] = this.pixels[i_10];
                                     } else if (i_1 == 0) {
                                         i_12 = this.pixels[i_10++];
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2117,14 +2117,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                                 i_15 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                             } else if (anInt8878 != 255) {
-                                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                 i_12 = (i_13 | i_14 | i_15) >>> 8;
                                                 i_16 = ints_3[i_11];
                                                 ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                             } else {
-                                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                                 ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2173,7 +2173,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     } else if (i_1 == 0) {
                                         i_12 = this.pixels[i_10];
                                         if (i_12 != 0) {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -2256,7 +2256,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     ints_3[i_11] = this.pixels[i_10];
                                 } else if (i_1 == 0) {
                                     i_12 = this.pixels[i_10++];
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2292,14 +2292,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                             i_15 = ints_3[i_11];
                                             ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                         } else if (anInt8878 != 255) {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             i_12 = (i_13 | i_14 | i_15) >>> 8;
                                             i_16 = ints_3[i_11];
                                             ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                         } else {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2348,7 +2348,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                 } else if (i_1 == 0) {
                                     i_12 = this.pixels[i_10];
                                     if (i_12 != 0) {
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -2432,7 +2432,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     ints_3[i_11] = this.pixels[i_10];
                                 } else if (i_1 == 0) {
                                     i_12 = this.pixels[i_10++];
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2468,14 +2468,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                             i_15 = ints_3[i_11];
                                             ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                         } else if (anInt8878 != 255) {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             i_12 = (i_13 | i_14 | i_15) >>> 8;
                                             i_16 = ints_3[i_11];
                                             ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                         } else {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2524,7 +2524,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                 } else if (i_1 == 0) {
                                     i_12 = this.pixels[i_10];
                                     if (i_12 != 0) {
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -2597,7 +2597,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                     ints_3[i_11] = this.pixels[i_10];
                                 } else if (i_1 == 0) {
                                     i_12 = this.pixels[i_10++];
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2633,14 +2633,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                             i_15 = ints_3[i_11];
                                             ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                         } else if (anInt8878 != 255) {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             i_12 = (i_13 | i_14 | i_15) >>> 8;
                                             i_16 = ints_3[i_11];
                                             ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                         } else {
-                                            i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                            i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                             i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                             i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                             ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2689,7 +2689,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                 } else if (i_1 == 0) {
                                     i_12 = this.pixels[i_10];
                                     if (i_12 != 0) {
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -2773,7 +2773,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                 ints_3[i_11] = this.pixels[i_10];
                             } else if (i_1 == 0) {
                                 i_12 = this.pixels[i_10++];
-                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                 ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2809,14 +2809,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                         i_15 = ints_3[i_11];
                                         ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                     } else if (anInt8878 != 255) {
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         i_12 = (i_13 | i_14 | i_15) >>> 8;
                                         i_16 = ints_3[i_11];
                                         ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                     } else {
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2865,7 +2865,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                             } else if (i_1 == 0) {
                                 i_12 = this.pixels[i_10];
                                 if (i_12 != 0) {
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     i_12 = (i_13 | i_14 | i_15) >>> 8;
@@ -2949,7 +2949,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                                 ints_3[i_11] = this.pixels[i_10];
                             } else if (i_1 == 0) {
                                 i_12 = this.pixels[i_10++];
-                                i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                 i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                 i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                 ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -2985,14 +2985,14 @@ public class OpaqueSpriteSM extends SpriteSM {
                                         i_15 = ints_3[i_11];
                                         ints_3[i_11] = ((i_12 & 0xff00ff) * i_13 + (i_15 & 0xff00ff) * i_14 & -16711936) + (i_13 * (i_12 & 0xff00) + i_14 * (i_15 & 0xff00) & 0xff0000) >> 8;
                                     } else if (anInt8878 != 255) {
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         i_12 = (i_13 | i_14 | i_15) >>> 8;
                                         i_16 = ints_3[i_11];
                                         ints_3[i_11] = ((i_12 & 0xff00ff) * anInt8878 + (i_16 & 0xff00ff) * anInt8879 & -16711936) + ((i_12 & 0xff00) * anInt8878 + (i_16 & 0xff00) * anInt8879 & 0xff0000) >> 8;
                                     } else {
-                                        i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                        i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                         i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                         i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                         ints_3[i_11] = (i_13 | i_14 | i_15) >>> 8;
@@ -3041,7 +3041,7 @@ public class OpaqueSpriteSM extends SpriteSM {
                             } else if (i_1 == 0) {
                                 i_12 = this.pixels[i_10];
                                 if (i_12 != 0) {
-                                    i_13 = anInt8880 * (i_12 & 0xff0000) & -16777216;
+                                    i_13 = anInt8880 * (i_12 & 0xff0000) & ~0xffffff;
                                     i_14 = (i_12 & 0xff00) * anInt8852 & 0xff0000;
                                     i_15 = (i_12 & 0xff) * anInt8882 & 0xff00;
                                     i_12 = (i_13 | i_14 | i_15) >>> 8;

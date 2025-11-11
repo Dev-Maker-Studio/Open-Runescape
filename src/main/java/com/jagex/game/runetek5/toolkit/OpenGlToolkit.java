@@ -1170,7 +1170,7 @@ public class OpenGlToolkit extends AbstractToolkit {
             for (int x = 0; x < spriteType.height; x++) {
                 for (int y = 0; y < spriteType.width; y++) {
                     int pixel = spriteType.pallete[spriteType.pixels[src++] & 0xff];
-                    pixels[dst++] = pixel != 0 ? -16777216 | pixel : 0;
+                    pixels[dst++] = pixel != 0 ? ~0xffffff | pixel : 0;
                 }
             }
         }
@@ -1205,7 +1205,7 @@ public class OpenGlToolkit extends AbstractToolkit {
         setTexture(0, 34167, 768);
         float f_7 = class137Sub1Sub16.s / class137Sub1Sub16.singleWidth;
         float f_8 = class137Sub1Sub16.t / class137Sub1Sub16.singleLength;
-        OpenGL.glColor4ub((byte) (-16777216 >> 16), (byte) (-16777216 >> 8), (byte) -16777216, (byte) (-16777216 >> 24));
+        OpenGL.glColor4ub((byte) (~0xffffff >> 16), (byte) (~0xffffff >> 8), (byte) ~0xffffff, (byte) (~0xffffff >> 24));
         OpenGL.glBegin(GL_QUADS);
         OpenGL.glTexCoord2f(f_7 * (this.clipLeft - i_3), f_8 * (this.clipTop - i_4));
         OpenGL.glVertex2i(this.clipLeft, this.clipTop);

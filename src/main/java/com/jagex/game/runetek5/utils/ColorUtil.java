@@ -111,7 +111,7 @@ public class ColorUtil {
                     int i_19 = (int) (f_9 * 256.0F);
                     int i_20 = (int) (256.0F * f_10);
                     int i_21 = (int) (256.0F * f_11);
-                    int i_22 = i_21 + (i_20 << 8) + (i_19 << 16) + -16777216;
+                    int i_22 = i_21 + (i_20 << 8) + (i_19 << 16) + ~0xffffff;
                     ColorUtil.hsvToRgbTable[i_3++] = i_22;
                 }
             }

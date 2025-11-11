@@ -2135,7 +2135,7 @@ public class client extends GameShell {
 
     public static void drawGameArea(int x, int y, int gameAreaWidth, int gameAreaHeight, boolean bool4) {
         if (Resource.mapRegion.getScene() == null) {
-            Renderers.activeToolkit.clearPixels(x, y, gameAreaWidth, gameAreaHeight, -16777216);
+            Renderers.activeToolkit.clearPixels(x, y, gameAreaWidth, gameAreaHeight, ~0xffffff);
         } else {
             Vector3 abs = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords;
             boolean clearPixels = false;
@@ -2148,7 +2148,7 @@ public class client extends GameShell {
                 clearPixels = true;
             }
             if (clearPixels) {
-                Renderers.activeToolkit.clearPixels(x, y, gameAreaWidth, gameAreaHeight, -16777216);
+                Renderers.activeToolkit.clearPixels(x, y, gameAreaWidth, gameAreaHeight, ~0xffffff);
             } else {
                 timesSceneRendered++;
                 if (PlayerUpdate.MY_PLAYER != null
@@ -2279,7 +2279,7 @@ public class client extends GameShell {
                     awaitingPriorityRequests = false;
                 }
                 if (awaitingPriorityRequests) {
-                    Renderers.activeToolkit.clearPixels(x, y, gameAreaWidth, gameAreaHeight, -16777216);
+                    Renderers.activeToolkit.clearPixels(x, y, gameAreaWidth, gameAreaHeight, ~0xffffff);
                     MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont);
                 }
                 StaticMethods.method3850(Camera.aClass3847167, (x + gameAreaWidth / 2), (gameAreaHeight / 2 + y), (anInt7451 << 1), (anInt7451 << 1), gameAreaWidth, gameAreaHeight);

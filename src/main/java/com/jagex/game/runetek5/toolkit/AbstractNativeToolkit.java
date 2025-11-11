@@ -757,7 +757,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
                 for (int y = 0; y < spriteType.height; y++) {
                     for (int x = 0; x < spriteType.width; x++) {
                         int color = spriteType.pallete[spriteType.pixels[index++] & 0xff];
-                        spritePixels[pixelIndex++] = color != 0 ? -16777216 | color : 0;
+                        spritePixels[pixelIndex++] = color != 0 ? ~0xffffff | color : 0;
                     }
                 }
             }
@@ -1981,7 +1981,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
         
         int[] ints_3 = {-1};
         this.activeTextureSampler = createTextureSampler(1, 1, false, ints_3, 0, 0);
-        ints_3[0] = -16777216;
+        ints_3[0] = ~0xffffff;
         this.anInterface68795 = createTextureSampler(1, 1, false, ints_3, 0, 0);
         setNativeHeap(new NativeMemoryDX(262144));
         this.aClass708832 = method13995(new VertexDeclarationComponent[]{new VertexDeclarationComponent(new VertexDeclarationAction[]{VertexDeclarationAction.aClass69695, VertexDeclarationAction.aClass69692})});

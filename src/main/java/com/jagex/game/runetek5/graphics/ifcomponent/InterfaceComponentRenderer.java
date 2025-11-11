@@ -309,7 +309,7 @@ public class InterfaceComponentRenderer {
                                     NativeSprite sprite;
                                     if (component.containerItemId != -1) {
                                         PlayerAppearance appearance = component.wearCol ? PlayerUpdate.MY_PLAYER.playerAppearance : null;
-                                        sprite = TypeLists.OBJ.createNativeSprite(Renderers.activeToolkit, component.containerItemId, component.itemStackSize, component.borderThickness, -16777216 | component.spriteShadow, component.renderStack, appearance);
+                                        sprite = TypeLists.OBJ.createNativeSprite(Renderers.activeToolkit, component.containerItemId, component.itemStackSize, component.borderThickness, ~0xffffff | component.spriteShadow, component.renderStack, appearance);
                                     } else if (component.anInt1435 != -1) {
                                         sprite = VorbisNode.method8858(Renderers.activeToolkit, component.anInt1435);
                                     } else {

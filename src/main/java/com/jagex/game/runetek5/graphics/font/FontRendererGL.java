@@ -100,7 +100,7 @@ public class FontRendererGL extends AbstractFontRenderer {
                         for (int x = 0; x < width; x++) {
                             byte charPixel = charPixels[pixel++];
                             if (charPixel != 0) {
-                                pixels[i_17++] = -16777216 | palette[charPixel & 0xff];
+                                pixels[i_17++] = ~0xffffff | palette[charPixel & 0xff];
                             } else {
                                 i_17++;
                             }

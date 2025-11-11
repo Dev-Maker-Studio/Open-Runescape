@@ -199,7 +199,7 @@ public class NativeBloomRenderer {
         }
 
         this.toolkit.setDisplay(this.directDisplay);
-        this.toolkit.applyClearFlags(3, -16777216);
+        this.toolkit.applyClearFlags(3, ~0xffffff);
         this.toolkit.colorMask(15);
         this.toolkit.method13985();
         if (!this.directDisplay.isFramebufferComplete()) {

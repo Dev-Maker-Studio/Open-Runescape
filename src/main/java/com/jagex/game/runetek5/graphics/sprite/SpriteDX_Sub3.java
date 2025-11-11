@@ -135,7 +135,7 @@ public class SpriteDX_Sub3 extends NativeSprite {
             i_7 = i_6 * this.anInt9060;
 
             for (i_8 = 0; i_8 < this.anInt9060; i_8++) {
-                ints_5[i_7 + i_8] = ints_5[i_7 + i_8] & 0xffffff | (ints_4[i_7 + i_8] != 0 ? -16777216 : 0);
+                ints_5[i_7 + i_8] = ints_5[i_7 + i_8] & 0xffffff | (ints_4[i_7 + i_8] != 0 ? ~0xffffff : 0);
             }
         }
 
@@ -147,7 +147,7 @@ public class SpriteDX_Sub3 extends NativeSprite {
         int[] ints_7 = this.nativeToolkit.copyPixelRectangle(i_5, i_6, i_3, i_4);
         if (ints_7 != null) {
             for (int i_8 = 0; i_8 < ints_7.length; i_8++) {
-                ints_7[i_8] |= -16777216;
+                ints_7[i_8] |= ~0xffffff;
             }
 
             method14425(i_1, i_2, i_3, i_4, ints_7, i_3);
