@@ -34,11 +34,10 @@ fun initializeUI() {
     SwingUtilities.invokeAndWait {
         LafManager.install(DarculaTheme())
         UI = CheddarCheeseUI()
-        UI.isVisible = true
     }
 }
 
-class CheddarCheeseUI : JFrame("Cheddar Cheese") {
+class CheddarCheeseUI : JPanel() {
     private val scriptComboBox = object : JComboBox<ScriptMetadata>() {
         override fun getToolTipText(): String? {
             val selectedItem = selectedItem as? ScriptMetadata
@@ -62,16 +61,8 @@ class CheddarCheeseUI : JFrame("Cheddar Cheese") {
     private val tabbedPane = JTabbedPane()
 
     init {
-        defaultCloseOperation = DO_NOTHING_ON_CLOSE
-        addWindowListener(object : WindowAdapter() { override fun windowClosing(e: WindowEvent) {} })
-
-        val iconImages = loadCustomIcon()
-        if (iconImages != null)
-            setIconImages(iconImages)
-
-        setSize(800, 600)
-        setLocationRelativeTo(null)
         layout = BorderLayout()
+        preferredSize = Dimension(600, 600)
 
         tabbedPane.apply {
             addTab("Scripts", createScriptsTab())

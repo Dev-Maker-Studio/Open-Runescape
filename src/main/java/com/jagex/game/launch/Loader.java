@@ -2,6 +2,7 @@ package com.jagex.game.launch;
 
 import javax.swing.*;
 
+import com.darkan.bot.UIKt;
 import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.network.world.WorldDescriptor;
 
@@ -147,13 +148,25 @@ public class Loader extends Panel {
     }
 
     public void openFrame() {
-        clientFrame = new JFrame("Darkan Client");
+        clientFrame = new JFrame("Darkan Client with Bot");
         clientFrame.setLayout(new BorderLayout());
+
+        // Create client panel for the game
         JPanel client_panel = new JPanel();
         client_panel.setLayout(new BorderLayout());
         client_panel.add(this);
         client_panel.setPreferredSize(new Dimension(774, 588));
-        clientFrame.getContentPane().add(client_panel, "Center");
+
+        // Initialize bot UI
+        UIKt.initializeUI();
+        JPanel botPanel = UIKt.getUI();
+
+        // Create split pane with game on left, bot controls on right
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, client_panel, botPanel);
+        splitPane.setResizeWeight(0.6); // Give more space to the game
+        splitPane.setDividerLocation(774); // Initial divider position
+
+        clientFrame.getContentPane().add(splitPane, "Center");
         clientFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         clientFrame.pack();
         clientFrame.setVisible(true);

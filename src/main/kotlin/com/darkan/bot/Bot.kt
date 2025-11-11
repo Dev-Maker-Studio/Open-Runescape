@@ -36,7 +36,6 @@ import kotlin.math.pow
 
 fun main(args: Array<String>) {
     ScriptExecutor.loadScripts()
-    initializeUI()
     Loader.main(args)
 }
 
