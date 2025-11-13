@@ -414,12 +414,11 @@ object Bot {
 
     fun interfaceOnInterface(fromIf: Int, toIf: Int, fromSlot: Int, toSlot: Int, fromItem: Int, toItem: Int) {
         val packet = PacketEncoder.createPacket(ClientProt.IF_ON_IF, client.GAME_CONNECTION_CONTEXT.isaac)
-        Console.writeLine("SYNTHETIC_IF_ON_IF: [" + interfaceIdFromHash(fromIf) + ", " + componentIdFromHash(fromIf) + ", " + fromSlot + ", " + fromItem + "] -> [" + interfaceIdFromHash(toIf) + ", " + componentIdFromHash(toIf) + ", " + toSlot + ", " + toItem + "]")
         packet.buffer.writeShortAddLittle(toSlot)
         packet.buffer.writeShortLittle(fromSlot)
         packet.buffer.writeShortAddLittle(toItem)
-        packet.buffer.writeIntLittle(fromIf)
-        packet.buffer.writeIntInverseMiddle(toIf)
+        packet.buffer.writeIntLittle(toIf)
+        packet.buffer.writeIntInverseMiddle(fromIf)
         packet.buffer.writeShortLittle(fromItem)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }

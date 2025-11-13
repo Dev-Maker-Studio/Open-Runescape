@@ -764,7 +764,7 @@ object PacketDecoder {
                             chatEffects = chatEffects and 0x7fff
                             val quickchatMessage = QuickchatMessageTypeList.decodeQuickchatMessage(buffer)
                             qcMessageId = quickchatMessage.id
-                            message = quickchatMessage.message.fillDynamicValues(buffer)
+                            message = quickchatMessage.message!!.fillDynamicValues(buffer)
                         } else {
                             message = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
                         }

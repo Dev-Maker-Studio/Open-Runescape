@@ -38,7 +38,7 @@ class Class261_Sub1 extends Class261 {
     }
 
     @Override
-    void method4634(int i_1, float f_5, float f_6, float f_7, float f_8, float[] floats_9) {
+    protected void method4634(int i_1, float f_5, float f_6, float f_7, float f_8, float[] floats_9) {
         int start = 0;
         int i_11 = (int) (128 * f_5 - 1.0F);
         i_11 &= 0xff;
