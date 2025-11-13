@@ -1,5 +1,9 @@
 package com.jagex.game.runetek5.network.packet
 
+import com.darkan.bot.UI
+import com.darkan.bot.scripts.ScriptExecutor
+import com.darkan.bot.scripts.event.XPDrop
+import com.darkan.bot.utils.Skill
 import com.jagex.game.runetek5.botdetection.ReflectionCheckManager
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.buffer.Packet.Bit
@@ -1620,6 +1624,11 @@ object PacketDecoder {
             val xp = buffer.readInt()
             val skillId = buffer.readUByte()
             val level = buffer.readUByte()
+            if (xp > client.SKILL_XP[skillId]) {
+                val event = XPDrop(Skill.entries[skillId], xp - client.SKILL_XP[skillId])
+                ScriptExecutor.pushEvent(event)
+                UI.updateXpTable(event.skill, event.gainedXp)
+            }
             client.SKILL_XP[skillId] = xp
             client.SKILL_LEVEL_VISIBLE[skillId] = level
             client.SKILL_LEVEL_ACTUAL[skillId] = 1

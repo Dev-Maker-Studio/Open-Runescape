@@ -1,5 +1,7 @@
 package com.jagex.game.runetek5.interaction.chat;
 
+import com.darkan.bot.scripts.ScriptExecutor;
+import com.darkan.bot.scripts.event.Chat;
 import com.jagex.game.runetek5.cache.node.lru.LRUCache;
 import com.jagex.game.runetek5.client.ChatMessageType;
 import com.jagex.game.runetek5.client.client;
@@ -35,7 +37,8 @@ public class ChatBox {
 	public static int TRADE_FILTER = 0;
 
 	public static void writeMessage(ChatMessageType type, int effectFlags, String crownedName, String name, String simpleName, String message, String clan, int quickchatMessageId) {
-	    ChatLine line = ChatBox.CHAT_LINES[99];
+        ScriptExecutor.INSTANCE.pushEvent(new Chat(type, simpleName, crownedName, name, message));
+        ChatLine line = ChatBox.CHAT_LINES[99];
 	    System.arraycopy(ChatBox.CHAT_LINES, 0, ChatBox.CHAT_LINES, 1, 99);
 	    if (line == null) {
 	        line = new ChatLine(type, effectFlags, crownedName, name, simpleName, clan, quickchatMessageId, message);
