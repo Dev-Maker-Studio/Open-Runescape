@@ -408,8 +408,13 @@ object Bot {
         itemOnItem(itemId, inventory.getSlotByItem(itemId), itemId2, inventory.getSlotByItem(itemId2))
     }
 
+    fun alch(slot: Int) {
+        interfaceOnInterface(hashFromInterface(192, 59), hashFromInterface(INVENTORY_INTERFACE, 0), -1, slot, -1, inventory.getItem(slot))
+    }
+
     fun interfaceOnInterface(fromIf: Int, toIf: Int, fromSlot: Int, toSlot: Int, fromItem: Int, toItem: Int) {
         val packet = PacketEncoder.createPacket(ClientProt.IF_ON_IF, client.GAME_CONNECTION_CONTEXT.isaac)
+        Console.writeLine("SYNTHETIC_IF_ON_IF: [" + interfaceIdFromHash(fromIf) + ", " + componentIdFromHash(fromIf) + ", " + fromSlot + ", " + fromItem + "] -> [" + interfaceIdFromHash(toIf) + ", " + componentIdFromHash(toIf) + ", " + toSlot + ", " + toItem + "]")
         packet.buffer.writeShortAddLittle(toSlot)
         packet.buffer.writeShortLittle(fromSlot)
         packet.buffer.writeShortAddLittle(toItem)
