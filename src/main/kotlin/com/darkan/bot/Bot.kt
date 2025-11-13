@@ -920,7 +920,7 @@ object Bot {
                         it.shape,
                         x + getBaseX(),
                         y + getBaseY(),
-                        TypeLists.LOC.list(it.getId()).actions
+                        TypeLists.LOC.list(it.id).actions
                     ))
                 }
             }

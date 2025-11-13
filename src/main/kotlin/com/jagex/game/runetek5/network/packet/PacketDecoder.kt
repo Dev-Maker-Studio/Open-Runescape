@@ -867,7 +867,7 @@ object PacketDecoder {
                         bool69 = true
                         --total
                         for (index in 0..<total) {
-                            if (friendsChatPlayers[index]!!.textName.compareTo(friendsChatPlayers[index + 1]!!.textName) > 0) {
+                            if (friendsChatPlayers[index]!!.textName!!.compareTo(friendsChatPlayers[index + 1]!!.textName!!) > 0) {
                                 val tmp = friendsChatPlayers[index]
                                 friendsChatPlayers[index] = friendsChatPlayers[index + 1]
                                 friendsChatPlayers[index + 1] = tmp
@@ -1521,7 +1521,7 @@ object PacketDecoder {
                 var i_12: Int
                 i_12 = FriendsChat.FC_PLAYER_COUNT - 1
                 while (i_12 >= 0) {
-                    val i_35 = FriendsChat.FC_PLAYERS[i_12].textName.compareTo(fcPlayer.textName)
+                    val i_35 = FriendsChat.FC_PLAYERS[i_12].textName!!.compareTo(fcPlayer.textName!!)
                     if (i_35 == 0) {
                         FriendsChat.FC_PLAYERS[i_12].worldId = worldId
                         FriendsChat.FC_PLAYERS[i_12].rank = rank
