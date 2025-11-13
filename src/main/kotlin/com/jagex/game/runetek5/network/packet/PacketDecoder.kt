@@ -65,6 +65,7 @@ import com.jagex.game.runetek5.network.HostNameIdentifier
 import com.jagex.game.runetek5.network.PingRequester
 import com.jagex.game.runetek5.network.WorldConnection
 import com.jagex.game.runetek5.network.world.WorldDescriptor
+import com.jagex.game.runetek5.network.world.WorldList
 import com.jagex.game.runetek5.network.world.WorldMeta
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.*
@@ -244,7 +245,7 @@ object PacketDecoder {
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.MAP_PROJANIM_HALFSQ) {
-            decodeTilestreamPacket(UpdateZonePacket.MAP_PROJANIM_HALFSQ)
+            UpdateZonePacket.MAP_PROJANIM_HALFSQ.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLANCHANNEL_FULL) {
@@ -602,7 +603,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.OBJECT_PREFETCH) {
-            decodeTilestreamPacket(UpdateZonePacket.OBJECT_PREFETCH)
+            UpdateZonePacket.OBJECT_PREFETCH.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.OPEN_URL) {
@@ -935,7 +936,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.TILE_MESSAGE) {
-            decodeTilestreamPacket(UpdateZonePacket.TILE_MESSAGE)
+            UpdateZonePacket.TILE_MESSAGE.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.PLAYER_WEIGHT) {
@@ -1002,8 +1003,7 @@ object PacketDecoder {
                         break
                     }
                 }
-                if (i_10 <= 1 && IgnoreList.contains(string_88))
-                    bool14 = true
+                if (i_10 <= 1 && IgnoreList.contains(string_88)) bool14 = true
             }
             if (!bool14) {
                 client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_53
@@ -1179,7 +1179,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.OBJ_ANIM) {
-            decodeTilestreamPacket(UpdateZonePacket.OBJ_ANIM)
+            UpdateZonePacket.OBJ_ANIM.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARCLAN_SET_BYTE) {
@@ -1193,7 +1193,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.GROUND_ITEM_REVEAL) {
-            decodeTilestreamPacket(UpdateZonePacket.GROUND_ITEM_REVEAL)
+            UpdateZonePacket.GROUND_ITEM_REVEAL.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_INV_STOP_TRANSMIT) {
@@ -1214,7 +1214,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MIDI_SONG_LOCATION) {
-            decodeTilestreamPacket(UpdateZonePacket.MIDI_SONG_LOCATION)
+            UpdateZonePacket.MIDI_SONG_LOCATION.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_ZONE_PARTIAL_FOLLOWS) {
@@ -1228,8 +1228,8 @@ object PacketDecoder {
             UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByteAdd()
             UpdateZonePacket.UPDATE_ZONE_X = buffer.readByte().toInt() shl 3
             while (buffer.currentPosition < context.currentPacketSize) {
-                val tilestreampacket68: UpdateZonePacket? = UpdateZonePacket.entries[buffer.readUByte()]
-                decodeTilestreamPacket(tilestreampacket68)
+                val subPacket = UpdateZonePacket.entries[buffer.readUByte()]
+                subPacket.decode()
             }
             context.currentPacket = null
             return true
@@ -1254,7 +1254,7 @@ object PacketDecoder {
                 groundItems = client.GROUND_ITEMS.next()
             }
             var locAction: LocAction?
-            locAction = LocAction.pendingRemovals.getFirst() as LocAction?
+            locAction = LocAction.pendingRemovals.first as LocAction?
             while (locAction != null) {
                 if (locAction.x >= UpdateZonePacket.UPDATE_ZONE_X && locAction.x < UpdateZonePacket.UPDATE_ZONE_X + 8 && locAction.y >= UpdateZonePacket.UPDATE_ZONE_Y && locAction.y < UpdateZonePacket.UPDATE_ZONE_Y + 8 && locAction.plane == UpdateZonePacket.UPDATE_ZONE_PLANE) {
                     locAction.inUpdateZone = true
@@ -1392,7 +1392,7 @@ object PacketDecoder {
             val refresh = buffer.readUByte() == 1
             val data = ByteArray(context.currentPacketSize - 1)
             buffer.readBytes(data, 0, context.currentPacketSize - 1)
-            decodeWorldList(refresh, data)
+            WorldList.decode(refresh, data)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARBIT_LARGE) {
@@ -1587,7 +1587,7 @@ object PacketDecoder {
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.REMOVE_GROUND_ITEM) {
-            decodeTilestreamPacket(UpdateZonePacket.REMOVE_GROUND_ITEM)
+            UpdateZonePacket.REMOVE_GROUND_ITEM.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETANIM) {
@@ -1598,7 +1598,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SPOT_ANIM) {
-            decodeTilestreamPacket(UpdateZonePacket.SPOT_ANIM)
+            UpdateZonePacket.SPOT_ANIM.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARP_LARGE) {
@@ -1792,7 +1792,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.GROUND_ITEM_COUNT) {
-            decodeTilestreamPacket(UpdateZonePacket.GROUND_ITEM_COUNT)
+            UpdateZonePacket.GROUND_ITEM_COUNT.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERMODEL) {
@@ -1815,7 +1815,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CREATE_OBJECT) {
-            decodeTilestreamPacket(UpdateZonePacket.CREATE_OBJECT)
+            UpdateZonePacket.CREATE_OBJECT.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_PRIVATE_ECHO) {
@@ -1825,7 +1825,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CREATE_GROUND_ITEM) {
-            decodeTilestreamPacket(UpdateZonePacket.CREATE_GROUND_ITEM)
+            UpdateZonePacket.CREATE_GROUND_ITEM.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.FRIENDLIST_LOADED) {
@@ -1941,7 +1941,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CUSTOMIZE_OBJECT) {
-            decodeTilestreamPacket(UpdateZonePacket.CUSTOMIZE_OBJECT)
+            UpdateZonePacket.CUSTOMIZE_OBJECT.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.PLAYER_UPDATE) {
@@ -1978,10 +1978,8 @@ object PacketDecoder {
                 }
                 if (i_10 <= 1) {
                     if ((!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
-                        if (IgnoreList.contains(string_88))
-                            bool112 = true
-                    } else
-                        bool112 = true
+                        if (IgnoreList.contains(string_88)) bool112 = true
+                    } else bool112 = true
                 }
             }
             if (!bool112) {
@@ -2008,7 +2006,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MAP_PROJANIM) {
-            decodeTilestreamPacket(UpdateZonePacket.MAP_PROJANIM)
+            UpdateZonePacket.MAP_PROJANIM.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_SITESETTINGS_COOKIE) {
@@ -2179,7 +2177,7 @@ object PacketDecoder {
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.DESTROY_OBJECT) {
-            decodeTilestreamPacket(UpdateZonePacket.DESTROY_OBJECT)
+            UpdateZonePacket.DESTROY_OBJECT.decode()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.LOYALTY_UPDATE) {
@@ -2410,364 +2408,4 @@ object PacketDecoder {
             return true
         }
     }
-
-    fun decodeTilestreamPacket(packet: UpdateZonePacket?) {
-        val buffer = client.GAME_CONNECTION_CONTEXT.receivedBuffer
-        if (packet == UpdateZonePacket.GROUND_ITEM_COUNT) {
-            val i_3 = buffer.readUByte()
-            val coordgrid4 = Resource.mapRegion.getBaseCoordinates()
-            val i_5 = (i_3 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            val y = i_5 + coordgrid4.y
-            val i_7 = (i_3 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val x = i_7 + coordgrid4.x
-            val i_9 = buffer.readUShort()
-            val i_10 = buffer.readUShort()
-            val amount = buffer.readUShort()
-            if (client.GROUND_ITEMS != null) {
-                val class282Sub2912 = client.GROUND_ITEMS.get(UpdateZonePacket.UPDATE_ZONE_PLANE.toLong() shl 28 or (y.toLong() shl 14) or x.toLong())
-                if (class282Sub2912 != null) {
-                    var item = class282Sub2912.groundItems.getFirst() as GroundItemNode?
-                    while (item != null) {
-                        if ((i_9 and 0x7fff) == item.id && i_10 == item.amount) {
-                            item.unlink()
-                            item.amount = amount
-                            GroundItemUpdating.addGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, item)
-                            break
-                        }
-                        item = class282Sub2912.groundItems.next() as GroundItemNode?
-                    }
-                    if (i_7 >= 0 && i_5 >= 0 && i_7 < Resource.mapRegion.getSceneSizeX() && i_5 < Resource.mapRegion.getSceneSizeY()) {
-                        GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, i_7, i_5)
-                    }
-                }
-            }
-        } else if (packet == UpdateZonePacket.OBJECT_PREFETCH) {
-            val i_3 = buffer.readInt()
-            val i_21 = buffer.readUByte()
-            Resource.mapRegion.getLoctypeList().list(i_3).isTypeCached(i_21)
-        } else if (packet == UpdateZonePacket.SPOT_ANIM) {
-            val bitpacked = buffer.readUByte()
-            val x = (bitpacked shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val y = (bitpacked and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            var spotAnimId = buffer.readUShort()
-            if (spotAnimId == 65535) {
-                spotAnimId = -1
-            }
-            val height = buffer.readUShort()
-            val speed = buffer.readUShort()
-            val rotation = buffer.readUByte()
-            if (Resource.mapRegion.getLoadingType() !== RegionLoadingType.CUTSCENE && x >= 0 && y >= 0 && x < Resource.mapRegion.getSceneSizeX() && y < Resource.mapRegion.getSceneSizeY()) {
-                if (spotAnimId == -1) {
-                    val class282Sub50Sub1022 = client.ACTIVE_GFX.get(x.toLong() shl 16 or y.toLong())
-                    if (class282Sub50Sub1022 != null) {
-                        class282Sub50Sub1022.objectGfx.resetCycle()
-                        class282Sub50Sub1022.unlink()
-                    }
-                } else {
-                    val tileX = x * 512 + 256
-                    val tileY = y * 512 + 256
-                    var adjustedPlane = UpdateZonePacket.UPDATE_ZONE_PLANE
-                    if (adjustedPlane < 3 && Resource.mapRegion.getSettingsBits().areRoofsHidden(x, y)) {
-                        adjustedPlane++
-                    }
-                    val spotAnimation = SpotAnimation(Resource.mapRegion.getScene(), spotAnimId, speed, UpdateZonePacket.UPDATE_ZONE_PLANE, adjustedPlane, tileX, MapRegion.tileheightForAbsolutePosition(tileX, tileY, UpdateZonePacket.UPDATE_ZONE_PLANE) - height, tileY, x, x, y, y, rotation, false)
-                    client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
-                }
-            }
-        } else if (packet == UpdateZonePacket.MAP_PROJANIM_HALFSQ) {
-            val localCoordsHash = buffer.readUByte()
-            var localX = (localCoordsHash shr 4 and 0xf) + UpdateZonePacket.UPDATE_ZONE_X * 2
-            var localY = UpdateZonePacket.UPDATE_ZONE_Y * 2 + (localCoordsHash and 0xf)
-            val flags = buffer.readUByte()
-            val adjustToTerrainHeight = (flags and 0x1) != 0
-            val adjustToBASAnimFrameHeight = (flags and 0x2) != 0
-            val basOffIdx = if (adjustToBASAnimFrameHeight) flags shr 2 else -1
-            var xOff = localX + buffer.readByte()
-            var yOff = localY + buffer.readByte()
-            val source = buffer.readShort()
-            val lockOn = buffer.readShort()
-            val spotAnimId = buffer.readUShort()
-            var startHeight = buffer.readUByte()
-            if (adjustToBASAnimFrameHeight) {
-                startHeight = startHeight.toByte().toInt()
-            } else {
-                startHeight *= 4
-            }
-            var endHeight = buffer.readUByte() * 4
-            val startTime = buffer.readUShort()
-            val endTime = buffer.readUShort()
-            var angle = buffer.readUByte()
-            var slope = buffer.readUShort()
-            if (angle == 255) {
-                angle = -1
-            }
-            if (Resource.mapRegion.getLoadingType() !== RegionLoadingType.CUTSCENE && localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() * 2 && localY < Resource.mapRegion.getSceneSizeX() * 2 && xOff >= 0 && yOff >= 0 && xOff < Resource.mapRegion.getSceneSizeY() * 2 && yOff < Resource.mapRegion.getSceneSizeY() * 2 && spotAnimId != 65535) {
-                localX *= 256
-                localY *= 256
-                xOff *= 256
-                yOff *= 256
-                startHeight = startHeight shl 2
-                endHeight = endHeight shl 2
-                slope = slope shl 2
-                ProjectileSpawnRequest.create(spotAnimId, source, lockOn, basOffIdx, startHeight, endHeight, localX, localY, xOff, yOff, startTime, endTime, angle, slope, adjustToTerrainHeight)
-            }
-        } else if (packet == UpdateZonePacket.MAP_PROJANIM) {
-            val flags = buffer.readUByte()
-            val useFloorHeight = (flags and 0x80) != 0
-            var localX = (flags shr 3 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            var localY = (flags and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            var xOff = localX + buffer.readByte()
-            var yOff = localY + buffer.readByte()
-            val lockOn = buffer.readShort()
-            val spotAnimId = buffer.readUShort()
-            var startHeight = buffer.readUByte() * 4
-            var endHeight = buffer.readUByte() * 4
-            val startTime = buffer.readUShort()
-            val endTime = buffer.readUShort()
-            var angle = buffer.readUByte()
-            var slope = buffer.readUShort()
-            if (angle == 255) {
-                angle = -1
-            }
-            if (Resource.mapRegion.getLoadingType() !== RegionLoadingType.CUTSCENE && localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY() && xOff >= 0 && yOff >= 0 && xOff < Resource.mapRegion.getSceneSizeX() && yOff < Resource.mapRegion.getSceneSizeY() && spotAnimId != 65535) {
-                localX = localX * 512 + 256
-                localY = localY * 512 + 256
-                xOff = xOff * 512 + 256
-                yOff = yOff * 512 + 256
-                startHeight = startHeight shl 2
-                endHeight = endHeight shl 2
-                slope = slope shl 2
-                val p = Projectile(Resource.mapRegion.getScene(), spotAnimId, UpdateZonePacket.UPDATE_ZONE_PLANE, UpdateZonePacket.UPDATE_ZONE_PLANE, localX, localY, startHeight, startTime + client.cycles, endTime + client.cycles, angle, slope, 0, lockOn, endHeight, useFloorHeight, -1)
-                p.start(xOff, yOff, MapRegion.tileheightForAbsolutePosition(xOff, yOff, UpdateZonePacket.UPDATE_ZONE_PLANE) - endHeight, startTime + client.cycles)
-                client.PROJECTILES.addFirst(ProjectileSpawnRequest(p))
-            }
-        } else if (packet == UpdateZonePacket.MIDI_SONG_LOCATION) {
-            val i_3 = buffer.readUByte()
-            val i_21 = (i_3 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val i_5 = (i_3 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            var i_6 = buffer.readUShort()
-            if (i_6 == 65535) {
-                i_6 = -1
-            }
-            val i_7 = buffer.readUByte()
-            val i_8 = i_7 shr 4 and 0xf
-            val i_9 = i_7 and 0x7
-            val i_10 = buffer.readUByte()
-            val i_11 = buffer.readUByte()
-            val i_23 = buffer.readUShort()
-            if (Resource.mapRegion.getLoadingType() !== RegionLoadingType.CUTSCENE && i_21 >= 0 && i_5 >= 0 && i_21 < Resource.mapRegion.getSceneSizeX() && i_5 < Resource.mapRegion.getSceneSizeY()) {
-                val i_24 = i_8 + 1
-                if (PlayerUpdate.MY_PLAYER.movementBaseX[0] >= i_21 - i_24 && PlayerUpdate.MY_PLAYER.movementBaseX[0] <= i_21 + i_24 && PlayerUpdate.MY_PLAYER.movementBaseY[0] >= i_5 - i_24 && PlayerUpdate.MY_PLAYER.movementBaseY[0] <= i_24 + i_5) {
-                    AreaSoundPlayer.playSoundSynth(i_6, i_9, i_10, i_11, i_8 + (UpdateZonePacket.UPDATE_ZONE_PLANE shl 24) + (i_5 shl 8) + (i_21 shl 16), i_23)
-                }
-            }
-        } else if (packet == UpdateZonePacket.DESTROY_OBJECT) {
-            val display = buffer.readUByteAdd()
-            val shape = display shr 2
-            val rotation = display and 0x3
-            val type = client.OBJECT_TYPE_SLOTS[shape]
-            val coords = buffer.readUByte()
-            val x = (coords shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val y = (coords and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            if (Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations() || x >= 0 && y >= 0 && x < Resource.mapRegion.getSceneSizeX() && y < Resource.mapRegion.getSceneSizeY()) {
-                LocAction.destroyObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, -1, shape, rotation)
-            }
-        } else if (packet == UpdateZonePacket.REMOVE_GROUND_ITEM) {
-            val i_3 = buffer.readUByteInverse()
-            val coordgrid = Resource.mapRegion.getBaseCoordinates()
-            val i_5 = (i_3 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            val i_6 = i_5 + coordgrid.y
-            val i_7 = (i_3 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val i_8 = i_7 + coordgrid.x
-            val i_9 = buffer.readUShortAddLittle()
-            val class282Sub2939 = client.GROUND_ITEMS.get(UpdateZonePacket.UPDATE_ZONE_PLANE.toLong() shl 28 or (i_6.toLong() shl 14) or i_8.toLong())
-            if (class282Sub2939 != null) {
-                var class282Sub3426 = class282Sub2939.groundItems.getFirst() as GroundItemNode?
-                while (class282Sub3426 != null) {
-                    if ((i_9 and 0x7fff) == class282Sub3426.id) {
-                        class282Sub3426.unlink()
-                        break
-                    }
-                    class282Sub3426 = class282Sub2939.groundItems.next() as GroundItemNode?
-                }
-                if (class282Sub2939.groundItems.hasNext()) {
-                    class282Sub2939.unlink()
-                }
-                if (i_7 >= 0 && i_5 >= 0 && i_7 < Resource.mapRegion.getSceneSizeX() && i_5 < Resource.mapRegion.getSceneSizeY()) {
-                    GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, i_7, i_5)
-                }
-            }
-        } else if (packet == UpdateZonePacket.CUSTOMIZE_OBJECT) {
-            val locId = buffer.readInt()
-            val locType = Resource.mapRegion.getLoctypeList().list(locId)
-            val i_5 = buffer.readUByteAdd()
-            var locShape = i_5 shr 2
-            val type = client.OBJECT_TYPE_SLOTS[locShape]
-            val transformFlags = buffer.readUByte()
-            val coords = buffer.readUByteAdd()
-            val x = (coords shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val y = (coords and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            if (locShape == ObjectShapes.GROUND_INTERACT.shape) {
-                locShape = ObjectShapes.SCENERY_INTERACT.shape
-            }
-            var modelCount = 0
-            if (locType.shapes != null) {
-                var i_24 = -1
-                for (i_14 in locType.shapes.indices) {
-                    if (locShape == locType.shapes[i_14].toInt()) {
-                        i_24 = i_14
-                        break
-                    }
-                }
-                modelCount = locType.objectModelIds[i_24].size
-            }
-            var recolCount = 0
-            if (locType.recolorDst != null) {
-                recolCount = locType.recolorDst.size
-            }
-            var retexCount = 0
-            if (locType.retextureDst != null) {
-                retexCount = locType.retextureDst.size
-            }
-            if ((transformFlags and 0x1) == 1) {
-                LocAction.customizeObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, locId, locShape, null)
-            } else {
-                var locModelTransform: IntArray? = null
-                if ((transformFlags and 0x2) == 2) {
-                    locModelTransform = IntArray(modelCount)
-                    for (index in 0..<modelCount) {
-                        locModelTransform[index] = buffer.readInt()
-                    }
-                }
-                var locColorTransform: ShortArray? = null
-                if ((transformFlags and 0x4) == 4) {
-                    locColorTransform = ShortArray(recolCount)
-                    for (index in 0..<recolCount) {
-                        locColorTransform[index] = buffer.readUShort().toShort()
-                    }
-                }
-                var locTextureTransform: ShortArray? = null
-                if ((transformFlags and 0x8) == 8) {
-                    locTextureTransform = ShortArray(retexCount)
-                    for (index in 0..<retexCount) {
-                        locTextureTransform[index] = buffer.readUShort().toShort()
-                    }
-                }
-                LocAction.customizeObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, type, locId, locShape, ObjectTypeCustomisation(ObjectTypeCustomisation.locCustomisationId++, locModelTransform, locColorTransform, locTextureTransform))
-            }
-        } else if (packet == UpdateZonePacket.TILE_MESSAGE) {
-            buffer.readUByte()
-            val i_3 = buffer.readUByte()
-            val i_21 = (i_3 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val i_5 = (i_3 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            val i_6 = buffer.readUShort()
-            val i_7 = buffer.readUByte()
-            val i_8 = buffer.readUMedium()
-            val string_27 = buffer.readString()
-            if (Resource.mapRegion.getLoadingType() !== RegionLoadingType.CUTSCENE) {
-                TileMessage.offer(UpdateZonePacket.UPDATE_ZONE_PLANE, i_21, i_5, i_7, i_6, i_8, string_27)
-            }
-        } else if (packet == UpdateZonePacket.SOUND_AREA) { //sound related again
-            val flags = buffer.readUByte()
-            val localX = (flags shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val localY = (flags and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            var soundId = buffer.readUShort()
-            if (soundId == 65535) {
-                soundId = -1
-            }
-            val i_7 = buffer.readUByte()
-            val i_8 = i_7 shr 4 and 0xf
-            val timesRepeated = i_7 and 0x7
-            val delay = buffer.readUByte()
-            val volume = buffer.readUByte()
-            val sampleRate = buffer.readUShort()
-            val voiceEffect = buffer.readUByte() == 1
-            if (Resource.mapRegion.getLoadingType() !== RegionLoadingType.CUTSCENE && localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY()) {
-                val i_14 = i_8 + 1
-                if (PlayerUpdate.MY_PLAYER.movementBaseX[0] >= localX - i_14 && PlayerUpdate.MY_PLAYER.movementBaseX[0] <= localX + i_14 && PlayerUpdate.MY_PLAYER.movementBaseY[0] >= localY - i_14 && PlayerUpdate.MY_PLAYER.movementBaseY[0] <= i_14 + localY) {
-                    AreaSoundPlayer.playSoundVorbis(soundId, timesRepeated, delay, volume, i_8 + (UpdateZonePacket.UPDATE_ZONE_PLANE shl 24) + (localY shl 8) + (localX shl 16), voiceEffect, sampleRate)
-                }
-            }
-        } else if (packet == UpdateZonePacket.OBJ_ANIM) {
-            val i_3 = buffer.readUByteSubtract()
-            val type = i_3 shr 2
-            val rotation = i_3 and 0x3
-            val slot = client.OBJECT_TYPE_SLOTS[type]
-            val i_7 = buffer.readUByteSubtract()
-            val x = (i_7 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val y = (i_7 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            val animationId = buffer.readUIntLittle()
-            if (Resource.mapRegion.getLoadingType() !== RegionLoadingType.CUTSCENE) {
-                SceneGraph.animateObject(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, slot, type, rotation, animationId)
-            }
-        } else if (packet == UpdateZonePacket.GROUND_ITEM_REVEAL) {
-            val playerId = buffer.readUShort()
-            val i_21 = buffer.readUByte()
-            val coordgrid25 = Resource.mapRegion.getBaseCoordinates()
-            val localY = (i_21 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            val y = localY + coordgrid25.y
-            val localX = (i_21 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val x = localX + coordgrid25.x
-            val amount = buffer.readUShortAddLittle()
-            val id = buffer.readUShortAddLittle()
-            if (playerId != PlayerUpdate.myPlayerIndex) {
-                val withinSceneRange = localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY()
-                if (withinSceneRange || Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations()) {
-                    GroundItemUpdating.addGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, GroundItemNode(id, amount))
-                    if (withinSceneRange) {
-                        GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, localX, localY)
-                    }
-                }
-            }
-        } else if (packet == UpdateZonePacket.CREATE_GROUND_ITEM) {
-            val amount = buffer.readUShortAddLittle()
-            val id = buffer.readUShortAdd()
-            val i_5 = buffer.readUByteInverse()
-            val coordgrid31 = Resource.mapRegion.getBaseCoordinates()
-            val localY = (i_5 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            val y = localY + coordgrid31.y
-            val localX = (i_5 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val x = localX + coordgrid31.x
-            val bool36 = localX >= 0 && localY >= 0 && localX < Resource.mapRegion.getSceneSizeX() && localY < Resource.mapRegion.getSceneSizeY()
-            if (bool36 || Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations()) {
-                GroundItemUpdating.addGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y, GroundItemNode(id, amount))
-                if (bool36) {
-                    GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, localX, localY)
-                }
-            }
-        } else if (packet == UpdateZonePacket.CREATE_OBJECT) {
-            val i_3 = buffer.readInt()
-            val i_21 = buffer.readUByteSubtract()
-            val i_5 = (i_21 shr 4 and 0x7) + UpdateZonePacket.UPDATE_ZONE_X
-            val i_6 = (i_21 and 0x7) + UpdateZonePacket.UPDATE_ZONE_Y
-            val i_7 = buffer.readUByteSubtract()
-            val i_8 = i_7 shr 2
-            val i_9 = i_7 and 0x3
-            val i_10 = client.OBJECT_TYPE_SLOTS[i_8]
-            if (Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations() || i_5 >= 0 && i_6 >= 0 && i_5 < Resource.mapRegion.getSceneSizeX() && i_6 < Resource.mapRegion.getSceneSizeY()) {
-                LocAction.destroyObject(UpdateZonePacket.UPDATE_ZONE_PLANE, i_5, i_6, i_10, i_3, i_8, i_9)
-            }
-        } else {
-            PacketEncoder.sendErrorToServer("" + packet, RuntimeException())
-            client.logout(false)
-        }
-    }
-
-    fun decodeWorldList(refresh: Boolean, data: ByteArray) {
-        if (WorldMeta.WORLD_LIST_BUFFER == null) WorldMeta.WORLD_LIST_BUFFER = Packet(20000)
-        WorldMeta.WORLD_LIST_BUFFER.writeBytes(data, 0, data.size)
-        if (refresh) {
-            WorldDescriptor.decodeWorldList(WorldMeta.WORLD_LIST_BUFFER.buffer)
-            WorldConnection.WORLD_DESCRIPTORS_BYID = arrayOfNulls<WorldDescriptor>(WorldMeta.WORLD_LIST_SIZE)
-            var worldNumber = 0
-            for (worldIndex in WorldDescriptor.WORLD_LIST_START..WorldMeta.WORLD_LIST_SIZEPLUS1) {
-                val world: WorldDescriptor? = WorldDescriptor.getWorld(worldIndex)
-                if (world != null) WorldConnection.WORLD_DESCRIPTORS_BYID[worldNumber++] = world
-            }
-            WorldConnection.requestingWorldList = false
-            WorldConnection.worldListReceivedTime = Utils.time()
-            WorldMeta.WORLD_LIST_BUFFER = null
-        }
-    }
-
 }
