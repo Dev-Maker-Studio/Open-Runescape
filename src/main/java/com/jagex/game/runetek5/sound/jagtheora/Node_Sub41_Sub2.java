@@ -21,7 +21,7 @@ public class Node_Sub41_Sub2 extends Node_Sub41 {
     }
 
     @Override
-    void decode(OggPacket oggpacket1) {
+    public void decode(OggPacket oggpacket1) {
         if (super.anInt8031 <= 0 || "SUB".equals(this.aString9469)) {
             Packet rsbytebuffer3 = new Packet(oggpacket1.getData());
             int i_4 = rsbytebuffer3.readUByte();

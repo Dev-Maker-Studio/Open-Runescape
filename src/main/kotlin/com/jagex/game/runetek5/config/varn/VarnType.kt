@@ -1,0 +1,31 @@
+package com.jagex.game.runetek5.config.varn
+
+import com.jagex.game.runetek5.buffer.Packet
+import com.jagex.game.runetek5.utils.Utils
+
+/**
+ * @author Brainpower - 25/03/2023
+ *
+ * VARN = VarNPC
+ */
+class VarnType {
+
+    @JvmField
+    var character: Char = '\u0000'
+
+    fun decode(buffer: Packet, opcode: Int) {
+        if (opcode == 1) {
+            character = Utils.cp1252ToChar(buffer.readByte())
+        }
+    }
+
+    fun decode(buffer: Packet) {
+        while (true) {
+            val opcde = buffer.readUByte()
+            if (opcde == 0) {
+                return
+            }
+            decode(buffer, opcde)
+        }
+    }
+}

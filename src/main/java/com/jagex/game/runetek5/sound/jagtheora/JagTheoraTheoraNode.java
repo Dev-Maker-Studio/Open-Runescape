@@ -36,7 +36,7 @@ public class JagTheoraTheoraNode extends Node_Sub41 {
     }
 
     @Override
-    void decode(OggPacket packet) {
+    public void decode(OggPacket packet) {
         if (!this.headerDecoded) {
             int header = this.setupInfo.decodeHeader(this.info, this.comment, packet);
             if (header == 0) {

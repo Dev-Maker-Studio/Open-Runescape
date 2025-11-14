@@ -26,13 +26,13 @@ public class SystemCycleManager extends AbstractCycleManager {
     }
 
     @Override
-    long getIdleDurationMs() {
+    public long getIdleDurationMs() {
         this.currentCycleAt += averageExecutionTime();
         return this.nextCycleAt > this.currentCycleAt ? (this.nextCycleAt - this.currentCycleAt) / 1000000L : 0L;
     }
 
     @Override
-    int loopsInCycle(long preferedDuration) {
+    public int loopsInCycle(long preferedDuration) {
         if (this.nextCycleAt > this.currentCycleAt) {
             this.lastNanotime += this.nextCycleAt - this.currentCycleAt;
             this.currentCycleAt += this.nextCycleAt - this.currentCycleAt;

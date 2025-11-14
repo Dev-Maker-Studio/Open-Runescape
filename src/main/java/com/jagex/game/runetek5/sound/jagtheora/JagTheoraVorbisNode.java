@@ -35,7 +35,7 @@ public class JagTheoraVorbisNode extends Node_Sub41 {
     }
 
     @Override
-    void decode(OggPacket oggpacket1) {
+    public void decode(OggPacket oggpacket1) {
         if (super.anInt8031 < 3) {
             int i_3 = this.aVorbisInfo9605.headerIn(this.aVorbisComment9599, oggpacket1);
             if (i_3 < 0) {
