@@ -51,71 +51,10 @@ public class NativeLibraryLoader implements INativeLibraryLoader {
         return this.loadedLibraryExecutor.containsKey("jagtheora");
     }
 
-
     @Override
     public boolean shutdown() {
-        Hashtable<String, Class<LibraryExecutor>> activeExecutors = new Hashtable<>();
-        Enumeration<String> currentlyLoaded = this.loadedLibraryExecutor.keys();
-        while (currentlyLoaded.hasMoreElements()) {
-            String loadedLibraryName = currentlyLoaded.nextElement();
-            activeExecutors.put(loadedLibraryName, this.loadedLibraryExecutor.get(loadedLibraryName));
-        }
-        try {
-            Class<?> accessibleObject = Class.forName("java.lang.reflect.AccessibleObject");
-            Class<?> classloader = Class.forName("java.lang.ClassLoader");
-            Field nativeLibraries = classloader.getDeclaredField("nativeLibraries");
-            Method setAccessible = accessibleObject.getDeclaredMethod("setAccessible", Boolean.TYPE);
-            setAccessible.invoke(nativeLibraries, Boolean.TRUE);
-            try {
-                currentlyLoaded = this.loadedLibraryExecutor.keys();
-                while (currentlyLoaded.hasMoreElements()) {
-                    String nextLibraryName = currentlyLoaded.nextElement();
-                    try {
-                        File nextLibraryFile = this.loadedLibraryFiles.get(nextLibraryName);
-                        Class<LibraryExecutor> nextLibraryExecutor = this.loadedLibraryExecutor.get(nextLibraryName);
-                        Vector<Object> vector = (Vector<Object>) nativeLibraries.get(nextLibraryExecutor.getClassLoader());
-                        for (int elementIndex = 0; elementIndex < vector.size(); elementIndex++) {
-                            try {
-                                Object loadedElement = vector.elementAt(elementIndex);
-                                Field nameField = loadedElement.getClass().getDeclaredField("name");
-                                setAccessible.invoke(nameField, Boolean.TRUE);
-                                try {
-                                    String loadedElementName = (String) nameField.get(loadedElement);
-                                    if (loadedElementName != null && loadedElementName.equalsIgnoreCase(nextLibraryFile.getCanonicalPath())) {
-                                        Field handleField = loadedElement.getClass().getDeclaredField("handle");
-                                        Method finalizeMethod = loadedElement.getClass().getDeclaredMethod("finalize");
-                                        setAccessible.invoke(handleField, Boolean.TRUE);
-                                        setAccessible.invoke(finalizeMethod, Boolean.TRUE);
-                                        try {
-                                            finalizeMethod.invoke(loadedElement);
-                                            handleField.set(loadedElement, Integer.valueOf(0));
-                                            activeExecutors.remove(nextLibraryName);
-                                        } catch (Throwable throwable) {
-                                        	throwable.printStackTrace();
-                                        }
-                                        setAccessible.invoke(finalizeMethod, Boolean.FALSE);
-                                        setAccessible.invoke(handleField, Boolean.FALSE);
-                                    }
-                                } catch (Throwable throwable) {
-                                	throwable.printStackTrace();
-                                }
-                                setAccessible.invoke(nameField, Boolean.FALSE);
-                            } catch (Throwable ignored) {
-                            	ignored.printStackTrace();
-                            }
-                        }
-                    } catch (Throwable ignored) {
-                    	ignored.printStackTrace();
-                    }
-                }
-            } catch (Throwable ignored) {
-            	ignored.printStackTrace();
-            }
-            setAccessible.invoke(nativeLibraries, Boolean.FALSE);
-        } catch (Throwable ignored) {
-        	ignored.printStackTrace();
-        }
-        this.loadedLibraryExecutor = activeExecutors;
+        this.loadedLibraryExecutor.clear();
+        this.loadedLibraryFiles.clear();
         return this.loadedLibraryExecutor.isEmpty();
     }
 
