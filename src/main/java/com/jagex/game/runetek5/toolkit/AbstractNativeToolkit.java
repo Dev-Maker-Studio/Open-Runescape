@@ -1184,6 +1184,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public void copyLights(int copyLength, PointLight[] lightNodesSrc) {
+        if (this.lightSources == null || lightNodesSrc == null) return;
         if (copyLength >= 0) System.arraycopy(lightNodesSrc, 0, this.lightSources, 0, copyLength);
     	
     	this.lastSceneLightCount = copyLength;
