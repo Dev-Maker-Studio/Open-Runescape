@@ -1299,7 +1299,7 @@ public class client extends GameShell {
         assert CURRENT_GAME != null;
         WindowSettings windowSettings = new WindowSettings(GAME_WIDTH, GAME_HEIGHT, BORDER_WIDTH, BORDER_HEIGHT, CURRENT_GAME.formattedName);
         ClientStartup.activeClient = this;
-        String buildEnvironmentMajor = BUILD_ENVIRONMENT.name;
+        String buildEnvironmentMajor = BUILD_ENVIRONMENT.getName();
         int storeId = BUILD_ENVIRONMENT.id + 32;
         if (!buildEnvironmentMinor.isEmpty()) {
             buildEnvironmentMajor = buildEnvironmentMajor + "_" + buildEnvironmentMinor;

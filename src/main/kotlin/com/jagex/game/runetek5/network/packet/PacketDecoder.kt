@@ -2067,7 +2067,7 @@ object PacketDecoder {
                             break
                         }
                     } else if (previousDisplayName == friend.displayName) {
-                        friend.displayName = displayName
+                        friend.displayName = displayName ?: ""
                         friend.previousDisplayName = previousDisplayName
                         displayName = null
                         break
@@ -2076,7 +2076,7 @@ object PacketDecoder {
                 if (displayName != null && FriendList.FRIEND_COUNT < 200) {
                     val friend = Friend()
                     FriendList.FRIENDS[FriendList.FRIEND_COUNT] = friend
-                    friend.displayName = displayName
+                    friend.displayName = displayName ?: ""
                     friend.previousDisplayName = previousDisplayName
                     friend.worldId = world
                     friend.worldName = worldName

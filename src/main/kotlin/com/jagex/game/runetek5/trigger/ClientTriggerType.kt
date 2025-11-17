@@ -1,12 +1,9 @@
-package com.jagex.game.runetek5.trigger;
+package com.jagex.game.runetek5.trigger
 
 /**
- * 
  * @author Steven - 06/10/2023
- *
  */
-public enum ClientTriggerType {
-
+enum class ClientTriggerType(@JvmField val id: Int) {
     MINIMENU_CLICK_MEC_OPTION1(10),
     MINIMENU_CLICK_MEC_OPTION2(11),
     MINIMENU_CLICK_MEC_OPTION3(12),
@@ -26,11 +23,5 @@ public enum ClientTriggerType {
     IF_SETACTIVEOBJECT(26),
     IF_SETACTIVEGROUNDITEM(27),
     USED_TRIGGER_73(73),
-    USED_TRIGGER_76(76);
-
-    public final int id;
-
-    ClientTriggerType(int id) {
-        this.id = id;
-    }
+    USED_TRIGGER_76(76)
 }
