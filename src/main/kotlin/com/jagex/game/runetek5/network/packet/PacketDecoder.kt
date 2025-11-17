@@ -1499,15 +1499,15 @@ object PacketDecoder {
                     return true
                 }
                 i_11 = 0
-                while (i_11 < FriendsChat.FC_PLAYER_COUNT && (FriendsChat.FC_PLAYERS[i_11].username != username || worldId != FriendsChat.FC_PLAYERS[i_11].worldId)) {
+                while (i_11 < FriendsChat.FC_PLAYER_COUNT && (FriendsChat.FC_PLAYERS!![i_11]!!.username != username || worldId != FriendsChat.FC_PLAYERS!![i_11]!!.worldId)) {
                     i_11++
                 }
                 if (i_11 < FriendsChat.FC_PLAYER_COUNT) {
                     while (i_11 < FriendsChat.FC_PLAYER_COUNT - 1) {
-                        FriendsChat.FC_PLAYERS[i_11] = FriendsChat.FC_PLAYERS[i_11 + 1]
+                        FriendsChat.FC_PLAYERS!![i_11] = FriendsChat.FC_PLAYERS!![i_11 + 1]
                         ++i_11
                     }
-                    FriendsChat.FC_PLAYERS[--FriendsChat.FC_PLAYER_COUNT] = null
+                    FriendsChat.FC_PLAYERS!![--FriendsChat.FC_PLAYER_COUNT] = null
                 }
             } else {
                 val worldName = buffer.readString()
@@ -1521,11 +1521,11 @@ object PacketDecoder {
                 var i_12: Int
                 i_12 = FriendsChat.FC_PLAYER_COUNT - 1
                 while (i_12 >= 0) {
-                    val i_35 = FriendsChat.FC_PLAYERS[i_12].textName!!.compareTo(fcPlayer.textName!!)
+                    val i_35 = FriendsChat.FC_PLAYERS!![i_12]!!.textName!!.compareTo(fcPlayer.textName!!)
                     if (i_35 == 0) {
-                        FriendsChat.FC_PLAYERS[i_12].worldId = worldId
-                        FriendsChat.FC_PLAYERS[i_12].rank = rank
-                        FriendsChat.FC_PLAYERS[i_12].worldName = worldName
+                        FriendsChat.FC_PLAYERS!![i_12]!!.worldId = worldId
+                        FriendsChat.FC_PLAYERS!![i_12]!!.rank = rank
+                        FriendsChat.FC_PLAYERS!![i_12]!!.worldName = worldName
                         if (username == PlayerUpdate.MY_PLAYER.displayName) {
                             FriendsChat.MY_PLAYER_FC_RANK = rank
                         }
@@ -1538,7 +1538,7 @@ object PacketDecoder {
                     }
                     --i_12
                 }
-                if (FriendsChat.FC_PLAYER_COUNT >= FriendsChat.FC_PLAYERS.size) {
+                if (FriendsChat.FC_PLAYER_COUNT >= FriendsChat.FC_PLAYERS!!.size) {
                     context.currentPacket = null
                     return true
                 }
@@ -1546,7 +1546,7 @@ object PacketDecoder {
                 if (FriendsChat.FC_PLAYER_COUNT == 0) {
                     FriendsChat.FC_PLAYERS = arrayOfNulls<FriendsChatPlayer>(100)
                 }
-                FriendsChat.FC_PLAYERS[i_12 + 1] = fcPlayer
+                FriendsChat.FC_PLAYERS!![i_12 + 1] = fcPlayer
                 FriendsChat.FC_PLAYER_COUNT++
                 if (username == PlayerUpdate.MY_PLAYER.displayName) {
                     FriendsChat.MY_PLAYER_FC_RANK = rank
