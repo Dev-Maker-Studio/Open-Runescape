@@ -24,6 +24,6 @@ class GlElementsArrayBuffer(
     }
 
     override fun getBufferAddress(): Long {
-        return super.buffer.getBufferAddress()
+        return super.buffer!!.getBufferAddress()
     }
 }
