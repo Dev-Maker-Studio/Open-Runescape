@@ -71,10 +71,13 @@ public class EnvironmentManager {
         } else {
             chunkEnvironmentUpdate(Camera.cameraPositionAbsoluteX >> 12, Camera.cameraPositionAbsoluteY >> 12, ENVIRONMENT_UPDATE_DURATION);
         }
-        transitionSceneEnvironment();
-        applySun();
-        setSceneBloomFilter();
-        calculateFog();
+        // Only perform GL-affecting operations on the render thread.
+        if (!mapregion.asyncMaploading) {
+            transitionSceneEnvironment();
+            applySun();
+            setSceneBloomFilter();
+            calculateFog();
+        }
     }
 
     public Environment getEnvironment() {
@@ -106,7 +109,6 @@ public class EnvironmentManager {
         if (environment != null) {
             this.sunPosition.copy(environment.sunPosition);
         }
-        applySun();
     }
 
     public void requestDirectEnvironmentTransition() {
