@@ -30,7 +30,7 @@ public class GameTipType {
         if (details == TipRenderDetails.BACKGROUND)
             return TipsBackground.decode(buffer);
         if (details == TipRenderDetails.aClass60602)
-            return Class350_Sub2.decode(buffer);
+            return decodeSub2(buffer);
         if (details == TipRenderDetails.OUTLINED)
             return OutlinedNewsItem.decode(buffer);
         if (details == TipRenderDetails.ROTATED_SPRITE)

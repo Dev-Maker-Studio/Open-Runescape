@@ -17,21 +17,4 @@ class RotatableSpritePositioning(
     override fun getRenderDetails(): TipRenderDetails {
         return TipRenderDetails.ROTATED_SPRITE
     }
-
-    companion object {
-        @JvmStatic
-        @JvmName("decodeRotatable")
-        fun decode(buffer: Packet): SpritePositioning {
-            val positioning = SpritePositioning.decode(buffer)
-            val angle = buffer.readMedium()
-            return RotatableSpritePositioning(
-                positioning.spriteId,
-                positioning.horizontalAnchor,
-                positioning.verticalAnchor,
-                positioning.spriteOffsetX,
-                positioning.spriteOffsetY,
-                angle
-            )
-        }
-    }
 }

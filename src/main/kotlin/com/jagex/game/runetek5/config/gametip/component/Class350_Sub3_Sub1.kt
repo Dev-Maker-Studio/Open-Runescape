@@ -41,6 +41,18 @@ fun decodeAnchored(buffer: Packet): AnchoredElement {
     return AnchoredElement(horizontalAnchor, verticalAnchor, offX, offY, width, height, i_8, fileId, i_10)
 }
 
+fun decodeSub2(rsbytebuffer0: Packet): AnchoredElement {
+    val anchoredElement = decodeAnchored(rsbytebuffer0)
+    val i_3 = rsbytebuffer0.readInt()
+    val i_4 = rsbytebuffer0.readInt()
+    return Class350_Sub2(
+        anchoredElement.horizontalAnchor, anchoredElement.verticalAnchor,
+        anchoredElement.offsetX, anchoredElement.offsetY,
+        anchoredElement.width, anchoredElement.height,
+        anchoredElement.anInt4092, anchoredElement.fileId, anchoredElement.anInt4091, i_3, i_4
+    )
+}
+
 fun decodeSub3(rsbytebuffer0: Packet): AnchoredElement {
     val class3502 = decodeAnchored(rsbytebuffer0)
     val i_3 = rsbytebuffer0.readBigSmart()
@@ -72,5 +84,18 @@ fun decodeSub1(buffer: Packet): AnchoredElement {
     val i_5 = buffer.readBigSmart()
     return Class350_Sub1(
         element.horizontalAnchor, element.verticalAnchor, element.offsetX, element.offsetY, element.width, element.height, element.anInt4092, element.fileId, element.anInt4091, i_4, i_5
+    )
+}
+
+fun decodeRotatable(buffer: Packet): SpritePositioning {
+    val positioning = SpritePositioning.decode(buffer)
+    val angle = buffer.readMedium()
+    return RotatableSpritePositioning(
+        positioning.spriteId,
+        positioning.horizontalAnchor,
+        positioning.verticalAnchor,
+        positioning.spriteOffsetX,
+        positioning.spriteOffsetY,
+        angle
     )
 }
