@@ -153,12 +153,7 @@ public class ClientStartup {
                 LoadingStage.gametipsToDisplay = new LoginScreenComponent[updateDetails.length];
 
                 for (int index = 0; index < LoadingStage.gametipsToDisplay.length; index++) {
-                    LoadingStage.gametipsToDisplay[index] = new DrawableGameTip(TypeLists.GAME_TIPS.list(
-                		updateDetails[index].tipFileId),
-                		updateDetails[index].displayDurationMs,
-                		updateDetails[index].timeBetweenUpdatesMs,
-                            tipsLoader
-                    );
+                    LoadingStage.gametipsToDisplay[index] = new DrawableGameTip(TypeLists.GAME_TIPS.list(updateDetails[index].tipFileId), updateDetails[index].displayDurationMs, updateDetails[index].timeBetweenUpdatesMs, tipsLoader);
                 }
             }
         }

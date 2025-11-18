@@ -20,15 +20,4 @@ public class Class350_Sub1 extends AnchoredElement {
     public TipRenderDetails getRenderDetails() {
         return TipRenderDetails.aClass60603;
     }
-
-	public static AnchoredElement decode(Packet buffer) {
-	    AnchoredElement element = AnchoredElement.decode(buffer);
-	    int i_3 = buffer.readInt();
-	    int i_4 = buffer.readInt();
-	    int i_5 = buffer.readBigSmart();
-	    return new Class350_Sub1(element.horizontalAnchor, element.verticalAnchor,
-	    		element.offsetX, element.offsetY,
-	    		element.width, element.height, 
-	    		element.anInt4092, element.fileId, element.anInt4091, i_4, i_5);
-	}
 }

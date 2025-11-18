@@ -20,7 +20,7 @@ public class GameTipTypeList {
     public GameTipTypeList(Js5ResourceProvider resourceProvider) {
         this.tipsResource = resourceProvider;
         Packet buffer = new Packet(this.tipsResource.getFile(0, 0));
-        int size = buffer.buffer != null && buffer.buffer.length >= 1 ? buffer.readUByte() : -1;
+        int size = buffer.buffer.length >= 1 ? buffer.readUByte() : -1;
         if (size < 4) {
         	this.tipStages = new GameTipStage[0];
             this.tipsFileId = -1;
@@ -29,9 +29,9 @@ public class GameTipTypeList {
             TipRenderDetails[] tipRenderDetails = TipRenderDetails.values();
             boolean hasStages = true;
             if (tipRenderDetails.length == length) {
-                for (int index = 0; index < tipRenderDetails.length; index++) {
+                for (TipRenderDetails tipRenderDetail : tipRenderDetails) {
                     int transformType = buffer.readUByte();
-                    if (transformType != tipRenderDetails[index].transformType) {
+                    if (transformType != tipRenderDetail.transformType) {
                         hasStages = false;
                         break;
                     }

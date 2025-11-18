@@ -12,6 +12,8 @@ import com.jagex.game.runetek5.config.gametip.component.SpritePositioning;
 import com.jagex.game.runetek5.config.gametip.component.TipsBackground;
 import com.jagex.game.runetek5.config.gametip.component.TipsSprite;
 
+import static com.jagex.game.runetek5.config.gametip.component.Class350_Sub3_Sub1Kt.*;
+
 public class GameTipType {
 
     public ITipDetails[] tipDetailsCache;
@@ -36,15 +38,15 @@ public class GameTipType {
         if (details == TipRenderDetails.SPRITE)
             return SpritePositioning.decode(buffer);
         if (details == TipRenderDetails.aClass60603)
-            return Class350_Sub1.decode(buffer);
+            return decodeSub1(buffer);
         if (details == TipRenderDetails.aClass60608)
-            return Class350_Sub3.decode(buffer);
+            return decodeSub3(buffer);
         if (details == TipRenderDetails.ANCHORED_TEXT)
             return AnchoredTextMeta.decode(buffer);
         if (details == TipRenderDetails.aClass60601)
             return TipsSprite.decode(buffer);
         if (details == TipRenderDetails.aClass60610)
-            return Class350_Sub3_Sub1.decode(buffer);
+            return decodeSub3Sub1(buffer);
         return null;
     }
 }
