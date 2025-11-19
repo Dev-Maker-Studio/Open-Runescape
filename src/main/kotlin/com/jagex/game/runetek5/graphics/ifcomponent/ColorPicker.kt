@@ -18,7 +18,7 @@ object ColorPicker {
             ColorUtil.initializeTables(false, true)
             val rgb = ColorUtil.hslToRgb[hsl]
             ColorUtil.resetTables(false, true)
-            toolkit.drawFilledRectangle(x, (63 - hue) * component.height shr 6 + y, component.width, (component.height shr 6) + 1, rgb, 0)
+            toolkit.drawFilledRectangle(x, ((63 - hue) * component.height shr 6) + y, component.width, (component.height shr 6) + 1, rgb, 0)
         }
     }
 }
