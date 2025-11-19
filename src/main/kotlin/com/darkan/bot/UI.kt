@@ -7,20 +7,20 @@ import com.darkan.bot.scripts.ScriptMetadata
 import com.darkan.bot.utils.Skill
 import com.github.weisj.darklaf.LafManager
 import com.github.weisj.darklaf.theme.DarculaTheme
-import java.awt.BorderLayout
-import java.awt.Component
-import java.awt.Dimension
-import java.awt.Image
+import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.io.*
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.border.EmptyBorder
+import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.DefaultTableModel
 
 lateinit var UI: CheddarCheeseUI
@@ -38,19 +38,17 @@ fun initializeUI() {
 }
 
 class CheddarCheeseUI : JPanel() {
-    private val scriptComboBox = object : JComboBox<ScriptMetadata>() {
-        override fun getToolTipText(): String? {
-            val selectedItem = selectedItem as? ScriptMetadata
-            return selectedItem?.description
-        }
-    }
-    private val currentScriptLabel = JLabel("No script running")
     private val xpTableModel = DefaultTableModel()
     private val xpData = mutableMapOf<Skill, Pair<Long, Int>>()
     val originalOut: PrintStream = System.out
     var logFile: File? = null
     private var lastLogModifiedTime = 0L
     private val configTabs = mutableMapOf<ScriptMetadata, ScriptConfigWrapper>()
+    var isUIInitialized = false
+    private val varcTableModel = DefaultTableModel()
+    private val varcSearchField = JTextField()
+    private val allVarcData = mutableListOf<Array<Any>>()
+    private val maxVarcEntries = 100
 
     val logTextPane = object : JTextPane() {
         override fun getScrollableTracksViewportWidth(): Boolean {
@@ -65,7 +63,8 @@ class CheddarCheeseUI : JPanel() {
         preferredSize = Dimension(600, 600)
 
         tabbedPane.apply {
-            addTab("Scripts", createScriptsTab())
+            addTab("Scripts", ScriptSelectionPanel())
+            addTab("Logs", JScrollPane(logTextPane))
             addTab("Skills", createSkillsTab())
             addTab("Settings", createSettingsTab())
         }
@@ -99,16 +98,63 @@ class CheddarCheeseUI : JPanel() {
         }
     }
 
-    private fun createSettingsTab(): JPanel = JPanel().apply {
-        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+    private fun createSettingsTab(): JPanel = JPanel(BorderLayout()).apply {
         border = EmptyBorder(10, 10, 10, 10)
 
-        val settings = listOf("Toggle Varp Debug", "Toggle Varc Debug")
-        settings.forEach { setting ->
-            add(JRadioButton(setting).apply {
-                addActionListener { handleSettingToggle(setting, isSelected) }
+        val topPanel = JPanel()
+        topPanel.apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+
+            val togglePanel = JPanel(FlowLayout(FlowLayout.LEFT))
+            listOf("Toggle Varp Debug", "Toggle Varc Debug").forEach { setting ->
+                togglePanel.add(JRadioButton(setting).apply {
+                    addActionListener { handleSettingToggle(setting, isSelected) }
+                })
+            }
+            add(togglePanel)
+
+            val searchPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+            searchPanel.add(JLabel("Search:"))
+            varcSearchField.preferredSize = Dimension(200, 25)
+            varcSearchField.addActionListener { filterVarcTable(varcSearchField.text) }
+            searchPanel.add(varcSearchField)
+            searchPanel.add(JButton("Clear Search").apply {
+                addActionListener {
+                    varcSearchField.text = ""
+                    filterVarcTable("")
+                }
+            })
+            searchPanel.add(JButton("Clear Table").apply {
+                addActionListener { clearVarcTable() }
+            })
+            add(searchPanel)
+        }
+        add(topPanel, BorderLayout.NORTH)
+
+        varcTableModel.setColumnIdentifiers(arrayOf("Type", "ID", "Previous Value", "New Value"))
+        val varcTable = JTable(varcTableModel).apply {
+            setDefaultRenderer(Object::class.java, object : DefaultTableCellRenderer() {
+                override fun getTableCellRendererComponent(
+                    table: JTable, value: Any?, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int
+                ): Component {
+                    val c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+                    if (!isSelected && row < table.rowCount && table.columnCount >= 4) {
+                        val prevValue = table.getValueAt(row, 2)?.toString() ?: ""
+                        val newValue = table.getValueAt(row, 3)?.toString() ?: ""
+                        if (column == 3 && prevValue != newValue && prevValue.isNotEmpty() && newValue.isNotEmpty()) {
+                            c.background = table.background
+                            c.font = c.font.deriveFont(java.awt.Font.BOLD)
+                        } else {
+                            c.background = table.background
+                            c.font = c.font.deriveFont(java.awt.Font.PLAIN)
+                        }
+                    }
+                    return c
+                }
             })
         }
+        add(JScrollPane(varcTable), BorderLayout.CENTER)
+        isUIInitialized = true
     }
 
     private fun handleSettingToggle(settingName: String, isSelected: Boolean) {
@@ -118,128 +164,80 @@ class CheddarCheeseUI : JPanel() {
         }
     }
 
-    private fun createScriptsTab(): JPanel = JPanel().apply {
-        layout = BorderLayout()
-        border = EmptyBorder(10, 10, 10, 10)
-
-        val controlsPanel = JPanel().apply {
-            layout = BoxLayout(this, BoxLayout.X_AXIS)
-            populateScriptComboBox()
-
-            add(scriptComboBox.apply {
-                maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
-                toolTipText = ""
-                renderer = createScriptRenderer()
-            })
-
-            val startButton = JButton("Start script").apply {
-                addActionListener { startScript() }
-            }
-            val stopButton = JButton("Stop scripts").apply {
-                addActionListener { stopScripts() }
-            }
-
-            add(Box.createRigidArea(Dimension(10, 0)))
-            add(startButton)
-            add(Box.createRigidArea(Dimension(5, 0)))
-            add(stopButton)
+    private fun filterVarcTable(searchText: String) {
+        if (!isUIInitialized) return
+        SwingUtilities.invokeLater {
+            varcTableModel.rowCount = 0
+            if (searchText.isEmpty()) allVarcData.forEach { varcTableModel.addRow(it) }
+            else allVarcData.filter { row ->
+                row[0].toString().lowercase().contains(searchText.lowercase()) ||
+                        row[1].toString().contains(searchText) ||
+                        row[2].toString().contains(searchText) ||
+                        row[3].toString().contains(searchText)
+            }.forEach { varcTableModel.addRow(it) }
         }
-
-        val statusPanel = JPanel().apply {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
-            add(Box.createRigidArea(Dimension(0, 10)))
-            add(currentScriptLabel)
-        }
-
-        logTextPane.isEditable = false
-        val logScrollPane = JScrollPane(logTextPane)
-
-        val topPanel = JPanel().apply {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
-            add(controlsPanel)
-            add(statusPanel)
-        }
-
-        add(topPanel, BorderLayout.NORTH)
-        add(logScrollPane, BorderLayout.CENTER)
     }
 
-    private fun populateScriptComboBox() {
-        scriptComboBox.model = DefaultComboBoxModel(ScriptExecutor.scripts.values.toTypedArray())
-        scriptComboBox.selectedIndex = -1
-    }
-
-    private fun createScriptRenderer(): ListCellRenderer<ScriptMetadata> {
-        return object : DefaultListCellRenderer() {
-            override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
-                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                val scriptValue = value as? ScriptMetadata
-                text = scriptValue?.toString() ?: "Select a script"
-                toolTipText = scriptValue?.description
-                return this
+    fun addVarcTableEntry(type: String, id: Int, prevValue: Int, newValue: Int) {
+        if (!isUIInitialized || prevValue == newValue) return
+        SwingUtilities.invokeLater {
+            val newRow: Array<Any> = arrayOf(type, id, prevValue, newValue)
+            val existingIndex = allVarcData.indexOfFirst { it[0] == type && it[1] == id }
+            if (existingIndex != -1) allVarcData[existingIndex] = newRow
+            else {
+                allVarcData.add(0, newRow)
+                if (allVarcData.size > maxVarcEntries) allVarcData.removeAt(allVarcData.size - 1)
             }
-        } as ListCellRenderer<ScriptMetadata>
-    }
-
-    private fun startScript() {
-        val scriptMetadata = scriptComboBox.selectedItem as? ScriptMetadata
-        if (scriptMetadata != null) {
-            try {
-                val script = scriptMetadata.scriptClass.getDeclaredConstructor().newInstance()
-                if (script is ConfigurableScript)
-                    addConfigTab(scriptMetadata, script)
-
-                ScriptExecutor.activate(script)
-                currentScriptLabel.text = "Running: ${scriptMetadata.name}"
-                println("Starting script: ${scriptMetadata.name}")
-            } catch (e: Exception) {
-                JOptionPane.showMessageDialog(this, "Failed to start script: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
-                e.printStackTrace()
-            }
-        } else
-            JOptionPane.showMessageDialog(this, "Please select a script to start.", "No Script Selected", JOptionPane.WARNING_MESSAGE)
-    }
-
-    private fun addConfigTab(scriptMetadata: ScriptMetadata, script: Any) {
-        if (configTabs.containsKey(scriptMetadata)) {
-            SwingUtilities.invokeLater {
-                configTabs[scriptMetadata]?.let { wrapper ->
-                    tabbedPane.remove(wrapper.configPanel)
+            filterVarcTable(varcSearchField.text)
+            for (i in 0 until varcTableModel.rowCount) {
+                val rowType = varcTableModel.getValueAt(i, 0) as? String
+                val rowId = varcTableModel.getValueAt(i, 1) as? Int
+                if (rowType == type && rowId == id) {
+                    varcTableModel.setValueAt(prevValue, i, 2)
+                    varcTableModel.setValueAt(newValue, i, 3)
+                    return@invokeLater
                 }
-                configTabs.remove(scriptMetadata)
-                addNewConfigTab(scriptMetadata, script)
             }
-        } else
-            addNewConfigTab(scriptMetadata, script)
+            varcTableModel.addRow(arrayOf<Any>(type, id, prevValue, newValue))
+        }
     }
 
-    private fun addNewConfigTab(scriptMetadata: ScriptMetadata, script: Any) {
+    private fun clearVarcTable() = SwingUtilities.invokeLater {
+        allVarcData.clear()
+        varcTableModel.rowCount = 0
+        varcSearchField.text = ""
+    }
+
+    fun addConfigTab(scriptMetadata: ScriptMetadata, script: Any) {
+        val tabTitle = "${scriptMetadata.name} Settings"
+        val existingIndex = tabbedPane.indexOfTab(tabTitle)
+        if (existingIndex != -1) {
+            tabbedPane.selectedIndex = existingIndex
+            return
+        }
+
         val configWrapper = ScriptConfigWrapper(script)
+        val panel = configWrapper.configPanel
         configTabs[scriptMetadata] = configWrapper
-
-        tabbedPane.addTab("${scriptMetadata.name} Config", configWrapper.configPanel)
-        tabbedPane.selectedComponent = configWrapper.configPanel
-    }
-
-    private fun removeConfigTab(scriptMetadata: ScriptMetadata) {
-        if (configTabs.containsKey(scriptMetadata)) {
-            SwingUtilities.invokeLater {
-                configTabs[scriptMetadata]?.let { wrapper ->
-                    tabbedPane.remove(wrapper.configPanel)
+        tabbedPane.addTab(tabTitle, panel)
+        val tabIndex = tabbedPane.indexOfComponent(panel)
+        val tabComponent = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+            isOpaque = false
+            add(JLabel(tabTitle))
+            add(JButton("x").apply {
+                margin = Insets(0, 5, 0, 5)
+                isBorderPainted = false
+                isFocusPainted = false
+                isContentAreaFilled = false
+                toolTipText = "Close tab"
+                addActionListener {
+                    tabbedPane.remove(panel)
                     configTabs.remove(scriptMetadata)
                 }
-            }
+            })
         }
-    }
-
-    private fun stopScripts() {
-        // Remove all config tabs
-        configTabs.keys.toList().forEach { scriptMetadata ->
-            removeConfigTab(scriptMetadata)
-        }
-
-        ScriptExecutor.stopAll()
-        currentScriptLabel.text = "No script running"
+        tabbedPane.setTabComponentAt(tabIndex, tabComponent)
+        tabbedPane.selectedIndex = tabIndex
     }
 
     private fun createSkillsTab(): JPanel = JPanel(BorderLayout()).apply {
@@ -330,10 +328,12 @@ class CheddarCheeseUI : JPanel() {
     private fun redirectSystemOut() {
         try {
             val userHome = System.getProperty("user.home")
-            val cheddarCheeseDir = File(userHome, ".cheddarcheese")
-            if (!cheddarCheeseDir.exists())
-                cheddarCheeseDir.mkdirs()
-            logFile = File(cheddarCheeseDir, "cheddarcheese-log.txt")
+            val logDir = File(userHome, ".cheddarcheese/logs")
+            if (!logDir.exists())
+                logDir.mkdirs()
+            val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSS").format(Date())
+            val pid = ProcessHandle.current().pid()
+            logFile = File(logDir, "cheddarcheese-${timestamp}-${pid}.log")
             println("Attaching to logfile at $logFile")
             if (!logFile!!.exists())
                 logFile!!.createNewFile()

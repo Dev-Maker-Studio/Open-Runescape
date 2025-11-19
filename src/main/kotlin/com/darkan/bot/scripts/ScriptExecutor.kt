@@ -1,6 +1,7 @@
 package com.darkan.bot.scripts
 
 import com.darkan.bot.UI
+import com.darkan.bot.formatElapsedTime
 import com.darkan.bot.random
 import com.darkan.bot.scripts.event.Event
 import com.darkan.bot.Bot
@@ -25,6 +26,7 @@ object ScriptExecutor {
     val scripts: Map<String, ScriptMetadata> get() = _scripts
 
     private val activeScripts = ConcurrentHashMap<String, Script>()
+    private val scriptStartTimes = ConcurrentHashMap<String, Long>()
     private val eventBus = ConcurrentLinkedDeque<Event>()
     var tick = 0L
 
@@ -46,9 +48,29 @@ object ScriptExecutor {
 
     fun pushEvent(event: Event) = eventBus.addLast(event)
 
-    fun activate(script: Script) { activeScripts[script.javaClass.name] = script }
+    fun activate(script: Script) {
+        activeScripts[script.javaClass.name] = script
+        scriptStartTimes[script.javaClass.name] = System.currentTimeMillis()
+    }
 
-    fun deactivate(script: Script) = activeScripts.remove(script.javaClass.name)
+    fun deactivate(script: Script) {
+        activeScripts.remove(script.javaClass.name)
+        scriptStartTimes.remove(script.javaClass.name)
+    }
+
+    fun deactivate(scriptClass: Class<*>) {
+        activeScripts.remove(scriptClass.name)
+        scriptStartTimes.remove(scriptClass.name)
+    }
+
+    fun isScriptRunning(scriptClass: Class<*>): Boolean = activeScripts.containsKey(scriptClass.name)
+
+    fun getScriptInstance(scriptClass: Class<*>): Script? = activeScripts[scriptClass.name]
+
+    fun getScriptRuntimeFormatted(scriptClass: Class<*>): String? {
+        val startTime = scriptStartTimes[scriptClass.name] ?: return null
+        return formatElapsedTime(System.currentTimeMillis(), startTime)
+    }
 
     fun stopAll() = activeScripts.values.toList().forEach { it.stop() }
 
