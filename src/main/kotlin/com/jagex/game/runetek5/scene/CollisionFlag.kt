@@ -1,7 +1,7 @@
-package com.jagex.game.runetek5.scene;
+package com.jagex.game.runetek5.scene
 
-public enum CollisionFlag {
-    EMPTY(0xFFFFFFFF), // -1
+enum class CollisionFlag(@JvmField val flag: Int) {
+    EMPTY(0xFFFFFFFF.toInt()), // -1
 
     NW_OBJ(0x1), // 1
     N_OBJ(0x2), // 2
@@ -34,11 +34,5 @@ public enum CollisionFlag {
     S_ALT_OBJ(0x8000000), // 134217728
     SW_ALT_OBJ(0x10000000), // 268435456
     W_ALT_OBJ(0x20000000), // 536870912
-    ALT_OBJ(0x40000000); // 1073741824
-
-    public final int flag;
-
-    CollisionFlag(int flag) {
-        this.flag = flag;
-    }
+    ALT_OBJ(0x40000000) // 1073741824
 }
