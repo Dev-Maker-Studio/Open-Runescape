@@ -17,4 +17,17 @@ class RotatableSpritePositioning(
     override fun getRenderDetails(): TipRenderDetails {
         return TipRenderDetails.ROTATED_SPRITE
     }
+
+    companion object {
+        @JvmStatic
+        fun decode(buffer: Packet): RotatableSpritePositioning {
+            val spriteId = buffer.readBigSmart()
+            val anchorX = AnchorX.values()[buffer.readUByte()]
+            val anchorY = AnchorY.values()[buffer.readUByte()]
+            val offsetX = buffer.readShort()
+            val offsetY = buffer.readShort()
+            val utAngle = buffer.readShort()
+            return RotatableSpritePositioning(spriteId, anchorX, anchorY, offsetX, offsetY, utAngle)
+        }
+    }
 }
