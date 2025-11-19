@@ -15,7 +15,7 @@ class TextureOpVerticalGradient : TextureOperation(0, true) {
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = super.monochromeImageCache.getPalette(i_1)
         if (super.monochromeImageCache.dirty) {
-            ArrayUtils.setVariables(ints_3, 0, TextureRaster.currentWidth, TextureRaster.verticalTable[i_1])
+            ArrayUtils.setVariables(ints_3, 0, TextureRaster.currentWidth, TextureRaster.verticalTable!![i_1])
         }
         return ints_3
     }

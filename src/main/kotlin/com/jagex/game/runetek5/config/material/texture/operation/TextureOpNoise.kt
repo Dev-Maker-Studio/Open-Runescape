@@ -14,10 +14,10 @@ class TextureOpNoise : TextureOperation(0, true) {
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = super.monochromeImageCache.getPalette(i_1)
         if (super.monochromeImageCache.dirty) {
-            val i_4 = TextureRaster.verticalTable[i_1]
+            val i_4 = TextureRaster.verticalTable!![i_1]
 
             for (i_5 in 0 until TextureRaster.currentWidth) {
-                ints_3[i_5] = method15428(TextureRaster.horizontalTable[i_5], i_4) % 4096
+                ints_3[i_5] = method15428(TextureRaster.horizontalTable!![i_5], i_4) % 4096
             }
         }
 

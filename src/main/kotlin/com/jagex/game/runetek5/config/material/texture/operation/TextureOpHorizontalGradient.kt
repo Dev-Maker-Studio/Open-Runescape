@@ -11,6 +11,6 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
  */
 class TextureOpHorizontalGradient : TextureOperation(0, true) {
     override fun getMonochromeOutput(i_1: Int): IntArray {
-        return TextureRaster.horizontalTable
+        return TextureRaster.horizontalTable!!
     }
 }
