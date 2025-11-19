@@ -1,5 +1,8 @@
 package com.jagex.game.runetek5.graphics.texture.water
 
+/**
+ * Generates water textures using Perlin noise with multiple octaves
+ */
 internal class Class264 {
 
     init {
@@ -7,54 +10,63 @@ internal class Class264 {
     }
 
     companion object {
+        /**
+         * Generates a single octave layer of noise with multiple frequencies
+         */
         @JvmStatic
-        fun method4781(i_0: Int, class2615: Class261, f_6: Float, f_7: Float, f_8: Float, f_9: Float, bytes_11: ByteArray, i_12: Int) {
-            val i_13 = 16384
-            val floats_14 = FloatArray(i_13)
+        fun generateOctave(layer: Int, noiseGen: Class261, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: ByteArray, offset: Int) {
+            val octaveSize = 16384
+            val tempBuffer = FloatArray(octaveSize)
 
-            var i_15: Int
-            var i_16: Int
-            var f_6_var = f_6
-            var f_7_var = f_7
-            var f_8_var = f_8
-            var f_9_var = f_9
+            var currentScaleX = scaleX
+            var currentScaleY = scaleY
+            var currentScaleZ = scaleZ
+            var currentAmplitude = amplitude
 
-            for (i_15 in 0 until 8) {
-                i_16 = i_12
-                class2615.method4634(i_0, f_6_var / 128, f_7_var / 128, f_8_var / 16, f_9_var * 127.0f, floats_14)
+            for (octave in 0 until 8) {
+                var writePos = offset
+                noiseGen.method4634(layer, currentScaleX / 128, currentScaleY / 128, currentScaleZ / 16, currentAmplitude * 127.0f, tempBuffer)
 
-                for (i_17 in 0 until i_13) {
-                    bytes_11[i_16] = (bytes_11[i_16] + floats_14[i_17]).toInt().toByte()
-                    ++i_16
+                for (i in 0 until octaveSize) {
+                    output[writePos] = (output[writePos] + tempBuffer[i]).toInt().toByte()
+                    ++writePos
                 }
 
-                f_6_var *= 2.0f
-                f_7_var *= 2.0f
-                f_8_var *= 2.0f
-                f_9_var *= 0.6f
+                currentScaleX *= 2.0f
+                currentScaleY *= 2.0f
+                currentScaleZ *= 2.0f
+                currentAmplitude *= 0.6f
             }
 
-            i_15 = i_12
+            var normalizePos = offset
 
-            for (i_16 in 0 until i_13) {
-                bytes_11[i_15] = (bytes_11[i_15] + 127).toByte()
-                ++i_15
+            for (i in 0 until octaveSize) {
+                output[normalizePos] = (output[normalizePos] + 127).toByte()
+                ++normalizePos
             }
         }
 
+        /**
+         * Generates a complete water texture using Perlin noise
+         */
         @JvmStatic
-        fun method4782(class2614: Class261): ByteArray {
-            val bytes_10 = ByteArray(262144)
-            method4783(class2614, bytes_10, 0)
-            return bytes_10
+        @JvmName("method4782")
+        fun generatePerlinWaterTexture(noiseGen: Class261): ByteArray {
+            val textureData = ByteArray(262144)
+            generatePerlinWaterTextureLayers(noiseGen, textureData, 0)
+            return textureData
         }
 
+        /**
+         * Generates all layers of the water texture
+         */
         @JvmStatic
-        fun method4783(class2614: Class261, bytes_10: ByteArray, i_11: Int) {
-            var i_11_var = i_11
-            for (i_12 in 0 until 16) {
-                method4781(i_12, class2614, 4.0f, 4.0f, 16.0f, 0.5f, bytes_10, i_11_var)
-                i_11_var += 16384
+        @JvmName("method4783")
+        fun generatePerlinWaterTextureLayers(noiseGen: Class261, output: ByteArray, startOffset: Int) {
+            var offset = startOffset
+            for (layer in 0 until 16) {
+                generateOctave(layer, noiseGen, 4.0f, 4.0f, 16.0f, 0.5f, output, offset)
+                offset += 16384
             }
         }
     }
