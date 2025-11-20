@@ -78,7 +78,7 @@ public class TextureContainerGL {
 
         Texture3DShaderGL class1644 = openglToolkit.aClass1648363;
         if (class1644.createShader() && databufferHdrTexture == null) {
-            buffer = Class264.method4782(new Class261_Sub1());
+            buffer = PerlinWaterTextureGenerator.method4782(new PerlinNoiseGenerator());
             databufferHdrTexture = DataBuffer.createDataBuffer(buffer);
         }
     }

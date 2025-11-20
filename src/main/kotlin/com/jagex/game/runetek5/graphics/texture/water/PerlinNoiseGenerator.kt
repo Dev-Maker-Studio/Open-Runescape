@@ -6,7 +6,7 @@ import java.util.Random
  * Implements 3D Perlin noise generation for water textures
  * Uses gradient vectors and permutation table for pseudorandom noise
  */
-internal class Class261_Sub1 : Class261() {
+internal class PerlinNoiseGenerator : NoiseGenerator() {
 
     @JvmField val permutationTable: IntArray = IntArray(512)
 

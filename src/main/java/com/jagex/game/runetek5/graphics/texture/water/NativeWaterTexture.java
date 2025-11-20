@@ -77,7 +77,7 @@ public class NativeWaterTexture {
         if (this.normalSampler == null) {
             byte[] bytes_1;
             if (hdrDatabuffer == null) {
-                bytes_1 = Class264.method4782(new Class261_Sub1());
+                bytes_1 = PerlinWaterTextureGenerator.method4782(new PerlinNoiseGenerator());
                 hdrDatabuffer = DataBuffer.createDataBuffer(bytes_1);
             }
 
@@ -117,7 +117,7 @@ public class NativeWaterTexture {
             return false;
 		if (anInterface1_480 == null) {
 			if (anObject483 == null) {
-				byte[] is = Class264.method4782(128, 128, 16, 8, new Class261_Sub1(419684), 4.0F, 4.0F, 16.0F, 0.5F, 0.6F);
+				byte[] is = PerlinWaterTextureGenerator.method4782(128, 128, 16, 8, new PerlinNoiseGenerator(419684), 4.0F, 4.0F, 16.0F, 0.5F, 0.6F);
 				anObject483 = DataBuffer.create_data_buffer(is, false, (byte) 40);
 			}
 			byte[] is = Class346.method6154(anObject483, false, (byte) 1);

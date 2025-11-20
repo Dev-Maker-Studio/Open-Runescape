@@ -4,7 +4,7 @@ package com.jagex.game.runetek5.graphics.texture.water
  * Base class for noise generation algorithms
  * Used for procedural water texture generation
  */
-internal abstract class Class261 {
+internal abstract class NoiseGenerator {
     /**
      * Generates 3D Perlin noise values
      * @param layer The layer index (for multiple octaves)
