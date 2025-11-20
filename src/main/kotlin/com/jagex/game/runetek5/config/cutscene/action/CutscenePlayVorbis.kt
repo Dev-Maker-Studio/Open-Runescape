@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.config.cutscene.action
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
-import com.jagex.game.runetek5.config.midi.AreadSound
+import com.jagex.game.runetek5.config.midi.AreaSound
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 
 /**
@@ -12,7 +12,7 @@ import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
  */
 class CutscenePlayVorbis(buffer: Packet) : CutsceneAction(buffer) {
 
-    @JvmField var vorbisSound: AreadSound? = null
+    @JvmField var vorbisSound: AreaSound? = null
 
     @JvmField val soundId: Int
 

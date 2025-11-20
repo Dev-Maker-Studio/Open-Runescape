@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.client.client;
 import com.jagex.game.runetek5.client.input.camera.Camera;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.cutscene.action.CutsceneBasicMovement;
-import com.jagex.game.runetek5.config.midi.AreadSound;
+import com.jagex.game.runetek5.config.midi.AreaSound;
 import com.jagex.game.runetek5.config.midi.MixedAudioBuffer;
 import com.jagex.game.runetek5.config.midi.SongReference;
 import com.jagex.game.runetek5.config.midi.instrument.MusicSample;
@@ -28,7 +28,7 @@ public class AreaSoundPlayer {
     public static int titlescreenMusicArchive = -1;
     public static int AREA_SOUND_CACHE_SIZE;
 
-    public static AreadSound[] AREA_SOUND_CACHE = new AreadSound[50];
+    public static AreaSound[] AREA_SOUND_CACHE = new AreaSound[50];
 
     public static int SOUND_LEVEL;
 	public static Js5ResourceProvider MUSIC_RESOURCE;
@@ -38,14 +38,14 @@ public class AreaSoundPlayer {
     }
 
 	public static void initialize() {
-	    AREA_SOUND_CACHE = new AreadSound[50];
+	    AREA_SOUND_CACHE = new AreaSound[50];
 	    AREA_SOUND_CACHE_SIZE = 0;
 	}
     
 	public static void method1623() {
 	    PacketEncoder.method3675();
 	    for (int soundIndex = 0; soundIndex < AREA_SOUND_CACHE_SIZE; soundIndex++) {
-	        AreadSound sound = AREA_SOUND_CACHE[soundIndex];
+	        AreaSound sound = AREA_SOUND_CACHE[soundIndex];
 	        boolean bool3 = false;
 	        if (sound.areaSoundStream == null) {
 	            if (--sound.delay >= (sound.spoken() ? -1500 : -10)) {
@@ -180,10 +180,10 @@ public class AreaSoundPlayer {
 	/**
 	 * Plays vorbis sound with volume adjusted by distance from given position
 	 */
-	public static AreadSound playSoundVorbis(int soundId, int timesRepeated, int delay, int volume, int bitpackedPosition, boolean voiceEffect, int sampleRate) {
+	public static AreaSound playSoundVorbis(int soundId, int timesRepeated, int delay, int volume, int bitpackedPosition, boolean voiceEffect, int sampleRate) {
 	    if ((voiceEffect ? PreferenceManager.preferences.voiceOverVolume.getValue()
 	    		: PreferenceManager.preferences.soundEffectVolume.getValue()) != 0 && timesRepeated != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
-	        AreadSound areaSound = new AreadSound((byte) (voiceEffect ? 3 : 2), soundId, timesRepeated, delay, volume, bitpackedPosition, sampleRate, null);
+	        AreaSound areaSound = new AreaSound((byte) (voiceEffect ? 3 : 2), soundId, timesRepeated, delay, volume, bitpackedPosition, sampleRate, null);
 	        AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound;
 	        return areaSound;
 	    } 
@@ -193,10 +193,10 @@ public class AreaSoundPlayer {
 	/**
 	 * Plays vorbis sound with a constant volume
 	 */
-	public static AreadSound playSoundVorbis(int soundId, int timesRepeated, int delay, int volume, boolean voiceEffect, int sampleRate) {
+	public static AreaSound playSoundVorbis(int soundId, int timesRepeated, int delay, int volume, boolean voiceEffect, int sampleRate) {
 	    if ((voiceEffect ? PreferenceManager.preferences.voiceOverVolume.getValue()
 	    		: PreferenceManager.preferences.soundEffectVolume.getValue()) != 0 && timesRepeated != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
-	        AreadSound areaSound = new AreadSound((byte) (voiceEffect ? 3 : 2), soundId, timesRepeated, delay, volume, 0, sampleRate, null);
+	        AreaSound areaSound = new AreaSound((byte) (voiceEffect ? 3 : 2), soundId, timesRepeated, delay, volume, 0, sampleRate, null);
 	        AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound;
 	        return areaSound;
 	    } 
@@ -206,9 +206,9 @@ public class AreaSoundPlayer {
 	/**
 	 * Plays synth sound with volume adjusted by distance from given position
 	 */
-	public static AreadSound playSoundSynth(int soundId, int timesRepeat, int delay, int volume, int bitpackedPosition, int sampleRate) {
+	public static AreaSound playSoundSynth(int soundId, int timesRepeat, int delay, int volume, int bitpackedPosition, int sampleRate) {
 	    if (PreferenceManager.preferences.soundEffectVolume.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
-	        AreadSound areaSound = new AreadSound((byte) 1, soundId, timesRepeat, delay, volume, bitpackedPosition, sampleRate, null);
+	        AreaSound areaSound = new AreaSound((byte) 1, soundId, timesRepeat, delay, volume, bitpackedPosition, sampleRate, null);
 	        AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound;
 	        return areaSound;
 	    }
@@ -218,9 +218,9 @@ public class AreaSoundPlayer {
 	/**
 	 * Plays synth sound with a constant volume
 	 */
-	public static AreadSound playSoundSynth(int soundId, int timesRepeat, int delay, int volume, int sampleRate) {
+	public static AreaSound playSoundSynth(int soundId, int timesRepeat, int delay, int volume, int sampleRate) {
 	    if (PreferenceManager.preferences.soundEffectVolume.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
-	        AreadSound areaSound = new AreadSound((byte) 1, soundId, timesRepeat, delay, volume, 0, sampleRate, null);
+	        AreaSound areaSound = new AreaSound((byte) 1, soundId, timesRepeat, delay, volume, 0, sampleRate, null);
 	        AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound;
 	        return areaSound;
 	    } 
@@ -229,14 +229,14 @@ public class AreaSoundPlayer {
 
 	public static void resetSounds() {
 	    for (int index = 0; index < AREA_SOUND_CACHE_SIZE; index++) {
-	        AreadSound areaSound = AREA_SOUND_CACHE[index];
+	        AreaSound areaSound = AREA_SOUND_CACHE[index];
 	        if (areaSound.type == 3) {
 	            resetAreaSound(areaSound);
 	        }
 	    }
 	}
 	
-	public static void resetAreaSound(AreadSound areaSound) {
+	public static void resetAreaSound(AreaSound areaSound) {
 	    if (areaSound.areaSoundStream != null) {
 	        AmbientSound.gameSounds.unlink(areaSound.areaSoundStream);
 	    } else {

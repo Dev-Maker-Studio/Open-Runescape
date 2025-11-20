@@ -2,12 +2,12 @@ package com.jagex.game.runetek5.config.cutscene.action
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
-import com.jagex.game.runetek5.config.midi.AreadSound
+import com.jagex.game.runetek5.config.midi.AreaSound
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 
 class CutscenePlaySynth(rsbytebuffer1: Packet) : CutsceneAction(rsbytebuffer1) {
 
-    @JvmField var aClass2689367: AreadSound? = null
+    @JvmField var aClass2689367: AreaSound? = null
     @JvmField val anInt9363: Int = rsbytebuffer1.readUShort()
     @JvmField val anInt9365: Int = rsbytebuffer1.readUByte()
     @JvmField val anInt9364: Int = rsbytebuffer1.readUByte()

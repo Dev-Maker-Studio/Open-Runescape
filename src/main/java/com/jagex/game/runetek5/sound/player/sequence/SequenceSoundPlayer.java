@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.sound.player.sequence;
 
 import com.jagex.game.runetek5.client.PreferenceManager;
-import com.jagex.game.runetek5.config.midi.AreadSound;
+import com.jagex.game.runetek5.config.midi.AreaSound;
 import com.jagex.game.runetek5.config.sequence.SeqType;
 import com.jagex.game.runetek5.entity.SceneGraphEntity;
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate;
@@ -52,7 +52,7 @@ public class SequenceSoundPlayer {
 	            int sceneX = (int) absolute.x - 256 >> 9;
 	            int sceneZ = (int) absolute.z - 256 >> 9;
 	            int bitpackedPosition = sceneObject == PlayerUpdate.MY_PLAYER ? 0 : positionOffset + (sceneZ << 8) + (sceneObject.plane << 24) + (sceneX << 16);
-	            AreaSoundPlayer.AREA_SOUND_CACHE[++AreaSoundPlayer.AREA_SOUND_CACHE_SIZE - 1] = new AreadSound((byte) (seqtype.vorbis ? 2 : 1), soundId, timesRepeat, 0, volume, bitpackedPosition, sampleRate, sceneObject);
+	            AreaSoundPlayer.AREA_SOUND_CACHE[++AreaSoundPlayer.AREA_SOUND_CACHE_SIZE - 1] = new AreaSound((byte) (seqtype.vorbis ? 2 : 1), soundId, timesRepeat, 0, volume, bitpackedPosition, sampleRate, sceneObject);
 	        }
 	    }
 	

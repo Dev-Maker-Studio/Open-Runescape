@@ -38,8 +38,8 @@ class ParticleBinaryTree {
         }
         node.next = this.current.next
         node.child = this.current
-        node.next!!.child = node
-        node.child!!.next = node
+        node.next.child = node
+        node.child.next = node
     }
 
     fun getNodeCount(): Int {
