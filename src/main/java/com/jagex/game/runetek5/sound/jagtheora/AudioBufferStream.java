@@ -897,14 +897,14 @@ public class AudioBufferStream extends AreaSoundStream {
         do {
             if (super.anInt9858 <= 0) {
                 if (super.sampleRate == -256 && (super.anInt9853 & 0xff) == 0) {
-                    if (PcmPlayerManager.sterio) {
+                    if (PcmPlayerManager.stereo) {
                         return method15731(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, i_4, i_3, this);
                     }
 
                     return method15774(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9848, i_4, i_3, this);
                 }
 
-                if (PcmPlayerManager.sterio) {
+                if (PcmPlayerManager.stereo) {
                     return method15729(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, i_4, i_3, this, super.sampleRate, f_5);
                 }
 
@@ -918,12 +918,12 @@ public class AudioBufferStream extends AreaSoundStream {
 
             super.anInt9858 += i_2;
             if (super.sampleRate == -256 && (super.anInt9853 & 0xff) == 0) {
-                if (PcmPlayerManager.sterio) {
+                if (PcmPlayerManager.stereo) {
                     i_2 = method15739(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this);
                 } else {
                     i_2 = method15738(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9848, super.anInt9849, i_6, i_3, this);
                 }
-            } else if (PcmPlayerManager.sterio) {
+            } else if (PcmPlayerManager.stereo) {
                 i_2 = method15743(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this, super.sampleRate, f_5);
             } else {
                 i_2 = method15742(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9848, super.anInt9849, i_6, i_3, this, super.sampleRate, f_5);
@@ -943,14 +943,14 @@ public class AudioBufferStream extends AreaSoundStream {
         do {
             if (super.anInt9858 <= 0) {
                 if (super.sampleRate == 256 && (super.anInt9853 & 0xff) == 0) {
-                    if (PcmPlayerManager.sterio) {
+                    if (PcmPlayerManager.stereo) {
                         return method15770(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, i_4, i_3, this);
                     }
 
                     return method15740(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9848, i_4, i_3, this);
                 }
 
-                if (PcmPlayerManager.sterio) {
+                if (PcmPlayerManager.stereo) {
                     return method15746(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, i_4, i_3, this, super.sampleRate, f_5);
                 }
 
@@ -964,12 +964,12 @@ public class AudioBufferStream extends AreaSoundStream {
 
             super.anInt9858 += i_2;
             if (super.sampleRate == 256 && (super.anInt9853 & 0xff) == 0) {
-                if (PcmPlayerManager.sterio) {
+                if (PcmPlayerManager.stereo) {
                     i_2 = method15737(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this);
                 } else {
                     i_2 = method15777(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9848, super.anInt9849, i_6, i_3, this);
                 }
-            } else if (PcmPlayerManager.sterio) {
+            } else if (PcmPlayerManager.stereo) {
                 i_2 = method15741(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this, super.sampleRate, f_5);
             } else {
                 i_2 = method15735(((AudioBuffer) super.buffer).getSamples(), ints_1, super.anInt9853, i_2, super.anInt9848, super.anInt9849, i_6, i_3, this, super.sampleRate, f_5);

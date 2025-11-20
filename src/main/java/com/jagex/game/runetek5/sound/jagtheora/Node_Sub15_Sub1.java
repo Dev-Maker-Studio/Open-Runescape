@@ -39,7 +39,7 @@ public class Node_Sub15_Sub1 extends PcmStream {
                 }
             } else {
                 int i_4 = i_3 + i_2;
-                if (PcmPlayerManager.sterio) {
+                if (PcmPlayerManager.stereo) {
                     i_4 <<= 1;
                 }
                 byte b_5 = 0;
@@ -54,7 +54,7 @@ public class Node_Sub15_Sub1 extends PcmStream {
                     }
                     short[][] shorts_8;
                     for (shorts_8 = class282Sub397.aShortArrayArray8003; i_2 < i_4 && this.anInt9570 < shorts_8[0].length; this.anInt9570++) {
-                        if (PcmPlayerManager.sterio) {
+                        if (PcmPlayerManager.stereo) {
                             ints_1[i_2++] = shorts_8[b_5][this.anInt9570] * this.anInt9565;
                             ints_1[i_2++] = shorts_8[b_6][this.anInt9570] * this.anInt9572;
                         } else {

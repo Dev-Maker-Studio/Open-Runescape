@@ -392,7 +392,7 @@ public class SoundEffectPlayer {
 
 	public static void reload() {
 	    shutdownPlayers();
-	    PcmPlayerManager.setSterio(PreferenceManager.preferences.monoStereo.getValue() == 1);
+	    PcmPlayerManager.setStereo(PreferenceManager.preferences.monoStereo.getValue() == 1);
 	    SoundEffectPlayer.jinglePlayer = PcmPlayerManager.start(0, 22050);
 	    setJingleStream(SoundEffectPlayer.getStream(null));
 	    SoundEffectPlayer.soundEffectPlayer = PcmPlayerManager.start(1, 2048);
@@ -400,7 +400,7 @@ public class SoundEffectPlayer {
 	}
 
 	public static void initializeAudio() {
-	    PcmPlayerManager.setSterio(PreferenceManager.preferences.monoStereo.getValue() == 1);
+	    PcmPlayerManager.setStereo(PreferenceManager.preferences.monoStereo.getValue() == 1);
 	    SoundEffectPlayer.jinglePlayer = PcmPlayerManager.start(0, 22050);
 	    setJingleStream(SoundEffectPlayer.getStream(null));
 	    SoundEffectPlayer.soundEffectPlayer = PcmPlayerManager.start(1, 2048);

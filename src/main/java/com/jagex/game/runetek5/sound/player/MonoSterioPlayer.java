@@ -31,14 +31,14 @@ public class MonoSterioPlayer extends PcmPlayer {
             }
         }
 
-        this.audioFormat = new AudioFormat(PcmPlayerManager.sampleRate, 16, PcmPlayerManager.sterio ? 2 : 1, true, false);
-        this.buffer = new byte[256 << (PcmPlayerManager.sterio ? 2 : 1)];
+        this.audioFormat = new AudioFormat(PcmPlayerManager.sampleRate, 16, PcmPlayerManager.stereo ? 2 : 1, true, false);
+        this.buffer = new byte[256 << (PcmPlayerManager.stereo ? 2 : 1)];
     }
 
     @Override
     public void play(int bufferLength) throws LineUnavailableException {
         try {
-        	DataLine.Info dataline = new DataLine.Info(SourceDataLine.class, this.audioFormat, bufferLength << (PcmPlayerManager.sterio ? 2 : 1));
+        	DataLine.Info dataline = new DataLine.Info(SourceDataLine.class, this.audioFormat, bufferLength << (PcmPlayerManager.stereo ? 2 : 1));
             this.sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataline);
             this.sourceDataLine.open();
             this.sourceDataLine.start();
@@ -56,7 +56,7 @@ public class MonoSterioPlayer extends PcmPlayer {
     @Override
     public void writeToBuffer() {
         int byteCount = 256;
-        if (PcmPlayerManager.sterio) {
+        if (PcmPlayerManager.stereo) {
             byteCount <<= 1;
         }
 
@@ -87,7 +87,7 @@ public class MonoSterioPlayer extends PcmPlayer {
         if (this.hasSoundmax) {
             this.sourceDataLine.close();
             this.sourceDataLine = null;
-            DataLine.Info dataline = new DataLine.Info(SourceDataLine.class, this.audioFormat, this.bufferLength << (PcmPlayerManager.sterio ? 2 : 1));
+            DataLine.Info dataline = new DataLine.Info(SourceDataLine.class, this.audioFormat, this.bufferLength << (PcmPlayerManager.stereo ? 2 : 1));
             this.sourceDataLine = (SourceDataLine) AudioSystem.getLine(dataline);
             this.sourceDataLine.open();
             this.sourceDataLine.start();
@@ -96,7 +96,7 @@ public class MonoSterioPlayer extends PcmPlayer {
 
     @Override
     public int dataLeft() {
-        return this.bufferLength - (this.sourceDataLine.available() >> (PcmPlayerManager.sterio ? 2 : 1));
+        return this.bufferLength - (this.sourceDataLine.available() >> (PcmPlayerManager.stereo ? 2 : 1));
     }
 
 	public static int invalid(int bufferLength) {

@@ -164,7 +164,7 @@ public class PcmPlayer {
 
     public void method4337(int[] bitpackedSoundData) {
         int bufferLength = 256;
-        if (PcmPlayerManager.sterio) {
+        if (PcmPlayerManager.stereo) {
             bufferLength = 512;
         }
 
