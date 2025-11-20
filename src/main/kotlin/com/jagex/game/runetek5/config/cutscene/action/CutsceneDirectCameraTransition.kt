@@ -30,8 +30,8 @@ class CutsceneDirectCameraTransition(buffer: Packet) : CutsceneAction(buffer) {
     }
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS[this.anInt9299].method1363(0)
-        CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS[this.anInt9300].method1363(1)
+        CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS[this.anInt9299].loadIntoClientCameraPath(0)
+        CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS[this.anInt9300].loadIntoClientCameraPath(1)
         client.anInt7277 = 0
         client.anInt7279 = this.anInt9301
         client.anInt7256 = 0
