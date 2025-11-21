@@ -894,7 +894,7 @@ object PacketDecoder {
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
             }
-            ClanVarTypeList.CLAN_VARS[key] = string_88
+            ClanVarTypeList.CLAN_VARS!![key] = string_88
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
@@ -1028,7 +1028,7 @@ object PacketDecoder {
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
             }
-            ClanVarTypeList.CLAN_VARS[key] = long_47
+            ClanVarTypeList.CLAN_VARS!![key] = long_47
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
@@ -1087,7 +1087,7 @@ object PacketDecoder {
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
             }
-            ClanVarTypeList.CLAN_VARS[key] = flags
+            ClanVarTypeList.CLAN_VARS!![key] = flags
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
@@ -1188,7 +1188,7 @@ object PacketDecoder {
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
             }
-            ClanVarTypeList.CLAN_VARS[key] = b_84.toInt()
+            ClanVarTypeList.CLAN_VARS!![key] = b_84.toInt()
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
