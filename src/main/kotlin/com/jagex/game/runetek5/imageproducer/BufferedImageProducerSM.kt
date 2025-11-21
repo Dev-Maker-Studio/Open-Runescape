@@ -26,7 +26,7 @@ class BufferedImageProducerSM(
 
     override fun initialize() {
         super.initialize()
-        val dataBuffer = DataBufferInt(super.colorBuffer, super.colorBuffer.size)
+        val dataBuffer = DataBufferInt(super.colorBuffer!!, super.colorBuffer!!.size)
         val colorModel = DirectColorModel(32, 16711680, 65280, 255)
         val writableRaster = Raster.createWritableRaster(colorModel.createCompatibleSampleModel(super.width, super.height), dataBuffer, null)
         this.image = BufferedImage(colorModel, writableRaster, false, Hashtable<Any, Any>())
