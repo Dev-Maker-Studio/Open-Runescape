@@ -1029,7 +1029,6 @@ public class SceneGraph extends MapLoader {
 	                    if (type != ObjectShapes.GROUND_DECORATION.shape || PreferenceManager.preferences.groundDecoration.getValue() != 0
 	                    		|| loctype.hasActions != 0 || loctype.blocksMovement == 1 || loctype.forceDisplayDecoration) {
 	                        if (!loctype.fullyCached()) {
-                                System.out.println(loctype.id + ", " + loctype.name + " - FULLY CACHED");
 	                            incompleteLocs++;
 	                        }
 	                        cached = true;

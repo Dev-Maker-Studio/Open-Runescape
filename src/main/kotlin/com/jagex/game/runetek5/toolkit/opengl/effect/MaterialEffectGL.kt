@@ -15,7 +15,7 @@ abstract class MaterialEffectGL(
 
     abstract fun applyEffectParams(effectParam1: Int, effectParam2: Int)
 
-    abstract fun loadCombiner(combiner: OpenGlTexture, combineMode: Int)
+    abstract fun loadCombiner(combiner: OpenGlTexture?, combineMode: Int)
 
     abstract fun loadCombineMode()
 }

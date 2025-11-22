@@ -11,6 +11,26 @@ public class RemoteFileRequester extends Js5NetQueue {
 
     public Connection updateServerConnection;
 
+    /**
+     * Resets all waiting requests back to pending state so they can be retried.
+     * This should be called whenever a connection error occurs to prevent requests
+     * from being stuck in waiting state forever.
+     */
+    private void resetWaitingRequests() {
+        // Remove all waiting requests completely - they will be recreated when needed
+        // We need to remove them from both the queue (unlinkSub) and the main map (unlink)
+        Js5NetQueueRequest request;
+        while ((request = (Js5NetQueueRequest) super.waitingPriorityRequests.getNext()) != null) {
+            request.unlinkSub(); // Remove from queue
+            request.unlink();     // Remove from RemoteFileWorker.pendingRequests
+        }
+        while ((request = (Js5NetQueueRequest) super.waitingRegularRequests.getNext()) != null) {
+            request.unlinkSub(); // Remove from queue
+            request.unlink();     // Remove from RemoteFileWorker.pendingRequests
+        }
+        this.lastRemoteRequest = null;
+    }
+
     @Override
     public void init(Connection updateServerConnection, boolean loggedIn) {
         if (this.updateServerConnection != null) {
@@ -50,6 +70,7 @@ public class RemoteFileRequester extends Js5NetQueue {
                                 this.updateServerConnection = null;
                                 this.failedRequests++;
                                 this.connectionStatus = -2;
+                                resetWaitingRequests();
                             }
                         }
                         super.lastConnectionInteraction = 0;
@@ -80,6 +101,7 @@ public class RemoteFileRequester extends Js5NetQueue {
                 this.updateServerConnection = null;
                 this.failedRequests++;
                 this.connectionStatus = -2;
+                resetWaitingRequests();
             }
         }
     }
@@ -101,6 +123,7 @@ public class RemoteFileRequester extends Js5NetQueue {
                 this.updateServerConnection = null;
                 this.failedRequests++;
                 this.connectionStatus = -2;
+                resetWaitingRequests();
             }
         }
     }
@@ -140,6 +163,7 @@ public class RemoteFileRequester extends Js5NetQueue {
                 this.updateServerConnection = null;
                 this.failedRequests++;
                 this.connectionStatus = -2;
+                resetWaitingRequests();
             }
         }
     }
@@ -166,6 +190,7 @@ public class RemoteFileRequester extends Js5NetQueue {
                 	// NOOP
                 }
                 this.updateServerConnection = null;
+                resetWaitingRequests();
             }
         }
 
@@ -302,6 +327,7 @@ public class RemoteFileRequester extends Js5NetQueue {
             this.updateServerConnection = null;
             this.failedRequests++;
             this.connectionStatus = -2;
+            resetWaitingRequests();
             return priorityRequestCount() == 0 && regularRequestCount() == 0;
         }
     }

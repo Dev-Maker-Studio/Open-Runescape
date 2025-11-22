@@ -13,7 +13,7 @@ import com.jagex.game.runetek5.toolkit.OpenGlToolkit
  */
 class HideLightsEffect(toolkit: OpenGlToolkit) : MaterialEffectGL(toolkit) {
 
-    override fun loadCombiner(texture: OpenGlTexture, combineMode: Int) {
+    override fun loadCombiner(texture: OpenGlTexture?, combineMode: Int) {
         super.glToolkit.setActiveTexture(texture)
         super.glToolkit.loadTextureCombineMode(combineMode)
     }

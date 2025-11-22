@@ -506,7 +506,6 @@ public class MapRegion {
             this.currentStage = RegionLoadingStage.LOADING_MAPS;
             return false;
         }
-        System.out.println("LOCS STILL LOADING");
         this.locsStillLoading = 0;
         for (int mapPtr = 0; mapPtr < this.surfaceMapBuffer.length; mapPtr++) {
             byte[] mapdata = this.surfaceLocBuffer[mapPtr];
@@ -519,7 +518,6 @@ public class MapRegion {
                 }
                 int incompleteLocs = SceneGraph.loadLocs(this.loctypeList, mapdata, x, y, this.sceneSizeX, this.sceneSizeY);
                 if (incompleteLocs > 0) {
-                    System.out.println("surfaceLocBuffer: " + incompleteLocs);
                     this.locsStillLoading += incompleteLocs;
                 }
             }
@@ -533,13 +531,11 @@ public class MapRegion {
                 }
                 int incompleteLocs = SceneGraph.loadLocs(this.loctypeList, mapdata, x, y, this.sceneSizeX, this.sceneSizeY);
                 if (incompleteLocs > 0) {
-                    System.out.println("underwaterLocBuffer: " + incompleteLocs);
                     this.locsStillLoading += incompleteLocs;
                 }
             }
         }
         if (this.locsStillLoading > 0) {
-            System.out.println("[MapRegion] Locs still loading: " + this.locsStillLoading + "/" + this.totalLocsLoading);
             if (this.totalLocsLoading < this.locsStillLoading) {
                 this.totalLocsLoading = this.locsStillLoading;
             }

@@ -134,7 +134,7 @@ public class RemoteFileWorker extends FileWorker {
     @Override
     public byte[] requestArchive(int archiveId) {
         Js5WorkerRequestMessage fileRequest = request(archiveId, 0);
-        if (67900 == archiveId) {
+        if (70291 == archiveId) {
             System.out.println("[RemoteFileWorker] " + archiveId + " - " + fileRequest);
         }
         if (fileRequest == null) {
@@ -211,12 +211,6 @@ public class RemoteFileWorker extends FileWorker {
      */
     public Js5WorkerRequestMessage request(int fileId, int actionType) {
     	Js5WorkerRequestMessage fileRequest = this.pendingRequests.get(fileId);
-        if (67900 == fileId) {
-            System.out.println("[RemoteFileWorker.request] " + fileId + " - " + fileRequest);
-            if (fileRequest != null) {
-                System.out.println("\t[RemoteFileWorker.request] " + fileRequest.highPriority + ", " + fileRequest.waiting + ", " + fileRequest.isCompleted + ", " + fileRequest.getCompletion());
-            }
-        }
         if (fileRequest != null && actionType == 0 && !fileRequest.highPriority && fileRequest.waiting) {
             fileRequest.unlink();
             fileRequest = null;

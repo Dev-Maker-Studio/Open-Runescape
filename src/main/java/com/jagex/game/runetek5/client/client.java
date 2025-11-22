@@ -1522,17 +1522,13 @@ public class client extends GameShell {
             } else if (method5789(gameState)) {
                 client.method11501();
             } else if (GameState.isLoadingRegion(gameState)) {
-                System.out.println("[MapRegion] Loading ("+Resource.mapRegion.getCurrentLoadingStage()+")...");
                 if (Resource.mapRegion.getCurrentLoadingStage() == RegionLoadingStage.LOADING_MAPS) {
                     int completion = Resource.mapRegion.getCompletion() / 2;
-                    System.out.println("[MapRegion] LOADING_MAPS ("+completion+"%)...");
                     MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE) + "<br>" + "(" + completion + "%)", true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont);
                 } else if (Resource.mapRegion.getCurrentLoadingStage() == RegionLoadingStage.LOADING_LOCS) {
                     int completion = 50 + Resource.mapRegion.locLoadingPercent() / 2;
-                    System.out.println("[MapRegion] LOADING_LOCS ("+completion+"%)...");
                     MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE) + "<br>" + "(" + completion + "%)", true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont);
                 } else {
-                    System.out.println("[MapRegion] Still loading region state but not transitioned yet...");
                     MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont);
                 }
             } else if (gameState == GameState.LOGGED_INGAME) {
