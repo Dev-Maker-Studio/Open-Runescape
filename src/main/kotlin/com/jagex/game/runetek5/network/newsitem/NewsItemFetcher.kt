@@ -49,12 +49,12 @@ class NewsItemFetcher : Runnable {
             val port = if (ServerEnvironment.SERVER_ENVIRONMENT == ServerEnvironment.LIVE) {
                 80
             } else {
-                WorldConnection.GAME_CONNECTION.worldId + 7000
+                WorldConnection.GAME_CONNECTION!!.worldId + 7000
             }
             val reader = BufferedReader(
                 InputStreamReader(
                     DataInputStream(
-                        URL("http://${WorldConnection.GAME_CONNECTION.host}:$port/news.ws?game=${client.CURRENT_GAME.id}")
+                        URL("http://${WorldConnection.GAME_CONNECTION!!.host}:$port/news.ws?game=${client.CURRENT_GAME.id}")
                             .openStream()
                     )
                 )

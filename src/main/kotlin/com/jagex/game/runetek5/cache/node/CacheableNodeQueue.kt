@@ -44,11 +44,11 @@ class CacheableNodeQueue(size: Int) {
      */
     fun put(value: CacheableNode, key: Long) {
         if (capacityLeft == 0) {
-            var first = queue.getFirst()
+            var first = queue.getFirst()!!
             first.unlink()
             first.unlinkSub()
             if (first == head) {
-                first = queue.getFirst()
+                first = queue.getFirst()!!
                 first.unlink()
                 first.unlinkSub()
             }
