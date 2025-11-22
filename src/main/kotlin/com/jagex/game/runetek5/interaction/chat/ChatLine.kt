@@ -42,7 +42,7 @@ class ChatLine(
         this.message = message
     }
 
-    fun set(type: ChatMessageType, effectFlags: Int, crownedName: String, name: String, simpleName: String, clan: String, quickchatMessageId: Int, message: String) {
+    fun set(type: ChatMessageType?, effectFlags: Int, crownedName: String?, name: String?, simpleName: String?, clan: String?, quickchatMessageId: Int, message: String?) {
         this.identifier = ChatBox.getChatlineIdentifier()
         this.time = client.cycles
         this.type = type
