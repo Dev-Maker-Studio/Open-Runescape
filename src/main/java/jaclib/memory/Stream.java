@@ -24,7 +24,7 @@ public final class Stream {
 	}
 
 	public Stream(Buffer buffer, int i, int i0) {
-		this(buffer.getSize() < 4096 ? buffer.getSize() : 4096);
+		this(Math.min(buffer.getSize(), 4096));
 		method2917(buffer, i, i0);
 	}
 
