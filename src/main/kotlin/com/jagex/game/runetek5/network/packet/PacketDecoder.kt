@@ -24,17 +24,13 @@ import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.clanvar.ClanVarTypeList
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
-import com.jagex.game.runetek5.config.`object`.ObjectShapes
-import com.jagex.game.runetek5.config.`object`.ObjectTypeCustomisation
 import com.jagex.game.runetek5.config.quickchat.QuickchatMessageTypeList
 import com.jagex.game.runetek5.config.rsinterface.*
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer
 import com.jagex.game.runetek5.config.sequence.MovementType
 import com.jagex.game.runetek5.config.sequence.PositionedGfx
-import com.jagex.game.runetek5.config.sequence.Projectile
 import com.jagex.game.runetek5.encoding.HuffmanList
-import com.jagex.game.runetek5.entity.grounditem.GroundItemNode
 import com.jagex.game.runetek5.entity.grounditem.GroundItemUpdating
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.npc.NPCUpdate
@@ -64,12 +60,9 @@ import com.jagex.game.runetek5.network.BufferedConnectionContext
 import com.jagex.game.runetek5.network.HostNameIdentifier
 import com.jagex.game.runetek5.network.PingRequester
 import com.jagex.game.runetek5.network.WorldConnection
-import com.jagex.game.runetek5.network.world.WorldDescriptor
 import com.jagex.game.runetek5.network.world.WorldList
-import com.jagex.game.runetek5.network.world.WorldMeta
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.*
-import com.jagex.game.runetek5.scene.tile.TileMessage
 import com.jagex.game.runetek5.sound.VorbisSoundManager
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 import com.jagex.game.runetek5.sound.player.area.SoundEffectPlayer
@@ -302,7 +295,7 @@ object PacketDecoder {
             val key1 = buffer.readInt()
             client.requestVarVerifyid()
             if (type == 2) {
-                client.setLoading()
+                client.setLoadingWorldMap()
             }
             val xteas = intArrayOf(key1, key2, key3, key4)
             client.BASE_WINDOW_ID = interfaceId

@@ -831,7 +831,10 @@ public class ObjectType {
         synchronized (this.locTypeList.meshResource) {
             for (int shape = 0; shape < this.objectModelIds.length; shape++) {
                 for (int model = 0; model < this.objectModelIds[shape].length; model++) {
-                    cached &= this.locTypeList.meshResource.isCached(this.objectModelIds[shape][model], 0);
+                    boolean modelCached = this.locTypeList.meshResource.isCached(this.objectModelIds[shape][model], 0);
+                    if (!modelCached)
+                        System.out.println("Noncached model: " + this.objectModelIds[shape][model]);
+                    cached &= modelCached;
                 }
             }
             return cached;

@@ -8984,7 +8984,7 @@ public class CS2Interpreter {
     }
 
     public static void method15403() {
-        client.setLoading();
+        client.setLoadingWorldMap();
     }
 
     public static void method798(CS2Executor executor) {

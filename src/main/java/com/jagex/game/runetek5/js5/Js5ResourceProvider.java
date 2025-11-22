@@ -5,6 +5,8 @@ import com.jagex.game.runetek5.js5.request.FileWorker;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.utils.Utils;
 
+import java.util.Arrays;
+
 /**
  * [J]
  * 
@@ -66,7 +68,11 @@ public class Js5ResourceProvider {
         if (this.directMemoryMode) {
             this.archives[archiveId] = this.fileWorker.requestArchive(archiveId);
         } else {
-            this.archives[archiveId] = DataBuffer.createDataBuffer(this.fileWorker.requestArchive(archiveId));
+            byte[] file = this.fileWorker.requestArchive(archiveId);
+            if (67900 == archiveId) {
+                System.out.println("Requesting archive (" + this.fileWorker + "): " + archiveId + " - " + Arrays.toString(file));
+            }
+            this.archives[archiveId] = DataBuffer.createDataBuffer(file);
         }
     }
 
@@ -507,6 +513,7 @@ public class Js5ResourceProvider {
 
     public synchronized boolean isCached(int archiveId, int fileId) {
         if (!fileExists(archiveId, fileId)) {
+            System.out.println("File doesn't exist: " + archiveId + "/" + fileId);
             return false;
         } 
         if (this.archiveFiles[archiveId] != null && this.archiveFiles[archiveId][fileId] != null) {

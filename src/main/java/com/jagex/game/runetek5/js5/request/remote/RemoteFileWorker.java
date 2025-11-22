@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.js5.request.remote;
 
 import static com.jagex.game.runetek5.js5.request.RequestStatus.*;
 
+import java.util.Arrays;
 import java.util.zip.CRC32;
 
 import com.jagex.game.runetek5.cache.Decompressor;
@@ -133,6 +134,9 @@ public class RemoteFileWorker extends FileWorker {
     @Override
     public byte[] requestArchive(int archiveId) {
         Js5WorkerRequestMessage fileRequest = request(archiveId, 0);
+        if (67900 == archiveId) {
+            System.out.println("[RemoteFileWorker] " + archiveId + " - " + fileRequest);
+        }
         if (fileRequest == null) {
             return null;
         } 
@@ -207,6 +211,12 @@ public class RemoteFileWorker extends FileWorker {
      */
     public Js5WorkerRequestMessage request(int fileId, int actionType) {
     	Js5WorkerRequestMessage fileRequest = this.pendingRequests.get(fileId);
+        if (67900 == fileId) {
+            System.out.println("[RemoteFileWorker.request] " + fileId + " - " + fileRequest);
+            if (fileRequest != null) {
+                System.out.println("\t[RemoteFileWorker.request] " + fileRequest.highPriority + ", " + fileRequest.waiting + ", " + fileRequest.isCompleted + ", " + fileRequest.getCompletion());
+            }
+        }
         if (fileRequest != null && actionType == 0 && !fileRequest.highPriority && fileRequest.waiting) {
             fileRequest.unlink();
             fileRequest = null;
