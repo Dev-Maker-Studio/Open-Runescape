@@ -500,7 +500,7 @@ open class Packet : Node<Packet> {
 
         constructor(size: Int) : super(size)
 
-        fun setIsaacCipher(cipher: Isaac) {
+        fun setIsaacCipher(cipher: Isaac?) {
             isaac = cipher
         }
 
