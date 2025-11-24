@@ -1,5 +1,7 @@
 package com.jagex.game.runetek5.client.periodic;
 
+import com.darkan.bot.scripts.ScriptExecutor;
+import com.darkan.bot.scripts.event.Varc;
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;
 import com.jagex.game.runetek5.cache.node.Queue;
 import com.jagex.game.runetek5.client.client;
@@ -83,6 +85,7 @@ public class PulseEventHandler {
 	        int type = event.getType();
 	        long value = event.getValue();
 	        if (type == CLIENT_SETVARC) {
+                ScriptExecutor.INSTANCE.pushEvent(new Varc((int) value, VarcTypeList.VARC_INT[(int) value], event.primary));
 	            VarcTypeList.VARC_INT[(int) value] = event.primary;
 	            client.clientIsActive |= VarcTypeList.VARC_BOOL[(int) value];
 	            client.anIntArray7150[++client.keyCycle - 1 & 0x1f] = (int) value;

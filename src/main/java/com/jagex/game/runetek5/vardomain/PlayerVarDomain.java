@@ -1,8 +1,12 @@
 package com.jagex.game.runetek5.vardomain;
 
+import com.darkan.bot.scripts.ScriptExecutor;
+import com.darkan.bot.scripts.event.Varc;
+import com.darkan.bot.scripts.event.Varp;
 import com.jagex.game.runetek5.cache.node.IterableNodeMap;
 import com.jagex.game.runetek5.cache.node.impl.LongNode;
 import com.jagex.game.runetek5.config.TypeLists;
+import com.jagex.game.runetek5.config.varc.VarcTypeList;
 import com.jagex.game.runetek5.config.varp.VarpbitType;
 import com.jagex.game.runetek5.utils.Utils;
 
@@ -135,6 +139,7 @@ public class PlayerVarDomain implements VarDomain {
      * [J]
      */
     public void setVarValue(int configIndex, int varValue) {
+        ScriptExecutor.INSTANCE.pushEvent(new Varp(configIndex, this.activeVars[configIndex], varValue));
         this.activeVars[configIndex] = varValue;
         LongNode value = this.updates.get(configIndex);
         if (value != null) {
