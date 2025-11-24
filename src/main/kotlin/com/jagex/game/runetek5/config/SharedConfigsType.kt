@@ -1,11 +1,14 @@
-package com.jagex.game.runetek5.config;
+package com.jagex.game.runetek5.config
 
 /**
- * 
- * @author Brainpower - 29/03/2022
+ * Shared configuration types enum.
  *
+ * @author Brainpower - 29/03/2022
  */
-public enum SharedConfigsType {
+enum class SharedConfigsType(
+    @JvmField val id: Int,
+    @JvmField val bit: Int = 0
+) {
     UNDERLAYS(1),
     UNUSED_2(2),
     IDENTITY_KIT(3),
@@ -64,27 +67,15 @@ public enum SharedConfigsType {
     UNUSED_73(73),
     UNUSED_74(74);
 
-    public final int id;
-    public final int bit;
-
-    SharedConfigsType(int id) {
-        this(id, 0);
+    fun archiveFileCapacity(): Int {
+        return 1 shl bit
     }
 
-    SharedConfigsType(int id, int bit) {
-        this.id = id;
-        this.bit = bit;
+    fun archiveId(fileId: Int): Int {
+        return fileId ushr bit
     }
 
-    public int archiveFileCapacity() {
-        return 1 << this.bit;
-    }
-
-    public int archiveId(int fileId) {
-        return fileId >>> this.bit;
-    }
-
-    public int archiveFileId(int fileId) {
-        return fileId & (1 << this.bit) - 1;
+    fun archiveFileId(fileId: Int): Int {
+        return fileId and ((1 shl bit) - 1)
     }
 }

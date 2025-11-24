@@ -30,36 +30,36 @@ abstract class AbstractWall(
 
     override fun isSoftHidden(toolkit: AbstractToolkit): Boolean {
         val absolute = getAbsolutePosition().coords
-        return scene.culling.hideWall(
+        return scene!!.culling.hideWall(
             this,
             collisionPlane.toInt(),
-            (absolute.x.toInt() shr scene.tileUnits),
-            (absolute.z.toInt() shr scene.tileUnits)
+            (absolute.x.toInt() shr scene!!.tileUnits),
+            (absolute.z.toInt() shr scene!!.tileUnits)
         )
     }
 
     override fun canRender(): Boolean {
         val absolute = getAbsolutePosition().coords
-        val tileX = (absolute.x.toInt() shr scene.tileUnits) - scene.cameraGridPositionX + scene.visibleTiles
-        val tileZ = (absolute.z.toInt() shr scene.tileUnits) - scene.cameraGridPositionY + scene.visibleTiles
-        return scene.adjacent_tile_on_screen[tileX][tileZ]
+        val tileX = (absolute.x.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionX + scene!!.visibleTiles
+        val tileZ = (absolute.z.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionY + scene!!.visibleTiles
+        return scene!!.adjacent_tile_on_screen[tileX][tileZ]
     }
 
     override fun getActiveLights(cacheInto: Array<PointLight?>): Int {
         val absolute = getAbsolutePosition().coords
-        val posX = absolute.x.toInt() shr scene.tileUnits
-        val posY = absolute.z.toInt() shr scene.tileUnits
+        val posX = absolute.x.toInt() shr scene!!.tileUnits
+        val posY = absolute.z.toInt() shr scene!!.tileUnits
         var maskIndex = 0
 
-        if (scene.cameraGridPositionX == posX) {
+        if (scene!!.cameraGridPositionX == posX) {
             maskIndex++
-        } else if (scene.cameraGridPositionX < posX) {
+        } else if (scene!!.cameraGridPositionX < posX) {
             maskIndex += 2
         }
 
-        if (scene.cameraGridPositionY == posY) {
+        if (scene!!.cameraGridPositionY == posY) {
             maskIndex += 3
-        } else if (scene.cameraGridPositionY > posY) {
+        } else if (scene!!.cameraGridPositionY > posY) {
             maskIndex += 6
         }
 
@@ -68,19 +68,19 @@ abstract class AbstractWall(
             getActiveLights(posX, posY, cacheInto)
         } else if (cullingType.toInt() == 1 && posX > 0) {
             getActiveLights(posX - 1, posY, cacheInto)
-        } else if (cullingType.toInt() == 4 && posX <= scene.sceneDimensionX) {
+        } else if (cullingType.toInt() == 4 && posX <= scene!!.sceneDimensionX) {
             getActiveLights(posX + 1, posY, cacheInto)
         } else if (cullingType.toInt() == 8 && posY > 0) {
             getActiveLights(posX, posY - 1, cacheInto)
-        } else if (cullingType.toInt() == 2 && posY <= scene.sceneDimensionY) {
+        } else if (cullingType.toInt() == 2 && posY <= scene!!.sceneDimensionY) {
             getActiveLights(posX, posY + 1, cacheInto)
-        } else if (cullingType.toInt() == 16 && posX > 0 && posY <= scene.sceneDimensionY) {
+        } else if (cullingType.toInt() == 16 && posX > 0 && posY <= scene!!.sceneDimensionY) {
             getActiveLights(posX - 1, posY + 1, cacheInto)
-        } else if (cullingType.toInt() == 32 && posX <= scene.sceneDimensionX && posY <= scene.sceneDimensionY) {
+        } else if (cullingType.toInt() == 32 && posX <= scene!!.sceneDimensionX && posY <= scene!!.sceneDimensionY) {
             getActiveLights(posX + 1, posY + 1, cacheInto)
         } else if (cullingType.toInt() == 128 && posX > 0 && posY > 0) {
             getActiveLights(posX - 1, posY - 1, cacheInto)
-        } else if (cullingType.toInt() == 64 && posX <= scene.sceneDimensionX && posY > 0) {
+        } else if (cullingType.toInt() == 64 && posX <= scene!!.sceneDimensionX && posY > 0) {
             getActiveLights(posX + 1, posY - 1, cacheInto)
         } else {
             throw RuntimeException("")

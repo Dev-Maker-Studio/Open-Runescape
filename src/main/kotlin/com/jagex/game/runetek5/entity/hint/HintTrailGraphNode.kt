@@ -56,7 +56,7 @@ class HintTrailGraphNode(
             val matrix44var4 = getProjectionMatrix()
             val abs = getAbsolutePosition()
             matrix44var3.copyFrom(matrix44var4)
-            val tile = scene.tiles[plane.toInt()][abs.coords.x.toInt() shr 9][abs.coords.z.toInt() shr 9]
+            val tile = scene!!.tiles[plane.toInt()][abs.coords.x.toInt() shr 9][abs.coords.z.toInt() shr 9]
             if (tile != null) {
                 val decoration = tile.groundDecoration
                 if (decoration != null) {

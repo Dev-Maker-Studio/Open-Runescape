@@ -1,9 +1,9 @@
-package com.jagex.game.runetek5.entity;
+package com.jagex.game.runetek5.entity
 
-import com.jagex.game.runetek5.graphics.light.PointLight;
-import com.jagex.game.runetek5.graphics.model.particle.Silhouette;
-import com.jagex.game.runetek5.scene.Scene;
-import com.jagex.game.runetek5.toolkit.AbstractToolkit;
+import com.jagex.game.runetek5.graphics.light.PointLight
+import com.jagex.game.runetek5.graphics.model.particle.Silhouette
+import com.jagex.game.runetek5.scene.Scene
+import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
 /**
 jag::graphics::GraphEntity::LineIntersectionSupport(void) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     .text  00000000000ADFD0 00000003                   R . . . . . .
@@ -11,80 +11,77 @@ jag::graphics::GraphEntity::LowerCurrentLOD(int) [clone]                        
 jag::graphics::GraphEntity::OccludesView(void) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                .text  00000000000ADFE0 00000003                   R . . . . . .
 jag::graphics::GraphEntity::TestIntersection(jag::math::Vector3 const&,jag::math::Vector3 const&,int) [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         .text  00000000000ADFC0 00000003                   R . . . . . .
 jag::graphics::GraphEntity::~GraphEntity() [clone]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    .text  00000000000F7F50 0000000B                   R . . . . . .
-jag::graphics::GraphEntity::~GraphEntity() [clone]     
+jag::graphics::GraphEntity::~GraphEntity() [clone]
  */
-public abstract class SceneGraphEntity extends SceneGraphNode {
+@Suppress("EXPOSED_SUPER_CLASS")
+abstract class SceneGraphEntity(
+    @JvmField var scene: Scene?
+) : SceneGraphNode() {
 
-    public byte plane;
-    public byte collisionPlane;
-    public Scene scene;
-    public BoundingBoxPolygon[] boundingBoxPolygons;
-    public SceneGraphEntity child;
-    public int floorDepth;
+    @JvmField var plane: Byte = 0
+    @JvmField var collisionPlane: Byte = 0
+    @JvmField var boundingBoxPolygons: Array<BoundingBoxPolygon>? = null
+    @JvmField var child: SceneGraphEntity? = null
+    @JvmField var floorDepth: Int = 0
 
-    protected SceneGraphEntity(Scene scene) {
-        this.scene = scene;
-    }
+    abstract fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean
 
-    public abstract boolean calculateProjection(AbstractToolkit toolkit, int mouseX, int mouseY);
+    abstract fun removeTileShadow()
 
-    public abstract void removeTileShadow();
+    abstract fun hasTileShadow(): Boolean
 
-    public abstract boolean hasTileShadow();
-
-    public abstract boolean disregardTextureMovement();
+    abstract fun disregardTextureMovement(): Boolean
 
     // FIXME: find correct name
     // has_alpha
     // account_for_layers
     // account_for_priorities
-    public abstract boolean hasAlpha();
+    abstract fun hasAlpha(): Boolean
 
-    public abstract RenderedEntity draw(AbstractToolkit toolkit);
+    abstract fun draw(toolkit: AbstractToolkit): RenderedEntity?
 
-    public abstract void particleCycle(AbstractToolkit toolkit);
+    abstract fun particleCycle(toolkit: AbstractToolkit)
 
-    public abstract Silhouette getAxisAlignedBoundingBox(AbstractToolkit toolkit);
+    abstract fun getAxisAlignedBoundingBox(toolkit: AbstractToolkit): Silhouette?
 
-    public abstract int getMinY();
+    abstract fun getMinY(): Int
 
-    public int getMaxSizeShift() {
-        return 0;
+    open fun getMaxSizeShift(): Int {
+        return 0
     }
 
-    public int getIconHeight() {
-        return -getMinY();
+    open fun getIconHeight(): Int {
+        return -getMinY()
     }
 
-    public int getActiveLights(int x, int y, PointLight[] lights) {
-        long tileLightBaseUid = this.scene.tileLightUids[this.plane][x][y];
-        long uidShift = 0L;
-        int lightCount;
-        for (lightCount = 0; uidShift <= 48L; uidShift += 16L) {
-            int slot = (int) (tileLightBaseUid >> uidShift & 65535L);
+    open fun getActiveLights(x: Int, y: Int, lights: Array<PointLight?>): Int {
+        if (scene == null) return 0
+        val tileLightBaseUid = scene!!.tileLightUids[plane.toInt()][x][y]
+        var uidShift = 0L
+        var lightCount = 0
+        while (uidShift <= 48L) {
+            val slot = (tileLightBaseUid shr uidShift.toInt() and 65535L).toInt()
             if (slot <= 0) {
-                break;
+                break
             }
-            lights[lightCount++] = this.scene.lightSlotOccupant[slot - 1].pointLight;
+            lights[lightCount++] = scene!!.lightSlotOccupant[slot - 1].pointLight
+            uidShift += 16L
         }
-        for (int lightIndex = lightCount; lightIndex < 4; lightIndex++) {
-            lights[lightIndex] = null;
+        for (lightIndex in lightCount until 4) {
+            lights[lightIndex] = null
         }
-        return lightCount;
-    }
-    
-    protected void setupBoundingBox(int amount) {
-        this.boundingBoxPolygons = new BoundingBoxPolygon[amount];
-        for (int count = 0; count < this.boundingBoxPolygons.length; count++) {
-            this.boundingBoxPolygons[count] = new BoundingBoxPolygon();
-        }
+        return lightCount
     }
 
-    public abstract void castShadow(SceneGraphEntity node, int width, int length, int height, boolean var6);
+    protected fun setupBoundingBox(amount: Int) {
+        boundingBoxPolygons = Array(amount) { BoundingBoxPolygon() }
+    }
 
-    public abstract boolean canRender();
+    abstract fun castShadow(node: SceneGraphEntity, width: Int, length: Int, height: Int, var6: Boolean)
 
-    public abstract int getActiveLights(PointLight[] nodes);
+    abstract fun canRender(): Boolean
 
-    public abstract boolean isSoftHidden(AbstractToolkit toolkit);
+    abstract fun getActiveLights(nodes: Array<PointLight?>): Int
+
+    abstract fun isSoftHidden(toolkit: AbstractToolkit): Boolean
 }

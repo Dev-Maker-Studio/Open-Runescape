@@ -25,18 +25,19 @@ abstract class AbstractGroundDecoration(
         setBasePosition(Vector3(x.toFloat(), y.toFloat(), z.toFloat()))
     }
 
-    override fun getActiveLights(lights: Array<PointLight>): Int {
+    override fun getActiveLights(lights: Array<PointLight?>): Int {
         val absolutePosition = getAbsolutePosition().coords
-        return getActiveLights((absolutePosition.x.toInt() shr super.scene.tileUnits), (absolutePosition.z.toInt() shr super.scene.tileUnits), lights)
+        @Suppress("UNCHECKED_CAST")
+        return getActiveLights((absolutePosition.x.toInt() shr super.scene!!.tileUnits), (absolutePosition.z.toInt() shr super.scene!!.tileUnits), lights as Array<PointLight?>)
     }
 
     override fun isSoftHidden(toolkit: AbstractToolkit): Boolean {
         val absolutePosition = getAbsolutePosition().coords
-        return super.scene.culling.isTileHidden(super.collisionPlane.toInt(), (absolutePosition.x.toInt() shr super.scene.tileUnits), (absolutePosition.z.toInt() shr super.scene.tileUnits))
+        return super.scene!!.culling.isTileHidden(super.collisionPlane.toInt(), (absolutePosition.x.toInt() shr super.scene!!.tileUnits), (absolutePosition.z.toInt() shr super.scene!!.tileUnits))
     }
 
     override fun canRender(): Boolean {
         val absolutePosition = getAbsolutePosition().coords
-        return super.scene.adjacent_tile_on_screen[(absolutePosition.x.toInt() shr super.scene.tileUnits) - super.scene.cameraGridPositionX + super.scene.visibleTiles][(absolutePosition.z.toInt() shr super.scene.tileUnits) - super.scene.cameraGridPositionY + super.scene.visibleTiles]
+        return super.scene!!.adjacent_tile_on_screen[(absolutePosition.x.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionX + super.scene!!.visibleTiles][(absolutePosition.z.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionY + super.scene!!.visibleTiles]
     }
 }

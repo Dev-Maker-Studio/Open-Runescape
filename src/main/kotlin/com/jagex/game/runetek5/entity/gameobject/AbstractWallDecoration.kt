@@ -37,20 +37,21 @@ abstract class AbstractWallDecoration protected constructor(
         throw IllegalStateException()
     }
 
-    override fun getActiveLights(lights: Array<PointLight>): Int {
+    override fun getActiveLights(lights: Array<PointLight?>): Int {
         val absolutePosition = getAbsolutePosition().coords
+        @Suppress("UNCHECKED_CAST")
         return getActiveLights(
-            absolutePosition.x.toInt() shr scene.tileUnits,
-            absolutePosition.z.toInt() shr scene.tileUnits,
-            lights
+            absolutePosition.x.toInt() shr scene!!.tileUnits,
+            absolutePosition.z.toInt() shr scene!!.tileUnits,
+            lights as Array<PointLight?>
         )
     }
 
     override fun canRender(): Boolean {
         val abs = getAbsolutePosition().coords
-        val tileX = (abs.x.toInt() shr scene.tileUnits) - scene.cameraGridPositionX + scene.visibleTiles
-        val tileZ = (abs.z.toInt() shr scene.tileUnits) - scene.cameraGridPositionY + scene.visibleTiles
-        return scene.adjacent_tile_on_screen[tileX][tileZ]
+        val tileX = (abs.x.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionX + scene!!.visibleTiles
+        val tileZ = (abs.z.toInt() shr scene!!.tileUnits) - scene!!.cameraGridPositionY + scene!!.visibleTiles
+        return scene!!.adjacent_tile_on_screen[tileX][tileZ]
     }
 
     override fun castShadow(node: SceneGraphEntity, width: Int, length: Int, height: Int, bool6: Boolean) {
@@ -59,10 +60,10 @@ abstract class AbstractWallDecoration protected constructor(
 
     override fun isSoftHidden(toolkit: AbstractToolkit): Boolean {
         val abs = getAbsolutePosition().coords
-        return scene.culling.isTileHidden(
+        return scene!!.culling.isTileHidden(
             collisionPlane.toInt(),
-            abs.x.toInt() shr scene.tileUnits,
-            abs.z.toInt() shr scene.tileUnits,
+            abs.x.toInt() shr scene!!.tileUnits,
+            abs.z.toInt() shr scene!!.tileUnits,
             getMinY()
         )
     }

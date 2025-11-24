@@ -27,9 +27,9 @@ abstract class AbstractGroundItem(
 
     override fun canRender(): Boolean {
         val absolute = getAbsolutePosition().coords
-        val tileX = (absolute.x.toInt() shr super.scene.tileUnits) - super.scene.cameraGridPositionX + super.scene.visibleTiles
-        val tileZ = (absolute.z.toInt() shr super.scene.tileUnits) - super.scene.cameraGridPositionY + super.scene.visibleTiles
-        return super.scene.adjacent_tile_on_screen[tileX][tileZ]
+        val tileX = (absolute.x.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionX + super.scene!!.visibleTiles
+        val tileZ = (absolute.z.toInt() shr super.scene!!.tileUnits) - super.scene!!.cameraGridPositionY + super.scene!!.visibleTiles
+        return super.scene!!.adjacent_tile_on_screen[tileX][tileZ]
     }
 
     override fun hasTileShadow(): Boolean {
@@ -47,26 +47,26 @@ abstract class AbstractGroundItem(
     override fun getActiveLights(lightNodes: Array<PointLight?>): Int {
         val absolute = getAbsolutePosition().coords
         return getActiveLights(
-            absolute.x.toInt() shr super.scene.tileUnits,
-            absolute.z.toInt() shr super.scene.tileUnits,
+            absolute.x.toInt() shr super.scene!!.tileUnits,
+            absolute.z.toInt() shr super.scene!!.tileUnits,
             lightNodes
         )
     }
 
     override fun isSoftHidden(toolkit: AbstractToolkit): Boolean {
         val absolute = getAbsolutePosition().coords
-        val tileX = absolute.x.toInt() shr super.scene.tileUnits
-        val tileZ = absolute.z.toInt() shr super.scene.tileUnits
-        val interactives = super.scene.getInteractiveObjects(super.plane.toInt(), tileX, tileZ)
+        val tileX = absolute.x.toInt() shr super.scene!!.tileUnits
+        val tileZ = absolute.z.toInt() shr super.scene!!.tileUnits
+        val interactives = super.scene!!.getInteractiveObjects(super.plane.toInt(), tileX, tileZ)
         return if (interactives != null && interactives.interactiveObject!!.supportsItems) {
-            super.scene.culling.isTileHidden(
+            super.scene!!.culling.isTileHidden(
                 super.plane.toInt(),
                 tileX,
                 tileZ,
                 interactives.interactiveObject!!.getMinY() + getMinY()
             )
         } else {
-            super.scene.culling.isTileHidden(super.plane.toInt(), tileX, tileZ)
+            super.scene!!.culling.isTileHidden(super.plane.toInt(), tileX, tileZ)
         }
     }
 }
