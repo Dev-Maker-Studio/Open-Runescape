@@ -26,7 +26,8 @@ object ParticleTypeList {
 
             particletype.setDefaults()
             if (particletype.particleHandlingType == 2 && ParticleType.particleTypeCache.get(particleFileId.toLong()) == null) {
-                ParticleType.particleTypeCache.put(IntNode(ParticleType.particleType), particleFileId.toLong())
+                @Suppress("UNCHECKED_CAST")
+                (ParticleType.particleTypeCache as com.jagex.game.runetek5.cache.node.IterableNodeMap<IntNode>).put(IntNode(ParticleType.particleType), particleFileId.toLong())
                 ParticleType.particleTypes[++ParticleType.particleType - 1] = particletype
             }
 
