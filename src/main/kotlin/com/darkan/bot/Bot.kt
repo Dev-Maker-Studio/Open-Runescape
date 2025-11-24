@@ -78,8 +78,6 @@ object Bot {
     var lastAnimated = System.currentTimeMillis()
 
     var targetNpc: String? = null
-    var uN: String? = null
-    var uP: String? = null
 
     val optionsDialogue = arrayOfNulls<String>(5)
 

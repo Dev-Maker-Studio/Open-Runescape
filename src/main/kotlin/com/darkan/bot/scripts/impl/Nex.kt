@@ -8,11 +8,10 @@ import com.darkan.bot.scripts.ScriptDescription
     author = "Trent",
     name = "Nex",
     version = "1.0",
-    description = "Memes"
+    description = "Kills Nex"
 )
 class Nex : Script(), ConfigurableScript {
     override suspend fun loop() {
-        TODO("Not yet implemented")
-    }
 
+    }
 }
