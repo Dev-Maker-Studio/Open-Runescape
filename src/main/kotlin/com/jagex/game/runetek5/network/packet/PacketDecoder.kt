@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.network.packet
 
 import com.darkan.bot.UI
 import com.darkan.bot.scripts.ScriptExecutor
+import com.darkan.bot.scripts.event.Varc
 import com.darkan.bot.scripts.event.XPDrop
 import com.darkan.bot.utils.Skill
 import com.jagex.game.runetek5.botdetection.ReflectionCheckManager

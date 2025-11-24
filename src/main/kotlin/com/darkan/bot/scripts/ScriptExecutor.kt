@@ -25,23 +25,33 @@ object ScriptExecutor {
     private val _scripts = mutableMapOf<String, ScriptMetadata>()
     val scripts: Map<String, ScriptMetadata> get() = _scripts
 
-    private val activeScripts = ConcurrentHashMap<String, Script>()
-    private val scriptStartTimes = ConcurrentHashMap<String, Long>()
+    private val _activeScripts = ConcurrentHashMap<String, Script>()
+    val activeScripts: Collection<Script> get() = _activeScripts.values
     private val eventBus = ConcurrentLinkedDeque<Event>()
     var tick = 0L
 
+    private val scriptStartTimes = ConcurrentHashMap<String, Long>()
+
+    @Volatile private var pausingScript: Script? = null
+
     fun mainLogic() {
         tick++
-        UI.updateAllXPPerHour()
         try {
-            if (activeScripts.isNotEmpty())
-                StayloggedInTask.tick()
+            StayloggedInTask.tick()
             while (eventBus.isNotEmpty()) {
-                val event = eventBus.poll()
-                activeScripts.takeIf { it.isNotEmpty() }?.values?.forEach { it._processEvent(event) }
+                try {
+                    val event = eventBus.poll()
+                    _activeScripts.takeIf { it.isNotEmpty() }?.values?.forEach { it._processEvent(event) }
+                } catch(e: Throwable) {
+                    e.printStackTrace()
+                }
             }
-            activeScripts.values.forEach { it.tick() }
-        } catch (e: Exception) {
+            val currentPausing = pausingScript
+            if (currentPausing != null)
+                currentPausing.tick()
+            else
+                _activeScripts.values.forEach { it.tick() }
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
@@ -49,34 +59,60 @@ object ScriptExecutor {
     fun pushEvent(event: Event) = eventBus.addLast(event)
 
     fun activate(script: Script) {
-        activeScripts[script.javaClass.name] = script
+        _activeScripts[script.javaClass.name] = script
         scriptStartTimes[script.javaClass.name] = System.currentTimeMillis()
     }
 
     fun deactivate(script: Script) {
-        activeScripts.remove(script.javaClass.name)
+        _activeScripts.remove(script.javaClass.name)
         scriptStartTimes.remove(script.javaClass.name)
     }
 
+    fun isScriptRunning(scriptClass: Class<*>): Boolean { return _activeScripts.containsKey(scriptClass.name) }
+
+    fun getScriptInstance(clazz: Class<*>): Script? { return _activeScripts[clazz.name] }
+
     fun deactivate(scriptClass: Class<*>) {
-        activeScripts.remove(scriptClass.name)
-        scriptStartTimes.remove(scriptClass.name)
+        val instance = _activeScripts[scriptClass.name]
+        if (instance != null)
+            deactivate(instance)
     }
 
-    fun isScriptRunning(scriptClass: Class<*>): Boolean = activeScripts.containsKey(scriptClass.name)
-
-    fun getScriptInstance(scriptClass: Class<*>): Script? = activeScripts[scriptClass.name]
+    fun stopAll() = _activeScripts.values.toList().forEach { it.stop() }
 
     fun getScriptRuntimeFormatted(scriptClass: Class<*>): String? {
-        val startTime = scriptStartTimes[scriptClass.name] ?: return null
-        return formatElapsedTime(System.currentTimeMillis(), startTime)
+        val start = scriptStartTimes[scriptClass.name] ?: return null
+        val elapsedMillis = System.currentTimeMillis() - start
+        val totalSeconds = elapsedMillis / 1000
+        val hrs = totalSeconds / 3600
+        val mins = (totalSeconds % 3600) / 60
+        val secs = totalSeconds % 60
+        return "%02d:%02d:%02d".format(hrs, mins, secs)
     }
 
-    fun stopAll() = activeScripts.values.toList().forEach { it.stop() }
+    fun pauseOthers(script: Script): Boolean {
+        return if (pausingScript == null || pausingScript == script) {
+            pausingScript = script
+            true
+        } else false
+    }
+
+    fun resumeOthers(script: Script): Boolean {
+        return if (pausingScript == script) {
+            pausingScript = null
+            true
+        } else false
+    }
+
+    fun isPaused(): Boolean = pausingScript != null
+
+    private fun clearScripts() {
+        _scripts.clear()
+    }
 
     private fun registerScript(scriptClass: Class<out Script>) {
         val annotation = scriptClass.getAnnotation(ScriptDescription::class.java)
-        if (annotation != null) {
+        if (annotation != null && annotation.visible) {
             val metadata = ScriptMetadata(
                 scriptClass = scriptClass,
                 name = annotation.name,
@@ -89,6 +125,8 @@ object ScriptExecutor {
     }
 
     fun loadScripts() {
+        println("🔍 ScriptExecutor.loadScripts() called")
+
         fun isScriptClass(clazz: Class<*>): Class<out Script>? {
             return if (
                 Script::class.java.isAssignableFrom(clazz) &&
@@ -115,12 +153,13 @@ object ScriptExecutor {
             .mapNotNull { isScriptClass(it) }
             .sortedBy { it.getAnnotation(ScriptDescription::class.java).name }
 
+        clearScripts()
         scripts.forEach(::registerScript)
     }
 
     private fun getScriptsDirectoryFile(): File {
         val userHome = System.getProperty("user.home")
-        val scriptsDir = File(userHome, ".cheddarcheese").resolve("scripts")
+        val scriptsDir = File(userHome, ".undercut").resolve("scripts")
         if (!scriptsDir.exists()) {
             scriptsDir.mkdirs()
         }

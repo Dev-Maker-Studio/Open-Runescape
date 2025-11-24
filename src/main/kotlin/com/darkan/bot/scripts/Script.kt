@@ -44,6 +44,7 @@ abstract class Script {
                 delay(40)
             }
             onStop()
+            stopParallelScripts()
         }
         suspendLambda.startCoroutine(object : Continuation<Unit> {
             override val context: CoroutineContext = dispatcher
@@ -66,10 +67,21 @@ abstract class Script {
         ScriptExecutor.activate(script)
     }
 
+    fun stopParallelScripts() = parallelScripts.forEach { ScriptExecutor.deactivate(it) }
+
+    fun removeParallelScript(script: Script, deactivate: Boolean = true) {
+        parallelScripts.remove(script)
+        if (deactivate) {
+            ScriptExecutor.deactivate(script)
+        }
+    }
+
     open fun onStart() = println("${this.javaClass.simpleName} started.")
     open fun onStop() = println("${this.javaClass.simpleName} stopped.")
 
     open fun onEvent(event: Event) {}
+
+    open fun render() {}
 
     fun _processEvent(event: Event) {
         onEvent(event)
@@ -91,17 +103,11 @@ abstract class Script {
             withTimeoutOrNull(timeoutMillis) {
                 while (wrappedPredicate()) {
                     delay(pollingDelayMillis)
-                    suspendCancellableCoroutine<Unit> { cont ->
-                        dispatcher.addPredicateContinuation(cont, wrappedPredicate)
-                    }
                 }
             }
         } else {
             while (wrappedPredicate()) {
                 delay(pollingDelayMillis)
-                suspendCancellableCoroutine<Unit> { cont ->
-                    dispatcher.addPredicateContinuation(cont, wrappedPredicate)
-                }
             }
         }
     }
@@ -127,8 +133,10 @@ abstract class Script {
         pendingEventPredicate = null
     }
 
-    suspend fun waitForXPDrop(skill: Skill, timeoutMillis: Long = 15000) {
-        waitForEvent(timeoutMillis) { event -> event is XPDrop && event.skill == skill }
+    suspend fun waitForXPDrop(skill: Skill? = null, timeoutMillis: Long = 15000) {
+        waitForEvent(timeoutMillis) { event ->
+            event is XPDrop && (skill == null || event.skill == skill)
+        }
     }
 
     suspend fun waitForChatContaining(type: ChatMessageType, text: String, timeoutMillis: Long = 15000) {
@@ -144,6 +152,20 @@ abstract class Script {
     suspend fun delay(mean: Int, variance: Int) {
         delay(gaussian(mean, variance))
     }
+
+    fun pauseOthers(): Boolean = ScriptExecutor.pauseOthers(this)
+    fun resumeOthers(): Boolean = ScriptExecutor.resumeOthers(this)
+    fun isPaused(): Boolean = ScriptExecutor.isPaused()
+
+    suspend fun pauseOthersFor(durationMs: Long) {
+        if (pauseOthers()) {
+            try {
+                delay(durationMs.toInt())
+            } finally {
+                resumeOthers()
+            }
+        }
+    }
 }
 
 @Target(AnnotationTarget.CLASS)
@@ -153,6 +175,9 @@ annotation class ScriptDescription(
     val version: String,
     val author: String,
     val description: String,
+    val visible: Boolean = true,
+    val category: ScriptCategory = ScriptCategory.OTHER
+
     /**
      * TODO
      * possible requirements field that scripters can attach level requirements,
@@ -160,3 +185,45 @@ annotation class ScriptDescription(
      * dropdown without them being met on the account
      */
 )
+
+enum class ScriptCategory(val readableName: String) {
+
+    COMBAT("Combat"),
+    MAGIC("Magic"),
+    PRAYER("Prayer"),
+    SUMMONING("Summoning"),
+    NECROMANCY("Necromancy"),
+
+    // Gathering Skills
+    MINING("Mining"),
+    FISHING("Fishing"),
+    WOODCUTTING("Woodcutting"),
+    FARMING("Farming"),
+    HUNTER("Hunter"),
+    DIVINATION("Divination"),
+    ARCHAEOLOGY("Archaeology"),
+
+    // Artisan Skills
+    SMITHING("Smithing"),
+    HERBLORE("Herblore"),
+    COOKING("Cooking"),
+    CRAFTING("Crafting"),
+    FIREMAKING("Firemaking"),
+    FLETCHING("Fletching"),
+    RUNECRAFTING("Runecrafting"),
+    CONSTRUCTION("Construction"),
+
+    // Support Skills
+    AGILITY("Agility"),
+    THIEVING("Thieving"),
+    SLAYER("Slayer"),
+    DUNGEONEERING("Dungeoneering"),
+
+    // Elite Skills
+    INVENTION("Invention"),
+
+    // Other Categories
+    QUESTS("Quests"),
+    BOSSES("Bosses"),
+    OTHER("Other")
+}
