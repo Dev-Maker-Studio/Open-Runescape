@@ -151,7 +151,7 @@ object PacketDecoder {
                 throw IOException(opcode.toString() + " " + buffer.currentPosition)
             }
             context.currentPacket = packet
-            context.currentPacketSize = context.currentPacket.size
+            context.currentPacketSize = context.currentPacket!!.size
         }
         if (context.currentPacketSize == -1) {
             if (!connection.available(1)) {
@@ -2397,7 +2397,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else {
-            PacketEncoder.sendErrorToServer((if (context.currentPacket != null) context.currentPacket.opcode else -1).toString() + "," + (if (context.secondLastPacket != null) context.secondLastPacket.opcode else -1) + "," + (if (context.thirdLastPacket != null) context.thirdLastPacket.opcode else -1) + " " + context.currentPacketSize, RuntimeException())
+            PacketEncoder.sendErrorToServer((if (context.currentPacket != null) context.currentPacket!!.opcode else -1).toString() + "," + (if (context.secondLastPacket != null) context.secondLastPacket!!.opcode else -1) + "," + (if (context.thirdLastPacket != null) context.thirdLastPacket!!.opcode else -1) + " " + context.currentPacketSize, RuntimeException())
             client.logout(false)
             return true
         }

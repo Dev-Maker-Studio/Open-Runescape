@@ -7,9 +7,9 @@ import com.jagex.game.runetek5.utils.Utils
 object WorldList {
     fun decode(refresh: Boolean, data: ByteArray) {
         if (WorldMeta.WORLD_LIST_BUFFER == null) WorldMeta.WORLD_LIST_BUFFER = Packet(20000)
-        WorldMeta.WORLD_LIST_BUFFER.writeBytes(data, 0, data.size)
+        WorldMeta.WORLD_LIST_BUFFER!!.writeBytes(data, 0, data.size)
         if (refresh) {
-            WorldDescriptor.decodeWorldList(WorldMeta.WORLD_LIST_BUFFER.buffer)
+            WorldDescriptor.decodeWorldList(WorldMeta.WORLD_LIST_BUFFER!!.buffer)
             WorldConnection.WORLD_DESCRIPTORS_BYID = arrayOfNulls<WorldDescriptor>(WorldMeta.WORLD_LIST_SIZE)
             var worldNumber = 0
             for (worldIndex in WorldDescriptor.WORLD_LIST_START..WorldMeta.WORLD_LIST_SIZEPLUS1) {
