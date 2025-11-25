@@ -16,7 +16,7 @@ class NewsItemBackground(
 
     override fun draw(draw: Boolean) {
         if (draw) {
-            Renderers.activeToolkit.drawFilledRectangle(0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, this.background.color, 0)
+            Renderers.activeToolkit!!.drawFilledRectangle(0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, this.background.color, 0)
         }
     }
 

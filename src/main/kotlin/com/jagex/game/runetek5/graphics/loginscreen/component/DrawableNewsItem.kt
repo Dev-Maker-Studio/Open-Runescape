@@ -27,7 +27,7 @@ class DrawableNewsItem(
         var y = outlinedNewsItem.verticalAnchor.calculateDrawY(outlinedNewsItem.height, client.GAME_HEIGHT) + outlinedNewsItem.offsetY
 
         if (outlinedNewsItem.drawOutline) {
-            Renderers.activeToolkit.drawRectangleOutline(
+            Renderers.activeToolkit!!.drawRectangleOutline(
                 x, y, outlinedNewsItem.width, outlinedNewsItem.height,
                 outlinedNewsItem.backgroundColor, 0
             )
@@ -37,7 +37,7 @@ class DrawableNewsItem(
         y += 8
 
         if (outlinedNewsItem.drawOutline) {
-            Renderers.activeToolkit.drawTransparentLine(
+            Renderers.activeToolkit!!.drawTransparentLine(
                 x, y, outlinedNewsItem.width + x - 1, y,
                 outlinedNewsItem.backgroundColor, 0
             )

@@ -36,6 +36,6 @@ class AnchoredText(
 
     override fun initialize() {
         val fontMetrics = FontMetrics.list(this.fontResource, this.item.fileId)
-        this.frontRenderer = Renderers.activeToolkit.createFontRenderer(fontMetrics, SpriteType.listGroup(this.spriteResource, this.item.fileId), true)
+        this.frontRenderer = Renderers.activeToolkit!!.createFontRenderer(fontMetrics, SpriteType.listGroup(this.spriteResource, this.item.fileId), true)
     }
 }

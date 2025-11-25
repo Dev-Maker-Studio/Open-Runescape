@@ -100,7 +100,7 @@ object ChatBox {
                 if (chatIcon == null) {
                     val spriteType = SpriteType.listSingle(Resource.SPRITES, questType.graphicId, 0)
                     if (spriteType != null) {
-                        chatIcon = Renderers.activeToolkit.generateSprite(spriteType, true)
+                        chatIcon = Renderers.activeToolkit!!.generateSprite(spriteType, true)
                         CHAT_ICONS.put(chatIcon, questType.graphicId.toLong())
                     }
                 }

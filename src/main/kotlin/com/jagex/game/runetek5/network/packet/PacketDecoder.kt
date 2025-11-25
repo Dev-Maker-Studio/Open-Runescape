@@ -1153,7 +1153,7 @@ object PacketDecoder {
                 client.HINT_TRAILS[idx] = null
             }
             if (modelId != -1) {
-                client.HINT_TRAILS[idx] = HintTrail(Renderers.activeToolkit, buffer, modelId)
+                client.HINT_TRAILS[idx] = HintTrail(Renderers.activeToolkit!!, buffer, modelId)
                 client.HINT_TRAILS[idx].addTo(Resource.mapRegion.getScene())
             }
             context.currentPacket = null
@@ -2030,8 +2030,8 @@ object PacketDecoder {
                 for (index in 0..<FriendList.FRIEND_COUNT) {
                     val friend = FriendList.FRIENDS[index]
                     if (!warnMessage) {
-                        if (displayName == friend.displayName) {
-                            if (world != friend.worldId) {
+                        if (displayName == friend!!.displayName) {
+                            if (world != friend!!.worldId) {
                                 var announce = true
                                 var statusUpdate = client.PLAYER_LOGINSTATE_UPDATES.getFirst() as LoginStateUpdate?
                                 while (statusUpdate != null) {
@@ -2049,20 +2049,20 @@ object PacketDecoder {
                                 if (announce) {
                                     client.PLAYER_LOGINSTATE_UPDATES.offer(LoginStateUpdate(displayName, world))
                                 }
-                                friend.worldId = world
+                                friend!!.worldId = world
                             }
-                            friend.previousDisplayName = previousDisplayName
-                            friend.worldName = worldName
-                            friend.friendsChatRank = friendchatRank
-                            friend.platform = platform
-                            friend.referrer = referrer
-                            friend.worldFlags = worldFlags
+                            friend!!.previousDisplayName = previousDisplayName
+                            friend!!.worldName = worldName
+                            friend!!.friendsChatRank = friendchatRank
+                            friend!!.platform = platform
+                            friend!!.referrer = referrer
+                            friend!!.worldFlags = worldFlags
                             displayName = null
                             break
                         }
-                    } else if (previousDisplayName == friend.displayName) {
-                        friend.displayName = displayName ?: ""
-                        friend.previousDisplayName = previousDisplayName
+                    } else if (previousDisplayName == friend!!.displayName) {
+                        friend!!.displayName = displayName ?: ""
+                        friend!!.previousDisplayName = previousDisplayName
                         displayName = null
                         break
                     }
@@ -2070,14 +2070,14 @@ object PacketDecoder {
                 if (displayName != null && FriendList.FRIEND_COUNT < 200) {
                     val friend = Friend()
                     FriendList.FRIENDS[FriendList.FRIEND_COUNT] = friend
-                    friend.displayName = displayName ?: ""
-                    friend.previousDisplayName = previousDisplayName
-                    friend.worldId = world
-                    friend.worldName = worldName
-                    friend.friendsChatRank = friendchatRank
-                    friend.platform = platform
-                    friend.referrer = referrer
-                    friend.worldFlags = worldFlags
+                    friend!!.displayName = displayName ?: ""
+                    friend!!.previousDisplayName = previousDisplayName
+                    friend!!.worldId = world
+                    friend!!.worldName = worldName
+                    friend!!.friendsChatRank = friendchatRank
+                    friend!!.platform = platform
+                    friend!!.referrer = referrer
+                    friend!!.worldFlags = worldFlags
                     ++FriendList.FRIEND_COUNT
                 }
             }
@@ -2092,13 +2092,13 @@ object PacketDecoder {
                     var bool70 = false
                     val class6132 = FriendList.FRIENDS[i_6]
                     val class6134 = FriendList.FRIENDS[i_6 + 1]
-                    if (class6132.worldId != LoginManager.GAME_CONNECTION_INFO.worldId && class6134.worldId == LoginManager.GAME_CONNECTION_INFO.worldId) {
+                    if (class6132!!.worldId != LoginManager.GAME_CONNECTION_INFO.worldId && class6134!!.worldId == LoginManager.GAME_CONNECTION_INFO.worldId) {
                         bool70 = true
                     }
-                    if (!bool70 && class6132.worldId == 0 && class6134.worldId != 0) {
+                    if (!bool70 && class6132!!.worldId == 0 && class6134!!.worldId != 0) {
                         bool70 = true
                     }
-                    if (!bool70 && !class6132.referrer && class6134.referrer) {
+                    if (!bool70 && !class6132!!.referrer && class6134!!.referrer) {
                         bool70 = true
                     }
                     if (bool70) {
