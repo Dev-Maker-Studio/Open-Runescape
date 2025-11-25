@@ -49,13 +49,13 @@ class SongReference(
                 return false
             }
             soundBankCache = SoundBankCache(
-                SoundResourceManager.SOUND_EFFECT_PROVIDER,
-                SoundResourceManager.MIDI_INSTRUMENT_PROVIDER
+                SoundResourceManager.SOUND_EFFECT_PROVIDER!!,
+                SoundResourceManager.MIDI_INSTRUMENT_PROVIDER!!
             )
             loadingStage = 1
         }
         if (loadingStage == 1) {
-            if (!stream.ready(musicTrack, SoundResourceManager.SOUND_MIDI_PROVIDER, soundBankCache)) {
+            if (!stream.ready(musicTrack, SoundResourceManager.SOUND_MIDI_PROVIDER!!, soundBankCache)) {
                 return false
             }
             loadingStage = 2
@@ -67,7 +67,7 @@ class SongReference(
         @JvmStatic
         @JvmName("method1966")
         fun method1966(): Boolean {
-            return SoundResourceManager.anInt1730 != 0 || SoundResourceManager.aNodeSub15Sub21735.dataLoaded()
+            return SoundResourceManager.anInt1730 != 0 || SoundResourceManager.aNodeSub15Sub21735!!.dataLoaded()
         }
 
         @JvmStatic

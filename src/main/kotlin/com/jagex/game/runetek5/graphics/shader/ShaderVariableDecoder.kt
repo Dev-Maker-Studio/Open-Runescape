@@ -1,9 +1,9 @@
-package com.jagex.game.runetek5.graphics.shader;
+package com.jagex.game.runetek5.graphics.shader
 
-import com.jagex.game.runetek5.unidentified.Class111;
+import com.jagex.game.runetek5.unidentified.Class111
 
 /**
- * 
+ *
  * @author Brainpower
  *
  *	Content table:
@@ -73,45 +73,45 @@ A: proj
 A: PosAndTexCoords
 A: sceneTex
 A: params
-A: pixelOffsetAndBloomScale 
+A: pixelOffsetAndBloomScale
 A: sampleSize
 A: bloomTex1
  *
  */
-public class ShaderVariableDecoder {
+class ShaderVariableDecoder {
 
-    public int[] anIntArray1531;
-    public int[] anIntArray1534;
-    public Class111 aClass1111529;
-    public Class111 aClass1111533;
-    public int anInt1528 = -1;
-    
+    @JvmField var anIntArray1531: IntArray? = null
+    @JvmField var anIntArray1534: IntArray? = null
+    @JvmField var aClass1111529: Class111? = null
+    @JvmField var aClass1111533: Class111? = null
+    @JvmField var anInt1528 = -1
+
     /**
      * Always used
      */
-    public String primaryShaderAttributeName;
-    
+    @JvmField var primaryShaderAttributeName: String? = null
+
     /**
      * Always unused
      */
-    public String secondaryShaderAttributeName;
+    @JvmField var secondaryShaderAttributeName: String? = null
 
-    public void decode(ShaderBuffer shaderBuffer) {
-        int mainEntryCount = shaderBuffer.getEntryCount();
-        this.aClass1111529 = Class111.getAll()[mainEntryCount];
-        if (this.aClass1111529 == Class111.aClass1111109) {
-            int i_4 = shaderBuffer.getEntryCount();
-            this.aClass1111533 = Class111.getAll()[i_4];
-            this.anInt1528 = shaderBuffer.getEntryCount();
+    fun decode(shaderBuffer: ShaderBuffer) {
+        val mainEntryCount = shaderBuffer.getEntryCount()
+        aClass1111529 = Class111.getAll()[mainEntryCount]
+        if (aClass1111529 == Class111.aClass1111109) {
+            val i_4 = shaderBuffer.getEntryCount()
+            aClass1111533 = Class111.getAll()[i_4]
+            anInt1528 = shaderBuffer.getEntryCount()
         }
-        this.primaryShaderAttributeName = shaderBuffer.readString();
-        this.secondaryShaderAttributeName = shaderBuffer.readString();
-        int count = shaderBuffer.getEntryCount();
-        this.anIntArray1531 = new int[count];
-        this.anIntArray1534 = new int[count];
-        for (int index = 0; index < count; index++) {
-            this.anIntArray1531[index] = shaderBuffer.getEntryCount();
-            this.anIntArray1534[index] = shaderBuffer.getEntryCount();
+        primaryShaderAttributeName = shaderBuffer.readString()
+        secondaryShaderAttributeName = shaderBuffer.readString()
+        val count = shaderBuffer.getEntryCount()
+        anIntArray1531 = IntArray(count)
+        anIntArray1534 = IntArray(count)
+        for (index in 0 until count) {
+            anIntArray1531!![index] = shaderBuffer.getEntryCount()
+            anIntArray1534!![index] = shaderBuffer.getEntryCount()
         }
     }
 }

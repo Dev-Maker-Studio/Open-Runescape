@@ -80,7 +80,7 @@ class FrameSet(
                 }
                 frameBaseList.insertTail(frameBase)
             }
-            frames!![fileIds[fileIndex]] = AnimFrame(data, frameBase)
+            frames!![fileIds[fileIndex]] = AnimFrame(data, frameBase!!)
         }
         frameData = null
         return true

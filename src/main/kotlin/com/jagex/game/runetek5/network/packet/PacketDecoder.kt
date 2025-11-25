@@ -2210,7 +2210,7 @@ object PacketDecoder {
                 ignore.temporary = (flags and 0x2) == 2
             } else {
                 for (i in 0..<IgnoreList.IGNORE_COUNT) {
-                    val ignore = IgnoreList.IGNORED[i]
+                    val ignore = IgnoreList.IGNORED[i]!!
                     if (displayName == ignore.unfilteredUsername) {
                         ignore.unfilteredUsername = username
                         ignore.displayName = displayName

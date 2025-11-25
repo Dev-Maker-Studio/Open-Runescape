@@ -12,11 +12,11 @@ abstract class ShaderAttribute protected constructor(class1221: ShaderVariableDe
     @JvmField val aClass11110060: Class111
 
     init {
-        this.aClass11110058 = class1221.aClass1111529
-        this.primaryShaderAttributeName = class1221.primaryShaderAttributeName
+        this.aClass11110058 = class1221.aClass1111529!!
+        this.primaryShaderAttributeName = class1221.primaryShaderAttributeName!!
         this.secondaryShaderAttributeName = class1221.secondaryShaderAttributeName
         this.anInt10059 = class1221.anInt1528
-        this.aClass11110060 = class1221.aClass1111533
+        this.aClass11110060 = class1221.aClass1111533!!
     }
 
     protected fun getPrimaryShaderAttributeName(): String {

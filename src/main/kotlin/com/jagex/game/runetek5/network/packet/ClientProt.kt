@@ -1,6 +1,10 @@
-package com.jagex.game.runetek5.network.packet;
+package com.jagex.game.runetek5.network.packet
 
-public enum ClientProt {
+enum class ClientProt(
+    @JvmField val id: Int,
+    @JvmField val size: Int,
+    @JvmField val tickProcessed: Boolean = false
+) {
     PING(0, 0),
     PLAYER_OP6(1, 3, true),
     SOUND_EFFECT_MUSIC_ENDED(2, 4),
@@ -80,7 +84,7 @@ public enum ClientProt {
     REGION_LOADED_CONFIRM(76, 0),
     NPC_OP4(77, 3, true),
     MOVE_MOUSE_2(78, -1),
-    ACCOUNT_CREATION_STAGE(79, 1), 
+    ACCOUNT_CREATION_STAGE(79, 1),
     RESUME_NAMEDIALOG(80, -1),
     IF_OP10(81, 8, true),
     UNK_82(82, 4), //writes one identical int sometime during gamestate/region loading. Probably sends when something fails to load or error occurs
@@ -105,18 +109,4 @@ public enum ClientProt {
     SEND_SIGN_UP_FORM(101, -2),
     CHECK_EMAIL_VALIDITY(102, -2),
     PLAYER_OP5(103, 3, true);
-
-    public final int id;
-    public final int size;
-    public final boolean tickProcessed;
-
-    ClientProt(int id, int size, boolean tickProcessed) {
-        this.id = id;
-        this.size = size;
-        this.tickProcessed = tickProcessed;
-    }
-
-    ClientProt(int id, int size) {
-        this(id, size, false);
-    }
 }

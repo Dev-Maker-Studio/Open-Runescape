@@ -5,8 +5,8 @@ class ShaderAttributeDX(
     class1222: ShaderVariableDecoder
 ) : ShaderAttribute(class1222) {
 
-    @JvmField val anIntArray10306: IntArray = class1222.anIntArray1531
-    @JvmField val anIntArray10307: IntArray = class1222.anIntArray1534
+    @JvmField val anIntArray10306: IntArray = class1222.anIntArray1531!!
+    @JvmField val anIntArray10307: IntArray = class1222.anIntArray1534!!
 
     override fun loadUniformLocation(i_1: Int): Boolean {
         return true
