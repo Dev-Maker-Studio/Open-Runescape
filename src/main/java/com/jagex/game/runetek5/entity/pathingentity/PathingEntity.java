@@ -118,9 +118,11 @@ public abstract class PathingEntity extends AbstractInteractiveEntity {
     
     public final int[] activeHitsplatIds;
     public final int[] hitsplatText;
+    public final String[] hitsplatCustomText;
     public final int[] hitsplatCycles;
     public final int[] soakHitsplatIds;
     public final int[] soakHitsplatText;
+    public final String[] soakHitsplatCustomText;
     public final EntityNodeList entityHitbars;
     public int faceEntity;
     public int[] currentAnimations;
@@ -178,9 +180,11 @@ public abstract class PathingEntity extends AbstractInteractiveEntity {
         this.hitCachePtr = 0;
         this.activeHitsplatIds = new int[client.ENTITY_DEFAULTS.maximumHits];
         this.hitsplatText = new int[client.ENTITY_DEFAULTS.maximumHits];
+        this.hitsplatCustomText = new String[client.ENTITY_DEFAULTS.maximumHits];
         this.hitsplatCycles = new int[client.ENTITY_DEFAULTS.maximumHits];
         this.soakHitsplatIds = new int[client.ENTITY_DEFAULTS.maximumHits];
         this.soakHitsplatText = new int[client.ENTITY_DEFAULTS.maximumHits];
+        this.soakHitsplatCustomText = new String[client.ENTITY_DEFAULTS.maximumHits];
         this.entityHitbars = new EntityNodeList();
         this.faceEntity = -1;
         this.currentAnimations = null;
@@ -662,9 +666,10 @@ public abstract class PathingEntity extends AbstractInteractiveEntity {
         this.previousMovementStepsLeft = 0;
     }
 
-    public void applyHit(int hitsplatId, int hitText, int soakHitsplatId, int soakText, int currentCycles, int delay) {
+    public void applyHit(int hitsplatId, int hitText, String hitCustomText, int soakHitsplatId, int soakText, String soakCustomText, int currentCycles, int delay) {
         if (Loader.X10_HITS_MODE)
             hitText = (int) Math.ceil((double) hitText / 10.0);
+
         boolean clearCurrentHits = true;
         boolean hasPrerequisites = true;
 
@@ -731,11 +736,12 @@ public abstract class PathingEntity extends AbstractInteractiveEntity {
         if (hitIndex >= 0) {
             this.activeHitsplatIds[hitIndex] = hitsplatId;
             this.hitsplatText[hitIndex] = hitText;
+            this.hitsplatCustomText[hitIndex] = hitCustomText;
             this.soakHitsplatIds[hitIndex] = soakHitsplatId;
             this.soakHitsplatText[hitIndex] = soakText;
+            this.soakHitsplatCustomText[hitIndex] = soakCustomText;
             this.hitsplatCycles[hitIndex] = currentCycles + cyclesVisible + delay;
         }
-
     }
 
     public void displayHitbar(int hitbarId, int currentCycle, int lifetimeCycles, int delay, int fromPercentage, int toPercentage) {

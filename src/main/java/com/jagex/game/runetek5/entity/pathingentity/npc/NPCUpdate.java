@@ -349,25 +349,36 @@ public class NPCUpdate {
                 if (hitCount > 0) {
                     for (int index = 0; index < hitCount; index++) {
                         int soakHitsplatId = -1;
-                        int hitText;
+                        int hitText = -1;
                         int soakText = -1;
+                        String hitCustomText = null;
+                        String soakCustomText = null;
                         int hitsplatId = buffer.readUSmart();
-                        if (hitsplatId == 32767) {
-                        	// Soaking
-                            hitsplatId = buffer.readUSmart();
-                            hitText = buffer.readUSmart();
-                            soakHitsplatId = buffer.readUSmart();
-                            soakText = buffer.readUSmart();
-                        } else if (hitsplatId != 32766) {
-                        	// Hitmark
-                            hitText = buffer.readUSmart();
-                        } else {
-                        	// Missed
-                            hitsplatId = -1;
-                            hitText = buffer.readUByte();
+                        switch(hitsplatId) {
+                            case 32767 -> { // Soaking
+                                hitsplatId = buffer.readUSmart();
+                                hitText = buffer.readUSmart();
+                                soakHitsplatId = buffer.readUSmart();
+                                soakText = buffer.readUSmart();
+                            }
+                            case 32766 -> { // Missed
+                                hitsplatId = -1;
+                                hitText = buffer.readUByte();
+                            }
+                            case 32764 -> { // Custom with soaking
+                                hitsplatId = buffer.readUSmart();
+                                hitCustomText = buffer.readString();
+                                soakHitsplatId = buffer.readUSmart();
+                                soakCustomText = buffer.readString();
+                            }
+                            case 32765 -> { // Custom without soaking
+                                hitsplatId = buffer.readUSmart();
+                                hitCustomText = buffer.readString();
+                            }
+                            default -> hitText = buffer.readUSmart();
                         }
                         int delay = buffer.readUSmart();
-                        npc.applyHit(hitsplatId, hitText, soakHitsplatId, soakText, client.cycles, delay);
+                        npc.applyHit(hitsplatId, hitText, hitCustomText, soakHitsplatId, soakText, soakCustomText, client.cycles, delay);
                     }
                 }
                 int hitbarCount = buffer.readUByteAdd();

@@ -307,21 +307,35 @@ public class PlayerUpdate {
                     int soakHitsplatId = -1;
                     int soakText = -1;
                     int hitText = -1;
+                    String hitCustomText = null;
+                    String soakCustomText = null;
                     int hitsplatId = stream.readUSmart();
-                    if (hitsplatId == 32767) {
-                        hitsplatId = stream.readUSmart();
-                        hitText = stream.readUSmart();
-                        soakHitsplatId = stream.readUSmart();
-                        soakText = stream.readUSmart();
-                    } else if (hitsplatId == 32766) {
-                        hitsplatId = -1;
-                        hitText = stream.readUByteInverse();
-                    } else {
-                        hitText = stream.readUSmart();
+                    switch (hitsplatId) {
+                        case 32767 -> {
+                            hitsplatId = stream.readUSmart();
+                            hitText = stream.readUSmart();
+                            soakHitsplatId = stream.readUSmart();
+                            soakText = stream.readUSmart();
+                        }
+                        case 32766 -> {
+                            hitsplatId = -1;
+                            hitText = stream.readUByteInverse();
+                        }
+                        case 32764 -> { // Custom with soaking
+                            hitsplatId = stream.readUSmart();
+                            hitCustomText = stream.readString();
+                            soakHitsplatId = stream.readUSmart();
+                            soakCustomText = stream.readString();
+                        }
+                        case 32765 -> { // Custom without soaking
+                            hitsplatId = stream.readUSmart();
+                            hitCustomText = stream.readString();
+                        }
+                        default -> hitText = stream.readUSmart();
                     }
 
                     int delay = stream.readUSmart();
-                    player.applyHit(hitsplatId, hitText, soakHitsplatId, soakText, client.cycles, delay);
+                    player.applyHit(hitsplatId, hitText, hitCustomText, soakHitsplatId, soakText, soakCustomText, client.cycles, delay);
                 }
             }
 
