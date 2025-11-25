@@ -17,7 +17,7 @@ class UpdatePlayer(
     @JvmField var name: String? = null
 
     override fun applyTo(clanChannel: ClanChannel) {
-        val player = clanChannel.players[this.playerIndex]
+        val player = clanChannel.players!![this.playerIndex]!!
         player.rank = this.rank
         player.world = this.world
         player.name = this.name

@@ -63,6 +63,6 @@ class CutsceneApplyHitmark(buffer: Packet) : CutsceneAction(buffer) {
 
     override fun perform() {
         val entity = CutsceneTypeList.CUTSCENE_ENTITIES[entityIndex].getEntity()
-        entity.applyHit(hitsplatId, hitText, soakHitsplatId, soakText, client.cycles, 0)
+        entity.applyHit(hitsplatId, hitText, null, soakHitsplatId, soakText, null, client.cycles, 0)
     }
 }
