@@ -43,9 +43,6 @@ object Bot {
 
     @JvmField
     var PROD: Boolean = true
-    var IP = "prod.darkan.org"
-    var PROXY_IP = "147.135.15.128"
-    var PROXY_PORT = -1
 
     // Interface IDs
     private const val BANK_INTERFACE = 762

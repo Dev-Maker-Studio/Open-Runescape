@@ -477,7 +477,7 @@ public class EntityUpdating {
                                 String hitsplatText = ((PathingEntity) entity).hitsplatCustomText[hitsplatIndex] != null ? ((PathingEntity) entity).hitsplatCustomText[hitsplatIndex] : hitsplatType.getCenteredText(((PathingEntity) entity).hitsplatText[hitsplatIndex]);
                                 int regularWidth = fontmetrics54.getWidthNoSprites(hitsplatText);
                                 if (soakHitsplat != null) {
-                                    soakText = soakHitsplat.getCenteredText(((PathingEntity) entity).soakHitsplatText[hitsplatIndex]);
+                                    soakText = ((PathingEntity) entity).soakHitsplatCustomText[hitsplatIndex] != null ? ((PathingEntity) entity).soakHitsplatCustomText[hitsplatIndex] : soakHitsplat.getCenteredText(((PathingEntity) entity).soakHitsplatText[hitsplatIndex]);
                                     soakWidth = fontmetrics55.getWidthNoSprites(soakText);
                                 }
                                 int i_63 = 0;
