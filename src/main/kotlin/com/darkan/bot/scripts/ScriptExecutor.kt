@@ -37,7 +37,8 @@ object ScriptExecutor {
     fun mainLogic() {
         tick++
         try {
-            StayloggedInTask.tick()
+            if (activeScripts.isNotEmpty())
+                StayloggedInTask.tick()
             while (eventBus.isNotEmpty()) {
                 try {
                     val event = eventBus.poll()
