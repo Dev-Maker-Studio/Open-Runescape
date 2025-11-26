@@ -11,11 +11,11 @@ open class EntityNode {
     @JvmField var previous: EntityNode? = null
 
     open fun unlinkNode() {
-        if (this.previous != null) {
-            this.previous!!.next = this.next
-            this.next!!.previous = this.previous
-            this.next = null
-            this.previous = null
+        if (previous != null) {
+            previous!!.next = next
+            next!!.previous = previous
+            next = null
+            previous = null
         }
     }
 

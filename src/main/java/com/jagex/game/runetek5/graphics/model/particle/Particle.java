@@ -77,7 +77,7 @@ public class Particle extends PointEntity {
         ParticleSystemManager.particleCache[ParticleSystemManager.killIndex] = this;
         ParticleSystemManager.killIndex = ParticleSystemManager.killIndex + 1 & 0x3ff;
         unlinkNode();
-        unlink();
+        unlinkTree();
     }
 
     void processCycle(Scene scene, AbstractToolkit toolkit) {

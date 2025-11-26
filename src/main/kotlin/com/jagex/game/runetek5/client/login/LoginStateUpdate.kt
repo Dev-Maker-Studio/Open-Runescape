@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.client.login
 
 import com.jagex.game.runetek5.entity.EntityNode
+import com.jagex.game.runetek5.graphics.model.particle.ParticleNode
 import com.jagex.game.runetek5.utils.Utils
 
 class LoginStateUpdate(

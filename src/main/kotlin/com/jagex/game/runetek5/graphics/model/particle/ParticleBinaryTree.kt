@@ -6,60 +6,60 @@ class ParticleBinaryTree {
     @JvmField var aParticleNode: ParticleNode? = null
 
     init {
-        this.current.child = this.current
-        this.current.next = this.current
+        current.child = current
+        current.treeNext = current
     }
 
     fun getNext(): ParticleNode? {
-        val child = this.current.child
-        return if (child == this.current) {
-            this.aParticleNode = null
+        val child = current.child
+        return if (child == current) {
+            aParticleNode = null
             null
         } else {
-            this.aParticleNode = child!!.child
+            aParticleNode = child!!.child
             child
         }
     }
 
     fun method7734(): ParticleNode? {
-        val node = this.aParticleNode
-        return if (node == this.current) {
-            this.aParticleNode = null
+        val node = aParticleNode
+        return if (node == null || node == current) {
+            aParticleNode = null
             null
         } else {
-            this.aParticleNode = node!!.child
+            aParticleNode = node.child
             node
         }
     }
 
     fun insert(node: ParticleNode) {
-        if (node.next != null) {
-            node.unlink()
+        if (node.treeNext != null) {
+            node.unlinkTree()
         }
-        node.next = this.current.next
-        node.child = this.current
-        (node.next as ParticleNode).child = node
-        node.child!!.next = node
+        node.treeNext = current.treeNext
+        node.child = current
+        node.treeNext!!.child = node
+        node.child!!.treeNext = node
     }
 
     fun getNodeCount(): Int {
         var count = 0
-        var class275Sub13 = this.current.child
-        while (class275Sub13 != this.current) {
+        var n = current.child
+        while (n != current) {
             count++
-            class275Sub13 = class275Sub13!!.child
+            n = n!!.child
         }
         return count
     }
 
     fun unlinkAll() {
         while (true) {
-            val particleNode = this.current.child
-            if (particleNode == this.current) {
-                this.aParticleNode = null
+            val particleNode = current.child
+            if (particleNode == current) {
+                aParticleNode = null
                 return
             }
-            particleNode!!.unlink()
+            particleNode!!.unlinkTree()
         }
     }
 }

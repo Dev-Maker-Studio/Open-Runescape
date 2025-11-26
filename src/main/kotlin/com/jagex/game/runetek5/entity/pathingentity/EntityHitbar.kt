@@ -14,7 +14,7 @@ class EntityHitbar(
     @JvmField val hitbarType: HitbarType
 ) : EntityNode() {
 
-    @JvmField val entityList = EntityNodeList()
+    @JvmField val entityList = EntityNodeList<EntityHitbarDisplayDetails>()
 
     /**
      * Retrieves the current hitbar display details for the given client cycle.
@@ -23,16 +23,16 @@ class EntityHitbar(
      * @return The hitbar display details, or null if none are active
      */
     fun method12600(clientCycle: Int): EntityHitbarDisplayDetails? {
-        var details = entityList.getFirst() as EntityHitbarDisplayDetails?
+        var details = entityList.getFirst()
         if (details != null && details.discardAtCycle <= clientCycle) {
-            var nextDetails = entityList.getNext() as EntityHitbarDisplayDetails?
+            var nextDetails = entityList.getNext()
             while (nextDetails != null && nextDetails.discardAtCycle <= clientCycle) {
                 details!!.unlinkNode()
                 details = nextDetails
-                nextDetails = entityList.getNext() as EntityHitbarDisplayDetails?
+                nextDetails = entityList.getNext()
             }
 
-            if (hitbarType.anInt2443 + details!!.discardAtCycle + details.lifetimeCycles > clientCycle) {
+            if (hitbarType.anInt2443 + details.discardAtCycle + details.lifetimeCycles > clientCycle) {
                 return details
             }
             details.unlinkNode()
@@ -53,7 +53,7 @@ class EntityHitbar(
         var adjustedHitbar: EntityHitbarDisplayDetails? = null
         var hitbarCount = 0
 
-        var hitbarDisplay = entityList.getFirst() as EntityHitbarDisplayDetails?
+        var hitbarDisplay = entityList.getFirst()
         while (hitbarDisplay != null) {
             hitbarCount++
             if (hitbarDisplay.discardAtCycle == discardCycle) {
@@ -64,7 +64,7 @@ class EntityHitbar(
             if (hitbarDisplay.discardAtCycle <= discardCycle) {
                 adjustedHitbar = hitbarDisplay
             }
-            hitbarDisplay = entityList.getNext() as EntityHitbarDisplayDetails?
+            hitbarDisplay = entityList.getNext()
         }
 
         if (adjustedHitbar == null) {
@@ -72,7 +72,7 @@ class EntityHitbar(
                 entityList.getPrevious(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles))
             }
         } else {
-            EntityNode.replace(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles), adjustedHitbar)
+            replace(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles), adjustedHitbar)
             if (hitbarCount >= client.ENTITY_DEFAULTS.anInt7030) {
                 entityList.getFirst()!!.unlinkNode()
             }

@@ -6,98 +6,102 @@ import java.util.NoSuchElementException
  * Needs better naming...
  *
  */
-class EntityNodeList : Iterable<EntityNode> {
+class EntityNodeList<N : EntityNode> : Iterable<N> {
 
-    @JvmField val head = EntityNode()
-    @JvmField var pointer: EntityNode? = null
+    @JvmField
+    val head: EntityNode = EntityNode()
+
+    @JvmField
+    var pointer: EntityNode? = null
 
     init {
         head.next = head
         head.previous = head
     }
 
-    fun getPrevious(entityNode: EntityNode) {
-        if (entityNode.previous != null) {
-            entityNode.unlinkNode()
+    fun getPrevious(node: N) {
+        if (node.previous != null) {
+            node.unlinkNode()
         }
-        entityNode.previous = head
-        entityNode.next = head.next
-        entityNode.previous!!.next = entityNode
-        entityNode.next!!.previous = entityNode
+        node.previous = head
+        node.next = head.next
+        node.previous!!.next = node
+        node.next!!.previous = node
     }
 
-    fun get(): EntityNode? {
-        val entityNode = head.next
-        if (entityNode == head) {
+    fun get(): N? {
+        val node = head.next
+        if (node == head) {
             return null
         }
-        entityNode!!.unlinkNode()
-        return entityNode
+        node!!.unlinkNode()
+        @Suppress("UNCHECKED_CAST")
+        return node as N
     }
 
-    fun offer(entityNode: EntityNode) {
-        if (entityNode.previous != null) {
-            entityNode.unlinkNode()
+    fun offer(node: N) {
+        if (node.previous != null) {
+            node.unlinkNode()
         }
-        entityNode.previous = head.previous
-        entityNode.next = head
-        entityNode.previous!!.next = entityNode
-        entityNode.next!!.previous = entityNode
+        node.previous = head.previous
+        node.next = head
+        node.previous!!.next = node
+        node.next!!.previous = node
     }
 
-    fun getNext(): EntityNode? {
-        val entity = pointer
-        if (entity == head) {
+    fun getNext(): N? {
+        val node = pointer
+        if (node == null || node == head) {
             pointer = null
             return null
         }
-        pointer = entity!!.next
-        return entity
+        pointer = node.next
+        @Suppress("UNCHECKED_CAST")
+        return node as N
     }
 
     fun unlink() {
         while (true) {
-            val entity = head.next
-            if (entity == head) {
+            val node = head.next
+            if (node == head) {
                 pointer = null
                 return
             }
-            entity!!.unlinkNode()
+            node!!.unlinkNode()
         }
     }
 
-    fun getFirst(): EntityNode? {
-        val entity = head.next
-        if (entity == head) {
+    fun getFirst(): N? {
+        val node = head.next
+        if (node == head) {
             pointer = null
             return null
         }
-        pointer = entity!!.next
-        return entity
+        pointer = node!!.next
+        @Suppress("UNCHECKED_CAST")
+        return node as N
     }
 
     fun isEmpty(): Boolean {
         return head.next == head
     }
 
-    override fun iterator(): Iterator<EntityNode> {
-        return EntityNodeIterator()
-    }
+    override fun iterator(): Iterator<N> = EntityNodeIterator()
 
-    private inner class EntityNodeIterator : Iterator<EntityNode> {
-        private var current = head.next
+    private inner class EntityNodeIterator : Iterator<N> {
+        private var current: EntityNode? = head.next
 
         override fun hasNext(): Boolean {
             return current != head
         }
 
-        override fun next(): EntityNode {
-            if (!hasNext()) {
-                throw NoSuchElementException()
-            }
+        override fun next(): N {
+            if (!hasNext()) throw NoSuchElementException()
             val node = current!!
-            current = current!!.next
-            return node
+            current = node.next
+            @Suppress("UNCHECKED_CAST")
+            return node as N
         }
     }
 }
+
