@@ -48,7 +48,7 @@ class LocAction : Node<LocAction>() {
             while (locAction != null) {
                 if (!locAction.inUpdateZone) {
                     locAction.queued = true
-                    if (locAction.x >= 0 && locAction.y >= 0 && locAction.x < Resource.mapRegion.getSceneSizeX() && locAction.y < Resource.mapRegion.getSceneSizeY()) {
+                    if (locAction.x >= 0 && locAction.y >= 0 && locAction.x < Resource.mapRegion!!.getSceneSizeX() && locAction.y < Resource.mapRegion!!.getSceneSizeY()) {
                         fetchGameobject(locAction)
                     }
                 } else {
@@ -85,7 +85,7 @@ class LocAction : Node<LocAction>() {
                 locAction.gameObjectType = type
                 locAction.x = x
                 locAction.y = y
-                if (x >= 0 && y >= 0 && x < Resource.mapRegion.getSceneSizeX() && y < Resource.mapRegion.getSceneSizeY()) {
+                if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.getSceneSizeX() && y < Resource.mapRegion!!.getSceneSizeY()) {
                     fetchGameobject(locAction)
                 }
                 pendingRemovals.addFirst(locAction)
@@ -125,7 +125,7 @@ class LocAction : Node<LocAction>() {
 
         @JvmStatic
         fun fetchGameobject(action: LocAction) {
-            val scene = Resource.mapRegion.getScene()
+            val scene = Resource.mapRegion!!.getScene()
             if (scene != null) {
                 var gameObject: GameObject? = null
                 if (action.gameObjectType == 0) {

@@ -72,7 +72,7 @@ class AsyncMapLoader : Runnable {
         }
 
         region.setLoadingRegion()
-        Resource.mapRegion.setLoadingRegion()
+        Resource.mapRegion!!.setLoadingRegion()
     }
 
     fun initializeRegion(loctypelist: com.jagex.game.runetek5.config.`object`.ObjectTypeList) {

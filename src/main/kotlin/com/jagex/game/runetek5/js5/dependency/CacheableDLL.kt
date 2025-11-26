@@ -20,7 +20,7 @@ class CacheableDLL(
         if (this.doneLoading) {
             return 100
         }
-        val loadPercentage = Resource.NATIVE_LIBRARY_LOADER.getLibraryLoadingPercent(this.nativeName)
+        val loadPercentage = Resource.NATIVE_LIBRARY_LOADER!!.getLibraryLoadingPercent(this.nativeName)
         if (loadPercentage >= 0 && loadPercentage <= 100) {
             return loadPercentage
         }

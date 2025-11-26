@@ -46,7 +46,7 @@ object SongPlayer {
             } else if (musicArchive != -1 && (musicArchive != AreaSoundPlayer.currentMusicArchive || !SongReference.method1966())
                 && adjustedVolume != 0 && !SoundEffectPlayer.soundJinglePlaying
             ) {
-                transitionToNextSong(i_2, Resource.MUSIC, musicArchive, adjustedVolume, SongTransition())
+                transitionToNextSong(i_2, Resource.MUSIC!!, musicArchive, adjustedVolume, SongTransition())
                 method12658()
             }
             if (musicArchive != AreaSoundPlayer.currentMusicArchive) {

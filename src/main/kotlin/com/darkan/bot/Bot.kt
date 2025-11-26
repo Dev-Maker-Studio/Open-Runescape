@@ -627,7 +627,7 @@ object Bot {
             getMyPlayer().endX.toInt(),
             getMyPlayer().endZ.toInt(), PlayerUpdate.MY_PLAYER.size,
             strategy,
-            Resource.mapRegion.getCollisionMap(PlayerUpdate.MY_PLAYER.plane.toInt()),
+            Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER.plane.toInt()),
             alt,
             client.WALKING_STEPS_X,
             client.WALKING_STEPS_Y
@@ -763,8 +763,8 @@ object Bot {
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
-    fun getBaseX() = Resource.mapRegion.getBaseCoordinates().x
-    fun getBaseY() = Resource.mapRegion.getBaseCoordinates().y
+    fun getBaseX() = Resource.mapRegion!!.getBaseCoordinates().x
+    fun getBaseY() = Resource.mapRegion!!.getBaseCoordinates().y
     fun getMyPlayerX() = getMyPlayer().endX.toInt() + getBaseX()
     fun getMyPlayerY() = getMyPlayer().endZ.toInt() + getBaseY()
 
@@ -897,16 +897,16 @@ object Bot {
         for (x in 0 until 104) {
             for (y in 0 until 104) {
                 val plane = getMyPlayer().plane.toInt()
-                var obj: GameObject? = Resource.mapRegion.getScene().getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
+                var obj: GameObject? = Resource.mapRegion!!.getScene().getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
 
                 if (obj == null)
-                    obj = Resource.mapRegion.getScene().getGroundDecoration(plane, x, y) as GameObject?
+                    obj = Resource.mapRegion!!.getScene().getGroundDecoration(plane, x, y) as GameObject?
 
                 if (obj == null)
-                    obj = Resource.mapRegion.getScene().getWall(plane, x, y) as GameObject?
+                    obj = Resource.mapRegion!!.getScene().getWall(plane, x, y) as GameObject?
 
                 if (obj == null)
-                    obj = Resource.mapRegion.getScene().getPrimaryWallDecoration(plane, x, y) as GameObject?
+                    obj = Resource.mapRegion!!.getScene().getPrimaryWallDecoration(plane, x, y) as GameObject?
 
                 obj?.let {
                     objects.add(WorldObject(
@@ -975,7 +975,7 @@ object Bot {
             "npcnext" -> { println(getClosestNPC("fishing spot")); getNPCs().forEach { println(it.definitions.name) } }
             "objnext" -> { println(getClosestObject("Fur stall")); println("Number found: ${getObjectsNearby("Fur stall").size}"); clickClosestObject("Fur stall") }
             "nearbyobjects" -> { Console.writeLine("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: "); getObjectsNearby(cmd[1]).forEach { Console.writeLine("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}") } }
-            "objonme" -> println((Resource.mapRegion.getScene().getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject)?.id)
+            "objonme" -> println((Resource.mapRegion!!.getScene().getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject)?.id)
 
             // Debug & Toggles
             "togglepackets" -> { disableIncomingPackets = !disableIncomingPackets; Console.writeLine("Disabled packets: $disableIncomingPackets") }
@@ -995,10 +995,10 @@ object Bot {
                 for (x in 0 until 104) {
                     for (y in 0 until 104) {
                         val plane = getMyPlayer().plane.toInt()
-                        var obj: GameObject? = Resource.mapRegion.getScene().getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
-                        if (obj == null) obj = Resource.mapRegion.getScene().getGroundDecoration(plane, x, y) as? GameObject
-                        if (obj == null) obj = Resource.mapRegion.getScene().getWall(plane, x, y) as? GameObject
-                        if (obj == null) obj = Resource.mapRegion.getScene().getPrimaryWallDecoration(plane, x, y) as? GameObject
+                        var obj: GameObject? = Resource.mapRegion!!.getScene().getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+                        if (obj == null) obj = Resource.mapRegion!!.getScene().getGroundDecoration(plane, x, y) as? GameObject
+                        if (obj == null) obj = Resource.mapRegion!!.getScene().getWall(plane, x, y) as? GameObject
+                        if (obj == null) obj = Resource.mapRegion!!.getScene().getPrimaryWallDecoration(plane, x, y) as? GameObject
                         obj?.let { println("Object type: ${it.javaClass.name}") }
                     }
                 }

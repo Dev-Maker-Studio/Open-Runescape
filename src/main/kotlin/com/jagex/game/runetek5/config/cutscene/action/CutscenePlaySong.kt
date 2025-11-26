@@ -19,7 +19,7 @@ class CutscenePlaySong(buffer: Packet) : CutsceneAction(buffer) {
 
     override fun isFullyCached(): Boolean {
         if (this.songReference == null) {
-            this.songReference = SongReference(Resource.MUSIC, this.musicId)
+            this.songReference = SongReference(Resource.MUSIC!!, this.musicId)
         }
         return this.songReference!!.initialize()
     }

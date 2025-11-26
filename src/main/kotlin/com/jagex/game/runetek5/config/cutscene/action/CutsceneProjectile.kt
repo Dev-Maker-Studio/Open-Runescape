@@ -95,7 +95,7 @@ class CutsceneProjectile(rsbytebuffer1: Packet, i_2: Int, i_3: Int) : CutsceneAc
         }
         val i_7 = anInt9399 shl 2
         val projectile = Projectile(
-            Resource.mapRegion.getScene(), gfxId, plane, plane, dstX, dstY,
+            Resource.mapRegion!!.getScene(), gfxId, plane, plane, dstX, dstY,
             anInt9405 shl 2, client.cycles, anInt9409 + client.cycles, anInt9412, i_7, anInt9402 + 1, anInt9400 + 1, endHeight shl 2, false, 0
         )
         projectile.start(srcX, srcY, endHeight shl 2, anInt9409 + client.cycles)

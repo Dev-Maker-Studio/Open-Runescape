@@ -121,13 +121,13 @@ object Renderers {
         cleanup()
         activeToolkit!!.initialize()
         activeToolkit!!.generateFlags()
-        Resource.mapRegion.calculateViewRange()
+        Resource.mapRegion!!.calculateViewRange()
         activeToolkit!!.resetTextureState()
         if (activeToolkit!!.hasBloomSupport()) {
             PreferenceManager.setBloom(PreferenceManager.preferences.bloom.getValue() == 1)
         }
-        Resource.mapRegion.resetAtmosphere()
-        Resource.mapRegion.getEnvironmentManager().requestDirectEnvironmentTransition()
+        Resource.mapRegion!!.resetAtmosphere()
+        Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
         client.preferencesSavedOnServer = false
         client.needsResize = true
         WindowMode.activeDisplayModeDetails = null

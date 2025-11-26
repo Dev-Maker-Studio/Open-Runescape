@@ -36,8 +36,8 @@ object GraphicsCache {
             preferenceMask = preferenceMask or ModelFunctionMask.DISABLE_TEXTURES
         }
         Component.resetCache(preferenceMask)
-        Resource.mapRegion.getLoctypeList().resetCaches(preferenceMask)
-        Resource.mapRegionLoaderTask.getMapRegion().getLoctypeList().resetCaches(preferenceMask)
+        Resource.mapRegion!!.getLoctypeList().resetCaches(preferenceMask)
+        Resource.mapRegionLoaderTask!!.getMapRegion().getLoctypeList().resetCaches(preferenceMask)
         TypeLists.OBJ.resetCache(preferenceMask)
         TypeLists.NPC.setPreferenceFlags(preferenceMask)
         TypeLists.SPOT_ANIM.setPreferenceMask(preferenceMask)
@@ -46,7 +46,7 @@ object GraphicsCache {
         PathingEntity.resetCache(preferenceMask)
         PlayerAppearance.setPreferences(preferenceMask)
         ItemContainer.resetCache(preferenceMask)
-        Resource.mapRegion.reload()
+        Resource.mapRegion!!.reload()
     }
 
     /**

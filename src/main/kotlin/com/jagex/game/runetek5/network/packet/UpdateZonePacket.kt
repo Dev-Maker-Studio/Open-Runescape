@@ -60,7 +60,7 @@ enum class UpdateZonePacket(val size: Int) {
 
     private fun decodeGroundItemCount(buffer: Packet) {
         val coords = buffer.readUByte()
-        val baseCoords = Resource.mapRegion.getBaseCoordinates()
+        val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
         val localX = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val localY = (coords and 0x7) + UPDATE_ZONE_Y
         val x = localX + baseCoords.x
@@ -90,7 +90,7 @@ enum class UpdateZonePacket(val size: Int) {
     private fun decodeObjectPrefetch(buffer: Packet) {
         val objectId = buffer.readInt()
         val typeIndex = buffer.readUByte()
-        Resource.mapRegion.getLoctypeList().list(objectId).isTypeCached(typeIndex)
+        Resource.mapRegion!!.getLoctypeList().list(objectId).isTypeCached(typeIndex)
     }
 
     private fun decodeSpotAnim(buffer: Packet) {
@@ -113,12 +113,12 @@ enum class UpdateZonePacket(val size: Int) {
                 val tileY = y * 512 + 256
                 var adjustedPlane = UPDATE_ZONE_PLANE
 
-                if (adjustedPlane < 3 && Resource.mapRegion.settingsBits.areRoofsHidden(x, y)) {
+                if (adjustedPlane < 3 && Resource.mapRegion!!.settingsBits.areRoofsHidden(x, y)) {
                     adjustedPlane++
                 }
 
                 val spotAnimation = SpotAnimation(
-                    Resource.mapRegion.getScene(), spotAnimId, speed, UPDATE_ZONE_PLANE,
+                    Resource.mapRegion!!.getScene(), spotAnimId, speed, UPDATE_ZONE_PLANE,
                     adjustedPlane, tileX,
                     MapRegion.tileheightForAbsolutePosition(tileX, tileY, UPDATE_ZONE_PLANE) - height,
                     tileY, x, x, y, y, rotation, false
@@ -150,11 +150,11 @@ enum class UpdateZonePacket(val size: Int) {
         var angle = buffer.readUByte().let { if (it == 255) -1 else it }
         var slope = buffer.readUShort()
 
-        val sceneSize = Resource.mapRegion.getSceneSizeX()
+        val sceneSize = Resource.mapRegion!!.getSceneSizeX()
         if (shouldProcessUpdate() &&
             localX in 0 until sceneSize * 2 && localY in 0 until sceneSize * 2 &&
-            xOff in 0 until Resource.mapRegion.getSceneSizeY() * 2 &&
-            yOff in 0 until Resource.mapRegion.getSceneSizeY() * 2 &&
+            xOff in 0 until Resource.mapRegion!!.getSceneSizeY() * 2 &&
+            yOff in 0 until Resource.mapRegion!!.getSceneSizeY() * 2 &&
             spotAnimId != 65535) {
 
             localX *= 256
@@ -188,7 +188,7 @@ enum class UpdateZonePacket(val size: Int) {
         var angle = buffer.readUByte().let { if (it == 255) -1 else it }
         var slope = buffer.readUShort()
 
-        val sceneSize = Resource.mapRegion.getSceneSizeX()
+        val sceneSize = Resource.mapRegion!!.getSceneSizeX()
         if (shouldProcessUpdate() &&
             localX in 0 until sceneSize && localY in 0 until sceneSize &&
             xOff in 0 until sceneSize && yOff in 0 until sceneSize &&
@@ -203,7 +203,7 @@ enum class UpdateZonePacket(val size: Int) {
             slope = slope shl 2
 
             val p = Projectile(
-                Resource.mapRegion.getScene(), spotAnimId, UPDATE_ZONE_PLANE, UPDATE_ZONE_PLANE,
+                Resource.mapRegion!!.getScene(), spotAnimId, UPDATE_ZONE_PLANE, UPDATE_ZONE_PLANE,
                 localX, localY, startHeight, startTime + client.cycles, endTime + client.cycles,
                 angle, slope, 0, lockOn, endHeight, useFloorHeight, -1
             )
@@ -244,14 +244,14 @@ enum class UpdateZonePacket(val size: Int) {
         val x = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val y = (coords and 0x7) + UPDATE_ZONE_Y
 
-        if (Resource.mapRegion.getLoadingType().ignoreUpdateZoneSizeLimitations() || isWithinScene(x, y)) {
+        if (Resource.mapRegion!!.getLoadingType().ignoreUpdateZoneSizeLimitations() || isWithinScene(x, y)) {
             LocAction.destroyObject(UPDATE_ZONE_PLANE, x, y, type, -1, shape, rotation)
         }
     }
 
     private fun decodeRemoveGroundItem(buffer: Packet) {
         val coords = buffer.readUByteInverse()
-        val baseCoords = Resource.mapRegion.getBaseCoordinates()
+        val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
         val localY = (coords and 0x7) + UPDATE_ZONE_Y
         val localX = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val y = localY + baseCoords.y
@@ -280,7 +280,7 @@ enum class UpdateZonePacket(val size: Int) {
 
     private fun decodeCustomizeObject(buffer: Packet) {
         val locId = buffer.readInt()
-        val locType = Resource.mapRegion.getLoctypeList().list(locId)
+        val locType = Resource.mapRegion!!.getLoctypeList().list(locId)
         val displayInfo = buffer.readUByteAdd()
         var locShape = displayInfo shr 2
         val type = client.OBJECT_TYPE_SLOTS[locShape]
@@ -385,7 +385,7 @@ enum class UpdateZonePacket(val size: Int) {
     private fun decodeGroundItemReveal(buffer: Packet) {
         val playerId = buffer.readUShort()
         val coords = buffer.readUByte()
-        val baseCoords = Resource.mapRegion.getBaseCoordinates()
+        val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
         val localY = (coords and 0x7) + UPDATE_ZONE_Y
         val localX = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val y = localY + baseCoords.y
@@ -395,7 +395,7 @@ enum class UpdateZonePacket(val size: Int) {
 
         if (playerId != PlayerUpdate.myPlayerIndex) {
             val withinScene = isWithinScene(localX, localY)
-            if (withinScene || Resource.mapRegion.loadingType.ignoreUpdateZoneSizeLimitations()) {
+            if (withinScene || Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations()) {
                 GroundItemUpdating.addGroundItem(UPDATE_ZONE_PLANE, x, y, GroundItemNode(id, amount))
                 if (withinScene) {
                     GroundItemUpdating.removeGroundItem(UPDATE_ZONE_PLANE, localX, localY)
@@ -408,14 +408,14 @@ enum class UpdateZonePacket(val size: Int) {
         val amount = buffer.readUShortAddLittle()
         val id = buffer.readUShortAdd()
         val coords = buffer.readUByteInverse()
-        val baseCoords = Resource.mapRegion.getBaseCoordinates()
+        val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
         val localY = (coords and 0x7) + UPDATE_ZONE_Y
         val localX = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val y = localY + baseCoords.y
         val x = localX + baseCoords.x
 
         val withinScene = isWithinScene(localX, localY)
-        if (withinScene || Resource.mapRegion.loadingType.ignoreUpdateZoneSizeLimitations()) {
+        if (withinScene || Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations()) {
             GroundItemUpdating.addGroundItem(UPDATE_ZONE_PLANE, x, y, GroundItemNode(id, amount))
             if (withinScene) {
                 GroundItemUpdating.removeGroundItem(UPDATE_ZONE_PLANE, localX, localY)
@@ -433,19 +433,19 @@ enum class UpdateZonePacket(val size: Int) {
         val rotation = displayInfo and 0x3
         val type = client.OBJECT_TYPE_SLOTS[shape]
 
-        if (Resource.mapRegion.loadingType.ignoreUpdateZoneSizeLimitations() || isWithinScene(x, y)) {
+        if (Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations() || isWithinScene(x, y)) {
             LocAction.destroyObject(UPDATE_ZONE_PLANE, x, y, type, objectId, shape, rotation)
         }
     }
 
     private fun shouldProcessUpdate(x: Int = 0, y: Int = 0): Boolean {
-        return Resource.mapRegion.loadingType !== RegionLoadingType.CUTSCENE &&
+        return Resource.mapRegion!!.loadingType !== RegionLoadingType.CUTSCENE &&
                 (x == 0 && y == 0 || isWithinScene(x, y))
     }
 
     private fun isWithinScene(x: Int, y: Int): Boolean {
-        return x in 0 until Resource.mapRegion.getSceneSizeX() &&
-                y in 0 until Resource.mapRegion.getSceneSizeY()
+        return x in 0 until Resource.mapRegion!!.getSceneSizeX() &&
+                y in 0 until Resource.mapRegion!!.getSceneSizeY()
     }
 
     private fun isPlayerWithinRange(x: Int, y: Int, range: Int): Boolean {

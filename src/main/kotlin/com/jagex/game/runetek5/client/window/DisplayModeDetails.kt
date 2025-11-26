@@ -65,7 +65,7 @@ class DisplayModeDetails {
                 val renderMatrix = Renderers.activeToolkit!!.method8449()
                 renderMatrix.method6531(
                     (dimension.width / 2f), (dimension.height / 2f), 512.0f, 512.0f,
-                    Resource.mapRegion.getViewRangeStart().toFloat(), Resource.mapRegion.getViewRangeEnd().toFloat(),
+                    Resource.mapRegion!!.getViewRangeStart().toFloat(), Resource.mapRegion!!.getViewRangeEnd().toFloat(),
                     dimension.width.toFloat(), dimension.height.toFloat()
                 )
                 Renderers.activeToolkit!!.setModelMatrix(renderMatrix)

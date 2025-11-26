@@ -19,8 +19,8 @@ class ColoredMiniMenuEntry(
      * @return The click type, or -1 if the queue is empty
      */
     fun getClickType(): Int {
-        return if (nodeQueue.current.next != nodeQueue.current) {
-            (nodeQueue.current.next as MiniMenuEntry).clickType
+        return if (nodeQueue.current.nextCache != nodeQueue.current) {
+            (nodeQueue.current.nextCache as MiniMenuEntry).clickType
         } else {
             -1
         }
@@ -86,9 +86,9 @@ class ColoredMiniMenuEntry(
                 nodeA.unlinkSub()
             }
             nodeA.current = nodeB.current
-            nodeA.next = nodeB
-            nodeA.current!!.next = nodeA
-            nodeA.next!!.current = nodeA
+            nodeA.nextCache = nodeB
+            nodeA.current!!.nextCache = nodeA
+            nodeA.nextCache!!.current = nodeA
         }
     }
 }

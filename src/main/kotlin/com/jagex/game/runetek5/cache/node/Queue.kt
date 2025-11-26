@@ -11,7 +11,7 @@ class Queue<T> : Iterable<T> {
     @JvmField var next: CacheableNode? = null
 
     init {
-        current.next = current
+        current.nextCache = current
         current.current = current
     }
 
@@ -19,8 +19,8 @@ class Queue<T> : Iterable<T> {
      * Removes all nodes from the queue.
      */
     fun reset() {
-        while (current.next != current) {
-            current.next!!.unlinkSub()
+        while (current.nextCache != current) {
+            current.nextCache!!.unlinkSub()
         }
     }
 
@@ -34,9 +34,9 @@ class Queue<T> : Iterable<T> {
             next.unlinkSub()
         }
         next.current = current.current
-        next.next = current
-        next.current!!.next = next
-        next.next!!.current = next
+        next.nextCache = current
+        next.current!!.nextCache = next
+        next.nextCache!!.current = next
     }
 
     /**
@@ -45,7 +45,7 @@ class Queue<T> : Iterable<T> {
      * @return The first node, or null if empty
      */
     fun getFirst(): CacheableNode? {
-        val node = current.next
+        val node = current.nextCache
         return if (node == current) {
             null
         } else {
@@ -61,10 +61,10 @@ class Queue<T> : Iterable<T> {
      */
     fun size(): Int {
         var size = 0
-        var node = current.next
+        var node = current.nextCache
         while (node != current) {
             size++
-            node = node!!.next
+            node = node!!.nextCache
         }
         return size
     }
@@ -84,12 +84,12 @@ class Queue<T> : Iterable<T> {
      * @return The first node, or null if empty
      */
     fun getCurrentNext(): CacheableNode? {
-        val node = current.next
+        val node = current.nextCache
         return if (node == current) {
             next = null
             null
         } else {
-            next = node!!.next
+            next = node!!.nextCache
             node
         }
     }
@@ -105,7 +105,7 @@ class Queue<T> : Iterable<T> {
             next = null
             null
         } else {
-            next = node!!.next
+            next = node!!.nextCache
             node
         }
     }

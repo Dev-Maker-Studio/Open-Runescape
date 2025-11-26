@@ -15,14 +15,14 @@ class GroundItemFetcher(
     fun getGroundItem(): GroundItem? {
         val wrapper = client.GROUND_ITEMS.get((this.itemPosition.plane.toLong() shl 28) or (this.itemPosition.y.toLong() shl 14) or this.itemPosition.x.toLong())
         if (wrapper != null) {
-            val coords = Resource.mapRegion.getBaseCoordinates()
+            val coords = Resource.mapRegion!!.getBaseCoordinates()
             val sceneX = this.itemPosition.x - coords.x
             val sceneY = this.itemPosition.y - coords.y
-            if (sceneX >= 0 && sceneY >= 0 && sceneX < Resource.mapRegion.getSceneSizeX() && sceneY < Resource.mapRegion.getSceneSizeY()) {
+            if (sceneX >= 0 && sceneY >= 0 && sceneX < Resource.mapRegion!!.getSceneSizeX() && sceneY < Resource.mapRegion!!.getSceneSizeY()) {
                 var node = wrapper.groundItems.getFirst() as GroundItemNode?
                 while (node != null) {
                     if (node.id == this.groundItemId) {
-                        return Resource.mapRegion.getScene().getGroundItem(this.itemPosition.plane, sceneX, sceneY) as GroundItem
+                        return Resource.mapRegion!!.getScene().getGroundItem(this.itemPosition.plane, sceneX, sceneY) as GroundItem
                     }
                     node = wrapper.groundItems.next() as GroundItemNode?
                 }

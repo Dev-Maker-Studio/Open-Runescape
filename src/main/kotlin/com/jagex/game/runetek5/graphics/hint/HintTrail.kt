@@ -75,8 +75,8 @@ class HintTrail(toolkit: AbstractToolkit, buffer: Packet, @JvmField val modelId:
 
     fun buildList(scene: Scene) {
         hintTrialGraphNodes = LinkedList()
-        val settingsBits = Resource.mapRegion.getSettingsBits()
-        val base = Resource.mapRegion.getBaseCoordinates()
+        val settingsBits = Resource.mapRegion!!.settingsBits
+        val base = Resource.mapRegion!!.getBaseCoordinates()
         var previous = CoordGrid(PlayerUpdate.MY_PLAYER_PLANE, placementX[0], placementY[0])
         for (index in 1 until length) {
             val current = CoordGrid(PlayerUpdate.MY_PLAYER_PLANE, placementX[index], placementY[index])

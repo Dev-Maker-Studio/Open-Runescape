@@ -4,14 +4,14 @@ import com.jagex.game.runetek5.cache.node.Node
 
 open class CacheableNode : Node<CacheableNode>() {
     @JvmField var indexReference: Long = 0
-    @JvmField var next: CacheableNode? = null
+    @JvmField var nextCache: CacheableNode? = null
     @JvmField var current: CacheableNode? = null
 
     fun unlinkSub() {
         if (current != null) {
-            current!!.next = next
-            next!!.current = current
-            next = null
+            current!!.nextCache = nextCache
+            nextCache!!.current = current
+            nextCache = null
             current = null
         }
     }
@@ -23,9 +23,9 @@ open class CacheableNode : Node<CacheableNode>() {
                 currentNode.unlinkSub()
             }
             currentNode.current = nextNode
-            currentNode.next = nextNode.next
-            currentNode.current!!.next = currentNode
-            currentNode.next!!.current = currentNode
+            currentNode.nextCache = nextNode.nextCache
+            currentNode.current!!.nextCache = currentNode
+            currentNode.nextCache!!.current = currentNode
         }
     }
 }

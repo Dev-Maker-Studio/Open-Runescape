@@ -85,7 +85,7 @@ class MapSpriteTypeList(
     companion object {
         @JvmStatic
         fun isCached(gameObject: GameObject): Boolean {
-            val locType = Resource.mapRegion.getLoctypeList().list(gameObject.id)
+            val locType = Resource.mapRegion!!.getLoctypeList().list(gameObject.id)
             if (locType.mapIconId == -1) {
                 return true
             }

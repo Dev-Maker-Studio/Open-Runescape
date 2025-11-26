@@ -150,6 +150,7 @@ public class Class170 {
         return !this.aBool2105;
     }
 
+    @SuppressWarnings("unchecked")
     public void method2883() {
         if (this.aBool2100) {
             if (this.aClass158Sub1Sub42101 != null) {
@@ -167,8 +168,8 @@ public class Class170 {
             int colorAttachmentSlot = 1;
 
             Node_Sub5 prev;
-            for (Node_Sub5 tail = (Node_Sub5) this.aClass4732108.getTail(); tail != null; tail = prev) {
-                prev = (Node_Sub5) this.aClass4732108.getPrevious();
+            for (Node_Sub5 tail = (Node_Sub5) (Node) this.aClass4732108.getTail(); tail != null; tail = prev) {
+                prev = (Node_Sub5) (Node) this.aClass4732108.getPrevious();
                 int numTexturedFaces = tail.getTexturedFaces();
 
                 for (int face = 0; face < numTexturedFaces; face++) {
@@ -252,12 +253,13 @@ public class Class170 {
         method2886();
     }
 
+    @SuppressWarnings("unchecked")
     public void method2886() {
         int texturedFaces = 0;
         boolean loadTexture = false;
         GLActionFormat pixelFormat = GLActionFormat.PIXEL_FORMAT;
 
-        for (Node_Sub5 node = (Node_Sub5) this.aClass4732108.getTail(); node != null; node = (Node_Sub5) this.aClass4732108.getPrevious()) {
+        for (Node_Sub5 node = (Node_Sub5) (Node) this.aClass4732108.getTail(); node != null; node = (Node_Sub5) (Node) this.aClass4732108.getPrevious()) {
             GLActionFormat class767 = node.getFormat();
             if (class767.bytesPerEntry > pixelFormat.bytesPerEntry) {
                 pixelFormat = class767;
