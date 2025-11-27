@@ -35,6 +35,7 @@ import kotlin.math.floor
 import kotlin.math.pow
 
 fun main(args: Array<String>) {
+    Bot.ENABLED = true
     ScriptExecutor.loadScripts()
     Loader.main(args)
 }
@@ -44,7 +45,7 @@ object Bot {
     @JvmField
     var PROD: Boolean = true
     @JvmField
-    var ENABLED: Boolean = true
+    var ENABLED: Boolean = false
 
     // Interface IDs
     private const val BANK_INTERFACE = 762

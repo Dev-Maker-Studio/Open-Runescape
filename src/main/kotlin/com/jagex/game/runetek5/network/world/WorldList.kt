@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.network.world
 
+import com.darkan.bot.Bot
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.network.WorldConnection
 import com.jagex.game.runetek5.utils.Utils
@@ -14,8 +15,13 @@ object WorldList {
             var worldNumber = 0
             for (worldIndex in WorldDescriptor.WORLD_LIST_START..WorldMeta.WORLD_LIST_SIZEPLUS1) {
                 val world: WorldDescriptor? = WorldDescriptor.getWorld(worldIndex)
-                if (world != null) WorldConnection.WORLD_DESCRIPTORS_BYID[worldNumber++] = world
+                if (world != null) {
+                    if (!Bot.ENABLED || world.isPvp())
+                        WorldConnection.WORLD_DESCRIPTORS_BYID[worldNumber++] = world
+                }
             }
+            if (worldNumber < WorldConnection.WORLD_DESCRIPTORS_BYID.size)
+                WorldConnection.WORLD_DESCRIPTORS_BYID = WorldConnection.WORLD_DESCRIPTORS_BYID.copyOf(worldNumber)
             WorldConnection.requestingWorldList = false
             WorldConnection.worldListReceivedTime = Utils.time()
             WorldMeta.WORLD_LIST_BUFFER = null
