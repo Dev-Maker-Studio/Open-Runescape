@@ -1,0 +1,160 @@
+package com.jagex.game.runetek5.sound.jagtheora
+
+import com.jagex.game.runetek5.cache.node.Node
+import com.jagex.game.runetek5.cache.node.NodeCollection
+
+/**
+ * Audio stream queue manager that handles multiple PCM streams with timing/priority.
+ */
+class Node_Sub15_Sub4 : PcmStream() {
+
+    val streamQueue: NodeCollection = NodeCollection()
+    val scheduledEvents: NodeCollection = NodeCollection()
+    var currentPosition: Int = 0
+    var nextEventTime: Int = -1
+
+    @Suppress("UNCHECKED_CAST")
+    fun insertEvent(node: Node<Any?>, event: Node_Sub22) {
+        var currentNode: Node<Any?> = node
+        while (scheduledEvents.tail != currentNode && (currentNode as Node_Sub22).anInt7676 <= event.anInt7676) {
+            currentNode = currentNode.next as Node<Any?>
+        }
+
+        Node.replace(event, currentNode)
+        nextEventTime = (scheduledEvents.tail.next as Node_Sub22).anInt7676
+    }
+
+    @Synchronized
+    fun addSubStream(stream: PcmStream) {
+        streamQueue.method8098(stream)
+    }
+
+    @Synchronized
+    fun unlink(stream: PcmStream) {
+        stream.unlink()
+    }
+
+    fun updateEventTimings() {
+        if (currentPosition > 0) {
+            var event = scheduledEvents.getFirst() as Node_Sub22?
+            while (event != null) {
+                event.anInt7676 -= currentPosition
+                event = scheduledEvents.next() as Node_Sub22?
+            }
+
+            nextEventTime -= currentPosition
+            currentPosition = 0
+        }
+    }
+
+    fun removeEvent(event: Node_Sub22) {
+        event.unlink()
+        event.method12355()
+        val nextNode = scheduledEvents.tail.next
+        if (nextNode === scheduledEvents.tail) {
+            nextEventTime = -1
+        } else {
+            nextEventTime = (nextNode as Node_Sub22).anInt7676
+        }
+    }
+
+    fun skipAllStreams(amount: Int) {
+        var stream = streamQueue.getFirst() as PcmStream?
+        while (stream != null) {
+            stream.skip(amount)
+            stream = streamQueue.next() as PcmStream?
+        }
+    }
+
+    override fun method12228(): Int = 0
+
+    @Synchronized
+    override fun fill(buffer: IntArray, offset: Int, length: Int) {
+        var currentOffset = offset
+        var remainingLength = length
+
+        while (true) {
+            if (nextEventTime < 0) {
+                fillFromStreams(buffer, currentOffset, remainingLength)
+                return
+            } else if (currentPosition + remainingLength < nextEventTime) {
+                currentPosition += remainingLength
+                fillFromStreams(buffer, currentOffset, remainingLength)
+                return
+            } else {
+                val amountToFill = nextEventTime - currentPosition
+                fillFromStreams(buffer, currentOffset, amountToFill)
+                currentOffset += amountToFill
+                remainingLength -= amountToFill
+                currentPosition += amountToFill
+                updateEventTimings()
+
+                val event = scheduledEvents.getFirst() as Node_Sub22
+                synchronized(event) {
+                    val result = event.method12354(this)
+                    if (result < 0) {
+                        event.anInt7676 = 0
+                        removeEvent(event)
+                    } else {
+                        event.anInt7676 = result
+                        insertEvent(event.next as Node<Any?>, event)
+                    }
+                }
+
+                if (remainingLength == 0) {
+                    return
+                }
+            }
+        }
+    }
+
+    fun fillFromStreams(buffer: IntArray, offset: Int, length: Int) {
+        var stream = streamQueue.getFirst() as PcmStream?
+        while (stream != null) {
+            stream.process(buffer, offset, length)
+            stream = streamQueue.next() as PcmStream?
+        }
+    }
+
+    @Synchronized
+    override fun skip(amount: Int) {
+        var remainingAmount = amount
+
+        while (true) {
+            if (nextEventTime < 0) {
+                skipAllStreams(remainingAmount)
+                return
+            } else if (currentPosition + remainingAmount < nextEventTime) {
+                currentPosition += remainingAmount
+                skipAllStreams(remainingAmount)
+                return
+            } else {
+                val amountToSkip = nextEventTime - currentPosition
+                skipAllStreams(amountToSkip)
+                remainingAmount -= amountToSkip
+                currentPosition += amountToSkip
+                updateEventTimings()
+
+                val event = scheduledEvents.getFirst() as Node_Sub22
+                synchronized(event) {
+                    val result = event.method12354(this)
+                    if (result < 0) {
+                        event.anInt7676 = 0
+                        removeEvent(event)
+                    } else {
+                        event.anInt7676 = result
+                        insertEvent(event.next as Node<Any?>, event)
+                    }
+                }
+
+                if (remainingAmount == 0) {
+                    return
+                }
+            }
+        }
+    }
+
+    override fun getNextStream(): PcmStream? = streamQueue.next() as PcmStream?
+
+    override fun getFirstStream(): PcmStream? = streamQueue.getFirst() as PcmStream?
+}

@@ -99,7 +99,7 @@ class NativeWaterfall(
         aFloatArray10150[3] = toolkit.animatingCycle * flowSpeedU % 1.0f
         if (!aClass4910147.hasDepth) {
             val textureIndex = (flowSpeedV * toolkit.animatingCycle * 16.0f).toInt()
-            toolkit.setTextureSampler(aClass4910147.textureSamplers[textureIndex % 16])
+            toolkit.setTextureSampler(aClass4910147.textureSamplers!![textureIndex % 16])
         } else {
             aFloat10149 = (toolkit.animatingCycle.toDouble() * flowSpeedV % 1.0).toFloat()
         }
