@@ -1,9 +1,6 @@
-package com.jagex.game.runetek5.network.packet;
+package com.jagex.game.runetek5.network.packet
 
-import java.util.HashMap;
-import java.util.Map;
-
-public enum ServerProt {
+enum class ServerProt(val opcode: Int, val size: Int) {
     IF_SETPLAYERHEAD(0, 4),
     CREATE_CHECK_EMAIL_REPLY(1, 1),
     PROCESS_DEV_CONSOLE_COMMAND(2, -1),
@@ -166,22 +163,19 @@ public enum ServerProt {
     REQUEST_FPS(159, 8),
     GAME_MESSAGE(160, -1);
 
-    public static final Map<Integer, ServerProt> OPCODE_MAP = new HashMap<>();
+    companion object {
+        @JvmField
+        val OPCODE_MAP: MutableMap<Int, ServerProt> = HashMap()
 
-    static {
-        for (ServerProt p : ServerProt.values())
-            OPCODE_MAP.put(p.opcode, p);
-    }
+        init {
+            for (p in ServerProt.entries) {
+                OPCODE_MAP[p.opcode] = p
+            }
+        }
 
-    public final int opcode;
-    public final int size;
-
-    ServerProt(int opcode, int size) {
-        this.opcode = opcode;
-        this.size = size;
-    }
-
-    public static ServerProt forId(int opcode) {
-        return OPCODE_MAP.get(opcode);
+        @JvmStatic
+        fun forId(opcode: Int): ServerProt? {
+            return OPCODE_MAP[opcode]
+        }
     }
 }
