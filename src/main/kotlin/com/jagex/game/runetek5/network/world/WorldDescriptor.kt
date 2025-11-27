@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.network.world
 
+import com.darkan.bot.Bot
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.client.client
 import com.jagex.game.runetek5.client.login.LoginManager

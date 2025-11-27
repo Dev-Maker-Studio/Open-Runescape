@@ -10,7 +10,7 @@ object WorldList {
         WorldMeta.WORLD_LIST_BUFFER!!.writeBytes(data, 0, data.size)
         if (refresh) {
             WorldDescriptor.decodeWorldList(WorldMeta.WORLD_LIST_BUFFER!!.buffer)
-            WorldConnection.WORLD_DESCRIPTORS_BYID = arrayOfNulls<WorldDescriptor>(WorldMeta.WORLD_LIST_SIZE)
+            WorldConnection.WORLD_DESCRIPTORS_BYID = arrayOfNulls(WorldMeta.WORLD_LIST_SIZE)
             var worldNumber = 0
             for (worldIndex in WorldDescriptor.WORLD_LIST_START..WorldMeta.WORLD_LIST_SIZEPLUS1) {
                 val world: WorldDescriptor? = WorldDescriptor.getWorld(worldIndex)

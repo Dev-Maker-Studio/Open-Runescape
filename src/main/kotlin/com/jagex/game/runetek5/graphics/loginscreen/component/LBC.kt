@@ -37,12 +37,12 @@ abstract class LBC(
     abstract fun drawBackground(x: Int, y: Int)
 
     fun loadPercentDecimalFullout(): Int {
-        val loadPercentage = LoadingStage.plainLoginScreenRenderer.getLoadingPercentage()
+        val loadPercentage = LoadingStage.plainLoginScreenRenderer!!.getLoadingPercentage()
         var loadPercentDecimalFullout = loadPercentage * 100
         if (loadPercentage == lastLoadPercent && loadPercentage != 0) {
-            val loadingStageCompletion = LoadingStage.plainLoginScreenRenderer.getLoadingStageCompletion()
+            val loadingStageCompletion = LoadingStage.plainLoginScreenRenderer!!.getLoadingStageCompletion()
             if (loadingStageCompletion > loadPercentage) {
-                val timeDelta = lastLoadPercentChange - LoadingStage.plainLoginScreenRenderer.loadingStageChangedTime()
+                val timeDelta = lastLoadPercentChange - LoadingStage.plainLoginScreenRenderer!!.loadingStageChangedTime()
                 if (timeDelta > 0L) {
                     val timeForCompletion = 10000L * timeDelta / loadPercentage * (loadingStageCompletion - loadPercentage)
                     val elapsedTime = (Utils.time() - lastLoadPercentChange) * 10000L
@@ -65,9 +65,9 @@ abstract class LBC(
         val y = anchoredElement.verticalAnchor.calculateDrawY(anchoredElement.height, client.GAME_HEIGHT) + anchoredElement.offsetY
         drawOutline(draw, x, y)
         drawBackground(x, y)
-        var loadingText = LoadingStage.plainLoginScreenRenderer.getLoadingText()
+        var loadingText = LoadingStage.plainLoginScreenRenderer!!.getLoadingText()
         if (Utils.time() - lastLoadPercentChange > 10000L) {
-            loadingText = loadingText + " (" + LoadingStage.plainLoginScreenRenderer.getLoadingStage().number + ")"
+            loadingText = loadingText + " (" + LoadingStage.plainLoginScreenRenderer!!.getLoadingStage()!!.number + ")"
         }
         fontRenderer!!.renderCentered(loadingText, anchoredElement.width / 2 + x, anchoredElement.height / 2 + anchoredElement.anInt4092 + y + 4, anchoredElement.anInt4091, -1)
     }

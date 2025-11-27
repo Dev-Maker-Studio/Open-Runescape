@@ -43,6 +43,8 @@ object Bot {
 
     @JvmField
     var PROD: Boolean = true
+    @JvmField
+    var ENABLED: Boolean = true
 
     // Interface IDs
     private const val BANK_INTERFACE = 762
