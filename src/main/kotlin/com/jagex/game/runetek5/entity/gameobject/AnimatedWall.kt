@@ -53,13 +53,13 @@ class AnimatedWall(
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
         val model = gameObject.getAnimatedModel(toolkit, 2048, false, true) ?: return null
-        val projectionMatrix = projectionMatrix
-        val abs = absolutePosition
+        val projectionMatrix = getProjectionMatrix()
+        val abs = getAbsolutePosition()
         val renderedEntity = RenderedEntityCache.generate(interactable)
         val x = abs.coords.x.toInt() shr 9
         val z = abs.coords.z.toInt() shr 9
         gameObject.animateParticles(toolkit, model, projectionMatrix, true)
-        model.drawMatrixThreaded(projectionMatrix, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
+        model.drawMatrixThreaded(projectionMatrix, super.boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
         if (gameObject.particleSystem != null) {
             val particles = gameObject.particleSystem!!.allParticles
             toolkit.renderParticles(particles)
@@ -105,8 +105,8 @@ class AnimatedWall(
     override fun particleCycle(toolkit: AbstractToolkit) {
         val model = gameObject.getAnimatedModel(toolkit, 262144, true, true)
         if (model != null) {
-            val projectionMatrix = projectionMatrix
-            val abs = absolutePosition
+            val projectionMatrix = getProjectionMatrix()
+            val abs = getAbsolutePosition()
             val x = abs.coords.x.toInt() shr 9
             val z = abs.coords.z.toInt() shr 9
             gameObject.animateParticles(toolkit, model, projectionMatrix, false)
@@ -142,7 +142,7 @@ class AnimatedWall(
 
     override fun calculateProjection(toolkit: AbstractToolkit, cameraX: Int, cameraY: Int): Boolean {
         val model = gameObject.getAnimatedModel(toolkit, 131072, false, false)
-        return model != null && model.calculateProjection(cameraX, cameraY, projectionMatrix, false, 0)
+        return model != null && model.calculateProjection(cameraX, cameraY, getProjectionMatrix(), false, 0)
     }
 
     override fun castShadow(entity: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {

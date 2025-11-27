@@ -74,13 +74,13 @@ class AnimatedGroundDecoration(
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
         val model = gameObject.getAnimatedModel(toolkit, ModelFunctionMask.HAS_TEXTURE_COORDS, false, true) ?: return null
-        val projectionMatrix = projectionMatrix
-        val absolute = absolutePosition
+        val projectionMatrix = getProjectionMatrix()
+        val absolute = getAbsolutePosition()
         val renderedEntity = RenderedEntityCache.generate(canInteract)
         val x = absolute.coords.x.toInt() shr 9
         val y = absolute.coords.z.toInt() shr 9
         gameObject.animateParticles(toolkit, model, projectionMatrix, true)
-        model.drawMatrixThreaded(projectionMatrix, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
+        model.drawMatrixThreaded(projectionMatrix, super.boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
         if (gameObject.particleSystem != null) {
             val particles = gameObject.particleSystem!!.allParticles
             toolkit.renderParticles(particles)
@@ -108,16 +108,16 @@ class AnimatedGroundDecoration(
     override fun particleCycle(toolkit: AbstractToolkit) {
         val model = gameObject.getAnimatedModel(toolkit, ModelFunctionMask.SHADOWED, true, true)
         if (model != null) {
-            val abs = absolutePosition.coords
+            val abs = getAbsolutePosition().coords
             val x = abs.x.toInt() shr 9
             val z = abs.z.toInt() shr 9
-            gameObject.animateParticles(toolkit, model, projectionMatrix, false)
+            gameObject.animateParticles(toolkit, model, getProjectionMatrix(), false)
         }
     }
 
     override fun calculateProjection(toolkit: AbstractToolkit, cameraX: Int, cameraY: Int): Boolean {
         val model = gameObject.getAnimatedModel(toolkit, 131072, false, false)
-        return model != null && model.calculateProjection(cameraX, cameraY, projectionMatrix, false, 0)
+        return model != null && model.calculateProjection(cameraX, cameraY, getProjectionMatrix(), false, 0)
     }
 
     override fun hasTileShadow(): Boolean {

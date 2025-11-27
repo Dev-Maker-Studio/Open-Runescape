@@ -84,16 +84,16 @@ class AnimatedInteractiveObject(
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
         val model = activeGameObject.getAnimatedModel(toolkit, ModelFunctionMask.HAS_TEXTURE_COORDS, false, true) ?: return null
-        val projectionMatrix = projectionMatrix
+        val projectionMatrix = getProjectionMatrix()
         val renderedEntity = RenderedEntityCache.generate(canInteract)
         activeGameObject.animateParticles(toolkit, model, projectionMatrix, true)
-        model.drawMatrixThreaded(projectionMatrix, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
+        model.drawMatrixThreaded(projectionMatrix, super.boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
         if (activeGameObject.particleSystem != null) {
             val particles = activeGameObject.particleSystem!!.allParticles
             toolkit.renderParticles(particles)
         }
         hasParticles = model.accountForLayers() || activeGameObject.particleSystem != null
-        val absolute = absolutePosition
+        val absolute = getAbsolutePosition()
         if (axisAlignedBoundingBox == null) {
             axisAlignedBoundingBox = Silhouette.generate(
                 absolute.coords.x.toInt(),
@@ -116,7 +116,7 @@ class AnimatedInteractiveObject(
     override fun particleCycle(toolkit: AbstractToolkit) {
         val model = activeGameObject.getAnimatedModel(toolkit, ModelFunctionMask.SHADOWED, true, true)
         if (model != null) {
-            activeGameObject.animateParticles(toolkit, model, projectionMatrix, false)
+            activeGameObject.animateParticles(toolkit, model, getProjectionMatrix(), false)
         }
     }
 
@@ -126,7 +126,7 @@ class AnimatedInteractiveObject(
 
     override fun calculateProjection(toolkit: AbstractToolkit, cameraX: Int, cameraY: Int): Boolean {
         val model = activeGameObject.getAnimatedModel(toolkit, 131072, false, false)
-        return model != null && model.calculateProjection(cameraX, cameraY, projectionMatrix, false, 0)
+        return model != null && model.calculateProjection(cameraX, cameraY, getProjectionMatrix(), false, 0)
     }
 
     override fun hasTileShadow(): Boolean {
