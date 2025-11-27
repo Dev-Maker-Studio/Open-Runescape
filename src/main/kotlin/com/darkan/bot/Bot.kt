@@ -911,7 +911,7 @@ object Bot {
                 obj?.let {
                     objects.add(WorldObject(
                         it.id,
-                        it.rotation,
+                        it.getRotation(),
                         it.shape,
                         x + getBaseX(),
                         y + getBaseY(),

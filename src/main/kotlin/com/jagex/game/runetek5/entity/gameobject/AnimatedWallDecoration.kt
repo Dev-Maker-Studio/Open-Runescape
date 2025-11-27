@@ -134,8 +134,7 @@ class AnimatedWallDecoration(
         wallDecoration.removeShadow()
     }
 
-    override val rotation: Int
-        get() = wallDecoration.rotation
+    override fun getRotation(): Int = wallDecoration.rotation
 
     override fun disregardTextureMovement(): Boolean {
         return false

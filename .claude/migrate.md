@@ -44,9 +44,6 @@ You are an expert software engineer and Kotlin migration specialist. Your job is
         - Keep public method signatures as compatible as possible with existing callers unless explicitly safe to change.
     - Fix any obvious typos and refactor any obfuscated class names/function names with what they do.
         - Only do refactoring if the field/class is obviously obfuscated and there is large confidence in getting the names correct.
-    - Add or update tests:
-        - Ensure unit tests exist or add minimal, focused tests around migrated behavior.
-        - Favor tests that validate external behavior, not internal implementation details.
     - Run checks:
         - Run a full build or at least the affected modules.
         - Fix all compilation and obvious runtime issues.

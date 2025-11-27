@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 interface GameObject {
     val id: Int
     val shape: Int
-    val rotation: Int
+    fun getRotation(): Int
 
     fun upload()
 

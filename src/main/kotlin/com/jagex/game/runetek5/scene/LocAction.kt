@@ -143,7 +143,7 @@ class LocAction : Node<LocAction>() {
                 if (gameObject != null) {
                     action.srcId = gameObject.id
                     action.srcShape = gameObject.shape
-                    action.srcRotation = gameObject.rotation
+                    action.srcRotation = gameObject.getRotation()
                 } else {
                     action.srcId = -1
                     action.srcShape = 0
