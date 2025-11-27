@@ -39,7 +39,7 @@ object Renderers {
                 val fontMetrics = FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p12FullIndex)
                 val fontRenderer = activeToolkit!!.createFontRenderer(fontMetrics, SpriteType.decodeGroup(Resource.SPRITES, FontManager.p12FullIndex), true)
                 WindowMode.fillWindowRect()
-                MessageBox.draw(topleftScreenText, true, activeToolkit, fontRenderer, fontMetrics)
+                MessageBox.draw(topleftScreenText, true, activeToolkit!!, fontRenderer, fontMetrics)
             }
         } else {
             var generatedToolkit: AbstractToolkit? = null

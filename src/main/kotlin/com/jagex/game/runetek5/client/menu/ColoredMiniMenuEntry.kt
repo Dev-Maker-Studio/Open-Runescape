@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.client.menu
 
+import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.Queue
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
 

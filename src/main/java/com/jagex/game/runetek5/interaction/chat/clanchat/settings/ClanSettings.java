@@ -27,7 +27,7 @@ public class ClanSettings {
     public byte coinShare;
     public long aLong631;
     public long[] bannedUserHashes;
-    public IterableNodeMap<Node> variables;
+    public IterableNodeMap<Node<?>> variables;
     public int[] sortedAffinedSlots;
     public int updateCount;
     public int anInt623;
@@ -61,7 +61,7 @@ public class ClanSettings {
         if (this.variables == null) {
             return null;
         } 
-        Node<Object> node3 = this.variables.get(i_1);
+        Node<?> node3 = this.variables.get(i_1);
         return node3 instanceof IntNode ? Integer.valueOf(((IntNode) node3).value) : null;
     }
 
@@ -69,7 +69,7 @@ public class ClanSettings {
         if (this.variables == null) {
             return null;
         } 
-        Node<Object> node3 = this.variables.get(i_1);
+        Node<?> node3 = this.variables.get(i_1);
         return node3 instanceof LongNode ? Long.valueOf(((LongNode) node3).bitpacked) : null;
     }
 
@@ -77,7 +77,7 @@ public class ClanSettings {
         if (this.variables == null) {
             return null;
         } 
-        Node<Object> node3 = this.variables.get(i_1);
+        Node<?> node3 = this.variables.get(i_1);
         return node3 instanceof ObjectNode ? (String) ((ObjectNode) node3).value : null;
     }
 
@@ -197,7 +197,7 @@ public class ClanSettings {
         value <<= shift;
         value &= clearMask;
         if (this.variables != null) {
-            Node<Object> node = this.variables.get(key);
+            Node<?> node = this.variables.get(key);
             if (node != null) {
                 if (node instanceof IntNode intnode) {
                     if ((intnode.value & clearMask) == value) {
@@ -218,7 +218,7 @@ public class ClanSettings {
 
     public boolean setLongVariable(int key, long value) {
         if (this.variables != null) {
-            Node<Object> node4 = this.variables.get(key);
+            Node<?> node4 = this.variables.get(key);
             if (node4 != null) {
                 if (node4 instanceof LongNode class282Sub455) {
                     if (class282Sub455.bitpacked == value) {
@@ -282,7 +282,7 @@ public class ClanSettings {
 
     public boolean putIntVariable(int key, int value) {
         if (this.variables != null) {
-            Node<Object> node4 = this.variables.get(key);
+            Node<?> node4 = this.variables.get(key);
             if (node4 != null) {
                 if (node4 instanceof IntNode class282Sub385) {
                     if (value == class282Sub385.value) {
@@ -307,7 +307,7 @@ public class ClanSettings {
             value = value.substring(0, 80);
         }
         if (this.variables != null) {
-            Node<Object> node4 = this.variables.get(key);
+            Node<?> node4 = this.variables.get(key);
             if (node4 != null) {
                 if (node4 instanceof ObjectNode class282Sub475) {
                     if (class282Sub475.value instanceof String) {
@@ -333,7 +333,7 @@ public class ClanSettings {
         if (this.variables == null) {
             return null;
         } 
-        Node<Object> node5 = this.variables.get(i_1);
+        Node<?> node5 = this.variables.get(i_1);
         if (node5 instanceof IntNode) {
             int i_6 = i_3 == 31 ? -1 : (1 << i_3 + 1) - 1;
             return Integer.valueOf((((IntNode) node5).value & i_6) >>> i_2);

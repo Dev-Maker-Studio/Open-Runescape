@@ -38,8 +38,8 @@ You are an expert software engineer and Kotlin migration specialist. Your job is
     - Perform the conversion:
         - Convert the file to Kotlin.
         - Use idiomatic Kotlin features gradually:
-            - `val` / `var` and nullability.
-            - Data classes, `object`, top-level functions as appropriate.
+            - `val` / `var` and nullability.[
+            - Data classes, `object`, top-level functions as appropriate.]()
             - Extension functions where they simplify call sites.
         - Keep public method signatures as compatible as possible with existing callers unless explicitly safe to change.
     - Fix any obvious typos and refactor any obfuscated class names/function names with what they do.

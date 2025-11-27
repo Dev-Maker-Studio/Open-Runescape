@@ -204,7 +204,7 @@ public class MiniMenu {
         for (ColoredMiniMenuEntry class282Sub50Sub151 = (ColoredMiniMenuEntry) MiniMenu.aClass477182.getNext(); class282Sub50Sub151 != null; class282Sub50Sub151 = (ColoredMiniMenuEntry) MiniMenu.aClass477182.getDirectNext()) {
             if (class282Sub50Sub151.queueSize > 1) {
                 class282Sub50Sub151.queueSize = 0;
-                MiniMenu.aClass229164.put(class282Sub50Sub151, ((MiniMenuEntry) class282Sub50Sub151.nodeQueue.current.next).bitpacked);
+                MiniMenu.aClass229164.put(class282Sub50Sub151, ((MiniMenuEntry) class282Sub50Sub151.nodeQueue.current.nextCache).bitpacked);
                 class282Sub50Sub151.nodeQueue.reset();
             }
         }
@@ -345,7 +345,7 @@ public class MiniMenu {
 	    for (ColoredMiniMenuEntry class282Sub50Sub151 = (ColoredMiniMenuEntry) MiniMenu.aClass477182.getNext(); class282Sub50Sub151 != null; class282Sub50Sub151 = (ColoredMiniMenuEntry) MiniMenu.aClass477182.getDirectNext()) {
 	        if (class282Sub50Sub151.queueSize > 1) {
 	            class282Sub50Sub151.queueSize = 0;
-	            MiniMenu.aClass229164.put(class282Sub50Sub151, ((MiniMenuEntry) class282Sub50Sub151.nodeQueue.current.next).bitpacked);
+	            MiniMenu.aClass229164.put(class282Sub50Sub151, ((MiniMenuEntry) class282Sub50Sub151.nodeQueue.current.nextCache).bitpacked);
 	            class282Sub50Sub151.nodeQueue.reset();
 	        }
 	    }
@@ -553,7 +553,7 @@ public class MiniMenu {
 	                        class4699 = new QueueIterator(aClass477182);
 	                        for (ColoredMiniMenuEntry class282Sub50Sub1510 = (ColoredMiniMenuEntry) class4699.method7790(); class282Sub50Sub1510 != null; class282Sub50Sub1510 = (ColoredMiniMenuEntry) class4699.next()) {
 	                            if (i_5++ == i_4) {
-	                                return ((MiniMenuEntry) class282Sub50Sub1510.nodeQueue.current.next).cursor;
+	                                return ((MiniMenuEntry) class282Sub50Sub1510.nodeQueue.current.nextCache).cursor;
 	                            }
 	                        }
 	                    }
@@ -648,7 +648,7 @@ public class MiniMenu {
 	        i_12 = 0;
 	        for (class282Sub50Sub1516 = (ColoredMiniMenuEntry) aClass477182.getNext(); class282Sub50Sub1516 != null; class282Sub50Sub1516 = (ColoredMiniMenuEntry) aClass477182.getDirectNext()) {
 	            i_14 = i_3 + b_6 + i_12 * anInt178 + fontmetrics8.topPadding + 1;
-	            if (i_10 > StaticMethods.anInt3555 && i_10 < MiniMenu.anInt8975 + StaticMethods.anInt3555 && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && (class282Sub50Sub1516.queueSize > 1 || ((MiniMenuEntry) class282Sub50Sub1516.nodeQueue.current.next).aBool9583)) {
+	            if (i_10 > StaticMethods.anInt3555 && i_10 < MiniMenu.anInt8975 + StaticMethods.anInt3555 && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && (class282Sub50Sub1516.queueSize > 1 || ((MiniMenuEntry) class282Sub50Sub1516.nodeQueue.current.nextCache).aBool9583)) {
 	                toolkit.drawFilledRectangle(StaticMethods.anInt3555, i_14 - fontmetrics8.topPadding, MiniMenu.anInt8975, anInt178, alpha << 24 | MiniMenu.anInt188, 1);
 	            }
 	            ++i_12;
