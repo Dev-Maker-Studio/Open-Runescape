@@ -268,12 +268,12 @@ public class StillWaterEffect extends MaterialEffectGL {
         }
 
         float depth = super.glToolkit.waterDepth;
-        float scaleX = matrix.faceList[4] * depth + matrix.faceList[12];
-        float scaleY = matrix.faceList[5] * depth + matrix.faceList[13];
-        float scaleZ = matrix.faceList[6] * depth + matrix.faceList[14];
-        XYZW[0] = -matrix.faceList[4];
-        XYZW[1] = -matrix.faceList[5];
-        XYZW[2] = -matrix.faceList[6];
+        float scaleX = matrix.getFaceList()[4] * depth + matrix.getFaceList()[12];
+        float scaleY = matrix.getFaceList()[5] * depth + matrix.getFaceList()[13];
+        float scaleZ = matrix.getFaceList()[6] * depth + matrix.getFaceList()[14];
+        XYZW[0] = -matrix.getFaceList()[4];
+        XYZW[1] = -matrix.getFaceList()[5];
+        XYZW[2] = -matrix.getFaceList()[6];
         XYZW[3] = -(XYZW[0] * scaleX + XYZW[1] * scaleY + XYZW[2] * scaleZ);
         OpenGL.glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 1, XYZW[0], XYZW[1], XYZW[2], XYZW[3]); 
         OpenGL.glEnable(GL_VERTEX_PROGRAM_ARB);

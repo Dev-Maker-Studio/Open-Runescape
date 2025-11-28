@@ -1026,10 +1026,10 @@ public class OpenGlToolkit extends AbstractToolkit {
 
     @Override
     public void calculateProjection(float f_1, float f_2, float f_3, float[] floats_4) {
-        float f_5 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * f_1 + this.aClass3848394.faceList[7] * f_2 + this.aClass3848394.faceList[11] * f_3;
-        float f_6 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * f_1 + this.aClass3848394.faceList[4] * f_2 + this.aClass3848394.faceList[8] * f_3;
-        float f_7 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * f_1 + this.aClass3848394.faceList[5] * f_2 + this.aClass3848394.faceList[9] * f_3;
-        float f_8 = this.aClass3848348.faceList[14] + this.aClass3848348.faceList[2] * f_1 + this.aClass3848348.faceList[6] * f_2 + this.aClass3848348.faceList[10] * f_3;
+        float f_5 = this.aClass3848394.getFaceList()[15] + this.aClass3848394.getFaceList()[3] * f_1 + this.aClass3848394.getFaceList()[7] * f_2 + this.aClass3848394.getFaceList()[11] * f_3;
+        float f_6 = this.aClass3848394.getFaceList()[12] + this.aClass3848394.getFaceList()[0] * f_1 + this.aClass3848394.getFaceList()[4] * f_2 + this.aClass3848394.getFaceList()[8] * f_3;
+        float f_7 = this.aClass3848394.getFaceList()[13] + this.aClass3848394.getFaceList()[1] * f_1 + this.aClass3848394.getFaceList()[5] * f_2 + this.aClass3848394.getFaceList()[9] * f_3;
+        float f_8 = this.aClass3848348.getFaceList()[14] + this.aClass3848348.getFaceList()[2] * f_1 + this.aClass3848348.getFaceList()[6] * f_2 + this.aClass3848348.getFaceList()[10] * f_3;
         floats_4[0] = this.aFloat8315 + this.imageProducerCenterX * f_6 / f_5;
         floats_4[1] = this.aFloat8399 + this.imageProducerCenterY * f_7 / f_5;
         floats_4[2] = f_8;
@@ -1037,14 +1037,14 @@ public class OpenGlToolkit extends AbstractToolkit {
 
     @Override
     public void computeWorldToScreen(float f_1, float f_2, float f_3, float[] floats_4) {
-        float f_5 = this.aClass3848394.faceList[14] + this.aClass3848394.faceList[2] * f_1 + this.aClass3848394.faceList[6] * f_2 + this.aClass3848394.faceList[10] * f_3;
-        float f_6 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * f_1 + this.aClass3848394.faceList[7] * f_2 + this.aClass3848394.faceList[11] * f_3;
+        float f_5 = this.aClass3848394.getFaceList()[14] + this.aClass3848394.getFaceList()[2] * f_1 + this.aClass3848394.getFaceList()[6] * f_2 + this.aClass3848394.getFaceList()[10] * f_3;
+        float f_6 = this.aClass3848394.getFaceList()[15] + this.aClass3848394.getFaceList()[3] * f_1 + this.aClass3848394.getFaceList()[7] * f_2 + this.aClass3848394.getFaceList()[11] * f_3;
         if (f_5 >= -f_6 && f_5 <= f_6) {
-            float f_7 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * f_1 + this.aClass3848394.faceList[4] * f_2 + this.aClass3848394.faceList[8] * f_3;
+            float f_7 = this.aClass3848394.getFaceList()[12] + this.aClass3848394.getFaceList()[0] * f_1 + this.aClass3848394.getFaceList()[4] * f_2 + this.aClass3848394.getFaceList()[8] * f_3;
             if (f_7 >= -f_6 && f_7 <= f_6) {
-                float f_8 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * f_1 + this.aClass3848394.faceList[5] * f_2 + this.aClass3848394.faceList[9] * f_3;
+                float f_8 = this.aClass3848394.getFaceList()[13] + this.aClass3848394.getFaceList()[1] * f_1 + this.aClass3848394.getFaceList()[5] * f_2 + this.aClass3848394.getFaceList()[9] * f_3;
                 if (f_8 >= -f_6 && f_8 <= f_6) {
-                    float f_9 = this.aClass3848348.faceList[14] + this.aClass3848348.faceList[2] * f_1 + this.aClass3848348.faceList[6] * f_2 + this.aClass3848348.faceList[10] * f_3;
+                    float f_9 = this.aClass3848348.getFaceList()[14] + this.aClass3848348.getFaceList()[2] * f_1 + this.aClass3848348.getFaceList()[6] * f_2 + this.aClass3848348.getFaceList()[10] * f_3;
                     floats_4[0] = this.aFloat8315 + this.imageProducerCenterX * f_7 / f_6;
                     floats_4[1] = this.aFloat8399 + this.imageProducerCenterY * f_8 / f_6;
                     floats_4[2] = f_9;
@@ -1537,7 +1537,7 @@ public class OpenGlToolkit extends AbstractToolkit {
     }
 
     public void loadMatrix(Matrix44 matrix4x4) {
-        OpenGL.glLoadMatrixf(matrix4x4.faceList, 0);
+        OpenGL.glLoadMatrixf(matrix4x4.getFaceList(), 0);
     }
 
     @Override
@@ -1591,9 +1591,9 @@ public class OpenGlToolkit extends AbstractToolkit {
         this.fogMinimumStartPosition = this.aClass3848442.method6533();
         setFogRange();
         if (this.depthClippingMode == 2) {
-            invertMatrix(this.aClass3848442.faceList);
+            invertMatrix(this.aClass3848442.getFaceList());
         } else if (this.depthClippingMode == 1) {
-            invertMatrix(this.aClass3848385.faceList);
+            invertMatrix(this.aClass3848385.getFaceList());
         }
     }
 
@@ -1655,18 +1655,18 @@ public class OpenGlToolkit extends AbstractToolkit {
     @Override
     public int isOnScreen(int i_1, int i_2, int i_3, int i_4, int i_5, int i_6) {
         int i_7 = 0;
-        float f_8 = this.aClass3848394.faceList[14] + this.aClass3848394.faceList[2] * i_1 + this.aClass3848394.faceList[6] * i_2 + this.aClass3848394.faceList[10] * i_3;
-        float f_9 = this.aClass3848394.faceList[14] + this.aClass3848394.faceList[2] * i_4 + this.aClass3848394.faceList[6] * i_5 + this.aClass3848394.faceList[10] * i_6;
-        float f_10 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * i_1 + this.aClass3848394.faceList[7] * i_2 + this.aClass3848394.faceList[11] * i_3;
-        float f_11 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * i_4 + this.aClass3848394.faceList[7] * i_5 + this.aClass3848394.faceList[11] * i_6;
+        float f_8 = this.aClass3848394.getFaceList()[14] + this.aClass3848394.getFaceList()[2] * i_1 + this.aClass3848394.getFaceList()[6] * i_2 + this.aClass3848394.getFaceList()[10] * i_3;
+        float f_9 = this.aClass3848394.getFaceList()[14] + this.aClass3848394.getFaceList()[2] * i_4 + this.aClass3848394.getFaceList()[6] * i_5 + this.aClass3848394.getFaceList()[10] * i_6;
+        float f_10 = this.aClass3848394.getFaceList()[15] + this.aClass3848394.getFaceList()[3] * i_1 + this.aClass3848394.getFaceList()[7] * i_2 + this.aClass3848394.getFaceList()[11] * i_3;
+        float f_11 = this.aClass3848394.getFaceList()[15] + this.aClass3848394.getFaceList()[3] * i_4 + this.aClass3848394.getFaceList()[7] * i_5 + this.aClass3848394.getFaceList()[11] * i_6;
         if (f_8 < -f_10 && f_9 < -f_11) {
             i_7 |= 0x10;
         } else if (f_8 > f_10 && f_9 > f_11) {
             i_7 |= 0x20;
         }
 
-        float f_12 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * i_1 + this.aClass3848394.faceList[4] * i_2 + this.aClass3848394.faceList[8] * i_3;
-        float f_13 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * i_4 + this.aClass3848394.faceList[4] * i_5 + this.aClass3848394.faceList[8] * i_6;
+        float f_12 = this.aClass3848394.getFaceList()[12] + this.aClass3848394.getFaceList()[0] * i_1 + this.aClass3848394.getFaceList()[4] * i_2 + this.aClass3848394.getFaceList()[8] * i_3;
+        float f_13 = this.aClass3848394.getFaceList()[12] + this.aClass3848394.getFaceList()[0] * i_4 + this.aClass3848394.getFaceList()[4] * i_5 + this.aClass3848394.getFaceList()[8] * i_6;
         if (f_12 < -f_10 && f_13 < -f_11) {
             i_7 |= 0x1;
         }
@@ -1675,8 +1675,8 @@ public class OpenGlToolkit extends AbstractToolkit {
             i_7 |= 0x2;
         }
 
-        float f_14 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * i_1 + this.aClass3848394.faceList[5] * i_2 + this.aClass3848394.faceList[9] * i_3;
-        float f_15 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * i_4 + this.aClass3848394.faceList[5] * i_5 + this.aClass3848394.faceList[9] * i_6;
+        float f_14 = this.aClass3848394.getFaceList()[13] + this.aClass3848394.getFaceList()[1] * i_1 + this.aClass3848394.getFaceList()[5] * i_2 + this.aClass3848394.getFaceList()[9] * i_3;
+        float f_15 = this.aClass3848394.getFaceList()[13] + this.aClass3848394.getFaceList()[1] * i_4 + this.aClass3848394.getFaceList()[5] * i_5 + this.aClass3848394.getFaceList()[9] * i_6;
         if (f_14 < -f_10 && f_15 < -f_11) {
             i_7 |= 0x4;
         }
@@ -2159,7 +2159,7 @@ public class OpenGlToolkit extends AbstractToolkit {
 
     public void multiMatrix(Matrix44 matrix44) {
         OpenGL.glPushMatrix();
-        OpenGL.glMultMatrixf(matrix44.faceList, 0);
+        OpenGL.glMultMatrixf(matrix44.getFaceList(), 0);
     }
 
     public void updatePointSizeRange(float red, float green, float blue, float alpha) {
@@ -2237,7 +2237,7 @@ public class OpenGlToolkit extends AbstractToolkit {
     public void method13645() {
         if (this.depthClippingMode != 2) {
             this.depthClippingMode = 2;
-            invertMatrix(this.aClass3848442.faceList);
+            invertMatrix(this.aClass3848442.getFaceList());
             method13748();
             method13584();
             updateDepthRange();
@@ -2607,7 +2607,7 @@ public class OpenGlToolkit extends AbstractToolkit {
 
     public void method13748() {
         OpenGL.glLoadIdentity();
-        OpenGL.glMultMatrixf(this.aClass3848348.faceList, 0);
+        OpenGL.glMultMatrixf(this.aClass3848348.getFaceList(), 0);
         if (this.renderStillWater) {
             this.effectManager.waterEffect.enable();
         }

@@ -191,9 +191,9 @@ public class NativeFont extends AbstractFontRenderer {
         float f_7 = this.aGraphicalRendererSub29321.getDisplay().getWidth();
         float f_8 = this.aGraphicalRendererSub29321.getDisplay().getHeight();
         class476.worldViewProjectionMatrix.method6525(2.0F / f_7, 2.0F / f_8, 1.0F, 1.0F);
-        class476.worldViewProjectionMatrix.faceList[12] = (i_2 + this.aGraphicalRendererSub29321.method13905()) * 2.0F / f_7 - 1.0F;
-        class476.worldViewProjectionMatrix.faceList[13] = (i_3 + this.aGraphicalRendererSub29321.method13905()) * 2.0F / f_8 - 1.0F;
-        class476.worldViewProjectionMatrix.faceList[14] = -1.0f;
+        class476.worldViewProjectionMatrix.getFaceList()[12] = (i_2 + this.aGraphicalRendererSub29321.method13905()) * 2.0F / f_7 - 1.0F;
+        class476.worldViewProjectionMatrix.getFaceList()[13] = (i_3 + this.aGraphicalRendererSub29321.method13905()) * 2.0F / f_8 - 1.0F;
+        class476.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
         class476.aClass384440.identity();
         class476.anInterface4445 = this.anInterface49320;
         class476.anInt446 = var_1 * 4;

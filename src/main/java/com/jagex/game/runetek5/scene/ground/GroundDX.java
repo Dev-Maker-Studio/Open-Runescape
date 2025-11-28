@@ -502,7 +502,7 @@ public class GroundDX extends Ground {
                                     i_85 = 126;
                                 }
 
-                                i_52 = ColorUtil.hslToRgb[i_44 & 0xff80 | i_85];
+                                i_52 = ColorUtil.getHslToRgb()[i_44 & 0xff80 | i_85];
                                 if ((this.flags & 0x7) == 0) {
                                     f_53 = this.activeToolkit.sunPosition[0] * f_54 + this.activeToolkit.sunPosition[1] * f_55 + this.activeToolkit.sunPosition[2] * f_56;
                                     f_53 = this.activeToolkit.lightIntensity + f_53 * (f_53 > 0.0F ? this.activeToolkit.sunColorIntensity : this.activeToolkit.antiSunColorIntensity);
@@ -525,7 +525,7 @@ public class GroundDX extends Ground {
                                         i_88 = 126;
                                     }
 
-                                    i_87 = ColorUtil.hslToRgb[i_45 & 0xff80 | i_88];
+                                    i_87 = ColorUtil.getHslToRgb()[i_45 & 0xff80 | i_88];
                                     if ((this.flags & 0x7) == 0) {
                                         float f_10000 = this.activeToolkit.sunPosition[0] * f_54 + this.activeToolkit.sunPosition[1] * f_55 + this.activeToolkit.sunPosition[2] * f_56;
                                         f_61 = this.activeToolkit.lightIntensity + f_53 * (f_53 > 0.0F ? this.activeToolkit.sunColorIntensity : this.activeToolkit.antiSunColorIntensity);
@@ -896,7 +896,7 @@ public class GroundDX extends Ground {
                             envShader.anInt470 = directxWater.anInt7514 / 3;
                             switch (b_29) {
                                 case 1:
-                                    envShader.eyePos.set(this.activeToolkit.aClass3848814.faceList[12], this.activeToolkit.aClass3848814.faceList[13], this.activeToolkit.aClass3848814.faceList[14]);
+                                    envShader.eyePos.set(this.activeToolkit.aClass3848814.getFaceList()[12], this.activeToolkit.aClass3848814.getFaceList()[13], this.activeToolkit.aClass3848814.getFaceList()[14]);
                                     envShader.loadSpecularPointlight(0);
                                     break;
                                 case 2:
@@ -908,7 +908,7 @@ public class GroundDX extends Ground {
                                         NativeEvtWaterMapper evtWaterMapper = this.activeToolkit.nativeEvtWaterMapper;
                                         evtWaterMapper.waterViewingPlaneMatrix.copyFrom(this.activeToolkit.aClass3848729);
                                         evtWaterMapper.textureCoordinateMatrix.method6525(1.0F / (directxWater.waterScale * directxWater.hdWaterTile.floOpcode20), 1.0F / (directxWater.waterScale * directxWater.hdWaterTile.floOpcode20), 1.0F, 1.0F);
-                                        evtWaterMapper.eye.set(this.activeToolkit.aClass3848814.faceList[12], this.activeToolkit.aClass3848814.faceList[13], this.activeToolkit.aClass3848814.faceList[14]);
+                                        evtWaterMapper.eye.set(this.activeToolkit.aClass3848814.getFaceList()[12], this.activeToolkit.aClass3848814.getFaceList()[13], this.activeToolkit.aClass3848814.getFaceList()[14]);
                                         MaterialType class16923 = this.activeToolkit.materialProvider.getMaterial(directxWater.textureId);
                                         evtWaterMapper.effectParam1 = class16923.effectParam1;
                                         evtWaterMapper.anInt10110 = directxWater.anInt7519;
@@ -937,7 +937,7 @@ public class GroundDX extends Ground {
                                     envShader.loadUnlitProgram(!MaterialTypeList.isOpaqueEffect(b_29));
                                     break;
                                 case 7:
-                                    envShader.eyePos.set(this.activeToolkit.aClass3848814.faceList[12], this.activeToolkit.aClass3848814.faceList[13], this.activeToolkit.aClass3848814.faceList[14]);
+                                    envShader.eyePos.set(this.activeToolkit.aClass3848814.getFaceList()[12], this.activeToolkit.aClass3848814.getFaceList()[13], this.activeToolkit.aClass3848814.getFaceList()[14]);
                                     envShader.aClass384465.identity();
                                     envShader.anInterface31451 = this.activeToolkit.getEnvironmentMapSampler();
                                     envShader.loadPointlightEnvironmentMapping(0);
@@ -955,7 +955,7 @@ public class GroundDX extends Ground {
                 this.activeToolkit.setVertexDeclaration(this.aClass708550);
                 Matrix44 matrix4428 = this.activeToolkit.aClass3848683;
                 matrix4428.identity();
-                matrix4428.faceList[13] = -1.0f;
+                matrix4428.getFaceList()[13] = -1.0f;
                 envShader.loadWorldViewProjection(matrix4428);
                 this.shadowMapper.method1314(envShader, i_1, i_2, i_3, bools_4, bool5);
             }

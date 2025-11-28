@@ -260,7 +260,7 @@ public class ModelGL extends Model {
                     throw new RuntimeException();
                 }
 
-                triangleIndex = ColorUtil.hslToRgb[mesh.facesColor[billboard.appliesOnFace] & 0xffff] & 0xffffff;
+                triangleIndex = ColorUtil.getHslToRgb()[mesh.facesColor[billboard.appliesOnFace] & 0xffff] & 0xffffff;
                 triangleIndex |= 255 - (mesh.facesAlpha != null ? mesh.facesAlpha[billboard.appliesOnFace] : 0) << 24;
                 this.billboardEffects[currentFace] = new BillboardEffectGL(appliesOnFace, mesh.facesA[billboard.appliesOnFace], mesh.facesB[billboard.appliesOnFace], mesh.facesC[billboard.appliesOnFace], billboardType.size2d, billboardType.size3d, billboardType.materialId, billboardType.shape, billboardType.stationary, billboard.distance);
                 this.billboardSurfaces[currentFace] = new BillboardSurfaceGL(triangleIndex);
@@ -1792,7 +1792,7 @@ public class ModelGL extends Model {
 
 
     public int hslToRgb(int colorHsl, short materialId, int ambient, byte alpha) {
-        int i_5 = ColorUtil.hslToRgb[method13538(colorHsl, ambient)];
+        int i_5 = ColorUtil.getHslToRgb()[method13538(colorHsl, ambient)];
         if (materialId != -1) {
             MaterialType materialType = this.toolkit.materialProvider.getMaterial(materialId & 0xffff);
             int a = materialType.alpha & 0xff;
@@ -2374,7 +2374,7 @@ public class ModelGL extends Model {
                                 for (int i_10 = 0; i_10 < this.billboardCount; i_10++) {
                                     class16254 = this.billboardEffects[i_10];
                                     class14556 = this.billboardSurfaces[i_10];
-                                    class14556.diffuseColor = class14556.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class16254.appliesOnFace] & 0xffff] & 0xffffff;
+                                    class14556.diffuseColor = class14556.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[class16254.appliesOnFace] & 0xffff] & 0xffffff;
                                 }
                             }
                         }
@@ -2559,7 +2559,7 @@ public class ModelGL extends Model {
                 for (int b = 0; b < this.billboardCount; b++) {
                 	BillboardEffectGL effect = this.billboardEffects[b];
                     BillboardSurfaceGL surface = this.billboardSurfaces[b];
-                    surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                    surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                 }
             }
         } else if (transformationType == 8) {
@@ -2860,7 +2860,7 @@ public class ModelGL extends Model {
                     for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                     	BillboardEffectGL effect = this.billboardEffects[billboard];
                         BillboardSurfaceGL surface = this.billboardSurfaces[billboard];
-                        surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                        surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                     }
                 }
             }
@@ -2970,15 +2970,15 @@ public class ModelGL extends Model {
                     class875 = class874.child;
                 }
 
-                class875.verticeXA = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class874.faceA] + matrix442.faceList[4] * this.verticesY[class874.faceA] + matrix442.faceList[8] * this.verticesZ[class874.faceA]);
-                class875.verticeYA = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class874.faceA] + matrix442.faceList[5] * this.verticesY[class874.faceA] + matrix442.faceList[9] * this.verticesZ[class874.faceA]);
-                class875.verticeZA = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class874.faceA] + matrix442.faceList[6] * this.verticesY[class874.faceA] + matrix442.faceList[10] * this.verticesZ[class874.faceA]);
-                class875.verticeXB = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class874.faceB] + matrix442.faceList[4] * this.verticesY[class874.faceB] + matrix442.faceList[8] * this.verticesZ[class874.faceB]);
-                class875.verticeYB = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class874.faceB] + matrix442.faceList[5] * this.verticesY[class874.faceB] + matrix442.faceList[9] * this.verticesZ[class874.faceB]);
-                class875.verticeZB = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class874.faceB] + matrix442.faceList[6] * this.verticesY[class874.faceB] + matrix442.faceList[10] * this.verticesZ[class874.faceB]);
-                class875.verticeXC = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class874.faceC] + matrix442.faceList[4] * this.verticesY[class874.faceC] + matrix442.faceList[8] * this.verticesZ[class874.faceC]);
-                class875.verticeYC = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class874.faceC] + matrix442.faceList[5] * this.verticesY[class874.faceC] + matrix442.faceList[9] * this.verticesZ[class874.faceC]);
-                class875.verticeZC = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class874.faceC] + matrix442.faceList[6] * this.verticesY[class874.faceC] + matrix442.faceList[10] * this.verticesZ[class874.faceC]);
+                class875.verticeXA = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class874.faceA] + matrix442.getFaceList()[4] * this.verticesY[class874.faceA] + matrix442.getFaceList()[8] * this.verticesZ[class874.faceA]);
+                class875.verticeYA = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class874.faceA] + matrix442.getFaceList()[5] * this.verticesY[class874.faceA] + matrix442.getFaceList()[9] * this.verticesZ[class874.faceA]);
+                class875.verticeZA = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class874.faceA] + matrix442.getFaceList()[6] * this.verticesY[class874.faceA] + matrix442.getFaceList()[10] * this.verticesZ[class874.faceA]);
+                class875.verticeXB = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class874.faceB] + matrix442.getFaceList()[4] * this.verticesY[class874.faceB] + matrix442.getFaceList()[8] * this.verticesZ[class874.faceB]);
+                class875.verticeYB = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class874.faceB] + matrix442.getFaceList()[5] * this.verticesY[class874.faceB] + matrix442.getFaceList()[9] * this.verticesZ[class874.faceB]);
+                class875.verticeZB = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class874.faceB] + matrix442.getFaceList()[6] * this.verticesY[class874.faceB] + matrix442.getFaceList()[10] * this.verticesZ[class874.faceB]);
+                class875.verticeXC = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class874.faceC] + matrix442.getFaceList()[4] * this.verticesY[class874.faceC] + matrix442.getFaceList()[8] * this.verticesZ[class874.faceC]);
+                class875.verticeYC = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class874.faceC] + matrix442.getFaceList()[5] * this.verticesY[class874.faceC] + matrix442.getFaceList()[9] * this.verticesZ[class874.faceC]);
+                class875.verticeZC = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class874.faceC] + matrix442.getFaceList()[6] * this.verticesY[class874.faceC] + matrix442.getFaceList()[10] * this.verticesZ[class874.faceC]);
             }
         }
 
@@ -2996,9 +2996,9 @@ public class ModelGL extends Model {
                     class1726.matrix = new Matrix44(matrix442);
                 }
 
-                class1727.verticeX = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class1726.appliesOnVertex] + matrix442.faceList[4] * this.verticesY[class1726.appliesOnVertex] + matrix442.faceList[8] * this.verticesZ[class1726.appliesOnVertex]);
-                class1727.verticeY = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class1726.appliesOnVertex] + matrix442.faceList[5] * this.verticesY[class1726.appliesOnVertex] + matrix442.faceList[9] * this.verticesZ[class1726.appliesOnVertex]);
-                class1727.verticeZ = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class1726.appliesOnVertex] + matrix442.faceList[6] * this.verticesY[class1726.appliesOnVertex] + matrix442.faceList[10] * this.verticesZ[class1726.appliesOnVertex]);
+                class1727.verticeX = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class1726.appliesOnVertex] + matrix442.getFaceList()[4] * this.verticesY[class1726.appliesOnVertex] + matrix442.getFaceList()[8] * this.verticesZ[class1726.appliesOnVertex]);
+                class1727.verticeY = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class1726.appliesOnVertex] + matrix442.getFaceList()[5] * this.verticesY[class1726.appliesOnVertex] + matrix442.getFaceList()[9] * this.verticesZ[class1726.appliesOnVertex]);
+                class1727.verticeZ = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class1726.appliesOnVertex] + matrix442.getFaceList()[6] * this.verticesY[class1726.appliesOnVertex] + matrix442.getFaceList()[10] * this.verticesZ[class1726.appliesOnVertex]);
             }
         }
 
@@ -3059,11 +3059,11 @@ public class ModelGL extends Model {
             int i_39 = matrixX[i_24];
             int i_26 = matrixY[i_24];
             int i_27 = matrixZ[i_24];
-            float f_28 = matrix446.faceList[2] * i_39 + matrix446.faceList[6] * i_26 + matrix446.faceList[10] * i_27 + matrix446.faceList[14];
-            float f_29 = matrix446.faceList[3] * i_39 + matrix446.faceList[7] * i_26 + matrix446.faceList[11] * i_27 + matrix446.faceList[15];
+            float f_28 = matrix446.getFaceList()[2] * i_39 + matrix446.getFaceList()[6] * i_26 + matrix446.getFaceList()[10] * i_27 + matrix446.getFaceList()[14];
+            float f_29 = matrix446.getFaceList()[3] * i_39 + matrix446.getFaceList()[7] * i_26 + matrix446.getFaceList()[11] * i_27 + matrix446.getFaceList()[15];
             if (f_28 >= -f_29) {
-            	float f_30 = matrix446.faceList[0] * i_39 + matrix446.faceList[4] * i_26 + matrix446.faceList[8] * i_27 + matrix446.faceList[12];
-            	float f_31 = matrix446.faceList[1] * i_39 + matrix446.faceList[5] * i_26 + matrix446.faceList[9] * i_27 + matrix446.faceList[13];
+            	float f_30 = matrix446.getFaceList()[0] * i_39 + matrix446.getFaceList()[4] * i_26 + matrix446.getFaceList()[8] * i_27 + matrix446.getFaceList()[12];
+            	float f_31 = matrix446.getFaceList()[1] * i_39 + matrix446.getFaceList()[5] * i_26 + matrix446.getFaceList()[9] * i_27 + matrix446.getFaceList()[13];
                 int i_32 = (int) (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_30 / f_29);
                 int i_33 = (int) (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_31 / f_29);
                 if (i_32 < i_8) {
@@ -3103,11 +3103,11 @@ public class ModelGL extends Model {
             	int i_27 = this.verticesX[i_26];
                 int i_40 = this.verticesY[i_26];
                 int i_41 = this.verticesZ[i_26];
-                float f_30 = matrix446.faceList[2] * i_27 + matrix446.faceList[6] * i_40 + matrix446.faceList[10] * i_41 + matrix446.faceList[14];
-                float f_31 = matrix446.faceList[3] * i_27 + matrix446.faceList[7] * i_40 + matrix446.faceList[11] * i_41 + matrix446.faceList[15];
+                float f_30 = matrix446.getFaceList()[2] * i_27 + matrix446.getFaceList()[6] * i_40 + matrix446.getFaceList()[10] * i_41 + matrix446.getFaceList()[14];
+                float f_31 = matrix446.getFaceList()[3] * i_27 + matrix446.getFaceList()[7] * i_40 + matrix446.getFaceList()[11] * i_41 + matrix446.getFaceList()[15];
                 if (f_30 >= -f_31) {
-                    float f_42 = matrix446.faceList[0] * i_27 + matrix446.faceList[4] * i_40 + matrix446.faceList[8] * i_41 + matrix446.faceList[12];
-                    float f_43 = matrix446.faceList[1] * i_27 + matrix446.faceList[5] * i_40 + matrix446.faceList[9] * i_41 + matrix446.faceList[13];
+                    float f_42 = matrix446.getFaceList()[0] * i_27 + matrix446.getFaceList()[4] * i_40 + matrix446.getFaceList()[8] * i_41 + matrix446.getFaceList()[12];
+                    float f_43 = matrix446.getFaceList()[1] * i_27 + matrix446.getFaceList()[5] * i_40 + matrix446.getFaceList()[9] * i_41 + matrix446.getFaceList()[13];
                     int i_34 = this.triangles[i_26];
                     int i_35 = this.triangles[i_26 + 1];
 
@@ -3193,10 +3193,10 @@ public class ModelGL extends Model {
                 int i_35 = this.minX + this.maxX >> 1;
                 int i_36 = this.minZ + this.maxZ >> 1;
                 short s_19 = this.minY;
-                float f_21 = matrix446.faceList[0] * i_35 + matrix446.faceList[4] * s_19 + matrix446.faceList[8] * i_36 + matrix446.faceList[12];
-                float f_22 = matrix446.faceList[1] * i_35 + matrix446.faceList[5] * s_19 + matrix446.faceList[9] * i_36 + matrix446.faceList[13];
-                float f_23 = matrix446.faceList[2] * i_35 + matrix446.faceList[6] * s_19 + matrix446.faceList[10] * i_36 + matrix446.faceList[14];
-                float f_24 = matrix446.faceList[3] * i_35 + matrix446.faceList[7] * s_19 + matrix446.faceList[11] * i_36 + matrix446.faceList[15];
+                float f_21 = matrix446.getFaceList()[0] * i_35 + matrix446.getFaceList()[4] * s_19 + matrix446.getFaceList()[8] * i_36 + matrix446.getFaceList()[12];
+                float f_22 = matrix446.getFaceList()[1] * i_35 + matrix446.getFaceList()[5] * s_19 + matrix446.getFaceList()[9] * i_36 + matrix446.getFaceList()[13];
+                float f_23 = matrix446.getFaceList()[2] * i_35 + matrix446.getFaceList()[6] * s_19 + matrix446.getFaceList()[10] * i_36 + matrix446.getFaceList()[14];
+                float f_24 = matrix446.getFaceList()[3] * i_35 + matrix446.getFaceList()[7] * s_19 + matrix446.getFaceList()[11] * i_36 + matrix446.getFaceList()[15];
                 if (f_23 >= -f_24) {
                     boundingBox.left = (int) (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_21 / f_24);
                     boundingBox.bottom = (int) (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_22 / f_24);
@@ -3205,10 +3205,10 @@ public class ModelGL extends Model {
                 }
 
                 s_19 = this.maxY;
-                float f_25 = matrix446.faceList[0] * i_35 + matrix446.faceList[4] * s_19 + matrix446.faceList[8] * i_36 + matrix446.faceList[12];
-                float f_26 = matrix446.faceList[1] * i_35 + matrix446.faceList[5] * s_19 + matrix446.faceList[9] * i_36 + matrix446.faceList[13];
-                float f_27 = matrix446.faceList[2] * i_35 + matrix446.faceList[6] * s_19 + matrix446.faceList[10] * i_36 + matrix446.faceList[14];
-                float f_28 = matrix446.faceList[3] * i_35 + matrix446.faceList[7] * s_19 + matrix446.faceList[11] * i_36 + matrix446.faceList[15];
+                float f_25 = matrix446.getFaceList()[0] * i_35 + matrix446.getFaceList()[4] * s_19 + matrix446.getFaceList()[8] * i_36 + matrix446.getFaceList()[12];
+                float f_26 = matrix446.getFaceList()[1] * i_35 + matrix446.getFaceList()[5] * s_19 + matrix446.getFaceList()[9] * i_36 + matrix446.getFaceList()[13];
+                float f_27 = matrix446.getFaceList()[2] * i_35 + matrix446.getFaceList()[6] * s_19 + matrix446.getFaceList()[10] * i_36 + matrix446.getFaceList()[14];
+                float f_28 = matrix446.getFaceList()[3] * i_35 + matrix446.getFaceList()[7] * s_19 + matrix446.getFaceList()[11] * i_36 + matrix446.getFaceList()[15];
                 if (f_27 >= -f_28) {
                     boundingBox.right = (int) (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_25 / f_28);
                     boundingBox.top = (int) (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_26 / f_28);
@@ -3244,12 +3244,12 @@ public class ModelGL extends Model {
 
                 if (bool15) {
                     if (f_23 / f_24 > f_27 / f_28) {
-                        f_29 = f_21 + matrix444.faceList[0] * this.size2d + matrix444.faceList[12];
-                        f_30 = f_24 + matrix444.faceList[3] * this.size2d + matrix444.faceList[15];
+                        f_29 = f_21 + matrix444.getFaceList()[0] * this.size2d + matrix444.getFaceList()[12];
+                        f_30 = f_24 + matrix444.getFaceList()[3] * this.size2d + matrix444.getFaceList()[15];
                         boundingBox.size = (int) (this.toolkit.aFloat8315 - boundingBox.left + this.toolkit.imageProducerCenterX * f_29 / f_30);
                     } else {
-                        f_29 = f_25 + matrix444.faceList[0] * this.size2d + matrix444.faceList[12];
-                        f_30 = f_28 + matrix444.faceList[3] * this.size2d + matrix444.faceList[15];
+                        f_29 = f_25 + matrix444.getFaceList()[0] * this.size2d + matrix444.getFaceList()[12];
+                        f_30 = f_28 + matrix444.getFaceList()[3] * this.size2d + matrix444.getFaceList()[15];
                         boundingBox.size = (int) (this.toolkit.aFloat8315 - boundingBox.right + this.toolkit.imageProducerCenterX * f_29 / f_30);
                     }
 
@@ -3321,9 +3321,9 @@ public class ModelGL extends Model {
                     float f_6 = (this.verticesX[effect.faceA] + this.verticesX[effect.faceB] + this.verticesX[effect.faceC]) * 0.3333333F;
                     float f_7 = (this.verticesY[effect.faceA] + this.verticesY[effect.faceB] + this.verticesY[effect.faceC]) * 0.3333333F;
                     float f_8 = (this.verticesZ[effect.faceA] + this.verticesZ[effect.faceB] + this.verticesZ[effect.faceC]) * 0.3333333F;
-                    float f_9 = matrix441.faceList[0] * f_6 + matrix441.faceList[4] * f_7 + matrix441.faceList[8] * f_8 + matrix441.faceList[12];
-                    float f_10 = matrix441.faceList[1] * f_6 + matrix441.faceList[5] * f_7 + matrix441.faceList[9] * f_8 + matrix441.faceList[13];
-                    float f_11 = matrix441.faceList[2] * f_6 + matrix441.faceList[6] * f_7 + matrix441.faceList[10] * f_8 + matrix441.faceList[14];
+                    float f_9 = matrix441.getFaceList()[0] * f_6 + matrix441.getFaceList()[4] * f_7 + matrix441.getFaceList()[8] * f_8 + matrix441.getFaceList()[12];
+                    float f_10 = matrix441.getFaceList()[1] * f_6 + matrix441.getFaceList()[5] * f_7 + matrix441.getFaceList()[9] * f_8 + matrix441.getFaceList()[13];
+                    float f_11 = matrix441.getFaceList()[2] * f_6 + matrix441.getFaceList()[6] * f_7 + matrix441.getFaceList()[10] * f_8 + matrix441.getFaceList()[14];
                     float f_12 = (float) (1.0D / Math.sqrt(f_9 * f_9 + f_10 * f_10 + f_11 * f_11)) * effect.distance;
                     matrix442.method6549(surface.rotation, surface.scaleX * effect.sizeX >> 7, surface.scaleY * effect.sizeY >> 7, f_9 + surface.offsetX - f_9 * f_12, f_10 + surface.offsetY - f_10 * f_12, f_11 - f_11 * f_12);
                     this.toolkit.loadMatrix(matrix442);
@@ -3867,7 +3867,7 @@ public class ModelGL extends Model {
             for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                 BillboardEffectGL effect = this.billboardEffects[billboard];
                 BillboardSurfaceGL suraface = this.billboardSurfaces[billboard];
-                suraface.diffuseColor = suraface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                suraface.diffuseColor = suraface.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 
@@ -3888,7 +3888,7 @@ public class ModelGL extends Model {
             for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                 BillboardEffectGL effect = this.billboardEffects[billboard];
                 BillboardSurfaceGL surface = this.billboardSurfaces[billboard];
-                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 
@@ -3946,7 +3946,7 @@ public class ModelGL extends Model {
                 for (int billboard = 0; billboard < this.billboardCount; billboard++) {
                     BillboardEffectGL effect = this.billboardEffects[billboard];
                     BillboardSurfaceGL surface = this.billboardSurfaces[billboard];
-                    surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                    surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                 }
             }
 

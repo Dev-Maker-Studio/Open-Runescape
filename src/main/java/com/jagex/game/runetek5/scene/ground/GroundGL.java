@@ -443,7 +443,7 @@ public class GroundGL extends Ground {
                                     lightness = 126;
                                 }
 
-                                directColor = ColorUtil.hslToRgb[mainColor & 0xff80 | lightness];
+                                directColor = ColorUtil.getHslToRgb()[mainColor & 0xff80 | lightness];
                                 if ((this.waterFunctionMask & GroundFunctionMask.HD_LIGHT) == 0) {
                                     f_50 = this.activeToolkit.sunDirection[0] * lightX + this.activeToolkit.sunDirection[1] * lightY + this.activeToolkit.sunDirection[2] * lightZ;
                                     f_50 = this.activeToolkit.sunBrightness + f_50 * (f_50 > 0.0F ? this.activeToolkit.aFloat8433 : this.activeToolkit.aFloat8434);
@@ -466,7 +466,7 @@ public class GroundGL extends Ground {
                                         lightness = 126;
                                     }
 
-                                    colorRgb = ColorUtil.hslToRgb[blendColor & 0xff80 | lightness];
+                                    colorRgb = ColorUtil.getHslToRgb()[blendColor & 0xff80 | lightness];
                                     if ((this.waterFunctionMask & GroundFunctionMask.HD_LIGHT) == 0) {
                                         float f_10000 = this.activeToolkit.sunDirection[0] * lightX + this.activeToolkit.sunDirection[1] * lightY + this.activeToolkit.sunDirection[2] * lightZ;
                                         float lightStrengthMultiplier = this.activeToolkit.sunBrightness + f_50 * (f_50 > 0.0F ? this.activeToolkit.aFloat8433 : this.activeToolkit.aFloat8434);

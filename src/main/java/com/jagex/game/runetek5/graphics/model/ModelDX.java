@@ -239,7 +239,7 @@ public class ModelDX extends Model {
                     throw new RuntimeException();
                 }
 
-                int rgbOnFace = ColorUtil.hslToRgb[mesh.facesColor[billboard.appliesOnFace] & 0xffff] & 0xffffff;
+                int rgbOnFace = ColorUtil.getHslToRgb()[mesh.facesColor[billboard.appliesOnFace] & 0xffff] & 0xffffff;
                 rgbOnFace |= 255 - (mesh.facesAlpha != null ? mesh.facesAlpha[billboard.appliesOnFace] : 0) << 24;
                 this.billboardEffects[index] = new BillboardEffectDX(face, mesh.facesA[billboard.appliesOnFace], mesh.facesB[billboard.appliesOnFace], mesh.facesC[billboard.appliesOnFace], billboardType.size2d, billboardType.size3d, billboardType.materialId, billboardType.stationary, billboard.distance);
                 this.billboardBackgrounds[index] = new BillboardSurfaceDX(rgbOnFace);
@@ -1666,7 +1666,7 @@ public class ModelDX extends Model {
             for (i_3 = 0; i_3 < this.numBillboards; i_3++) {
                 BillboardEffectDX class564 = this.billboardEffects[i_3];
                 BillboardSurfaceDX class655 = this.billboardBackgrounds[i_3];
-                class655.diffuseColor = class655.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class564.appliesOnFace] & 0xffff] & 0xffffff;
+                class655.diffuseColor = class655.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[class564.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 
@@ -1724,7 +1724,7 @@ public class ModelDX extends Model {
                 for (int index = 0; index < this.numBillboards; index++) {
                     BillboardEffectDX effect = this.billboardEffects[index];
                     BillboardSurfaceDX background = this.billboardBackgrounds[index];
-                    background.diffuseColor = background.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                    background.diffuseColor = background.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                 }
             }
 
@@ -1766,9 +1766,9 @@ public class ModelDX extends Model {
                     float f_7 = (this.verticesX[effect.faceA] + this.verticesX[effect.faceB] + this.verticesX[effect.faceC]) * 0.3333333F;
                     float f_8 = (this.verticesY[effect.faceA] + this.verticesY[effect.faceB] + this.verticesY[effect.faceC]) * 0.3333333F;
                     float f_9 = (this.verticesZ[effect.faceA] + this.verticesZ[effect.faceB] + this.verticesZ[effect.faceC]) * 0.3333333F;
-                    float f_10 = matrix441.faceList[0] * f_7 + matrix441.faceList[4] * f_8 + matrix441.faceList[8] * f_9 + matrix441.faceList[12];
-                    float f_11 = matrix441.faceList[1] * f_7 + matrix441.faceList[5] * f_8 + matrix441.faceList[9] * f_9 + matrix441.faceList[13];
-                    float f_12 = matrix441.faceList[2] * f_7 + matrix441.faceList[6] * f_8 + matrix441.faceList[10] * f_9 + matrix441.faceList[14];
+                    float f_10 = matrix441.getFaceList()[0] * f_7 + matrix441.getFaceList()[4] * f_8 + matrix441.getFaceList()[8] * f_9 + matrix441.getFaceList()[12];
+                    float f_11 = matrix441.getFaceList()[1] * f_7 + matrix441.getFaceList()[5] * f_8 + matrix441.getFaceList()[9] * f_9 + matrix441.getFaceList()[13];
+                    float f_12 = matrix441.getFaceList()[2] * f_7 + matrix441.getFaceList()[6] * f_8 + matrix441.getFaceList()[10] * f_9 + matrix441.getFaceList()[14];
                     float f_13 = (float) (1.0D / Math.sqrt(f_10 * f_10 + f_11 * f_11 + f_12 * f_12)) * effect.distance;
                     matrix44var2.method5213(background.rotation, background.scaleX * effect.size2d >> 7, background.scaleY * effect.size3d >> 7, f_10 + background.offsetX - f_10 * f_13, f_11 + background.offsetY - f_11 * f_13, f_12 - f_12 * f_13);
                     matrix44var2.multiply(this.toolkit.aClass2948804);
@@ -1918,7 +1918,7 @@ public class ModelDX extends Model {
                         for (i_5 = 0; i_5 < this.numBillboards; i_5++) {
                             class5610 = this.billboardEffects[i_5];
                             class6511 = this.billboardBackgrounds[i_5];
-                            class6511.diffuseColor = class6511.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
+                            class6511.diffuseColor = class6511.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
                         }
                     }
 
@@ -2246,7 +2246,7 @@ public class ModelDX extends Model {
                                     for (i_10 = 0; i_10 < this.numBillboards; i_10++) {
                                         effect = this.billboardEffects[i_10];
                                         background = this.billboardBackgrounds[i_10];
-                                        background.diffuseColor = background.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
+                                        background.diffuseColor = background.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[effect.appliesOnFace] & 0xffff] & 0xffffff;
                                     }
                                 }
 
@@ -2333,15 +2333,15 @@ public class ModelDX extends Model {
                     class875 = class874.child;
                 }
 
-                class875.verticeXA = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class874.faceA] + matrix442.faceList[4] * this.verticesY[class874.faceA] + matrix442.faceList[8] * this.verticesZ[class874.faceA]);
-                class875.verticeYA = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class874.faceA] + matrix442.faceList[5] * this.verticesY[class874.faceA] + matrix442.faceList[9] * this.verticesZ[class874.faceA]);
-                class875.verticeZA = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class874.faceA] + matrix442.faceList[6] * this.verticesY[class874.faceA] + matrix442.faceList[10] * this.verticesZ[class874.faceA]);
-                class875.verticeXB = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class874.faceB] + matrix442.faceList[4] * this.verticesY[class874.faceB] + matrix442.faceList[8] * this.verticesZ[class874.faceB]);
-                class875.verticeYB = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class874.faceB] + matrix442.faceList[5] * this.verticesY[class874.faceB] + matrix442.faceList[9] * this.verticesZ[class874.faceB]);
-                class875.verticeZB = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class874.faceB] + matrix442.faceList[6] * this.verticesY[class874.faceB] + matrix442.faceList[10] * this.verticesZ[class874.faceB]);
-                class875.verticeXC = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class874.faceC] + matrix442.faceList[4] * this.verticesY[class874.faceC] + matrix442.faceList[8] * this.verticesZ[class874.faceC]);
-                class875.verticeYC = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class874.faceC] + matrix442.faceList[5] * this.verticesY[class874.faceC] + matrix442.faceList[9] * this.verticesZ[class874.faceC]);
-                class875.verticeZC = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class874.faceC] + matrix442.faceList[6] * this.verticesY[class874.faceC] + matrix442.faceList[10] * this.verticesZ[class874.faceC]);
+                class875.verticeXA = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class874.faceA] + matrix442.getFaceList()[4] * this.verticesY[class874.faceA] + matrix442.getFaceList()[8] * this.verticesZ[class874.faceA]);
+                class875.verticeYA = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class874.faceA] + matrix442.getFaceList()[5] * this.verticesY[class874.faceA] + matrix442.getFaceList()[9] * this.verticesZ[class874.faceA]);
+                class875.verticeZA = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class874.faceA] + matrix442.getFaceList()[6] * this.verticesY[class874.faceA] + matrix442.getFaceList()[10] * this.verticesZ[class874.faceA]);
+                class875.verticeXB = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class874.faceB] + matrix442.getFaceList()[4] * this.verticesY[class874.faceB] + matrix442.getFaceList()[8] * this.verticesZ[class874.faceB]);
+                class875.verticeYB = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class874.faceB] + matrix442.getFaceList()[5] * this.verticesY[class874.faceB] + matrix442.getFaceList()[9] * this.verticesZ[class874.faceB]);
+                class875.verticeZB = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class874.faceB] + matrix442.getFaceList()[6] * this.verticesY[class874.faceB] + matrix442.getFaceList()[10] * this.verticesZ[class874.faceB]);
+                class875.verticeXC = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class874.faceC] + matrix442.getFaceList()[4] * this.verticesY[class874.faceC] + matrix442.getFaceList()[8] * this.verticesZ[class874.faceC]);
+                class875.verticeYC = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class874.faceC] + matrix442.getFaceList()[5] * this.verticesY[class874.faceC] + matrix442.getFaceList()[9] * this.verticesZ[class874.faceC]);
+                class875.verticeZC = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class874.faceC] + matrix442.getFaceList()[6] * this.verticesY[class874.faceC] + matrix442.getFaceList()[10] * this.verticesZ[class874.faceC]);
             }
         }
 
@@ -2359,9 +2359,9 @@ public class ModelDX extends Model {
                     class1726.matrix = new Matrix44(matrix442);
                 }
 
-                class1727.verticeX = (int) (matrix442.faceList[12] + matrix442.faceList[0] * this.verticesX[class1726.appliesOnVertex] + matrix442.faceList[4] * this.verticesY[class1726.appliesOnVertex] + matrix442.faceList[8] * this.verticesZ[class1726.appliesOnVertex]);
-                class1727.verticeY = (int) (matrix442.faceList[13] + matrix442.faceList[1] * this.verticesX[class1726.appliesOnVertex] + matrix442.faceList[5] * this.verticesY[class1726.appliesOnVertex] + matrix442.faceList[9] * this.verticesZ[class1726.appliesOnVertex]);
-                class1727.verticeZ = (int) (matrix442.faceList[14] + matrix442.faceList[2] * this.verticesX[class1726.appliesOnVertex] + matrix442.faceList[6] * this.verticesY[class1726.appliesOnVertex] + matrix442.faceList[10] * this.verticesZ[class1726.appliesOnVertex]);
+                class1727.verticeX = (int) (matrix442.getFaceList()[12] + matrix442.getFaceList()[0] * this.verticesX[class1726.appliesOnVertex] + matrix442.getFaceList()[4] * this.verticesY[class1726.appliesOnVertex] + matrix442.getFaceList()[8] * this.verticesZ[class1726.appliesOnVertex]);
+                class1727.verticeY = (int) (matrix442.getFaceList()[13] + matrix442.getFaceList()[1] * this.verticesX[class1726.appliesOnVertex] + matrix442.getFaceList()[5] * this.verticesY[class1726.appliesOnVertex] + matrix442.getFaceList()[9] * this.verticesZ[class1726.appliesOnVertex]);
+                class1727.verticeZ = (int) (matrix442.getFaceList()[14] + matrix442.getFaceList()[2] * this.verticesX[class1726.appliesOnVertex] + matrix442.getFaceList()[6] * this.verticesY[class1726.appliesOnVertex] + matrix442.getFaceList()[10] * this.verticesZ[class1726.appliesOnVertex]);
             }
         }
 
@@ -2422,11 +2422,11 @@ public class ModelDX extends Model {
         	float pX = PROJ_X[index];
         	float pY = PROJ_Y[index];
         	float pZ = PROJ_Z[index];
-        	float f_28 = matrix446.faceList[2] * pX + matrix446.faceList[6] * pY + matrix446.faceList[10] * pZ + matrix446.faceList[14];
-        	float f_29 = matrix446.faceList[3] * pX + matrix446.faceList[7] * pY + matrix446.faceList[11] * pZ + matrix446.faceList[15];
+        	float f_28 = matrix446.getFaceList()[2] * pX + matrix446.getFaceList()[6] * pY + matrix446.getFaceList()[10] * pZ + matrix446.getFaceList()[14];
+        	float f_29 = matrix446.getFaceList()[3] * pX + matrix446.getFaceList()[7] * pY + matrix446.getFaceList()[11] * pZ + matrix446.getFaceList()[15];
             if (f_28 >= -f_29) {
-            	float f_30 = matrix446.faceList[0] * pX + matrix446.faceList[4] * pY + matrix446.faceList[8] * pZ + matrix446.faceList[12];
-            	float f_31 = matrix446.faceList[1] * pX + matrix446.faceList[5] * pY + matrix446.faceList[9] * pZ + matrix446.faceList[13];
+            	float f_30 = matrix446.getFaceList()[0] * pX + matrix446.getFaceList()[4] * pY + matrix446.getFaceList()[8] * pZ + matrix446.getFaceList()[12];
+            	float f_31 = matrix446.getFaceList()[1] * pX + matrix446.getFaceList()[5] * pY + matrix446.getFaceList()[9] * pZ + matrix446.getFaceList()[13];
                 float f_32 = this.toolkit.aFloat8797 + this.toolkit.viewportCenterX * f_30 / f_29;
                 float f_33 = this.toolkit.aFloat8741 + this.toolkit.viewportCenterY * f_31 / f_29;
                 if (f_32 < f_8) {
@@ -2463,13 +2463,13 @@ public class ModelDX extends Model {
             	float f_25 = this.verticesX[index];
             	float f_26 = this.verticesY[index];
             	float f_27 = this.verticesZ[index];
-            	float f_28 = matrix446.faceList[2] * f_25 + matrix446.faceList[6] * f_26 + matrix446.faceList[10] * f_27 + matrix446.faceList[14];
-            	float f_29 = matrix446.faceList[3] * f_25 + matrix446.faceList[7] * f_26 + matrix446.faceList[11] * f_27 + matrix446.faceList[15];
+            	float f_28 = matrix446.getFaceList()[2] * f_25 + matrix446.getFaceList()[6] * f_26 + matrix446.getFaceList()[10] * f_27 + matrix446.getFaceList()[14];
+            	float f_29 = matrix446.getFaceList()[3] * f_25 + matrix446.getFaceList()[7] * f_26 + matrix446.getFaceList()[11] * f_27 + matrix446.getFaceList()[15];
                 int i_38;
                 int i_39;
                 if (f_28 >= -f_29) {
-                	float f_30 = matrix446.faceList[0] * f_25 + matrix446.faceList[4] * f_26 + matrix446.faceList[8] * f_27 + matrix446.faceList[12];
-                	float f_31 = matrix446.faceList[1] * f_25 + matrix446.faceList[5] * f_26 + matrix446.faceList[9] * f_27 + matrix446.faceList[13];
+                	float f_30 = matrix446.getFaceList()[0] * f_25 + matrix446.getFaceList()[4] * f_26 + matrix446.getFaceList()[8] * f_27 + matrix446.getFaceList()[12];
+                	float f_31 = matrix446.getFaceList()[1] * f_25 + matrix446.getFaceList()[5] * f_26 + matrix446.getFaceList()[9] * f_27 + matrix446.getFaceList()[13];
                     i_38 = this.totalFaceCounts[index];
                     i_39 = this.totalFaceCounts[index + 1];
 
@@ -2659,10 +2659,10 @@ public class ModelDX extends Model {
                 int i_35 = this.minX + this.maxX >> 1;
                 int i_36 = this.minZ + this.maxZ >> 1;
                 int i_19 = this.minY;
-                float f_21 = matrix446.faceList[0] * i_35 + matrix446.faceList[4] * i_19 + matrix446.faceList[8] * i_36 + matrix446.faceList[12];
-                float f_22 = matrix446.faceList[1] * i_35 + matrix446.faceList[5] * i_19 + matrix446.faceList[9] * i_36 + matrix446.faceList[13];
-                float f_23 = matrix446.faceList[2] * i_35 + matrix446.faceList[6] * i_19 + matrix446.faceList[10] * i_36 + matrix446.faceList[14];
-                float f_24 = matrix446.faceList[3] * i_35 + matrix446.faceList[7] * i_19 + matrix446.faceList[11] * i_36 + matrix446.faceList[15];
+                float f_21 = matrix446.getFaceList()[0] * i_35 + matrix446.getFaceList()[4] * i_19 + matrix446.getFaceList()[8] * i_36 + matrix446.getFaceList()[12];
+                float f_22 = matrix446.getFaceList()[1] * i_35 + matrix446.getFaceList()[5] * i_19 + matrix446.getFaceList()[9] * i_36 + matrix446.getFaceList()[13];
+                float f_23 = matrix446.getFaceList()[2] * i_35 + matrix446.getFaceList()[6] * i_19 + matrix446.getFaceList()[10] * i_36 + matrix446.getFaceList()[14];
+                float f_24 = matrix446.getFaceList()[3] * i_35 + matrix446.getFaceList()[7] * i_19 + matrix446.getFaceList()[11] * i_36 + matrix446.getFaceList()[15];
                 if (f_23 >= -f_24) {
                     class275Sub52.left = (int) (this.toolkit.aFloat8797 + this.toolkit.viewportCenterX * f_21 / f_24);
                     class275Sub52.bottom = (int) (this.toolkit.aFloat8741 + this.toolkit.viewportCenterY * f_22 / f_24);
@@ -2671,10 +2671,10 @@ public class ModelDX extends Model {
                 }
 
                 i_19 = this.maxY;
-                float f_25 = matrix446.faceList[0] * i_35 + matrix446.faceList[4] * i_19 + matrix446.faceList[8] * i_36 + matrix446.faceList[12];
-                float f_26 = matrix446.faceList[1] * i_35 + matrix446.faceList[5] * i_19 + matrix446.faceList[9] * i_36 + matrix446.faceList[13];
-                float f_27 = matrix446.faceList[2] * i_35 + matrix446.faceList[6] * i_19 + matrix446.faceList[10] * i_36 + matrix446.faceList[14];
-                float f_28 = matrix446.faceList[3] * i_35 + matrix446.faceList[7] * i_19 + matrix446.faceList[11] * i_36 + matrix446.faceList[15];
+                float f_25 = matrix446.getFaceList()[0] * i_35 + matrix446.getFaceList()[4] * i_19 + matrix446.getFaceList()[8] * i_36 + matrix446.getFaceList()[12];
+                float f_26 = matrix446.getFaceList()[1] * i_35 + matrix446.getFaceList()[5] * i_19 + matrix446.getFaceList()[9] * i_36 + matrix446.getFaceList()[13];
+                float f_27 = matrix446.getFaceList()[2] * i_35 + matrix446.getFaceList()[6] * i_19 + matrix446.getFaceList()[10] * i_36 + matrix446.getFaceList()[14];
+                float f_28 = matrix446.getFaceList()[3] * i_35 + matrix446.getFaceList()[7] * i_19 + matrix446.getFaceList()[11] * i_36 + matrix446.getFaceList()[15];
                 if (f_27 >= -f_28) {
                     class275Sub52.right = (int) (this.toolkit.aFloat8797 + this.toolkit.viewportCenterX * f_25 / f_28);
                     class275Sub52.top = (int) (this.toolkit.aFloat8741 + this.toolkit.viewportCenterY * f_26 / f_28);
@@ -2710,12 +2710,12 @@ public class ModelDX extends Model {
 
                 if (bool15) {
                     if (f_23 / f_24 > f_27 / f_28) {
-                        f_29 = f_21 + matrix444.faceList[0] * this.size2d + matrix444.faceList[12];
-                        f_30 = f_24 + matrix444.faceList[3] * this.size2d + matrix444.faceList[15];
+                        f_29 = f_21 + matrix444.getFaceList()[0] * this.size2d + matrix444.getFaceList()[12];
+                        f_30 = f_24 + matrix444.getFaceList()[3] * this.size2d + matrix444.getFaceList()[15];
                         class275Sub52.size = (int) (this.toolkit.aFloat8797 - class275Sub52.left + this.toolkit.viewportCenterX * f_29 / f_30);
                     } else {
-                        f_29 = f_25 + matrix444.faceList[0] * this.size2d + matrix444.faceList[12];
-                        f_30 = f_28 + matrix444.faceList[3] * this.size2d + matrix444.faceList[15];
+                        f_29 = f_25 + matrix444.getFaceList()[0] * this.size2d + matrix444.getFaceList()[12];
+                        f_30 = f_28 + matrix444.getFaceList()[3] * this.size2d + matrix444.getFaceList()[15];
                         class275Sub52.size = (int) (this.toolkit.aFloat8797 - class275Sub52.right + this.toolkit.viewportCenterX * f_29 / f_30);
                     }
 
@@ -2785,12 +2785,12 @@ public class ModelDX extends Model {
                         perspective.textureSampler = this.toolkit.materialCache.getTextureSampler(materialId);
                         MaterialType material = this.toolkit.materialProvider.getMaterial(materialId);
                         transparent = !MaterialTypeList.isOpaqueEffect(material.effectId);
-                        perspective.textureCoordinateMatrix.faceList[12] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedU / 64.0F % 1.0F;
-                        perspective.textureCoordinateMatrix.faceList[13] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedV / 64.0F % 1.0F;
+                        perspective.textureCoordinateMatrix.getFaceList()[12] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedU / 64.0F % 1.0F;
+                        perspective.textureCoordinateMatrix.getFaceList()[13] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedV / 64.0F % 1.0F;
                     } else {
                         perspective.textureSampler = this.toolkit.activeTextureSampler;
-                        float[] floats_18 = perspective.textureCoordinateMatrix.faceList;
-                        perspective.textureCoordinateMatrix.faceList[13] = 0.0F;
+                        float[] floats_18 = perspective.textureCoordinateMatrix.getFaceList();
+                        perspective.textureCoordinateMatrix.getFaceList()[13] = 0.0F;
                         floats_18[12] = 0.0F;
                     }
 
@@ -2846,12 +2846,12 @@ public class ModelDX extends Model {
                         MaterialType material = this.toolkit.materialProvider.getMaterial(faceMaterial);
                         effectId = material.effectId;
                         perspective.indentifyMaterialEffect(material);
-                        perspective.textureCoordinateMatrix.faceList[12] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedU / 64.0F % 1.0F;
-                        perspective.textureCoordinateMatrix.faceList[13] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedV / 64.0F % 1.0F;
+                        perspective.textureCoordinateMatrix.getFaceList()[12] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedU / 64.0F % 1.0F;
+                        perspective.textureCoordinateMatrix.getFaceList()[13] = (this.toolkit.animatingCycle % 128000) / 1000.0F * material.textureSpeedV / 64.0F % 1.0F;
                     } else {
                         perspective.textureSampler = this.toolkit.activeTextureSampler;
-                        float[] floats_20 = perspective.textureCoordinateMatrix.faceList;
-                        perspective.textureCoordinateMatrix.faceList[13] = 0.0F;
+                        float[] floats_20 = perspective.textureCoordinateMatrix.getFaceList();
+                        perspective.textureCoordinateMatrix.getFaceList()[13] = 0.0F;
                         floats_20[12] = 0.0F;
                     }
 
@@ -2861,7 +2861,7 @@ public class ModelDX extends Model {
                     perspective.anInt470 = i_7 - index;
                     switch (effectId) {
                         case 1:
-                            perspective.eyePos.set(this.toolkit.aClass3848814.faceList[12], this.toolkit.aClass3848814.faceList[13], this.toolkit.aClass3848814.faceList[14]);
+                            perspective.eyePos.set(this.toolkit.aClass3848814.getFaceList()[12], this.toolkit.aClass3848814.getFaceList()[13], this.toolkit.aClass3848814.getFaceList()[14]);
                             perspective.eyePos.transformWithTranslation(matrix);
                             perspective.loadSpecularPointlight(lightCount);
                             break;
@@ -2892,7 +2892,7 @@ public class ModelDX extends Model {
                             perspective.loadUnlitProgram(!MaterialTypeList.isOpaqueEffect(effectId));
                             break;
                         case 7:
-                            perspective.eyePos.set(this.toolkit.aClass3848814.faceList[12], this.toolkit.aClass3848814.faceList[13], this.toolkit.aClass3848814.faceList[14]);
+                            perspective.eyePos.set(this.toolkit.aClass3848814.getFaceList()[12], this.toolkit.aClass3848814.getFaceList()[13], this.toolkit.aClass3848814.getFaceList()[14]);
                             perspective.eyePos.transformWithTranslation(matrix);
                             perspective.aClass384465.fromMatrix(matrix44var1);
                             perspective.anInterface31451 = this.toolkit.getEnvironmentMapSampler();
@@ -4100,7 +4100,7 @@ public class ModelDX extends Model {
                                     for (i_11 = 0; i_11 < this.numBillboards; i_11++) {
                                         class5657 = this.billboardEffects[i_11];
                                         class6555 = this.billboardBackgrounds[i_11];
-                                        class6555.diffuseColor = class6555.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class5657.appliesOnFace] & 0xffff] & 0xffffff;
+                                        class6555.diffuseColor = class6555.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[class5657.appliesOnFace] & 0xffff] & 0xffffff;
                                     }
                                 }
 
@@ -4209,7 +4209,7 @@ public class ModelDX extends Model {
             for (int index = 0; index < this.numBillboards; index++) {
                 BillboardEffectDX class5610 = this.billboardEffects[index];
                 BillboardSurfaceDX class6511 = this.billboardBackgrounds[index];
-                class6511.diffuseColor = class6511.diffuseColor & ~0xffffff | ColorUtil.hslToRgb[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
+                class6511.diffuseColor = class6511.diffuseColor & ~0xffffff | ColorUtil.getHslToRgb()[this.facesColor[class5610.appliesOnFace] & 0xffff] & 0xffffff;
             }
         }
 

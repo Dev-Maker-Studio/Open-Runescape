@@ -277,7 +277,7 @@ public class GroundSM extends Ground {
                 if (primaryColors[index] == -1) {
                     primaryColors[index] = 0;
                 } else {
-                    primaryColors[index] = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(primaryColors[index]) & 0xffff] << 8 | 0xff;
+                    primaryColors[index] = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(primaryColors[index]) & 0xffff] << 8 | 0xff;
                 }
             }
 
@@ -286,7 +286,7 @@ public class GroundSM extends Ground {
                     if (materialColors[index] == -1) {
                         materialColors[index] = 0;
                     } else {
-                        materialColors[index] = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(materialColors[index]) & 0xffff] << 8 | 0xff;
+                        materialColors[index] = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(materialColors[index]) & 0xffff] << 8 | 0xff;
                     }
                 }
             }
@@ -717,17 +717,17 @@ public class GroundSM extends Ground {
                                 if (texturesEnabled) {
                                     materialId = materialIds[verticeA];
                                     if (materialId != -1 && !this.toolkit.materialProvider.getMaterial(materialId).detailsOnly) {
-                                        shapedBlendedTile.colors[verticeA] = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.toolkit.materialProvider.getMaterial(materialId).colorHsl & 0xffff) & 0xffff];
+                                        shapedBlendedTile.colors[verticeA] = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.toolkit.materialProvider.getMaterial(materialId).colorHsl & 0xffff) & 0xffff];
                                     }
 
                                     materialId = materialIds[verticeB];
                                     if (materialId != -1 && !this.toolkit.materialProvider.getMaterial(materialId).detailsOnly) {
-                                        shapedBlendedTile.colors[verticeB] = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.toolkit.materialProvider.getMaterial(materialId).colorHsl & 0xffff) & 0xffff];
+                                        shapedBlendedTile.colors[verticeB] = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.toolkit.materialProvider.getMaterial(materialId).colorHsl & 0xffff) & 0xffff];
                                     }
 
                                     materialId = materialIds[verticeC];
                                     if (materialId != -1 && !this.toolkit.materialProvider.getMaterial(materialId).detailsOnly) {
-                                        shapedBlendedTile.colors[verticeC] = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.toolkit.materialProvider.getMaterial(materialId).colorHsl & 0xffff) & 0xffff];
+                                        shapedBlendedTile.colors[verticeC] = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.toolkit.materialProvider.getMaterial(materialId).colorHsl & 0xffff) & 0xffff];
                                     }
                                 }
                                 shapedBlendedTile.materialIds[face] = -1;
@@ -1259,22 +1259,22 @@ public class GroundSM extends Ground {
     		throw new IllegalStateException("");
     	}
         Matrix44 floorMatrix = this.toolkit.floorMatrix;
-        this.vertexXA = floorMatrix.faceList[0];
-        this.vertexYA = floorMatrix.faceList[1];
-        this.vertexZNearA = floorMatrix.faceList[2];
-        this.vertexZFarA = floorMatrix.faceList[3];
-        this.vertexXB = floorMatrix.faceList[4];
-        this.vertexYB = floorMatrix.faceList[5];
-        this.vertexZNearB = floorMatrix.faceList[6];
-        this.vertexZFarB = floorMatrix.faceList[7];
-        this.vertexXC = floorMatrix.faceList[8];
-        this.vertexYC = floorMatrix.faceList[9];
-        this.vertexZNearC = floorMatrix.faceList[10];
-        this.vertexZFarC = floorMatrix.faceList[11];
-        this.vertexXD = floorMatrix.faceList[12];
-        this.vertexYD = floorMatrix.faceList[13];
-        this.vertexZNearD = floorMatrix.faceList[14];
-        this.vertexZFarD = floorMatrix.faceList[15];
+        this.vertexXA = floorMatrix.getFaceList()[0];
+        this.vertexYA = floorMatrix.getFaceList()[1];
+        this.vertexZNearA = floorMatrix.getFaceList()[2];
+        this.vertexZFarA = floorMatrix.getFaceList()[3];
+        this.vertexXB = floorMatrix.getFaceList()[4];
+        this.vertexYB = floorMatrix.getFaceList()[5];
+        this.vertexZNearB = floorMatrix.getFaceList()[6];
+        this.vertexZFarB = floorMatrix.getFaceList()[7];
+        this.vertexXC = floorMatrix.getFaceList()[8];
+        this.vertexYC = floorMatrix.getFaceList()[9];
+        this.vertexZNearC = floorMatrix.getFaceList()[10];
+        this.vertexZFarC = floorMatrix.getFaceList()[11];
+        this.vertexXD = floorMatrix.getFaceList()[12];
+        this.vertexYD = floorMatrix.getFaceList()[13];
+        this.vertexZNearD = floorMatrix.getFaceList()[14];
+        this.vertexZFarD = floorMatrix.getFaceList()[15];
         for (int startX = 0; startX < visibleTiles + visibleTiles; startX++) {
             for (int startY = 0; startY < visibleTiles + visibleTiles; startY++) {
                 if (onscreen[startX][startY]) {
@@ -1722,7 +1722,7 @@ public class GroundSM extends Ground {
                 if ((xA - XC) * (YB - YC) - (yA - YC) * (XB - XC) > 0.0F) {
                     rasterizer.clipEdges = xA < 0.0F || XC < 0.0F || XB < 0.0F || xA > rasterizer.clipWidth || XC > rasterizer.clipWidth || XB > rasterizer.clipWidth;
                     if (plainTile.materialId >= 0) {
-                        rasterizer.drawMaterializedTriangle(true, true, false, yA, YC, YB, xA, XC, XB, zA, ZC, ZB, farZC, farZD, farZB, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorNorthEast & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorNorthWest & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorSouthEast & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
+                        rasterizer.drawMaterializedTriangle(true, true, false, yA, YC, YB, xA, XC, XB, zA, ZC, ZB, farZC, farZD, farZB, 1.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.0F, ~0xffffff | ColorUtil.getHsvToRgbTable()[plainTile.colorNorthEast & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.getHsvToRgbTable()[plainTile.colorNorthWest & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.getHsvToRgbTable()[plainTile.colorSouthEast & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
                     } else {
                         rasterizer.drawShadedTriangle(true, true, false, yA, YC, YB, xA, XC, XB, zA, ZC, ZB, (plainTile.colorNorthEast & 0xffff), (plainTile.colorNorthWest & 0xffff), (plainTile.colorSouthEast & 0xffff));
                     }
@@ -1731,7 +1731,7 @@ public class GroundSM extends Ground {
                 if ((XA - XB) * (YC - YB) - (YA - YB) * (XC - XB) > 0.0F) {
                     rasterizer.clipEdges = XA < 0.0F || XB < 0.0F || XC < 0.0F || XA > rasterizer.clipWidth || XB > rasterizer.clipWidth || XC > rasterizer.clipWidth;
                     if (plainTile.materialId >= 0) {
-                        rasterizer.drawMaterializedTriangle(true, true, false, YA, YB, YC, XA, XB, XC, ZA, ZB, ZC, farZA, farZB, farZD, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorSouthWest & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorSouthEast & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[plainTile.colorNorthWest & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
+                        rasterizer.drawMaterializedTriangle(true, true, false, YA, YB, YC, XA, XB, XC, ZA, ZB, ZC, farZA, farZB, farZD, 0.0F, 1.0F, 1.0F, 0.0F, 0.0F, 1.0F, ~0xffffff | ColorUtil.getHsvToRgbTable()[plainTile.colorSouthWest & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.getHsvToRgbTable()[plainTile.colorSouthEast & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.getHsvToRgbTable()[plainTile.colorNorthWest & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, plainTile.materialId);
                     } else {
                         rasterizer.drawShadedTriangle(true, true, false, YA, YB, YC, XA, XB, XC, ZA, ZB, ZC, (plainTile.colorSouthWest & 0xffff), (plainTile.colorSouthEast & 0xffff), (plainTile.colorNorthWest & 0xffff));
                     }
@@ -1783,7 +1783,7 @@ public class GroundSM extends Ground {
                             rasterizer.clipEdges = xA < 0.0F || xB < 0.0F || xC < 0.0F || xA > rasterizer.clipWidth || xB > rasterizer.clipWidth || xC > rasterizer.clipWidth;
                             short materialA = shapedTile.primaryMaterialIds[triangleIndex];
                             if (materialA != -1) {
-                                rasterizer.drawMaterializedTriangle(true, true, false, yA, yB, yC, xA, xB, xC, perspectiveZNear[a], perspectiveZNear[b], perspectiveZNear[c], perspectiveZFar[a], perspectiveZFar[b], perspectiveZFar[c], (float) shapedTile.offsetX[a] / super.tileUnits, (float) shapedTile.offsetX[b] / super.tileUnits, (float) shapedTile.offsetX[c] / super.tileUnits, (float) shapedTile.offsetY[a] / super.tileUnits, (float) shapedTile.offsetY[b] / super.tileUnits, (float) shapedTile.offsetY[c] / super.tileUnits, ~0xffffff | ColorUtil.hsvToRgbTable[shapedTile.light[a] & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[shapedTile.light[b] & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.hsvToRgbTable[shapedTile.light[c] & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, materialA);
+                                rasterizer.drawMaterializedTriangle(true, true, false, yA, yB, yC, xA, xB, xC, perspectiveZNear[a], perspectiveZNear[b], perspectiveZNear[c], perspectiveZFar[a], perspectiveZFar[b], perspectiveZFar[c], (float) shapedTile.offsetX[a] / super.tileUnits, (float) shapedTile.offsetX[b] / super.tileUnits, (float) shapedTile.offsetX[c] / super.tileUnits, (float) shapedTile.offsetY[a] / super.tileUnits, (float) shapedTile.offsetY[b] / super.tileUnits, (float) shapedTile.offsetY[c] / super.tileUnits, ~0xffffff | ColorUtil.getHsvToRgbTable()[shapedTile.light[a] & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.getHsvToRgbTable()[shapedTile.light[b] & 0xffff] & 0xffffff, ~0xffffff | ColorUtil.getHsvToRgbTable()[shapedTile.light[c] & 0xffff] & 0xffffff, 0, 0.0F, 0.0F, 0.0F, materialA);
                             } else {
                                 int primaryColor = shapedTile.primaryColors[triangleIndex];
                                 if (primaryColor != -1) {

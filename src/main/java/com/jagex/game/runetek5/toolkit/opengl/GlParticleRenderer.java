@@ -48,10 +48,10 @@ public class GlParticleRenderer {
 
     public void drawParticles(OpenGlToolkit toolkit, ParticleWrapper particleWrapper) {
         disableLights(toolkit);
-        float vertexZNearA = toolkit.aClass3848348.faceList[2];
-        float vertexZNearB = toolkit.aClass3848348.faceList[6];
-        float vertexZNearC = toolkit.aClass3848348.faceList[10];
-        float vertexZNearD = toolkit.aClass3848348.faceList[14];
+        float vertexZNearA = toolkit.aClass3848348.getFaceList()[2];
+        float vertexZNearB = toolkit.aClass3848348.getFaceList()[6];
+        float vertexZNearC = toolkit.aClass3848348.getFaceList()[10];
+        float vertexZNearD = toolkit.aClass3848348.getFaceList()[14];
 
         try {
             int totalParticles = 0;

@@ -161,7 +161,7 @@ public class LappingWaterEffect extends MaterialEffectGL {
             this.listUtils.callList(0);
             super.glToolkit.activateTexture(1);
             OpenGL.glMatrixMode(GL_TEXTURE);
-            OpenGL.glLoadMatrixf(super.glToolkit.aClass3848391.faceList, 0);
+            OpenGL.glLoadMatrixf(super.glToolkit.aClass3848391.getFaceList(), 0);
             OpenGL.glMatrixMode(GL_MODELVIEW);
             super.glToolkit.activateTexture(0);
             if (super.glToolkit.textureAnimatingProgression != this.animatingProgression) {

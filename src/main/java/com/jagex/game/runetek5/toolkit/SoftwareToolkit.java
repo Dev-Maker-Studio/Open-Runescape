@@ -217,10 +217,10 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
 
     @Override
     public void calculateProjection(float f_1, float f_2, float f_3, float[] floats_4) {
-        float f_5 = this.aw.faceList[15] + this.aw.faceList[3] * f_1 + this.aw.faceList[7] * f_2 + this.aw.faceList[11] * f_3;
-        float f_6 = this.aw.faceList[12] + this.aw.faceList[0] * f_1 + this.aw.faceList[4] * f_2 + this.aw.faceList[8] * f_3;
-        float f_7 = this.aw.faceList[13] + this.aw.faceList[1] * f_1 + this.aw.faceList[5] * f_2 + this.aw.faceList[9] * f_3;
-        float f_8 = this.ao.faceList[14] + this.ao.faceList[2] * f_1 + this.ao.faceList[6] * f_2 + this.ao.faceList[10] * f_3;
+        float f_5 = this.aw.getFaceList()[15] + this.aw.getFaceList()[3] * f_1 + this.aw.getFaceList()[7] * f_2 + this.aw.getFaceList()[11] * f_3;
+        float f_6 = this.aw.getFaceList()[12] + this.aw.getFaceList()[0] * f_1 + this.aw.getFaceList()[4] * f_2 + this.aw.getFaceList()[8] * f_3;
+        float f_7 = this.aw.getFaceList()[13] + this.aw.getFaceList()[1] * f_1 + this.aw.getFaceList()[5] * f_2 + this.aw.getFaceList()[9] * f_3;
+        float f_8 = this.ao.getFaceList()[14] + this.ao.getFaceList()[2] * f_1 + this.ao.getFaceList()[6] * f_2 + this.ao.getFaceList()[10] * f_3;
         floats_4[0] = this.ax + this.az * f_6 / f_5;
         floats_4[1] = this.al + this.ap * f_7 / f_5;
         floats_4[2] = f_8;
@@ -346,18 +346,18 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
     @Override
     public int isOnScreen(int i_1, int i_2, int i_3, int i_4, int i_5, int i_6) {
         int i_7 = 0;
-        float f_8 = this.aw.faceList[14] + this.aw.faceList[2] * i_1 + this.aw.faceList[6] * i_2 + this.aw.faceList[10] * i_3;
-        float f_9 = this.aw.faceList[14] + this.aw.faceList[2] * i_4 + this.aw.faceList[6] * i_5 + this.aw.faceList[10] * i_6;
-        float f_10 = this.aw.faceList[15] + this.aw.faceList[3] * i_1 + this.aw.faceList[7] * i_2 + this.aw.faceList[11] * i_3;
-        float f_11 = this.aw.faceList[15] + this.aw.faceList[3] * i_4 + this.aw.faceList[7] * i_5 + this.aw.faceList[11] * i_6;
+        float f_8 = this.aw.getFaceList()[14] + this.aw.getFaceList()[2] * i_1 + this.aw.getFaceList()[6] * i_2 + this.aw.getFaceList()[10] * i_3;
+        float f_9 = this.aw.getFaceList()[14] + this.aw.getFaceList()[2] * i_4 + this.aw.getFaceList()[6] * i_5 + this.aw.getFaceList()[10] * i_6;
+        float f_10 = this.aw.getFaceList()[15] + this.aw.getFaceList()[3] * i_1 + this.aw.getFaceList()[7] * i_2 + this.aw.getFaceList()[11] * i_3;
+        float f_11 = this.aw.getFaceList()[15] + this.aw.getFaceList()[3] * i_4 + this.aw.getFaceList()[7] * i_5 + this.aw.getFaceList()[11] * i_6;
         if (f_8 < -f_10 && f_9 < -f_11) {
             i_7 |= 0x10;
         } else if (f_8 > f_10 && f_9 > f_11) {
             i_7 |= 0x20;
         }
 
-        float f_12 = this.aw.faceList[12] + this.aw.faceList[0] * i_1 + this.aw.faceList[4] * i_2 + this.aw.faceList[8] * i_3;
-        float f_13 = this.aw.faceList[12] + this.aw.faceList[0] * i_4 + this.aw.faceList[4] * i_5 + this.aw.faceList[8] * i_6;
+        float f_12 = this.aw.getFaceList()[12] + this.aw.getFaceList()[0] * i_1 + this.aw.getFaceList()[4] * i_2 + this.aw.getFaceList()[8] * i_3;
+        float f_13 = this.aw.getFaceList()[12] + this.aw.getFaceList()[0] * i_4 + this.aw.getFaceList()[4] * i_5 + this.aw.getFaceList()[8] * i_6;
         if (f_12 < -f_10 && f_13 < -f_11) {
             i_7 |= 0x1;
         }
@@ -366,8 +366,8 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
             i_7 |= 0x2;
         }
 
-        float f_14 = this.aw.faceList[13] + this.aw.faceList[1] * i_1 + this.aw.faceList[5] * i_2 + this.aw.faceList[9] * i_3;
-        float f_15 = this.aw.faceList[13] + this.aw.faceList[1] * i_4 + this.aw.faceList[5] * i_5 + this.aw.faceList[9] * i_6;
+        float f_14 = this.aw.getFaceList()[13] + this.aw.getFaceList()[1] * i_1 + this.aw.getFaceList()[5] * i_2 + this.aw.getFaceList()[9] * i_3;
+        float f_15 = this.aw.getFaceList()[13] + this.aw.getFaceList()[1] * i_4 + this.aw.getFaceList()[5] * i_5 + this.aw.getFaceList()[9] * i_6;
         if (f_14 < -f_10 && f_15 < -f_11) {
             i_7 |= 0x4;
         }
@@ -386,14 +386,14 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
 
     @Override
     public void computeWorldToScreen(float f_1, float f_2, float f_3, float[] floats_4) {
-        float f_5 = this.aw.faceList[14] + this.aw.faceList[2] * f_1 + this.aw.faceList[6] * f_2 + this.aw.faceList[10] * f_3;
-        float f_6 = this.aw.faceList[15] + this.aw.faceList[3] * f_1 + this.aw.faceList[7] * f_2 + this.aw.faceList[11] * f_3;
+        float f_5 = this.aw.getFaceList()[14] + this.aw.getFaceList()[2] * f_1 + this.aw.getFaceList()[6] * f_2 + this.aw.getFaceList()[10] * f_3;
+        float f_6 = this.aw.getFaceList()[15] + this.aw.getFaceList()[3] * f_1 + this.aw.getFaceList()[7] * f_2 + this.aw.getFaceList()[11] * f_3;
         if (f_5 >= -f_6 && f_5 <= f_6) {
-            float f_7 = this.aw.faceList[12] + this.aw.faceList[0] * f_1 + this.aw.faceList[4] * f_2 + this.aw.faceList[8] * f_3;
+            float f_7 = this.aw.getFaceList()[12] + this.aw.getFaceList()[0] * f_1 + this.aw.getFaceList()[4] * f_2 + this.aw.getFaceList()[8] * f_3;
             if (f_7 >= -f_6 && f_7 <= f_6) {
-                float f_8 = this.aw.faceList[13] + this.aw.faceList[1] * f_1 + this.aw.faceList[5] * f_2 + this.aw.faceList[9] * f_3;
+                float f_8 = this.aw.getFaceList()[13] + this.aw.getFaceList()[1] * f_1 + this.aw.getFaceList()[5] * f_2 + this.aw.getFaceList()[9] * f_3;
                 if (f_8 >= -f_6 && f_8 <= f_6) {
-                    float f_9 = this.ao.faceList[14] + this.ao.faceList[2] * f_1 + this.ao.faceList[6] * f_2 + this.ao.faceList[10] * f_3;
+                    float f_9 = this.ao.getFaceList()[14] + this.ao.getFaceList()[2] * f_1 + this.ao.getFaceList()[6] * f_2 + this.ao.getFaceList()[10] * f_3;
                     floats_4[0] = this.ax + this.az * f_7 / f_6;
                     floats_4[1] = this.al + this.ap * f_8 / f_6;
                     floats_4[2] = f_9;
@@ -535,7 +535,7 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
     public void setSunPosition(Matrix43 matrix44var1) {
         this.ay = matrix44var1;
         this.ao.fromMatrix(matrix44var1);
-        AA(this.ao.faceList);
+        AA(this.ao.getFaceList());
         this.aw.calculatePerspective(this.ao, this.an);
     }
 
@@ -546,7 +546,7 @@ public class SoftwareToolkit extends AbstractToolkit implements INativeObject {
     @Override
     public void setModelMatrix(Matrix44 matrix441) {
         this.an = matrix441;
-        wa(this.an.faceList);
+        wa(this.an.getFaceList());
         this.aw.calculatePerspective(this.ao, this.an);
     }
 

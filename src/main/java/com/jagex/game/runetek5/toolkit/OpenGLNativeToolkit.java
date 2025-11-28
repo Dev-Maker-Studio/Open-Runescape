@@ -528,7 +528,7 @@ public class OpenGLNativeToolkit extends AbstractNativeToolkit {
 
     @Override
     public void loadWorldViewProjectionMatrix(Matrix44 matrix441) {
-        float[] floats_2 = matrix441.faceList;
+        float[] floats_2 = matrix441.getFaceList();
         floats_2[1] = -floats_2[1];
         floats_2[5] = -floats_2[5];
         floats_2[9] = -floats_2[9];
@@ -553,7 +553,7 @@ public class OpenGLNativeToolkit extends AbstractNativeToolkit {
     @Override
     void configureLights() {
         OpenGL.glMatrixMode(GL_MODELVIEW);
-        OpenGL.glLoadMatrixf(super.particleMatrix.faceList, 0);
+        OpenGL.glLoadMatrixf(super.particleMatrix.getFaceList(), 0);
 
         int index;
         for (index = 0; index < super.lastSceneLightCount; index++) {
@@ -1182,16 +1182,16 @@ public class OpenGLNativeToolkit extends AbstractNativeToolkit {
     public void setMatrixTransform(Matrix44 matrix441, Matrix44 matrix442, Matrix44 matrix443) {
         OpenGL.glMatrixMode(GL_MODELVIEW);
         super.aClass3848683.calculatePerspective(matrix441, matrix442);
-        OpenGL.glLoadMatrixf(super.aClass3848683.faceList, 0);
+        OpenGL.glLoadMatrixf(super.aClass3848683.getFaceList(), 0);
         OpenGL.glMatrixMode(5889);
-        OpenGL.glLoadMatrixf(matrix443.faceList, 0);
+        OpenGL.glLoadMatrixf(matrix443.getFaceList(), 0);
     }
 
 
     @Override
     void setLightPosition() {
         OpenGL.glMatrixMode(GL_MODELVIEW);
-        OpenGL.glLoadMatrixf(super.particleMatrix.faceList, 0);
+        OpenGL.glLoadMatrixf(super.particleMatrix.getFaceList(), 0);
         OpenGL.glLightfv(GL_LIGHT0, GL_POSITION, super.sunPosition, 0);
         OpenGL.glLightfv(GL_LIGHT1, GL_POSITION, super.lightPosition, 0);
     }

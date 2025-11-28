@@ -92,10 +92,10 @@ public class DirectXParticleRenderer {
     public void render(AbstractNativeToolkit nativeToolkit, ParticleWrapper particleWrapper) {
         nativeToolkit.setDepthBuffering(false);
         currentLightIntensity = nativeToolkit.lightIntensity;
-        float zNearA = nativeToolkit.particleMatrix.faceList[2];
-        float zNearB = nativeToolkit.particleMatrix.faceList[6];
-        float zNearC = nativeToolkit.particleMatrix.faceList[10];
-        float zNearD = nativeToolkit.particleMatrix.faceList[14];
+        float zNearA = nativeToolkit.particleMatrix.getFaceList()[2];
+        float zNearB = nativeToolkit.particleMatrix.getFaceList()[6];
+        float zNearC = nativeToolkit.particleMatrix.getFaceList()[10];
+        float zNearD = nativeToolkit.particleMatrix.getFaceList()[14];
         int i_7 = 0;
         int i_8 = Integer.MAX_VALUE;
         int i_9 = 0;
@@ -200,12 +200,12 @@ public class DirectXParticleRenderer {
     public void method1096(AbstractNativeToolkit nativeToolkit, int i_2) {
         int i_3 = 0;
         Matrix44 particleMatrix = nativeToolkit.particleMatrix;
-        float xA = particleMatrix.faceList[0];
-        float xB = particleMatrix.faceList[4];
-        float xC = particleMatrix.faceList[8];
-        float yA = particleMatrix.faceList[1];
-        float yB = particleMatrix.faceList[5];
-        float yC = particleMatrix.faceList[9];
+        float xA = particleMatrix.getFaceList()[0];
+        float xB = particleMatrix.getFaceList()[4];
+        float xC = particleMatrix.getFaceList()[8];
+        float yA = particleMatrix.getFaceList()[1];
+        float yB = particleMatrix.getFaceList()[5];
+        float yC = particleMatrix.getFaceList()[9];
         float scaleXA = xA + yA;
         float scaleYA = xB + yB;
         float scaleZA = xC + yC;

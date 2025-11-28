@@ -63,8 +63,8 @@ public class ShadowMapperDX {
                                 for (int currZ = startZ; currZ < endZ; currZ++) {
                                     if (currZ - camZ >= -maxDistance && currZ - camZ <= maxDistance && visibleTiles[currX - camX + maxDistance][maxDistance + (currZ - camZ)]) {
                                         shader.textureCoordinateMatrix.method6525(invTileUnits, invTileUnits, 1.0F, 1.0F);
-                                        shader.textureCoordinateMatrix.faceList[12] = (-x);
-                                        shader.textureCoordinateMatrix.faceList[13] = (-z);
+                                        shader.textureCoordinateMatrix.getFaceList()[12] = (-x);
+                                        shader.textureCoordinateMatrix.getFaceList()[13] = (-z);
                                         this.tiles[x][z].method1288(shader);
                                         continue label147;
                                     }
@@ -128,8 +128,8 @@ public class ShadowMapperDX {
                     for (int x = 0; x < this.sizeX; x++) {
                         if (ints_24[i_10] != 0) {
                             shader.textureCoordinateMatrix.method6525(invTileUnits, invTileUnits, 1.0F, 1.0F);
-                            shader.textureCoordinateMatrix.faceList[12] = (-x);
-                            shader.textureCoordinateMatrix.faceList[13] = (-z);
+                            shader.textureCoordinateMatrix.getFaceList()[12] = (-x);
+                            shader.textureCoordinateMatrix.getFaceList()[13] = (-z);
                             this.tiles[x][z].method1290(shader, interface3212, i_13, ints_24[i_10] / 3);
                             i_13 += ints_24[i_10];
                         }

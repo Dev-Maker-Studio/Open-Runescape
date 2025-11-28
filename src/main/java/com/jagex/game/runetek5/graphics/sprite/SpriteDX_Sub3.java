@@ -113,9 +113,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
         float displayWidth = this.nativeToolkit.getDisplay().getWidth();
         float displayHeight = this.nativeToolkit.getDisplay().getHeight();
         shader.worldViewProjectionMatrix.method6525(i_3 * 2.0F / displayWidth, i_4 * 2.0F / displayHeight, 1.0F, 1.0F);
-        shader.worldViewProjectionMatrix.faceList[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / displayWidth - 1.0F;
-        shader.worldViewProjectionMatrix.faceList[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / displayHeight - 1.0F;
-        shader.worldViewProjectionMatrix.faceList[14] = -1.0f;
+        shader.worldViewProjectionMatrix.getFaceList()[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / displayWidth - 1.0F;
+        shader.worldViewProjectionMatrix.getFaceList()[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / displayHeight - 1.0F;
+        shader.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
         shader.aClass384440.method6525(this.anInterface69050.method47(this.anInt9060), this.anInterface69050.method62(this.anInt9053), 1.0F, 1.0F);
         shader.anInterface4445 = this.nativeToolkit.anInterface48746;
         shader.anInt446 = 0;
@@ -200,13 +200,13 @@ public class SpriteDX_Sub3 extends NativeSprite {
         f_12 = this.nativeToolkit.getDisplay().getWidth();
         f_13 = this.nativeToolkit.getDisplay().getHeight();
         class4725.worldViewProjectionMatrix.identity();
-        class4725.worldViewProjectionMatrix.faceList[0] = (f_3 - f_1) * 2.0F / f_12;
-        class4725.worldViewProjectionMatrix.faceList[1] = (f_4 - f_2) * 2.0F / f_13;
-        class4725.worldViewProjectionMatrix.faceList[4] = (f_5 - f_1) * 2.0F / f_12;
-        class4725.worldViewProjectionMatrix.faceList[5] = (f_6 - f_2) * 2.0F / f_13;
-        class4725.worldViewProjectionMatrix.faceList[12] = (f_1 + this.nativeToolkit.method13905()) * 2.0F / f_12 - 1.0F;
-        class4725.worldViewProjectionMatrix.faceList[13] = (f_2 + this.nativeToolkit.method13905()) * 2.0F / f_13 - 1.0F;
-        class4725.worldViewProjectionMatrix.faceList[14] = -1.0f;
+        class4725.worldViewProjectionMatrix.getFaceList()[0] = (f_3 - f_1) * 2.0F / f_12;
+        class4725.worldViewProjectionMatrix.getFaceList()[1] = (f_4 - f_2) * 2.0F / f_13;
+        class4725.worldViewProjectionMatrix.getFaceList()[4] = (f_5 - f_1) * 2.0F / f_12;
+        class4725.worldViewProjectionMatrix.getFaceList()[5] = (f_6 - f_2) * 2.0F / f_13;
+        class4725.worldViewProjectionMatrix.getFaceList()[12] = (f_1 + this.nativeToolkit.method13905()) * 2.0F / f_12 - 1.0F;
+        class4725.worldViewProjectionMatrix.getFaceList()[13] = (f_2 + this.nativeToolkit.method13905()) * 2.0F / f_13 - 1.0F;
+        class4725.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
         class4725.aClass384440.method6525(this.anInterface69050.method47(this.anInt9060), this.anInterface69050.method62(this.anInt9053), 1.0F, 1.0F);
         class4725.anInterface4445 = this.nativeToolkit.anInterface48746;
         class4725.anInt446 = 0;
@@ -230,9 +230,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
         float f_7 = this.nativeToolkit.getDisplay().getWidth();
         float f_8 = this.nativeToolkit.getDisplay().getHeight();
         class476.worldViewProjectionMatrix.method6525(this.anInt9060 * 2.0F / f_7, this.anInt9053 * 2.0F / f_8, 1.0F, 1.0F);
-        class476.worldViewProjectionMatrix.faceList[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_7 - 1.0F;
-        class476.worldViewProjectionMatrix.faceList[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_8 - 1.0F;
-        class476.worldViewProjectionMatrix.faceList[14] = -1.0f;
+        class476.worldViewProjectionMatrix.getFaceList()[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_7 - 1.0F;
+        class476.worldViewProjectionMatrix.getFaceList()[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_8 - 1.0F;
+        class476.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
         class476.aClass384440.method6525(this.anInterface69050.method47(this.anInt9060), this.anInterface69050.method62(this.anInt9053), 1.0F, 1.0F);
         class476.anInterface4445 = this.nativeToolkit.anInterface48746;
         class476.anInt446 = 0;
@@ -240,8 +240,8 @@ public class SpriteDX_Sub3 extends NativeSprite {
         NativeTextureSampler interface69 = ((Class455_Sub1) class4553).nativeTextureSampler;
         class476.anInterface6441 = interface69;
         class476.aClass384444.method6525(interface69.method47(this.anInt9060), interface69.method62(this.anInt9053), 1.0F, 1.0F);
-        class476.aClass384444.faceList[12] = interface69.method47((i_1 - i_4));
-        class476.aClass384444.faceList[13] = interface69.method62((i_2 - i_5));
+        class476.aClass384444.getFaceList()[12] = interface69.method47((i_1 - i_4));
+        class476.aClass384444.getFaceList()[13] = interface69.method62((i_2 - i_5));
         class476.loadMasked();
     }
 
@@ -262,9 +262,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
         boolean bool12 = this.aBool9061 && this.anInt9055 == 0 && this.anInt9058 == 0;
         if (bool12 & bool11) {
             class478.worldViewProjectionMatrix.method6525(i_3 * 2.0F / f_9, i_4 * 2.0F / f_10, 1.0F, 1.0F);
-            class478.worldViewProjectionMatrix.faceList[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-            class478.worldViewProjectionMatrix.faceList[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-            class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+            class478.worldViewProjectionMatrix.getFaceList()[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+            class478.worldViewProjectionMatrix.getFaceList()[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+            class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
             class478.aClass384440.method6525(this.anInterface69050.method47(i_3), this.anInterface69050.method62(i_4), 1.0F, 1.0F);
             class478.loadNormal();
         } else {
@@ -280,9 +280,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
 
                 for (i_16 = i_15 + this.anInt9053; i_16 <= i_13; i_16 += i_14) {
                     class478.worldViewProjectionMatrix.method6525(i_3 * 2.0F / f_9, this.anInt9053 * 2.0F / f_10, 1.0F, 1.0F);
-                    class478.worldViewProjectionMatrix.faceList[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[13] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                    class478.worldViewProjectionMatrix.getFaceList()[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[13] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                     class478.loadNormal();
                     i_15 += i_14;
                 }
@@ -291,9 +291,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
                     i_16 = i_13 - i_15;
                     class478.aClass384440.method6525(this.anInterface69050.method47(i_3), this.anInterface69050.method62(i_16), 1.0F, 1.0F);
                     class478.worldViewProjectionMatrix.method6525(i_3 * 2.0F / f_9, i_16 * 2.0F / f_10, 1.0F, 1.0F);
-                    class478.worldViewProjectionMatrix.faceList[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[13] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                    class478.worldViewProjectionMatrix.getFaceList()[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[13] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                     class478.loadNormal();
                 }
             } else if (bool11) {
@@ -304,9 +304,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
 
                 for (i_16 = i_15 + this.anInt9060; i_16 <= i_13; i_16 += i_14) {
                     class478.worldViewProjectionMatrix.method6525(this.anInt9060 * 2.0F / f_9, i_4 * 2.0F / f_10, 1.0F, 1.0F);
-                    class478.worldViewProjectionMatrix.faceList[12] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                    class478.worldViewProjectionMatrix.getFaceList()[12] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                     class478.loadNormal();
                     i_15 += i_14;
                 }
@@ -315,9 +315,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
                     i_16 = i_13 - i_15;
                     class478.aClass384440.method6525(this.anInterface69050.method47(i_16), this.anInterface69050.method62(i_4), 1.0F, 1.0F);
                     class478.worldViewProjectionMatrix.method6525(i_16 * 2.0F / f_9, i_4 * 2.0F / f_10, 1.0F, 1.0F);
-                    class478.worldViewProjectionMatrix.faceList[12] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                    class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                    class478.worldViewProjectionMatrix.getFaceList()[12] = (i_15 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                    class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                     class478.loadNormal();
                 }
             } else {
@@ -336,9 +336,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
 
                     for (i_20 = i_19 + this.anInt9060; i_20 <= i_14; i_20 += i_15) {
                         class478.worldViewProjectionMatrix.method6525(this.anInt9060 * 2.0F / f_9, this.anInt9053 * 2.0F / f_10, 1.0F, 1.0F);
-                        class478.worldViewProjectionMatrix.faceList[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                        class478.worldViewProjectionMatrix.getFaceList()[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                         class478.loadNormal();
                         i_19 += i_15;
                     }
@@ -347,9 +347,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
                         i_20 = i_14 - i_19;
                         class478.aClass384440.method6525(this.anInterface69050.method47(i_20), this.anInterface69050.method62(this.anInt9053), 1.0F, 1.0F);
                         class478.worldViewProjectionMatrix.method6525(i_20 * 2.0F / f_9, this.anInt9053 * 2.0F / f_10, 1.0F, 1.0F);
-                        class478.worldViewProjectionMatrix.faceList[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                        class478.worldViewProjectionMatrix.getFaceList()[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                         class478.loadNormal();
                     }
 
@@ -363,9 +363,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
 
                     for (i_20 = i_19 + this.anInt9060; i_20 <= i_14; i_20 += i_15) {
                         class478.worldViewProjectionMatrix.method6525(this.anInt9060 * 2.0F / f_9, i_18 * 2.0F / f_10, 1.0F, 1.0F);
-                        class478.worldViewProjectionMatrix.faceList[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                        class478.worldViewProjectionMatrix.getFaceList()[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                         class478.loadNormal();
                         i_19 += i_15;
                     }
@@ -374,9 +374,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
                         i_20 = i_14 - i_19;
                         class478.aClass384440.method6525(this.anInterface69050.method47(i_20), this.anInterface69050.method62(i_18), 1.0F, 1.0F);
                         class478.worldViewProjectionMatrix.method6525(i_20 * 2.0F / f_9, i_18 * 2.0F / f_10, 1.0F, 1.0F);
-                        class478.worldViewProjectionMatrix.faceList[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
-                        class478.worldViewProjectionMatrix.faceList[14] = -1.0f;
+                        class478.worldViewProjectionMatrix.getFaceList()[12] = (i_19 + this.nativeToolkit.method13905()) * 2.0F / f_9 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[13] = (i_17 + this.nativeToolkit.method13905()) * 2.0F / f_10 - 1.0F;
+                        class478.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
                         class478.loadNormal();
                     }
                 }
@@ -399,28 +399,28 @@ public class SpriteDX_Sub3 extends NativeSprite {
         if (this.aBool9051) {
             float f_14 = (float) this.anInt9060 / getSpriteWidth();
             float f_15 = (float) this.anInt9053 / getSpriteHeight();
-            class4711.worldViewProjectionMatrix.faceList[0] = (f_3 - f_1) * f_14;
-            class4711.worldViewProjectionMatrix.faceList[1] = (f_4 - f_2) * f_14;
-            class4711.worldViewProjectionMatrix.faceList[4] = (f_5 - f_1) * f_15;
-            class4711.worldViewProjectionMatrix.faceList[5] = (f_6 - f_2) * f_15;
-            class4711.worldViewProjectionMatrix.faceList[12] = (f_1 + this.anInt9055) * f_14 + this.nativeToolkit.method13905();
-            class4711.worldViewProjectionMatrix.faceList[13] = (f_2 + this.anInt9057) * f_15 + this.nativeToolkit.method13905();
+            class4711.worldViewProjectionMatrix.getFaceList()[0] = (f_3 - f_1) * f_14;
+            class4711.worldViewProjectionMatrix.getFaceList()[1] = (f_4 - f_2) * f_14;
+            class4711.worldViewProjectionMatrix.getFaceList()[4] = (f_5 - f_1) * f_15;
+            class4711.worldViewProjectionMatrix.getFaceList()[5] = (f_6 - f_2) * f_15;
+            class4711.worldViewProjectionMatrix.getFaceList()[12] = (f_1 + this.anInt9055) * f_14 + this.nativeToolkit.method13905();
+            class4711.worldViewProjectionMatrix.getFaceList()[13] = (f_2 + this.anInt9057) * f_15 + this.nativeToolkit.method13905();
         } else {
-            class4711.worldViewProjectionMatrix.faceList[0] = f_3 - f_1;
-            class4711.worldViewProjectionMatrix.faceList[1] = f_4 - f_2;
-            class4711.worldViewProjectionMatrix.faceList[4] = f_5 - f_1;
-            class4711.worldViewProjectionMatrix.faceList[5] = f_6 - f_2;
-            class4711.worldViewProjectionMatrix.faceList[12] = f_1 + this.nativeToolkit.method13905();
-            class4711.worldViewProjectionMatrix.faceList[13] = f_2 + this.nativeToolkit.method13905();
+            class4711.worldViewProjectionMatrix.getFaceList()[0] = f_3 - f_1;
+            class4711.worldViewProjectionMatrix.getFaceList()[1] = f_4 - f_2;
+            class4711.worldViewProjectionMatrix.getFaceList()[4] = f_5 - f_1;
+            class4711.worldViewProjectionMatrix.getFaceList()[5] = f_6 - f_2;
+            class4711.worldViewProjectionMatrix.getFaceList()[12] = f_1 + this.nativeToolkit.method13905();
+            class4711.worldViewProjectionMatrix.getFaceList()[13] = f_2 + this.nativeToolkit.method13905();
         }
 
         Matrix44 matrix4416 = this.nativeToolkit.aClass3848683;
         matrix4416.identity();
-        matrix4416.faceList[0] = 2.0F / f_12;
-        matrix4416.faceList[5] = 2.0F / f_13;
-        matrix4416.faceList[12] = -1.0f;
-        matrix4416.faceList[13] = -1.0f;
-        matrix4416.faceList[14] = -1.0f;
+        matrix4416.getFaceList()[0] = 2.0F / f_12;
+        matrix4416.getFaceList()[5] = 2.0F / f_13;
+        matrix4416.getFaceList()[12] = -1.0f;
+        matrix4416.getFaceList()[13] = -1.0f;
+        matrix4416.getFaceList()[14] = -1.0f;
         class4711.worldViewProjectionMatrix.multiplyBy(matrix4416);
         class4711.aClass384440.method6525(this.anInterface69050.method47(this.anInt9060), this.anInterface69050.method62(this.anInt9053), 1.0F, 1.0F);
         class4711.anInterface4445 = this.nativeToolkit.anInterface48746;
@@ -429,12 +429,12 @@ public class SpriteDX_Sub3 extends NativeSprite {
         NativeTextureSampler interface617 = ((Class455_Sub1) class4558).nativeTextureSampler;
         class4711.anInterface6441 = interface617;
         class4711.aClass384444.identity();
-        class4711.aClass384444.faceList[0] = (f_3 - f_1) * interface617.method47(1.0F);
-        class4711.aClass384444.faceList[1] = (f_4 - f_2) * interface617.method47(1.0F);
-        class4711.aClass384444.faceList[4] = (f_5 - f_1) * interface617.method62(1.0F);
-        class4711.aClass384444.faceList[5] = (f_6 - f_2) * interface617.method62(1.0F);
-        class4711.aClass384444.faceList[12] = (f_1 - i_9) * interface617.method47(1.0F);
-        class4711.aClass384444.faceList[13] = (f_2 - i_10) * interface617.method62(1.0F);
+        class4711.aClass384444.getFaceList()[0] = (f_3 - f_1) * interface617.method47(1.0F);
+        class4711.aClass384444.getFaceList()[1] = (f_4 - f_2) * interface617.method47(1.0F);
+        class4711.aClass384444.getFaceList()[4] = (f_5 - f_1) * interface617.method62(1.0F);
+        class4711.aClass384444.getFaceList()[5] = (f_6 - f_2) * interface617.method62(1.0F);
+        class4711.aClass384444.getFaceList()[12] = (f_1 - i_9) * interface617.method47(1.0F);
+        class4711.aClass384444.getFaceList()[13] = (f_2 - i_10) * interface617.method62(1.0F);
         class4711.loadMasked();
     }
 
@@ -450,9 +450,9 @@ public class SpriteDX_Sub3 extends NativeSprite {
         float f_7 = this.nativeToolkit.getDisplay().getWidth();
         float f_8 = this.nativeToolkit.getDisplay().getHeight();
         class476.worldViewProjectionMatrix.method6525(this.anInt9060 * 2.0F / f_7, this.anInt9053 * 2.0F / f_8, 1.0F, 1.0F);
-        class476.worldViewProjectionMatrix.faceList[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_7 - 1.0F;
-        class476.worldViewProjectionMatrix.faceList[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_8 - 1.0F;
-        class476.worldViewProjectionMatrix.faceList[14] = -1.0f;
+        class476.worldViewProjectionMatrix.getFaceList()[12] = (i_1 + this.nativeToolkit.method13905()) * 2.0F / f_7 - 1.0F;
+        class476.worldViewProjectionMatrix.getFaceList()[13] = (i_2 + this.nativeToolkit.method13905()) * 2.0F / f_8 - 1.0F;
+        class476.worldViewProjectionMatrix.getFaceList()[14] = -1.0f;
         class476.aClass384440.method6525(this.anInterface69050.method47(this.anInt9060), this.anInterface69050.method62(this.anInt9053), 1.0F, 1.0F);
         class476.anInterface4445 = this.nativeToolkit.anInterface48746;
         class476.anInt446 = 0;

@@ -8917,7 +8917,7 @@ public class CS2Interpreter {
 
     public static void hsvToRGB(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(i_2) & 0xffff];
+        executor.intStack[++executor.intStackPtr - 1] = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(i_2) & 0xffff];
     }
 
     public static void method12802(CS2Executor executor) {

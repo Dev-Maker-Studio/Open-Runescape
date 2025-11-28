@@ -487,7 +487,7 @@ public class RasterizerSM {
             this.texturePixelsA = this.safemodeToolkit.getAnimatedMaterialArgb(materialA);
             if (this.texturePixelsA == null) {
                 this.blendingAlpha = 255 - (floorColorA >> 24 & 0xff);
-                int materialColorRgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialA)) & 0xffff];
+                int materialColorRgb = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialA)) & 0xffff];
                 int tmp2 = ~0xffffff | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
                 drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC));
                 return;
@@ -504,7 +504,7 @@ public class RasterizerSM {
             this.texturePixelsB = this.safemodeToolkit.getAnimatedMaterialArgb(materialB);
             if (this.texturePixelsB == null) {
                 this.blendingAlpha = 255 - (floorColorA >> 24 & 0xff);
-                int materialColorRgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialB)) & 0xffff];
+                int materialColorRgb = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialB)) & 0xffff];
                 int tmp2 = ~0xffffff | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
                 drawTriangle(true, true, false, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC));
                 return;
@@ -520,7 +520,7 @@ public class RasterizerSM {
             this.texturePixelsC = this.safemodeToolkit.getAnimatedMaterialArgb(materialC);
             if (this.texturePixelsC == null) {
                 this.blendingAlpha = 255 - (floorColorA >> 24 & 0xff);
-                int materialColorRgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialC)) & 0xffff];
+                int materialColorRgb = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialC)) & 0xffff];
                 int tmp2 = ~0xffffff | (materialColorRgb >> 16 & 0xff) * (floorColorA >> 16 & 0xff) << 8 & 0xff0000 | (floorColorA >> 8 & 0xff) * (materialColorRgb >> 8 & 0xff) & 0xff00 | (materialColorRgb & 0xff) * (floorColorA & 0xff) >> 8;
                 drawTriangle(true, true, false, ((int) yA), ((int) yB), ((int) yC), ((int) xA), ((int) xB), ((int) xC), ((int) zNearA), ((int) zNearB), ((int) zNearC), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(tmp2, fogColor, fogDensityC));
                 return;
@@ -1712,7 +1712,7 @@ public class RasterizerSM {
                 this.texturePixelsA = this.safemodeToolkit.getAnimatedMaterialArgb(materialId);
                 if (this.texturePixelsA == null) {
                     this.blendingAlpha = 255 - (colorA >> 24 & 0xff);
-                    int materialARgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialId)) & 0xffff];
+                    int materialARgb = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.safemodeToolkit.getMaterialColor(materialId)) & 0xffff];
                     int centerColour = ~0xffffff | (materialARgb >> 16 & 0xff) * (colorA >> 16 & 0xff) << 8 & 0xff0000 | (colorA >> 8 & 0xff) * (materialARgb >> 8 & 0xff) & 0xff00 | (materialARgb & 0xff) * (colorA & 0xff) >> 8;
                     drawTriangle(true, depthWrite, transparent, yA, yB, yC, xA, xB, xC, zNearA, zNearB, zNearC, ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityA), ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityB), ColorUtil.mixColorsWithTransparency(centerColour, fogColor, fogDensityC));
                     return;
@@ -2715,9 +2715,9 @@ public class RasterizerSM {
         if (!colorWrite) {
             drawFlatTriangle(false, depthWrite, transparent, yA, yB, yC, xA, xB, xC, zA, zB, zC, 0);
         } else if (this.wireframeMode) {
-            this.safemodeToolkit.drawOpaqueLine((int) xA, (int) yA, (int) xB, (int) yB, ColorUtil.hsvToRgbTable[(int) colorA & 0xffff]);
-            this.safemodeToolkit.drawOpaqueLine((int) xB, (int) yB, (int) xC, (int) yC, ColorUtil.hsvToRgbTable[(int) colorA & 0xffff]);
-            this.safemodeToolkit.drawOpaqueLine((int) xC, (int) yC, (int) xA, (int) yA, ColorUtil.hsvToRgbTable[(int) colorA & 0xffff]);
+            this.safemodeToolkit.drawOpaqueLine((int) xA, (int) yA, (int) xB, (int) yB, ColorUtil.getHsvToRgbTable()[(int) colorA & 0xffff]);
+            this.safemodeToolkit.drawOpaqueLine((int) xB, (int) yB, (int) xC, (int) yC, ColorUtil.getHsvToRgbTable()[(int) colorA & 0xffff]);
+            this.safemodeToolkit.drawOpaqueLine((int) xC, (int) yC, (int) xA, (int) yA, ColorUtil.getHsvToRgbTable()[(int) colorA & 0xffff]);
         } else {
             float slopeXBa = xB - xA;
             float slopeYBa = yB - yA;
@@ -3693,7 +3693,7 @@ public class RasterizerSM {
                 if (this.blendingAlpha == 0) {
                     if (x > 0) {
                         do {
-                        	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                        	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                             colour += colourSlope;
                             bufferOffset++;
                             if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
@@ -3731,7 +3731,7 @@ public class RasterizerSM {
                     }
                     x = endX - startX & 0x3;
                     if (x > 0) {
-                    	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                    	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                         do {
                             bufferOffset++;
                             if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
@@ -3748,7 +3748,7 @@ public class RasterizerSM {
                 	int invertedAlpha = 256 - this.blendingAlpha;
                     if (x > 0) {
                         do {
-                        	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                        	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                             colour += colourSlope;
                             background = (invertedAlpha * (background & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (background & 0xff00) >> 8 & 0xff00);
                             bufferOffset++;
@@ -3810,7 +3810,7 @@ public class RasterizerSM {
                     }
                     x = endX - startX & 0x3;
                     if (x > 0) {
-                    	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                    	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                         background = (invertedAlpha * (background & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (background & 0xff00) >> 8 & 0xff00);
                         do {
                             bufferOffset++;
@@ -3837,7 +3837,7 @@ public class RasterizerSM {
                     do {
                         bufferOffset++;
                         if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                        	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                        	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                             background = (invertedAlpha * (background & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (background & 0xff00) >> 8 & 0xff00);
                             int pixel = pixels[bufferOffset];
                             if (transparent) {
@@ -3856,7 +3856,7 @@ public class RasterizerSM {
                     do {
                         bufferOffset++;
                         if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                            pixels[bufferOffset] = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                            pixels[bufferOffset] = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                             if (writeDepth) {
                                 this.depthBuffer[bufferOffset] = depth;
                             }
@@ -3872,7 +3872,7 @@ public class RasterizerSM {
             if (this.blendingAlpha == 0) {
                 if (x > 0) {
                     do {
-                    	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                    	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                         colour += colourSlope;
                         bufferOffset++;
                         if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
@@ -3898,7 +3898,7 @@ public class RasterizerSM {
                 }
                 x = endX - startX & 0x3;
                 if (x > 0) {
-                	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                     do {
                         bufferOffset++;
                         if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
@@ -3912,7 +3912,7 @@ public class RasterizerSM {
             	int invertedAlpha = 256 - this.blendingAlpha;
                 if (x > 0) {
                     do {
-                    	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                    	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                         colour += colourSlope;
                         background = (invertedAlpha * (background & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (background & 0xff00) >> 8 & 0xff00);
                         bufferOffset++;
@@ -3961,7 +3961,7 @@ public class RasterizerSM {
                 }
                 x = endX - startX & 0x3;
                 if (x > 0) {
-                	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                     background = (invertedAlpha * (background & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (background & 0xff00) >> 8 & 0xff00);
                     do {
                         bufferOffset++;
@@ -3985,7 +3985,7 @@ public class RasterizerSM {
                 do {
                     bufferOffset++;
                     if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                    	int background = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                    	int background = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                         background = (invertedAlpha * (background & 0xff00ff) >> 8 & 0xff00ff) + (invertedAlpha * (background & 0xff00) >> 8 & 0xff00);
                         int pixel = pixels[bufferOffset];
                         if (transparent) {
@@ -4001,7 +4001,7 @@ public class RasterizerSM {
                 do {
                     bufferOffset++;
                     if (!writeDepth || depth < this.depthBuffer[bufferOffset]) {
-                        pixels[bufferOffset] = ColorUtil.hsvToRgbTable[(int) colour & 0xffff];
+                        pixels[bufferOffset] = ColorUtil.getHsvToRgbTable()[(int) colour & 0xffff];
                     }
                     depth += depthSlope;
                     colour += colourSlope;

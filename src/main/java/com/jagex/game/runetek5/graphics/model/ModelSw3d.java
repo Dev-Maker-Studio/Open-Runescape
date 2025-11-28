@@ -257,7 +257,7 @@ public class ModelSw3d extends Model implements INativeObject, AutoCloseable {
     public void offsetSubmesh(Matrix43 matrix44var1, int i_2, boolean bool3) {
         Matrix44 matrix444 = this.aja7140.nx().aClass38451;
         matrix444.fromMatrix(matrix44var1);
-        aa(matrix444.faceList, i_2, bool3);
+        aa(matrix444.getFaceList(), i_2, bool3);
     }
 
 

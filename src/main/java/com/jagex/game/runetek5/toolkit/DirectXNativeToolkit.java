@@ -589,9 +589,9 @@ public class DirectXNativeToolkit extends AbstractNativeToolkit {
 
     @Override
     public void setMatrixTransform(Matrix44 matrix441, Matrix44 matrix442, Matrix44 matrix443) {
-        IDirect3DDevice.SetTransform(this.renderTarget, 256, matrix441.faceList);
-        IDirect3DDevice.SetTransform(this.renderTarget, 2, matrix442.faceList);
-        IDirect3DDevice.SetTransform(this.renderTarget, 3, matrix443.faceList);
+        IDirect3DDevice.SetTransform(this.renderTarget, 256, matrix441.getFaceList());
+        IDirect3DDevice.SetTransform(this.renderTarget, 2, matrix442.getFaceList());
+        IDirect3DDevice.SetTransform(this.renderTarget, 3, matrix443.getFaceList());
     }
 
     @Override

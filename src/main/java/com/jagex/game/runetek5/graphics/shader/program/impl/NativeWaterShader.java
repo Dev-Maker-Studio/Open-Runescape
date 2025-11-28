@@ -181,7 +181,7 @@ public abstract class NativeWaterShader extends AbstractWaterShader {
     public void method14529(Matrix43 matrix44var2) {
         if (this.eyePositionOS != null) {
             Matrix44 eyePosOsMatrix = super.toolkit.getEyePositionOsMatrix();
-            float[] eyePos = {eyePosOsMatrix.faceList[12], eyePosOsMatrix.faceList[13], eyePosOsMatrix.faceList[14]};
+            float[] eyePos = {eyePosOsMatrix.getFaceList()[12], eyePosOsMatrix.getFaceList()[13], eyePosOsMatrix.getFaceList()[14]};
             float[] floats_5 = {0.0F, 0.0F, 0.0F};
             eyePosOsMatrix.method6528(floats_5);
             float[] floats_6 = {0.0F, 0.0F, 0.0F};

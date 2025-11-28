@@ -557,7 +557,7 @@ public abstract class AbstractToolkit implements AutoCloseable {
 	        for (int lightness = 127; lightness >= 0; --lightness) {
 	            int hsl = (hue & 0x3f) << 10 | (saturation & 0x7) << 7 | lightness & 0x7f;
 	            ColorUtil.initializeTables(false, true);
-	            int rgb = ColorUtil.hslToRgb[hsl];
+	            int rgb = ColorUtil.getHslToRgb()[hsl];
 	            ColorUtil.resetTables(false, true);
 	            toolkit.drawFilledRectangle((lightness * component.width >> 7) + baseLight, baseSaturation + ((7 - saturation) * component.height >> 3), (component.width >> 7) + 1, (component.height >> 3) + 1, rgb, 0);
 	        }

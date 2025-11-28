@@ -340,9 +340,9 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
             }
 
             if (this.endiannessType == 0) {
-                this.hslToRgb = ColorUtil.hslToRgb;
+                this.hslToRgb = ColorUtil.getHslToRgb();
             } else {
-                this.hslToRgb = ColorUtil.unsignedHslToRgb;
+                this.hslToRgb = ColorUtil.getUnsignedHslToRgb();
             }
 
             try {
@@ -1134,10 +1134,10 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public void calculateProjection(float f_1, float f_2, float f_3, float[] floats_4) {
-        float f_5 = this.transformMatrix.faceList[15] + this.transformMatrix.faceList[3] * f_1 + this.transformMatrix.faceList[7] * f_2 + this.transformMatrix.faceList[11] * f_3;
-        float f_6 = this.transformMatrix.faceList[12] + this.transformMatrix.faceList[0] * f_1 + this.transformMatrix.faceList[4] * f_2 + this.transformMatrix.faceList[8] * f_3;
-        float f_7 = this.transformMatrix.faceList[13] + this.transformMatrix.faceList[1] * f_1 + this.transformMatrix.faceList[5] * f_2 + this.transformMatrix.faceList[9] * f_3;
-        float f_8 = this.particleMatrix.faceList[14] + this.particleMatrix.faceList[2] * f_1 + this.particleMatrix.faceList[6] * f_2 + this.particleMatrix.faceList[10] * f_3;
+        float f_5 = this.transformMatrix.getFaceList()[15] + this.transformMatrix.getFaceList()[3] * f_1 + this.transformMatrix.getFaceList()[7] * f_2 + this.transformMatrix.getFaceList()[11] * f_3;
+        float f_6 = this.transformMatrix.getFaceList()[12] + this.transformMatrix.getFaceList()[0] * f_1 + this.transformMatrix.getFaceList()[4] * f_2 + this.transformMatrix.getFaceList()[8] * f_3;
+        float f_7 = this.transformMatrix.getFaceList()[13] + this.transformMatrix.getFaceList()[1] * f_1 + this.transformMatrix.getFaceList()[5] * f_2 + this.transformMatrix.getFaceList()[9] * f_3;
+        float f_8 = this.particleMatrix.getFaceList()[14] + this.particleMatrix.getFaceList()[2] * f_1 + this.particleMatrix.getFaceList()[6] * f_2 + this.particleMatrix.getFaceList()[10] * f_3;
         floats_4[0] = this.aFloat8797 + this.viewportCenterX * f_6 / f_5;
         floats_4[1] = this.aFloat8741 + this.viewportCenterY * f_7 / f_5;
         floats_4[2] = f_8;
@@ -1145,14 +1145,14 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public void computeWorldToScreen(float x, float y, float z, float[] screenCoords) {
-        float wX = this.transformMatrix.faceList[14] + this.transformMatrix.faceList[2] * x + this.transformMatrix.faceList[6] * y + this.transformMatrix.faceList[10] * z;
-        float wY = this.transformMatrix.faceList[15] + this.transformMatrix.faceList[3] * x + this.transformMatrix.faceList[7] * y + this.transformMatrix.faceList[11] * z;
+        float wX = this.transformMatrix.getFaceList()[14] + this.transformMatrix.getFaceList()[2] * x + this.transformMatrix.getFaceList()[6] * y + this.transformMatrix.getFaceList()[10] * z;
+        float wY = this.transformMatrix.getFaceList()[15] + this.transformMatrix.getFaceList()[3] * x + this.transformMatrix.getFaceList()[7] * y + this.transformMatrix.getFaceList()[11] * z;
         if (wX >= -wY && wX <= wY) {
-            float wZ = this.transformMatrix.faceList[12] + this.transformMatrix.faceList[0] * x + this.transformMatrix.faceList[4] * y + this.transformMatrix.faceList[8] * z;
+            float wZ = this.transformMatrix.getFaceList()[12] + this.transformMatrix.getFaceList()[0] * x + this.transformMatrix.getFaceList()[4] * y + this.transformMatrix.getFaceList()[8] * z;
             if (wZ >= -wY && wZ <= wY) {
-                float f_8 = this.transformMatrix.faceList[13] + this.transformMatrix.faceList[1] * x + this.transformMatrix.faceList[5] * y + this.transformMatrix.faceList[9] * z;
+                float f_8 = this.transformMatrix.getFaceList()[13] + this.transformMatrix.getFaceList()[1] * x + this.transformMatrix.getFaceList()[5] * y + this.transformMatrix.getFaceList()[9] * z;
                 if (f_8 >= -wY && f_8 <= wY) {
-                    float screenZ = this.particleMatrix.faceList[14] + this.particleMatrix.faceList[2] * x + this.particleMatrix.faceList[6] * y + this.particleMatrix.faceList[10] * z;
+                    float screenZ = this.particleMatrix.getFaceList()[14] + this.particleMatrix.getFaceList()[2] * x + this.particleMatrix.getFaceList()[6] * y + this.particleMatrix.getFaceList()[10] * z;
                     screenCoords[0] = this.aFloat8797 + this.viewportCenterX * wZ / wY;
                     screenCoords[1] = this.aFloat8741 + this.viewportCenterY * f_8 / wY;
                     screenCoords[2] = screenZ;
@@ -1761,8 +1761,8 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
     public void calculateViewRange() {
         this.projectionMatrix.copyFrom(this.aClass3848708);
         loadWorldViewProjectionMatrix(this.projectionMatrix);
-        this.camFar = (this.projectionMatrix.faceList[14] - this.projectionMatrix.faceList[15]) / (this.projectionMatrix.faceList[11] - this.projectionMatrix.faceList[10]);
-        this.camNear = -this.projectionMatrix.faceList[14] / this.projectionMatrix.faceList[10];
+        this.camFar = (this.projectionMatrix.getFaceList()[14] - this.projectionMatrix.getFaceList()[15]) / (this.projectionMatrix.getFaceList()[11] - this.projectionMatrix.getFaceList()[10]);
+        this.camNear = -this.projectionMatrix.getFaceList()[14] / this.projectionMatrix.getFaceList()[10];
         method14062();
     }
 
@@ -1882,18 +1882,18 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
     @Override
     public int isOnScreen(int i_1, int i_2, int i_3, int i_4, int i_5, int i_6) {
         int i_7 = 0;
-        float f_8 = this.transformMatrix.faceList[14] + this.transformMatrix.faceList[2] * i_1 + this.transformMatrix.faceList[6] * i_2 + this.transformMatrix.faceList[10] * i_3;
-        float f_9 = this.transformMatrix.faceList[14] + this.transformMatrix.faceList[2] * i_4 + this.transformMatrix.faceList[6] * i_5 + this.transformMatrix.faceList[10] * i_6;
-        float f_10 = this.transformMatrix.faceList[15] + this.transformMatrix.faceList[3] * i_1 + this.transformMatrix.faceList[7] * i_2 + this.transformMatrix.faceList[11] * i_3;
-        float f_11 = this.transformMatrix.faceList[15] + this.transformMatrix.faceList[3] * i_4 + this.transformMatrix.faceList[7] * i_5 + this.transformMatrix.faceList[11] * i_6;
+        float f_8 = this.transformMatrix.getFaceList()[14] + this.transformMatrix.getFaceList()[2] * i_1 + this.transformMatrix.getFaceList()[6] * i_2 + this.transformMatrix.getFaceList()[10] * i_3;
+        float f_9 = this.transformMatrix.getFaceList()[14] + this.transformMatrix.getFaceList()[2] * i_4 + this.transformMatrix.getFaceList()[6] * i_5 + this.transformMatrix.getFaceList()[10] * i_6;
+        float f_10 = this.transformMatrix.getFaceList()[15] + this.transformMatrix.getFaceList()[3] * i_1 + this.transformMatrix.getFaceList()[7] * i_2 + this.transformMatrix.getFaceList()[11] * i_3;
+        float f_11 = this.transformMatrix.getFaceList()[15] + this.transformMatrix.getFaceList()[3] * i_4 + this.transformMatrix.getFaceList()[7] * i_5 + this.transformMatrix.getFaceList()[11] * i_6;
         if (f_8 < -f_10 && f_9 < -f_11) {
             i_7 |= 0x10;
         } else if (f_8 > f_10 && f_9 > f_11) {
             i_7 |= 0x20;
         }
 
-        float f_12 = this.transformMatrix.faceList[12] + this.transformMatrix.faceList[0] * i_1 + this.transformMatrix.faceList[4] * i_2 + this.transformMatrix.faceList[8] * i_3;
-        float f_13 = this.transformMatrix.faceList[12] + this.transformMatrix.faceList[0] * i_4 + this.transformMatrix.faceList[4] * i_5 + this.transformMatrix.faceList[8] * i_6;
+        float f_12 = this.transformMatrix.getFaceList()[12] + this.transformMatrix.getFaceList()[0] * i_1 + this.transformMatrix.getFaceList()[4] * i_2 + this.transformMatrix.getFaceList()[8] * i_3;
+        float f_13 = this.transformMatrix.getFaceList()[12] + this.transformMatrix.getFaceList()[0] * i_4 + this.transformMatrix.getFaceList()[4] * i_5 + this.transformMatrix.getFaceList()[8] * i_6;
         if (f_12 < -f_10 && f_13 < -f_11) {
             i_7 |= 0x1;
         }
@@ -1902,8 +1902,8 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
             i_7 |= 0x2;
         }
 
-        float f_14 = this.transformMatrix.faceList[13] + this.transformMatrix.faceList[1] * i_1 + this.transformMatrix.faceList[5] * i_2 + this.transformMatrix.faceList[9] * i_3;
-        float f_15 = this.transformMatrix.faceList[13] + this.transformMatrix.faceList[1] * i_4 + this.transformMatrix.faceList[5] * i_5 + this.transformMatrix.faceList[9] * i_6;
+        float f_14 = this.transformMatrix.getFaceList()[13] + this.transformMatrix.getFaceList()[1] * i_1 + this.transformMatrix.getFaceList()[5] * i_2 + this.transformMatrix.getFaceList()[9] * i_3;
+        float f_15 = this.transformMatrix.getFaceList()[13] + this.transformMatrix.getFaceList()[1] * i_4 + this.transformMatrix.getFaceList()[5] * i_5 + this.transformMatrix.getFaceList()[9] * i_6;
         if (f_14 < -f_10 && f_15 < -f_11) {
             i_7 |= 0x4;
         }

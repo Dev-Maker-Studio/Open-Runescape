@@ -52,7 +52,7 @@ public class FlickeringEffect {
             this.ranges[index] = (short) (height << 8 | lowestHeight);
         }
         size2d = (size2d << sizeShift) + (1 << sizeShift >> 1);
-        int color = ColorUtil.hslToRgb != null ? ColorUtil.hslToRgb[stream.readUShort()] : ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(stream.readUShort()) & 0xffff];
+        int color = ColorUtil.getHslToRgb() != null ? ColorUtil.getHslToRgb()[stream.readUShort()] : ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(stream.readUShort()) & 0xffff];
         int bitpacked = stream.readUByte();
         this.type = bitpacked & 0x1f;
         this.rotationOffset = (bitpacked & 0xe0) << 3;

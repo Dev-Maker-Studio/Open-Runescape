@@ -196,7 +196,7 @@ public class ModelSM extends Model {
             for (int billboardIndex = 0; billboardIndex < mesh.billboards.length; billboardIndex++) {
                 Billboard billboard = mesh.billboards[billboardIndex];
                 BillboardType billboardType = BillboardTypeList.list(billboard.billboardId);
-                int billboardFaceRgb = ColorUtil.hsvToRgbTable[mesh.facesColor[billboard.appliesOnFace] & 0xffff] & 0xffffff;
+                int billboardFaceRgb = ColorUtil.getHsvToRgbTable()[mesh.facesColor[billboard.appliesOnFace] & 0xffff] & 0xffffff;
                 billboardFaceRgb |= 255 - (mesh.facesAlpha != null ? mesh.facesAlpha[billboard.appliesOnFace] & 0xff : 0) << 24;
                 this.billboardEffects[billboardIndex] = new BillboardEffect(billboard.appliesOnFace, billboardType.size2d, billboardType.size3d, billboardType.materialId, billboardType.blendType, billboardType.shape, billboardType.hasUid, billboard.distance);
                 this.billboardSurfaces[billboardIndex] = new BillboardSurface(billboardFaceRgb);
@@ -728,7 +728,7 @@ public class ModelSM extends Model {
     }
 
     public int getMaterialColor(int hsl, short materialId, int lightness) {
-        int color = ColorUtil.hslToRgb[mixLightness(hsl, lightness)];
+        int color = ColorUtil.getHslToRgb()[mixLightness(hsl, lightness)];
         MaterialType material = this.toolkit.materialProvider.getMaterial(materialId & 0xffff);
         int contrast = material.alpha & 0xff;
         int brightness;
@@ -1388,15 +1388,15 @@ public class ModelSM extends Model {
                 if (emitter.child != null) {
                     childEmitter = emitter.child;
                 }
-                childEmitter.verticeXA = (int) (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX[emitter.faceA] + particleMatrix.faceList[4] * this.verticesY[emitter.faceA] + particleMatrix.faceList[8] * this.verticesZ[emitter.faceA]);
-                childEmitter.verticeYA = (int) (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX[emitter.faceA] + particleMatrix.faceList[5] * this.verticesY[emitter.faceA] + particleMatrix.faceList[9] * this.verticesZ[emitter.faceA]);
-                childEmitter.verticeZA = (int) (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX[emitter.faceA] + particleMatrix.faceList[6] * this.verticesY[emitter.faceA] + particleMatrix.faceList[10] * this.verticesZ[emitter.faceA]);
-                childEmitter.verticeXB = (int) (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX[emitter.faceB] + particleMatrix.faceList[4] * this.verticesY[emitter.faceB] + particleMatrix.faceList[8] * this.verticesZ[emitter.faceB]);
-                childEmitter.verticeYB = (int) (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX[emitter.faceB] + particleMatrix.faceList[5] * this.verticesY[emitter.faceB] + particleMatrix.faceList[9] * this.verticesZ[emitter.faceB]);
-                childEmitter.verticeZB = (int) (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX[emitter.faceB] + particleMatrix.faceList[6] * this.verticesY[emitter.faceB] + particleMatrix.faceList[10] * this.verticesZ[emitter.faceB]);
-                childEmitter.verticeXC = (int) (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX[emitter.faceC] + particleMatrix.faceList[4] * this.verticesY[emitter.faceC] + particleMatrix.faceList[8] * this.verticesZ[emitter.faceC]);
-                childEmitter.verticeYC = (int) (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX[emitter.faceC] + particleMatrix.faceList[5] * this.verticesY[emitter.faceC] + particleMatrix.faceList[9] * this.verticesZ[emitter.faceC]);
-                childEmitter.verticeZC = (int) (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX[emitter.faceC] + particleMatrix.faceList[6] * this.verticesY[emitter.faceC] + particleMatrix.faceList[10] * this.verticesZ[emitter.faceC]);
+                childEmitter.verticeXA = (int) (particleMatrix.getFaceList()[12] + particleMatrix.getFaceList()[0] * this.verticesX[emitter.faceA] + particleMatrix.getFaceList()[4] * this.verticesY[emitter.faceA] + particleMatrix.getFaceList()[8] * this.verticesZ[emitter.faceA]);
+                childEmitter.verticeYA = (int) (particleMatrix.getFaceList()[13] + particleMatrix.getFaceList()[1] * this.verticesX[emitter.faceA] + particleMatrix.getFaceList()[5] * this.verticesY[emitter.faceA] + particleMatrix.getFaceList()[9] * this.verticesZ[emitter.faceA]);
+                childEmitter.verticeZA = (int) (particleMatrix.getFaceList()[14] + particleMatrix.getFaceList()[2] * this.verticesX[emitter.faceA] + particleMatrix.getFaceList()[6] * this.verticesY[emitter.faceA] + particleMatrix.getFaceList()[10] * this.verticesZ[emitter.faceA]);
+                childEmitter.verticeXB = (int) (particleMatrix.getFaceList()[12] + particleMatrix.getFaceList()[0] * this.verticesX[emitter.faceB] + particleMatrix.getFaceList()[4] * this.verticesY[emitter.faceB] + particleMatrix.getFaceList()[8] * this.verticesZ[emitter.faceB]);
+                childEmitter.verticeYB = (int) (particleMatrix.getFaceList()[13] + particleMatrix.getFaceList()[1] * this.verticesX[emitter.faceB] + particleMatrix.getFaceList()[5] * this.verticesY[emitter.faceB] + particleMatrix.getFaceList()[9] * this.verticesZ[emitter.faceB]);
+                childEmitter.verticeZB = (int) (particleMatrix.getFaceList()[14] + particleMatrix.getFaceList()[2] * this.verticesX[emitter.faceB] + particleMatrix.getFaceList()[6] * this.verticesY[emitter.faceB] + particleMatrix.getFaceList()[10] * this.verticesZ[emitter.faceB]);
+                childEmitter.verticeXC = (int) (particleMatrix.getFaceList()[12] + particleMatrix.getFaceList()[0] * this.verticesX[emitter.faceC] + particleMatrix.getFaceList()[4] * this.verticesY[emitter.faceC] + particleMatrix.getFaceList()[8] * this.verticesZ[emitter.faceC]);
+                childEmitter.verticeYC = (int) (particleMatrix.getFaceList()[13] + particleMatrix.getFaceList()[1] * this.verticesX[emitter.faceC] + particleMatrix.getFaceList()[5] * this.verticesY[emitter.faceC] + particleMatrix.getFaceList()[9] * this.verticesZ[emitter.faceC]);
+                childEmitter.verticeZC = (int) (particleMatrix.getFaceList()[14] + particleMatrix.getFaceList()[2] * this.verticesX[emitter.faceC] + particleMatrix.getFaceList()[6] * this.verticesY[emitter.faceC] + particleMatrix.getFaceList()[10] * this.verticesZ[emitter.faceC]);
             }
         }
         if (this.effectors != null) {
@@ -1411,9 +1411,9 @@ public class ModelSM extends Model {
                 } else {
                     effectiveVertex.matrix = new Matrix44(particleMatrix);
                 }
-                effectiveVertexChild.verticeX = (int) (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX[effectiveVertex.appliesOnVertex] + particleMatrix.faceList[4] * this.verticesY[effectiveVertex.appliesOnVertex] + particleMatrix.faceList[8] * this.verticesZ[effectiveVertex.appliesOnVertex]);
-                effectiveVertexChild.verticeY = (int) (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX[effectiveVertex.appliesOnVertex] + particleMatrix.faceList[5] * this.verticesY[effectiveVertex.appliesOnVertex] + particleMatrix.faceList[9] * this.verticesZ[effectiveVertex.appliesOnVertex]);
-                effectiveVertexChild.verticeZ = (int) (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX[effectiveVertex.appliesOnVertex] + particleMatrix.faceList[6] * this.verticesY[effectiveVertex.appliesOnVertex] + particleMatrix.faceList[10] * this.verticesZ[effectiveVertex.appliesOnVertex]);
+                effectiveVertexChild.verticeX = (int) (particleMatrix.getFaceList()[12] + particleMatrix.getFaceList()[0] * this.verticesX[effectiveVertex.appliesOnVertex] + particleMatrix.getFaceList()[4] * this.verticesY[effectiveVertex.appliesOnVertex] + particleMatrix.getFaceList()[8] * this.verticesZ[effectiveVertex.appliesOnVertex]);
+                effectiveVertexChild.verticeY = (int) (particleMatrix.getFaceList()[13] + particleMatrix.getFaceList()[1] * this.verticesX[effectiveVertex.appliesOnVertex] + particleMatrix.getFaceList()[5] * this.verticesY[effectiveVertex.appliesOnVertex] + particleMatrix.getFaceList()[9] * this.verticesZ[effectiveVertex.appliesOnVertex]);
+                effectiveVertexChild.verticeZ = (int) (particleMatrix.getFaceList()[14] + particleMatrix.getFaceList()[2] * this.verticesX[effectiveVertex.appliesOnVertex] + particleMatrix.getFaceList()[6] * this.verticesY[effectiveVertex.appliesOnVertex] + particleMatrix.getFaceList()[10] * this.verticesZ[effectiveVertex.appliesOnVertex]);
             }
         }
     }
@@ -1659,7 +1659,7 @@ public class ModelSM extends Model {
 					for (int billboardIndex = 0; billboardIndex < this.numBillboards; billboardIndex++) {
 						BillboardEffect effect = this.billboardEffects[billboardIndex];
 						BillboardSurface surface = this.billboardSurfaces[billboardIndex];
-						surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
+						surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
 					}
 				}
 			}
@@ -2104,7 +2104,7 @@ public class ModelSM extends Model {
 					for (int billboardIndex = 0; billboardIndex < this.numBillboards; billboardIndex++) {
 						BillboardEffect effect = this.billboardEffects[billboardIndex];
 						BillboardSurface surface = this.billboardSurfaces[billboardIndex];
-						surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil
+						surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil
 								.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
 					}
 				}
@@ -2264,7 +2264,7 @@ public class ModelSM extends Model {
 				for (int faceIndex = 0; faceIndex < this.numBillboards; faceIndex++) {
 					BillboardEffect effect = this.billboardEffects[faceIndex];
 					BillboardSurface surface = this.billboardSurfaces[faceIndex];
-					surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil
+					surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil
 							.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
 				}
 			}
@@ -2321,16 +2321,16 @@ public class ModelSM extends Model {
             float nNearFaceA;
             float zNearFaceD;
             if (bool8) {
-                zNearFaceD = matrix446.faceList[14];
-                nNearFaceA = matrix446.faceList[6];
+                zNearFaceD = matrix446.getFaceList()[14];
+                nNearFaceA = matrix446.getFaceList()[6];
             } else {
-                zNearFaceD = particleMatrix.faceList[12] * matrix446.faceList[2] + particleMatrix.faceList[13] * matrix446.faceList[6] + particleMatrix.faceList[14] * matrix446.faceList[10] + matrix446.faceList[14];
-                nNearFaceA = particleMatrix.faceList[4] * matrix446.faceList[2] + particleMatrix.faceList[5] * matrix446.faceList[6] + particleMatrix.faceList[6] * matrix446.faceList[10];
+                zNearFaceD = particleMatrix.getFaceList()[12] * matrix446.getFaceList()[2] + particleMatrix.getFaceList()[13] * matrix446.getFaceList()[6] + particleMatrix.getFaceList()[14] * matrix446.getFaceList()[10] + matrix446.getFaceList()[14];
+                nNearFaceA = particleMatrix.getFaceList()[4] * matrix446.getFaceList()[2] + particleMatrix.getFaceList()[5] * matrix446.getFaceList()[6] + particleMatrix.getFaceList()[6] * matrix446.getFaceList()[10];
             }
             f_18 = zNearFaceD + this.minY * nNearFaceA;
             f_19 = zNearFaceD + this.maxY * nNearFaceA;
             float f_20 = f_18 > f_19 ? f_18 + this.size2d : f_19 + this.size2d;
-            float f_21 = matrix447.faceList[10] * f_20 + matrix447.faceList[14];
+            float f_21 = matrix447.getFaceList()[10] * f_20 + matrix447.getFaceList()[14];
             if (this.toolkit.executingThreadCount > 1) {
                 synchronized (this) {
                     while (this.renderLock) {
@@ -2361,10 +2361,10 @@ public class ModelSM extends Model {
                 int verticeX = this.verticesX[verticeIndex];
                 int verticeY = this.verticesY[verticeIndex];
                 int verticeZ = this.verticesZ[verticeIndex];
-                float matrixX = renderMatrix.faceList[0] * verticeX + renderMatrix.faceList[4] * verticeY + renderMatrix.faceList[8] * verticeZ + renderMatrix.faceList[12];
-                float matrixY = renderMatrix.faceList[1] * verticeX + renderMatrix.faceList[5] * verticeY + renderMatrix.faceList[9] * verticeZ + renderMatrix.faceList[13];
-                float matrixZ = renderMatrix.faceList[2] * verticeX + renderMatrix.faceList[6] * verticeY + renderMatrix.faceList[10] * verticeZ + renderMatrix.faceList[14];
-                float z = renderMatrix.faceList[3] * verticeX + renderMatrix.faceList[7] * verticeY + renderMatrix.faceList[11] * verticeZ + renderMatrix.faceList[15];
+                float matrixX = renderMatrix.getFaceList()[0] * verticeX + renderMatrix.getFaceList()[4] * verticeY + renderMatrix.getFaceList()[8] * verticeZ + renderMatrix.getFaceList()[12];
+                float matrixY = renderMatrix.getFaceList()[1] * verticeX + renderMatrix.getFaceList()[5] * verticeY + renderMatrix.getFaceList()[9] * verticeZ + renderMatrix.getFaceList()[13];
+                float matrixZ = renderMatrix.getFaceList()[2] * verticeX + renderMatrix.getFaceList()[6] * verticeY + renderMatrix.getFaceList()[10] * verticeZ + renderMatrix.getFaceList()[14];
+                float z = renderMatrix.getFaceList()[3] * verticeX + renderMatrix.getFaceList()[7] * verticeY + renderMatrix.getFaceList()[11] * verticeZ + renderMatrix.getFaceList()[15];
                 this.projectedVerticesZ[verticeIndex] = this.threadResource.aFloat2335 + this.threadResource.aFloat2311 * matrixZ / z;
                 this.projectedVerticesZ2[verticeIndex] = z;
                 if (matrixZ >= -z) {
@@ -2375,7 +2375,7 @@ public class ModelSM extends Model {
                     offscreen = true;
                 }
                 if (this.threadResource.hasWaterUpdate) {
-                    this.waterRenderHeight[verticeIndex] = (int) (particleMatrix.faceList[13] + particleMatrix.faceList[1] * verticeX + particleMatrix.faceList[5] * verticeY + particleMatrix.faceList[9] * verticeZ);
+                    this.waterRenderHeight[verticeIndex] = (int) (particleMatrix.getFaceList()[13] + particleMatrix.getFaceList()[1] * verticeX + particleMatrix.getFaceList()[5] * verticeY + particleMatrix.getFaceList()[9] * verticeZ);
                 }
             }
             if (this.billboardEffects != null) {
@@ -2388,27 +2388,27 @@ public class ModelSM extends Model {
                     int avgX = (this.verticesX[a] + this.verticesX[b] + this.verticesX[c]) / 3;
                     int avgY = (this.verticesY[a] + this.verticesY[b] + this.verticesY[c]) / 3;
                     int avgZ = (this.verticesZ[a] + this.verticesZ[b] + this.verticesZ[c]) / 3;
-                    float mX = renderMatrix.faceList[0] * avgX + renderMatrix.faceList[4] * avgY + renderMatrix.faceList[8] * avgZ + renderMatrix.faceList[12];
-                    float mY = renderMatrix.faceList[1] * avgX + renderMatrix.faceList[5] * avgY + renderMatrix.faceList[9] * avgZ + renderMatrix.faceList[13];
-                    float mZ = renderMatrix.faceList[2] * avgX + renderMatrix.faceList[6] * avgY + renderMatrix.faceList[10] * avgZ + renderMatrix.faceList[14];
-                    float mZB2 = renderMatrix.faceList[3] * avgX + renderMatrix.faceList[7] * avgY + renderMatrix.faceList[11] * avgZ + renderMatrix.faceList[15];
-                    mZ += matrix447.faceList[2] * surface.offsetX + matrix447.faceList[6] * surface.offsetY;
-                    mZB2 += matrix447.faceList[3] * surface.offsetX + matrix447.faceList[7] * surface.offsetY;
+                    float mX = renderMatrix.getFaceList()[0] * avgX + renderMatrix.getFaceList()[4] * avgY + renderMatrix.getFaceList()[8] * avgZ + renderMatrix.getFaceList()[12];
+                    float mY = renderMatrix.getFaceList()[1] * avgX + renderMatrix.getFaceList()[5] * avgY + renderMatrix.getFaceList()[9] * avgZ + renderMatrix.getFaceList()[13];
+                    float mZ = renderMatrix.getFaceList()[2] * avgX + renderMatrix.getFaceList()[6] * avgY + renderMatrix.getFaceList()[10] * avgZ + renderMatrix.getFaceList()[14];
+                    float mZB2 = renderMatrix.getFaceList()[3] * avgX + renderMatrix.getFaceList()[7] * avgY + renderMatrix.getFaceList()[11] * avgZ + renderMatrix.getFaceList()[15];
+                    mZ += matrix447.getFaceList()[2] * surface.offsetX + matrix447.getFaceList()[6] * surface.offsetY;
+                    mZB2 += matrix447.getFaceList()[3] * surface.offsetX + matrix447.getFaceList()[7] * surface.offsetY;
                     if (mZ > -mZB2) {
-                        mX += matrix447.faceList[0] * surface.offsetX + matrix447.faceList[4] * surface.offsetY;
-                        mY += matrix447.faceList[1] * surface.offsetX + matrix447.faceList[5] * surface.offsetY;
+                        mX += matrix447.getFaceList()[0] * surface.offsetX + matrix447.getFaceList()[4] * surface.offsetY;
+                        mY += matrix447.getFaceList()[1] * surface.offsetX + matrix447.getFaceList()[5] * surface.offsetY;
                         float x = this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * mX / mZB2;
                         float y = this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * mY / mZB2;
                         float adjustedSizeX = surface.scaleX * effect.size2d;
                         float adjustedSizeY = surface.scaleY * effect.size3d;
-                        float adjustX = mX + matrix447.faceList[0] * adjustedSizeX + matrix447.faceList[4] * adjustedSizeY;
-                        float adjustY = mY + matrix447.faceList[1] * adjustedSizeX + matrix447.faceList[5] * adjustedSizeY;
-                        float adjustZB2 = mZB2 + matrix447.faceList[3] * adjustedSizeX + matrix447.faceList[7] * adjustedSizeY;
+                        float adjustX = mX + matrix447.getFaceList()[0] * adjustedSizeX + matrix447.getFaceList()[4] * adjustedSizeY;
+                        float adjustY = mY + matrix447.getFaceList()[1] * adjustedSizeX + matrix447.getFaceList()[5] * adjustedSizeY;
+                        float adjustZB2 = mZB2 + matrix447.getFaceList()[3] * adjustedSizeX + matrix447.getFaceList()[7] * adjustedSizeY;
                         float otherX = this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * adjustX / adjustZB2;
                         float otherY = this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * adjustY / adjustZB2;
                         surface.x = (int) x;
                         surface.y = (int) y;
-                        surface.z = this.toolkit.aFloat8985 + this.toolkit.aFloat8978 * (mZ - matrix447.faceList[10] * effect.distance) / mZB2;
+                        surface.z = this.toolkit.aFloat8985 + this.toolkit.aFloat8978 * (mZ - matrix447.getFaceList()[10] * effect.distance) / mZB2;
                         surface.size2d = (int) (otherX < x ? x - otherX : otherX - x);
                         surface.size3d = (int) (otherY < y ? y - otherY : otherY - y);
                     } else {
@@ -2423,10 +2423,10 @@ public class ModelSM extends Model {
                 int sizeDeltaX = this.minX + this.maxX >> 1;
                 int sizeDeltaZ = this.minZ + this.maxZ >> 1;
                 short mY = this.minY;
-                float z = renderMatrix.faceList[0] * sizeDeltaX + renderMatrix.faceList[4] * mY + renderMatrix.faceList[8] * sizeDeltaZ + renderMatrix.faceList[12];
-                float f_64 = renderMatrix.faceList[1] * sizeDeltaX + renderMatrix.faceList[5] * mY + renderMatrix.faceList[9] * sizeDeltaZ + renderMatrix.faceList[13];
-                float f_33 = renderMatrix.faceList[2] * sizeDeltaX + renderMatrix.faceList[6] * mY + renderMatrix.faceList[10] * sizeDeltaZ + renderMatrix.faceList[14];
-                float f_34 = renderMatrix.faceList[3] * sizeDeltaX + renderMatrix.faceList[7] * mY + renderMatrix.faceList[11] * sizeDeltaZ + renderMatrix.faceList[15];
+                float z = renderMatrix.getFaceList()[0] * sizeDeltaX + renderMatrix.getFaceList()[4] * mY + renderMatrix.getFaceList()[8] * sizeDeltaZ + renderMatrix.getFaceList()[12];
+                float f_64 = renderMatrix.getFaceList()[1] * sizeDeltaX + renderMatrix.getFaceList()[5] * mY + renderMatrix.getFaceList()[9] * sizeDeltaZ + renderMatrix.getFaceList()[13];
+                float f_33 = renderMatrix.getFaceList()[2] * sizeDeltaX + renderMatrix.getFaceList()[6] * mY + renderMatrix.getFaceList()[10] * sizeDeltaZ + renderMatrix.getFaceList()[14];
+                float f_34 = renderMatrix.getFaceList()[3] * sizeDeltaX + renderMatrix.getFaceList()[7] * mY + renderMatrix.getFaceList()[11] * sizeDeltaZ + renderMatrix.getFaceList()[15];
                 if (f_33 >= -f_34) {
                     renderedEntity.left = (int) (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * z / f_34);
                     renderedEntity.bottom = (int) (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_64 / f_34);
@@ -2434,10 +2434,10 @@ public class ModelSM extends Model {
                     bool57 = true;
                 }
                 mY = this.maxY;
-                float f_35 = renderMatrix.faceList[0] * sizeDeltaX + renderMatrix.faceList[4] * mY + renderMatrix.faceList[8] * sizeDeltaZ + renderMatrix.faceList[12];
-                float f_36 = renderMatrix.faceList[1] * sizeDeltaX + renderMatrix.faceList[5] * mY + renderMatrix.faceList[9] * sizeDeltaZ + renderMatrix.faceList[13];
-                float f_37 = renderMatrix.faceList[2] * sizeDeltaX + renderMatrix.faceList[6] * mY + renderMatrix.faceList[10] * sizeDeltaZ + renderMatrix.faceList[14];
-                float f_38 = renderMatrix.faceList[3] * sizeDeltaX + renderMatrix.faceList[7] * mY + renderMatrix.faceList[11] * sizeDeltaZ + renderMatrix.faceList[15];
+                float f_35 = renderMatrix.getFaceList()[0] * sizeDeltaX + renderMatrix.getFaceList()[4] * mY + renderMatrix.getFaceList()[8] * sizeDeltaZ + renderMatrix.getFaceList()[12];
+                float f_36 = renderMatrix.getFaceList()[1] * sizeDeltaX + renderMatrix.getFaceList()[5] * mY + renderMatrix.getFaceList()[9] * sizeDeltaZ + renderMatrix.getFaceList()[13];
+                float f_37 = renderMatrix.getFaceList()[2] * sizeDeltaX + renderMatrix.getFaceList()[6] * mY + renderMatrix.getFaceList()[10] * sizeDeltaZ + renderMatrix.getFaceList()[14];
+                float f_38 = renderMatrix.getFaceList()[3] * sizeDeltaX + renderMatrix.getFaceList()[7] * mY + renderMatrix.getFaceList()[11] * sizeDeltaZ + renderMatrix.getFaceList()[15];
                 if (f_37 >= -f_38) {
                     renderedEntity.right = (int) (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * f_35 / f_38);
                     renderedEntity.top = (int) (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_36 / f_38);
@@ -2466,12 +2466,12 @@ public class ModelSM extends Model {
 
                 if (bool58) {
                     if (f_33 / f_34 > f_37 / f_38) {
-                    	float f_39 = z + matrix447.faceList[0] * this.size2d + matrix447.faceList[12];
-                    	float f_40 = f_34 + matrix447.faceList[3] * this.size2d + matrix447.faceList[15];
+                    	float f_39 = z + matrix447.getFaceList()[0] * this.size2d + matrix447.getFaceList()[12];
+                    	float f_40 = f_34 + matrix447.getFaceList()[3] * this.size2d + matrix447.getFaceList()[15];
                         renderedEntity.size = (int) (this.toolkit.aFloat9003 - renderedEntity.left + this.toolkit.aFloat8976 * f_39 / f_40);
                     } else {
-                    	float f_39 = f_35 + matrix447.faceList[0] * this.size2d + matrix447.faceList[12];
-                    	float f_40 = f_38 + matrix447.faceList[3] * this.size2d + matrix447.faceList[15];
+                    	float f_39 = f_35 + matrix447.getFaceList()[0] * this.size2d + matrix447.getFaceList()[12];
+                    	float f_40 = f_38 + matrix447.getFaceList()[3] * this.size2d + matrix447.getFaceList()[15];
                         renderedEntity.size = (int) (this.toolkit.aFloat9003 - renderedEntity.right + this.toolkit.aFloat8976 * f_39 / f_40);
                     }
 
@@ -2644,10 +2644,10 @@ public class ModelSM extends Model {
             int b = this.facesB[faceIndex];
             int c = this.facesC[faceIndex];
             Matrix44 matrix448 = this.toolkit.modelMatrix;
-            float f_9 = matrix448.faceList[10];
-            float f_10 = matrix448.faceList[14];
-            float f_11 = matrix448.faceList[11];
-            float f_12 = matrix448.faceList[15];
+            float f_9 = matrix448.getFaceList()[10];
+            float f_10 = matrix448.getFaceList()[14];
+            float f_11 = matrix448.getFaceList()[11];
+            float f_12 = matrix448.getFaceList()[15];
             float f_13 = f_10 * f_11 - f_9 * f_12;
             float f_14 = (this.projectedVerticesZ[a] - this.threadResource.aFloat2335) * this.threadResource.aFloat2308;
             float f_15 = (this.projectedVerticesZ[b] - this.threadResource.aFloat2335) * this.threadResource.aFloat2308;
@@ -2695,9 +2695,9 @@ public class ModelSM extends Model {
                             this.rasterizer.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], this.projectedVerticesZ2[a], this.projectedVerticesZ2[b], this.projectedVerticesZ2[c], this.uMap[faceIndex][0], this.uMap[faceIndex][1], this.uMap[faceIndex][2], this.vMap[faceIndex][0], this.vMap[faceIndex][1], this.vMap[faceIndex][2], transparency | this.facesColourA[faceIndex] & 0xffffff, transparency | this.facesColourB[faceIndex] & 0xffffff, transparency | this.facesColourC[faceIndex] & 0xffffff, this.threadResource.fogColor, mixAlphaA * 255.0F, mixAlphaB * 255.0F, mixAlphaC * 255.0F, this.facesMaterial[faceIndex]);
                         }
                     } else if (this.facesColourC[faceIndex] == -1) {
-                        this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaC * 255.0F));
+                        this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaC * 255.0F));
                     } else {
-                        this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourB[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourC[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaC * 255.0F));
+                        this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourB[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourC[faceIndex] & 0xffff], this.threadResource.fogColor, mixAlphaC * 255.0F));
                     }
                 }
             }
@@ -2741,9 +2741,9 @@ public class ModelSM extends Model {
                     this.rasterizer.drawMaterializedTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], this.projectedVerticesZ2[a], this.projectedVerticesZ2[b], this.projectedVerticesZ2[c], this.uMap[faceIndex][0], this.uMap[faceIndex][1], this.uMap[faceIndex][2], this.vMap[faceIndex][0], this.vMap[faceIndex][1], this.vMap[faceIndex][2], transparency | this.facesColourA[faceIndex] & 0xffffff, transparency | this.facesColourB[faceIndex] & 0xffffff, transparency | this.facesColourC[faceIndex] & 0xffffff, this.threadResource.fogColor, waterAlphaMultiplierA * 255.0F, waterAlphaMultiplierB * 255.0F, waterAlphaMultiplierC * 255.0F, this.facesMaterial[faceIndex]);
                 }
             } else if (this.facesColourC[faceIndex] == -1) {
-                this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierC * 255.0F));
+                this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierC * 255.0F));
             } else {
-                this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourB[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.hsvToRgbTable[this.facesColourC[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierC * 255.0F));
+                this.rasterizer.drawTriangle(colorWrite, depthWrite, transparent, this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c], this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c], this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c], ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierA * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourB[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierB * 255.0F), ColorUtil.mixColorsWithTransparency(ColorUtil.getHsvToRgbTable()[this.facesColourC[faceIndex] & 0xffff], this.threadResource.fogColor, waterAlphaMultiplierC * 255.0F));
             }
         }
 
@@ -2805,11 +2805,11 @@ public class ModelSM extends Model {
         	int x = this.matrixX[matrixIndex];
         	int y = this.matrixY[matrixIndex];
         	int z = this.matrixZ[matrixIndex];
-        	float depthA = renderMatrix.faceList[2] * x + renderMatrix.faceList[6] * y + renderMatrix.faceList[10] * z + renderMatrix.faceList[14];
-        	float depthB = renderMatrix.faceList[3] * x + renderMatrix.faceList[7] * y + renderMatrix.faceList[11] * z + renderMatrix.faceList[15];
+        	float depthA = renderMatrix.getFaceList()[2] * x + renderMatrix.getFaceList()[6] * y + renderMatrix.getFaceList()[10] * z + renderMatrix.getFaceList()[14];
+        	float depthB = renderMatrix.getFaceList()[3] * x + renderMatrix.getFaceList()[7] * y + renderMatrix.getFaceList()[11] * z + renderMatrix.getFaceList()[15];
             if (depthA >= -depthB) {
-            	float f_31 = renderMatrix.faceList[0] * x + renderMatrix.faceList[4] * y + renderMatrix.faceList[8] * z + renderMatrix.faceList[12];
-            	float f_32 = renderMatrix.faceList[1] * x + renderMatrix.faceList[5] * y + renderMatrix.faceList[9] * z + renderMatrix.faceList[13];
+            	float f_31 = renderMatrix.getFaceList()[0] * x + renderMatrix.getFaceList()[4] * y + renderMatrix.getFaceList()[8] * z + renderMatrix.getFaceList()[12];
+            	float f_32 = renderMatrix.getFaceList()[1] * x + renderMatrix.getFaceList()[5] * y + renderMatrix.getFaceList()[9] * z + renderMatrix.getFaceList()[13];
                 int screenPosX = (int) (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * f_31 / depthB);
                 int screenPosY = (int) (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_32 / depthB);
                 if (screenPosX < left) {
@@ -2835,11 +2835,11 @@ public class ModelSM extends Model {
             	int x = this.verticesX[verticeIndex];
             	int y = this.verticesY[verticeIndex];
             	int z = this.verticesZ[verticeIndex];
-            	float depthA = renderMatrix.faceList[2] * x + renderMatrix.faceList[6] * y + renderMatrix.faceList[10] * z + renderMatrix.faceList[14];
-            	float depthB = renderMatrix.faceList[3] * x + renderMatrix.faceList[7] * y + renderMatrix.faceList[11] * z + renderMatrix.faceList[15];
+            	float depthA = renderMatrix.getFaceList()[2] * x + renderMatrix.getFaceList()[6] * y + renderMatrix.getFaceList()[10] * z + renderMatrix.getFaceList()[14];
+            	float depthB = renderMatrix.getFaceList()[3] * x + renderMatrix.getFaceList()[7] * y + renderMatrix.getFaceList()[11] * z + renderMatrix.getFaceList()[15];
                 if (depthA >= -depthB) {
-                	float multiplierX = renderMatrix.faceList[0] * x + renderMatrix.faceList[4] * y + renderMatrix.faceList[8] * z + renderMatrix.faceList[12];
-                	float multiplierY = renderMatrix.faceList[1] * x + renderMatrix.faceList[5] * y + renderMatrix.faceList[9] * z + renderMatrix.faceList[13];
+                	float multiplierX = renderMatrix.getFaceList()[0] * x + renderMatrix.getFaceList()[4] * y + renderMatrix.getFaceList()[8] * z + renderMatrix.getFaceList()[12];
+                	float multiplierY = renderMatrix.getFaceList()[1] * x + renderMatrix.getFaceList()[5] * y + renderMatrix.getFaceList()[9] * z + renderMatrix.getFaceList()[13];
                     this.projectedVerticesX[verticeIndex] = ((int) (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * multiplierX / depthB));
                     this.projectedVerticesY[verticeIndex] = ((int) (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * multiplierY / depthB));
                 } else {
@@ -2941,7 +2941,7 @@ public class ModelSM extends Model {
             for (int index = 0; index < this.numBillboards; index++) {
                 BillboardEffect effect = this.billboardEffects[index];
                 BillboardSurface surface = this.billboardSurfaces[index];
-                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace]) & 0xffff] & 0xffffff;
+                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace]) & 0xffff] & 0xffffff;
             }
         }
         if (this.appearanceUpdateStage == 2) {
@@ -2998,7 +2998,7 @@ public class ModelSM extends Model {
             for (int faceIndex = 0; faceIndex < this.numBillboards; faceIndex++) {
                 BillboardEffect effect = this.billboardEffects[faceIndex];
                 BillboardSurface surface = this.billboardSurfaces[faceIndex];
-                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
+                surface.diffuseColor = surface.diffuseColor & ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(this.facesColor[effect.appliesOnFace] & 0xffff) & 0xffff] & 0xffffff;
             }
         }
         if (this.appearanceUpdateStage == 2) {
@@ -3092,7 +3092,7 @@ public class ModelSM extends Model {
                 		this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c],
                 		this.projectedVerticesX[a], this.projectedVerticesX[b], this.projectedVerticesX[c],
                 		this.projectedVerticesZ[a], this.projectedVerticesZ[b], this.projectedVerticesZ[c],
-                		ColorUtil.hsvToRgbTable[this.facesColourA[faceIndex] & 0xffff]);
+                		ColorUtil.getHsvToRgbTable()[this.facesColourA[faceIndex] & 0xffff]);
             } else {
                 this.rasterizer.drawShadedTriangle(colorWrite, depthWrite, transparent,
                 		this.projectedVerticesY[a], this.projectedVerticesY[b], this.projectedVerticesY[c],

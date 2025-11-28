@@ -742,9 +742,9 @@ public class WorldMap {
             }
 
             modifiedHsl = lightness + (colorHsl + hueRandomisation & 0xfc00) + (colorHsl & 0x380);
-            finalFloorColor = ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
+            finalFloorColor = ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
         } else if (textureId >= 0) {
-            finalFloorColor = ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(materialProvider.getMaterial(textureId).colorHsl, 96)) & 0xffff];
+            finalFloorColor = ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(ColorUtil.method4162(materialProvider.getMaterial(textureId).colorHsl, 96)) & 0xffff];
         } else if (overlay.tileColorHsl == -1) {
             finalFloorColor = 0;
         } else {
@@ -757,7 +757,7 @@ public class WorldMap {
             }
 
             modifiedHsl = lightness + (colorHsl + hueRandomisation & 0xfc00) + (colorHsl & 0x380);
-            finalFloorColor = ~0xffffff | ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
+            finalFloorColor = ~0xffffff | ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)) & 0xffff];
         }
 
         return finalFloorColor;
@@ -1002,7 +1002,7 @@ public class WorldMap {
 
                             int i_23 = clampedLightness + (i_3 + hsl24 & 0xfc00) + (hsl24 & 0x380);
                             int i_24 = x + y * mapSizeX;
-                            int rgb = ColorUtil.hsvToRgbTable[ColorUtil.adjustHsv(ColorUtil.method14677(i_23, 96)) & 0xffff];
+                            int rgb = ColorUtil.getHsvToRgbTable()[ColorUtil.adjustHsv(ColorUtil.method14677(i_23, 96)) & 0xffff];
                             bytes_1[i_24] = (byte) (rgb >> 16 & 0xff);
                             shorts_2[i_24] = (short) (rgb & 0xffff);
                         }

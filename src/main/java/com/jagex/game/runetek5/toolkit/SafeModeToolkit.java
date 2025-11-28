@@ -400,17 +400,17 @@ public class SafeModeToolkit extends AbstractToolkit {
             int positionX = pointEntry.x >> 12;
             int positionY = pointEntry.y >> 12;
             int positionZ = pointEntry.z >> 12;
-            float f_12 = this.floorMatrix.faceList[14] + this.floorMatrix.faceList[10] * positionZ + positionX * this.floorMatrix.faceList[2] + positionY * this.floorMatrix.faceList[6];
-            float f_13 = this.floorMatrix.faceList[15] + this.floorMatrix.faceList[7] * positionY + this.floorMatrix.faceList[3] * positionX + this.floorMatrix.faceList[11] * positionZ;
+            float f_12 = this.floorMatrix.getFaceList()[14] + this.floorMatrix.getFaceList()[10] * positionZ + positionX * this.floorMatrix.getFaceList()[2] + positionY * this.floorMatrix.getFaceList()[6];
+            float f_13 = this.floorMatrix.getFaceList()[15] + this.floorMatrix.getFaceList()[7] * positionY + this.floorMatrix.getFaceList()[3] * positionX + this.floorMatrix.getFaceList()[11] * positionZ;
             if (f_12 >= -f_13) {
                 float f_14 = this.aFloat8985 + f_12 * this.aFloat8978 / f_13;
                 if (f_12 <= threadResource.aFloat2305) {
-                    float f_15 = this.floorMatrix.faceList[0] * positionX + this.floorMatrix.faceList[4] * positionY + positionZ * this.floorMatrix.faceList[8] + this.floorMatrix.faceList[12];
-                    float f_16 = positionZ * this.floorMatrix.faceList[9] + this.floorMatrix.faceList[1] * positionX + this.floorMatrix.faceList[5] * positionY + this.floorMatrix.faceList[13];
+                    float f_15 = this.floorMatrix.getFaceList()[0] * positionX + this.floorMatrix.getFaceList()[4] * positionY + positionZ * this.floorMatrix.getFaceList()[8] + this.floorMatrix.getFaceList()[12];
+                    float f_16 = positionZ * this.floorMatrix.getFaceList()[9] + this.floorMatrix.getFaceList()[1] * positionX + this.floorMatrix.getFaceList()[5] * positionY + this.floorMatrix.getFaceList()[13];
                     if (f_15 >= -f_13 && f_15 <= f_13 && f_16 >= -f_13 && f_16 <= f_13) {
                         float f_17 = pointEntry.size / 4096.0F;
-                        float f_18 = f_17 * this.modelMatrix.faceList[0] + f_15;
-                        float f_19 = f_13 + this.modelMatrix.faceList[3] * f_17;
+                        float f_18 = f_17 * this.modelMatrix.getFaceList()[0] + f_15;
+                        float f_19 = f_13 + this.modelMatrix.getFaceList()[3] * f_17;
                         float f_20 = this.aFloat9003 + f_15 * this.aFloat8976 / f_13;
                         float f_21 = this.aFloat9004 * f_16 / f_13 + this.aFloat8982;
                         float f_22 = this.aFloat9003 + f_18 * this.aFloat8976 / f_19;
@@ -1572,18 +1572,18 @@ public class SafeModeToolkit extends AbstractToolkit {
     @Override
     public int isOnScreen(int i_1, int i_2, int i_3, int i_4, int i_5, int i_6) {
         int flags = 0;
-        float f_8 = i_3 * this.floorMatrix.faceList[10] + i_2 * this.floorMatrix.faceList[6] + this.floorMatrix.faceList[14] + i_1 * this.floorMatrix.faceList[2];
-        float f_9 = this.floorMatrix.faceList[6] * i_5 + this.floorMatrix.faceList[14] + this.floorMatrix.faceList[2] * i_4 + this.floorMatrix.faceList[10] * i_6;
-        float f_10 = this.floorMatrix.faceList[15] + i_1 * this.floorMatrix.faceList[3] + i_2 * this.floorMatrix.faceList[7] + i_3 * this.floorMatrix.faceList[11];
-        float f_11 = i_5 * this.floorMatrix.faceList[7] + this.floorMatrix.faceList[15] + this.floorMatrix.faceList[3] * i_4 + i_6 * this.floorMatrix.faceList[11];
+        float f_8 = i_3 * this.floorMatrix.getFaceList()[10] + i_2 * this.floorMatrix.getFaceList()[6] + this.floorMatrix.getFaceList()[14] + i_1 * this.floorMatrix.getFaceList()[2];
+        float f_9 = this.floorMatrix.getFaceList()[6] * i_5 + this.floorMatrix.getFaceList()[14] + this.floorMatrix.getFaceList()[2] * i_4 + this.floorMatrix.getFaceList()[10] * i_6;
+        float f_10 = this.floorMatrix.getFaceList()[15] + i_1 * this.floorMatrix.getFaceList()[3] + i_2 * this.floorMatrix.getFaceList()[7] + i_3 * this.floorMatrix.getFaceList()[11];
+        float f_11 = i_5 * this.floorMatrix.getFaceList()[7] + this.floorMatrix.getFaceList()[15] + this.floorMatrix.getFaceList()[3] * i_4 + i_6 * this.floorMatrix.getFaceList()[11];
         if (f_8 < -f_10 && f_9 < -f_11) {
             flags |= 0x10;
         } else if (f_8 > f_10 && f_9 > f_11) {
             flags |= 0x20;
         }
 
-        float f_12 = this.floorMatrix.faceList[4] * i_2 + this.floorMatrix.faceList[12] + i_1 * this.floorMatrix.faceList[0] + i_3 * this.floorMatrix.faceList[8];
-        float f_13 = i_6 * this.floorMatrix.faceList[8] + i_4 * this.floorMatrix.faceList[0] + this.floorMatrix.faceList[12] + this.floorMatrix.faceList[4] * i_5;
+        float f_12 = this.floorMatrix.getFaceList()[4] * i_2 + this.floorMatrix.getFaceList()[12] + i_1 * this.floorMatrix.getFaceList()[0] + i_3 * this.floorMatrix.getFaceList()[8];
+        float f_13 = i_6 * this.floorMatrix.getFaceList()[8] + i_4 * this.floorMatrix.getFaceList()[0] + this.floorMatrix.getFaceList()[12] + this.floorMatrix.getFaceList()[4] * i_5;
         if (f_12 < -f_10 && f_13 < -f_11) {
             flags |= 0x1;
         }
@@ -1592,8 +1592,8 @@ public class SafeModeToolkit extends AbstractToolkit {
             flags |= 0x2;
         }
 
-        float f_14 = this.floorMatrix.faceList[5] * i_2 + i_1 * this.floorMatrix.faceList[1] + this.floorMatrix.faceList[13] + this.floorMatrix.faceList[9] * i_3;
-        float f_15 = this.floorMatrix.faceList[13] + this.floorMatrix.faceList[1] * i_4 + this.floorMatrix.faceList[5] * i_5 + i_6 * this.floorMatrix.faceList[9];
+        float f_14 = this.floorMatrix.getFaceList()[5] * i_2 + i_1 * this.floorMatrix.getFaceList()[1] + this.floorMatrix.getFaceList()[13] + this.floorMatrix.getFaceList()[9] * i_3;
+        float f_15 = this.floorMatrix.getFaceList()[13] + this.floorMatrix.getFaceList()[1] * i_4 + this.floorMatrix.getFaceList()[5] * i_5 + i_6 * this.floorMatrix.getFaceList()[9];
         if (f_14 < -f_10 && f_15 < -f_11) {
             flags |= 0x4;
         }
@@ -1616,10 +1616,10 @@ public class SafeModeToolkit extends AbstractToolkit {
 
     @Override
     public void calculateProjection(float width, float height, float length, float[] matrix) {
-        float z = length * this.floorMatrix.faceList[11] + this.floorMatrix.faceList[7] * height + width * this.floorMatrix.faceList[3] + this.floorMatrix.faceList[15];
-        float x = height * this.floorMatrix.faceList[4] + width * this.floorMatrix.faceList[0] + this.floorMatrix.faceList[12] + this.floorMatrix.faceList[8] * length;
-        float y = height * this.floorMatrix.faceList[5] + width * this.floorMatrix.faceList[1] + this.floorMatrix.faceList[13] + length * this.floorMatrix.faceList[9];
-        float floorOffset = length * this.aClass3848994.faceList[10] + this.aClass3848994.faceList[6] * height + width * this.aClass3848994.faceList[2] + this.aClass3848994.faceList[14];
+        float z = length * this.floorMatrix.getFaceList()[11] + this.floorMatrix.getFaceList()[7] * height + width * this.floorMatrix.getFaceList()[3] + this.floorMatrix.getFaceList()[15];
+        float x = height * this.floorMatrix.getFaceList()[4] + width * this.floorMatrix.getFaceList()[0] + this.floorMatrix.getFaceList()[12] + this.floorMatrix.getFaceList()[8] * length;
+        float y = height * this.floorMatrix.getFaceList()[5] + width * this.floorMatrix.getFaceList()[1] + this.floorMatrix.getFaceList()[13] + length * this.floorMatrix.getFaceList()[9];
+        float floorOffset = length * this.aClass3848994.getFaceList()[10] + this.aClass3848994.getFaceList()[6] * height + width * this.aClass3848994.getFaceList()[2] + this.aClass3848994.getFaceList()[14];
         matrix[0] = this.aFloat9003 + x * this.aFloat8976 / z;
         matrix[1] = this.aFloat8982 + y * this.aFloat9004 / z;
         matrix[2] = floorOffset;
@@ -2106,8 +2106,8 @@ public class SafeModeToolkit extends AbstractToolkit {
         this.floorMatrix.method6613(this.aFloatArrayArray8989[4]);
         this.floorMatrix.method6538(this.aFloatArrayArray8989[5]);
         float f_1 = this.modelMatrix.getDepthPerspectiveCD();
-        float f_2 = this.modelMatrix.faceList[10] * (f_1 - 255.0F) + this.modelMatrix.faceList[14];
-        float f_3 = this.modelMatrix.faceList[10] * f_1 + this.modelMatrix.faceList[14];
+        float f_2 = this.modelMatrix.getFaceList()[10] * (f_1 - 255.0F) + this.modelMatrix.getFaceList()[14];
+        float f_3 = this.modelMatrix.getFaceList()[10] * f_1 + this.modelMatrix.getFaceList()[14];
         float f_4 = f_3 - f_2;
 
         for (int i_5 = 0; i_5 < this.executingThreadCount; i_5++) {
@@ -2167,14 +2167,14 @@ public class SafeModeToolkit extends AbstractToolkit {
 
     @Override
     public void computeWorldToScreen(float f_1, float f_2, float f_3, float[] floats_4) {
-        float f_5 = this.floorMatrix.faceList[10] * f_3 + f_1 * this.floorMatrix.faceList[2] + this.floorMatrix.faceList[14] + f_2 * this.floorMatrix.faceList[6];
-        float f_6 = this.floorMatrix.faceList[3] * f_1 + this.floorMatrix.faceList[15] + this.floorMatrix.faceList[7] * f_2 + f_3 * this.floorMatrix.faceList[11];
+        float f_5 = this.floorMatrix.getFaceList()[10] * f_3 + f_1 * this.floorMatrix.getFaceList()[2] + this.floorMatrix.getFaceList()[14] + f_2 * this.floorMatrix.getFaceList()[6];
+        float f_6 = this.floorMatrix.getFaceList()[3] * f_1 + this.floorMatrix.getFaceList()[15] + this.floorMatrix.getFaceList()[7] * f_2 + f_3 * this.floorMatrix.getFaceList()[11];
         if (f_5 >= -f_6 && f_5 <= f_6) {
-            float f_7 = f_2 * this.floorMatrix.faceList[4] + this.floorMatrix.faceList[12] + f_1 * this.floorMatrix.faceList[0] + this.floorMatrix.faceList[8] * f_3;
+            float f_7 = f_2 * this.floorMatrix.getFaceList()[4] + this.floorMatrix.getFaceList()[12] + f_1 * this.floorMatrix.getFaceList()[0] + this.floorMatrix.getFaceList()[8] * f_3;
             if (f_7 >= -f_6 && f_7 <= f_6) {
-                float f_8 = f_3 * this.floorMatrix.faceList[9] + this.floorMatrix.faceList[13] + this.floorMatrix.faceList[1] * f_1 + this.floorMatrix.faceList[5] * f_2;
+                float f_8 = f_3 * this.floorMatrix.getFaceList()[9] + this.floorMatrix.getFaceList()[13] + this.floorMatrix.getFaceList()[1] * f_1 + this.floorMatrix.getFaceList()[5] * f_2;
                 if (f_8 >= -f_6 && f_8 <= f_6) {
-                    float f_9 = this.aClass3848994.faceList[14] + this.aClass3848994.faceList[2] * f_1 + this.aClass3848994.faceList[6] * f_2 + this.aClass3848994.faceList[10] * f_3;
+                    float f_9 = this.aClass3848994.getFaceList()[14] + this.aClass3848994.getFaceList()[2] * f_1 + this.aClass3848994.getFaceList()[6] * f_2 + this.aClass3848994.getFaceList()[10] * f_3;
                     floats_4[0] = this.aFloat9003 + f_7 * this.aFloat8976 / f_6;
                     floats_4[1] = f_8 * this.aFloat9004 / f_6 + this.aFloat8982;
                     floats_4[2] = f_9;
