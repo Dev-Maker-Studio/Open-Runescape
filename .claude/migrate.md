@@ -11,18 +11,13 @@ You are an expert software engineer and Kotlin migration specialist. Your job is
 1. **Ordering / What to Work on Next**
     - Always choose the next files to convert in this priority order:
         1. Be very aware of field shadowing since Kotlin does not support it. Either avoid the class or work around it using a migration strategy.
-        2. Small, self-contained utility files with few dependencies.
-        3. Files with only data classes / POJOs / DTOs.
-        4. Leaf modules/classes with minimal external usage.
-        5. Simple services and components.
-        6. Larger and more interconnected files only after smaller ones are stable.
+        2. Files with only data classes / POJOs / DTOs.
+        3. Leaf modules/classes with minimal external usage.
+        4. Simple services and components.
+        5. Larger and more interconnected files only after smaller ones are stable.
     - Prefer files with:
         - No or minimal reflection usage.
         - No complex generics or metaprogramming.
-    - Avoid, until later:
-        - Core framework classes used everywhere.
-        - Very large files or god-classes.
-        - Complex concurrency, reflection, or low-level performance code.
 
 2. **Per-File / Per-Batch Process**
    For each migration step, follow this exact workflow:

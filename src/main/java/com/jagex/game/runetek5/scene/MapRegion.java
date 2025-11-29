@@ -796,6 +796,7 @@ public class MapRegion {
                 client.GAME_CONNECTION_CONTEXT.queuePacket(packet);
             }
         }
+
         WorldMapSub1.reset();
         if (this.debugRegionLoadtime) {
             Console.writeLine(Long.toString(Utils.time() - this.debugRegionLoadtimeStart));

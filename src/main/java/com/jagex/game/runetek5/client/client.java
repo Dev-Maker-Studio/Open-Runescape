@@ -1421,6 +1421,7 @@ public class client extends GameShell {
                 Resource.mapRegion.loadRegion();
             }
 
+
             if (GameState.isLoggedOut(gameState) && !GameState.isLoadingRegion(gameState)) {
                 method12044();
                 AccountCreationStage.handleAccountCreationStart();

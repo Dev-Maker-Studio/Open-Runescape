@@ -598,6 +598,7 @@ public class LoginManager {
 	                        LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacket = null;
 	                    }
 	                } else if (LoginManager.loginStage == LoginStage.UNK_196) {
+                        System.out.println("Logging in check");
 	                    if (LoginManager.CURRENT_CONNECTION_CONTEXT.currentPacketSize == -2) {
 	                        if (!LoginManager.CURRENT_CONNECTION_CONTEXT.getConnection().available(2)) {
 	                            return;
