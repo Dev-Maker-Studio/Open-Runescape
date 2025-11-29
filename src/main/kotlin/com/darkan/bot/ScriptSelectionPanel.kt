@@ -297,8 +297,9 @@ class ScriptSelectionPanel : JPanel(BorderLayout()) {
                         if (isRunning) {
                             ScriptExecutor.deactivate(metadata.scriptClass)
                         } else {
-                            val instance = configuredInstances.remove(metadata.scriptClass)
-                                ?: metadata.scriptClass.getDeclaredConstructor().newInstance()
+                            val instance = configuredInstances.getOrPut(metadata.scriptClass) {
+                                metadata.scriptClass.getDeclaredConstructor().newInstance()
+                            }
 
                             ScriptExecutor.activate(instance as Script)
                         }

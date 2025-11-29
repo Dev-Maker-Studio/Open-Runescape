@@ -76,7 +76,7 @@ object ScriptExecutor {
     fun deactivate(scriptClass: Class<*>) {
         val instance = _activeScripts[scriptClass.name]
         if (instance != null)
-            deactivate(instance)
+            instance.stop()
     }
 
     fun stopAll() = _activeScripts.values.toList().forEach { it.stop() }
