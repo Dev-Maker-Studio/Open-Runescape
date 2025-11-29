@@ -4,6 +4,7 @@ import com.darkan.bot.scripts.ConfigurableScript
 import com.darkan.bot.scripts.Script
 import com.darkan.bot.scripts.ScriptExecutor
 import com.darkan.bot.scripts.ScriptMetadata
+import com.darkan.bot.scripts.getScriptsDirectory
 import java.awt.*
 import java.io.File
 import javax.swing.*
@@ -55,6 +56,30 @@ class ScriptSelectionPanel : JPanel(BorderLayout()) {
                 add(searchField)
                 add(JLabel("Status:"))
                 add(statusFilter)
+                add(JButton("Reload Scripts").apply {
+                    toolTipText = "Reload all scripts from disk (including .kts files)"
+                    addActionListener {
+                        try {
+                            println("Reloading scripts...")
+                            ScriptExecutor.loadScripts()
+                            updateFilteredCards()
+                            JOptionPane.showMessageDialog(
+                                this@ScriptSelectionPanel,
+                                "Scripts reloaded successfully!\nLoaded ${ScriptExecutor.scripts.size} script(s)",
+                                "Reload Complete",
+                                JOptionPane.INFORMATION_MESSAGE
+                            )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            JOptionPane.showMessageDialog(
+                                this@ScriptSelectionPanel,
+                                "Failed to reload scripts: ${e.message}",
+                                "Reload Error",
+                                JOptionPane.ERROR_MESSAGE
+                            )
+                        }
+                    }
+                })
                 add(JButton("Stop All").apply {
                     addActionListener {
                         ScriptExecutor.scripts.values.forEach {
@@ -63,6 +88,26 @@ class ScriptSelectionPanel : JPanel(BorderLayout()) {
                             }
                         }
                         updateFilteredCards()
+                    }
+                })
+                add(JButton("Open Scripts Folder").apply {
+                    toolTipText = "Open the scripts folder in your file manager"
+                    addActionListener {
+                        try {
+                            val scriptsDir = getScriptsDirectory()
+                            if (Desktop.isDesktopSupported()) {
+                                Desktop.getDesktop().open(scriptsDir)
+                            } else {
+                                JOptionPane.showMessageDialog(
+                                    this@ScriptSelectionPanel,
+                                    "Scripts folder: ${scriptsDir.absolutePath}",
+                                    "Scripts Location",
+                                    JOptionPane.INFORMATION_MESSAGE
+                                )
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 })
             }

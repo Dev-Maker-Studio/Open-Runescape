@@ -51,6 +51,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     implementation("io.github.classgraph:classgraph:4.8.177")
     implementation("com.github.weisj:darklaf-core:3.0.2")
+
+    //kotlinscript support
+    implementation("org.jetbrains.kotlin:kotlin-scripting-common:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies:2.2.21")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven:2.2.21")
 }
 
 publishing {

@@ -142,29 +142,35 @@ object ScriptExecutor {
 
         val scriptsDir = getScriptsDirectoryFile()
 
+        // Scan for compiled classes (JAR and .class files)
         val scriptsDirectoryScanner = ClassScannerFactory.create(
             path = scriptsDir.absolutePath,
             type = ScannerType.BOTH
         )
 
+        // Scan for current project scripts
         val currentProjectScanner = CurrentProjectScriptsScanner()
 
-        val foundClassPaths = scriptsDirectoryScanner.scan() + currentProjectScanner.scan()
+        // Scan for .kts files
+        val kotlinScriptScanner = KotlinScriptScanner(scriptsDir)
+
+        // Combine all found scripts
+        val foundClassPaths = scriptsDirectoryScanner.scan() +
+                             currentProjectScanner.scan() +
+                             kotlinScriptScanner.scan()
+
         val scripts = foundClassPaths
             .mapNotNull { isScriptClass(it) }
             .sortedBy { it.getAnnotation(ScriptDescription::class.java).name }
 
         clearScripts()
         scripts.forEach(::registerScript)
+
+        println("✓ Loaded ${scripts.size} script(s)")
     }
 
     private fun getScriptsDirectoryFile(): File {
-        val userHome = System.getProperty("user.home")
-        val scriptsDir = File(userHome, ".undercut").resolve("scripts")
-        if (!scriptsDir.exists()) {
-            scriptsDir.mkdirs()
-        }
-        return scriptsDir
+        return getScriptsDirectory()
     }
 }
 
