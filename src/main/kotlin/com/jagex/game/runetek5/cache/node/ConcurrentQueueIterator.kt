@@ -14,7 +14,7 @@ class ConcurrentQueueIterator(
         if (this.concurrentQueue.accessingThreadId != this.accessingThreadId) {
             throw ConcurrentModificationException()
         } else if (this.currentPosition < this.concurrentQueue.currentPosition) {
-            val nodeObject = this.concurrentQueue.queuedObjectNodes[this.currentPosition].`object`
+            val nodeObject = this.concurrentQueue.queuedObjectNodes[this.currentPosition]!!.`object`
             this.currentPosition++
             return nodeObject
         } else {

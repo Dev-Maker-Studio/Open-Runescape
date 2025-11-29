@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.client.login
 
-import com.jagex.game.launch.Loader.MAJOR_BUILD
-import com.jagex.game.launch.Loader.MINOR_BUILD
+import com.jagex.game.launch.Loader.Companion.MAJOR_BUILD
+import com.jagex.game.launch.Loader.Companion.MINOR_BUILD
 import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.client.client
 import com.jagex.game.runetek5.config.Identifiable
