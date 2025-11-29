@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.client.login;
 
 import java.io.IOException;
 
+import com.darkan.bot.Bot;
 import com.jagex.game.runetek5.botdetection.ReflectionCheckManager;
 import com.jagex.game.runetek5.buffer.Packet;
 import com.jagex.game.runetek5.cache.FileOnDisk;
@@ -934,6 +935,19 @@ public class LoginManager {
 	public static int RECOVERYQUESTIONSSETDATE;
 
 	public static boolean setGameHost(int world, String host) {
+	    if (Bot.ENABLED) {
+	        boolean worldInList = false;
+	        for (int i = 0; i < WorldConnection.WORLD_DESCRIPTORS_BYID.length; i++) {
+	            if (WorldConnection.WORLD_DESCRIPTORS_BYID[i] != null &&
+	                WorldConnection.WORLD_DESCRIPTORS_BYID[i].worldNumber == world) {
+	                worldInList = true;
+	                break;
+	            }
+	        }
+	        if (!worldInList)
+	            return false;
+	    }
+
 	    GAME_CONNECTION_INFO = new ConnectionInfo();
 	    GAME_CONNECTION_INFO.worldId = world;
 	    GAME_CONNECTION_INFO.host = host;
