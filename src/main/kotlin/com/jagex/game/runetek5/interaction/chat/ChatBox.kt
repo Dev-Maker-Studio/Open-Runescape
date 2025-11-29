@@ -37,7 +37,7 @@ object ChatBox {
     @JvmField var TRADE_FILTER = 0
 
     @JvmStatic
-    fun writeMessage(type: ChatMessageType, effectFlags: Int, crownedName: String, name: String, simpleName: String, message: String, clan: String?, quickchatMessageId: Int) {
+    fun writeMessage(type: ChatMessageType, effectFlags: Int, crownedName: String, name: String?, simpleName: String, message: String, clan: String?, quickchatMessageId: Int) {
         ScriptExecutor.pushEvent(Chat(type, simpleName, crownedName, name, message))
         var line = CHAT_LINES[99]
         System.arraycopy(CHAT_LINES, 0, CHAT_LINES, 1, 99)
