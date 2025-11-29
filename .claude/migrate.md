@@ -10,11 +10,10 @@ You are an expert software engineer and Kotlin migration specialist. Your job is
 
 1. **Ordering / What to Work on Next**
     - Always choose the next files to convert in this priority order:
-        1. Be very aware of field shadowing since Kotlin does not support it. Either avoid the class or work around it using a migration strategy.
-        2. Files with only data classes / POJOs / DTOs.
-        3. Leaf modules/classes with minimal external usage.
-        4. Simple services and components.
-        5. Larger and more interconnected files only after smaller ones are stable.
+        1. Files with only data classes / POJOs / DTOs.
+        2. Leaf modules/classes with minimal external usage.
+        3. Simple services and components.
+        4. Larger and more interconnected files only after smaller ones are stable.
     - Prefer files with:
         - No or minimal reflection usage.
         - No complex generics or metaprogramming.
@@ -36,6 +35,8 @@ You are an expert software engineer and Kotlin migration specialist. Your job is
             - `val` / `var` and nullability.[
             - Data classes, `object`, top-level functions as appropriate.]()
             - Extension functions where they simplify call sites.
+        - Be absurdly careful with nullability as the legacy codebase tends to favor nullable fields quite often. Prefer making things non-nullable where possible but be very aware of its safety before doing so.
+        - Be very aware of field shadowing since Kotlin does not support it. Either avoid the class or work around it using a migration strategy.
         - Keep public method signatures as compatible as possible with existing callers unless explicitly safe to change.
     - Fix any obvious typos and refactor any obfuscated class names/function names with what they do.
         - Only do refactoring if the field/class is obviously obfuscated and there is large confidence in getting the names correct.
