@@ -96,7 +96,7 @@ object HintRenderer {
             absX = width / 2 + (graphNode.startX.toInt() shl 9)
             absY = length / 2 + (graphNode.startZ.toInt() shl 9)
         } else {
-            val abs = graphNode.absolutePosition.coords
+            val abs = graphNode.getAbsolutePosition().coords
             absX = abs.x.toInt()
             absY = abs.z.toInt()
         }
@@ -132,7 +132,7 @@ object HintRenderer {
                     val objectNode = client.NPC_MAP[arrow.targetIndex.toLong()] as? ObjectNode
                     if (objectNode != null) {
                         val npc = objectNode.value as NpcEntity
-                        val abs = npc.absolutePosition.coords
+                        val abs = npc.getAbsolutePosition().coords
                         val x = (abs.x / 128 - offsetX / 128).toInt()
                         val y = (abs.z / 128 - offsetY / 128).toInt()
                         draw(component, sprite, clipLeft, clipTop, x, y, arrow.arrowSprite, 360000L)
@@ -150,7 +150,7 @@ object HintRenderer {
                 if (arrow.targetType == 10 && arrow.targetIndex >= 0 && arrow.targetIndex < PlayerUpdate.players.size) {
                     val player = PlayerUpdate.players[arrow.targetIndex]
                     if (player != null) {
-                        val abs = player.absolutePosition.coords
+                        val abs = player.getAbsolutePosition().coords
                         val x = (abs.x / 128 - offsetX / 128).toInt()
                         val y = (abs.z / 128 - offsetY / 128).toInt()
                         draw(component, sprite, clipLeft, clipTop, x, y, arrow.arrowSprite, 360000L)
