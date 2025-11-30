@@ -82,7 +82,7 @@ class CursorTypeList(
             }
             if (cursor != client.CURRENT_CURSOR) {
                 if (cursor != -1) {
-                    val cursortype = TypeLists.CURSOR.list(cursor)
+                    val cursortype = TypeLists.CURSOR!!.list(cursor)
                     val spritetype = cursortype.getSprite()
                     if (spritetype != null) {
                         CursorManager.instance!!.setCustomCursor(

@@ -132,9 +132,9 @@ class QuickchatMessageType : CacheableNode() {
             var shorts_3 = ShortArray(16)
             var i_4 = 0
             val i_5 = if (bool1) 32768 else 0
-            val i_6 = (if (bool1) TypeLists.QUICK_CHAT_MESSAGE.menuCount else TypeLists.QUICK_CHAT_MESSAGE.messageCount) + i_5
+            val i_6 = (if (bool1) TypeLists.QUICK_CHAT_MESSAGE!!.menuCount else TypeLists.QUICK_CHAT_MESSAGE!!.messageCount) + i_5
             for (i_7 in i_5 until i_6) {
-                val quickchatdefinitions12 = TypeLists.QUICK_CHAT_MESSAGE.listMessage(i_7)
+                val quickchatdefinitions12 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_7)
                 if (quickchatdefinitions12.searchable && quickchatdefinitions12.method14898().lowercase().indexOf(searchString) != -1) {
                     if (i_4 >= 50) {
                         CS2Interpreter.CS2_QUERY_RESULTS_LEN = -1
@@ -154,7 +154,7 @@ class QuickchatMessageType : CacheableNode() {
             CS2Interpreter.CS2_QUERY_RESULTS_LEN = i_4
             val arr_11 = Array(CS2Interpreter.CS2_QUERY_RESULTS_LEN) { "" }
             for (i_8 in 0 until CS2Interpreter.CS2_QUERY_RESULTS_LEN) {
-                arr_11[i_8] = TypeLists.QUICK_CHAT_MESSAGE.listMessage(shorts_3[i_8].toInt()).method14898()
+                arr_11[i_8] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(shorts_3[i_8].toInt()).method14898()
             }
             Utils.sortAlphabetically(arr_11, ColorImageCache.CS2_QUERY_RESULTS)
         }

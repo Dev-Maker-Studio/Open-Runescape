@@ -40,12 +40,12 @@ class ConfigNodeMap {
         if (intNode != null) {
             return intNode.value
         }
-        val varType = TypeLists.VAR.list(varId)
+        val varType = TypeLists.VAR!!.list(varId)
         return if (varType.aChar4328.code != 105) -1 else 0
     }
 
     fun getVarbit(varbitId: Int): Int {
-        val varbitType = TypeLists.VARPBIT.list(varbitId)
+        val varbitType = TypeLists.VARPBIT!!.list(varbitId)
         val configIndex = varbitType.configIndex
         val mask = if (varbitType.endBit == 31) -1 else (1 shl varbitType.endBit + 1) - 1
         return (getVarp(configIndex) and mask) ushr varbitType.startBit

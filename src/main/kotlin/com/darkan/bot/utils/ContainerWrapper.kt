@@ -10,7 +10,7 @@ class ContainerWrapper(var container: ItemContainer) {
         var amtOf = 0
         for (i in container.itemIds.indices) {
             if (container.itemIds[i] != -1) {
-                if (TypeLists.OBJ.list(getItem(i)).name.lowercase().contains(name)) {
+                if (TypeLists.OBJ!!.list(getItem(i)).name.lowercase().contains(name)) {
                     amtOf += container.amounts[i]
                 }
             }
@@ -21,7 +21,7 @@ class ContainerWrapper(var container: ItemContainer) {
     fun getSlotByItem(name: String): Int {
         for (i in container.itemIds.indices) {
             if (container.itemIds[i] != -1) {
-                if (TypeLists.OBJ.list(getItem(i)).name.lowercase().contains(name)) {
+                if (TypeLists.OBJ!!.list(getItem(i)).name.lowercase().contains(name)) {
                     return i
                 }
             }
@@ -32,7 +32,7 @@ class ContainerWrapper(var container: ItemContainer) {
     fun getSlotByItemOfGreaterAmount(name: String, minAmount: Int): Int {
         for (i in container.itemIds.indices) {
             if (container.itemIds[i] != -1) {
-                if (TypeLists.OBJ.list(getItem(i)).name.lowercase().contains(name) && container.amounts[i] > minAmount) {
+                if (TypeLists.OBJ!!.list(getItem(i)).name.lowercase().contains(name) && container.amounts[i] > minAmount) {
                     return i
                 }
             }
@@ -65,7 +65,7 @@ class ContainerWrapper(var container: ItemContainer) {
     fun getItemId(name: String): Int {
         for (i in container.itemIds.indices) {
             if (container.itemIds[i] != -1) {
-                val defs: ItemType = TypeLists.OBJ.list(getItem(i))
+                val defs: ItemType = TypeLists.OBJ!!.list(getItem(i))
                 if (!defs.name.equals(name, ignoreCase = true)) {
                     return container.itemIds[i]
                 }
@@ -104,7 +104,7 @@ class ContainerWrapper(var container: ItemContainer) {
     fun numberOf(string: String): Int {
         var amount = 0
         for (i in container.itemIds.indices) {
-            if (TypeLists.OBJ.list(getItem(i)).name.lowercase().contains(string))
+            if (TypeLists.OBJ!!.list(getItem(i)).name.lowercase().contains(string))
                 amount += getAmount(i)
         }
         return amount

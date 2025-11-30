@@ -35,12 +35,12 @@ class CutsceneObject(buffer: Packet) {
         if (locId < 0) {
             return true
         }
-        val locType: ObjectType = TypeLists.LOC.list(locId)
+        val locType: ObjectType = TypeLists.LOC!!.list(locId)
         var cached = locType.isTypeCached(locShape.shape)
         val seqIds = locType.getAnimations()
         if (seqIds != null) {
             for (seqId in seqIds) {
-                cached = cached and TypeLists.SEQ.list(seqId).ready()
+                cached = cached and TypeLists.SEQ!!.list(seqId).ready()
             }
         }
         return cached

@@ -88,7 +88,7 @@ object DebugDisplay {
                 23 -> {
                     Console.writeLine(Component.NATIVE_SPRITE_CACHE.getCapacityLeft().toString() + " " + Component.NATIVE_SPRITE_CACHE.getCapacity())
                     Console.writeLine(Component.MODEL_CACHE.getCapacityLeft().toString() + " " + Component.MODEL_CACHE.getCapacity())
-                    Console.writeLine(TypeLists.OBJ.spriteDrawQueue.getCurrentCapacity().toString() + " " + TypeLists.OBJ.spriteDrawQueue.getMaxCapacity())
+                    Console.writeLine(TypeLists.OBJ!!.spriteDrawQueue.getCurrentCapacity().toString() + " " + TypeLists.OBJ!!.spriteDrawQueue.getMaxCapacity())
                 }
                 16 -> TypeLists.resetCachedData(false)
                 15 -> {

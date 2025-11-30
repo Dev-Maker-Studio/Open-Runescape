@@ -18,14 +18,14 @@ object GroundItemUpdating {
             groundItemWrapper = GroundItemWrapper()
             client.GROUND_ITEMS.put(groundItemWrapper, uid)
         } else {
-            val addedObjType = TypeLists.OBJ.list(addedGroundItem.id)
+            val addedObjType = TypeLists.OBJ!!.list(addedGroundItem.id)
             var addedItemValue = addedObjType.value
             if (addedObjType.stackable == 1) {
                 addedItemValue *= addedGroundItem.amount + 1
             }
             var existingGroundItem = groundItemWrapper.groundItems.getFirst() as GroundItemNode?
             while (existingGroundItem != null) {
-                val existingObjType = TypeLists.OBJ.list(existingGroundItem.id)
+                val existingObjType = TypeLists.OBJ!!.list(existingGroundItem.id)
                 var existingItemValue = existingObjType.value
                 if (existingObjType.stackable == 1) {
                     existingItemValue *= existingGroundItem.amount + 1

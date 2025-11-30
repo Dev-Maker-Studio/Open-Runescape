@@ -47,6 +47,6 @@ open class WorldObject : Tile {
     }
 
     fun getDefinitions(): ObjectType {
-        return TypeLists.LOC.list(id)
+        return TypeLists.LOC!!.list(id)
     }
 }

@@ -103,9 +103,9 @@ class CutsceneProjectile(rsbytebuffer1: Packet, i_2: Int, i_3: Int) : CutsceneAc
     }
 
     override fun isFullyCached(): Boolean {
-        val gfxType = TypeLists.SPOT_ANIM.list(gfxId)
+        val gfxType = TypeLists.SPOT_ANIM!!.list(gfxId)
         var loaded = gfxType.isModelLoaded()
-        val seqType = TypeLists.SEQ.list(gfxType.sequenceId)
+        val seqType = TypeLists.SEQ!!.list(gfxType.sequenceId)
         loaded = loaded and seqType.ready()
         return loaded
     }

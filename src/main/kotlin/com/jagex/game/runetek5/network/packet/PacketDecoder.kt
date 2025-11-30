@@ -364,7 +364,7 @@ object PacketDecoder {
             if (!ignore) {
                 client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = messageUniqueHash
                 client.anInt7389 = (client.anInt7389 + 1) % 100
-                val qcMessage = TypeLists.QUICK_CHAT_MESSAGE.listMessage(qcMsgId).fillDynamicValues(buffer)
+                val qcMessage = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(qcMsgId).fillDynamicValues(buffer)
                 if (rights == 2) {
                     ChatBox.writeMessage(ChatMessageType.PRIVATE_QUICKCHAT, 0, TextUtils.getCrown(1) + crownedName, TextUtils.getCrown(1) + name, crownedName, qcMessage, null, qcMsgId)
                 } else if (rights == 1) {
@@ -456,9 +456,9 @@ object PacketDecoder {
                     val curGfxId = npcGfx.spotAnimationId
                     if (reqGfxId != -1 && curGfxId != -1) {
                         if (reqGfxId == curGfxId) {
-                            val reqGfx = TypeLists.SPOT_ANIM.list(reqGfxId)
+                            val reqGfx = TypeLists.SPOT_ANIM!!.list(reqGfxId)
                             if (reqGfx.replay && reqGfx.sequenceId != -1) {
-                                val reqGfxSeq = TypeLists.SEQ.list(reqGfx.sequenceId)
+                                val reqGfxSeq = TypeLists.SEQ!!.list(reqGfx.sequenceId)
                                 val reqLoopType = reqGfxSeq.loopType
                                 if (reqLoopType != 0 && reqLoopType != 2) {
                                     if (reqLoopType == 1) {
@@ -468,11 +468,11 @@ object PacketDecoder {
                                 }
                             }
                         } else {
-                            val reqGfx = TypeLists.SPOT_ANIM.list(reqGfxId)
-                            val curGfx = TypeLists.SPOT_ANIM.list(curGfxId)
+                            val reqGfx = TypeLists.SPOT_ANIM!!.list(reqGfxId)
+                            val curGfx = TypeLists.SPOT_ANIM!!.list(curGfxId)
                             if (reqGfx.sequenceId != -1 && curGfx.sequenceId != -1) {
-                                val reqSeq = TypeLists.SEQ.list(reqGfx.sequenceId)
-                                val curSeq = TypeLists.SEQ.list(curGfx.sequenceId)
+                                val reqSeq = TypeLists.SEQ!!.list(reqGfx.sequenceId)
+                                val curSeq = TypeLists.SEQ!!.list(curGfx.sequenceId)
                                 if (reqSeq.priority < curSeq.priority) {
                                     overwriteCurrent = false
                                 }
@@ -484,7 +484,7 @@ object PacketDecoder {
                         npcGfx.height = height
                         npcGfx.adjustmentType = setting1
                         if (reqGfxId != -1) {
-                            val reqGfx = TypeLists.SPOT_ANIM.list(reqGfxId)
+                            val reqGfx = TypeLists.SPOT_ANIM!!.list(reqGfxId)
                             var replayMode = if (reqGfx.replay) 0 else 2
                             if (setting2) {
                                 replayMode = 1
@@ -509,9 +509,9 @@ object PacketDecoder {
                     val i_34 = class161121.spotAnimationId
                     if (reqGfxId != -1 && i_34 != -1) {
                         if (i_34 == reqGfxId) {
-                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM.list(reqGfxId)
+                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM!!.list(reqGfxId)
                             if (spotanimdefinitions125.replay && spotanimdefinitions125.sequenceId != -1) {
-                                val animationdefinitions124 = TypeLists.SEQ.list(spotanimdefinitions125.sequenceId)
+                                val animationdefinitions124 = TypeLists.SEQ!!.list(spotanimdefinitions125.sequenceId)
                                 val i_40 = animationdefinitions124.loopType
                                 if (i_40 != 0 && i_40 != 2) {
                                     if (i_40 == 1) {
@@ -521,11 +521,11 @@ object PacketDecoder {
                                 }
                             }
                         } else {
-                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM.list(reqGfxId)
-                            val spotanimdefinitions38 = TypeLists.SPOT_ANIM.list(i_34)
+                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM!!.list(reqGfxId)
+                            val spotanimdefinitions38 = TypeLists.SPOT_ANIM!!.list(i_34)
                             if (spotanimdefinitions125.sequenceId != -1 && spotanimdefinitions38.sequenceId != -1) {
-                                val animationdefinitions86 = TypeLists.SEQ.list(spotanimdefinitions125.sequenceId)
-                                val animationdefinitions123 = TypeLists.SEQ.list(spotanimdefinitions38.sequenceId)
+                                val animationdefinitions86 = TypeLists.SEQ!!.list(spotanimdefinitions125.sequenceId)
+                                val animationdefinitions123 = TypeLists.SEQ!!.list(spotanimdefinitions38.sequenceId)
                                 if (animationdefinitions86.priority < animationdefinitions123.priority) {
                                     bool16 = false
                                 }
@@ -538,7 +538,7 @@ object PacketDecoder {
                         class161121.adjustmentType = setting1
                         class161121.rotation = rotation
                         if (reqGfxId != -1) {
-                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM.list(reqGfxId)
+                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM!!.list(reqGfxId)
                             var i_83 = if (spotanimdefinitions125.replay) 0 else 2
                             if (setting2) {
                                 i_83 = 1
@@ -670,7 +670,7 @@ object PacketDecoder {
             val msgId = buffer.readUShort()
             val ignore = rights <= 1 && IgnoreList.contains(crownedUsername)
             if (!ignore) {
-                val message = TypeLists.QUICK_CHAT_MESSAGE.listMessage(msgId).fillDynamicValues(buffer)
+                val message = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(msgId).fillDynamicValues(buffer)
                 if (rights == 2) {
                     ChatBox.writeMessage(ChatMessageType.GROUP_QUICKCHAT, 0, TextUtils.getCrown(1) + username, TextUtils.getCrown(1) + crownedUsername, username, message, null, msgId)
                 } else if (rights == 1) {
@@ -887,7 +887,7 @@ object PacketDecoder {
             val key = buffer.readUShort()
             val string_88 = buffer.readString()
             if (ClanVarTypeList.CLAN_VARS == null) {
-                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
+                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = string_88
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
@@ -1003,7 +1003,7 @@ object PacketDecoder {
             if (!bool14) {
                 client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_53
                 client.anInt7389 = (client.anInt7389 + 1) % 100
-                val string_17 = TypeLists.QUICK_CHAT_MESSAGE.listMessage(i_11).fillDynamicValues(buffer)
+                val string_17 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_11).fillDynamicValues(buffer)
                 val messageType = if (nonGuest) ChatMessageType.CLAN_QUICKCHAT else ChatMessageType.GUEST_CLAN_QUICKCHAT
                 if (i_10 != 2 && i_10 != 3) {
                     if (i_10 == 1) {
@@ -1021,7 +1021,7 @@ object PacketDecoder {
             val key = buffer.readUShort()
             val long_47 = buffer.readLong()
             if (ClanVarTypeList.CLAN_VARS == null) {
-                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
+                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = long_47
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
@@ -1058,7 +1058,7 @@ object PacketDecoder {
             if (!bool115) {
                 client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_57
                 client.anInt7389 = (client.anInt7389 + 1) % 100
-                val string_41 = TypeLists.QUICK_CHAT_MESSAGE.listMessage(i_77).fillDynamicValues(buffer)
+                val string_41 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_77).fillDynamicValues(buffer)
                 if (i_35 == 2) {
                     ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + str92, string_88, string_41, TextUtils.decodeUidName(long_28), i_77)
                 } else if (i_35 == 1) {
@@ -1072,7 +1072,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_PRIVATE_ECHO) {
             val string_63 = buffer.readString()
             val flags = buffer.readUShort()
-            val str92 = TypeLists.QUICK_CHAT_MESSAGE.listMessage(flags).fillDynamicValues(buffer)
+            val str92 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(flags).fillDynamicValues(buffer)
             ChatBox.writeMessage(ChatMessageType.PRIVATE_QUICKCHAT_ECHO, 0, string_63, string_63, string_63, str92, null, flags)
             context.currentPacket = null
             return true
@@ -1080,7 +1080,7 @@ object PacketDecoder {
             val key = buffer.readUShort()
             val flags = buffer.readInt()
             if (ClanVarTypeList.CLAN_VARS == null) {
-                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
+                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = flags
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
@@ -1181,7 +1181,7 @@ object PacketDecoder {
             val key = buffer.readUShort()
             val b_84 = buffer.readByte()
             if (ClanVarTypeList.CLAN_VARS == null) {
-                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
+                ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = b_84.toInt()
             client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
@@ -1646,7 +1646,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARCLAN_ENABLE) {
-            ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR.size)
+            ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETRECOL) {
@@ -1774,7 +1774,7 @@ object PacketDecoder {
             val amount = buffer.readUIntInverseMiddle()
             client.requestVarVerifyid()
             PulseEventQueue.priorityIfitemUpdate(interfaceHash, itemId, amount)
-            val defs = TypeLists.OBJ.list(itemId)
+            val defs = TypeLists.OBJ!!.list(itemId)
             PulseEventQueue.priorityIfangleUpdate(interfaceHash, defs.modelRotationX, defs.modelRotationY, defs.modelZoom)
             PulseEventQueue.priorityIfoffsetUpdate(interfaceHash, defs.modelOffsetX, defs.modelOffsetY, defs.modelRotationZ)
             context.currentPacket = null

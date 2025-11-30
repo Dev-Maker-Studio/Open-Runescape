@@ -36,7 +36,7 @@ class CutsceneAnimatedMovement(buffer: Packet) : CutsceneAction(buffer) {
     }
 
     override fun isFullyCached(): Boolean {
-        val seqType = TypeLists.SEQ.list(this.movementAnimationId)
+        val seqType = TypeLists.SEQ!!.list(this.movementAnimationId)
         return seqType.ready()
     }
 }

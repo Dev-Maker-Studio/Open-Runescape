@@ -60,7 +60,7 @@ class SpotAnimation(
     @JvmField var particleSystem: ParticleSystem? = null
 
     init {
-        val spotAnimType = TypeLists.SPOT_ANIM.list(gfxId)
+        val spotAnimType = TypeLists.SPOT_ANIM!!.list(gfxId)
         val sequenceId = spotAnimType.sequenceId
         if (sequenceId != -1) {
             sequence = EntitySequence(this)
@@ -94,7 +94,7 @@ class SpotAnimation(
     }
 
     fun generateGfxModel(toolkit: AbstractToolkit, functionMask: Int, gfxId: Int): Model? {
-        val gfxType = TypeLists.SPOT_ANIM.list(gfxId)
+        val gfxType = TypeLists.SPOT_ANIM!!.list(gfxId)
         val currentLvl = scene!!.surfaceHeightmap[plane.toInt()]
         val nextLvl = if (collisionPlane < 3) scene!!.surfaceHeightmap[collisionPlane.toInt() + 1] else null
         val absolute = getAbsolutePosition().coords

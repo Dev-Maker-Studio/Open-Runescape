@@ -12,9 +12,9 @@ abstract class AbstractCutsceneSpotAnimation(buffer: Packet) : CutsceneAction(bu
     @JvmField val displayHeight: Int = buffer.readUByte()
 
     override fun isFullyCached(): Boolean {
-        val gfxType: SpotAnimType = TypeLists.SPOT_ANIM.list(this.gfxId)
+        val gfxType: SpotAnimType = TypeLists.SPOT_ANIM!!.list(this.gfxId)
         var ready = gfxType.isModelLoaded()
-        val seqType: SeqType = TypeLists.SEQ.list(gfxType.sequenceId)
+        val seqType: SeqType = TypeLists.SEQ!!.list(gfxType.sequenceId)
         ready = ready and seqType.ready()
         return ready
     }

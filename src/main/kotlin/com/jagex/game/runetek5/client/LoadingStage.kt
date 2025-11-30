@@ -148,7 +148,7 @@ class LoadingStage(
 
                             renderer.setDisplayedGametip(tips[index])
                             if (++lastDisplayedGametip >= tips.size - 1 && tips.size > 1) {
-                                lastDisplayedGametip = if (TypeLists.GAME_TIPS.hasTipsFile()) 0 else -1
+                                lastDisplayedGametip = if (TypeLists.GAME_TIPS!!.hasTipsFile()) 0 else -1
                             }
                         }
                     }

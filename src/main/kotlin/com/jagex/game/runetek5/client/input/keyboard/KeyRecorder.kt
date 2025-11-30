@@ -5,7 +5,7 @@ abstract class KeyRecorder {
 
     abstract fun held(key: Int): Boolean
 
-    abstract fun popHead(): KeyRecord
+    abstract fun popHead(): KeyRecord?
 
     abstract fun addKeyListeners()
 

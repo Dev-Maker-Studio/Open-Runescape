@@ -38,9 +38,9 @@ object GraphicsCache {
         Component.resetCache(preferenceMask)
         Resource.mapRegion!!.getLoctypeList().resetCaches(preferenceMask)
         Resource.mapRegionLoaderTask!!.getMapRegion().getLoctypeList().resetCaches(preferenceMask)
-        TypeLists.OBJ.resetCache(preferenceMask)
-        TypeLists.NPC.setPreferenceFlags(preferenceMask)
-        TypeLists.SPOT_ANIM.setPreferenceMask(preferenceMask)
+        TypeLists.OBJ!!.resetCache(preferenceMask)
+        TypeLists.NPC!!.setPreferenceFlags(preferenceMask)
+        TypeLists.SPOT_ANIM!!.setPreferenceMask(preferenceMask)
         HintArrow.resetCache(preferenceMask)
         HintTrail.resetCache(preferenceMask)
         PathingEntity.resetCache(preferenceMask)
@@ -89,6 +89,6 @@ object GraphicsCache {
         if (WorldMapSub1.LOCTYPE_LIST != null) {
             WorldMapSub1.LOCTYPE_LIST!!.resetLruCache(256)
         }
-        TypeLists.VARPBIT.resetCache(64)
+        TypeLists.VARPBIT!!.resetCache(64)
     }
 }

@@ -89,7 +89,7 @@ class MapSpriteTypeList(
             if (locType.mapIconId == -1) {
                 return true
             }
-            val mapSpriteType = TypeLists.MAP_SPRITE.list(locType.mapIconId)
+            val mapSpriteType = TypeLists.MAP_SPRITE!!.list(locType.mapIconId)
             return mapSpriteType.fileId == -1 || mapSpriteType.isCached()
         }
     }

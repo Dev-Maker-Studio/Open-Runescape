@@ -653,7 +653,7 @@ object Bot {
 
     fun getHitbarValue(entity: PathingEntity?, hitbarIndex: Int): Int {
         if (entity == null) return -1
-        val hitbarDef = TypeLists.HITBAR.list(hitbarIndex)
+        val hitbarDef = TypeLists.HITBAR!!.list(hitbarIndex)
         for (hitbar in entity.entityHitbars) {
             val bar = hitbar as? EntityHitbar ?: continue
             if (bar.hitbarType != hitbarDef) continue
@@ -698,7 +698,7 @@ object Bot {
         val locShape: ObjectShapes = Identifiable.identify(ObjectShapes.entries.toTypedArray(), obj.type) as ObjectShapes? ?: return Int.MAX_VALUE
         val strategy: RouteStrategy = when {
             locShape == ObjectShapes.SCENERY_INTERACT || locShape == ObjectShapes.GROUND_INTERACT || locShape == ObjectShapes.GROUND_DECORATION -> {
-                val defs = TypeLists.LOC.list(obj.id)
+                val defs = TypeLists.LOC!!.list(obj.id)
                 val (sizeX, sizeY) = if (obj.rotation == 0 || obj.rotation == 2) {
                     defs.sizeX to defs.sizeY
                 } else {
@@ -853,7 +853,7 @@ object Bot {
 
     fun dropAllExceptExact(vararg itemNames: String) {
         for (i in 0 until 28) {
-            val itemName = TypeLists.OBJ.list(inventory.getItem(i)).name
+            val itemName = TypeLists.OBJ!!.list(inventory.getItem(i)).name
             if (itemNames.any { it.equals(itemName, ignoreCase = true) }) continue
             dropItem(inventory.getItem(i), i)
             clickDialogue(77529097)
@@ -862,7 +862,7 @@ object Bot {
 
     fun dropAllExcept(vararg itemNames: String) {
         for (i in 0 until 28) {
-            val itemName = TypeLists.OBJ.list(inventory.getItem(i)).name
+            val itemName = TypeLists.OBJ!!.list(inventory.getItem(i)).name
             if (itemNames.any { itemName.contains(it, ignoreCase = true) }) continue
             dropItem(inventory.getItem(i), i)
             clickDialogue(77529097)
@@ -918,7 +918,7 @@ object Bot {
                         it.shape,
                         x + getBaseX(),
                         y + getBaseY(),
-                        TypeLists.LOC.list(it.id).actions
+                        TypeLists.LOC!!.list(it.id).actions
                     ))
                 }
             }

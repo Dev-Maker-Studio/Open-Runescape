@@ -29,8 +29,8 @@ class PlayerVarDomain : VarDomain {
     @JvmField var pendingVars: IntArray
 
     init {
-        pendingVars = IntArray(TypeLists.VAR.size)
-        activeVars = IntArray(TypeLists.VAR.size)
+        pendingVars = IntArray(TypeLists.VAR!!.size)
+        activeVars = IntArray(TypeLists.VAR!!.size)
     }
 
     /**
@@ -61,7 +61,7 @@ class PlayerVarDomain : VarDomain {
      * [J]
      */
     override fun getVarBitValue(varbitId: Int): Int {
-        val varbitType = TypeLists.VARPBIT.list(varbitId)
+        val varbitType = TypeLists.VARPBIT!!.list(varbitId)
         val varId = varbitType.configIndex
         val start = varbitType.startBit
         val end = varbitType.endBit
@@ -80,7 +80,7 @@ class PlayerVarDomain : VarDomain {
      * [J]
      */
     fun setVarBitValueFromServer(varbitId: Int, variable: Int) {
-        val varbit = TypeLists.VARPBIT.list(varbitId)
+        val varbit = TypeLists.VARPBIT!!.list(varbitId)
         val configIndex = varbit.configIndex
         val start = varbit.startBit
         val end = varbit.endBit
@@ -113,7 +113,7 @@ class PlayerVarDomain : VarDomain {
      * [J]
      */
     fun setVarBitValue(varbitId: Int, variable: Int) {
-        val varbitType = TypeLists.VARPBIT.list(varbitId)
+        val varbitType = TypeLists.VARPBIT!!.list(varbitId)
         val configIndex = varbitType.configIndex
         val start = varbitType.startBit
         val end = varbitType.endBit
@@ -145,7 +145,7 @@ class PlayerVarDomain : VarDomain {
      * [J]
      */
     fun reset() {
-        for (index in 0 until TypeLists.VAR.size) {
+        for (index in 0 until TypeLists.VAR!!.size) {
             pendingVars[index] = 0
             activeVars[index] = 0
         }

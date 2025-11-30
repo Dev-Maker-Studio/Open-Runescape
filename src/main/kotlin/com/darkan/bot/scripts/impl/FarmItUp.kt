@@ -13,7 +13,7 @@ import com.jagex.game.runetek5.config.TypeLists
     description = "Memes"
 )
 class FarmItUp : Script() {
-    val varBit = TypeLists.LOC.list(8151).varpbitId
+    val varBit = TypeLists.LOC!!.list(8151).varpbitId
 
     override suspend fun loop() {
         val value: Int = Bot.getVarBit(varBit)

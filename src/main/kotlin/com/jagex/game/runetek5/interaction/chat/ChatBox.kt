@@ -94,7 +94,7 @@ object ChatBox {
         val questStringbuilder = StringBuilder()
         var iconIndex = StaticMedia.totalChatIcons
         for (index in questId.indices) {
-            val questType = TypeLists.QUEST.list(questId[index])
+            val questType = TypeLists.QUEST!!.list(questId[index])
             if (questType.graphicId != -1) {
                 var chatIcon = CHAT_ICONS.get(questType.graphicId.toLong()) as NativeSprite?
                 if (chatIcon == null) {

@@ -13,23 +13,27 @@ object SequenceSoundPlayer {
 
     @JvmStatic
     fun playSequenceSound(seqtype: SeqType?, frameId: Int, sceneObject: SceneGraphEntity) {
-        if (AreaSoundPlayer.AREA_SOUND_CACHE_SIZE < 50 && seqtype != null && seqtype.frameSounds != null && frameId < seqtype.frameSounds.size
-            && seqtype.frameSounds[frameId] != null && sceneObject.plane == PlayerUpdate.MY_PLAYER.plane
+        val frameSounds = seqtype?.frameSounds
+        if (AreaSoundPlayer.AREA_SOUND_CACHE_SIZE < 50 && seqtype != null && frameSounds != null && frameId < frameSounds.size
+            && frameSounds[frameId] != null && sceneObject.plane == PlayerUpdate.MY_PLAYER.plane
         ) {
-            val bitpacked = seqtype.frameSounds[frameId]!![0]
+            val frameSoundsForId = frameSounds[frameId]!!
+            val bitpacked = frameSoundsForId[0]
             var soundId = bitpacked shr 8
             val timesRepeat = bitpacked shr 5 and 0x7
             val positionOffset = bitpacked and 0x1f
-            if (seqtype.frameSounds[frameId]!!.size > 1) {
-                val random = (Math.random() * seqtype.frameSounds[frameId]!!.size).toInt()
+            if (frameSoundsForId.size > 1) {
+                val random = (Math.random() * frameSoundsForId.size).toInt()
                 if (random > 0) {
-                    soundId = seqtype.frameSounds[frameId]!![random]
+                    soundId = frameSoundsForId[random]
                 }
             }
 
             var sampleRate = 256
-            if (seqtype.soundMaxDelay != null && seqtype.soundMinDelay != null) {
-                sampleRate = (Math.random() * (seqtype.soundMinDelay[frameId] - seqtype.soundMaxDelay[frameId])).toInt() + seqtype.soundMaxDelay[frameId]
+            val soundMinDelay = seqtype.soundMinDelay
+            val soundMaxDelay = seqtype.soundMaxDelay
+            if (soundMaxDelay != null && soundMinDelay != null) {
+                sampleRate = (Math.random() * (soundMinDelay[frameId] - soundMaxDelay[frameId])).toInt() + soundMaxDelay[frameId]
             }
 
             val volume = seqtype.frameSoundVolume?.get(frameId) ?: 255
@@ -61,21 +65,25 @@ object SequenceSoundPlayer {
 
     @JvmStatic
     fun playInterfaceSequenceSound(seqType: SeqType?, frameId: Int) {
-        if (AreaSoundPlayer.AREA_SOUND_CACHE_SIZE < 50 && seqType != null && seqType.frameSounds != null
-            && frameId < seqType.frameSounds.size && seqType.frameSounds[frameId] != null
+        val frameSounds = seqType?.frameSounds
+        if (AreaSoundPlayer.AREA_SOUND_CACHE_SIZE < 50 && seqType != null && frameSounds != null
+            && frameId < frameSounds.size && frameSounds[frameId] != null
         ) {
-            val bitpacked = seqType.frameSounds[frameId]!![0]
+            val frameSoundsForId = frameSounds[frameId]!!
+            val bitpacked = frameSoundsForId[0]
             var soundId = bitpacked shr 8
             val timesRepeated = bitpacked shr 5 and 0x7
-            if (seqType.frameSounds[frameId]!!.size > 1) {
-                val randomSoundIndex = (Math.random() * seqType.frameSounds[frameId]!!.size).toInt()
+            if (frameSoundsForId.size > 1) {
+                val randomSoundIndex = (Math.random() * frameSoundsForId.size).toInt()
                 if (randomSoundIndex > 0) {
-                    soundId = seqType.frameSounds[frameId]!![randomSoundIndex]
+                    soundId = frameSoundsForId[randomSoundIndex]
                 }
             }
             var sampleRate = 256
-            if (seqType.soundMaxDelay != null && seqType.soundMinDelay != null) {
-                sampleRate = MathUtils.calculateSampleRate(seqType.soundMaxDelay[frameId], seqType.soundMinDelay[frameId])
+            val soundMaxDelay = seqType.soundMaxDelay
+            val soundMinDelay = seqType.soundMinDelay
+            if (soundMaxDelay != null && soundMinDelay != null) {
+                sampleRate = MathUtils.calculateSampleRate(soundMaxDelay[frameId], soundMinDelay[frameId])
             }
             val volume = seqType.frameSoundVolume?.get(frameId) ?: 255
             if (seqType.vorbis) {

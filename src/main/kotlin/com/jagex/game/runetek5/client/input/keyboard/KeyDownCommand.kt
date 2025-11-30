@@ -19,16 +19,16 @@ object KeyDownCommand {
 
     @JvmStatic
     fun minimenuKeyDown(): Boolean {
-        return isActive(TypeLists.INTERACTION_DEFAULTS.minimenuKey)
+        return isActive(TypeLists.INTERACTION_DEFAULTS!!.minimenuKey)
     }
 
     @JvmStatic
     fun teleportKeyDown(): Boolean {
-        return isActive(TypeLists.INTERACTION_DEFAULTS.teleportKey)
+        return isActive(TypeLists.INTERACTION_DEFAULTS!!.teleportKey)
     }
 
     @JvmStatic
     fun runKeyDown(): Boolean {
-        return isActive(TypeLists.INTERACTION_DEFAULTS.toggleRunKey)
+        return isActive(TypeLists.INTERACTION_DEFAULTS!!.toggleRunKey)
     }
 }

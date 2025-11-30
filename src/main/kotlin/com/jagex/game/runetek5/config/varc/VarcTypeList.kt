@@ -84,7 +84,7 @@ class VarcTypeList(
                         for (index in 0 until size) {
                             val varcId = buffer.readUShort()
                             val varcState = buffer.readInt()
-                            if (varcId < VARC_INT!!.size && VARC_BOOL!![varcId] && (TypeLists.VARC.list(varcId).aChar4984 != '1' || varcState >= -1 && varcState <= 1)) {
+                            if (varcId < VARC_INT!!.size && VARC_BOOL!![varcId] && (TypeLists.VARC!!.list(varcId).aChar4984 != '1' || varcState >= -1 && varcState <= 1)) {
                                 VARC_INT!![varcId] = varcState
                             }
                         }

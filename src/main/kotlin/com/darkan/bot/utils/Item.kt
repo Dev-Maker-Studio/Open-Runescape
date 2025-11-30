@@ -22,11 +22,11 @@ class Item {
     }
 
     fun getDefinitions(): ItemType {
-        return TypeLists.OBJ.list(id)
+        return TypeLists.OBJ!!.list(id)
     }
 
     fun getName(): String {
-        return TypeLists.OBJ.list(id).name
+        return TypeLists.OBJ!!.list(id).name
     }
 
     override fun toString(): String {

@@ -88,7 +88,7 @@ class QuickchatMessageTypeList(
         fun decodeQuickchatMessage(buffer: Packet): QuickChatMessage {
             val message = QuickChatMessage()
             message.id = buffer.readUShort()
-            message.message = TypeLists.QUICK_CHAT_MESSAGE.listMessage(message.id)
+            message.message = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(message.id)
             return message
         }
     }

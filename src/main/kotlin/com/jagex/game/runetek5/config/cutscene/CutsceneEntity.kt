@@ -32,7 +32,7 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
                 npc = NpcEntity(Resource.mapRegion!!.getScene())
                 npc!!.playerIndex = index
                 npc!!.lastUpdate = client.cycles
-                npc!!.setDirection(TypeLists.NPC.list(id))
+                npc!!.setDirection(TypeLists.NPC!!.list(id))
                 npc!!.size = npc!!.definitions.size
                 npc!!.turnDirection = npc!!.definitions.turnDirection shl 3
                 npc!!.worldPriority = ++drawPriority - 1
@@ -75,15 +75,15 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
         if (id < 0) {
             return true
         }
-        val npcType = TypeLists.NPC.list(id)
+        val npcType = TypeLists.NPC!!.list(id)
         var cached = npcType.isBodyCached()
         if (animations == null) {
-            val basType = TypeLists.BAS.list(npcType.npcBasId)
+            val basType = TypeLists.BAS!!.list(npcType.npcBasId)
             animations = basType.getAnimations()
         }
         for (index in animations!!.indices) {
             val seqType = animations!![index]
-            cached = cached and TypeLists.SEQ.list(seqType).ready()
+            cached = cached and TypeLists.SEQ!!.list(seqType).ready()
         }
         return cached
     }

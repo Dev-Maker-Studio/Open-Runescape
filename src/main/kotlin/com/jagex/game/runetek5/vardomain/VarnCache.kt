@@ -35,7 +35,7 @@ class VarnCache {
             return intNode.value
         }
 
-        val varnType = TypeLists.VARN.list(varnId)
+        val varnType = TypeLists.VARN!!.list(varnId)
         return if (varnType.character.code != 105) -1 else 0
     }
 
@@ -45,7 +45,7 @@ class VarnCache {
      * @return The extracted varnbit value
      */
     fun getVarnBit(varnbitId: Int): Int {
-        val varnBitType = TypeLists.VARNBIT.list(varnbitId)
+        val varnBitType = TypeLists.VARNBIT!!.list(varnbitId)
         val varnId = varnBitType.varnId
 
         // Calculate bitmask

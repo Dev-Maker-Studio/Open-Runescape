@@ -36,7 +36,7 @@ class Alch : Script(), ConfigurableScript {
         }
 
         val itemSlot = inventory.container.itemIds.indexOfFirst { itemId ->
-            if (itemId > 0) TypeLists.OBJ.list(itemId).name.contains(targetName, ignoreCase = true) else false
+            if (itemId > 0) TypeLists.OBJ!!.list(itemId).name.contains(targetName, ignoreCase = true) else false
         }
 
         if (itemSlot != -1) {

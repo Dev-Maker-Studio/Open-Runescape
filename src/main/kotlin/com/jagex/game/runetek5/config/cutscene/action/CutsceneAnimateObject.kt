@@ -22,7 +22,7 @@ class CutsceneAnimateObject(buffer: Packet) : CutsceneAction(buffer) {
     }
 
     override fun isFullyCached(): Boolean {
-        val seqType = TypeLists.SEQ.list(this.sequenceId)
+        val seqType = TypeLists.SEQ!!.list(this.sequenceId)
         return seqType.ready()
     }
 }
