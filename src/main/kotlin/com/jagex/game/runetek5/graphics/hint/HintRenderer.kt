@@ -38,7 +38,7 @@ object HintRenderer {
             if (arrow.targetType == 2) {
                 calculateHintArrowPlacement(arrow.plane, arrow.x, arrow.y, arrow.height * 2)
                 if (client.HINT_POSITION[0] > -1.0f && client.cycles % 20 < 10) {
-                    val arrowSprite = StaticMedia.hintHeadiconSprites[arrow.arrowSprite]
+                    val arrowSprite = StaticMedia.hintHeadiconSprites!![arrow.arrowSprite]
                     val drawX = (client.HINT_POSITION[0] + x - 12.0f).toInt()
                     val drawY = (client.HINT_POSITION[1] + y - 28.0f).toInt()
                     arrowSprite.draw(drawX, drawY)
@@ -189,9 +189,9 @@ object HintRenderer {
 
             val dx = (cosAngle * x + y * sinAngle) shr 14
             val dy = (y * cosAngle - sinAngle * x) shr 14
-            val hintSprite = StaticMedia.hintMapmarkerSprites[arrowSprite]
-            val width = hintSprite.width
-            val height = hintSprite.height
+            val hintSprite = StaticMedia.hintMapmarkerSprites!![arrowSprite]
+            val width = hintSprite.getSpriteWidth()
+            val height = hintSprite.getSpriteHeight()
             val x1 = dx + component.width / 2 - width / 2
             val x2 = width + x1
             val y1 = -dy + component.height / 2 - height
@@ -207,7 +207,7 @@ object HintRenderer {
                 maxArrowDistance -= 6
                 val i25 = (sin(angleRadians) * maxArrowDistance).toInt()
                 val i26 = (cos(angleRadians) * maxArrowDistance).toInt()
-                StaticMedia.hintMapedgeSprites[arrowSprite].method2758(
+                StaticMedia.hintMapedgeSprites!![arrowSprite].method2758(
                     clipLeft + component.width / 2.0f + i25,
                     clipTop + component.height / 2.0f - i26,
                     4096,

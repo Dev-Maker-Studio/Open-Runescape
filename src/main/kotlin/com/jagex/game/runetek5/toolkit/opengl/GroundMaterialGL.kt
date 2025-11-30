@@ -209,7 +209,7 @@ class GroundMaterialGL(
 
     fun generateNativeBuffer(colorCount: Int) {
         nativeHeapBuffer = toolkit.nativeHeap.createBuffer(colorCount * 4, true)
-        nativeStream = Stream(nativeHeapBuffer)
+        nativeStream = Stream(nativeHeapBuffer!!)
     }
 
 }

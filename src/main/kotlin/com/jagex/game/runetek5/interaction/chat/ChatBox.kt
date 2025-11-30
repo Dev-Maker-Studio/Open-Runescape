@@ -105,7 +105,7 @@ object ChatBox {
                     }
                 }
                 if (chatIcon != null) {
-                    StaticMedia.chatIcons[iconIndex] = chatIcon
+                    StaticMedia.chatIcons!![iconIndex] = chatIcon
                     questStringbuilder.append(" <img=").append(iconIndex++).append(">")
                 }
             }

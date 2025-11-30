@@ -89,7 +89,7 @@ class AnimatedInteractiveObject(
         activeGameObject.animateParticles(toolkit, model, projectionMatrix, true)
         model.drawMatrixThreaded(projectionMatrix, super.boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
         if (activeGameObject.particleSystem != null) {
-            val particles = activeGameObject.particleSystem!!.allParticles
+            val particles = activeGameObject.particleSystem!!.getAllParticles()
             toolkit.renderParticles(particles)
         }
         hasParticles = model.accountForLayers() || activeGameObject.particleSystem != null

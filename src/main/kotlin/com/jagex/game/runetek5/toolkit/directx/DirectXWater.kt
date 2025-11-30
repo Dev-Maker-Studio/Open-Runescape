@@ -185,7 +185,7 @@ class DirectXWater(
 
     fun method12150(i_1: Int) {
         nativeHeap = nativeToolkit.generateNativeHeapBuffer(i_1 * 4, true)
-        buffer = Stream(nativeHeap, 0, i_1 * 4)
+        buffer = Stream(nativeHeap!!, 0, i_1 * 4)
     }
 
     fun method12152(i_1: Int, i_2: Int, i_3: Int) {

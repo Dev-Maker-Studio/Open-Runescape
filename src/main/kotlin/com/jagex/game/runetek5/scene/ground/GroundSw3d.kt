@@ -113,7 +113,7 @@ class GroundSw3d(
 
     override fun renderFloor(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
         var i_7 = 0
-        val floats_8 = FloatArray(aClass4827143.size)
+        val floats_8 = FloatArray(aClass4827143.size())
 
         var class282Sub249 = aClass4827143.getFirst() as PointLight?
         while (class282Sub249 != null) {

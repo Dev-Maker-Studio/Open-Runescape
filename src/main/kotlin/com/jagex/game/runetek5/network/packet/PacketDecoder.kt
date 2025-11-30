@@ -1298,7 +1298,7 @@ object PacketDecoder {
                 val arrow = HintArrow()
                 arrow.targetType = targetType
                 arrow.arrowSprite = buffer.readUByte()
-                if (arrow.arrowSprite >= 0 && arrow.arrowSprite < StaticMedia.hintHeadiconSprites.size) {
+                if (arrow.arrowSprite >= 0 && arrow.arrowSprite < StaticMedia.hintHeadiconSprites!!.size) {
                     if (arrow.targetType != 1 && arrow.targetType != 10) {
                         if (arrow.targetType <= 6) {
                             if (arrow.targetType == 2) {

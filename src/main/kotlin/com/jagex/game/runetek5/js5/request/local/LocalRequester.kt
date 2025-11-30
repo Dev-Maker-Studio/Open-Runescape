@@ -63,7 +63,7 @@ class LocalRequester : Runnable {
                     2 -> {
                         requestNode.cacheFile?.put(
                             requestNode.indexReference.toInt(),
-                            requestNode.payload,
+                            requestNode.payload!!,
                             requestNode.payload!!.size
                         )
                     }

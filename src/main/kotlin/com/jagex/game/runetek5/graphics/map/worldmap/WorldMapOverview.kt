@@ -48,8 +48,8 @@ object WorldMapOverview {
             adjustedY += (height - scaledHeight) / 2
 
             if (ComponentMinimap.aNativeSprite5883 == null ||
-                ComponentMinimap.aNativeSprite5883!!.width != width ||
-                ComponentMinimap.aNativeSprite5883!!.height != height) {
+                ComponentMinimap.aNativeSprite5883!!.getSpriteWidth() != width ||
+                ComponentMinimap.aNativeSprite5883!!.getSpriteHeight() != height) {
                 WorldMapSub1.method5139(
                     WorldMapSub1.mapSquareAbsX,
                     WorldMapSub1.mapSquareAbsY + WorldMapSub1.mapSizeY,

@@ -82,7 +82,7 @@ class AnimatedGroundDecoration(
         gameObject.animateParticles(toolkit, model, projectionMatrix, true)
         model.drawMatrixThreaded(projectionMatrix, super.boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
         if (gameObject.particleSystem != null) {
-            val particles = gameObject.particleSystem!!.allParticles
+            val particles = gameObject.particleSystem!!.getAllParticles()
             toolkit.renderParticles(particles)
         }
         hasRenderingParticles = model.accountForLayers() || gameObject.particleSystem != null
