@@ -25,7 +25,7 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
         method2348(openglToolkit)
         if (!texture3dSupported) {
             textures2d = Array(16) { index ->
-                val bytes = DataBuffer.readDataBuffer(anObject1637, index * 32768)
+                val bytes = DataBuffer.readDataBuffer(anObject1637, index * 32768)!!
                 OpenGl2DTexture(
                     openglToolkit, 3553, GLFormat.aClass1501952,
                     GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.aClass1501952, false
@@ -33,7 +33,7 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
             }
 
             aClass137Sub1Array1634 = Array(16) { index ->
-                val bytes = DataBuffer.readDataBuffer(anObject1627, index * 32768)
+                val bytes = DataBuffer.readDataBuffer(anObject1627, index * 32768)!!
                 OpenGl2DTexture(
                     openglToolkit, 3553, GLFormat.aClass1501952,
                     GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.aClass1501952, false
