@@ -27,7 +27,7 @@ class NativeSpriteShaderHd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
     }
 
     override fun loadNormal() {
-        spriteShader!!.loadProgram(shaderMappings[0])
+        spriteShader!!.loadProgram(shaderMappings[0]!!)
         activeUniformLocations = uniformLocations[spriteShader!!.getOccupyingSlot()]
         load()
     }
@@ -45,7 +45,7 @@ class NativeSpriteShaderHd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
         shaderMappings[1] = spriteShader!!.getShaderMapping("Masked")
         shaderMappings[2] = spriteShader!!.getShaderMapping("AlphaTex")
         for (type in 0 until 3) {
-            val slot = spriteShader!!.getMappingSlot(shaderMappings[type])
+            val slot = spriteShader!!.getMappingSlot(shaderMappings[type]!!)
             uniformLocations[type][0] = WVPMatrix.getUniformLocation(slot)
             uniformLocations[type][1] = SpriteSampler.getUniformLocation(slot)
             uniformLocations[type][2] = MaskSampler.getUniformLocation(slot)
@@ -54,7 +54,7 @@ class NativeSpriteShaderHd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
             uniformLocations[type][3] = SpriteTexCoordMatrix.getUniformLocation(slot)
             uniformLocations[type][4] = MaskTexCoordMatrix.getUniformLocation(slot)
         }
-        spriteShader!!.loadProgram(shaderMappings[0])
+        spriteShader!!.loadProgram(shaderMappings[0]!!)
         return true
     }
 
@@ -82,7 +82,7 @@ class NativeSpriteShaderHd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
 
     fun load() {
         spriteShader!!.setActiveMapping()
-        spriteShader!!.setDiffuseSampler(activeUniformLocations!![1], 0, anInterface6443)
+        spriteShader!!.setDiffuseSampler(activeUniformLocations!![1], 0, anInterface6443!!)
         activeToolkit.loadWorldViewProjectionMatrix(worldViewProjectionMatrix)
         spriteShader!!.setWorldViewProjectionMatrix(activeUniformLocations!![0], worldViewProjectionMatrix)
         spriteShader!!.setTextureCoordinateMatrix(activeUniformLocations!![3], aClass384440)
@@ -94,9 +94,9 @@ class NativeSpriteShaderHd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
     }
 
     override fun loadMasked() {
-        spriteShader!!.loadProgram(shaderMappings[1])
+        spriteShader!!.loadProgram(shaderMappings[1]!!)
         activeUniformLocations = uniformLocations[spriteShader!!.getOccupyingSlot()]
-        spriteShader!!.setDiffuseSampler(activeUniformLocations!![2], 1, anInterface6441)
+        spriteShader!!.setDiffuseSampler(activeUniformLocations!![2], 1, anInterface6441!!)
         spriteShader!!.setTextureCoordinateMatrix(activeUniformLocations!![4], aClass384444)
         load()
     }

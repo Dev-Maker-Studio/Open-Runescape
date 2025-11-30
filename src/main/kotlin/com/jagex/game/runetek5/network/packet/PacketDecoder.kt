@@ -1249,7 +1249,7 @@ object PacketDecoder {
                 groundItems = client.GROUND_ITEMS.next()
             }
             var locAction: LocAction?
-            locAction = LocAction.pendingRemovals.first as LocAction?
+            locAction = LocAction.pendingRemovals.first() as LocAction?
             while (locAction != null) {
                 if (locAction.x >= UpdateZonePacket.UPDATE_ZONE_X && locAction.x < UpdateZonePacket.UPDATE_ZONE_X + 8 && locAction.y >= UpdateZonePacket.UPDATE_ZONE_Y && locAction.y < UpdateZonePacket.UPDATE_ZONE_Y + 8 && locAction.plane == UpdateZonePacket.UPDATE_ZONE_PLANE) {
                     locAction.inUpdateZone = true

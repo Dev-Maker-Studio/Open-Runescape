@@ -32,7 +32,7 @@ class NativeEnvironmentShaderHd(
 
         activeUniformLocation = uniformLocations[modelShader!!.getOccupyingSlot()]
         modelShader!!.setActiveMapping()
-        modelShader!!.setDiffuseSampler(activeUniformLocation!![2], 0, textureSampler)
+        modelShader!!.setDiffuseSampler(activeUniformLocation!![2], 0, textureSampler!!)
         modelShader!!.setWorldViewProjectionMatrix(activeUniformLocation!![4], worldViewProjectionMatrix)
         modelShader!!.setTextureCoordinateMatrix(activeUniformLocation!![5], textureCoordinateMatrix)
         modelShader!!.load4f(activeUniformLocation!![7], heightFogPlane.x, heightFogPlane.y, heightFogPlane.z, heightFogPlane.w)
@@ -71,7 +71,7 @@ class NativeEnvironmentShaderHd(
      * @param unit
      */
     fun loadUnit(unit: Int) {
-        modelShader!!.setDiffuseSampler(activeUniformLocation!![2], 0, textureSampler)
+        modelShader!!.setDiffuseSampler(activeUniformLocation!![2], 0, textureSampler!!)
         modelShader!!.setWorldViewProjectionMatrix(activeUniformLocation!![4], worldViewProjectionMatrix)
         modelShader!!.setTextureCoordinateMatrix(activeUniformLocation!![5], textureCoordinateMatrix)
         modelShader!!.load4f(activeUniformLocation!![7], heightFogPlane.x, heightFogPlane.y, heightFogPlane.z, heightFogPlane.w)
@@ -112,7 +112,7 @@ class NativeEnvironmentShaderHd(
         modelShader!!.setActiveMapping()
         modelShader!!.method1674(activeUniformLocation!![15], aClass384465)
         modelShader!!.load3f(activeUniformLocation!![6], eyePos.x, eyePos.y, eyePos.z)
-        modelShader!!.setDiffuseSampler(activeUniformLocation!![3], 1, anInterface31451)
+        modelShader!!.setDiffuseSampler(activeUniformLocation!![3], 1, anInterface31451!!)
         loadUnit(unit)
     }
 

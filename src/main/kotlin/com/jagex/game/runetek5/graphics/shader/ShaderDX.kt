@@ -15,28 +15,28 @@ class ShaderDX(
 ) : Shader(toolkit, shaderLoader) {
 
     @JvmField var active: Boolean = false
-    @JvmField var shaderMapping: ShaderMappingDX? = null
+    @JvmField var activeDxShaderMapping: ShaderMappingDX? = null
 
     override fun loadMapping(toolkit: AbstractNativeToolkit, shaderMapping: NativeShaderMapping): ShaderMapping {
         return ShaderMappingDX(toolkit as DirectXNativeToolkit, this, shaderMapping)
     }
 
     override fun loadProgram(shaderMapping: ShaderMapping): Boolean {
-        if (shaderMapping === this.shaderMapping) {
+        if (shaderMapping === this.activeDxShaderMapping) {
             return true
         }
         if (!shaderMapping.createShaders()) {
             return false
         }
-        this.shaderMapping = shaderMapping as ShaderMappingDX
+        this.activeDxShaderMapping = shaderMapping as ShaderMappingDX
         occupyingSlot = getMappingSlot(shaderMapping)
         if (occupyingSlot == -1) {
             throw IllegalArgumentException()
         }
         if (active) {
-            toolkit.setVertexShader(this.shaderMapping!!.vertexShaderHandle)
-            toolkit.setPixelShader(this.shaderMapping!!.fragmentShaderHandle)
-            toolkit.activeShaderMapping = this.shaderMapping
+            toolkit.setVertexShader(this.activeDxShaderMapping!!.vertexShaderHandle)
+            toolkit.setPixelShader(this.activeDxShaderMapping!!.fragmentShaderHandle)
+            toolkit.activeShaderMapping = this.activeDxShaderMapping!!
         }
         return true
     }
@@ -64,9 +64,9 @@ class ShaderDX(
         if (shaderMapping == null) {
             throw ShaderHardwareException()
         }
-        toolkit.setVertexShader(shaderMapping!!.vertexShaderHandle)
-        toolkit.setPixelShader(shaderMapping!!.fragmentShaderHandle)
-        toolkit.activeShaderMapping = shaderMapping
+        toolkit.setVertexShader((this.activeDxShaderMapping as ShaderMappingDX).vertexShaderHandle)
+        toolkit.setPixelShader((this.activeDxShaderMapping as ShaderMappingDX).fragmentShaderHandle)
+        toolkit.activeShaderMapping = shaderMapping as ShaderMappingDX
         active = true
     }
 }

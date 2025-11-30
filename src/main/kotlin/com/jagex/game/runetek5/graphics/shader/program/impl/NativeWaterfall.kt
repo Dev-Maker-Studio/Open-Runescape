@@ -52,29 +52,29 @@ class NativeWaterfall(
         billowSampler3d = activeShader!!.getAttribute("billowSampler3D")
         if (aClass4910147.hasDepth) {
             waterfall3d = activeShader!!.getShaderMapping("Waterfall3D")
-            activeShader!!.loadProgram(waterfall3d)
+            activeShader!!.loadProgram(waterfall3d!!)
         } else {
             waterfall2d = activeShader!!.getShaderMapping("Waterfall2D")
-            activeShader!!.loadProgram(waterfall2d)
+            activeShader!!.loadProgram(waterfall2d!!)
         }
         return true
     }
 
     fun method15549() {
         if (aClass4910147.hasDepth) {
-            activeShader!!.loadProgram(waterfall3d)
+            activeShader!!.loadProgram(waterfall3d!!)
         } else {
-            activeShader!!.loadProgram(waterfall2d)
+            activeShader!!.loadProgram(waterfall2d!!)
         }
         activeShader!!.setActiveMapping()
         if (aClass4910147.hasDepth) {
-            activeShader!!.loadTextureSampler(billowSampler3d, 0, aClass4910147.billowSampler)
+            activeShader!!.loadTextureSampler(billowSampler3d!!, 0, aClass4910147.billowSampler!!)
         }
-        activeShader!!.loadMatrix(worldMatrix, aClass38410146)
-        activeShader!!.loadMatrix(wvpMatrix, aClass38410138)
-        activeShader!!.insertAttribute(uGenerationPlane, Vector4(aFloatArray10148[0], aFloatArray10148[1], aFloatArray10148[2], aFloatArray10148[3]))
-        activeShader!!.insertAttribute(vGenerationPlane, Vector4(aFloatArray10150[0], aFloatArray10150[1], aFloatArray10150[2], aFloatArray10150[3]))
-        activeShader!!.insertAttribute(time, Vector4(aFloat10149, 0.0f, 0.0f, 0.0f))
+        activeShader!!.loadMatrix(worldMatrix!!, aClass38410146)
+        activeShader!!.loadMatrix(wvpMatrix!!, aClass38410138)
+        activeShader!!.insertAttribute(uGenerationPlane!!, Vector4(aFloatArray10148[0], aFloatArray10148[1], aFloatArray10148[2], aFloatArray10148[3]))
+        activeShader!!.insertAttribute(vGenerationPlane!!, Vector4(aFloatArray10150[0], aFloatArray10150[1], aFloatArray10150[2], aFloatArray10150[3]))
+        activeShader!!.insertAttribute(time!!, Vector4(aFloat10149, 0.0f, 0.0f, 0.0f))
         toolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, anInt10152, anInt10153, anInt10142, anInt10155)
     }
 

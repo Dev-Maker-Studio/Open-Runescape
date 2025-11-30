@@ -54,7 +54,7 @@ object GroundItemUpdating {
             if (node == null) {
                 Resource.mapRegion!!.getScene().removeGroundItem(plane, x, y)
             } else {
-                val groundItemNode = node.groundItems.first as GroundItemNode?
+                val groundItemNode = node.groundItems.first() as GroundItemNode?
                 if (groundItemNode == null) {
                     Resource.mapRegion!!.getScene().removeGroundItem(plane, x, y)
                 } else {

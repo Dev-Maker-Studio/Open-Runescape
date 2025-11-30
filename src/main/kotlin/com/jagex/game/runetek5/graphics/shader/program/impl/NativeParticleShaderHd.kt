@@ -36,7 +36,7 @@ class NativeParticleShaderHd(toolkit: AbstractNativeToolkit) : AbstractParticleS
         diffuseSamplerAttribute = particleShader!!.getAttribute("DiffuseSampler")
         textureCoordinateMatrixAttribute = particleShader!!.getAttribute("TexCoordMatrix")
         diffuseColorAttribute = particleShader!!.getAttribute("DiffuseColour")
-        particleShader!!.loadProgram(particleShader!!.createSingleMapping())
+        particleShader!!.loadProgram(particleShader!!.createSingleMapping()!!)
         return true
     }
 
@@ -59,11 +59,11 @@ class NativeParticleShaderHd(toolkit: AbstractNativeToolkit) : AbstractParticleS
      * Loads the shader program and sets all shader parameters.
      */
     fun loadProgram() {
-        particleShader!!.loadProgram(particleShader!!.createSingleMapping())
+        particleShader!!.loadProgram(particleShader!!.createSingleMapping()!!)
         particleShader!!.setActiveMapping()
-        particleShader!!.loadTextureSampler(diffuseSamplerAttribute, 0, diffuseSampler)
-        particleShader!!.loadMatrix(wvpMatrixAttribute, wvpMatrix)
-        particleShader!!.loadTextureMatrix(textureCoordinateMatrixAttribute, textureCoordinateMatrix)
-        particleShader!!.loadRgbaColorAttribute(diffuseColorAttribute, diffuseColor)
+        particleShader!!.loadTextureSampler(diffuseSamplerAttribute!!, 0, diffuseSampler!!)
+        particleShader!!.loadMatrix(wvpMatrixAttribute!!, wvpMatrix)
+        particleShader!!.loadTextureMatrix(textureCoordinateMatrixAttribute!!, textureCoordinateMatrix)
+        particleShader!!.loadRgbaColorAttribute(diffuseColorAttribute!!, diffuseColor)
     }
 }
