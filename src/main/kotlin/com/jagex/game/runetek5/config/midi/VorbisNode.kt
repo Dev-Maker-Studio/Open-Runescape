@@ -64,7 +64,7 @@ class VorbisNode(
                             val audioStream = vorbisNode.method14845()
                             if (audioStream != null) {
                                 audioStream.method14820(node.anInt7997)
-                                AmbientSound.gameSounds.addSubStream(audioStream)
+                                AmbientSound.gameSounds?.addSubStream(audioStream)
                                 node.aBool8000 = true
                             }
                         }
