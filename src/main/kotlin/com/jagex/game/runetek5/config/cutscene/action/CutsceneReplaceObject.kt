@@ -27,6 +27,6 @@ class CutsceneReplaceObject(buffer: Packet) : CutsceneAction(buffer) {
     }
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_OBJECTS[this.locIndex].replace(this.plane, this.x, this.y, this.rotation)
+        CutsceneTypeList.CUTSCENE_OBJECTS!![this.locIndex].replace(this.plane, this.x, this.y, this.rotation)
     }
 }

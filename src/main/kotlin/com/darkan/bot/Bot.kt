@@ -983,7 +983,7 @@ object Bot {
             // Debug & Toggles
             "togglepackets" -> { disableIncomingPackets = !disableIncomingPackets; Console.writeLine("Disabled packets: $disableIncomingPackets") }
             "toggleinterfaces" -> { disableInterfaces = !disableInterfaces; Console.writeLine("Disabled interfaces: $disableInterfaces") }
-            "iswalking" -> { Console.writeLine("${isWalking()}"); Console.writeLine(getMyPlayer().movementTypes.contentToString()); Console.writeLine("${getMyPlayer().movingSequence.type.id}") }
+            "iswalking" -> { Console.writeLine("${isWalking()}"); Console.writeLine(getMyPlayer().movementTypes.contentToString()); Console.writeLine("${getMyPlayer().movingSequence.getType()?.id}") }
             "healthpray" -> println("Health: ${getHealth()} Prayer: ${getPrayer()}")
             "curemote" -> Console.writeLine("Emote: ${getCurrentAnimation()}")
 
@@ -1028,7 +1028,7 @@ object Bot {
     }
 
     fun isWalking(): Boolean {
-        val animId = getMyPlayer().movingSequence.type.id
+        val animId = getMyPlayer().movingSequence.getType()?.id ?: -1
         return animId != 11975
     }
 

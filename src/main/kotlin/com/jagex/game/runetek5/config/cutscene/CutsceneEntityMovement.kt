@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
  * @author Brainpower - 06/04/2022
  *
  */
-internal class CutsceneEntityMovement(buffer: Packet) {
+class CutsceneEntityMovement(buffer: Packet) {
 
     @JvmField val movementTypes: IntArray
     @JvmField val bitpackedPositions: IntArray

@@ -57,7 +57,7 @@ class ItemContainer : Node<ItemContainer>() {
         }
 
         if (sequence != null) {
-            animateFunctionMask = functionMask or sequence.functionMask
+            animateFunctionMask = functionMask or sequence.getFunctionMask()
         }
 
         val hash = calculateHash(items, bastypeId, playerAppearance?.recolorDstIndices, female)

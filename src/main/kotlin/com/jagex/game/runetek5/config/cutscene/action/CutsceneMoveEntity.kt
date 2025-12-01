@@ -27,6 +27,6 @@ class CutsceneMoveEntity(buffer: Packet) : CutsceneAction(buffer) {
     }
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_ENTITIES[this.targetIndex].move(this.x, this.y, this.plane, this.direction)
+        CutsceneTypeList.CUTSCENE_ENTITIES!![this.targetIndex].move(this.x, this.y, this.plane, this.direction)
     }
 }

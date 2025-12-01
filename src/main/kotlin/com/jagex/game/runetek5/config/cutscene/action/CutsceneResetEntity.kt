@@ -13,6 +13,6 @@ class CutsceneResetEntity(buffer: Packet) : CutsceneAction(buffer) {
     val entityIndex: Int = buffer.readUShort()
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_ENTITIES[entityIndex].reset()
+        CutsceneTypeList.CUTSCENE_ENTITIES!![entityIndex].reset()
     }
 }

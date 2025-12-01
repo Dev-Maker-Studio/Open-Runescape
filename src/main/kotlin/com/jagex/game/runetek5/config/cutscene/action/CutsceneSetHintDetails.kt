@@ -16,6 +16,6 @@ class CutsceneSetHintDetails(buffer: Packet) : CutsceneAction(buffer) {
     @JvmField val duration: Int = buffer.readUShort()
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_ENTITIES[this.entityIndex].getEntity().setHintDetails(this.text, this.colorType, 0, this.duration)
+        CutsceneTypeList.CUTSCENE_ENTITIES!![this.entityIndex].getEntity().setHintDetails(this.text, this.colorType, 0, this.duration)
     }
 }

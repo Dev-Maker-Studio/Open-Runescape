@@ -12,8 +12,8 @@ class CutsceneBasicMovement(buffer: Packet) : CutsceneAction(buffer) {
     @JvmField val plane: Int = buffer.readUByte()
 
     override fun perform() {
-        val entity: CutsceneEntity = CutsceneTypeList.CUTSCENE_ENTITIES[this.entityIndex]
-        val movement: CutsceneEntityMovement = CutsceneTypeList.CUTSCENE_ENTITY_MOVEMENTS[this.movementIndex]
+        val entity: CutsceneEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![this.entityIndex]
+        val movement: CutsceneEntityMovement = CutsceneTypeList.CUTSCENE_ENTITY_MOVEMENTS!![this.movementIndex]
         movement.move(entity, this.plane)
     }
 

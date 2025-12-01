@@ -2169,7 +2169,7 @@ object PacketDecoder {
             }
             val i_6 = buffer.readUByte()
             CutsceneTypeList.CUTSCENE_BUFFER = Packet(i_6)
-            CutsceneTypeList.CUTSCENE_BUFFER.writeBytes(buffer.buffer, buffer.currentPosition, i_6)
+            CutsceneTypeList.CUTSCENE_BUFFER!!.writeBytes(buffer.buffer, buffer.currentPosition, i_6)
             buffer.currentPosition += i_6
             context.currentPacket = null
             return false

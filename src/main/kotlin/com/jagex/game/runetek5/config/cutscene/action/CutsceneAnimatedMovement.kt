@@ -27,7 +27,7 @@ class CutsceneAnimatedMovement(buffer: Packet) : CutsceneAction(buffer) {
     }
 
     override fun perform() {
-        val pathingEntity = CutsceneTypeList.CUTSCENE_ENTITIES[this.entityIndex].getEntity()
+        val pathingEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![this.entityIndex].getEntity()
         if (this.seqFlag == 0) {
             PlayerUpdate.animate(pathingEntity, this.movementAnimations, 0, false)
         } else {

@@ -19,7 +19,7 @@ class CutscenePlaySynth(rsbytebuffer1: Packet) : CutsceneAction(rsbytebuffer1) {
 
     override fun method1593() {
         if (this.aClass2689367 != null) {
-            AreaSoundPlayer.resetAreaSound(this.aClass2689367)
+            AreaSoundPlayer.resetAreaSound(this.aClass2689367!!)
             this.aClass2689367 = null
         }
     }

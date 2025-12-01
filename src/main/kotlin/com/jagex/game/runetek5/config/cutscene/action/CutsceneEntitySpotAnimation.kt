@@ -9,7 +9,7 @@ class CutsceneEntitySpotAnimation(buffer: Packet) : AbstractCutsceneSpotAnimatio
     @JvmField val adjustmentType: Int = buffer.readUShort()
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_ENTITIES[targetIndex].getEntity().playSpotAnimation(
+        CutsceneTypeList.CUTSCENE_ENTITIES!![targetIndex].getEntity().playSpotAnimation(
             gfxId,
             displayHeight shl 16,
             rotation,

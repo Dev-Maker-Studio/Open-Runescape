@@ -13,6 +13,6 @@ class CutsceneDestroyObject(buffer: Packet) : CutsceneAction(buffer) {
     val cutsceneObjectPtr: Int = buffer.readUShort()
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_OBJECTS[cutsceneObjectPtr].destroy()
+        CutsceneTypeList.CUTSCENE_OBJECTS!![cutsceneObjectPtr].destroy()
     }
 }

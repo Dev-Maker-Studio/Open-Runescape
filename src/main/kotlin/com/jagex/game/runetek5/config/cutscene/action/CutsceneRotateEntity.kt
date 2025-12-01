@@ -16,6 +16,6 @@ class CutsceneRotateEntity(buffer: Packet) : CutsceneAction(buffer) {
     val rotation: Int = buffer.readUShort()
 
     override fun perform() {
-        CutsceneTypeList.CUTSCENE_ENTITIES[cutsceneEntityPtr].getEntity().turn(rotation, true)
+        CutsceneTypeList.CUTSCENE_ENTITIES!![cutsceneEntityPtr].getEntity().turn(rotation, true)
     }
 }

@@ -73,7 +73,7 @@ class CutsceneProjectile(rsbytebuffer1: Packet, i_2: Int, i_3: Int) : CutsceneAc
             dstY = anInt9404 * 512 + 256
             plane = anInt9401
         } else {
-            val animable9 = CutsceneTypeList.CUTSCENE_ENTITIES[anInt9402].getEntity()
+            val animable9 = CutsceneTypeList.CUTSCENE_ENTITIES!![anInt9402].getEntity()
             val abs = animable9.getAbsolutePosition().coords
             dstX = abs.x.toInt()
             dstY = abs.z.toInt()
@@ -85,7 +85,7 @@ class CutsceneProjectile(rsbytebuffer1: Packet, i_2: Int, i_3: Int) : CutsceneAc
             srcX = anInt9407 * 512 + 256
             srcY = anInt9408 * 512 + 256
         } else {
-            val entity = CutsceneTypeList.CUTSCENE_ENTITIES[anInt9400].getEntity()
+            val entity = CutsceneTypeList.CUTSCENE_ENTITIES!![anInt9400].getEntity()
             val abs = entity.getAbsolutePosition().coords
             srcX = abs.x.toInt()
             srcY = abs.z.toInt()

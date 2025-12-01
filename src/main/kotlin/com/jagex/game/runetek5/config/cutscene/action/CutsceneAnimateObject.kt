@@ -17,7 +17,7 @@ class CutsceneAnimateObject(buffer: Packet) : CutsceneAction(buffer) {
     @JvmField val sequenceId: Int = buffer.readBigSmart()
 
     override fun perform() {
-        val `object` = CutsceneTypeList.CUTSCENE_OBJECTS[this.objectIndex]
+        val `object` = CutsceneTypeList.CUTSCENE_OBJECTS!![this.objectIndex]
         SceneGraph.animateObject(`object`.plane, `object`.x, `object`.y, `object`.locShape.group, `object`.locShape.shape, `object`.rotation, this.sequenceId)
     }
 
