@@ -190,7 +190,7 @@ object Resource {
         var cacheFile: Decompressor? = null
         val indexId = reference.getIndex()
         if (client.cacheFileData != null) {
-            cacheFile = Decompressor(indexId, client.cacheFileData, FileOnDisk.cacheFileIndices[indexId])
+            cacheFile = Decompressor(indexId, client.cacheFileData, FileOnDisk.cacheFileIndices!![indexId]!!)
         }
         remoteFileWorkersByIndex!![indexId] = client.requestManager.getWorker(indexId, cacheFile, referenceTableDecompressor)
         remoteFileWorkersByIndex!![indexId]!!.reset()
