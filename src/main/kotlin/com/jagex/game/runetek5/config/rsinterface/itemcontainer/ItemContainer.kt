@@ -90,14 +90,15 @@ class ItemContainer : Node<ItemContainer>() {
             }
 
             if (basType != null && basType.objVerticeTransformations != null) {
-                for (index in basType.objVerticeTransformations.indices) {
-                    if (basType.objVerticeTransformations[index] != null && meshes[index] != null) {
-                        val translateX = basType.objVerticeTransformations[index][0]
-                        val translateY = basType.objVerticeTransformations[index][1]
-                        val translateZ = basType.objVerticeTransformations[index][2]
-                        val rotateX = basType.objVerticeTransformations[index][3]
-                        val rotateY = basType.objVerticeTransformations[index][4]
-                        val rotateZ = basType.objVerticeTransformations[index][5]
+                val transformations = basType.objVerticeTransformations!!
+                for (index in transformations.indices) {
+                    if (transformations[index] != null && meshes[index] != null) {
+                        val translateX = transformations[index]!![0]
+                        val translateY = transformations[index]!![1]
+                        val translateZ = transformations[index]!![2]
+                        val rotateX = transformations[index]!![3]
+                        val rotateY = transformations[index]!![4]
+                        val rotateZ = transformations[index]!![5]
                         if (rotateX != 0 || rotateY != 0 || rotateZ != 0) {
                             meshes[index]!!.rotateWithoutNormals(rotateX, rotateY, rotateZ)
                         }
