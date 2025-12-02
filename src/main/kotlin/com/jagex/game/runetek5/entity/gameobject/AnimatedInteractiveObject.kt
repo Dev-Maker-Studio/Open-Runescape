@@ -75,7 +75,7 @@ class AnimatedInteractiveObject(
     }
 
     override fun getMinY(): Int {
-        return activeGameObject.minY
+        return activeGameObject.getMinY()
     }
 
     override fun getAxisAlignedBoundingBox(toolkit: AbstractToolkit): Silhouette? {
@@ -157,6 +157,6 @@ class AnimatedInteractiveObject(
     }
 
     override fun getIconHeight(): Int {
-        return activeGameObject.negativeMinY
+        return activeGameObject.getNegativeMinY()
     }
 }

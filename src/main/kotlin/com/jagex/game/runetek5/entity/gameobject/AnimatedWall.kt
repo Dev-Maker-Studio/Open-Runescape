@@ -133,11 +133,11 @@ class AnimatedWall(
     }
 
     override fun getIconHeight(): Int {
-        return gameObject.negativeMinY
+        return gameObject.getNegativeMinY()
     }
 
     override fun getMinY(): Int {
-        return gameObject.minY
+        return gameObject.getMinY()
     }
 
     override fun calculateProjection(toolkit: AbstractToolkit, cameraX: Int, cameraY: Int): Boolean {

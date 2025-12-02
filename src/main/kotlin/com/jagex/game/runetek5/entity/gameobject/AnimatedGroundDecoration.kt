@@ -65,11 +65,11 @@ class AnimatedGroundDecoration(
     }
 
     override fun getMinY(): Int {
-        return gameObject.minY
+        return gameObject.getMinY()
     }
 
     override fun getIconHeight(): Int {
-        return gameObject.negativeMinY
+        return gameObject.getNegativeMinY()
     }
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
