@@ -118,7 +118,7 @@ object SongPlayer {
             SoundResourceManager.aNodeSub15Sub21735!!.setMusicTrack(song.getMusicTrack(), false)
             SoundResourceManager.aNodeSub15Sub21735!!.setMusicVolume(volume)
             if (aClass2535830 != null) {
-                aClass2535830!!.setCurrentPcmStream(SoundResourceManager.aNodeSub15Sub21735)
+                aClass2535830!!.currentPcmStream = SoundResourceManager.aNodeSub15Sub21735
             }
             SongReference.reset()
         }

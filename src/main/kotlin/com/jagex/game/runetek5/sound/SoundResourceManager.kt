@@ -113,7 +113,7 @@ object SoundResourceManager {
                         }
                     }
                     if (SongPlayer.aClass2535830 != null) {
-                        SongPlayer.aClass2535830!!.setCurrentPcmStream(aNodeSub15Sub21735)
+                        SongPlayer.aClass2535830!!.currentPcmStream = aNodeSub15Sub21735
                     }
                     StaticMethods.aNodeSub79563 = null
                     StaticMethods.aClass2505450 = null

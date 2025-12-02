@@ -63,7 +63,7 @@ class MonoSterioPlayer : PcmPlayer() {
         }
 
         for (index in 0 until byteCount) {
-            var data = bitpackedSoundData[index]
+            var data = bitpackedSoundData!![index]
             if (data + 8388608 and 0xffffff.inv() != 0) {
                 data = 0x7fffff xor (data shr 31)
             }
