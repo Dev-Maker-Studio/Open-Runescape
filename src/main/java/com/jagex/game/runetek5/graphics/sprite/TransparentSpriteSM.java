@@ -1061,7 +1061,7 @@ public class TransparentSpriteSM extends SpriteSM {
     }
 
     @Override
-    void method14245(int i_1, int i_2) {
+    public void method14245(int i_1, int i_2) {
         int[] ints_3 = super.toolkit.colourBuffer;
         if (ints_3 != null) {
             int i_4;
@@ -2567,7 +2567,7 @@ public class TransparentSpriteSM extends SpriteSM {
     }
 
     @Override
-    void method14250(int[] ints_1, int[] ints_2, int i_3, int i_4) {
+    public void method14250(int[] ints_1, int[] ints_2, int i_3, int i_4) {
         int[] ints_5 = super.toolkit.colourBuffer;
         if (ints_5 != null) {
             int i_6;
