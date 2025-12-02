@@ -109,7 +109,7 @@ object DebugDisplay {
                 }
             }
         } catch (exception: Exception) {
-            Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(client.CURRENT_LANGUAGE))
+            Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(client.CURRENT_LANGUAGE)!!)
         }
     }
 
