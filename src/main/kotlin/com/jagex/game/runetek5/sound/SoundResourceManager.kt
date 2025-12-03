@@ -72,7 +72,7 @@ object SoundResourceManager {
         try {
             if (anInt1730 == 2) {
                 if (StaticMethods.aNodeSub79563 == null) {
-                    StaticMethods.aNodeSub79563 = MusicTrack.loadMusictrack(AreaSoundPlayer.MUSIC_RESOURCE, SongPlayer.musicArchiveId, musicFileId)
+                    StaticMethods.aNodeSub79563 = MusicTrack.loadMusictrack(AreaSoundPlayer.MUSIC_RESOURCE!!, SongPlayer.musicArchiveId, musicFileId)
                     if (StaticMethods.aNodeSub79563 == null) {
                         return false
                     }
