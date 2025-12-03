@@ -136,7 +136,7 @@ class EnvironmentManager(
     }
 
     fun applySun() {
-        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences.brightness.getValue() * 0.1f + Resource.mapRegion!!.getRandomColorOffset()) * this.environment.sunAmbient)
+        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness.getValue() * 0.1f + Resource.mapRegion!!.getRandomColorOffset()) * this.environment.sunAmbient)
         this.activeToolkit.applyLighting(this.environment.sunColour, this.environment.sunLight, this.environment.sunBacklight, (this.sunPosition.x.toInt() shl 2).toFloat(), (this.sunPosition.y.toInt() shl 2).toFloat(), (this.sunPosition.z.toInt() shl 2).toFloat())
         this.activeToolkit.setSunCubeTexture(this.environment.sunCubeTexture)
     }
@@ -156,7 +156,7 @@ class EnvironmentManager(
     }
 
     fun prepareLights() {
-        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences.brightness.getValue() * 0.1f + Resource.mapRegion!!.getRandomColorOffset()) * 1.1523438f)
+        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness.getValue() * 0.1f + Resource.mapRegion!!.getRandomColorOffset()) * 1.1523438f)
         this.activeToolkit.applyLighting(DEFAULT_SUN_COLOR, 0.69921875f, 1.2f, -200.0f, -240.0f, -200.0f)
         this.activeToolkit.calculateFog(DEFAULT_FOG_COLOR, -1, 0)
         this.activeToolkit.setSunCubeTexture(defaultSunCubeTexture)
@@ -237,7 +237,7 @@ class EnvironmentManager(
     fun calculateFog() {
         val off: Byte = 0
         val density = (this.environment.fogDepth + 256 shl 2) + off
-        this.activeToolkit.calculateFog(this.environment.fogColour, if (PreferenceManager.preferences.fog.getValue() == 1) density else -1, 0)
+        this.activeToolkit.calculateFog(this.environment.fogColour, if (PreferenceManager.preferences!!.fog.getValue() == 1) density else -1, 0)
     }
 
     companion object {

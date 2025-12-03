@@ -47,10 +47,10 @@ object SequenceSoundPlayer {
                 }
             } else {
                 if (sceneObject == PlayerUpdate.MY_PLAYER) {
-                    if (PreferenceManager.preferences.soundEffectVolume.getValue() == 0) {
+                    if (PreferenceManager.preferences!!.soundEffectVolume.getValue() == 0) {
                         return
                     }
-                } else if (PreferenceManager.preferences.ambientSoundVolume.getValue() == 0) {
+                } else if (PreferenceManager.preferences!!.ambientSoundVolume.getValue() == 0) {
                     return
                 }
 

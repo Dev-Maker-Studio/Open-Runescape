@@ -69,7 +69,7 @@ class StationaryWall(
     val interactive: Boolean = locType.hasActions != 0 && !bool10
 
     @JvmField
-    val aBool10516: Boolean = toolkit.hasShadows() && locType.dynamicShadow && !aBool10525 && PreferenceManager.preferences.sceneryShadows.getValue() != 0
+    val aBool10516: Boolean = toolkit.hasShadows() && locType.dynamicShadow && !aBool10525 && PreferenceManager.preferences!!.sceneryShadows.getValue() != 0
 
     @JvmField
     var model: Model? = null

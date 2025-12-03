@@ -175,7 +175,7 @@ object SoundEffectPlayer {
 	fun method2964(ambientSound: AmbientSound, plane: Int, absX: Int, absY: Int, step: Int) {
 	    if (ambientSound.soundEffectId != -1 || ambientSound.ambientSoundGroupIds != null) {
 	        var hearDistance = 0
-	        val preferedVolume = ambientSound.ambientSoundVolume * PreferenceManager.preferences.ambientSoundVolume.getValue() shr 8
+	        val preferedVolume = ambientSound.ambientSoundVolume * PreferenceManager.preferences!!.ambientSoundVolume.getValue() shr 8
 	        if (absX > ambientSound.absEndX) {
 	            hearDistance += absX - ambientSound.absEndX
 	        } else if (absX < ambientSound.absStartX) {
@@ -187,7 +187,7 @@ object SoundEffectPlayer {
 	            hearDistance += ambientSound.absStartY - absY
 	        }
 	        if (ambientSound.ambientSoundMinHearDistance != 0 && hearDistance - 256 <= ambientSound.ambientSoundMinHearDistance
-	        		&& PreferenceManager.preferences.ambientSoundVolume.getValue() != 0 && ambientSound.plane == plane) {
+	        		&& PreferenceManager.preferences!!.ambientSoundVolume.getValue() != 0 && ambientSound.plane == plane) {
 	            var adjustedHearDistance = hearDistance - 256
 	            if (adjustedHearDistance < 0) {
 	                adjustedHearDistance = 0
@@ -364,7 +364,7 @@ object SoundEffectPlayer {
 
 	@JvmStatic
 	fun playSoundJingle(jingleId: Int, volume: Int) {
-	    val adjustedVolume = volume * PreferenceManager.preferences.musicVolume.getValue() shr 8
+	    val adjustedVolume = volume * PreferenceManager.preferences!!.musicVolume.getValue() shr 8
 	    if (adjustedVolume != 0 && jingleId != -1) {
 	        if (!soundJinglePlaying && AreaSoundPlayer.currentMusicArchive != -1 && SongReference.method1966() && !StaticMethods.method6140()) {
 	            jingleStream = method7272()
@@ -414,7 +414,7 @@ object SoundEffectPlayer {
 	@JvmStatic
 	fun reload() {
 	    shutdownPlayers()
-	    PcmPlayerManager.setStereo(PreferenceManager.preferences.monoStereo.getValue() == 1)
+	    PcmPlayerManager.setStereo(PreferenceManager.preferences!!.monoStereo.getValue() == 1)
 	    jinglePlayer = PcmPlayerManager.start(0, 22050)
 	    setJingleStream(getStream(null))
 	    soundEffectPlayer = PcmPlayerManager.start(1, 2048)
@@ -423,7 +423,7 @@ object SoundEffectPlayer {
 
 	@JvmStatic
 	fun initializeAudio() {
-	    PcmPlayerManager.setStereo(PreferenceManager.preferences.monoStereo.getValue() == 1)
+	    PcmPlayerManager.setStereo(PreferenceManager.preferences!!.monoStereo.getValue() == 1)
 	    jinglePlayer = PcmPlayerManager.start(0, 22050)
 	    setJingleStream(getStream(null))
 	    soundEffectPlayer = PcmPlayerManager.start(1, 2048)

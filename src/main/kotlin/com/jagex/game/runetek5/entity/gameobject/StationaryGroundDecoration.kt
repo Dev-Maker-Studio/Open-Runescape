@@ -44,7 +44,7 @@ class StationaryGroundDecoration(
     override val id: Int = loctype.id
     @JvmField val currentRotation: Byte = rotation.toByte()
     @JvmField val interactive: Boolean = loctype.hasActions != 0 && !underwater
-    @JvmField val hasShadow: Boolean = toolkit.hasShadows() && loctype.dynamicShadow && !this.underwater && PreferenceManager.preferences.sceneryShadows.getValue() != 0
+    @JvmField val hasShadow: Boolean = toolkit.hasShadows() && loctype.dynamicShadow && !this.underwater && PreferenceManager.preferences!!.sceneryShadows.getValue() != 0
     @JvmField var model: Model? = null
     override val shape: Int = ObjectShapes.GROUND_DECORATION.shape
 

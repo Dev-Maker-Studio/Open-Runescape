@@ -13,7 +13,8 @@ import java.io.File
 import java.io.IOException
 
 object PreferenceManager {
-    lateinit var preferences: GamePreferences
+    @JvmField
+    var preferences: GamePreferences? = null
 
     @JvmField
     var preferenceFile: File? = null
@@ -89,7 +90,7 @@ object PreferenceManager {
 
         try {
             preferenceFile = loadPreferenceFile("", client.CURRENT_GAME.name, true)
-            val preferenceBuffer = preferences.encode()
+            val preferenceBuffer = preferences!!.encode()
             preferenceFile.write(preferenceBuffer.buffer, 0, preferenceBuffer.currentPosition)
         } catch (exception: Exception) {
             // NOOP
@@ -122,11 +123,11 @@ object PreferenceManager {
                 1
             }
         }
-        if (preferences.activeToolkit.getValue() != 2) {
-            preferences.setValue(preferences.toolkit, 2)
+        if (preferences!!.activeToolkit.getValue() != 2) {
+            preferences!!.setValue(preferences!!.toolkit, 2)
             client.loadAssets(2, false)
         } else {
-            preferences.verifySettings(preferences.activeToolkit, true)
+            preferences!!.verifySettings(preferences!!.activeToolkit, true)
         }
         savePreferences()
         return mode
@@ -153,11 +154,11 @@ object PreferenceManager {
             }
         }
 
-        if (preferences.activeToolkit.getValue() != renderMode) {
-            preferences.setValue(preferences.toolkit, renderMode)
+        if (preferences!!.activeToolkit.getValue() != renderMode) {
+            preferences!!.setValue(preferences!!.toolkit, renderMode)
             client.loadAssets(renderMode, false)
         } else {
-            preferences.verifySettings(preferences.activeToolkit, true)
+            preferences!!.verifySettings(preferences!!.activeToolkit, true)
         }
 
         savePreferences()
@@ -190,11 +191,11 @@ object PreferenceManager {
             loadMinDetailPreferences()
             1
         }
-        if (preferences.activeToolkit.getValue() != 0) {
-            preferences.setValue(preferences.toolkit, 0)
+        if (preferences!!.activeToolkit.getValue() != 0) {
+            preferences!!.setValue(preferences!!.toolkit, 0)
             client.loadAssets(0, false)
         } else {
-            preferences.verifySettings(preferences.activeToolkit, true)
+            preferences!!.verifySettings(preferences!!.activeToolkit, true)
         }
         savePreferences()
         return graphicsSettings
@@ -202,27 +203,27 @@ object PreferenceManager {
 
     @JvmStatic
     fun loadMinDetailPreferences() {
-        preferences.setValue(preferences.removeRoofs, 1)
-        preferences.setValue(preferences.removeRoofsOptionOverride, 1)
-        preferences.setValue(preferences.groundDecoration, 0)
-        preferences.setValue(preferences.fog, 0)
-        preferences.setValue(preferences.goundBlending, 0)
-        preferences.setValue(preferences.idleAnimations, 0)
-        preferences.setValue(preferences.flickeringEffects, 0)
-        preferences.setValue(preferences.characterShadows, 0)
-        preferences.setValue(preferences.sceneryShadows, 0)
-        preferences.setValue(preferences.textures, 0)
-        preferences.setValue(preferences.lightDetail, 0)
-        preferences.setValue(preferences.water, 0)
-        preferences.setValue(preferences.antiAliasing, 0)
-        preferences.setValue(preferences.antiAliasingPreview, 0)
-        preferences.setValue(preferences.particles, 0)
-        preferences.setValue(preferences.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
-        preferences.setValue(preferences.bloom, 0)
-        preferences.setValue(preferences.skyboxes, 0)
+        preferences!!.setValue(preferences!!.removeRoofs, 1)
+        preferences!!.setValue(preferences!!.removeRoofsOptionOverride, 1)
+        preferences!!.setValue(preferences!!.groundDecoration, 0)
+        preferences!!.setValue(preferences!!.fog, 0)
+        preferences!!.setValue(preferences!!.goundBlending, 0)
+        preferences!!.setValue(preferences!!.idleAnimations, 0)
+        preferences!!.setValue(preferences!!.flickeringEffects, 0)
+        preferences!!.setValue(preferences!!.characterShadows, 0)
+        preferences!!.setValue(preferences!!.sceneryShadows, 0)
+        preferences!!.setValue(preferences!!.textures, 0)
+        preferences!!.setValue(preferences!!.lightDetail, 0)
+        preferences!!.setValue(preferences!!.water, 0)
+        preferences!!.setValue(preferences!!.antiAliasing, 0)
+        preferences!!.setValue(preferences!!.antiAliasingPreview, 0)
+        preferences!!.setValue(preferences!!.particles, 0)
+        preferences!!.setValue(preferences!!.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
+        preferences!!.setValue(preferences!!.bloom, 0)
+        preferences!!.setValue(preferences!!.skyboxes, 0)
         setCpuPreference()
-        preferences.setValue(preferences.maxScreenSize, 2)
-        preferences.setValue(preferences.graphics, 1)
+        preferences!!.setValue(preferences!!.maxScreenSize, 2)
+        preferences!!.setValue(preferences!!.graphics, 1)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
         client.needsResize = true
@@ -230,27 +231,27 @@ object PreferenceManager {
 
     @JvmStatic
     fun loadLowDetailPreferences() {
-        preferences.setValue(preferences.removeRoofs, 1)
-        preferences.setValue(preferences.removeRoofsOptionOverride, 1)
-        preferences.setValue(preferences.groundDecoration, 1)
-        preferences.setValue(preferences.goundBlending, 1)
-        preferences.setValue(preferences.idleAnimations, 0)
-        preferences.setValue(preferences.flickeringEffects, 0)
-        preferences.setValue(preferences.characterShadows, 0)
-        preferences.setValue(preferences.sceneryShadows, 0)
-        preferences.setValue(preferences.textures, 0)
-        preferences.setValue(preferences.lightDetail, 0)
-        preferences.setValue(preferences.water, 0)
-        preferences.setValue(preferences.fog, 0)
-        preferences.setValue(preferences.antiAliasing, 0)
-        preferences.setValue(preferences.antiAliasingPreview, 0)
-        preferences.setValue(preferences.particles, 0)
-        preferences.setValue(preferences.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
-        preferences.setValue(preferences.bloom, 0)
-        preferences.setValue(preferences.skyboxes, 0)
+        preferences!!.setValue(preferences!!.removeRoofs, 1)
+        preferences!!.setValue(preferences!!.removeRoofsOptionOverride, 1)
+        preferences!!.setValue(preferences!!.groundDecoration, 1)
+        preferences!!.setValue(preferences!!.goundBlending, 1)
+        preferences!!.setValue(preferences!!.idleAnimations, 0)
+        preferences!!.setValue(preferences!!.flickeringEffects, 0)
+        preferences!!.setValue(preferences!!.characterShadows, 0)
+        preferences!!.setValue(preferences!!.sceneryShadows, 0)
+        preferences!!.setValue(preferences!!.textures, 0)
+        preferences!!.setValue(preferences!!.lightDetail, 0)
+        preferences!!.setValue(preferences!!.water, 0)
+        preferences!!.setValue(preferences!!.fog, 0)
+        preferences!!.setValue(preferences!!.antiAliasing, 0)
+        preferences!!.setValue(preferences!!.antiAliasingPreview, 0)
+        preferences!!.setValue(preferences!!.particles, 0)
+        preferences!!.setValue(preferences!!.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
+        preferences!!.setValue(preferences!!.bloom, 0)
+        preferences!!.setValue(preferences!!.skyboxes, 0)
         setCpuPreference()
-        preferences.setValue(preferences.maxScreenSize, 2)
-        preferences.setValue(preferences.graphics, 2)
+        preferences!!.setValue(preferences!!.maxScreenSize, 2)
+        preferences!!.setValue(preferences!!.graphics, 2)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
         client.needsResize = true
@@ -258,27 +259,27 @@ object PreferenceManager {
 
     @JvmStatic
     fun loadMidDetailPreferences() {
-        preferences.setValue(preferences.removeRoofs, 2)
-        preferences.setValue(preferences.removeRoofsOptionOverride, 2)
-        preferences.setValue(preferences.groundDecoration, 1)
-        preferences.setValue(preferences.goundBlending, 1)
-        preferences.setValue(preferences.idleAnimations, 1)
-        preferences.setValue(preferences.flickeringEffects, 1)
-        preferences.setValue(preferences.characterShadows, 1)
-        preferences.setValue(preferences.textures, 1)
-        preferences.setValue(preferences.sceneryShadows, 1)
-        preferences.setValue(preferences.lightDetail, 1)
-        preferences.setValue(preferences.water, 0)
-        preferences.setValue(preferences.fog, 1)
-        preferences.setValue(preferences.antiAliasing, 0)
-        preferences.setValue(preferences.antiAliasingPreview, 0)
-        preferences.setValue(preferences.particles, 1)
-        preferences.setValue(preferences.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
-        preferences.setValue(preferences.bloom, 0)
-        preferences.setValue(preferences.skyboxes, 1)
+        preferences!!.setValue(preferences!!.removeRoofs, 2)
+        preferences!!.setValue(preferences!!.removeRoofsOptionOverride, 2)
+        preferences!!.setValue(preferences!!.groundDecoration, 1)
+        preferences!!.setValue(preferences!!.goundBlending, 1)
+        preferences!!.setValue(preferences!!.idleAnimations, 1)
+        preferences!!.setValue(preferences!!.flickeringEffects, 1)
+        preferences!!.setValue(preferences!!.characterShadows, 1)
+        preferences!!.setValue(preferences!!.textures, 1)
+        preferences!!.setValue(preferences!!.sceneryShadows, 1)
+        preferences!!.setValue(preferences!!.lightDetail, 1)
+        preferences!!.setValue(preferences!!.water, 0)
+        preferences!!.setValue(preferences!!.fog, 1)
+        preferences!!.setValue(preferences!!.antiAliasing, 0)
+        preferences!!.setValue(preferences!!.antiAliasingPreview, 0)
+        preferences!!.setValue(preferences!!.particles, 1)
+        preferences!!.setValue(preferences!!.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
+        preferences!!.setValue(preferences!!.bloom, 0)
+        preferences!!.setValue(preferences!!.skyboxes, 1)
         setCpuPreference()
-        preferences.setValue(preferences.maxScreenSize, 1)
-        preferences.setValue(preferences.graphics, 3)
+        preferences!!.setValue(preferences!!.maxScreenSize, 1)
+        preferences!!.setValue(preferences!!.graphics, 3)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
         client.needsResize = true
@@ -286,27 +287,27 @@ object PreferenceManager {
 
     @JvmStatic
     fun loadHighDetailPreferences() {
-        preferences.setValue(preferences.removeRoofs, 2)
-        preferences.setValue(preferences.removeRoofsOptionOverride, 2)
-        preferences.setValue(preferences.groundDecoration, 1)
-        preferences.setValue(preferences.goundBlending, 1)
-        preferences.setValue(preferences.idleAnimations, 1)
-        preferences.setValue(preferences.flickeringEffects, 1)
-        preferences.setValue(preferences.characterShadows, 1)
-        preferences.setValue(preferences.textures, 1)
-        preferences.setValue(preferences.sceneryShadows, 2)
-        preferences.setValue(preferences.lightDetail, 1)
-        preferences.setValue(preferences.water, 2)
-        preferences.setValue(preferences.fog, 1)
-        preferences.setValue(preferences.antiAliasing, 0)
-        preferences.setValue(preferences.antiAliasingPreview, 0)
-        preferences.setValue(preferences.particles, 2)
-        preferences.setValue(preferences.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
-        preferences.setValue(preferences.bloom, 0)
-        preferences.setValue(preferences.skyboxes, 1)
+        preferences!!.setValue(preferences!!.removeRoofs, 2)
+        preferences!!.setValue(preferences!!.removeRoofsOptionOverride, 2)
+        preferences!!.setValue(preferences!!.groundDecoration, 1)
+        preferences!!.setValue(preferences!!.goundBlending, 1)
+        preferences!!.setValue(preferences!!.idleAnimations, 1)
+        preferences!!.setValue(preferences!!.flickeringEffects, 1)
+        preferences!!.setValue(preferences!!.characterShadows, 1)
+        preferences!!.setValue(preferences!!.textures, 1)
+        preferences!!.setValue(preferences!!.sceneryShadows, 2)
+        preferences!!.setValue(preferences!!.lightDetail, 1)
+        preferences!!.setValue(preferences!!.water, 2)
+        preferences!!.setValue(preferences!!.fog, 1)
+        preferences!!.setValue(preferences!!.antiAliasing, 0)
+        preferences!!.setValue(preferences!!.antiAliasingPreview, 0)
+        preferences!!.setValue(preferences!!.particles, 2)
+        preferences!!.setValue(preferences!!.mapSize, MapSize.MAPSIZE_104_DEFAULT.id)
+        preferences!!.setValue(preferences!!.bloom, 0)
+        preferences!!.setValue(preferences!!.skyboxes, 1)
         setCpuPreference()
-        preferences.setValue(preferences.maxScreenSize, 0)
-        preferences.setValue(preferences.graphics, 4)
+        preferences!!.setValue(preferences!!.maxScreenSize, 0)
+        preferences!!.setValue(preferences!!.graphics, 4)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
         client.needsResize = true
@@ -315,9 +316,9 @@ object PreferenceManager {
     @JvmStatic
     fun setCpuPreference() {
         if (GameShell.availableProcessors > 1) {
-            preferences.setValue(preferences.cpu, 4)
+            preferences!!.setValue(preferences!!.cpu, 4)
         } else {
-            preferences.setValue(preferences.cpu, 2)
+            preferences!!.setValue(preferences!!.cpu, 2)
         }
     }
 
@@ -334,7 +335,7 @@ object PreferenceManager {
                 Renderers.activeToolkit!!.resetBloom()
             }
             if (enabled != isBloomEnabled) {
-                preferences.setValue(preferences.bloom, if (enabled) 1 else 0)
+                preferences!!.setValue(preferences!!.bloom, if (enabled) 1 else 0)
                 savePreferences()
                 return true
             }

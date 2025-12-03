@@ -101,7 +101,7 @@ object AreaSoundPlayer {
                                 if (currentDistance < 0) {
                                     currentDistance = 0
                                 }
-                                volume = (maxHearDistance - currentDistance) * PreferenceManager.preferences.ambientSoundVolume.getValue() * sound.volume / maxHearDistance shr 2
+                                volume = (maxHearDistance - currentDistance) * PreferenceManager.preferences!!.ambientSoundVolume.getValue() * sound.volume / maxHearDistance shr 2
                                 if (sound.startX != -1) {
                                     startX = sound.startX
                                     startY = sound.startZ
@@ -125,9 +125,9 @@ object AreaSoundPlayer {
                             }
                         } else {
                             volume = sound.volume * (if (sound.type.toInt() == 3)
-                                PreferenceManager.preferences.voiceOverVolume.getValue()
+                                PreferenceManager.preferences!!.voiceOverVolume.getValue()
                             else
-                                PreferenceManager.preferences.soundEffectVolume.getValue()) shr 2
+                                PreferenceManager.preferences!!.soundEffectVolume.getValue()) shr 2
                         }
                         if (volume > 0) {
                             if (sound.type.toInt() == 1) {
@@ -156,16 +156,16 @@ object AreaSoundPlayer {
             soundIndex++
         }
         if (SoundEffectPlayer.soundJinglePlaying && !SongReference.method1966()) {
-            if (PreferenceManager.preferences.musicVolume.getValue() != 0 && currentMusicArchive != -1) {
+            if (PreferenceManager.preferences!!.musicVolume.getValue() != 0 && currentMusicArchive != -1) {
                 if (SoundEffectPlayer.jingleStream != null) {
-                    method3690(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences.musicVolume.getValue(), SoundEffectPlayer.jingleStream!!)
+                    method3690(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences!!.musicVolume.getValue(), SoundEffectPlayer.jingleStream!!)
                 } else {
-                    method13400(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences.musicVolume.getValue())
+                    method13400(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences!!.musicVolume.getValue())
                 }
             }
             SoundEffectPlayer.soundJinglePlaying = false
             SoundEffectPlayer.jingleStream = null
-        } else if (PreferenceManager.preferences.musicVolume.getValue() != 0 && currentMusicArchive != -1 && !SongReference.method1966()) {
+        } else if (PreferenceManager.preferences!!.musicVolume.getValue() != 0 && currentMusicArchive != -1 && !SongReference.method1966()) {
             val musicEndedPacket = PacketEncoder.createPacket(ClientProt.SOUND_EFFECT_MUSIC_ENDED, client.GAME_CONNECTION_CONTEXT.isaac)
             musicEndedPacket.buffer.writeInt(currentMusicArchive)
             client.GAME_CONNECTION_CONTEXT.queuePacket(musicEndedPacket)
@@ -196,8 +196,8 @@ object AreaSoundPlayer {
      */
     @JvmStatic
     fun playSoundVorbis(soundId: Int, timesRepeated: Int, delay: Int, volume: Int, bitpackedPosition: Int, voiceEffect: Boolean, sampleRate: Int): AreaSound? {
-        if ((if (voiceEffect) PreferenceManager.preferences.voiceOverVolume.getValue()
-            else PreferenceManager.preferences.soundEffectVolume.getValue()) != 0 && timesRepeated != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
+        if ((if (voiceEffect) PreferenceManager.preferences!!.voiceOverVolume.getValue()
+            else PreferenceManager.preferences!!.soundEffectVolume.getValue()) != 0 && timesRepeated != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
             val areaSound = AreaSound((if (voiceEffect) 3 else 2).toByte(), soundId, timesRepeated, delay, volume, bitpackedPosition, sampleRate, null)
             AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound
             return areaSound
@@ -210,8 +210,8 @@ object AreaSoundPlayer {
      */
     @JvmStatic
     fun playSoundVorbis(soundId: Int, timesRepeated: Int, delay: Int, volume: Int, voiceEffect: Boolean, sampleRate: Int): AreaSound? {
-        if ((if (voiceEffect) PreferenceManager.preferences.voiceOverVolume.getValue()
-            else PreferenceManager.preferences.soundEffectVolume.getValue()) != 0 && timesRepeated != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
+        if ((if (voiceEffect) PreferenceManager.preferences!!.voiceOverVolume.getValue()
+            else PreferenceManager.preferences!!.soundEffectVolume.getValue()) != 0 && timesRepeated != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
             val areaSound = AreaSound((if (voiceEffect) 3 else 2).toByte(), soundId, timesRepeated, delay, volume, 0, sampleRate, null)
             AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound
             return areaSound
@@ -224,7 +224,7 @@ object AreaSoundPlayer {
      */
     @JvmStatic
     fun playSoundSynth(soundId: Int, timesRepeat: Int, delay: Int, volume: Int, bitpackedPosition: Int, sampleRate: Int): AreaSound? {
-        if (PreferenceManager.preferences.soundEffectVolume.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
+        if (PreferenceManager.preferences!!.soundEffectVolume.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
             val areaSound = AreaSound(1.toByte(), soundId, timesRepeat, delay, volume, bitpackedPosition, sampleRate, null)
             AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound
             return areaSound
@@ -237,7 +237,7 @@ object AreaSoundPlayer {
      */
     @JvmStatic
     fun playSoundSynth(soundId: Int, timesRepeat: Int, delay: Int, volume: Int, sampleRate: Int): AreaSound? {
-        if (PreferenceManager.preferences.soundEffectVolume.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
+        if (PreferenceManager.preferences!!.soundEffectVolume.getValue() != 0 && timesRepeat != 0 && AREA_SOUND_CACHE_SIZE < 50 && soundId != -1) {
             val areaSound = AreaSound(1.toByte(), soundId, timesRepeat, delay, volume, 0, sampleRate, null)
             AREA_SOUND_CACHE[++AREA_SOUND_CACHE_SIZE - 1] = areaSound
             return areaSound

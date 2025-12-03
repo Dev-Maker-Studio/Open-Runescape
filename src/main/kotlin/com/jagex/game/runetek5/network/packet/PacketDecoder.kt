@@ -602,7 +602,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.OPEN_URL) {
-            if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) WindowMode.requestWindowMode(PreferenceManager.preferences.fixedScreen.getValue(), -1, -1, false)
+            if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen.getValue(), -1, -1, false)
             val bytes = ByteArray(context.currentPacketSize - 1)
             val bool66 = buffer.readUByte() == 1
             buffer.readBytes(bytes, context.currentPacketSize - 1)
@@ -710,7 +710,7 @@ object PacketDecoder {
             val bitBuffer = Bit(context.currentPacketSize)
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize)
             client.resetCutscenes()
-            if (PreferenceManager.preferences.asyncMaploading.getValue() == 1) {
+            if (PreferenceManager.preferences!!.asyncMaploading.getValue() == 1) {
                 Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
             } else {
                 Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
@@ -1574,7 +1574,7 @@ object PacketDecoder {
             val bitBuffer = Bit(context.currentPacketSize)
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize)
             client.resetCutscenes()
-            if (PreferenceManager.preferences.asyncMaploading.getValue() == 1) {
+            if (PreferenceManager.preferences!!.asyncMaploading.getValue() == 1) {
                 Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
             } else {
                 Resource.mapRegion!!.initialize(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
@@ -2359,7 +2359,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.aClass3754437) {
             if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
-                WindowMode.requestWindowMode(PreferenceManager.preferences.fixedScreen.getValue(), -1, -1, false)
+                WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen.getValue(), -1, -1, false)
             }
             val bytes_64 = ByteArray(context.currentPacketSize)
             buffer.readBytes(bytes_64, context.currentPacketSize)

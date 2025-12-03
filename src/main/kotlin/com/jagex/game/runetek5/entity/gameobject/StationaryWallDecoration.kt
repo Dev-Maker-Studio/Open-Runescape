@@ -52,7 +52,7 @@ class StationaryWallDecoration(
     init {
         interactive = locType.hasActions != 0 && !belowWater
         shadowed = toolkit.hasShadows() && locType.dynamicShadow && !underwater &&
-                   PreferenceManager.preferences.sceneryShadows.getValue() != 0
+                   PreferenceManager.preferences!!.sceneryShadows.getValue() != 0
 
         var functionMask = 2048
         if (locType.dynamicTint) {

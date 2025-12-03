@@ -80,7 +80,7 @@ object CommandExecutor {
                         }
                     }
                     val renderInfo = Renderers.activeToolkit!!.getRenderInfo()
-                    Console.writeLine("Toolkit ID: " + PreferenceManager.preferences.activeToolkit.getValue())
+                    Console.writeLine("Toolkit ID: " + PreferenceManager.preferences!!.activeToolkit.getValue())
                     Console.writeLine("Vendor: " + renderInfo.vendor)
                     Console.writeLine("Name: " + renderInfo.name)
                     Console.writeLine("Version: " + renderInfo.version)
@@ -176,9 +176,9 @@ object CommandExecutor {
                 }
                 if ("tk0".equals(command, ignoreCase = true)) { // Safe mode
                     client.loadAssets(0, false)
-                    if (PreferenceManager.preferences.activeToolkit.getValue() == 0) {
+                    if (PreferenceManager.preferences!!.activeToolkit.getValue() == 0) {
                         Console.writeLine("Success")
-                        PreferenceManager.preferences.setValue(PreferenceManager.preferences.toolkit, 0)
+                        PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit, 0)
                         PreferenceManager.savePreferences()
                         client.preferencesSavedOnServer = false
                     } else {
@@ -188,9 +188,9 @@ object CommandExecutor {
                 }
                 if ("tk1".equals(command, ignoreCase = true)) { // OpenGL - no shaders
                     client.loadAssets(1, false)
-                    if (PreferenceManager.preferences.activeToolkit.getValue() == 1) {
+                    if (PreferenceManager.preferences!!.activeToolkit.getValue() == 1) {
                         Console.writeLine("Success")
-                        PreferenceManager.preferences.setValue(PreferenceManager.preferences.toolkit, 1)
+                        PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit, 1)
                         PreferenceManager.savePreferences()
                         client.preferencesSavedOnServer = false
                     } else {
@@ -200,9 +200,9 @@ object CommandExecutor {
                 }
                 if ("tk2".equals(command, ignoreCase = true)) { // Sw3d
                     client.loadAssets(2, false)
-                    if (PreferenceManager.preferences.activeToolkit.getValue() == 2) {
+                    if (PreferenceManager.preferences!!.activeToolkit.getValue() == 2) {
                         Console.writeLine("Success")
-                        PreferenceManager.preferences.setValue(PreferenceManager.preferences.toolkit, 2)
+                        PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit, 2)
                         PreferenceManager.savePreferences()
                         client.preferencesSavedOnServer = false
                     } else {
@@ -212,9 +212,9 @@ object CommandExecutor {
                 }
                 if ("tk3".equals(command, ignoreCase = true)) { // DirectX
                     client.loadAssets(3, false)
-                    if (PreferenceManager.preferences.activeToolkit.getValue() == 3) {
+                    if (PreferenceManager.preferences!!.activeToolkit.getValue() == 3) {
                         Console.writeLine("Success")
-                        PreferenceManager.preferences.setValue(PreferenceManager.preferences.toolkit, 3)
+                        PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit, 3)
                         PreferenceManager.savePreferences()
                         client.preferencesSavedOnServer = false
                     } else {
@@ -224,9 +224,9 @@ object CommandExecutor {
                 }
                 if ("tk5".equals(command, ignoreCase = true)) { // OpenGL - with shaders
                     client.loadAssets(5, false)
-                    if (PreferenceManager.preferences.activeToolkit.getValue() == 5) {
+                    if (PreferenceManager.preferences!!.activeToolkit.getValue() == 5) {
                         Console.writeLine("Success")
-                        PreferenceManager.preferences.setValue(PreferenceManager.preferences.toolkit, 5)
+                        PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit, 5)
                         PreferenceManager.savePreferences()
                         client.preferencesSavedOnServer = false
                     } else {

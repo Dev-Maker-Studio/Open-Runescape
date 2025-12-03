@@ -40,7 +40,7 @@ object SongPlayer {
             songLoadedPacket.buffer.writeInt(-1)
             client.GAME_CONNECTION_CONTEXT.queuePacket(songLoadedPacket)
         } else {
-            var adjustedVolume = volume * PreferenceManager.preferences.musicVolume.getValue() shr 8
+            var adjustedVolume = volume * PreferenceManager.preferences!!.musicVolume.getValue() shr 8
             if (musicArchive == -1 && !SoundEffectPlayer.soundJinglePlaying) {
                 SoundResourceManager.discardSongData()
             } else if (musicArchive != -1 && (musicArchive != AreaSoundPlayer.currentMusicArchive || !SongReference.method1966())
@@ -94,7 +94,7 @@ object SongPlayer {
 
     @JvmStatic
     fun play(songReference: SongReference?, volume: Int) {
-        val adjustedVolume = volume * PreferenceManager.preferences.musicVolume.getValue() shr 8
+        val adjustedVolume = volume * PreferenceManager.preferences!!.musicVolume.getValue() shr 8
         if (songReference == null) {
             SoundResourceManager.discardSongData()
         } else {

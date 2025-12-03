@@ -25,14 +25,14 @@ object GraphicsCache {
     @JvmStatic
     fun resetGraphicCaches() {
         var preferenceMask = 0
-        if (PreferenceManager.preferences.lightDetail.getValue() == 1) {
+        if (PreferenceManager.preferences!!.lightDetail.getValue() == 1) {
             preferenceMask = preferenceMask or 0x1
             preferenceMask = preferenceMask or 0x10
             preferenceMask = preferenceMask or 0x20
             preferenceMask = preferenceMask or 0x2
             preferenceMask = preferenceMask or 0x4
         }
-        if (PreferenceManager.preferences.textures.getValue() == 0) {
+        if (PreferenceManager.preferences!!.textures.getValue() == 0) {
             preferenceMask = preferenceMask or ModelFunctionMask.DISABLE_TEXTURES
         }
         Component.resetCache(preferenceMask)
