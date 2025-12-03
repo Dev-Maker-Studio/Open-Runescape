@@ -17,8 +17,8 @@ class ShaderDX(
     @JvmField var active: Boolean = false
     @JvmField var activeDxShaderMapping: ShaderMappingDX? = null
 
-    override fun loadMapping(toolkit: AbstractNativeToolkit, shaderMapping: NativeShaderMapping): ShaderMapping {
-        return ShaderMappingDX(toolkit as DirectXNativeToolkit, this, shaderMapping)
+    override fun loadMapping(toolkit: AbstractNativeToolkit, mapping: NativeShaderMapping): ShaderMapping {
+        return ShaderMappingDX(toolkit as DirectXNativeToolkit, mapping, this)
     }
 
     override fun loadProgram(shaderMapping: ShaderMapping): Boolean {
@@ -42,7 +42,7 @@ class ShaderDX(
     }
 
     override fun isActiveMapping(): Boolean {
-        return toolkit.activeShaderMapping === shaderMapping
+        return toolkit.activeShaderMapping === activeDxShaderMapping
     }
 
     override fun reset() {

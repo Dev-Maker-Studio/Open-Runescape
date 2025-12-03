@@ -66,7 +66,7 @@ object Renderers {
                     if (activeToolkit!!.utilisesNativeHeap()) {
                         var highMem = true
                         try {
-                            highMem = SystemInfo.SYSTEM_INFO.ram > 256
+                            highMem = SystemInfo.SYSTEM_INFO!!.ram > 256
                         } catch (throwable: Throwable) {
                             // NOOP
                         }

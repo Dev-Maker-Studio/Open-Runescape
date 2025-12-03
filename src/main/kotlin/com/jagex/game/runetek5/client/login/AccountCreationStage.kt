@@ -95,7 +95,7 @@ class AccountCreationStage {
                             packet.buffer.writeString(string_5)
                         }
 
-                        SystemInfo.SYSTEM_INFO.writeMachineInformation(packet.buffer)
+                        SystemInfo.SYSTEM_INFO!!.writeMachineInformation(packet.buffer)
                         packet.buffer.currentPosition += 7
                         packet.buffer.encryptXtea(LOGIN_XTEAS!!, i_4, packet.buffer.currentPosition)
                         packet.buffer.writeShortLength(packet.buffer.currentPosition - dataStartOffset)
