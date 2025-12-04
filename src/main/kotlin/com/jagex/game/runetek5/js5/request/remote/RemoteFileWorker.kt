@@ -69,18 +69,18 @@ class RemoteFileWorker(
         return fileRequest?.getCompletion() ?: 0
     }
 
-    override fun getMasterIndex(): Js5MasterIndex {
+    override fun getMasterIndex(): Js5MasterIndex? {
         if (masterIndex != null) {
-            return masterIndex!!
+            return masterIndex
         }
         if (masterIndexRequest == null) {
             if (standardRequester.priorityRequestUnavailable()) {
-                throw RuntimeException("Priority request unavailable")
+                return null
             }
             masterIndexRequest = standardRequester.request(255, indexId, 0.toByte(), true)
         }
         if (masterIndexRequest!!.waiting) {
-            throw RuntimeException("Master index request waiting")
+            return null
         }
         val referenceTablePayload = masterIndexRequest!!.getPayload()
         if (masterIndexRequest is LocalRequest) {
@@ -107,7 +107,7 @@ class RemoteFileWorker(
             fileRequestStatuses = ByteArray(masterIndex!!.archiveCount)
             filesSuccessfulyReceived = 0
         }
-        return masterIndex!!
+        return masterIndex
     }
 
     override fun requestArchive(archiveId: Int): ByteArray? {
