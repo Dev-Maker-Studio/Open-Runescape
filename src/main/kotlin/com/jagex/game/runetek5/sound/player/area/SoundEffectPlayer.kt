@@ -72,11 +72,11 @@ object SoundEffectPlayer {
 	        if (currentAnimatingType.toInt() != sound.animationType) {
 	        	val soundEffectId = getSoundEffectId(sound.npcEntity!!)
 	            var npc = sound.npcEntity!!.definitions
-	            if (npc.alternativeIds != null) {
+	            if (npc!!.alternativeIds != null) {
 	                npc = npc.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) ?: npc
 	            }
 	            if (npc != null && soundEffectId != -1) {
-	                if (soundEffectId == sound.soundEffectId && sound.instrumentSoundEffect == npc.instrumentSoundEffect) {
+	                if (soundEffectId == sound.soundEffectId && sound.instrumentSoundEffect == npc!!.instrumentSoundEffect) {
 	                    sound.animationType = currentAnimatingType.toInt()
 	                    sound.ambientSoundVolume = npc.ambientSoundVolume
 	                } else {
@@ -93,11 +93,11 @@ object SoundEffectPlayer {
 	                        replay = true
 	                    }
 	                    if (replay) {
-	                        sound.ambientSoundVolume = npc.ambientSoundVolume
+	                        sound.ambientSoundVolume = npc!!.ambientSoundVolume
 	                        sound.aNodeSub26Sub1Sub18082 = null
 	                        sound.instrumentEffect = null
 	                        sound.soundEffectId = soundEffectId
-	                        sound.instrumentSoundEffect = npc.instrumentSoundEffect
+	                        sound.instrumentSoundEffect = npc!!.instrumentSoundEffect
 	                        sound.animationType = currentAnimatingType.toInt()
 	                    }
 	                }
@@ -323,22 +323,22 @@ object SoundEffectPlayer {
 	@JvmStatic
 	fun getSoundEffectId(npc: NpcEntity): Int {
 	    var npcType = npc.definitions
-	    if (npcType.alternativeIds != null) {
+	    if (npcType!!.alternativeIds != null) {
 	        npcType = npcType.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) ?: return -1
 	    }
-	    var soundEffect = npcType.idleSoundEffect
+	    var soundEffect = npcType!!.idleSoundEffect
 	    val basType = npc.getBastype()
 	    val movingSequenceId = npc.movingSequence.getId()
 	    if (movingSequenceId != -1 && !npc.movingSequence.hasType) {
 	        if (movingSequenceId != basType.runningSequence && movingSequenceId != basType.runDir3 && movingSequenceId != basType.runDir1 && movingSequenceId != basType.runDir2) {
 	            if (movingSequenceId == basType.teleportSequence || movingSequenceId == basType.teleDir3 || movingSequenceId == basType.teleDir1 || movingSequenceId == basType.teleDir2) {
-	                soundEffect = npcType.teleportSoundEffect
+	                soundEffect = npcType!!.teleportSoundEffect
 	            }
 	        } else {
-	            soundEffect = npcType.runningSoundEffect
+	            soundEffect = npcType!!.runningSoundEffect
 	        }
 	    } else {
-	        soundEffect = npcType.walkingSoundEffect
+	        soundEffect = npcType!!.walkingSoundEffect
 	    }
 	    return soundEffect
 	}

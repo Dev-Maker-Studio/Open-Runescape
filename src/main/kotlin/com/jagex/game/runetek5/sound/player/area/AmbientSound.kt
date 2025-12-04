@@ -136,11 +136,11 @@ class AmbientSound : Node<AmbientSound>() {
             if (currentEffect != transformedEffect) {
                 soundEffectId = transformedEffect
                 var npcType = npcEntity!!.definitions
-                if (npcType.alternativeIds != null) {
+                if (npcType!!.alternativeIds != null) {
                     npcType = npcType.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
                 }
                 if (npcType != null) {
-                    ambientSoundMinHearDistance = npcType.ambientSoundMinHearDistance shl 9
+                    ambientSoundMinHearDistance = npcType!!.ambientSoundMinHearDistance shl 9
                     ambientSoundMaxHearDistance = npcType.ambientSoundMaxHearDistance shl 9
                     ambientSoundVolume = npcType.ambientSoundVolume
                     instrumentSoundEffect = npcType.instrumentSoundEffect
@@ -150,7 +150,7 @@ class AmbientSound : Node<AmbientSound>() {
                     ambientSoundMaxHearDistance = 0
                     ambientSoundMinHearDistance = 0
                     ambientSoundVolume = 0
-                    instrumentSoundEffect = npcEntity!!.definitions.instrumentSoundEffect
+                    instrumentSoundEffect = npcEntity!!.definitions!!.instrumentSoundEffect
                     minDelay = 256
                     maxDelay = 256
                 }
@@ -345,12 +345,12 @@ class AmbientSound : Node<AmbientSound>() {
             } else if (npc != null) {
                 soundEffectNode.npcEntity = npc
                 var npcType = npc.definitions
-                if (npcType.alternativeIds != null) {
+                if (npcType!!.alternativeIds != null) {
                     soundEffectNode.hasTransformation = true
                     npcType = npcType.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
                 }
                 if (npcType != null) {
-                    soundEffectNode.absEndX = (baseX + npcType.size) shl 9
+                    soundEffectNode.absEndX = (baseX + npcType!!.size) shl 9
                     soundEffectNode.absEndY = (baseY + npcType.size) shl 9
                     soundEffectNode.soundEffectId = SoundEffectPlayer.getSoundEffectId(npc)
                     soundEffectNode.instrumentSoundEffect = npcType.instrumentSoundEffect

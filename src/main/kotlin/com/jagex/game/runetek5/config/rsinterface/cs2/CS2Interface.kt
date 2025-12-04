@@ -11,7 +11,7 @@ class CS2Interface {
     fun setChild(interfaceId: Int, slotId: Int): Boolean {
         val def = Component.listIcomponent(interfaceId, slotId)
         if (def != null) {
-            this.inter = Interface.INTERFACES[interfaceId shr 16]
+            this.inter = Interface.INTERFACES!![interfaceId shr 16]
             this.comp = def
             return true
         }

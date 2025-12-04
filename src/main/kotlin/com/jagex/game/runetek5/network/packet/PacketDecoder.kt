@@ -848,7 +848,7 @@ object PacketDecoder {
                         } else {
                             friendsChatPlayers[index]!!.username = friendsChatPlayers[index]!!.displayName
                         }
-                        friendsChatPlayers[index]!!.textName = TextUtils.formatDisplayname(friendsChatPlayers[index]!!.username)
+                        friendsChatPlayers[index]!!.textName = TextUtils.formatDisplayname(friendsChatPlayers[index]!!.username!!)
                         friendsChatPlayers[index]!!.worldId = buffer.readUShort()
                         friendsChatPlayers[index]!!.rank = buffer.readByte()
                         friendsChatPlayers[index]!!.worldName = buffer.readString()
@@ -1471,7 +1471,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.TRIGGER_ONDIALOGABORT) {
             if (client.BASE_WINDOW_ID != -1) {
-                Interface.open_sub(client.BASE_WINDOW_ID, 0)
+                Interface.openSub(client.BASE_WINDOW_ID, 0)
             }
             context.currentPacket = null
             return true
@@ -1509,7 +1509,7 @@ object PacketDecoder {
                 val fcPlayer = FriendsChatPlayer()
                 fcPlayer.displayName = displayName
                 fcPlayer.username = username
-                fcPlayer.textName = TextUtils.formatDisplayname(fcPlayer.username)
+                fcPlayer.textName = TextUtils.formatDisplayname(fcPlayer.username!!)
                 fcPlayer.worldId = worldId
                 fcPlayer.rank = rank
                 fcPlayer.worldName = worldName
@@ -1927,11 +1927,11 @@ object PacketDecoder {
             val i_6 = buffer.readUShort()
             client.requestVarVerifyid()
             var i_8: Int
-            if (Interface.INTERFACES[key] != null) {
+            if (Interface.INTERFACES!![key] != null) {
                 for (i_7 in flags..<i_6) {
                     i_8 = buffer.readUMedium()
-                    if (i_7 < Interface.INTERFACES[key].components.size && Interface.INTERFACES[key].components[i_7] != null) {
-                        Interface.INTERFACES[key].components[i_7].serverTriggers = i_8
+                    if (i_7 < Interface.INTERFACES!![key]!!.components.size && Interface.INTERFACES!![key]!!.components[i_7] != null) {
+                        Interface.INTERFACES!![key]!!.components[i_7]!!.serverTriggers = i_8
                     }
                 }
             }
@@ -2145,10 +2145,10 @@ object PacketDecoder {
             parent2Def = Component.fromHash(fromParentUid)
             if (parent2Def != null) {
                 Component.redrawComponent(parent2Def)
-                Component.method483(Interface.INTERFACES[parent2Def.idHash ushr 16], parent2Def, true)
+                Component.method483(Interface.INTERFACES!![parent2Def.idHash ushr 16], parent2Def, true)
             }
             if (client.BASE_WINDOW_ID != -1) {
-                Interface.open_sub(client.BASE_WINDOW_ID, 1)
+                Interface.openSub(client.BASE_WINDOW_ID, 1)
             }
             context.currentPacket = null
             return true

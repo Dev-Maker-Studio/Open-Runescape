@@ -772,7 +772,7 @@ object Bot {
     fun getMyPlayerY() = getMyPlayer().endZ.toInt() + getBaseY()
 
     fun getNpcIndexByName(name: String): Int =
-        findNPC { it.definitions.name.equals(name, ignoreCase = true) }?.playerIndex ?: -1
+        findNPC { it.definitions!!.name.equals(name, ignoreCase = true) }?.playerIndex ?: -1
 
     fun getPid(entity: PathingEntity) = entity.playerIndex
 
@@ -793,7 +793,7 @@ object Bot {
         findNPC { it.playerIndex == index }
 
     fun getNpcIndexById(id: Int): Int =
-        findNPC { it.definitions.type == id }?.playerIndex ?: -1
+        findNPC { it.definitions!!.type == id }?.playerIndex ?: -1
 
     fun buy500ShopItem(slot: Int) = clickButton(1265, 20, slot, 6)
 
@@ -802,7 +802,7 @@ object Bot {
     }
 
     fun clickNPC(npc: NpcEntity?, option: String) {
-        npc?.let { npcOption(it.playerIndex, Utils.stringContainsIgnoreCase(it.definitions.actions, option)) }
+        npc?.let { npcOption(it.playerIndex, Utils.stringContainsIgnoreCase(it.definitions!!.actions, option)) }
     }
 
     fun clickNpc(name: String, option: Int) =
@@ -810,8 +810,8 @@ object Bot {
 
     fun clickNPCWithNearestOption(name: String, optionRequired: String, action: String) {
         val nearestNPC = getNPCs().firstOrNull { npc ->
-            npc.definitions.name.equals(name, ignoreCase = true) &&
-            npc.definitions.actions.any { it?.contains(optionRequired) == true }
+            npc.definitions!!.name.equals(name, ignoreCase = true) &&
+            npc.definitions!!.actions.any { it?.contains(optionRequired) == true }
         }
         clickNPC(nearestNPC, action)
     }
@@ -975,7 +975,7 @@ object Bot {
             "useon" -> for (i in 0 until 14) itemOnItem(inventory.getItem(i), i, inventory.getItem(i + 14), i + 14)
 
             // NPCs & Objects
-            "npcnext" -> { println(getClosestNPC("fishing spot")); getNPCs().forEach { println(it.definitions.name) } }
+            "npcnext" -> { println(getClosestNPC("fishing spot")); getNPCs().forEach { println(it.definitions!!.name) } }
             "objnext" -> { println(getClosestObject("Fur stall")); println("Number found: ${getObjectsNearby("Fur stall").size}"); clickClosestObject("Fur stall") }
             "nearbyobjects" -> { Console.writeLine("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: "); getObjectsNearby(cmd[1]).forEach { Console.writeLine("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}") } }
             "objonme" -> println((Resource.mapRegion!!.getScene().getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject)?.id)
@@ -1060,16 +1060,16 @@ object Bot {
     }
 
     fun getFilteredNPCs(id: Int) =
-        getNPCs().filter { it.definitions.type == id }
+        getNPCs().filter { it.definitions!!.type == id }
 
     fun getFilteredNPCs(id: String) =
-        getNPCs().filter { it.definitions.name.equals(id, ignoreCase = true) }
+        getNPCs().filter { it.definitions!!.name.equals(id, ignoreCase = true) }
 
     fun getFilteredNPCsByOption(id: String) =
-        getNPCs().filter { id in it.definitions.actions }
+        getNPCs().filter { id in it.definitions!!.actions }
 
     fun getFilteredNPCsContaining(id: String) =
-        getNPCs().filter { it.definitions.name.contains(id, ignoreCase = true) }
+        getNPCs().filter { it.definitions!!.name.contains(id, ignoreCase = true) }
 
     fun getClosestNPCNoClip(id: String) =
         getClosestEntity(getFilteredNPCs(id)) {

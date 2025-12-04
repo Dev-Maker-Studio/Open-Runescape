@@ -56,11 +56,11 @@ open class WorldDescriptor : WorldDescriptorFlags() {
 
                 return playersWorld1 - playersWorld2
             } else if (type == 2) {
-                return TextUtils.method7557(world1.getWorld().activity, world2.getWorld().activity, client.CURRENT_LANGUAGE)
+                return TextUtils.method7557(world1.getWorld().activity!!, world2.getWorld().activity!!, client.CURRENT_LANGUAGE)
             } else if (type == 3) {
                 return if ("-" == world1.unknown) (if ("-" == world2.unknown) 0 else (if (bool3) -1 else 1)) else (if ("-" == world2.unknown) (if (bool3) 1 else -1) else TextUtils.method7557(
-                    world1.unknown,
-                    world2.unknown,
+                    world1.unknown!!,
+                    world2.unknown!!,
                     client.CURRENT_LANGUAGE
                 ))
             } else if (type == 4) {

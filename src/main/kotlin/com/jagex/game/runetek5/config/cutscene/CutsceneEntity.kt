@@ -33,8 +33,8 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
                 npc!!.playerIndex = index
                 npc!!.lastUpdate = client.cycles
                 npc!!.setDirection(TypeLists.NPC!!.list(id))
-                npc!!.size = npc!!.definitions.size
-                npc!!.turnDirection = npc!!.definitions.turnDirection shl 3
+                npc!!.size = npc!!.definitions!!.size
+                npc!!.turnDirection = npc!!.definitions!!.turnDirection shl 3
                 npc!!.worldPriority = ++drawPriority - 1
             } else {
                 player = PlayerEntity(Resource.mapRegion!!.getScene())
