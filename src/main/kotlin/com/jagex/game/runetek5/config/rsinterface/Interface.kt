@@ -71,14 +71,14 @@ class Interface(
             interfaceResource = interfacesResource
             Resource.MESH = meshResource
             StaticMethods.SPRITES_INDEX = spriteResource
-            INTERFACES = Array(interfaceResource!!.archiveCount) { null }
-            INTERFACES_LOADED = BooleanArray(interfaceResource!!.archiveCount)
+            INTERFACES = Array(interfaceResource!!.getArchiveCount()) { null }
+            INTERFACES_LOADED = BooleanArray(interfaceResource!!.getArchiveCount())
         }
 
         @JvmStatic
         fun initializeTables() {
-            INTERFACES = Array(interfaceResource!!.archiveCount) { null }
-            INTERFACES_LOADED = BooleanArray(interfaceResource!!.archiveCount)
+            INTERFACES = Array(interfaceResource!!.getArchiveCount()) { null }
+            INTERFACES_LOADED = BooleanArray(interfaceResource!!.getArchiveCount())
         }
 
         @JvmStatic

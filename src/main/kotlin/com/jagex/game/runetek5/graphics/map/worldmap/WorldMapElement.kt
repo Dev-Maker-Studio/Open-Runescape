@@ -120,7 +120,7 @@ class WorldMapElement(
     companion object {
         @JvmStatic
         fun list(resourceProvider: Js5ResourceProvider, arhiveId: Int, fileId: Int): WorldMapElement {
-            val buffer = Packet(resourceProvider.getFile(arhiveId, fileId))
+            val buffer = Packet(resourceProvider.getFile(arhiveId, fileId)!!)
             val def = WorldMapElement(
                 fileId,
                 buffer.readString(),

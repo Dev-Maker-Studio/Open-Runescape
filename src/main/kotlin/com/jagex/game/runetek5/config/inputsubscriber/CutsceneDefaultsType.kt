@@ -9,7 +9,7 @@ class CutsceneDefaultsType(defaultsResource: Js5ResourceProvider) {
 
     init {
         val data = defaultsResource.getFile(DefaultsFile.CUTSCENE.fileId)
-        decode(Packet(data))
+        decode(Packet(data!!))
     }
 
     fun decode(buffer: Packet) {

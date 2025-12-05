@@ -26,7 +26,7 @@ class FontCombo(
             val fileId = fontFileIds[index]
             val fontMetrics = FontMetrics.list(fontmetricsResource, fileId)
             val fontData = loadingFontResource.getFile(fileId)
-            val fontRenderer = fontprovider.createFontRenderer(fontData, fontMetrics, true)
+            val fontRenderer = fontprovider.createFontRenderer(fontData!!, fontMetrics, true)
             fontMap!![index] = TypeResult(fontRenderer, fontMetrics)
         }
     }

@@ -19,7 +19,7 @@ class GameTipTypeList(resourceProvider: Js5ResourceProvider) {
 
     init {
         tipsResource = resourceProvider
-        val buffer = Packet(tipsResource.getFile(0, 0))
+        val buffer = Packet(tipsResource.getFile(0, 0)!!)
         val size = if (buffer.buffer.size >= 1) buffer.readUByte() else -1
         if (size < 4) {
             tipStages = emptyArray()
@@ -104,7 +104,7 @@ class GameTipTypeList(resourceProvider: Js5ResourceProvider) {
     fun list(fileId: Int): GameTipType {
         val data = tipsResource.getFile(fileId, 0)
         val tipsType = GameTipType()
-        tipsType.decode(Packet(data))
+        tipsType.decode(Packet(data!!))
         return tipsType
     }
 

@@ -48,7 +48,7 @@ class ObjectTypeList(
 
     init {
         if (configResource != null) {
-            val lastArchive = configResource.archiveCount - 1
+            val lastArchive = configResource.getArchiveCount() - 1
             SharedConfigsType.OBJECTS.archiveFileCapacity()
             configResource.getArchiveFileCount(lastArchive)
         }

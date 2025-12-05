@@ -34,7 +34,7 @@ class FrameSet(
                     return false
                 }
                 val fileIds = frameskeletonResource!!.getValidFileIds(groupId)
-                frameData = arrayOfNulls(fileIds.size)
+                frameData = arrayOfNulls(fileIds!!.size)
                 for (index in fileIds.indices) {
                     frameData!![index] = frameskeletonResource!!.getFile(groupId, fileIds[index])
                 }
@@ -58,7 +58,7 @@ class FrameSet(
         synchronized(frameskeletonResource!!) {
             val fileCount = frameskeletonResource!!.getArchiveFileCount(groupId)
             frames = arrayOfNulls(fileCount)
-            fileIds = frameskeletonResource!!.getValidFileIds(groupId)
+            fileIds = frameskeletonResource!!.getValidFileIds(groupId)!!
         }
         for (fileIndex in fileIds.indices) {
             val data = frameData!![fileIndex]!!
@@ -76,7 +76,7 @@ class FrameSet(
             }
             if (frameBase == null) {
                 synchronized(framebaseResource!!) {
-                    frameBase = AnimBase(frameId, framebaseResource!!.getFile(frameId))
+                    frameBase = AnimBase(frameId, framebaseResource!!.getFile(frameId)!!)
                 }
                 frameBaseList.insertTail(frameBase)
             }

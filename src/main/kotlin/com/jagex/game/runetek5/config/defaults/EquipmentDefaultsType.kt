@@ -14,7 +14,7 @@ class EquipmentDefaultsType(defaultsResource: Js5ResourceProvider) {
 
     init {
         val data = defaultsResource.getFile(DefaultsFile.EQUIPMENT.fileId)
-        decode(Packet(data))
+        decode(Packet(data!!))
         if (this.customizableObjSlots == null) {
             throw RuntimeException("")
         }

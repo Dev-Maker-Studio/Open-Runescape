@@ -26,7 +26,7 @@ class EntityDefaults(index1: Js5ResourceProvider) {
     @JvmField var recolorPaletteDst: Array<Array<ShortArray>>? = null
 
     init {
-        decode(Packet(index1.getFile(DefaultsFile.ENTITY.fileId)))
+        decode(Packet(index1.getFile(DefaultsFile.ENTITY.fileId)!!))
     }
 
     fun decode(buffer: Packet) {

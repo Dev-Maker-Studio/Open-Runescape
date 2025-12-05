@@ -17,7 +17,7 @@ class MaterialTypeList(
     val textures: Array<MaterialType?>
 
     init {
-        val materialBuffer = Packet(materialResource.getFile(0, 0))
+        val materialBuffer = Packet(materialResource.getFile(0, 0)!!)
         numMaterials = materialBuffer.readUShort()
         textures = arrayOfNulls(numMaterials)
 

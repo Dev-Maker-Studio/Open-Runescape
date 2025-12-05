@@ -194,7 +194,7 @@ object Resource {
         }
         remoteFileWorkersByIndex!![indexId] = client.requestManager.getWorker(indexId, cacheFile, referenceTableDecompressor)
         remoteFileWorkersByIndex!![indexId]!!.reset()
-        return Js5ResourceProvider(remoteFileWorkersByIndex!![indexId], directMemoryMode, loadType)
+        return Js5ResourceProvider(remoteFileWorkersByIndex!![indexId]!!, directMemoryMode, loadType)
     }
 
     @JvmStatic

@@ -27,7 +27,7 @@ class InteractionDefaultsType(resource: Js5ResourceProvider) {
 
     init {
         val data = resource.getFile(DefaultsFile.INTERACTIONS.fileId)
-        decode(Packet(data))
+        decode(Packet(data!!))
     }
 
     /**

@@ -83,7 +83,7 @@ class ShadowTileGL(
     }
 
     fun method2155() {
-        method2165(elementsBuffer!!, materialCount)
+        method2165(elementsBuffer, materialCount)
     }
 
     fun method2156(bytes_1: ByteArray, i_2: Int) {
@@ -163,7 +163,7 @@ class ShadowTileGL(
         }
     }
 
-    fun method2165(interface151: ElementsBufferGL, i_2: Int) {
+    fun method2165(interface151: ElementsBufferGL?, i_2: Int) {
         if (i_2 != 0) {
             regenerateTexture()
             toolkit.setActiveTexture(cachedTexture)
