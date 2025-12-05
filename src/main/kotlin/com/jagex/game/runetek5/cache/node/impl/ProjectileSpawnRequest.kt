@@ -47,12 +47,15 @@ class ProjectileSpawnRequest(
                     }
                 }
             }
-            val projectile = Projectile(
-                Resource.mapRegion!!.getScene(), spotAnimId, UpdateZonePacket.UPDATE_ZONE_PLANE, UpdateZonePacket.UPDATE_ZONE_PLANE,
-                localX, localY, adjustedStartHeight, startTime + client.cycles, endTime + client.cycles, angle, slope, source, lockOn, endHeight, useFloorHeight, basOffIdx
-            )
-            projectile.start(absX, absY, MapRegion.tileheightForAbsolutePosition(absX, absY, UpdateZonePacket.UPDATE_ZONE_PLANE) - endHeight, startTime + client.cycles)
-            client.PROJECTILES.addFirst(ProjectileSpawnRequest(projectile))
+            val scene = Resource.mapRegion!!.getScene()
+            if (scene != null) {
+                val projectile = Projectile(
+                    scene, spotAnimId, UpdateZonePacket.UPDATE_ZONE_PLANE, UpdateZonePacket.UPDATE_ZONE_PLANE,
+                    localX, localY, adjustedStartHeight, startTime + client.cycles, endTime + client.cycles, angle, slope, source, lockOn, endHeight, useFloorHeight, basOffIdx
+                )
+                projectile.start(absX, absY, MapRegion.tileheightForAbsolutePosition(absX, absY, UpdateZonePacket.UPDATE_ZONE_PLANE) - endHeight, startTime + client.cycles)
+                client.PROJECTILES.addFirst(ProjectileSpawnRequest(projectile))
+            }
         }
     }
 }

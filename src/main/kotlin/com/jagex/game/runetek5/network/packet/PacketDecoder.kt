@@ -436,14 +436,17 @@ object PacketDecoder {
                             positionedGfx.unlink()
                         }
                     } else {
-                        val tileX = x * 512 + 256
-                        val tileY = y * 512 + 256
-                        var toPlane = fromPlane
-                        if (fromPlane < 3 && Resource.mapRegion!!.getSettingsBits().areRoofsHidden(x, y)) {
-                            toPlane = fromPlane + 1
+                        val scene = Resource.mapRegion!!.getScene()
+                        if (scene != null) {
+                            val tileX = x * 512 + 256
+                            val tileY = y * 512 + 256
+                            var toPlane = fromPlane
+                            if (fromPlane < 3 && Resource.mapRegion!!.getSettingsBits().areRoofsHidden(x, y)) {
+                                toPlane = fromPlane + 1
+                            }
+                            val spotAnimation = SpotAnimation(scene, reqGfxId, speed, fromPlane, toPlane, tileX, MapRegion.tileheightForAbsolutePosition(tileX, tileY, fromPlane) - height, tileY, x, x, y, y, rotation, setting2)
+                            client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
                         }
-                        val spotAnimation = SpotAnimation(Resource.mapRegion!!.getScene(), reqGfxId, speed, fromPlane, toPlane, tileX, MapRegion.tileheightForAbsolutePosition(tileX, tileY, fromPlane) - height, tileY, x, x, y, y, rotation, setting2)
-                        client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
                     }
                 }
             } else if (targetHash shr 29 != 0) {
@@ -1149,13 +1152,16 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.HINT_TRAIL) {
             val idx = buffer.readUByte()
             val modelId = buffer.readBigSmart()
-            if (client.HINT_TRAILS[idx] != null) {
-                client.HINT_TRAILS[idx].removeFromScene(Resource.mapRegion!!.getScene())
-                client.HINT_TRAILS[idx] = null
-            }
-            if (modelId != -1) {
-                client.HINT_TRAILS[idx] = HintTrail(Renderers.activeToolkit!!, buffer, modelId)
-                client.HINT_TRAILS[idx].addTo(Resource.mapRegion!!.getScene())
+            val scene = Resource.mapRegion!!.getScene()
+            if (scene != null) {
+                if (client.HINT_TRAILS[idx] != null) {
+                    client.HINT_TRAILS[idx].removeFromScene(scene)
+                    client.HINT_TRAILS[idx] = null
+                }
+                if (modelId != -1) {
+                    client.HINT_TRAILS[idx] = HintTrail(Renderers.activeToolkit!!, buffer, modelId)
+                    client.HINT_TRAILS[idx].addTo(scene)
+                }
             }
             context.currentPacket = null
             return true

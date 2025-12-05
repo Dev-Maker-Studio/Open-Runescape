@@ -109,21 +109,24 @@ enum class UpdateZonePacket(val size: Int) {
                     unlink()
                 }
             } else {
-                val tileX = x * 512 + 256
-                val tileY = y * 512 + 256
-                var adjustedPlane = UPDATE_ZONE_PLANE
+                val scene = Resource.mapRegion!!.getScene()
+                if (scene != null) {
+                    val tileX = x * 512 + 256
+                    val tileY = y * 512 + 256
+                    var adjustedPlane = UPDATE_ZONE_PLANE
 
-                if (adjustedPlane < 3 && Resource.mapRegion!!.settingsBits.areRoofsHidden(x, y)) {
-                    adjustedPlane++
+                    if (adjustedPlane < 3 && Resource.mapRegion!!.settingsBits.areRoofsHidden(x, y)) {
+                        adjustedPlane++
+                    }
+
+                    val spotAnimation = SpotAnimation(
+                        scene, spotAnimId, speed, UPDATE_ZONE_PLANE,
+                        adjustedPlane, tileX,
+                        MapRegion.tileheightForAbsolutePosition(tileX, tileY, UPDATE_ZONE_PLANE) - height,
+                        tileY, x, x, y, y, rotation, false
+                    )
+                    client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
                 }
-
-                val spotAnimation = SpotAnimation(
-                    Resource.mapRegion!!.getScene(), spotAnimId, speed, UPDATE_ZONE_PLANE,
-                    adjustedPlane, tileX,
-                    MapRegion.tileheightForAbsolutePosition(tileX, tileY, UPDATE_ZONE_PLANE) - height,
-                    tileY, x, x, y, y, rotation, false
-                )
-                client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
             }
         }
     }
@@ -194,21 +197,24 @@ enum class UpdateZonePacket(val size: Int) {
             xOff in 0 until sceneSize && yOff in 0 until sceneSize &&
             spotAnimId != 65535) {
 
-            localX = localX * 512 + 256
-            localY = localY * 512 + 256
-            xOff = xOff * 512 + 256
-            yOff = yOff * 512 + 256
-            startHeight = startHeight shl 2
-            endHeight = endHeight shl 2
-            slope = slope shl 2
+            val scene = Resource.mapRegion!!.getScene()
+            if (scene != null) {
+                localX = localX * 512 + 256
+                localY = localY * 512 + 256
+                xOff = xOff * 512 + 256
+                yOff = yOff * 512 + 256
+                startHeight = startHeight shl 2
+                endHeight = endHeight shl 2
+                slope = slope shl 2
 
-            val p = Projectile(
-                Resource.mapRegion!!.getScene(), spotAnimId, UPDATE_ZONE_PLANE, UPDATE_ZONE_PLANE,
-                localX, localY, startHeight, startTime + client.cycles, endTime + client.cycles,
-                angle, slope, 0, lockOn, endHeight, useFloorHeight, -1
-            )
-            p.start(xOff, yOff, MapRegion.tileheightForAbsolutePosition(xOff, yOff, UPDATE_ZONE_PLANE) - endHeight, startTime + client.cycles)
-            client.PROJECTILES.addFirst(ProjectileSpawnRequest(p))
+                val p = Projectile(
+                    scene, spotAnimId, UPDATE_ZONE_PLANE, UPDATE_ZONE_PLANE,
+                    localX, localY, startHeight, startTime + client.cycles, endTime + client.cycles,
+                    angle, slope, 0, lockOn, endHeight, useFloorHeight, -1
+                )
+                p.start(xOff, yOff, MapRegion.tileheightForAbsolutePosition(xOff, yOff, UPDATE_ZONE_PLANE) - endHeight, startTime + client.cycles)
+                client.PROJECTILES.addFirst(ProjectileSpawnRequest(p))
+            }
         }
     }
 
