@@ -1007,7 +1007,7 @@ object Bot {
                 }
             }
 
-            else -> Console.writeLine("Unknown command.")
+            else -> {}
         }
     }
 

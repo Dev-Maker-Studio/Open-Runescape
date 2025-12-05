@@ -33,7 +33,7 @@ import com.jagex.game.runetek5.vardomain.VarProviders
 import com.jagex.game.runetek5.vardomain.VarnCache
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 
-class NpcEntity(scene: Scene) : PathingEntity(scene, 25) {
+class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
 
     @JvmField var customisation: NPCTypeCustomisation? = null
     @JvmField var faceX: Int = -1
