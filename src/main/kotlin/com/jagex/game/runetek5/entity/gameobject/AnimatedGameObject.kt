@@ -92,11 +92,13 @@ class AnimatedGameObject(
         val emitters = model.getEmissiveTriangles()
         val effectiveVertices = model.getEffectiveVertices()
         if ((particleSystem == null || particleSystem!!.isDisabled) && (emitters != null || effectiveVertices != null)) {
-            var locType = loctypelist.list(gameobjectId)
-            if (locType.alternativeIds != null) {
-                locType = locType.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)!!
+            var locType: ObjectType? = loctypelist.list(locId)
+            if (locType!!.alternativeIds != null) {
+                locType = locType.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
             }
-            particleSystem = ParticleSystem.get(client.cycles, true)
+            if (locType != null) {
+                particleSystem = ParticleSystem.get(client.cycles, true)
+            }
         }
 
         if (particleSystem != null) {
@@ -117,10 +119,13 @@ class AnimatedGameObject(
         var randomSequenceId = seqId
         var replay = false
         if (seqId == -1) {
-            var computedLoc = loctypelist.list(gameobjectId)
+            var computedLoc: ObjectType? = loctypelist.list(locId)
             var originalLoc: ObjectType? = computedLoc
-            if (computedLoc.alternativeIds != null) {
-                computedLoc = computedLoc.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)!!
+            if (computedLoc!!.alternativeIds != null) {
+                computedLoc = computedLoc.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
+            }
+            if (computedLoc == null) {
+                return
             }
 
             if (originalLoc === computedLoc) {
@@ -167,9 +172,14 @@ class AnimatedGameObject(
     fun getAnimatedModel(renderer: AbstractToolkit, functionMask: Int, bool3: Boolean, hasShadow: Boolean): Model? {
         var functionMask = functionMask
         var hasShadow = hasShadow
-        var loctype = loctypelist.list(gameobjectId)
-        if (loctype.alternativeIds != null) {
-            loctype = loctype.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)!!
+        var loctype: ObjectType? = loctypelist.list(locId)
+        if (loctype!!.alternativeIds != null) {
+            loctype = loctype.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
+        }
+        if (loctype == null) {
+            removeShadow()
+            gameobjectId = -1
+            return null
         }
 
         if (!hasSequenceId && gameobjectId != loctype.id) {
