@@ -311,7 +311,7 @@ object Console {
             if (client.cycles % 30 > 15) {
                 lineColor = 16777215
             }
-            toolkit.drawOpaqueVerticalLine(10 + FontMetrics.aClass4143438.getWidthNoSprites("--> ${formatCommand(commandString).substring(0, commandLength)}"), 350 - FontMetrics.aClass4143438.bottomPadding - 11, 12, lineColor)
+            toolkit.drawOpaqueVerticalLine(10 + FontMetrics.aClass4143438!!.getWidthNoSprites("--> ${formatCommand(commandString).substring(0, commandLength)}"), 350 - FontMetrics.aClass4143438!!.bottomPadding - 11, 12, lineColor)
         }
         toolkit.resetClipping()
     }

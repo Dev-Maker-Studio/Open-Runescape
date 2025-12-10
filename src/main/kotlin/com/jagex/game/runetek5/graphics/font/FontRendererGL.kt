@@ -63,7 +63,7 @@ class FontRendererGL(
                         i_14 += size - i_11
                     }
                 } else {
-                    bytes_27 = charSprite.alpha
+                    bytes_27 = charSprite.alpha!!
 
                     for (i_17 in 0 until i_26) {
                         for (i_18 in 0 until i_11) {

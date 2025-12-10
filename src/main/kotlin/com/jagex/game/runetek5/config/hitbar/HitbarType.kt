@@ -75,28 +75,28 @@ class HitbarType {
                 greenBarSpriteId
             )
         ) {
-            spriteType = SpriteType.listSingle(resource, greenBarSpriteId)
+            spriteType = SpriteType.listSingle(resource, greenBarSpriteId)!!
             hitbarTypeList!!.spriteCache.put(toolkit.generateSprite(spriteType, true), greenBarSpriteId.toLong())
         }
         if (redBarSpriteId >= 0 && hitbarTypeList!!.spriteCache.get(redBarSpriteId.toLong()) == null && resource.isFileCached(
                 redBarSpriteId
             )
         ) {
-            spriteType = SpriteType.listSingle(resource, redBarSpriteId)
+            spriteType = SpriteType.listSingle(resource, redBarSpriteId)!!
             hitbarTypeList!!.spriteCache.put(toolkit.generateSprite(spriteType, true), redBarSpriteId.toLong())
         }
         if (pGreenBarSpriteId >= 0 && hitbarTypeList!!.spriteCache.get(pGreenBarSpriteId.toLong()) == null && resource.isFileCached(
                 pGreenBarSpriteId
             )
         ) {
-            spriteType = SpriteType.listSingle(resource, pGreenBarSpriteId)
+            spriteType = SpriteType.listSingle(resource, pGreenBarSpriteId)!!
             hitbarTypeList!!.spriteCache.put(toolkit.generateSprite(spriteType, true), pGreenBarSpriteId.toLong())
         }
         if (pRedBarSpriteId >= 0 && hitbarTypeList!!.spriteCache.get(pRedBarSpriteId.toLong()) == null && resource.isFileCached(
                 pRedBarSpriteId
             )
         ) {
-            spriteType = SpriteType.listSingle(resource, pRedBarSpriteId)
+            spriteType = SpriteType.listSingle(resource, pRedBarSpriteId)!!
             hitbarTypeList!!.spriteCache.put(toolkit.generateSprite(spriteType, true), pRedBarSpriteId.toLong())
         }
     }

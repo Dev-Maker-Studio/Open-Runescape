@@ -71,56 +71,56 @@ object StaticMedia {
 
     @JvmStatic
     fun loadSprites(toolkit: AbstractToolkit, spriteResource: Js5ResourceProvider) {
-        var spriteTypes = SpriteType.decodeGroup(spriteResource, headiconPkGroupid)
+        var spriteTypes = SpriteType.decodeGroup(spriteResource, headiconPkGroupid)!!
         headiconPkSprites = Array(spriteTypes.size) { index ->
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, headiconsPrayerGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, headiconsPrayerGroupid)!!
         headiconPrayerSprites = Array(spriteTypes.size) { index ->
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, hintHeadiconsGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, hintHeadiconsGroupid)!!
         hintHeadiconSprites = Array(spriteTypes.size) { index ->
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, hintMapmarkersGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, hintMapmarkersGroupid)!!
         hintMapmarkerSprites = Array(spriteTypes.size) { index ->
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, mapflagGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, mapflagGroupid)!!
         var colorOffset: Byte = 25
         mapflagSprites = Array(spriteTypes.size) { index ->
             spriteTypes[index].offsetRgbColor(-colorOffset + (Math.random() * colorOffset * 2.0).toInt(), -colorOffset + (Math.random() * colorOffset * 2.0).toInt(), -colorOffset + (Math.random() * colorOffset * 2.0).toInt())
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, crossGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, crossGroupid)!!
         crossSprites = Array(spriteTypes.size) { index ->
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, mapdotsGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, mapdotsGroupid)!!
         colorOffset = 12
         mapdotSprites = Array(spriteTypes.size) { index ->
             spriteTypes[index].offsetRgbColor(-colorOffset + (Math.random() * colorOffset * 2.0).toInt(), -colorOffset + (Math.random() * colorOffset * 2.0).toInt(), -colorOffset + (Math.random() * colorOffset * 2.0).toInt())
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, nameIconsGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, nameIconsGroupid)!!
         colorOffset = 12
         nameIconSprites = Array(spriteTypes.size) { index ->
             spriteTypes[index].offsetRgbColor(-colorOffset + (Math.random() * colorOffset * 2.0).toInt(), -colorOffset + (Math.random() * colorOffset * 2.0).toInt(), -colorOffset + (Math.random() * colorOffset * 2.0).toInt())
             toolkit.generateSprite(spriteTypes[index], true)
         }
 
-        compassSprite = toolkit.generateSprite(SpriteType.listSingle(spriteResource, compassGroupid, 0), true)
-        otherLevelSprite = toolkit.generateSprite(SpriteType.listSingle(spriteResource, otherLevelGroupid, 0), true)
+        compassSprite = toolkit.generateSprite(SpriteType.listSingle(spriteResource, compassGroupid, 0)!!, true)
+        otherLevelSprite = toolkit.generateSprite(SpriteType.listSingle(spriteResource, otherLevelGroupid, 0)!!, true)
 
-        spriteTypes = SpriteType.decodeGroup(spriteResource, hintMapedgeGroupid)
+        spriteTypes = SpriteType.decodeGroup(spriteResource, hintMapedgeGroupid)!!
         hintMapedgeSprites = Array(spriteTypes.size) { index ->
             toolkit.generateSprite(spriteTypes[index], true)
         }

@@ -72,7 +72,7 @@ class NativeFont(
                         i_14 += i_6 - i_11
                     }
                 } else {
-                    bytes_16 = class9123.alpha
+                    bytes_16 = class9123.alpha!!
 
                     for (i_17 in 0 until i_10) {
                         for (i_18 in 0 until i_11) {

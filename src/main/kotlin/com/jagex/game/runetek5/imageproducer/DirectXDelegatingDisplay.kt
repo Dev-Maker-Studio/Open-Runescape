@@ -56,16 +56,17 @@ class DirectXDelegatingDisplay(
                 throw RuntimeException()
             }
 
-            val stencilFormat = aD3DPRESENTPARAMETERS10480!!.AutoDepthStencilFormat
-            swapChain = IDirect3DDevice.CreateAdditionalSwapChain(toolkit.renderTarget, aD3DPRESENTPARAMETERS10480)
+            val params = aD3DPRESENTPARAMETERS10480!!
+            val stencilFormat = params.AutoDepthStencilFormat
+            swapChain = IDirect3DDevice.CreateAdditionalSwapChain(toolkit.renderTarget, params)
             backBuffer = IDirect3DSwapChain.GetBackBuffer(swapChain, 0, 0)
             depthStencilSurface = IDirect3DDevice.CreateDepthStencilSurface(
                 toolkit.renderTarget,
                 this.backBufferWidth,
                 this.backBufferHeight,
                 stencilFormat,
-                aD3DPRESENTPARAMETERS10480!!.MultiSampleType,
-                aD3DPRESENTPARAMETERS10480!!.MultiSampleQuality,
+                params.MultiSampleType,
+                params.MultiSampleQuality,
                 false
             )
         }

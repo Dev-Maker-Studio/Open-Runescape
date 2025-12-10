@@ -46,7 +46,7 @@ class TransparentFontRendererSw3d(
     private external fun n(
         var1: SoftwareToolkit,
         var2: ba,
-        var3: Array<ByteArray>,
+        var3: Array<ByteArray?>,
         var4: IntArray,
         var5: IntArray,
         var6: IntArray,

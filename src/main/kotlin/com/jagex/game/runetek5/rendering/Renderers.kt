@@ -43,8 +43,8 @@ object Renderers {
             }
         } else {
             var generatedToolkit: AbstractToolkit? = null
-            var fontMetrics: FontMetrics
-            var fontRenderer: AbstractFontRenderer
+            var fontMetrics: FontMetrics?
+            var fontRenderer: AbstractFontRenderer?
             if (topleftScreenText != null) {
                 generatedToolkit = AbstractToolkit.create(0, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, 0)
                 generatedToolkit.applyClearFlags(1, 0)

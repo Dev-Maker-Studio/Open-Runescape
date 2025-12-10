@@ -65,22 +65,22 @@ class HitSplatType {
         val hitsplatSpriteResource: Js5ResourceProvider = typelist!!.spriteResource
         var spriteType: SpriteType
         if (spriteA >= 0 && typelist!!.spriteCache.get(spriteA.toLong()) == null && hitsplatSpriteResource.isFileCached(spriteA)) {
-            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteA)
+            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteA)!!
             typelist!!.spriteCache.put(toolkit.generateSprite(spriteType, true), spriteA.toLong())
         }
 
         if (spriteC >= 0 && typelist!!.spriteCache.get(spriteC.toLong()) == null && hitsplatSpriteResource.isFileCached(spriteC)) {
-            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteC)
+            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteC)!!
             typelist!!.spriteCache.put(toolkit.generateSprite(spriteType, true), spriteC.toLong())
         }
 
         if (spriteB >= 0 && typelist!!.spriteCache.get(spriteB.toLong()) == null && hitsplatSpriteResource.isFileCached(spriteB)) {
-            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteB)
+            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteB)!!
             typelist!!.spriteCache.put(toolkit.generateSprite(spriteType, true), spriteB.toLong())
         }
 
         if (spriteD >= 0 && typelist!!.spriteCache.get(spriteD.toLong()) == null && hitsplatSpriteResource.isFileCached(spriteD)) {
-            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteD)
+            spriteType = SpriteType.listSingle(hitsplatSpriteResource, spriteD)!!
             typelist!!.spriteCache.put(toolkit.generateSprite(spriteType, true), spriteD.toLong())
         }
     }
