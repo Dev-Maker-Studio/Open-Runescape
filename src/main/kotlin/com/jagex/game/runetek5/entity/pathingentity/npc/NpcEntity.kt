@@ -146,8 +146,8 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
     }
 
     fun move(plane: Int, baseX: Int, baseY: Int, stationary: Boolean, size: Int) {
-        this.plane = super.collisionPlane
         super.collisionPlane = plane.toByte()
+        this.plane = super.collisionPlane
         if (Resource.mapRegion!!.getSettingsBits().areRoofsHidden(baseX, baseY)) {
             super.collisionPlane = (super.collisionPlane + 1).toByte()
         }
