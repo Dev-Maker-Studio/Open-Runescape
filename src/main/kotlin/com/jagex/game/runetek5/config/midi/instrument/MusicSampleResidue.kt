@@ -39,7 +39,7 @@ class MusicSampleResidue {
         }
 
         if (!isFloat) {
-            val classwords = MusicSample.codebooks[anInt3286].dimensions
+            val classwords = MusicSample.codebooks!![anInt3286].dimensions
             val windowSize = anInt3281 - anInt3283
             val numWindows = windowSize / anInt3282
             val classification = IntArray(numWindows)
@@ -49,7 +49,7 @@ class MusicSampleResidue {
 
                 while (pcount < numWindows) {
                     if (pass == 0) {
-                        var q = MusicSample.codebooks[anInt3286].decode()
+                        var q = MusicSample.codebooks!![anInt3286].decode()
 
                         for (i in classwords - 1 downTo 0) {
                             if (pcount + i < numWindows) {
@@ -64,7 +64,7 @@ class MusicSampleResidue {
                         val bookIndex = residueBooks[pass + c * 8]
                         if (bookIndex >= 0) {
                             val offset = pcount * anInt3282 + anInt3283
-                            val codebook = MusicSample.codebooks[bookIndex]
+                            val codebook = MusicSample.codebooks!![bookIndex]
                             val step: Int
                             if (anInt3285 == 0) {
                                 step = anInt3282 / codebook.dimensions

@@ -230,7 +230,7 @@ object SoundEffectPlayer {
 	                    	256 else MathUtils.calculateSampleRate(ambientSound.maxDelay, ambientSound.minDelay)
 	                    if (ambientSound.instrumentSoundEffect) {
 	                        if (ambientSound.instrumentEffect == null) {
-	                            ambientSound.instrumentEffect = MusicSample.list(Resource.MIDI_INSTRUMENT, ambientSound.soundEffectId)
+	                            ambientSound.instrumentEffect = MusicSample.list(Resource.MIDI_INSTRUMENT!!, ambientSound.soundEffectId)
 	                        }
 	                        if (ambientSound.instrumentEffect != null) {
 	                            if (ambientSound.aNodeSub26Sub1Sub18082 == null) {
@@ -265,7 +265,7 @@ object SoundEffectPlayer {
 	                    if (ambientSound.instrumentAmbientSound) {
 	                        if (ambientSound.aNodeSub188087 == null) {
 	                            val random = (Math.random() * ambientSound.ambientSoundGroupIds!!.size).toInt()
-	                            ambientSound.aNodeSub188087 = MusicSample.list(Resource.MIDI_INSTRUMENT, ambientSound.ambientSoundGroupIds!![random])
+	                            ambientSound.aNodeSub188087 = MusicSample.list(Resource.MIDI_INSTRUMENT!!, ambientSound.ambientSoundGroupIds!![random])
 	                        }
 	                        if (ambientSound.aNodeSub188087 != null) {
 	                            if (ambientSound.aNodeSub26Sub1Sub18106 == null) {

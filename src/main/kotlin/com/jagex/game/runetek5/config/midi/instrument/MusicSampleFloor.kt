@@ -139,13 +139,13 @@ class MusicSampleFloor {
             val csub = (1 shl cbits) - 1
             var cval = 0
             if (cbits > 0) {
-                cval = MusicSample.codebooks[classMasterbooks[pclass]].decode()
+                cval = MusicSample.codebooks!![classMasterbooks[pclass]].decode()
             }
 
             for (k in 0 until cdim) {
                 val book = subclassBooks[pclass][cval and csub]
                 cval = cval ushr cbits
-                finalY!![offset++] = if (book >= 0) MusicSample.codebooks[book].decode() else 0
+                finalY!![offset++] = if (book >= 0) MusicSample.codebooks!![book].decode() else 0
             }
         }
 
