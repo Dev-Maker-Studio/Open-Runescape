@@ -30,7 +30,7 @@ class WaterPreference : Preference {
     }
 
     override fun canModify(value: Int): Int {
-        return if (value != 0 && super.gamePreferences.goundBlending.getValue() != 1) 2 else 1
+        return if (value != 0 && super.gamePreferences.goundBlending!!.getValue() != 1) 2 else 1
     }
 
     fun display(): Boolean {

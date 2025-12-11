@@ -20,7 +20,7 @@ class AsyncMaploadingPreference : Preference {
      * Ensures the async map loading setting is valid based on system capabilities.
      */
     fun ensureValid() {
-        var value = gamePreferences.toolkit.getValue()
+        var value = gamePreferences.toolkit!!.getValue()
         if (value != 3 && value != 5) {
             value = 0
         }
@@ -45,7 +45,7 @@ class AsyncMaploadingPreference : Preference {
         if (gamePreferences.getProcessorSpecs().getProcessorCount() < 2) {
             return 3
         }
-        val toolkit = gamePreferences.toolkit.getValue()
+        val toolkit = gamePreferences.toolkit!!.getValue()
         return if (toolkit != 3 && toolkit != 5) 3 else 1
     }
 

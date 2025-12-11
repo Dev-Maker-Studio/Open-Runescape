@@ -33,7 +33,7 @@ object Renderers {
     @JvmStatic
     fun prepareForRendering(toolkitId: Int, topleftScreenText: String?, verifySettingsPreUpdate: Boolean) {
         if (toolkitId == 0) {
-            activeToolkit = AbstractToolkit.create(0, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, PreferenceManager.preferences!!.antiAliasingPreview.getValue() * 2)
+            activeToolkit = AbstractToolkit.create(0, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, PreferenceManager.preferences!!.antiAliasingPreview!!.getValue() * 2)
             if (topleftScreenText != null) {
                 activeToolkit!!.applyClearFlags(1, 0)
                 val fontMetrics = FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p12FullIndex)
@@ -55,7 +55,7 @@ object Renderers {
             }
             try {
                 try {
-                    activeToolkit = AbstractToolkit.create(toolkitId, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, PreferenceManager.preferences!!.antiAliasingPreview.getValue() * 2)
+                    activeToolkit = AbstractToolkit.create(toolkitId, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, PreferenceManager.preferences!!.antiAliasingPreview!!.getValue() * 2)
                     if (topleftScreenText != null) {
                         generatedToolkit!!.applyClearFlags(1, 0)
                         fontMetrics = FontMetrics.getFontMetrics(Resource.FONT_METRICS, FontManager.p12FullIndex)
@@ -79,11 +79,11 @@ object Renderers {
                         activeToolkit!!.setNativeHeap(nativeHeap)
                     }
                 } catch (throwable: Throwable) {
-                    val toolkitSetting = PreferenceManager.preferences!!.activeToolkit.getValue()
+                    val toolkitSetting = PreferenceManager.preferences!!.activeToolkit!!.getValue()
                     if (toolkitSetting == 2) {
                         client.renderWithCpu = true
                     }
-                    PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.activeToolkit, 0)
+                    PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.activeToolkit!!, 0)
                     prepareForRendering(toolkitSetting, topleftScreenText, verifySettingsPreUpdate)
                     if (generatedToolkit != null) {
                         try {
@@ -112,11 +112,11 @@ object Renderers {
             }
         }
         if (verifySettingsPreUpdate) {
-            PreferenceManager.preferences!!.verifySettings(PreferenceManager.preferences!!.activeToolkit, false)
+            PreferenceManager.preferences!!.verifySettings(PreferenceManager.preferences!!.activeToolkit!!, false)
         }
-        PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.activeToolkit, toolkitId)
+        PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.activeToolkit!!, toolkitId)
         if (!verifySettingsPreUpdate) {
-            PreferenceManager.preferences!!.verifySettings(PreferenceManager.preferences!!.activeToolkit, true)
+            PreferenceManager.preferences!!.verifySettings(PreferenceManager.preferences!!.activeToolkit!!, true)
         }
         cleanup()
         activeToolkit!!.initialize()
@@ -124,7 +124,7 @@ object Renderers {
         Resource.mapRegion!!.calculateViewRange()
         activeToolkit!!.resetTextureState()
         if (activeToolkit!!.hasBloomSupport()) {
-            PreferenceManager.setBloom(PreferenceManager.preferences!!.bloom.getValue() == 1)
+            PreferenceManager.setBloom(PreferenceManager.preferences!!.bloom!!.getValue() == 1)
         }
         Resource.mapRegion!!.resetAtmosphere()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()

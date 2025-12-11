@@ -22,11 +22,11 @@ class SkyboxPreference : Preference {
     }
 
     fun display(): Boolean {
-        return GameState.isGamestate135(super.gamePreferences.activeToolkit.getValue())
+        return GameState.isGamestate135(super.gamePreferences.activeToolkit!!.getValue())
     }
 
     override fun canModify(i_1: Int): Int {
-        return if (!GameState.isGamestate135(super.gamePreferences.activeToolkit.getValue())) 3 else 1
+        return if (!GameState.isGamestate135(super.gamePreferences.activeToolkit!!.getValue())) 3 else 1
     }
 
     override fun setValue(value: Int) {

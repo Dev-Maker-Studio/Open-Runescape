@@ -16,11 +16,11 @@ class AntiAliasingPreference : Preference {
     constructor(gamePreferences: GamePreferences) : super(gamePreferences)
 
     override fun canModify(value: Int): Int {
-        return if (!GameState.isGamestate135(super.gamePreferences.activeToolkit.getValue())) 3 else 1
+        return if (!GameState.isGamestate135(super.gamePreferences.activeToolkit!!.getValue())) 3 else 1
     }
 
     fun ensureValid() {
-        if (super.gamePreferences.activeToolkit.verifySettings() && !GameState.isGamestate135(super.gamePreferences.activeToolkit.getValue())) {
+        if (super.gamePreferences.activeToolkit!!.verifySettings() && !GameState.isGamestate135(super.gamePreferences.activeToolkit!!.getValue())) {
             super.value = 0
         }
 
@@ -42,6 +42,6 @@ class AntiAliasingPreference : Preference {
     }
 
     fun visible(): Boolean {
-        return GameState.isGamestate135(super.gamePreferences.activeToolkit.getValue())
+        return GameState.isGamestate135(super.gamePreferences.activeToolkit!!.getValue())
     }
 }

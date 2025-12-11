@@ -17,12 +17,12 @@ class FogPreference : Preference {
 
     fun ensureValid() {
         // Disable fog if ground blending is off
-        if (value != 0 && gamePreferences.goundBlending.getValue() != 1) {
+        if (value != 0 && gamePreferences.goundBlending!!.getValue() != 1) {
             value = 0
         }
 
         // Disable fog for toolkit value 2 (software renderer)
-        if (value != 0 && gamePreferences.defaultToolkit.getValue() == 2) {
+        if (value != 0 && gamePreferences.defaultToolkit!!.getValue() == 2) {
             value = 0
         }
 
@@ -37,10 +37,10 @@ class FogPreference : Preference {
     override fun canModify(value: Int): Int {
         return when {
             // Cannot modify with software renderer
-            value != 0 && gamePreferences.defaultToolkit.getValue() == 2 -> 3
+            value != 0 && gamePreferences.defaultToolkit!!.getValue() == 2 -> 3
 
             // Incompatible with ground blending off
-            value != 0 && gamePreferences.goundBlending.getValue() != 1 -> 2
+            value != 0 && gamePreferences.goundBlending!!.getValue() != 1 -> 2
 
             // Can modify
             else -> 1

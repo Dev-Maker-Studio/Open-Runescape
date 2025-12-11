@@ -56,7 +56,7 @@ class Environment {
 
     fun decode(buffer: Packet, manager: EnvironmentManager) {
         val flags = buffer.readUByte()
-        if (PreferenceManager.preferences!!.lightDetail.getValue() == 1 && Renderers.activeToolkit!!.getMaxLights() > 0) {
+        if (PreferenceManager.preferences!!.lightDetail!!.getValue() == 1 && Renderers.activeToolkit!!.getMaxLights() > 0) {
             if ((flags and 0x1) != 0) {
                 this.sunColour = buffer.readInt()
             } else {

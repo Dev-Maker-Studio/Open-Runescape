@@ -203,7 +203,7 @@ class WindowMode @Throws(Exception::class) constructor() {
                 val allDetails = DisplayModeDetails.forWindowMode(activeWindowMode!!)
                 val allDetailsRebuilt = arrayOfNulls<DisplayModeDetails>(allDetails.size)
                 var detailCount = 0
-                val screenSizeType = PreferenceManager.preferences!!.maxScreenSize.value
+                val screenSizeType = PreferenceManager.preferences!!.maxScreenSize!!.value
                 Cache_Into@ for (detailIndex in allDetails.indices) {
                     val displayDetails = allDetails[detailIndex]
                     if ((displayDetails.bitDepth <= 0 || displayDetails.bitDepth >= 24)
@@ -257,7 +257,7 @@ class WindowMode @Throws(Exception::class) constructor() {
                 }
             }
             if (requestedWindowMode == 3 && (!fullScreenSupported || fullScreenFrame == null)) {
-                requestWindowMode(activeCurrentMode, PreferenceManager.preferences!!.fixedScreen.value, -1, -1, true)
+                requestWindowMode(activeCurrentMode, PreferenceManager.preferences!!.fixedScreen!!.value, -1, -1, true)
             } else {
                 val container = getActiveContainer()
                 if (fullScreenFrame != null) {
@@ -329,7 +329,7 @@ class WindowMode @Throws(Exception::class) constructor() {
         @JvmStatic
         fun notifyError() {
             if (fullScreenSupported && fullScreenFrame != null) {
-                requestWindowMode(PreferenceManager.preferences!!.fixedScreen.value, -1, -1, false)
+                requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.value, -1, -1, false)
             }
             if (GameShell.getApplicationType() == ApplicationType.APPLET) {
                 PacketEncoder.writeVarcPreferences()
@@ -375,7 +375,7 @@ class WindowMode @Throws(Exception::class) constructor() {
                 Renderers.activeToolkit!!.ensureImageproducerCreated(GameShell.gameCanvas, canvasDimension.width, canvasDimension.height)
                 Renderers.activeToolkit!!.setActiveCanvas(GameShell.gameCanvas)
             } else {
-                client.loadAssets(PreferenceManager.preferences!!.activeToolkit.value, false)
+                client.loadAssets(PreferenceManager.preferences!!.activeToolkit!!.value, false)
             }
             GameShell.setComponentsOnTop()
         }
@@ -473,7 +473,7 @@ class WindowMode @Throws(Exception::class) constructor() {
             val preferences = PreferenceManager.preferences
             var screensizePreference = 0
             if (preferences != null) {
-                screensizePreference = preferences.maxScreenSize.value
+                screensizePreference = preferences.maxScreenSize!!.value
             }
             if (screensizePreference == 2) {
                 val preferedWidth = Math.min(800, resizableScreenWidth)

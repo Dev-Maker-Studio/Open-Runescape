@@ -216,14 +216,14 @@ class TransparentFontRendererSM(
         i_3: Int,
         i_4: Int,
         bool5: Boolean,
-        class4556: ComponentSurface?,
+        dimension: ComponentSurface,
         i_7: Int,
         i_8: Int
     ) {
         val i_31 = i_3
         var i_21 = i_2
         if (aGraphicalRendererSub38889.colourBuffer != null) {
-            if (class4556 == null) {
+            if (dimension == null) {
                 drawChar(var_1, i_21, i_31, i_4, bool5)
             } else {
                 i_21 += anIntArray8891[var_1]
@@ -279,7 +279,7 @@ class TransparentFontRendererSM(
                         i_21,
                         i_31_mod,
                         anIntArray8886[var_1],
-                        class4556,
+                        dimension,
                         i_7,
                         i_8
                     )

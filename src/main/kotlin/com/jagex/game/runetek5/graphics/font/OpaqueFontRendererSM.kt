@@ -6,7 +6,7 @@ import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 import com.jagex.game.runetek5.unidentified.ComponentDimensionSM
 
 class OpaqueFontRendererSM(
-    val toolkit: SafeModeToolkit,
+    override val toolkit: SafeModeToolkit,
     fontMetrics: FontMetrics,
     sprites: Array<SpriteType>,
     val anIntArray8511: IntArray,
@@ -81,11 +81,11 @@ class OpaqueFontRendererSM(
         }
     }
 
-    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean, class4556: ComponentSurface?, i_7: Int, i_8: Int) {
+    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean, dimension: ComponentSurface, i_7: Int, i_8: Int) {
         var i_31 = i_3
         var i_21 = i_2
         if (this.toolkit.colourBuffer != null) {
-            if (class4556 == null) {
+            if (dimension == null) {
                 drawChar(var_1, i_21, i_31, i_4, bool5)
             } else {
                 i_21 += this.spriteMinX[var_1]
@@ -129,9 +129,9 @@ class OpaqueFontRendererSM(
 
                 if (i_9 > 0 && i_10 > 0) {
                     if ((i_4 and 0xffffff.inv()) == 0xffffff.inv()) {
-                        drawImage(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], class4556, i_7, i_8)
+                        drawImage(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], dimension, i_7, i_8)
                     } else {
-                        method13774(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], class4556, i_7, i_8)
+                        method13774(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], dimension, i_7, i_8)
                     }
                 }
             }

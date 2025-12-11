@@ -11,15 +11,12 @@ import kotlin.math.min
  * @author Brainpower
  */
 class FontRendererSM(
-    toolkit: SafeModeToolkit,
+    override val toolkit: SafeModeToolkit,
     fontMetrics: FontMetrics,
     arr_3: Array<SpriteType>,
     ints_4: IntArray,
     ints_5: IntArray
 ) : AbstractFontRenderer(toolkit, fontMetrics) {
-
-    @JvmField
-    var toolkit: SafeModeToolkit = toolkit
 
     @JvmField
     val charWidths: IntArray = ints_4
@@ -140,11 +137,11 @@ class FontRendererSM(
         }
     }
 
-    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean, class4556: ComponentSurface?, i_7: Int, i_8: Int) {
+    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean, dimension: ComponentSurface, i_7: Int, i_8: Int) {
         var i_31 = i_3
         var i_21 = i_2
         if (toolkit.colourBuffer != null) {
-            if (class4556 == null) {
+            if (dimension == null) {
                 drawChar(var_1, i_21, i_31, i_4, bool5)
             } else {
                 i_21 += anIntArray8973[var_1]
@@ -184,17 +181,17 @@ class FontRendererSM(
                 }
                 if (i_9 > 0 && i_10 > 0) {
                     if (bool5) {
-                        method14327(aByteArrayArray8967[var_1]!!, toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], class4556, i_7, i_8)
+                        method14327(aByteArrayArray8967[var_1]!!, toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], dimension, i_7, i_8)
                     } else {
-                        method14326(aByteArrayArray8967[var_1]!!, toolkit.colourBuffer!!, anIntArray8970!!, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], class4556, i_7, i_8)
+                        method14326(aByteArrayArray8967[var_1]!!, toolkit.colourBuffer!!, anIntArray8970!!, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], dimension, i_7, i_8)
                     }
                 }
             }
         }
     }
 
-    fun method14326(bytes_1: ByteArray, ints_2: IntArray, ints_3: IntArray, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, i_13: Int, class45514: ComponentSurface, i_15: Int, i_16: Int) {
-        val packetsdecoder17 = class45514 as ComponentDimensionSM
+    fun method14326(bytes_1: ByteArray, ints_2: IntArray, ints_3: IntArray, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, i_13: Int, dimension: ComponentSurface, i_15: Int, i_16: Int) {
+        val packetsdecoder17 = dimension as ComponentDimensionSM
         val ints_18 = packetsdecoder17.anIntArray9077
         val ints_19 = packetsdecoder17.anIntArray9078
         val i_20 = i_11 - toolkit.clipLeft

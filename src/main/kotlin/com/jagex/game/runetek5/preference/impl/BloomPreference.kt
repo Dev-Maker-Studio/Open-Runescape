@@ -18,8 +18,8 @@ class BloomPreference : Preference {
 
     fun ensureValid() {
         // Disable bloom if toolkit doesn't support it or game state doesn't allow it
-        if (gamePreferences.activeToolkit.verifySettings() &&
-            !GameState.isGamestate135(gamePreferences.activeToolkit.getValue())) {
+        if (gamePreferences.activeToolkit!!.verifySettings() &&
+            !GameState.isGamestate135(gamePreferences.activeToolkit!!.getValue())) {
             value = 0
         }
 
@@ -40,10 +40,10 @@ class BloomPreference : Preference {
     /**
      * Returns whether bloom is visible/available in current game state
      */
-    fun visible(): Boolean = GameState.isGamestate135(gamePreferences.activeToolkit.getValue())
+    fun visible(): Boolean = GameState.isGamestate135(gamePreferences.activeToolkit!!.getValue())
 
     override fun canModify(value: Int): Int {
-        return if (!GameState.isGamestate135(gamePreferences.activeToolkit.getValue())) {
+        return if (!GameState.isGamestate135(gamePreferences.activeToolkit!!.getValue())) {
             3 // Cannot modify
         } else {
             1 // Can modify

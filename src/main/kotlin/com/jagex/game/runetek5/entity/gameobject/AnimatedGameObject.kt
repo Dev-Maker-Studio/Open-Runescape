@@ -189,7 +189,7 @@ class AnimatedGameObject(
         }
         method2133()
         if (hasShadow) {
-            hasShadow = hasShadow and renderShadow and !aBool1552 and (PreferenceManager.preferences!!.sceneryShadows.getValue() != 0)
+            hasShadow = hasShadow and renderShadow and !aBool1552 and (PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0)
         }
         if (bool3 && !hasShadow) {
             gameobjectId = loctype.id
@@ -286,7 +286,7 @@ class AnimatedGameObject(
     fun method2133() {
         if (sequence.hasType()) {
             if (sequence.progressCycle(client.cycles - currentCycle)) {
-                if (PreferenceManager.preferences!!.sceneryShadows.getValue() == 2) {
+                if (PreferenceManager.preferences!!.sceneryShadows!!.getValue() == 2) {
                     aBool1552 = false
                 }
                 if (sequence.needsReset()) {

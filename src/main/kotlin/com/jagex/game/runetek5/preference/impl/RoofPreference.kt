@@ -18,7 +18,7 @@ class RoofPreference : Preference {
     constructor(gamePreferences: GamePreferences) : super(gamePreferences)
 
     fun ensureValid() {
-        if (super.gamePreferences.defaultToolkit.getValue() == 2 && super.value == 2) {
+        if (super.gamePreferences.defaultToolkit!!.getValue() == 2 && super.value == 2) {
             super.value = 1
         }
 

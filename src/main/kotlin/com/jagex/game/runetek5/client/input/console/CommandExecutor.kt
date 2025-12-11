@@ -70,7 +70,7 @@ object CommandExecutor {
                 }
                 command.equals("renderer", ignoreCase = true) -> {
                     val renderInfo = Renderers.activeToolkit!!.getRenderInfo()
-                    Console.writeLine("Toolkit ID: ${PreferenceManager.preferences!!.activeToolkit.getValue()}")
+                    Console.writeLine("Toolkit ID: ${PreferenceManager.preferences!!.activeToolkit!!.getValue()}")
                     Console.writeLine("Vendor: ${renderInfo.vendor}")
                     Console.writeLine("Name: ${renderInfo.name}")
                     Console.writeLine("Version: ${renderInfo.version}")
@@ -331,9 +331,9 @@ object CommandExecutor {
 
     private fun handleToolkitSwitch(toolkit: Int) {
         client.loadAssets(toolkit, false)
-        if (PreferenceManager.preferences!!.activeToolkit.getValue() == toolkit) {
+        if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == toolkit) {
             Console.writeLine("Success")
-            PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit, toolkit)
+            PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, toolkit)
             PreferenceManager.savePreferences()
             client.preferencesSavedOnServer = false
         } else {

@@ -37,7 +37,7 @@ class TexturesPreference : Preference {
     override fun canModify(value: Int): Int {
         return if (gamePreferences.getGame() == Game.RUNESCAPE) {
             // Return 2 if textures enabled and ground blending is off, otherwise 1
-            if (value != 0 && gamePreferences.goundBlending.getValue() != 1) 2 else 1
+            if (value != 0 && gamePreferences.goundBlending!!.getValue() != 1) 2 else 1
         } else {
             3 // Cannot modify for non-RuneScape games
         }

@@ -42,9 +42,9 @@ class DisplayModeDetails {
             if (client.ENTITY_DEFAULTS.profilingMesh == -1) {
                 return 1
             }
-            if (toolkitValue != PreferenceManager.preferences!!.activeToolkit.getValue()) {
+            if (toolkitValue != PreferenceManager.preferences!!.activeToolkit!!.getValue()) {
                 client.loadAssets(toolkitValue, LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE), true)
-                if (PreferenceManager.preferences!!.activeToolkit.getValue() != toolkitValue) {
+                if (PreferenceManager.preferences!!.activeToolkit!!.getValue() != toolkitValue) {
                     return -1
                 }
             }

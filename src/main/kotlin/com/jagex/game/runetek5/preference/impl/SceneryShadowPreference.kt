@@ -15,11 +15,11 @@ class SceneryShadowPreference : Preference {
     constructor(gamePreferences: GamePreferences) : super(gamePreferences)
 
     fun enabled(): Boolean {
-        return super.gamePreferences.textures.getValue() != 0
+        return super.gamePreferences.textures!!.getValue() != 0
     }
 
     override fun canModify(value: Int): Int {
-        return if (super.gamePreferences.textures.getValue() == 0) 3 else 1
+        return if (super.gamePreferences.textures!!.getValue() == 0) 3 else 1
     }
 
     override fun setValue(value: Int) {
@@ -35,7 +35,7 @@ class SceneryShadowPreference : Preference {
     }
 
     fun ensureValid() {
-        if (super.gamePreferences.textures.getValue() == 0) {
+        if (super.gamePreferences.textures!!.getValue() == 0) {
             super.value = 0
         }
         if (super.value < 0 || super.value > 2) {

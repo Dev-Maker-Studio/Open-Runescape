@@ -13,19 +13,16 @@ import com.jagex.game.runetek5.unidentified.SpriteSurfaceGL
 import jaggl.OpenGL
 
 class FontRendererGL(
-    toolkit: OpenGlToolkit,
+    override val toolkit: OpenGlToolkit,
     fontmetrics2: FontMetrics,
     characterSprites: Array<SpriteType>,
     bool4: Boolean
 ) : AbstractFontRenderer(toolkit, fontmetrics2) {
-
-    @JvmField val toolkit: OpenGlToolkit
     @JvmField val texture: OpenGl2DTexture_Sub1
     @JvmField val aBool9326: Boolean
     @JvmField val listUtils: GlListUtils
 
     init {
-        this.toolkit = toolkit
         var maxDimension = 0
 
         for (charIndex in 0 until 256) {

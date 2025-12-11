@@ -18,13 +18,13 @@ class GroundBlendingPreference : Preference {
     override fun canModify(value: Int): Int {
         if (gamePreferences.getGame() == Game.RUNESCAPE) {
             if (value == 0) {
-                if (gamePreferences.fog.getValue() == 1) {
+                if (gamePreferences.fog!!.getValue() == 1) {
                     return 2
                 }
-                if (gamePreferences.textures.getValue() == 1) {
+                if (gamePreferences.textures!!.getValue() == 1) {
                     return 2
                 }
-                if (gamePreferences.water.getValue() > 0) {
+                if (gamePreferences.water!!.getValue() > 0) {
                     return 2
                 }
             }

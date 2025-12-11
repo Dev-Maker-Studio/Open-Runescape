@@ -77,7 +77,7 @@ class CursorTypeList(
         @JvmStatic
         fun setCustomCursor(pickedCursor: Int) {
             var cursor = pickedCursor
-            if (PreferenceManager.preferences!!.customCursor.getValue() == 0) {
+            if (PreferenceManager.preferences!!.customCursor!!.getValue() == 0) {
                 cursor = -1
             }
             if (cursor != client.CURRENT_CURSOR) {

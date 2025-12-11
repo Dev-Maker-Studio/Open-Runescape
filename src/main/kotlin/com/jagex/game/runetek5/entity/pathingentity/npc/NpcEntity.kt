@@ -69,7 +69,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         this.tintHue = 32 + (Math.random() * 4.0).toInt()
         this.tintSaturation = 3 + (Math.random() * 2.0).toInt()
         this.tintLightness = 16 + (Math.random() * 3.0).toInt()
-        if (PreferenceManager.preferences!!.textures.getValue() == 1) {
+        if (PreferenceManager.preferences!!.textures!!.getValue() == 1) {
             this.tintOpacity = (Math.random() * 6.0).toInt()
         } else {
             this.tintOpacity = (Math.random() * 12.0).toInt()
@@ -354,7 +354,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             val npctype = if (this.definitions!!.alternativeIds != null) this.definitions!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) else this.definitions
             super.hasPreferedPriorities = false
             var renderedEntity: RenderedEntity? = null
-            if (PreferenceManager.preferences!!.characterShadows.getValue() == 1 && npctype!!.shadowed && bastype.rendersShadow) {
+            if (PreferenceManager.preferences!!.characterShadows!!.getValue() == 1 && npctype!!.shadowed && bastype.rendersShadow) {
                 val seq = if (super.currentSequence.hasType() && super.currentSequence.hasSpeed()) super.currentSequence else null
                 val moveseq = if (!super.movingSequence.hasType() || super.movingSequence.hasType && seq != null) null else super.movingSequence
                 val model = PathingEntity.getAnimatedShadowModel(toolkit, super.rotateX, super.rotateZ, super.translateY, this.definitions!!.size, super.models[0],

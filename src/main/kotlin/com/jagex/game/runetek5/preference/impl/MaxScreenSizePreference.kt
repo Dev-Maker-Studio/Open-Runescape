@@ -32,7 +32,7 @@ class MaxScreenSizePreference : Preference {
     }
 
     override fun getDefaultValue(): Int {
-        return if (super.gamePreferences.activeToolkit.verifySettings() && nonHardwareMode(super.gamePreferences.activeToolkit.getValue())) 1 else 0
+        return if (super.gamePreferences.activeToolkit!!.verifySettings() && nonHardwareMode(super.gamePreferences.activeToolkit!!.getValue())) 1 else 0
     }
 
     companion object {

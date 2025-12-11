@@ -81,7 +81,7 @@ class GroundItem(
         tintHue = 32 + (Math.random() * 4.0).toInt()
         tintSaturation = 3 + (Math.random() * 2.0).toInt()
         tintLightness = 16 + (Math.random() * 3.0).toInt()
-        tintOpacity = if (PreferenceManager.preferences!!.textures.value == 1) {
+        tintOpacity = if (PreferenceManager.preferences!!.textures!!.value == 1) {
             (Math.random() * 10.0).toInt()
         } else {
             (Math.random() * 20.0).toInt()

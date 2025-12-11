@@ -80,7 +80,7 @@ class StationaryInteractiveObject(
     var aBool10543: Boolean = bool17
 
     @JvmField
-    val aBool10544: Boolean = toolkit.hasShadows() && objectdefinitions4.dynamicShadow && !aBool10536 && PreferenceManager.preferences!!.sceneryShadows.getValue() != 0
+    val aBool10544: Boolean = toolkit.hasShadows() && objectdefinitions4.dynamicShadow && !aBool10536 && PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0
 
     @JvmField
     var interactiveModel: Model? = null
