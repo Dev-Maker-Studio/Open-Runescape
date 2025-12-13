@@ -11,7 +11,9 @@ import com.jagex.game.runetek5.client.input.keyboard.KeyRecorder;
 import com.jagex.game.runetek5.client.input.mouse.CursorManager;
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord;
 import com.jagex.game.runetek5.client.menu.MiniMenu;
-import com.jagex.game.runetek5.client.menu.MiniMenuBuilder;
+import static com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.interfaceComponentHovered;
+import static com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.tileHovered;
+import static com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.USE_OPTIONS_FLAGS;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.rsinterface.InteractiveComponentSprite;
@@ -126,7 +128,7 @@ public class InterfaceRenderer {
                         }
 
                         if (!MiniMenu.isOpen && withinBoundaries && !parentInterface.preventInteraction) {
-                            MiniMenuBuilder.interfaceComponentHovered(childComponent);
+                            interfaceComponentHovered(childComponent);
                         }
 
                         boolean leftClick = MouseRecord.recorder.leftButtonDown() && withinBoundaries;
@@ -264,7 +266,7 @@ public class InterfaceRenderer {
                                     }
 
                                     if (childComponent.contentType == ComponentContentType.GAME_WINDOW && !MiniMenu.isOpen && mouseX >= clipMinX && mouseY >= clipMinY && mouseX < clipMaxX && mouseY < clipMaxY) {
-                                        MiniMenuBuilder.tileHovered(Renderers.activeToolkit, mouseX, mouseY);
+                                        tileHovered(Renderers.activeToolkit, mouseX, mouseY);
 
                                         for (EntityOverhead overhead = (EntityOverhead) client.ENTITY_OVERHEADS.getFirst(); overhead != null; overhead = (EntityOverhead) client.ENTITY_OVERHEADS.getNext()) {
                                             if (mouseX >= overhead.startX && mouseX < overhead.endX && mouseY >= overhead.startY && mouseY < overhead.endY) {
@@ -339,7 +341,7 @@ public class InterfaceRenderer {
                                         mapY = ((int) playerPosition.z - playerSizeOffset >> 9) - (worldY >> 2);
                                     }
 
-                                    if (client.interfaceSelectionActive && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x40) != 0) {
+                                    if (client.interfaceSelectionActive && (USE_OPTIONS_FLAGS & 0x40) != 0) {
                                         Component interfaceComponent = Component.listIcomponent(client.anInt56, client.anInt7345);
                                         if (interfaceComponent != null) {
                                             MiniMenu.addEntry(client.useOnType, " ->", MiniMenu.useOnCursor, 59, childComponent.containerItemId, 1L, mapX, mapY, true, false, childComponent.slotId | childComponent.idHash, true);
@@ -910,7 +912,7 @@ public class InterfaceRenderer {
 	        client.interfaceSelectionActive = true;
 	        client.anInt56 = componentDefs.idHash;
 	        client.anInt7345 = componentDefs.slotId;
-	        MiniMenuBuilder.USE_OPTIONS_FLAGS = flags;
+	        com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.USE_OPTIONS_FLAGS = flags;
 	        MiniMenu.USE_INTERFACE_ID = interfaceId;
 	        client.anInt7346 = componentDefs.containerItemId;
 	        MiniMenu.useOnCursor = componentDefs.targetOverCursor;

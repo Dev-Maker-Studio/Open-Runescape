@@ -19,7 +19,7 @@ import com.jagex.game.runetek5.client.input.mouse.MouseActionServer;
 import com.jagex.game.runetek5.client.login.AccountCreationStage;
 import com.jagex.game.runetek5.client.login.CheckEmailRequest;
 import com.jagex.game.runetek5.client.login.CreateAccountRequest;
-import com.jagex.game.runetek5.client.menu.MiniMenuBuilder;
+import static com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.USE_OPTIONS_FLAGS;
 import com.jagex.game.runetek5.client.periodic.PulseEventQueue;
 import com.jagex.game.runetek5.client.window.WindowMode;
 import com.jagex.game.runetek5.config.Resource;
@@ -483,13 +483,13 @@ public class PacketEncoder {
 	}
 
 	public static void method4167(String string_0) {
-	    if (client.interfaceSelectionActive && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x18) != 0) {
+	    if (client.interfaceSelectionActive && (USE_OPTIONS_FLAGS & 0x18) != 0) {
 	        boolean bool2 = false;
 	        int count = PlayerUpdate.NUM_OUT_PLAYER_INDICES;
 	        int[] indices = PlayerUpdate.OUT_PLAYER_INDICES;
 	        for (int i = 0; i < count; i++) {
 	            PlayerEntity player6 = PlayerUpdate.players[indices[i]];
-	            if (player6.displayName != null && player6.displayName.equalsIgnoreCase(string_0) && (player6 == PlayerUpdate.MY_PLAYER && (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x10) != 0 || (MiniMenuBuilder.USE_OPTIONS_FLAGS & 0x8) != 0)) {
+	            if (player6.displayName != null && player6.displayName.equalsIgnoreCase(string_0) && (player6 == PlayerUpdate.MY_PLAYER && (USE_OPTIONS_FLAGS & 0x10) != 0 || (USE_OPTIONS_FLAGS & 0x8) != 0)) {
 	                TcpPacket packet = createPacket(ClientProt.IF_ON_PLAYER, client.GAME_CONNECTION_CONTEXT.isaac);
 	                packet.buffer.writeShort(client.anInt7345);
 	                packet.buffer.writeShortLittle(indices[i]);

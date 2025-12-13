@@ -10,7 +10,7 @@ import com.jagex.game.runetek5.client.login.CheckEmailRequest;
 import com.jagex.game.runetek5.client.login.LoginManager;
 import com.jagex.game.runetek5.client.menu.ColoredMiniMenuEntry;
 import com.jagex.game.runetek5.client.menu.MiniMenu;
-import com.jagex.game.runetek5.client.menu.MiniMenuBuilder;
+import static com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.SHOW_FACE_HERE;
 import com.jagex.game.runetek5.client.menu.MiniMenuEntry;
 import com.jagex.game.runetek5.client.menu.MenuInteraction;
 import com.jagex.game.runetek5.config.Resource;
@@ -473,7 +473,7 @@ public class StaticMethods {
 	}
 
 	public static void method4653(int mouseX, int mouseY) {
-	    if (client.ENTITY_DEFAULTS.aBool7044 || MiniMenu.entryCount != 1 && (!MiniMenuBuilder.SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712.action.equals(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE)))) {
+	    if (client.ENTITY_DEFAULTS.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712.action.equals(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE)))) {
 	        FontMetrics fontMetrics = FontMetrics.getForMinimenu();
 	        int i_4 = fontMetrics.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE));
 	        int i_5;

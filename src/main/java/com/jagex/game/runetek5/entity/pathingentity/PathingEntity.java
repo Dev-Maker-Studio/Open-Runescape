@@ -3,7 +3,8 @@ package com.jagex.game.runetek5.entity.pathingentity;
 import com.jagex.game.launch.Loader;
 import com.jagex.game.runetek5.cache.node.lru.LRUCache;
 import com.jagex.game.runetek5.client.client;
-import com.jagex.game.runetek5.client.menu.MiniMenuBuilder;
+import static com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.npcHovered;
+import static com.jagex.game.runetek5.client.menu.MiniMenuBuilderKt.playerHovered;
 import com.jagex.game.runetek5.config.Resource;
 import com.jagex.game.runetek5.config.TypeLists;
 import com.jagex.game.runetek5.config.bas.BasType;
@@ -341,10 +342,10 @@ public abstract class PathingEntity extends AbstractInteractiveEntity {
     public static void interfaceComponentOnEntity(PathingEntity entity) {
         if (entity instanceof NpcEntity npc) {
             if (npc.definitions != null) {
-                MiniMenuBuilder.npcHovered(npc, npc.plane != PlayerUpdate.MY_PLAYER.plane);
+                npcHovered(npc, npc.plane != PlayerUpdate.MY_PLAYER.plane);
             }
         } else if (entity instanceof PlayerEntity player) {
-            MiniMenuBuilder.playerHovered(player, player.plane != PlayerUpdate.MY_PLAYER.plane);
+            playerHovered(player, player.plane != PlayerUpdate.MY_PLAYER.plane);
         }
     }
     
