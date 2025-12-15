@@ -108,7 +108,7 @@ class GroundItem(
     }
 
     override fun calculateProjection(toolkit: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
-        val matrix44var5 = toolkit.renderingMatrix
+        val matrix44var5 = toolkit.getRenderingMatrix()
         matrix44var5.translateFromCoordspace(getAbsolutePosition())
         matrix44var5.translate(0.0f, -10.0f, 0.0f)
         var model = TypeLists.OBJ!!.list(nodeId).getAnimatedModel(toolkit, PROJECTION, nodeAmount, null, null, 0, 0, 0, 0)
@@ -169,7 +169,7 @@ class GroundItem(
             anInt10422 = offsetY
         }
 
-        val renderingMatrix = toolkit.renderingMatrix
+        val renderingMatrix = toolkit.getRenderingMatrix()
         renderingMatrix.reset()
         if (anInt10422 == 0) {
             val class39011 = scene!!.localHeightmap[collisionPlane.toInt()]

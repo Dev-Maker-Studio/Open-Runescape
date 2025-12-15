@@ -147,8 +147,8 @@ class Sun(
                 size.toFloat(),
                 50.0f,
                 50000.0f,
-                toolkit.getDisplay().getWidth().toFloat(),
-                toolkit.getDisplay().getHeight().toFloat(),
+                toolkit.getDisplay()!!!!.getWidth().toFloat(),
+                toolkit.getDisplay()!!!!.getHeight().toFloat(),
                 1024.0f
             )
             toolkit.setModelMatrix(matrix4413)
@@ -232,8 +232,8 @@ class Sun(
             size.toFloat(),
             50.0f,
             50000.0f,
-            toolkit.getDisplay().getWidth().toFloat(),
-            toolkit.getDisplay().getHeight().toFloat(),
+            toolkit.getDisplay()!!.getWidth().toFloat(),
+            toolkit.getDisplay()!!.getHeight().toFloat(),
             1024.0f
         )
         toolkit.setModelMatrix(matrix449)

@@ -29,15 +29,15 @@ class OpenGLTextureCache(
         if (cachedTexture != null) {
             return cachedTexture as OpenGl2DTexture
         }
-        if (!materialProvider.isCached(textureId)) {
+        if (!materialProvider!!.isCached(textureId)) {
             return null
         }
-        val material = materialProvider.getMaterial(textureId)
+        val material = materialProvider!!.getMaterial(textureId)
         textureSize = if (material.isSmall) 64 else toolkit.currentTextureSize
 
         val texture: OpenGl2DTexture
         if (material.hdr && toolkit.bloomEnabled()) {
-            val pixels = materialProvider.getPixelsHdr(textureId, textureSize, textureSize)
+            val pixels = materialProvider!!.getPixelsHdr(textureId, textureSize, textureSize)
             texture = OpenGl2DTexture(
                 toolkit, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB,
                 textureSize, textureSize, material.mipmapping.toInt() != 0, pixels, GLFormat.HDR
@@ -45,9 +45,9 @@ class OpenGLTextureCache(
         } else {
             val pixels: IntArray
             if (material.effectCombiner != 2 && MaterialTypeList.isOpaqueEffect(material.effectId.toInt())) {
-                pixels = materialProvider.getPixels(textureId, 0.7f, textureSize, textureSize, true)
+                pixels = materialProvider!!.getPixels(textureId, 0.7f, textureSize, textureSize, true)
             } else {
-                pixels = materialProvider.getPixelsArgb(textureId, textureSize, textureSize)
+                pixels = materialProvider!!.getPixelsArgb(textureId, textureSize, textureSize)
             }
             texture = OpenGl2DTexture(
                 toolkit, GL_TEXTURE_2D, textureSize, textureSize,

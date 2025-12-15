@@ -147,7 +147,7 @@ class NativeBloomRenderer(
 
             for (type in 0 until iterations) {
                 if (resize && type == iterations - 1) {
-                    this.toolkit.resizeDisplay(this.directDisplay)
+                    this.toolkit.resizeDisplay(this.directDisplay!!)
                 } else {
                     this.directDisplay!!.setFramebuffer(0, this.anInterface9368)
                 }
@@ -189,7 +189,7 @@ class NativeBloomRenderer(
             this.directDisplay!!.setRenderBuffer(this.anInterface8362)
         }
 
-        this.toolkit.setDisplay(this.directDisplay)
+        this.toolkit.setDisplay(this.directDisplay!!)
         this.toolkit.applyClearFlags(3, 0xffffff.inv())
         this.toolkit.colorMask(15)
         this.toolkit.method13985()

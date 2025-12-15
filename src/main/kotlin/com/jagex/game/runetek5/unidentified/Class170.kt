@@ -101,7 +101,7 @@ class Class170(val activeToolkit: OpenGlToolkit) {
 
         if (aBool2109) {
             if (aClass158Sub1Sub42101 != null) {
-                activeToolkit.setDisplay(aClass158Sub1Sub42099)
+                activeToolkit.setDisplay(aClass158Sub1Sub42099!!)
                 aClass158Sub1Sub42099!!.setRenderBuffer(null)
                 aClass158Sub1Sub42099!!.setFramebuffer(0, null)
                 aClass158Sub1Sub42099!!.setFramebuffer(1, null)
@@ -111,15 +111,15 @@ class Class170(val activeToolkit: OpenGlToolkit) {
                     aClass158Sub1Sub42099!!.setRenderBuffer(activeTexture!!.createRenderBuffer())
                 }
 
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42099)
-                activeToolkit.setDisplay(aClass158Sub1Sub42101)
+                activeToolkit.resizeDisplay(aClass158Sub1Sub42099!!)
+                activeToolkit.setDisplay(aClass158Sub1Sub42101!!)
                 aClass158Sub1Sub42101!!.setRenderBuffer(null)
                 aClass158Sub1Sub42101!!.setFramebuffer(0, null)
                 aClass158Sub1Sub42101!!.setFramebuffer(0, hdrRenderBuffer)
                 aClass158Sub1Sub42101!!.setRenderBuffer(renderBuffer)
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42101)
+                activeToolkit.resizeDisplay(aClass158Sub1Sub42101!!)
             } else {
-                activeToolkit.setDisplay(aClass158Sub1Sub42099)
+                activeToolkit.setDisplay(aClass158Sub1Sub42099!!)
                 aClass158Sub1Sub42099!!.setRenderBuffer(null)
                 aClass158Sub1Sub42099!!.setFramebuffer(0, null)
                 aClass158Sub1Sub42099!!.setFramebuffer(1, null)
@@ -131,7 +131,7 @@ class Class170(val activeToolkit: OpenGlToolkit) {
                     aClass158Sub1Sub42099!!.setRenderBuffer(renderBuffer)
                 }
 
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42099)
+                activeToolkit.resizeDisplay(aClass158Sub1Sub42099!!)
             }
 
             aBool2109 = false
@@ -139,9 +139,9 @@ class Class170(val activeToolkit: OpenGlToolkit) {
         }
 
         if (aBool2105) {
-            activeToolkit.setDisplay(aClass158Sub1Sub42095)
+            activeToolkit.setDisplay(aClass158Sub1Sub42095!!)
             aBool2105 = !aClass158Sub1Sub42095!!.isFramebufferComplete()
-            activeToolkit.resizeDisplay(aClass158Sub1Sub42095)
+            activeToolkit.resizeDisplay(aClass158Sub1Sub42095!!)
         }
 
         return !aBool2105
@@ -150,8 +150,8 @@ class Class170(val activeToolkit: OpenGlToolkit) {
     fun method2883() {
         if (aBool2100) {
             if (aClass158Sub1Sub42101 != null) {
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42101)
-                activeToolkit.setDisplay(aClass158Sub1Sub42099)
+                activeToolkit.resizeDisplay(aClass158Sub1Sub42101!!)
+                activeToolkit.setDisplay(aClass158Sub1Sub42099!!)
                 aClass158Sub1Sub42099!!.drawBuffer(0)
                 aClass158Sub1Sub42101!!.bindFrameBuffer(s, t, loadTexture)
             }
@@ -172,7 +172,7 @@ class Class170(val activeToolkit: OpenGlToolkit) {
                 for (face in 0 until numTexturedFaces) {
                     textures2d?.get(textureIndex)?.let { tail.draw(it) }
                     if (prev == null && face == numTexturedFaces - 1) {
-                        activeToolkit.resizeDisplay(aClass158Sub1Sub42099)
+                        activeToolkit.resizeDisplay(aClass158Sub1Sub42099!!)
                         activeToolkit.method13640(0, 0)
                         OpenGL.glBegin(7)
                         OpenGL.glTexCoord2f(0.0f, t.toFloat())
@@ -235,8 +235,8 @@ class Class170(val activeToolkit: OpenGlToolkit) {
                 vertexCoordinateX = 0
                 vertexCoordinateY = 0
                 aBool2100 = true
-                activeToolkit.method13640(-vertexCoordinateX, t + vertexCoordinateY - activeToolkit.getDisplay().getHeight())
-                activeToolkit.setDisplay(aClass158Sub1Sub42095)
+                activeToolkit.method13640(-vertexCoordinateX, t + vertexCoordinateY - activeToolkit.getDisplay()!!.getHeight())
+                activeToolkit.setDisplay(aClass158Sub1Sub42095!!)
                 activeToolkit.applyClearFlags(3, 0)
                 aClass158Sub1Sub42095!!.drawBuffer(0)
                 return true

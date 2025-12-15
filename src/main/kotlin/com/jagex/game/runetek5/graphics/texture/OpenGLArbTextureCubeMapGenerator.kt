@@ -33,11 +33,11 @@ class OpenGLArbTextureCubeMapGenerator(
             var largestMaterialSize = 0
 
             for (index in 0 until 6) {
-                if (!materialProvider.isCached(MATERIAL_BUFFER[index])) {
+                if (!materialProvider!!.isCached(MATERIAL_BUFFER[index])) {
                     return arbCubeMapTexture!!
                 }
 
-                val material = materialProvider.getMaterial(MATERIAL_BUFFER[index])
+                val material = materialProvider!!.getMaterial(MATERIAL_BUFFER[index])
                 val size = if (material.isSmall) 64 else 128
                 if (size > largestMaterialSize) {
                     largestMaterialSize = size
@@ -49,7 +49,7 @@ class OpenGLArbTextureCubeMapGenerator(
             }
 
             val pixelArrays = Array(6) { index ->
-                materialProvider.getPixels(MATERIAL_BUFFER[index], 1.0f, largestMaterialSize, largestMaterialSize, false)
+                openglToolkit.materialProvider!!.getPixels(MATERIAL_BUFFER[index], 1.0f, largestMaterialSize, largestMaterialSize, false)
             }
 
             arbCubeMapTexture = OpenGlArbCubeMapTexture(

@@ -812,6 +812,9 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public void calculateViewportCenter() {
+        if (super.display == null) {
+            return;
+        }
         this.viewportX = 0;
         this.viewportY = 0;
         this.viewportWidth = super.display.getWidth();
@@ -839,8 +842,13 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
         } else {
             this.anInt8749 = 0;
             this.anInt8776 = 0;
-            this.anInt8751 = super.display.getWidth();
-            this.anInt8752 = super.display.getHeight();
+            if (super.display != null) {
+                this.anInt8751 = super.display.getWidth();
+                this.anInt8752 = super.display.getHeight();
+            } else {
+                this.anInt8751 = 0;
+                this.anInt8752 = 0;
+            }
             this.depthRangeNear = 0.0F;
             this.depthRangeFar = 1.0F;
         }

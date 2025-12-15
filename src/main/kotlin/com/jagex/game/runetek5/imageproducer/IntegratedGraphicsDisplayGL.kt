@@ -104,7 +104,7 @@ class IntegratedGraphicsDisplayGL(
 
     fun bindFrameBuffer(i_3: Int, i_4: Int, bool8: Boolean) {
         val height = height
-        val displayHeight = toolkit.getDisplay().getHeight()
+        val displayHeight = toolkit.getDisplay()!!.getHeight()
         var flags = 0
         if (bool8) {
             flags = flags or 0x100

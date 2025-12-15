@@ -34,7 +34,7 @@ object ColorUtil {
             return overlay.minimapColorHsl
         }
         if (overlay.texture != -1) {
-            val material = drawingarea.materialProvider.getMaterial(overlay.texture)
+            val material = drawingarea.materialProvider!!.getMaterial(overlay.texture)
             if (!material.detailsOnly) {
                 return material.colorHsl.toInt()
             }

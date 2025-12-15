@@ -155,8 +155,8 @@ class SpriteDX_Sub3 : NativeSprite {
             localI2 += localI4 * anInt9057 / anInt9053
         }
 
-        val displayWidth = nativeToolkit.getDisplay().getWidth()
-        val displayHeight = nativeToolkit.getDisplay().getHeight()
+        val displayWidth = nativeToolkit.getDisplay()!!.getWidth()
+        val displayHeight = nativeToolkit.getDisplay()!!.getHeight()
         shader.worldViewProjectionMatrix.method6525(localI3 * 2.0F / displayWidth, localI4 * 2.0F / displayHeight, 1.0F, 1.0F)
         shader.worldViewProjectionMatrix.faceList[12] = (localI1 + nativeToolkit.method13905()) * 2.0F / displayWidth - 1.0F
         shader.worldViewProjectionMatrix.faceList[13] = (localI2 + nativeToolkit.method13905()) * 2.0F / displayHeight - 1.0F
@@ -247,8 +247,8 @@ class SpriteDX_Sub3 : NativeSprite {
         val class4725: AbstractSpriteShader = nativeToolkit.spriteShader
         class4725.anInterface6443 = anInterface69050
         class4725.setColours(i_7, i_8)
-        f_12 = nativeToolkit.getDisplay().getWidth().toFloat()
-        f_13 = nativeToolkit.getDisplay().getHeight().toFloat()
+        f_12 = nativeToolkit.getDisplay()!!.getWidth().toFloat()
+        f_13 = nativeToolkit.getDisplay()!!.getHeight().toFloat()
         class4725.worldViewProjectionMatrix.identity()
         class4725.worldViewProjectionMatrix.faceList[0] = (localF3 - localF1) * 2.0F / f_12
         class4725.worldViewProjectionMatrix.faceList[1] = (localF4 - localF2) * 2.0F / f_13
@@ -277,8 +277,8 @@ class SpriteDX_Sub3 : NativeSprite {
         var localI2 = i_2
         localI1 += anInt9055
         localI2 += anInt9057
-        val f_7 = nativeToolkit.getDisplay().getWidth()
-        val f_8 = nativeToolkit.getDisplay().getHeight()
+        val f_7 = nativeToolkit.getDisplay()!!.getWidth()
+        val f_8 = nativeToolkit.getDisplay()!!.getHeight()
         class476.worldViewProjectionMatrix.method6525(anInt9060 * 2.0F / f_7, anInt9053 * 2.0F / f_8, 1.0F, 1.0F)
         class476.worldViewProjectionMatrix.faceList[12] = (localI1 + nativeToolkit.method13905()) * 2.0F / f_7 - 1.0F
         class476.worldViewProjectionMatrix.faceList[13] = (localI2 + nativeToolkit.method13905()) * 2.0F / f_8 - 1.0F
@@ -302,8 +302,8 @@ class SpriteDX_Sub3 : NativeSprite {
         val class478: AbstractSpriteShader = nativeToolkit.spriteShader
         class478.anInterface6443 = anInterface69050
         class478.setColours(i_5, i_6)
-        val f_9 = nativeToolkit.getDisplay().getWidth()
-        val f_10 = nativeToolkit.getDisplay().getHeight()
+        val f_9 = nativeToolkit.getDisplay()!!.getWidth()
+        val f_10 = nativeToolkit.getDisplay()!!.getHeight()
         class478.anInterface4445 = nativeToolkit.anInterface48746
         class478.anInt446 = 0
         class478.aClass70447 = nativeToolkit.aClass708786
@@ -461,8 +461,8 @@ class SpriteDX_Sub3 : NativeSprite {
         val class4711: AbstractSpriteShader = nativeToolkit.spriteShader
         class4711.anInterface6443 = anInterface69050
         class4711.setColours(1, -1)
-        val f_12 = nativeToolkit.getDisplay().getWidth()
-        val f_13 = nativeToolkit.getDisplay().getHeight()
+        val f_12 = nativeToolkit.getDisplay()!!.getWidth()
+        val f_13 = nativeToolkit.getDisplay()!!.getHeight()
         class4711.worldViewProjectionMatrix.identity()
         if (aBool9051) {
             val f_14 = anInt9060.toFloat() / getSpriteWidth()
@@ -516,8 +516,8 @@ class SpriteDX_Sub3 : NativeSprite {
         var localI2 = i_2
         localI1 += anInt9055
         localI2 += anInt9057
-        val f_7 = nativeToolkit.getDisplay().getWidth()
-        val f_8 = nativeToolkit.getDisplay().getHeight()
+        val f_7 = nativeToolkit.getDisplay()!!.getWidth()
+        val f_8 = nativeToolkit.getDisplay()!!.getHeight()
         class476.worldViewProjectionMatrix.method6525(anInt9060 * 2.0F / f_7, anInt9053 * 2.0F / f_8, 1.0F, 1.0F)
         class476.worldViewProjectionMatrix.faceList[12] = (localI1 + nativeToolkit.method13905()) * 2.0F / f_7 - 1.0F
         class476.worldViewProjectionMatrix.faceList[13] = (localI2 + nativeToolkit.method13905()) * 2.0F / f_8 - 1.0F

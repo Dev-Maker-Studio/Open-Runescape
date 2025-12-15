@@ -58,7 +58,7 @@ class GroundMaterialGL(
     fun method12083(i_1: Int, color: Int, lightness: Int, colorMultiplier: Float) {
         var color = color
         if (materialId != -1) {
-            val material = toolkit.materialProvider.getMaterial(materialId)
+            val material = toolkit.materialProvider!!.getMaterial(materialId)
             val contrast = material.alpha.toInt() and 0xff
             if (contrast != 0 && material.effectId.toInt() != 4) {
                 val i_7: Int

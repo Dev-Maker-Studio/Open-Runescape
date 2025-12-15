@@ -24,9 +24,9 @@ object RouteFinder {
     @JvmField
     var exitX: Int = 0
     @JvmField
-    val directions: Array<IntArray> = Array(128) { IntArray(128) }
+    val directions: Array<IntArray> = Array(128) { _ -> IntArray(128) }
     @JvmField
-    val distances: Array<IntArray> = Array(128) { IntArray(128) }
+    val distances: Array<IntArray> = Array(128) { _ -> IntArray(128) }
     @JvmField
     val bufferX: IntArray = IntArray(4096)
     @JvmField

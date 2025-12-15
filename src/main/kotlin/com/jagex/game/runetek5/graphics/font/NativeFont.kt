@@ -192,8 +192,8 @@ class NativeFont(
         val class476 = aGraphicalRendererSub29321.spriteShader
         class476.anInterface6443 = anInterface69322
         class476.setColours(3, i_4)
-        val f_7 = aGraphicalRendererSub29321.getDisplay().getWidth().toFloat()
-        val f_8 = aGraphicalRendererSub29321.getDisplay().getHeight().toFloat()
+        val f_7 = aGraphicalRendererSub29321.getDisplay()!!.getWidth().toFloat()
+        val f_8 = aGraphicalRendererSub29321.getDisplay()!!.getHeight().toFloat()
         class476.worldViewProjectionMatrix.method6525(2.0f / f_7, 2.0f / f_8, 1.0f, 1.0f)
         class476.worldViewProjectionMatrix.faceList[12] = (i_2 + aGraphicalRendererSub29321.method13905()) * 2.0f / f_7 - 1.0f
         class476.worldViewProjectionMatrix.faceList[13] = (i_3 + aGraphicalRendererSub29321.method13905()) * 2.0f / f_8 - 1.0f

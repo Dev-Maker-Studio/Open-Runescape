@@ -352,6 +352,9 @@ public class OpenGlToolkit extends AbstractToolkit {
             }
             ColorUtil.initializeTables(false, true);
             this.colortableReset = true;
+            if (super.materialProvider == null) {
+                throw new IllegalStateException("OpenGlToolkit requires non-null materialProvider");
+            }
             this.textureCache = new OpenGLTextureCache(this, super.materialProvider);
             buildTables();
             this.aClass1648363 = new Texture3DShaderGL(this);
@@ -1286,6 +1289,9 @@ public class OpenGlToolkit extends AbstractToolkit {
 
     @Override
     public void calculateViewportCenter() {
+        if (super.display == null) {
+            return;
+        }
         this.anInt8417 = 0;
         this.anInt8418 = 0;
         this.imageProducerWidth = super.display.getWidth();
@@ -2197,6 +2203,9 @@ public class OpenGlToolkit extends AbstractToolkit {
     }
 
     public void method13639() {
+        if (super.display == null) {
+            return;
+        }
         int displayWidth = super.display.getWidth();
         int displayHeight = super.display.getHeight();
         this.aClass3848385.method6530(0.0F, displayWidth, 0.0F, displayHeight, -1.0f, 1.0F);

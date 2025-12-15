@@ -38,7 +38,7 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : Node_Sub5(toolkit) {
         OpenGL.glLoadIdentity()
         OpenGL.glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)
         if (mipmaps != null) {
-            activeToolkit.setDisplay(textureDisplay)
+            activeToolkit.setDisplay(textureDisplay!!)
             var width = MathUtils.furtestBitValue(s)
             var height = MathUtils.furtestBitValue(t)
 
@@ -80,9 +80,9 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : Node_Sub5(toolkit) {
                 mipmapLevel++
             }
 
-            activeToolkit.resizeDisplay(textureDisplay)
+            activeToolkit.resizeDisplay(textureDisplay!!)
             activeToolkit.setActiveTexture(mipmaps!![mipmapLevel - 1])
-            activeToolkit.setDisplay(display)
+            activeToolkit.setDisplay(display!!)
             display!!.drawBuffer(0)
             OpenGL.glViewport(0, 0, 256, 256)
             val handle = mipmappedScenetexShader!!.programHandle
@@ -99,7 +99,7 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : Node_Sub5(toolkit) {
             OpenGL.glTexCoord2f(0.0f, 1.0f)
         } else {
             activeToolkit.setActiveTexture(texture)
-            activeToolkit.setDisplay(display)
+            activeToolkit.setDisplay(display!!)
             display!!.drawBuffer(0)
             OpenGL.glViewport(0, 0, 256, 256)
             val handle = scenetexShader!!.programHandle
@@ -150,7 +150,7 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : Node_Sub5(toolkit) {
         OpenGL.glPopAttrib()
         OpenGL.glPopMatrix()
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        activeToolkit.resizeDisplay(display)
+        activeToolkit.resizeDisplay(display!!)
         val handle2 = bloomScenetexShader!!.programHandle
         OpenGL.glUseProgram(handle2)
         OpenGL.glUniform1i(OpenGL.glGetUniformLocation(handle2, "sceneTex"), 0)
@@ -177,15 +177,15 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : Node_Sub5(toolkit) {
             aClass137Sub110038!!.setRepeat(false, false)
             aClass137Sub110034 = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, 256, 256)
             aClass137Sub110034!!.setRepeat(false, false)
-            activeToolkit.setDisplay(display)
+            activeToolkit.setDisplay(display!!)
             display!!.setFramebuffer(0, aClass137Sub110038!!.createFrameBuffer())
             display!!.setFramebuffer(1, aClass137Sub110034!!.createFrameBuffer())
             display!!.drawBuffer(0)
             if (!display!!.isFramebufferComplete()) {
-                activeToolkit.resizeDisplay(display)
+                activeToolkit.resizeDisplay(display!!)
                 return false
             }
-            activeToolkit.resizeDisplay(display)
+            activeToolkit.resizeDisplay(display!!)
             scenetexShader = OpenGLShaderManager.addShaders(activeToolkit, arrayOf(
                 OpenGlShader.createShader(super.activeToolkit, GL_FRAGMENT_SHADER,
                     """#extension GL_ARB_texture_rectangle : enable

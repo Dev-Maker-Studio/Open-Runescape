@@ -34,7 +34,7 @@ class DirectXWater(
         anIntArray7515 = IntArray(directxGround.width * directxGround.length)
         var effect: Int = 10
         if (textureId >= 0) {
-            val material = nativeToolkit.materialProvider.getMaterial(textureId)
+            val material = nativeToolkit.materialProvider!!.getMaterial(textureId)
             if (material.effectId.toInt() > 0) {
                 effect = material.effectId.toInt()
             }
@@ -52,7 +52,7 @@ class DirectXWater(
     fun method12145(i_1: Int, colorRgb: Int, intensity: Int, transparency: Float) {
         var colorRgb = colorRgb
         if (textureId != -1) {
-            val material = nativeToolkit.materialProvider.getMaterial(textureId)
+            val material = nativeToolkit.materialProvider!!.getMaterial(textureId)
             val alpha = material.alpha.toInt() and 0xff
             var baseColor: Int
             if (alpha != 0 && material.effectId.toInt() != 4) {

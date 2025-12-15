@@ -32,11 +32,11 @@ class NativeCubeTextureGenerator(
             var largestSize = 0
 
             for (index in 0 until 6) {
-                if (!materialProvider.isCached(MATERIAL_IDS[index])) {
+                if (!materialProvider!!.isCached(MATERIAL_IDS[index])) {
                     return nativeCubeTexture!!
                 }
 
-                val material = materialProvider.getMaterial(MATERIAL_IDS[index])
+                val material = materialProvider!!.getMaterial(MATERIAL_IDS[index])
                 val size = if (material.isSmall) 64 else 128
                 if (size > largestSize) {
                     largestSize = size
@@ -48,7 +48,7 @@ class NativeCubeTextureGenerator(
             }
 
             for (index in 0 until 6) {
-                MATERIAL_PIXELS[index] = materialProvider.getPixels(MATERIAL_IDS[index], 1.0f, largestSize, largestSize, false)
+                MATERIAL_PIXELS[index] = nativeToolkit.materialProvider!!.getPixels(MATERIAL_IDS[index], 1.0f, largestSize, largestSize, false)
             }
 
             nativeCubeTexture = nativeToolkit.generateNativeCubeTexture(largestSize, mipmappingEnabled, MATERIAL_PIXELS)

@@ -159,7 +159,7 @@ class EnvironmentManager(
         this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness!!.getValue() * 0.1f + Resource.mapRegion!!.getRandomColorOffset()) * 1.1523438f)
         this.activeToolkit.applyLighting(DEFAULT_SUN_COLOR, 0.69921875f, 1.2f, -200.0f, -240.0f, -200.0f)
         this.activeToolkit.calculateFog(DEFAULT_FOG_COLOR, -1, 0)
-        this.activeToolkit.setSunCubeTexture(defaultSunCubeTexture)
+        defaultSunCubeTexture?.let { this.activeToolkit.setSunCubeTexture(it) }
     }
 
     fun addChunkEnvironment(chunkX: Int, chunkY: Int, environment: Environment) {

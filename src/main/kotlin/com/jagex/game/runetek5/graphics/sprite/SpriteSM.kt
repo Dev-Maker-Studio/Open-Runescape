@@ -68,7 +68,7 @@ abstract class SpriteSM(
         if (cachedClipping == null) {
             cachedClipping = IntArray(4)
         }
-        toolkit.getClipping(cachedClipping)
+        toolkit.getClipping(cachedClipping!!)
         toolkit.expandClipping(toolkit.clipLeft, toolkit.clipTop, width + x, y + height)
         val i_8 = getSpriteWidth()
         val i_9 = getSpriteHeight()
