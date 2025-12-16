@@ -31,11 +31,11 @@ object FontManager {
 
     @JvmStatic
     fun initialize() {
-        Renderers.FONT_RENDERER = StaticMethods.initializedFontcombos.list(client.FONT_PROVIDER, p11FullIndex, true, true) as AbstractFontRenderer
-        worldMapAreaFont = StaticMethods.initializedFontcombos.list(client.FONT_PROVIDER, p11FullIndex)
-        debugOverlayFont = StaticMethods.initializedFontcombos.list(client.FONT_PROVIDER, p12FullIndex, true, true) as AbstractFontRenderer
-        messageboxFont = StaticMethods.initializedFontcombos.list(client.FONT_PROVIDER, p12FullIndex)
-        MiniMenu.minimenuHeader = StaticMethods.initializedFontcombos.list(client.FONT_PROVIDER, b12FullIndex, true, true) as AbstractFontRenderer
-        FontMetrics.aClass4143438 = StaticMethods.initializedFontcombos.list(client.FONT_PROVIDER, b12FullIndex)
+        Renderers.FONT_RENDERER = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, p11FullIndex, true, true) as AbstractFontRenderer
+        worldMapAreaFont = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, p11FullIndex)
+        debugOverlayFont = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, p12FullIndex, true, true) as AbstractFontRenderer
+        messageboxFont = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, p12FullIndex)
+        MiniMenu.minimenuHeader = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, b12FullIndex, true, true) as AbstractFontRenderer
+        FontMetrics.aClass4143438 = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, b12FullIndex)
     }
 }

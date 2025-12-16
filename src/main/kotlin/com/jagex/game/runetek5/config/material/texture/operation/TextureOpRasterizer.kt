@@ -52,7 +52,8 @@ class TextureOpRasterizer : TextureOperation(0, true) {
     fun method15372(ints_1: Array<IntArray?>) {
         val i_3 = TextureRaster.currentWidth
         val i_4 = TextureRaster.currentHeight
-        StaticMethods.method3936(ints_1)
+        @Suppress("UNCHECKED_CAST")
+        StaticMethods.method3936(ints_1 as Array<IntArray>?)
         method16086(TextureRaster.rowEnd, TextureRaster.columnEnd)
         if (aClass149Array9862 != null) {
             for (i_5 in aClass149Array9862!!.indices) {
