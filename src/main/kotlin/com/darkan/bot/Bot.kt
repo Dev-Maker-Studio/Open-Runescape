@@ -616,7 +616,7 @@ object Bot {
 
     fun walkTo(tile: Tile) {
         val packet = PacketEncoder.walkToTile(tile.x - getBaseX(), tile.y - getBaseY(), 0)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        client.GAME_CONNECTION_CONTEXT.queuePacket(packet!!)
         RouteFinder.calculateRoute(
             tile.x - getBaseX(),
             tile.y - getBaseY(),
