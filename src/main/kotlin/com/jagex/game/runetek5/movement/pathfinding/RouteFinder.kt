@@ -23,10 +23,33 @@ object RouteFinder {
     var exitY: Int = 0
     @JvmField
     var exitX: Int = 0
+
+    private fun createDirectionsArray(): Array<IntArray> {
+        val result = arrayOfNulls<IntArray>(128)
+        var i = 0
+        while (i < 128) {
+            result[i] = IntArray(128)
+            i++
+        }
+        @Suppress("UNCHECKED_CAST")
+        return result as Array<IntArray>
+    }
+
+    private fun createDistancesArray(): Array<IntArray> {
+        val result = arrayOfNulls<IntArray>(128)
+        var i = 0
+        while (i < 128) {
+            result[i] = IntArray(128)
+            i++
+        }
+        @Suppress("UNCHECKED_CAST")
+        return result as Array<IntArray>
+    }
+
     @JvmField
-    val directions: Array<IntArray> = Array(128) { IntArray(128) }
+    val directions: Array<IntArray> = createDirectionsArray()
     @JvmField
-    val distances: Array<IntArray> = Array(128) { IntArray(128) }
+    val distances: Array<IntArray> = createDistancesArray()
     @JvmField
     val bufferX: IntArray = IntArray(4096)
     @JvmField

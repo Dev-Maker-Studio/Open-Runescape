@@ -420,7 +420,7 @@ class WindowMode @Throws(Exception::class) constructor() {
 
         @JvmStatic
         fun adjustActiveWindow() {
-            synchronized(ClientStartup.activeClient) {
+            synchronized(ClientStartup.activeClient!!) {
                 if (fullScreenFrame == null) {
                     val container = getActiveContainer()
                     if (container != null) {

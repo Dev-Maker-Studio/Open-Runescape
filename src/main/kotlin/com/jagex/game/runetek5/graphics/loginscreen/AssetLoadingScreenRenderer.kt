@@ -123,7 +123,7 @@ class AssetLoadingScreenRenderer : Runnable {
                             }
                         } catch (renderException: FrameRenderException) {
                             PacketEncoder.sendErrorToServer(
-                                renderException.message + ClientStartup.activeClient.getDebugString(),
+                                renderException.message + ClientStartup.activeClient!!.getDebugString(),
                                 renderException
                             )
                             client.loadAssets(0, true)
