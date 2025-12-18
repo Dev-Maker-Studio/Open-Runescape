@@ -131,11 +131,11 @@ object Utils {
         return realSteps
     }
 
-    fun stringContainsIgnoreCase(options: Array<String>?, option: String): Int {
+    fun stringContainsIgnoreCase(options: Array<String?>?, option: String): Int {
         if (options == null)
             return -1
         for (i in options.indices) {
-            if (options[i].equals(option, ignoreCase = true))
+            if (options[i]?.equals(option, ignoreCase = true) == true)
                 return i + 1
         }
         return -1

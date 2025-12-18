@@ -26,11 +26,11 @@ class NPCTypeCustomisation {
 
     constructor(npcType: NPCType, body: Boolean) {
         if (body) {
-            this.modelIds = IntArray(npcType.modelIds.size)
-            System.arraycopy(npcType.modelIds, 0, this.modelIds, 0, this.modelIds.size)
+            this.modelIds = IntArray(npcType.modelIds!!.size)
+            System.arraycopy(npcType.modelIds, 0, this.modelIds, 0, this.modelIds!!.size)
         } else {
-            this.modelIds = IntArray(npcType.headModels.size)
-            System.arraycopy(npcType.headModels, 0, this.modelIds, 0, this.modelIds.size)
+            this.modelIds = IntArray(npcType.headModels!!.size)
+            System.arraycopy(npcType.headModels, 0, this.modelIds, 0, this.modelIds!!.size)
         }
         if (npcType.recolorDst != null) {
             this.recolorDst = ShortArray(npcType.recolorDst!!.size)

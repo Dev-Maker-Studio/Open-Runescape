@@ -98,7 +98,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         }
 
         val rotation = super.yaw.getRotation()
-        val model = this.definitions!!.getAnimatedBodymodel(toolkit, functionMask, TypeLists.BAS, VarProviders.PLAYER_VAR_PROVIDER, seq, moveAnimation, super.sequences, super.equipmentRotations, rotation, this.customisation, getCurrentRenderAnimation(), false)
+        val model = this.definitions!!.getAnimatedBodymodel(toolkit, functionMask, TypeLists.BAS!!, VarProviders.PLAYER_VAR_PROVIDER, seq, moveAnimation, super.sequences as Array<Sequence?>?, super.equipmentRotations, rotation, this.customisation, getCurrentRenderAnimation(), false)
         super.models[0] = model
         if (model == null) {
             return false

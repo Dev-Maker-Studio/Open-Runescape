@@ -811,7 +811,7 @@ object Bot {
     fun clickNPCWithNearestOption(name: String, optionRequired: String, action: String) {
         val nearestNPC = getNPCs().firstOrNull { npc ->
             npc.definitions!!.name.equals(name, ignoreCase = true) &&
-            npc.definitions!!.actions.any { it?.contains(optionRequired) == true }
+            npc.definitions!!.actions?.any { it?.contains(optionRequired) == true } == true
         }
         clickNPC(nearestNPC, action)
     }
@@ -1066,7 +1066,7 @@ object Bot {
         getNPCs().filter { it.definitions!!.name.equals(id, ignoreCase = true) }
 
     fun getFilteredNPCsByOption(id: String) =
-        getNPCs().filter { id in it.definitions!!.actions }
+        getNPCs().filter { it.definitions!!.actions?.contains(id) == true }
 
     fun getFilteredNPCsContaining(id: String) =
         getNPCs().filter { it.definitions!!.name.contains(id, ignoreCase = true) }

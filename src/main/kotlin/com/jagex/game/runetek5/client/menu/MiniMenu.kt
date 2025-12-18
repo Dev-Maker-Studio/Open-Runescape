@@ -42,7 +42,7 @@ object MiniMenu {
     var aCacheableNodeSub712: MiniMenuEntry? = null
 
     @JvmStatic
-    fun prefixWithIndex(srcOptions: Array<String>?): Array<String> {
+    fun prefixWithIndex(srcOptions: Array<String?>?): Array<String?> {
         val dstOptions = arrayOfNulls<String>(5)
         for (index in 0 until 5) {
             dstOptions[index] = "$index "
@@ -50,7 +50,7 @@ object MiniMenu {
                 dstOptions[index] += srcOptions[index]
             }
         }
-        return dstOptions as Array<String>
+        return dstOptions
     }
 
     @JvmStatic
