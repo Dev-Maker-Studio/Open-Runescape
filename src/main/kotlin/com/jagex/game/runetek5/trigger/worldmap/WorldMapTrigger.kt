@@ -82,19 +82,19 @@ object WorldMapTrigger {
                 val mecId = mecClickzone.category.mecId.toLong()
                 if (mecClickzone.mouseWithin(x, y)) {
                     if (mec.minimenuActions[4] != null) {
-                        MiniMenu.addEntry(mec.minimenuActions[4], mec.minimenuName, -1, 1012, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
+                        MiniMenu.addEntry(mec.minimenuActions[4]!!, mec.minimenuName!!, -1, 1012, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
                     }
                     if (mec.minimenuActions[3] != null) {
-                        MiniMenu.addEntry(mec.minimenuActions[3], mec.minimenuName, -1, 1011, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
+                        MiniMenu.addEntry(mec.minimenuActions[3]!!, mec.minimenuName!!, -1, 1011, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
                     }
                     if (mec.minimenuActions[2] != null) {
-                        MiniMenu.addEntry(mec.minimenuActions[2], mec.minimenuName, -1, 1010, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
+                        MiniMenu.addEntry(mec.minimenuActions[2]!!, mec.minimenuName!!, -1, 1010, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
                     }
                     if (mec.minimenuActions[1] != null) {
-                        MiniMenu.addEntry(mec.minimenuActions[1], mec.minimenuName, -1, 1009, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
+                        MiniMenu.addEntry(mec.minimenuActions[1]!!, mec.minimenuName!!, -1, 1009, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
                     }
                     if (mec.minimenuActions[0] != null) {
-                        MiniMenu.addEntry(mec.minimenuActions[0], mec.minimenuName, -1, 1008, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
+                        MiniMenu.addEntry(mec.minimenuActions[0]!!, mec.minimenuName!!, -1, 1008, -1, mecId, mec.anInt2718, 0, true, false, mecId, false)
                     }
                     if (!mecClickzone.category.isMouseOver) {
                         mecClickzone.category.isMouseOver = true

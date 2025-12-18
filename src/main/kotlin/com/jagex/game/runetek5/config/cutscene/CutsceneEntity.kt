@@ -38,7 +38,7 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
                 npc!!.worldPriority = ++drawPriority - 1
             } else {
                 player = PlayerEntity(Resource.mapRegion!!.getScene())
-                player!!.decodeAppearance(CutsceneTypeList.CUTSCENE_BUFFER)
+                player!!.decodeAppearance(CutsceneTypeList.CUTSCENE_BUFFER!!)
                 player!!.playerIndex = index
                 player!!.lastUpdate = client.cycles
                 player!!.worldPriority = ++drawPriority - 1

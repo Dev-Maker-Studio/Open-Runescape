@@ -405,7 +405,7 @@ object InterfaceComponentRenderer {
                                     val lineHeight = component.primaryMediaId
                                     if (lineHeight >= 0 && lineHeight < 2048) {
                                         val player = PlayerUpdate.players[lineHeight]
-                                        if (player != null && (lineHeight == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName) == component.secondaryMediaId)) {
+                                        if (player != null && (lineHeight == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
                                             renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, player.playerAppearance)
                                             if (renderedMediaModel == null && Component.missingMedia) {
                                                 Component.redrawComponent(component)
@@ -416,15 +416,15 @@ object InterfaceComponentRenderer {
                                     val target = component.primaryMediaId
                                     if (target >= 0 && target < 2048) {
                                         val player = PlayerUpdate.players[target]
-                                        if (player != null && (target == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName) == component.secondaryMediaId)) {
+                                        if (player != null && (target == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
                                             renderedMediaModel = player.playerAppearance!!.getBodyModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, null, null, null, 0, TypeLists.EQUIPMENT_DEFAULTS)
                                         }
                                     }
                                 } else if (component.mediaType != MediaType.ITEM_CONTAINER_MALE && component.mediaType != MediaType.ITEM_CONTAINER_FEMALE) {
                                     if (component.animatingSequence != null && component.animatingSequence!!.hasType()) {
-                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, PlayerUpdate.MY_PLAYER!!.playerAppearance)
+                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, PlayerUpdate.MY_PLAYER.playerAppearance)
                                     } else {
-                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, null, PlayerUpdate.MY_PLAYER!!.playerAppearance)
+                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, null, PlayerUpdate.MY_PLAYER.playerAppearance)
                                     }
                                     if (renderedMediaModel == null && Component.missingMedia) {
                                         Component.redrawComponent(component)

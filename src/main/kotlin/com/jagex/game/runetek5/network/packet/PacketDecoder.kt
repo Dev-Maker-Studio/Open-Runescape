@@ -774,11 +774,11 @@ object PacketDecoder {
                             messageType = if (isQuickchat) ChatMessageType.PUBLIC_QUICKCHAT else ChatMessageType.STAFF_CHAT
                         }
                         if (icon == 2) {
-                            ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(1) + player.getUsernameWithTitle(), TextUtils.getCrown(1) + player.getDisplayName(), player.username, message, null, qcMessageId)
+                            ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(1) + player.getUsernameWithTitle(), TextUtils.getCrown(1) + player.getDisplayName(), player.username!!, message, null, qcMessageId)
                         } else if (icon == 1) {
-                            ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(0) + player.getUsernameWithTitle(), TextUtils.getCrown(0) + player.getDisplayName(), player.username, message, null, qcMessageId)
+                            ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(0) + player.getUsernameWithTitle(), TextUtils.getCrown(0) + player.getDisplayName(), player.username!!, message, null, qcMessageId)
                         } else {
-                            ChatBox.writeMessage(messageType, 0, player.getUsernameWithTitle(), player.getDisplayName(), player.username, message, null, qcMessageId)
+                            ChatBox.writeMessage(messageType, 0, player.getUsernameWithTitle(), player.getDisplayName(), player.username!!, message, null, qcMessageId)
                         }
                     }
                 }

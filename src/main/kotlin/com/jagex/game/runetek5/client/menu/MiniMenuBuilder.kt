@@ -266,7 +266,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
             } else {
                 if (SHOW_FACE_HERE) {
                     MiniMenu.addEntry(
-                        LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE),
+                        LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE)!!,
                         "",
                         -1,
                         60,
@@ -696,9 +696,9 @@ fun interfaceComponentHovered(component: Component) {
     }
 
     if (client.getComponentSettings(component).continueOptionEnabled()) {
-        val text = component.resumeText ?: LocalizedText.CONTINUE.translate(client.CURRENT_LANGUAGE)
+        val text = component.resumeText ?: LocalizedText.CONTINUE.translate(client.CURRENT_LANGUAGE)!!
         MiniMenu.addEntry(
-            text,
+            text!!,
             "",
             -1,
             30,

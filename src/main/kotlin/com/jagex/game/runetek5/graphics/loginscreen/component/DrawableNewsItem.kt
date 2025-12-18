@@ -33,7 +33,7 @@ class DrawableNewsItem(
             )
         }
 
-        y += drawText(MiniMenu.minimenuHeader, newsitem.line1, x, y) * 12
+        y += drawText(MiniMenu.minimenuHeader!!, newsitem.line1, x, y) * 12
         y += 8
 
         if (outlinedNewsItem.drawOutline) {
@@ -44,9 +44,9 @@ class DrawableNewsItem(
         }
 
         y++
-        y += drawText(MiniMenu.minimenuHeader, newsitem.line2, x, y) * 12
+        y += drawText(MiniMenu.minimenuHeader!!, newsitem.line2, x, y) * 12
         y += 5
-        drawText(MiniMenu.minimenuHeader, newsitem.line3, x, y)
+        drawText(MiniMenu.minimenuHeader!!, newsitem.line3, x, y)
     }
 
     /**
