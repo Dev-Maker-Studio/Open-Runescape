@@ -308,7 +308,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             functionMask = functionMask or DISPLACE_X or DISPLACE_Y or DISPLACE_Z
         }
 
-        val rotation = yaw.rotation
+        val rotation = yaw.getRotation()
         val tintModel = opacity.toInt() != 0 && client.cycles >= tintStartCycle && client.cycles < tintEndCycle
         if (tintModel) {
             functionMask = functionMask or TINT
@@ -580,7 +580,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             val renderingMatrix = activeToolkit.getRenderingMatrix()
             val projectionMatrix = getProjectionMatrix()
             val absolute = getAbsolutePosition()
-            val rotation = yaw.rotation
+            val rotation = yaw.getRotation()
             val occupiedTile = scene!!.tiles[plane.toInt()][absolute.coords.x.toInt() shr 9][absolute.coords.z.toInt() shr 9]
             if (occupiedTile != null && occupiedTile.groundDecoration != null) {
                 val groundDec = occupiedTile.groundDecoration!!
