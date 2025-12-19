@@ -1309,7 +1309,7 @@ public class client extends GameShell {
     }
 
     @Override
-    void onPulse() {
+    public void onPulse() {
         if (PreferenceManager.preferences.activeToolkit.getValue() == 2) {
             try {
                 pulse();
@@ -1812,7 +1812,7 @@ public class client extends GameShell {
     }
 
     @Override
-    void mainRedraw() {
+    public void mainRedraw() {
         if (PreferenceManager.preferences.activeToolkit.getValue() == 2) {
             try {
                 redraw();
@@ -1829,7 +1829,7 @@ public class client extends GameShell {
     }
 
     @Override
-    void shutdown() {
+    public void shutdown() {
         if (clientIsActive) {
             PacketEncoder.writeVarcPreferences();
         }
@@ -1877,7 +1877,7 @@ public class client extends GameShell {
 
     @SuppressWarnings("deprecation")
     @Override
-    void initializeEssentials() {
+    public void initializeEssentials() {
         Frame frame = new Frame(" ");
         frame.pack();
         frame.dispose();

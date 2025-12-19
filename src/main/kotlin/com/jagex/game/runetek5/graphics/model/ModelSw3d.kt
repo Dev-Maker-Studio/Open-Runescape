@@ -195,7 +195,7 @@ class ModelSw3d : Model, INativeObject, AutoCloseable {
 
 
     override fun calculateProjection(i_1: Int, i_2: Int, matrix44var3: Matrix43, bool4: Boolean, i_5: Int): Boolean {
-        return this.aja7140.nx().method335(this, i_1, i_2, matrix44var3, bool4)
+        return this.aja7140.nx()!!.method335(this, i_1, i_2, matrix44var3, bool4)
     }
 
     external override fun tint(var1: Int, var2: Int, var3: Int, var4: Int)
@@ -238,7 +238,7 @@ class ModelSw3d : Model, INativeObject, AutoCloseable {
     external override fun rematerial(var1: Short, var2: Short)
 
     override fun offsetSubmesh(matrix44var1: Matrix43, i_2: Int, bool3: Boolean) {
-        val matrix444 = this.aja7140.nx().aClass38451
+        val matrix444 = this.aja7140.nx()!!.aClass38451
         matrix444.fromMatrix(matrix44var1)
         aa(matrix444.faceList, i_2, bool3)
     }
@@ -261,10 +261,10 @@ class ModelSw3d : Model, INativeObject, AutoCloseable {
 
     override fun drawMatrixThreaded(matrix44var1: Matrix43, class275Sub52: BoundingBoxPolygon?, i_3: Int) {
         if (class275Sub52 == null) {
-            this.aja7140.nx().method314(this, matrix44var1, IntArray(0), i_3)
+            this.aja7140.nx()!!.method314(this, matrix44var1, IntArray(0), i_3)
         } else {
             SoftwareToolkit.ae[5] = 0
-            this.aja7140.nx().method314(this, matrix44var1, SoftwareToolkit.ae, i_3)
+            this.aja7140.nx()!!.method314(this, matrix44var1, SoftwareToolkit.ae, i_3)
             class275Sub52.left = SoftwareToolkit.ae[0]
             class275Sub52.bottom = SoftwareToolkit.ae[1]
             class275Sub52.right = SoftwareToolkit.ae[2]
@@ -286,10 +286,10 @@ class ModelSw3d : Model, INativeObject, AutoCloseable {
 
 
     fun method11604(ints_1: IntArray, matrix44var2: Matrix43) {
-        this.aja7140.nx().method331(this, ints_1, matrix44var2)
+        this.aja7140.nx()!!.method331(this, ints_1, matrix44var2)
     }
 
-    external override fun createShadowSprite(var1: Shadow): Shadow
+    external override fun createShadowSprite(var1: Shadow?): Shadow?
 
 
     override fun animatePartialtransform(i_1: Int, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, bool7: Boolean) {
@@ -322,7 +322,7 @@ class ModelSw3d : Model, INativeObject, AutoCloseable {
 
 
     override fun copy(b_1: Byte, i_2: Int, bool3: Boolean): Model {
-        return this.aja7140.nx().method325(this, b_1, i_2, bool3)
+        return this.aja7140.nx()!!.method325(this, b_1, i_2, bool3)
     }
 
 
@@ -331,7 +331,7 @@ class ModelSw3d : Model, INativeObject, AutoCloseable {
 
 
     override fun applyShading(meshrasterizer1: Model, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean) {
-        this.aja7140.nx().method313(this, meshrasterizer1, i_2, i_3, i_4, bool5)
+        this.aja7140.nx()!!.method313(this, meshrasterizer1, i_2, i_3, i_4, bool5)
     }
 
 

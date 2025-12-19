@@ -33,12 +33,12 @@ abstract class Ground(
     abstract fun addBlendedTile(
         tileX: Int,
         tileY: Int,
-        offsetsX: IntArray,
-        var4: IntArray,
-        offsetsZ: IntArray,
-        var6: IntArray,
-        colors: IntArray,
-        blendColors: IntArray,
+        offsetsX: IntArray?,
+        lightGroundOffsetsA: IntArray?,
+        offsetsZ: IntArray?,
+        lightGroundOffsetsB: IntArray?,
+        mainColors: IntArray,
+        blendColors: IntArray?,
         waterMaterials: IntArray,
         waterScaling: IntArray,
         waterTile: WaterTile?,
@@ -84,11 +84,11 @@ abstract class Ground(
         return 0
     }
 
-    abstract fun addShadow(shadow: Shadow, scaledX: Int, averageHeight: Int, scaledY: Int)
+    abstract fun addShadow(shadow: Shadow?, scaledX: Int, averageHeight: Int, scaledY: Int)
 
-    abstract fun removeShadow(shadow: Shadow, x: Int, groundOffset: Int, y: Int)
+    abstract fun removeShadow(shadow: Shadow?, x: Int, groundOffset: Int, y: Int)
 
-    abstract fun hasRenderingShadows(shadow: Shadow, x: Int, planesHeightDelta: Int, y: Int): Boolean
+    abstract fun hasRenderingShadows(shadow: Shadow?, x: Int, planesHeightDelta: Int, y: Int): Boolean
 
     abstract fun addLight(light: PointLight, var2: IntArray)
 
@@ -115,5 +115,5 @@ abstract class Ground(
         return tileHeights[x][y]
     }
 
-    abstract fun createShadowAt(x: Int, y: Int, shadow: Shadow): Shadow
+    abstract fun createShadowAt(x: Int, y: Int, shadow: Shadow?): Shadow?
 }

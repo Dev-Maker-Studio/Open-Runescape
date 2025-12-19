@@ -737,9 +737,10 @@ object ComponentMinimap {
                                     if (!locType.members || client.memberWorld) {
                                         var mapCategoryId = locType.mapCategoryid
                                         if (locType.alternativeIds != null) {
-                                            for (altIndex in locType.alternativeIds.indices) {
-                                                if (locType.alternativeIds[altIndex] != -1) {
-                                                    val morphedLoc: ObjectType = locTypeList.list(locType.alternativeIds[altIndex])
+                                            val alternativeIds = locType.alternativeIds!!
+                                            for (altIndex in alternativeIds.indices) {
+                                                if (alternativeIds[altIndex] != -1) {
+                                                    val morphedLoc: ObjectType = locTypeList.list(alternativeIds[altIndex])
                                                     if (morphedLoc.mapCategoryid >= 0) {
                                                         mapCategoryId = morphedLoc.mapCategoryid
                                                     }

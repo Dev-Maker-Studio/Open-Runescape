@@ -122,8 +122,8 @@ class ItemTypeList(
         if (itemStacksize > 1 && objType.stackIds != null) {
             var stackId = -1
             for (index in 0..9) {
-                if (itemStacksize >= objType.stackTriggerAmount[index] && objType.stackTriggerAmount[index] != 0) {
-                    stackId = objType.stackIds[index]
+                if (itemStacksize >= objType.stackTriggerAmount!![index] && objType.stackTriggerAmount!![index] != 0) {
+                    stackId = objType.stackIds!![index]
                 }
             }
             if (stackId != -1) {

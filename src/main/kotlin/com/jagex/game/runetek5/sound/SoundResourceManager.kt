@@ -84,7 +84,8 @@ object SoundResourceManager {
                 if (aNodeSub15Sub27836 != null) {
                     class282Sub15Sub22 = aNodeSub15Sub27836
                 }
-                if (class282Sub15Sub22!!.ready(StaticMethods.aNodeSub79563, SOUND_MIDI_PROVIDER!!, StaticMethods.aClass2505450)) {
+                val aNodeSub79563 = StaticMethods.aNodeSub79563!!
+                if (class282Sub15Sub22!!.ready(aNodeSub79563, SOUND_MIDI_PROVIDER!!, StaticMethods.aClass2505450!!)) {
                     aNodeSub15Sub21735 = class282Sub15Sub22
                     aNodeSub15Sub21735!!.method15096()
                     if (StaticMethods.anInt4664 > 0) {
@@ -104,9 +105,9 @@ object SoundResourceManager {
                     }
                     if (aNodeSub15Sub27836 == null) {
                         if (aLong1740 > 0L) {
-                            aNodeSub15Sub21735!!.method15100(StaticMethods.aNodeSub79563, StaticMethods.aBool1962, aLong1740)
+                            aNodeSub15Sub21735!!.method15100(aNodeSub79563, StaticMethods.aBool1962, aLong1740)
                         } else {
-                            aNodeSub15Sub21735!!.setMusicTrack(StaticMethods.aNodeSub79563, StaticMethods.aBool1962)
+                            aNodeSub15Sub21735!!.setMusicTrack(aNodeSub79563, StaticMethods.aBool1962)
                         }
                         if (SongPlayer.songTransition != null) {
                             SongPlayer.songTransition!!.transition()

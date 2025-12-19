@@ -228,7 +228,7 @@ class GroundItem(
             if (model != null) {
                 model.drawMatrixThreaded(renderingMatrix, boundingBoxPolygons!![2], ModelFunctionMaskGL.EMPTY)
                 layerPriorities = layerPriorities or model.accountForLayers()
-                size3d = model.size3d
+                size3d = model.getSize3d()
             }
         }
 
@@ -237,8 +237,8 @@ class GroundItem(
             if (model != null) {
                 model.drawMatrixThreaded(renderingMatrix, boundingBoxPolygons!![1], ModelFunctionMaskGL.EMPTY)
                 layerPriorities = layerPriorities or model.accountForLayers()
-                if (model.size3d > size3d) {
-                    size3d = model.size3d
+                if (model.getSize3d() > size3d) {
+                    size3d = model.getSize3d()
                 }
             }
         }
@@ -247,8 +247,8 @@ class GroundItem(
         if (model != null) {
             model.drawMatrixThreaded(renderingMatrix, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
             layerPriorities = layerPriorities or model.accountForLayers()
-            if (model.size3d > size3d) {
-                size3d = model.size3d
+            if (model.getSize3d() > size3d) {
+                size3d = model.getSize3d()
             }
         }
 

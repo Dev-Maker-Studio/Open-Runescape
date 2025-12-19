@@ -314,10 +314,11 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             functionMask = functionMask or TINT
         }
 
+        @Suppress("UNCHECKED_CAST")
         val model = playerAppearance!!.getBodyModel(
-            toolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ,
-            VarProviders.PLAYER_VAR_PROVIDER, currSeq, moveAnimation, sequences,
-            equipmentRotations, rotation, TypeLists.EQUIPMENT_DEFAULTS
+            toolkit, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!,
+            VarProviders.PLAYER_VAR_PROVIDER, currSeq, moveAnimation, sequences as Array<Sequence?>?,
+            equipmentRotations, rotation, TypeLists.EQUIPMENT_DEFAULTS!!
         ).also { models[0] = it }
 
         val bodyModelCount = PlayerAppearance.countBodyModels()
@@ -345,7 +346,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         if (model == null) {
             return false
         }
-        modelMinY = model.minY
+        modelMinY = model.getMinY()
         model.getSize3d()
         rotate(model)
         if (x == 0 && z == 0) {
@@ -483,7 +484,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         val staticRecolorDst = IntArray(10)
         for (slot in 0 until 10) {
             var color = buffer.readUByte()
-            if (PlayerAppearance.recolorPaletteDst.isEmpty() || color < 0 || color >= PlayerAppearance.recolorPaletteDst[slot][0].size) {
+            if (PlayerAppearance.recolorPaletteDst!!.isEmpty() || color < 0 || color >= PlayerAppearance.recolorPaletteDst!![slot][0].size) {
                 color = 0
             }
             staticRecolorDst[slot] = color
@@ -540,7 +541,8 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
 
         val morphedIdLastCycle = playerAppearance!!.morphism
         val typeRecolorDst = playerAppearance!!.recolorDstIndices
-        playerAppearance!!.setAppearance(getCurrentRenderAnimation(), bodyAppearances, meshModifiers, staticRecolorDst, male == 1.toByte(), currentMorphId)
+        @Suppress("UNCHECKED_CAST")
+        playerAppearance!!.setAppearance(getCurrentRenderAnimation(), bodyAppearances, meshModifiers as Array<ItemTypeCustomisation>?, staticRecolorDst, male == 1.toByte(), currentMorphId)
         if (currentMorphId != morphedIdLastCycle) {
             val absolutePosition2 = Vector3Pool.vector3From(getAbsolutePosition().coords)
             absolutePosition2.x = ((movementBaseX[0] shl 9) + (getSize() shl 8)).toFloat()
@@ -718,16 +720,16 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             }
             model = model.copy(6.toByte(), modelFlags.toInt(), true)
             if (rotationY != 0) {
-                model.yaxisRotateWithoutNormals(rotationY)
+                model!!.yaxisRotateWithoutNormals(rotationY)
             }
             if (rotationX != 0) {
-                model.xaxisRotateWithoutNormals(rotationX)
+                model!!.xaxisRotateWithoutNormals(rotationX)
             }
             if (rotationZ != 0) {
-                model.zaxisRotateWithoutNormals(rotationZ)
+                model!!.zaxisRotateWithoutNormals(rotationZ)
             }
             if (translateY != 0) {
-                model.translate(0, translateY, 0)
+                model!!.translate(0, translateY, 0)
             }
             return model
         }

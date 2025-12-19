@@ -445,7 +445,7 @@ open class NPCType {
             if (modifiesSubmesh && submeshMatrices != null) {
                 for (index in 0 until 12) {
                     if (submeshMatrices[index] != null) {
-                        copiedModel.offsetSubmesh(submeshMatrices[index], 1 shl index, true)
+                        copiedModel!!.offsetSubmesh(submeshMatrices[index]!!, 1 shl index, true)
                     }
                 }
             }
@@ -453,7 +453,7 @@ open class NPCType {
             var submesh = 1
             while (seqPtr < sequenceCount) {
                 if (animatingSequence!![seqPtr] != null) {
-                    animatingSequence[seqPtr]!!.animateUnrotatedModel(copiedModel, submesh)
+                    animatingSequence[seqPtr]!!.animateUnrotatedModel(copiedModel!!, submesh)
                 }
                 seqPtr++
                 submesh = submesh shl 1
@@ -465,28 +465,28 @@ open class NPCType {
                         rotation = rotation and 0x3fff
                         val matrix = Matrix43()
                         matrix.rotateMatrix(0.0F, 1.0F, 0.0F, MathUtils.getTheta(rotation))
-                        copiedModel.offsetSubmesh(matrix, 1 shl index, false)
+                        copiedModel!!.offsetSubmesh(matrix, 1 shl index, false)
                     }
                 }
             }
             if (modifiesSubmesh && submeshMatrices != null) {
                 for (index in 0 until 12) {
                     if (submeshMatrices[index] != null) {
-                        copiedModel.offsetSubmesh(submeshMatrices[index], 1 shl index, false)
+                        copiedModel!!.offsetSubmesh(submeshMatrices[index]!!, 1 shl index, false)
                     }
                 }
             }
             if (animationSequence != null && idleSequence != null) {
-                Sequence.doubleAnimation(copiedModel, animationSequence, idleSequence)
+                Sequence.doubleAnimation(copiedModel!!, animationSequence, idleSequence)
             } else if (animationSequence != null) {
-                animationSequence.animateRotatedModel(copiedModel, 0)
+                animationSequence.animateRotatedModel(copiedModel!!, 0)
             } else if (idleSequence != null) {
-                idleSequence.animateRotatedModel(copiedModel, 0)
+                idleSequence.animateRotatedModel(copiedModel!!, 0)
             }
             if (this.scaleXZ != 128 || this.scaleY != 128) {
-                copiedModel.scale(this.scaleXZ, this.scaleY, this.scaleXZ)
+                copiedModel!!.scale(this.scaleXZ, this.scaleY, this.scaleXZ)
             }
-            copiedModel.applyShading(functionMask)
+            copiedModel!!.applyShading(functionMask)
         }
         return copiedModel
     }
@@ -599,7 +599,7 @@ open class NPCType {
         }
         if (headSequence != null) {
             model = model!!.copy(1.toByte(), flagsCopy, true)
-            headSequence.animateRotatedModel(model, 0)
+            headSequence.animateRotatedModel(model!!, 0)
         }
         model!!.applyShading(initialFunctionMask)
         return model

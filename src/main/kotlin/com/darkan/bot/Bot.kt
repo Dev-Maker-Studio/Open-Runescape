@@ -230,19 +230,19 @@ object Bot {
         getNearbyObjects().find { it.x == tile.x && it.y == tile.y }
 
     fun getObjectsNearby(id: Int, option: String) =
-        getNearbyObjects().filter { it.id == id && option in it.getDefinitions().actions }
+        getNearbyObjects().filter { it.id == id && it.getDefinitions().actions?.contains(option) == true }
 
     fun getObjectsNearby(id: String, option: String) =
         getNearbyObjects().filter {
             it.getDefinitions().name.contains(id, ignoreCase = true) &&
-            option in it.getDefinitions().actions
+            it.getDefinitions().actions?.contains(option) == true
         }
 
     fun getObjectsNearby(id: Int) =
         getNearbyObjects().filter { it.id == id }
 
     fun getNearbyObjectsWithOption(option: String) =
-        getNearbyObjects().filter { option in it.getDefinitions().actions }
+        getNearbyObjects().filter { it.getDefinitions().actions?.contains(option) == true }
 
     fun getObjectsNearby(id: String) =
         getNearbyObjects().filter { it.getDefinitions().name.contains(id, ignoreCase = true) }
@@ -819,7 +819,7 @@ object Bot {
     fun clickObjectWithNearestOption(name: String, optionRequired: String, action: String) {
         val nearestObject = getNearbyObjects().firstOrNull { obj ->
             obj.getDefinitions().name.equals(name, ignoreCase = true) &&
-            optionRequired in obj.getDefinitions().actions
+            obj.getDefinitions().actions?.contains(optionRequired) == true
         }
         nearestObject?.let {
             Console.writeLine("Clicking ${it.getDefinitions().name}")

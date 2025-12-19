@@ -115,7 +115,7 @@ object SongPlayer {
         if (stream != null) {
             aClass2535830!!.start()
             SoundResourceManager.aNodeSub15Sub21735 = stream
-            SoundResourceManager.aNodeSub15Sub21735!!.setMusicTrack(song.getMusicTrack(), false)
+            SoundResourceManager.aNodeSub15Sub21735!!.setMusicTrack(song.getMusicTrack()!!, false)
             SoundResourceManager.aNodeSub15Sub21735!!.setMusicVolume(volume)
             if (aClass2535830 != null) {
                 aClass2535830!!.currentPcmStream = SoundResourceManager.aNodeSub15Sub21735

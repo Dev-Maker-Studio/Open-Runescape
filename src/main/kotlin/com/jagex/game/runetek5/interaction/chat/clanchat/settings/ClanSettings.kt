@@ -248,7 +248,8 @@ class ClanSettings(buffer: Packet) {
         if (sortedAffinedSlots == null) {
             val names = Array(memberCount) { memberNames!![it] }
             sortedAffinedSlots = IntArray(memberCount) { it }
-            ArrayUtils.quicksortt(names, sortedAffinedSlots!!)
+            @Suppress("UNCHECKED_CAST")
+            ArrayUtils.quicksortt(names as Array<String?>, sortedAffinedSlots!!)
         }
         return sortedAffinedSlots!!
     }

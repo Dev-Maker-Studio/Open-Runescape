@@ -74,7 +74,8 @@ class ObjectTypeList(
             val newLoctype = ObjectType().apply {
                 this.id = id
                 this.locTypeList = this@ObjectTypeList
-                this.actions = defaultActions.clone()
+                @Suppress("UNCHECKED_CAST")
+                this.actions = defaultActions.clone() as Array<String>?
 
                 if (data != null) {
                     decodeType(Packet(data))

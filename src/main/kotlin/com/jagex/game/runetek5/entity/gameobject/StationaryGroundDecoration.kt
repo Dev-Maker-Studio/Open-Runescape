@@ -118,7 +118,7 @@ class StationaryGroundDecoration(
             }
         }
         val absolute = getAbsolutePosition().coords
-        return loctype!!.getPair(toolkit, functionMask, ObjectShapes.GROUND_DECORATION.shape, this.currentRotation.toInt(), heightsCurrentLvl, heightsNextLvl, absolute.x.toInt(), absolute.y.toInt(), absolute.z.toInt(), hasShadow, null)
+        return loctype.getPair(toolkit, functionMask, ObjectShapes.GROUND_DECORATION.shape, this.currentRotation.toInt(), heightsCurrentLvl, heightsNextLvl, absolute.x.toInt(), absolute.y.toInt(), absolute.z.toInt(), hasShadow, null)
     }
 
     override fun getAxisAlignedBoundingBox(toolkit: AbstractToolkit): Silhouette? {

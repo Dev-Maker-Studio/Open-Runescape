@@ -1175,7 +1175,7 @@ object PacketDecoder {
             val tcpmessage111 = PacketEncoder.createPacket(ClientProt.SEND_FPS, context.isaac)
             tcpmessage111.buffer.writeIntInverseMiddle(key)
             tcpmessage111.buffer.writeIntMiddle(flags)
-            tcpmessage111.buffer.writeByteSubtract(client.FPS)
+            tcpmessage111.buffer.writeByteSubtract(GameShell.FPS)
             context.queuePacket(tcpmessage111)
             context.currentPacket = null
             return true

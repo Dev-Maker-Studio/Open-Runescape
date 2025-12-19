@@ -35,8 +35,21 @@ class GroundSw3d(
 
     override external fun setTileShadow(var1: Int, var2: Int, var3: Int)
 
-    override fun addBlendedTile(i_1: Int, i_2: Int, ints_3: IntArray, ints_4: IntArray, ints_5: IntArray, ints_6: IntArray, ints_7: IntArray, ints_8: IntArray, ints_9: IntArray, ints_10: IntArray, class9011: WaterTile?, bool12: Boolean) {
-        ya(i_1, i_2, ints_3, ints_4, ints_5, ints_6, ints_7, ints_8, ints_9, ints_10, class9011!!.color, class9011.scale, class9011.intensity, bool12)
+    override fun addBlendedTile(
+        tileX: Int,
+        tileY: Int,
+        offsetsX: IntArray?,
+        lightGroundOffsetsA: IntArray?,
+        offsetsZ: IntArray?,
+        lightGroundOffsetsB: IntArray?,
+        mainColors: IntArray,
+        blendColors: IntArray?,
+        waterMaterials: IntArray,
+        waterScaling: IntArray,
+        waterTile: WaterTile?,
+        hasShadows: Boolean
+    ) {
+        ya(tileX, tileY, offsetsX, lightGroundOffsetsA, offsetsZ, lightGroundOffsetsB, mainColors, blendColors, waterMaterials, waterScaling, waterTile!!.color, waterTile.scale, waterTile.intensity, hasShadows)
     }
 
     override fun calculateBlockTiles(i_1: Int, i_2: Int, ints_3: IntArray, ints_4: IntArray, ints_5: IntArray, ints_6: IntArray, ints_7: IntArray, ints_8: IntArray, ints_9: IntArray, ints_10: IntArray, ints_11: IntArray, ints_12: IntArray, ints_13: IntArray, class9014: WaterTile?) {
@@ -129,7 +142,7 @@ class GroundSw3d(
                     val i_11 = i_13 + (i_1 - i_3)
                     val i_12 = i_10 + (i_2 - i_3)
                     if (i_11 >= 0 && i_11 < width && i_12 >= 0 && i_12 < length) {
-                        aja7144.nx().method316(this, i_11, i_12)
+                        aja7144.nx()!!.method316(this, i_11, i_12)
                     }
                 }
             }
@@ -138,14 +151,14 @@ class GroundSw3d(
     }
 
     override fun renderMinimapFloor(i_1: Int, i_2: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, bools_8: Array<BooleanArray>) {
-        aja7144.nx().method318(this, i_1, i_2, i_4, i_5, i_6, i_7, bools_8)
+        aja7144.nx()!!.method318(this, i_1, i_2, i_4, i_5, i_6, i_7, bools_8)
     }
 
-    override external fun createShadowAt(var1: Int, var2: Int, var3: Shadow): Shadow
+    override external fun createShadowAt(var1: Int, var2: Int, var3: Shadow?): Shadow?
 
-    override external fun addShadow(var1: Shadow, var2: Int, var3: Int, var4: Int)
+    override external fun addShadow(var1: Shadow?, var2: Int, var3: Int, var4: Int)
 
-    override external fun removeShadow(var1: Shadow, var2: Int, var3: Int, var4: Int)
+    override external fun removeShadow(var1: Shadow?, var2: Int, var3: Int, var4: Int)
 
     override fun addLight(class282Sub241: PointLight, ints_2: IntArray) {
         aClass4827143.addFirst(class282Sub241)
@@ -166,9 +179,9 @@ class GroundSw3d(
     }
 
 
-    external fun ya(var1: Int, var2: Int, var3: IntArray, var4: IntArray, var5: IntArray, var6: IntArray, var7: IntArray, var8: IntArray, var9: IntArray, var10: IntArray, var11: Int, var12: Int, var13: Int, var14: Boolean)
+    external fun ya(var1: Int, var2: Int, var3: IntArray?, var4: IntArray?, var5: IntArray?, var6: IntArray?, var7: IntArray, var8: IntArray?, var9: IntArray, var10: IntArray, var11: Int, var12: Int, var13: Int, var14: Boolean)
 
-    override fun hasRenderingShadows(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int, i_4: Int): Boolean {
+    override fun hasRenderingShadows(class282Sub50Sub171: Shadow?, i_2: Int, i_3: Int, i_4: Int): Boolean {
         return true
     }
 

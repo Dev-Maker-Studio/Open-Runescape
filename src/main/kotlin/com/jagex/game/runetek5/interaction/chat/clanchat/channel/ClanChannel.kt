@@ -61,7 +61,8 @@ class ClanChannel(buffer: Packet) : Node<ClanChannel>() {
                 playerNames[i] = players!![i]!!.name!!
                 sortedNameIndices!![i] = i++
             }
-            ArrayUtils.quicksortt(playerNames, sortedNameIndices)
+            @Suppress("UNCHECKED_CAST")
+            ArrayUtils.quicksortt(playerNames as Array<String?>, sortedNameIndices!!)
         }
         return sortedNameIndices!!
     }

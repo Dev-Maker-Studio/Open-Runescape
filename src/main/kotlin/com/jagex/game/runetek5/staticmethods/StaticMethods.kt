@@ -174,14 +174,14 @@ object StaticMethods {
     @JvmStatic
     fun method7039() {
         InterfaceComponentRenderer.aClass118Array3772 = null
-        Component.method3629(client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379, 0, 0, -1)
+        Component.method3629(client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
         if (InterfaceComponentRenderer.aClass118Array3772 != null) {
             val arr_1 = InterfaceComponentRenderer.aClass118Array3772
             val i_2 = -1412584499
             val b_3: Int = 0
             val b_4: Int = 0
             val i_5 = GameShell.screenCanvasWidth
-            val i_6 = client.screenCanvasHeight * -969250379
+            val i_6 = GameShell.screenCanvasHeight * -969250379
             val i_7 = InterfaceComponentRenderer.anInt4822
             val i_8 = InterfaceComponentRenderer.anInt5157
             val i_9: Int = if (client.selectedComponent == client.frameComponent) {

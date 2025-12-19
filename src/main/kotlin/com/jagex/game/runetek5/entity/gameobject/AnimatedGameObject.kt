@@ -131,7 +131,7 @@ class AnimatedGameObject(
             if (originalLoc === computedLoc) {
                 originalLoc = null
             }
-            if (computedLoc.isAnimated) {
+            if (computedLoc.isAnimated()) {
                 if (isTransformed && sequence.hasType() && computedLoc.hasSequence(sequence.getId())) {
                     return
                 }
@@ -144,7 +144,7 @@ class AnimatedGameObject(
                 } else {
                     additionalAnimationFlag = 1
                 }
-            } else if (originalLoc != null && originalLoc.isAnimated) {
+            } else if (originalLoc != null && originalLoc.isAnimated()) {
                 if (isTransformed && sequence.hasType() && originalLoc.hasSequence(sequence.getId())) {
                     return
                 }
@@ -189,7 +189,7 @@ class AnimatedGameObject(
         }
         method2133()
         if (hasShadow) {
-            hasShadow = hasShadow and renderShadow and !aBool1552 and (PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0)
+            hasShadow = hasShadow && renderShadow && !aBool1552 && (PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0)
         }
         if (bool3 && !hasShadow) {
             gameobjectId = loctype.id

@@ -393,7 +393,7 @@ object PacketEncoder {
         val clientServerPacket = createPacket(ClientProt.SCREEN_SIZE, client.GAME_CONNECTION_CONTEXT.isaac)
         clientServerPacket.buffer.writeByte(WindowMode.getWindowMode())
         clientServerPacket.buffer.writeShort(GameShell.screenCanvasWidth)
-        clientServerPacket.buffer.writeShort(client.screenCanvasHeight * -969250379)
+        clientServerPacket.buffer.writeShort(GameShell.screenCanvasHeight * -969250379)
         clientServerPacket.buffer.writeByte(PreferenceManager.preferences!!.antiAliasingPreview!!.getValue())
         client.GAME_CONNECTION_CONTEXT.queuePacket(clientServerPacket)
     }

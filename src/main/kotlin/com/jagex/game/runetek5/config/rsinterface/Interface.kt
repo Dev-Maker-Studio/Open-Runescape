@@ -345,7 +345,7 @@ class Interface(
                     client.selectedComponentX = 0
                     client.selectedComponentY = 0
                     client.selectedComponentWidth = GameShell.screenCanvasWidth
-                    client.selectedComponentHeight = client.screenCanvasHeight * -969250379
+                    client.selectedComponentHeight = GameShell.screenCanvasHeight * -969250379
                 }
                 openSub(
                     null,
@@ -353,7 +353,7 @@ class Interface(
                     0,
                     0,
                     GameShell.screenCanvasWidth,
-                    client.screenCanvasHeight * -969250379,
+                    GameShell.screenCanvasHeight * -969250379,
                     0,
                     0,
                     x,

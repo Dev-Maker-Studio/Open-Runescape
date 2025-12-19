@@ -281,7 +281,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                     )
                 }
                 MiniMenu.addEntry(
-                    InterfaceRenderer.translatedUptext,
+                    InterfaceRenderer.translatedUptext!!,
                     "",
                     CursorManager.activeCursorId,
                     23,
@@ -488,8 +488,8 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
 
                             if (entity.plane == PlayerUpdate.MY_PLAYER.plane) {
                                 val groundActions = objtype.groundActions
-                                for (groundActionIndex in groundActions.indices.reversed()) {
-                                    groundActions[groundActionIndex]?.let { action ->
+                                for (groundActionIndex in groundActions!!.indices.reversed()) {
+                                    groundActions!![groundActionIndex]?.let { action ->
                                         val clickType = when (groundActionIndex) {
                                             0 -> 18
                                             1 -> 19

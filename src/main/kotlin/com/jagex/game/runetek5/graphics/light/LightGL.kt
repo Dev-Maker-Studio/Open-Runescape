@@ -84,7 +84,7 @@ class LightGL(
                 while (i_10 <= this.anInt7653) {
                     if (i_10 >= 0 && i_10 < aGroundSub27654.width) {
                         i_11 = ints_4[i_8]
-                        val ints_19 = aGroundSub27654.tileColors[i_10][i_9]
+                        val ints_19 = aGroundSub27654.tileColors!![i_10][i_9]
                         if (ints_19 != null && i_11 != 0) {
                             if (i_11 == 1) {
                                 i_13 = 0
@@ -125,7 +125,7 @@ class LightGL(
                     while (i_12 <= this.anInt7653) {
                         if (i_12 >= 0 && i_12 < aGroundSub27654.width) {
                             i_13 = ints_4[i_8]
-                            val ints_18 = aGroundSub27654.tileColors[i_12][i_10]
+                            val ints_18 = aGroundSub27654.tileColors!![i_12][i_10]
                             if (ints_18 != null && i_13 != 0) {
                                 if (i_13 != 1) {
                                     if (i_13 == 3) {
@@ -146,8 +146,8 @@ class LightGL(
                                         method12306(i_11, i_9, i_12, i_10, aGroundSub27654.tileUnits, aGroundSub27654.tileUnits)
                                     }
                                 } else {
-                                    val ints_15 = aGroundSub27654.tileOffsetsX[i_12][i_10]
-                                    val ints_16 = aGroundSub27654.tileOffsetsZ[i_12][i_10]
+                                    val ints_15 = aGroundSub27654.tileOffsetsX!![i_12][i_10]
+                                    val ints_16 = aGroundSub27654.tileOffsetsZ!![i_12][i_10]
                                     var i_17 = 0
 
                                     label108@ while (true) {
@@ -157,11 +157,11 @@ class LightGL(
                                             }
 
                                             if (ints_18[i_17] != -1 && ints_18[i_17 + 1] != -1 && ints_18[i_17 + 2] != -1) {
-                                                method12306(i_11, i_9, i_12, i_10, ints_15[i_17], ints_16[i_17])
+                                                method12306(i_11, i_9, i_12, i_10, ints_15!![i_17], ints_16!![i_17])
                                                 ++i_17
-                                                method12306(i_11, i_9, i_12, i_10, ints_15[i_17], ints_16[i_17])
+                                                method12306(i_11, i_9, i_12, i_10, ints_15!![i_17], ints_16!![i_17])
                                                 ++i_17
-                                                method12306(i_11, i_9, i_12, i_10, ints_15[i_17], ints_16[i_17])
+                                                method12306(i_11, i_9, i_12, i_10, ints_15!![i_17], ints_16!![i_17])
                                                 ++i_17
                                             } else {
                                                 i_17 += 3

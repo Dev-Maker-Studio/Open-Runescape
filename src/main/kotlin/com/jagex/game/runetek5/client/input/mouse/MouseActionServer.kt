@@ -106,14 +106,14 @@ open class MouseActionServer : MouseRecord() {
         @JvmStatic
         fun cycle() {
             synchronized(MOUSE_ACTIONS) {
-                val screenLocation: Point? = if (GameShell.gameCanvas.isShowing) {
-                    GameShell.gameCanvas.locationOnScreen
+                val screenLocation: Point? = if (GameShell.gameCanvas!!.isShowing) {
+                    GameShell.gameCanvas!!.locationOnScreen
                 } else {
                     null
                 }
                 while (true) {
                     val record = MOUSE_ACTIONS.poll() ?: return
-                    if (screenLocation != null && GameShell.gameCanvas.isShowing && GameShell.appletHasFocus) {
+                    if (screenLocation != null && GameShell.gameCanvas!!.isShowing && GameShell.appletHasFocus) {
                         record.offsetBy(screenLocation)
                         if (!record.clientSidedOnly() && record.getX() < GameShell.screenCanvasWidth && record.getY() < GameShell.screenCanvasHeight * -969250379 && record.getX() >= 0 && record.getY() >= 0) {
                             val clickType = record.getClickType()

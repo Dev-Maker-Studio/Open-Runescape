@@ -49,7 +49,7 @@ class DisplayModeDetails {
                 }
             }
             try {
-                val dimension = GameShell.gameCanvas.size
+                val dimension = GameShell.gameCanvas!!.size
                 MessageBox.draw(
                     LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE),
                     true,

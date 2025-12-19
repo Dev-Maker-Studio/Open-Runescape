@@ -15,8 +15,8 @@ class LocalizedText(
         languageMap[Language.PORTUGESE] = portugese
     }
 
-    fun translate(language: Language): String? {
-        return languageMap[language]
+    fun translate(language: Language): String {
+        return languageMap[language] ?: error("Unknown language: $language")
     }
 
     companion object {

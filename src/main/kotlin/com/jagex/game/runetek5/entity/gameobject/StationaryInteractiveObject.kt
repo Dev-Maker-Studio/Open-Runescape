@@ -194,11 +194,11 @@ class StationaryInteractiveObject(
     override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
         if (class521Sub12 is StationaryWall) {
             if (interactiveModel != null && class521Sub12.model != null) {
-                interactiveModel!!.applyShading(class521Sub12.model, i_3, i_4, i_5, bool6)
+                interactiveModel!!.applyShading(class521Sub12.model!!, i_3, i_4, i_5, bool6)
             }
         } else if (class521Sub12 is StationaryInteractiveObject) {
             if (interactiveModel != null && class521Sub12.interactiveModel != null) {
-                interactiveModel!!.applyShading(class521Sub12.interactiveModel, i_3, i_4, i_5, bool6)
+                interactiveModel!!.applyShading(class521Sub12.interactiveModel!!, i_3, i_4, i_5, bool6)
             }
         }
     }

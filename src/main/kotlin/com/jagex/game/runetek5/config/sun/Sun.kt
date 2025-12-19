@@ -216,10 +216,10 @@ class Sun(
             positionX = tmp
         }
         val copiedSunModel = sunModel!!.copy(0.toByte(), ModelFunctionMask.HAS_TEXTURE_COORDS or ModelFunctionMask.RECOLOR or ModelFunctionMask.RETEXTURE, true)
-        copiedSunModel.rematerial(0.toShort(), sunMaterialId.toShort())
+        copiedSunModel!!.rematerial(0.toShort(), sunMaterialId.toShort())
         toolkit.updateSun(1.0f)
         toolkit.applyLighting(16777215, 1.0f, 1.0f, positionX.toFloat(), positionY.toFloat(), positionZ.toFloat())
-        var size = sunUseDimension * 1024 / (copiedSunModel.getMaxX() - copiedSunModel.getMinX())
+        var size = sunUseDimension * 1024 / (copiedSunModel!!.getMaxX() - copiedSunModel!!.getMinX())
         if (sunColor != 0) {
             size = size * 13 / 16
         }
@@ -239,8 +239,8 @@ class Sun(
         toolkit.setModelMatrix(matrix449)
         toolkit.setSunPosition(Matrix43())
         val sunProjectionMatrix = Matrix43()
-        sunProjectionMatrix.setViewPosition(0.0f, 0.0f, (50 - copiedSunModel.getMinZ()).toFloat())
-        copiedSunModel.drawMatrixThreaded(sunProjectionMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
+        sunProjectionMatrix.setViewPosition(0.0f, 0.0f, (50 - copiedSunModel!!.getMinZ()).toFloat())
+        copiedSunModel!!.drawMatrixThreaded(sunProjectionMatrix, null, ModelFunctionMaskGL.SMOOTH_EDGES)
         val useDimension = sunUseDimension * 13 / 16
         val position = (sunUseDimension - useDimension) / 2
         activeAntiSun!!.drawCircle(position, position, useDimension, useDimension, 0, 0xff000000.toInt() or sunColor, 1)

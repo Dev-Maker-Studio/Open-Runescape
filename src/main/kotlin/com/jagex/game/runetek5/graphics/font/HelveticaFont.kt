@@ -99,7 +99,7 @@ class HelveticaFont(toolkit: AbstractToolkit, fontSize: Int, component: Componen
         val maxAscent = fontmetrics.maxAscent
         val height = fontmetrics.maxAscent + fontmetrics.maxDescent
         val strtY = fontmetrics.height
-        val image = GameShell.gameCanvas.createImage(width, height)
+        val image = GameShell.gameCanvas!!.createImage(width, height)
         val graphics = image.graphics
         graphics.color = Color.black
         graphics.fillRect(0, 0, width, height)

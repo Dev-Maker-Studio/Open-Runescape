@@ -13,7 +13,7 @@ abstract class AbstractAudioFile : Node_Sub26() {
     var enableLoop: Boolean = false
 
     @JvmField
-    protected var end: Int = 0
+    var end: Int = 0
 
     abstract fun getTotalSamples(): Int
 

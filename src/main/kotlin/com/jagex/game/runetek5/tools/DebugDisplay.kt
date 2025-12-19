@@ -69,8 +69,8 @@ object DebugDisplay {
                 20 -> LoginManager.GAME_CONNECTION_INFO.swap()
                 22 -> Resource.remoteFileRequesterJs5!!.closeStream()
                 3 -> Resource.remoteFileRequesterJs5!!.requestTermination()
-                13 -> GameShell.gameCanvas.setLocation(50, 50)
-                1 -> GameShell.gameCanvas.setLocation(GameShell.gameCanvasX, GameShell.gameCanvasY)
+                13 -> GameShell.gameCanvas!!.setLocation(50, 50)
+                1 -> GameShell.gameCanvas!!.setLocation(GameShell.gameCanvasX, GameShell.gameCanvasY)
                 27 -> MapRegion.requestDebugMapUpdate()
                 6 -> {
                     Resource.mapRegion!!.debugRegionLoadtimeStart = Utils.time()

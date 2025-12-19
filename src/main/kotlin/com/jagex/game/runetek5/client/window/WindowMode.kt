@@ -225,12 +225,13 @@ class WindowMode @Throws(Exception::class) constructor() {
                 }
                 activeDisplayModeDetails = Array<DisplayModeDetails>(detailCount) { allDetailsRebuilt[it]!! }
                 // System.arraycopy(allDetailsRebuilt, 0, activeDisplayModeDetails, 0, detailCount)
-                val displayDimensions = IntArray(activeDisplayModeDetails!!.size)
-                for (index in activeDisplayModeDetails!!.indices) {
-                    val details = activeDisplayModeDetails!![index]
+                val detailsArray = activeDisplayModeDetails!!
+                val displayDimensions = IntArray(detailsArray.size)
+                for (index in detailsArray.indices) {
+                    val details = detailsArray[index]
                     displayDimensions[index] = details.height * details.width
                 }
-                ArrayUtils.quicksort(displayDimensions, activeDisplayModeDetails)
+                ArrayUtils.quicksort(displayDimensions, detailsArray)
             }
             return activeDisplayModeDetails!!
         }
@@ -263,12 +264,12 @@ class WindowMode @Throws(Exception::class) constructor() {
                 if (fullScreenFrame != null) {
                     resizableScreenWidth = width
                     resizableScreenHeight = height
-                } else if (client.engineFrame != null) {
-                    val insets = client.engineFrame!!.insets
+                } else if (GameShell.engineFrame != null) {
+                    val insets = GameShell.engineFrame!!.insets
                     val widthDelta = insets.left + insets.right
-                    resizableScreenWidth = client.engineFrame!!.size.width - widthDelta
+                    resizableScreenWidth = GameShell.engineFrame!!.size.width - widthDelta
                     val heightDelta = insets.bottom + insets.top
-                    resizableScreenHeight = client.engineFrame!!.size.height - heightDelta
+                    resizableScreenHeight = GameShell.engineFrame!!.size.height - heightDelta
                 } else {
                     resizableScreenWidth = container.size.width
                     resizableScreenHeight = container.size.height
@@ -283,21 +284,21 @@ class WindowMode @Throws(Exception::class) constructor() {
                     canvasAdjustment()
                 } else {
                     GameShell.screenCanvasWidth = client.GAME_WIDTH
-                    client.gameCanvasX = (resizableScreenWidth - client.GAME_WIDTH) / 2
-                    client.screenCanvasHeight = client.GAME_HEIGHT * -1929118563
-                    client.gameCanvasY = 0
+                    GameShell.gameCanvasX = (resizableScreenWidth - client.GAME_WIDTH) / 2
+                    GameShell.screenCanvasHeight = client.GAME_HEIGHT * -1929118563
+                    GameShell.gameCanvasY = 0
                 }
                 if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE && GameShell.screenCanvasWidth < 1024) {
-                    val canvasH = client.screenCanvasHeight
+                    val canvasH = GameShell.screenCanvasHeight
                 }
                 if (!isFixed) {
-                    GameShell.gameCanvas.setSize(GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379)
-                    Renderers.activeToolkit!!.resizeGameCanvas(GameShell.gameCanvas, GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379)
-                    if (container == client.engineFrame) {
-                        val insets = client.engineFrame!!.insets
-                        GameShell.gameCanvas.setLocation(insets.left + client.gameCanvasX, insets.top + client.gameCanvasY)
+                    GameShell.gameCanvas!!.setSize(GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
+                    Renderers.activeToolkit!!.resizeGameCanvas(GameShell.gameCanvas!!, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
+                    if (container == GameShell.engineFrame) {
+                        val insets = GameShell.engineFrame!!.insets
+                        GameShell.gameCanvas!!.setLocation(insets.left + GameShell.gameCanvasX, insets.top + GameShell.gameCanvasY)
                     } else {
-                        GameShell.gameCanvas.setLocation(client.gameCanvasX, client.gameCanvasY)
+                        GameShell.gameCanvas!!.setLocation(GameShell.gameCanvasX, GameShell.gameCanvasY)
                     }
                 } else {
                     exitFullscreen()
@@ -318,12 +319,12 @@ class WindowMode @Throws(Exception::class) constructor() {
 
         @JvmStatic
         fun interfaceResize(hasBaseWindowId: Boolean) {
-            InterfaceRenderer.updateInterfaceDimensions(client.BASE_WINDOW_ID, GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379, hasBaseWindowId)
+            InterfaceRenderer.updateInterfaceDimensions(client.BASE_WINDOW_ID, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, hasBaseWindowId)
         }
 
         @JvmStatic
         fun getActiveContainer(): Container {
-            return if (fullScreenFrame != null) fullScreenFrame!! else if (GameShell.engineFrame != null) GameShell.engineFrame!! else GameShell.suppliedApplet
+            return if (fullScreenFrame != null) fullScreenFrame!! else if (GameShell.engineFrame != null) GameShell.engineFrame!! else GameShell.suppliedApplet!!
         }
 
         @JvmStatic
@@ -369,11 +370,11 @@ class WindowMode @Throws(Exception::class) constructor() {
         @JvmStatic
         fun exitFullscreen() {
             if (Renderers.activeToolkit!!.replaceCanvasOnDisplayUpdate()) {
-                Renderers.activeToolkit!!.removeCanvas(GameShell.gameCanvas)
+                Renderers.activeToolkit!!.removeCanvas(GameShell.gameCanvas!!)
                 client.buildCanvasComponents()
-                val canvasDimension = GameShell.gameCanvas.size
-                Renderers.activeToolkit!!.ensureImageproducerCreated(GameShell.gameCanvas, canvasDimension.width, canvasDimension.height)
-                Renderers.activeToolkit!!.setActiveCanvas(GameShell.gameCanvas)
+                val canvasDimension = GameShell.gameCanvas!!.size
+                Renderers.activeToolkit!!.ensureImageproducerCreated(GameShell.gameCanvas!!, canvasDimension.width, canvasDimension.height)
+                Renderers.activeToolkit!!.setActiveCanvas(GameShell.gameCanvas!!)
             } else {
                 client.loadAssets(PreferenceManager.preferences!!.activeToolkit!!.value, false)
             }
@@ -383,17 +384,17 @@ class WindowMode @Throws(Exception::class) constructor() {
         @JvmStatic
         fun fillWindowRect() {
             if (fullScreenFrame == null) {
-                val canvasX = client.gameCanvasX
-                val canvasY = client.gameCanvasY
+                val canvasX = GameShell.gameCanvasX
+                val canvasY = GameShell.gameCanvasY
                 val deltaX = resizableScreenWidth - GameShell.screenCanvasWidth - canvasX
-                val deltaY = resizableScreenHeight - client.screenCanvasHeight * -969250379 - canvasY
+                val deltaY = resizableScreenHeight - GameShell.screenCanvasHeight * -969250379 - canvasY
                 if (canvasX > 0 || deltaX > 0 || canvasY > 0 || deltaY > 0) {
                     try {
                         val activeContainer = getActiveContainer()
                         var x = 0
                         var y = 0
-                        if (activeContainer == client.engineFrame) {
-                            val frameInsets = client.engineFrame!!.insets
+                        if (activeContainer == GameShell.engineFrame) {
+                            val frameInsets = GameShell.engineFrame!!.insets
                             x = frameInsets.left
                             y = frameInsets.top
                         }
@@ -426,8 +427,8 @@ class WindowMode @Throws(Exception::class) constructor() {
                     if (container != null) {
                         resizableScreenWidth = container.size.width
                         resizableScreenHeight = container.size.height
-                        if (container == client.engineFrame) {
-                            val insets = client.engineFrame!!.insets
+                        if (container == GameShell.engineFrame) {
+                            val insets = GameShell.engineFrame!!.insets
                             resizableScreenWidth -= insets.left + insets.right
                             resizableScreenHeight -= insets.bottom + insets.top
                         }
@@ -441,23 +442,23 @@ class WindowMode @Throws(Exception::class) constructor() {
                             canvasAdjustment()
                         } else {
                             GameShell.screenCanvasWidth = client.GAME_WIDTH
-                            client.gameCanvasX = (resizableScreenWidth - client.GAME_WIDTH) / 2
-                            client.screenCanvasHeight = client.GAME_HEIGHT * -1929118563
-                            client.gameCanvasY = 0
+                            GameShell.gameCanvasX = (resizableScreenWidth - client.GAME_WIDTH) / 2
+                            GameShell.screenCanvasHeight = client.GAME_HEIGHT * -1929118563
+                            GameShell.gameCanvasY = 0
                         }
                         if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE && GameShell.screenCanvasWidth < 1024) {
-                            val canvasHeight = client.screenCanvasHeight
+                            val canvasHeight = GameShell.screenCanvasHeight
                         }
-                        GameShell.gameCanvas.setSize(GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379)
+                        GameShell.gameCanvas!!.setSize(GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
                         val toolkit = Renderers.activeToolkit
                         if (toolkit != null) {
-                            toolkit.resizeGameCanvas(GameShell.gameCanvas, GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379)
+                            toolkit.resizeGameCanvas(GameShell.gameCanvas!!, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
                         }
-                        if (container == client.engineFrame) {
-                            val insets = client.engineFrame!!.insets
-                            GameShell.gameCanvas.setLocation(insets.left + client.gameCanvasX, insets.top + client.gameCanvasY)
+                        if (container == GameShell.engineFrame) {
+                            val insets = GameShell.engineFrame!!.insets
+                            GameShell.gameCanvas!!.setLocation(insets.left + GameShell.gameCanvasX, insets.top + GameShell.gameCanvasY)
                         } else {
-                            GameShell.gameCanvas.setLocation(client.gameCanvasX, client.gameCanvasY)
+                            GameShell.gameCanvas!!.setLocation(GameShell.gameCanvasX, GameShell.gameCanvasY)
                         }
                         if (client.BASE_WINDOW_ID != -1) {
                             interfaceResize(true)
@@ -479,21 +480,21 @@ class WindowMode @Throws(Exception::class) constructor() {
                 val preferedWidth = Math.min(800, resizableScreenWidth)
                 val preferedHeight = Math.min(600, resizableScreenHeight)
                 GameShell.screenCanvasWidth = preferedWidth
-                client.gameCanvasX = (resizableScreenWidth - preferedWidth) / 2
-                client.screenCanvasHeight = preferedHeight * -1929118563
-                client.gameCanvasY = 0
+                GameShell.gameCanvasX = (resizableScreenWidth - preferedWidth) / 2
+                GameShell.screenCanvasHeight = preferedHeight * -1929118563
+                GameShell.gameCanvasY = 0
             } else if (screensizePreference == 1) {
                 val preferedWidth = Math.min(1024, resizableScreenWidth)
                 val preferedHeight = Math.min(768, resizableScreenHeight)
                 GameShell.screenCanvasWidth = preferedWidth
-                client.gameCanvasX = (resizableScreenWidth - preferedWidth) / 2
-                client.screenCanvasHeight = preferedHeight * -1929118563
-                client.gameCanvasY = 0
+                GameShell.gameCanvasX = (resizableScreenWidth - preferedWidth) / 2
+                GameShell.screenCanvasHeight = preferedHeight * -1929118563
+                GameShell.gameCanvasY = 0
             } else {
                 GameShell.screenCanvasWidth = resizableScreenWidth
-                client.gameCanvasX = 0
-                client.screenCanvasHeight = resizableScreenHeight * -1929118563
-                client.gameCanvasY = 0
+                GameShell.gameCanvasX = 0
+                GameShell.screenCanvasHeight = resizableScreenHeight * -1929118563
+                GameShell.gameCanvasY = 0
             }
         }
     }

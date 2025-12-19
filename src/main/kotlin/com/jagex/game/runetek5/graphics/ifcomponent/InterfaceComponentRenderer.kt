@@ -239,7 +239,7 @@ object InterfaceComponentRenderer {
 
                         if (component.type == ComponentType.CONTAINER) {
                             if (component.contentType == CUTSCENE_FADE && Renderers.activeToolkit!!.bloomEnabled()) {
-                                Renderers.activeToolkit!!.method8525(GameShell.screenCanvasWidth, client.screenCanvasHeight * -969250379)
+                                Renderers.activeToolkit!!.method8525(GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
                             }
                             drawComponents(components, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
                             if (component.itemSlots != null) {
@@ -394,7 +394,7 @@ object InterfaceComponentRenderer {
                                     val objType = TypeLists.OBJ!!.list(component.containerItemId)
                                     if (objType != null) {
                                         val stackAltType = objType.getStackSizeAlt(component.itemStackSize)
-                                        renderedMediaModel = stackAltType.getAnimatedModel(Renderers.activeToolkit, functionMask, 1, if (component.wearCol) PlayerUpdate.MY_PLAYER!!.playerAppearance else null, component.animatingSequence, 0, 0, 0, 0)
+                                        renderedMediaModel = stackAltType.getAnimatedModel(Renderers.activeToolkit!!, functionMask, 1, if (component.wearCol) PlayerUpdate.MY_PLAYER!!.playerAppearance else null, component.animatingSequence, 0, 0, 0, 0)
                                         if (renderedMediaModel != null) {
                                             centerY = -renderedMediaModel.getMinY() shr 1
                                         } else {
@@ -417,14 +417,14 @@ object InterfaceComponentRenderer {
                                     if (target >= 0 && target < 2048) {
                                         val player = PlayerUpdate.players[target]
                                         if (player != null && (target == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
-                                            renderedMediaModel = player.playerAppearance!!.getBodyModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, null, null, null, 0, TypeLists.EQUIPMENT_DEFAULTS)
+                                            renderedMediaModel = player.playerAppearance!!.getBodyModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, null, null, null, 0, TypeLists.EQUIPMENT_DEFAULTS!!)
                                         }
                                     }
                                 } else if (component.mediaType != MediaType.ITEM_CONTAINER_MALE && component.mediaType != MediaType.ITEM_CONTAINER_FEMALE) {
                                     if (component.animatingSequence != null && component.animatingSequence!!.hasType()) {
-                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, PlayerUpdate.MY_PLAYER.playerAppearance)
+                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, PlayerUpdate.MY_PLAYER.playerAppearance)
                                     } else {
-                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, null, PlayerUpdate.MY_PLAYER.playerAppearance)
+                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, null, PlayerUpdate.MY_PLAYER.playerAppearance)
                                     }
                                     if (renderedMediaModel == null && Component.missingMedia) {
                                         Component.redrawComponent(component)
@@ -467,12 +467,12 @@ object InterfaceComponentRenderer {
                                     viewRangeEnd += component.spriteScale
                                     if (component.usesOrthogonal) {
                                         if (component.hasOrigin) {
-                                            matrix44!!.method6532(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (client.screenCanvasHeight * -969250379).toFloat(), component.spriteScale.toFloat())
+                                            matrix44!!.method6532(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), component.spriteScale.toFloat())
                                         } else {
-                                            matrix44!!.method6532(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (client.screenCanvasHeight * -969250379).toFloat(), (component.spriteScale shl 2).toFloat())
+                                            matrix44!!.method6532(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), (component.spriteScale shl 2).toFloat())
                                         }
                                     } else {
-                                        matrix44!!.method6531(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (client.screenCanvasHeight * -969250379).toFloat())
+                                        matrix44!!.method6531(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat())
                                     }
                                     Renderers.activeToolkit!!.setModelMatrix(matrix44)
                                     Renderers.activeToolkit!!.applyClearFlags(2, 0)

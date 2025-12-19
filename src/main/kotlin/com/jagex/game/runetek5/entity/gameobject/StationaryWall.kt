@@ -232,11 +232,11 @@ class StationaryWall(
     override fun castShadow(sceneGraphEntity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         if (sceneGraphEntity is StationaryWall) {
             if (model != null && sceneGraphEntity.model != null) {
-                model!!.applyShading(sceneGraphEntity.model, x, y, z, renderTypeAdjustment)
+                model!!.applyShading(sceneGraphEntity.model!!, x, y, z, renderTypeAdjustment)
             }
         } else if (sceneGraphEntity is StationaryInteractiveObject) {
             if (model != null && sceneGraphEntity.interactiveModel != null) {
-                model!!.applyShading(sceneGraphEntity.interactiveModel, x, y, z, renderTypeAdjustment)
+                model!!.applyShading(sceneGraphEntity.interactiveModel!!, x, y, z, renderTypeAdjustment)
             }
         }
     }

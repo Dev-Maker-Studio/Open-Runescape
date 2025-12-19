@@ -257,7 +257,7 @@ class Skybox(
                         availableSuns!![availableSunCount++] = class3348
                     }
                 }
-                ArrayUtils.quicksort(ints_6, availableSuns, 0, availableSunCount - 1)
+                ArrayUtils.quicksort(ints_6, availableSuns!!, 0, availableSunCount - 1)
             }
             prepareSun = true
         }
@@ -320,7 +320,7 @@ class Skybox(
         toolkit.setSunPosition(rotatedSunPosition)
         // Update the sky model's alpha value if it has changed
         if (alpha != lastAlpha) {
-            skyModel!!.applyEnvironmentAlpha(alpha.toByte(), faceAlpha)
+            skyModel!!.applyEnvironmentAlpha(alpha.toByte(), faceAlpha!!)
             lastAlpha = alpha
         }
         // Draw the sky model using the rotated matrix

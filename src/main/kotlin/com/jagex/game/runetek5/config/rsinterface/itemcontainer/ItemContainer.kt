@@ -63,9 +63,9 @@ class ItemContainer : Node<ItemContainer>() {
         val hash = calculateHash(items, bastypeId, playerAppearance?.recolorDstIndices, female)
         var model = CONTAINER_ITEM_CACHE.get(hash) as Model?
 
-        if (model == null || toolkit.mismatchingFunctionMask(model.functionMask, animateFunctionMask) != 0) {
+        if (model == null || toolkit.mismatchingFunctionMask(model.getFunctionMask(), animateFunctionMask) != 0) {
             if (model != null) {
-                animateFunctionMask = toolkit.mergeFunctionMasks(animateFunctionMask, model.functionMask)
+                animateFunctionMask = toolkit.mergeFunctionMasks(animateFunctionMask, model.getFunctionMask())
             }
 
             val combineFunctionMask: Int
@@ -120,11 +120,11 @@ class ItemContainer : Node<ItemContainer>() {
             model = toolkit.createModel(combinedMesh, combineFunctionMask, ItemContainerTypeList.preferenceMask, 65, 857)
             if (playerAppearance != null) {
                 for (x in 0..9) {
-                    for (y in PlayerAppearance.recolorPaletteSrc[x].indices) {
-                        if (playerAppearance.recolorDstIndices[x] < PlayerAppearance.recolorPaletteDst[x][y].size) {
+                    for (y in PlayerAppearance.recolorPaletteSrc!![x].indices) {
+                        if (playerAppearance.recolorDstIndices!![x] < PlayerAppearance.recolorPaletteDst!![x][y].size) {
                             model!!.recolor(
-                                PlayerAppearance.recolorPaletteSrc[x][y],
-                                PlayerAppearance.recolorPaletteDst[x][y][playerAppearance.recolorDstIndices[x]]
+                                PlayerAppearance.recolorPaletteSrc!![x][y],
+                                PlayerAppearance.recolorPaletteDst!![x][y][playerAppearance.recolorDstIndices!![x]]
                             )
                         }
                     }
@@ -139,7 +139,7 @@ class ItemContainer : Node<ItemContainer>() {
             return model
         }
         val copiedModel = model!!.copy(1.toByte(), animateFunctionMask, true)
-        sequence.animateRotatedModel(copiedModel, 0)
+        sequence.animateRotatedModel(copiedModel!!, 0)
         return copiedModel
     }
 

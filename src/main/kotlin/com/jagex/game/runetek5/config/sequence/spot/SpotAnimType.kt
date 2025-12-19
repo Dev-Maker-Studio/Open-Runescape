@@ -225,33 +225,33 @@ class SpotAnimType {
 
         val model = cachedModel!!.copy(copyType, displacementFunctionMask, true)
 
-        sequence?.animateRotatedModel(model, 0)
+        sequence?.animateRotatedModel(model!!, 0)
 
         if (scaleXZ != 128 || scaleY != 128) {
-            model.scale(scaleXZ, scaleY, scaleXZ)
+            model!!.scale(scaleXZ, scaleY, scaleXZ)
         }
 
         if (rotation != 0) {
             when (rotation) {
-                90 -> model.yaxisRotateWithoutNormals(4096)
-                180 -> model.yaxisRotateWithoutNormals(8192)
-                270 -> model.yaxisRotateWithoutNormals(12288)
+                90 -> model!!.yaxisRotateWithoutNormals(4096)
+                180 -> model!!.yaxisRotateWithoutNormals(8192)
+                270 -> model!!.yaxisRotateWithoutNormals(12288)
             }
         }
 
         if (adjustment) {
-            model.contourToGround(
+            model!!.contourToGround(
                 contourType.toInt(),
                 contourModifier,
-                groundCurrentLvl,
-                groundNextLvl,
+                groundCurrentLvl!!,
+                groundNextLvl!!,
                 sceneX,
                 averageHeight,
                 sceneY
             )
         }
 
-        model.applyShading(initialFunctionMask)
+        model!!.applyShading(initialFunctionMask)
         return model
     }
 }

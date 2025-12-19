@@ -55,7 +55,7 @@ class SongReference(
             loadingStage = 1
         }
         if (loadingStage == 1) {
-            if (!stream.ready(musicTrack, SoundResourceManager.SOUND_MIDI_PROVIDER!!, soundBankCache)) {
+            if (!stream.ready(musicTrack!!, SoundResourceManager.SOUND_MIDI_PROVIDER!!, soundBankCache!!)) {
                 return false
             }
             loadingStage = 2

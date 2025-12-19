@@ -123,12 +123,12 @@ object CommandExecutor {
                     command.startsWith("dumpitems") -> {
                         for (itemId in 0 until 24806) {
                             val pixels = TypeLists.OBJ!!.list(itemId).getSpritePixels(
-                                Renderers.GPU_ITEM_RENDERER, Renderers.activeToolkit, 1, 1, -13623264,
-                                false, Component.StackMode.NONUM, Renderers.FONT_RENDERER,
-                                PlayerUpdate.MY_PLAYER.playerAppearance
+                                Renderers.GPU_ITEM_RENDERER!!, Renderers.activeToolkit!!, 1, 1, -13623264,
+                                false, Component.StackMode.NONUM, Renderers.FONT_RENDERER!!,
+                                PlayerUpdate.MY_PLAYER.playerAppearance!!
                             )
                             try {
-                                val dimension = Math.sqrt(pixels.size.toDouble()).toInt() - 1
+                                val dimension = Math.sqrt(pixels!!.size.toDouble()).toInt() - 1
                                 val itemImage = BufferedImage(36, 32, BufferedImage.TYPE_INT_ARGB)
                                 for (x in 0 until dimension) {
                                     for (y in 0 until dimension) {

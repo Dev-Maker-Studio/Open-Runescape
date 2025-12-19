@@ -302,7 +302,7 @@ enum class UpdateZonePacket(val size: Int) {
         val modelCount = locType.shapes?.let { shapes ->
             shapes.indexOfFirst { it.toInt() == locShape }
                 .takeIf { it != -1 }
-                ?.let { locType.objectModelIds[it].size }
+                ?.let { locType.objectModelIds!![it].size }
         } ?: 0
 
         val recolCount = locType.recolorDst?.size ?: 0

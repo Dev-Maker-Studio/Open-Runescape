@@ -485,7 +485,8 @@ object Utils {
     @JvmStatic
     fun sortAlphabetically(names: Array<String>, ids: ShortArray?) {
         if (ids != null) {
-            ArrayUtils.quicksort(names, ids, 0, names.size - 1)
+            @Suppress("UNCHECKED_CAST")
+            ArrayUtils.quicksort(names as Array<String?>, ids, 0, names.size - 1)
         }
     }
 

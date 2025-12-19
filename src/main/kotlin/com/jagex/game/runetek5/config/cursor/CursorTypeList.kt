@@ -86,7 +86,7 @@ class CursorTypeList(
                     val spritetype = cursortype.getSprite()
                     if (spritetype != null) {
                         CursorManager.instance!!.setCustomCursor(
-                            GameShell.gameCanvas,
+                            GameShell.gameCanvas!!,
                             spritetype.getPixels(),
                             spritetype.widthSum(),
                             spritetype.heightSum(),
@@ -98,7 +98,7 @@ class CursorTypeList(
                     }
                 }
                 if (cursor == -1 && client.CURRENT_CURSOR != -1) {
-                    CursorManager.instance!!.setCustomCursor(GameShell.gameCanvas, null, -1, -1, Point())
+                    CursorManager.instance!!.setCustomCursor(GameShell.gameCanvas!!, null, -1, -1, Point())
                     client.CURRENT_CURSOR = -1
                 }
             }
