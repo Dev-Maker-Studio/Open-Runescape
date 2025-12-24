@@ -188,13 +188,17 @@ class WorldMapElement(
             }
             var currentY = y
             for (line in 0 until lineCount) {
-                var areaNameLine = WorldMapSub1.RENDERED_WORLDMAP_AREA_NAMELINES[line]
-                if (line < lineCount - 1) {
-                    // If not the last line of the area name strip the <br> tag
-                    areaNameLine = areaNameLine.substring(0, areaNameLine.length - 4)
+                val lineText = WorldMapSub1.RENDERED_WORLDMAP_AREA_NAMELINES[line]
+                if (lineText != null) {
+                    val areaNameLine = if (line < lineCount - 1) {
+                        // If not the last line of the area name strip the <br> tag
+                        lineText.substring(0, lineText.length - 4)
+                    } else {
+                        lineText
+                    }
+                    font.drawClippedText(toolkit, areaNameLine, x, currentY, textColor)
+                    currentY += font.getLineHeight()
                 }
-                font.drawClippedText(toolkit, areaNameLine, x, currentY, textColor)
-                currentY += font.getLineHeight()
             }
         }
     }

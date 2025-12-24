@@ -28,6 +28,7 @@ import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontCombo
 import com.jagex.game.runetek5.graphics.font.FontMetrics
 import com.jagex.game.runetek5.graphics.hint.HintRenderer
+import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceComponentRenderer
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
@@ -346,7 +347,7 @@ object StaticMethods {
 
     @JvmStatic
     fun method304(): Int {
-        return if (WorldMapSub1.requestedMapZoom == 3.0f) 37 else if (WorldMapSub1.requestedMapZoom == 4.0f) 50 else if (WorldMapSub1.requestedMapZoom == 6.0f) 75 else if (WorldMapSub1.requestedMapZoom == 8.0f) 100 else 200
+        return if (WorldMap.requestedMapZoom == 3.0f) 37 else if (WorldMap.requestedMapZoom == 4.0f) 50 else if (WorldMap.requestedMapZoom == 6.0f) 75 else if (WorldMap.requestedMapZoom == 8.0f) 100 else 200
     }
 
     @JvmStatic
@@ -424,8 +425,8 @@ object StaticMethods {
 
     @JvmStatic
     fun method14263(i_0: Int, i_1: Int) {
-        WorldMapSub1.anInt8014 = i_0 - WorldMapSub1.mapSquareAbsX
-        WorldMapSub1.anInt8016 = i_1 - WorldMapSub1.mapSquareAbsY
+        WorldMapSub1.anInt8014 = i_0 - WorldMap.mapSquareAbsX
+        WorldMapSub1.anInt8016 = i_1 - WorldMap.mapSquareAbsY
     }
 
     @JvmStatic

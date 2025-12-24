@@ -27,22 +27,22 @@ class WorldMapCategory(
             } else {
                 var i_4 = -2
                 var i_5 = Int.MAX_VALUE
-                val i_6 = i_1 - WorldMapSub1.mapSquareAbsX
-                val i_7 = i_2 - WorldMapSub1.mapSquareAbsY
+                val i_6 = i_1 - WorldMap.mapSquareAbsX
+                val i_7 = i_2 - WorldMap.mapSquareAbsY
 
-                var class282Sub368 = WorldMapSub1.worldMapCategories.getFirst() as WorldMapCategory?
+                var class282Sub368 = WorldMap.worldMapCategories.getFirst() as WorldMapCategory?
                 while (class282Sub368 != null) {
                     if (i_0 == class282Sub368.mecId) {
                         val i_9 = class282Sub368.absX
                         val i_10 = class282Sub368.absY
-                        val i_11 = i_9 + WorldMapSub1.mapSquareAbsX shl 14 or (i_10 + WorldMapSub1.mapSquareAbsY)
+                        val i_11 = i_9 + WorldMap.mapSquareAbsX shl 14 or (i_10 + WorldMap.mapSquareAbsY)
                         val i_12 = (i_6 - i_9) * (i_6 - i_9) + (i_7 - i_10) * (i_7 - i_10)
                         if (i_4 < 0 || i_12 < i_5) {
                             i_4 = i_11
                             i_5 = i_12
                         }
                     }
-                    class282Sub368 = WorldMapSub1.worldMapCategories.next() as WorldMapCategory?
+                    class282Sub368 = WorldMap.worldMapCategories.next() as WorldMapCategory?
                 }
 
                 return i_4

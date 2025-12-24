@@ -56,18 +56,18 @@ object GraphicsCache {
      */
     @JvmStatic
     fun resetWorldmapCaches(preserveStaticElement: Boolean) {
-        if (preserveStaticElement && WorldMapSub1.staticElement != null) {
-            WorldMapSub1.anInt488 = WorldMapSub1.staticElement!!.anInt9536
+        if (preserveStaticElement && WorldMap.staticElement != null) {
+            WorldMapSub1.anInt488 = WorldMap.staticElement!!.anInt9536
         } else {
             WorldMapSub1.anInt488 = -1
         }
-        WorldMapSub1.staticElement = null
+        WorldMap.staticElement = null
         WorldMapInteraction.MEC_CLICKZONES = null
         ComponentMinimap.mapAssetLoadingPercentage = 0
         WorldMap.worldmapComponent = null
         WorldMapSub1.reset()
-        WorldMapSub1.worldMapCategories.remove_all()
-        WorldMapSub1.staticElements = null
+        WorldMap.worldMapCategories.remove_all()
+        WorldMap.staticElements = null
         ComponentMinimap.aNativeSprite5883 = null
         WorldMapSub1.anInt8014 = -1
         WorldMapSub1.anInt8016 = -1
@@ -79,15 +79,15 @@ object GraphicsCache {
         Resource.helvetica22Font = null
         Resource.helvetica26Font = null
         Resource.helvetica30Font = null
-        if (WorldMapSub1.MECTYPE_LIST != null) {
-            WorldMapSub1.MECTYPE_LIST!!.resetCache()
-            WorldMapSub1.MECTYPE_LIST!!.createCache(128, 64)
+        if (WorldMap.MECTYPE_LIST != null) {
+            WorldMap.MECTYPE_LIST!!.resetCache()
+            WorldMap.MECTYPE_LIST!!.createCache(128, 64)
         }
-        if (WorldMapSub1.MAP_SPRITE_TYPE_LIST != null) {
-            WorldMapSub1.MAP_SPRITE_TYPE_LIST!!.resetCaches(64, 64)
+        if (WorldMap.MAP_SPRITE_TYPE_LIST != null) {
+            WorldMap.MAP_SPRITE_TYPE_LIST!!.resetCaches(64, 64)
         }
-        if (WorldMapSub1.LOCTYPE_LIST != null) {
-            WorldMapSub1.LOCTYPE_LIST!!.resetLruCache(256)
+        if (WorldMap.LOCTYPE_LIST != null) {
+            WorldMap.LOCTYPE_LIST!!.resetLruCache(256)
         }
         TypeLists.VARPBIT!!.resetCache(64)
     }
