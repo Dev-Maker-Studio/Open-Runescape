@@ -43,7 +43,7 @@ fun main(args: Array<String>) {
 object Bot {
 
     @JvmField
-    var PROD: Boolean = true
+    var PROD: Boolean = false
     @JvmField
     var ENABLED: Boolean = false
 

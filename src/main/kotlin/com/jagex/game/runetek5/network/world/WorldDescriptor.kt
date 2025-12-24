@@ -11,7 +11,7 @@ import com.jagex.game.runetek5.utils.TextUtils
 open class WorldDescriptor : WorldDescriptorFlags() {
 
     @JvmField var worldNumber: Int = 0
-    @JvmField var port: Int = 0
+    @JvmField var port: Int = -1
     @JvmField var ipAddress: String? = null
     @JvmField var unknown: String? = null
     @JvmField var ping = -1

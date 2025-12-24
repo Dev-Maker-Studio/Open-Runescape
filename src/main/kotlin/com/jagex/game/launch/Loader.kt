@@ -15,7 +15,6 @@ import java.net.URL
 import java.util.*
 import javax.swing.*
 
-@Suppress("removal")
 class Loader : Panel() {
 
     var clientFrame: JFrame? = null
@@ -122,7 +121,7 @@ class Loader : Panel() {
         @JvmField
         val RSA_PUBLIC_EXPONENT = BigInteger("65537")
 
-        const val DEBUG = false
+        const val DEBUG = true
 
         @JvmField
         var IP_ADDRESS: String? = null
@@ -221,7 +220,7 @@ class Loader : Panel() {
             IP_ADDRESS = if (args.isNotEmpty() && args[0] != null) {
                 args[0]
             } else {
-                "prod.darkan.org"
+                if (Bot.PROD) "prod.darkan.org" else "localhost"
             }
 
             if (args.size > 1 && args[1] != null) {
