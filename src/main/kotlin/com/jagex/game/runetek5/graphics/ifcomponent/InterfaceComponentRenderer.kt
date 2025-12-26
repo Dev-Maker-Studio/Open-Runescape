@@ -217,7 +217,7 @@ object InterfaceComponentRenderer {
                                 continue
                             }
                             if (component.contentType == WORLDMAP) {
-                                WorldMap.drawWorldmap(Renderers.activeToolkit!!, TypeLists.MATERIALS, startX, startY, component.width, component.height)
+                                WorldMap.drawWorldmap(Renderers.activeToolkit!!, TypeLists.MATERIALS!!, startX, startY, component.width, component.height)
                                 client.IS_COMPONENT_ON_TOP[componentReference] = true
                                 Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                 continue

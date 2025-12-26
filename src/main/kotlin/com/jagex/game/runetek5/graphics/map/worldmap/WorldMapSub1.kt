@@ -132,7 +132,7 @@ object WorldMapSub1 {
             Utils.time()
             Utils.time()
             if (ComponentMinimap.mapAssetLoadingPercentage < 10) {
-                if (!WorldMap.MAP_AREA_RESOURCE.isCached(WorldMap.staticElement!!.filenamePrefix)) {
+                if (!WorldMap.MAP_AREA_RESOURCE!!.isCached(WorldMap.staticElement!!.filenamePrefix)) {
                     ComponentMinimap.mapAssetLoadingPercentage = Resource.WORLD_MAP!!.getArchiveLoadingPercent(WorldMap.staticElement!!.filenamePrefix) / 10
                     return
                 }
@@ -226,9 +226,9 @@ object WorldMapSub1 {
                 }
 
                 WorldMap.calculateRunetekPalette(materialProvider, WorldMap.hueRandomisation shr 2 shl 10, WorldMap.lightnessRandomisation shr 1)
-                WorldMap.MECTYPE_LIST.createCache(1024, 256)
-                WorldMap.MAP_SPRITE_TYPE_LIST.resetCaches(256, 256)
-                WorldMap.LOCTYPE_LIST.resetLruCache(4096)
+                WorldMap.MECTYPE_LIST!!.createCache(1024, 256)
+                WorldMap.MAP_SPRITE_TYPE_LIST!!.resetCaches(256, 256)
+                WorldMap.LOCTYPE_LIST!!.resetLruCache(4096)
                 TypeLists.VARPBIT!!.resetCache(256)
                 ComponentMinimap.mapAssetLoadingPercentage = 20
             } else if (ComponentMinimap.mapAssetLoadingPercentage == 20) {
@@ -238,12 +238,12 @@ object WorldMapSub1 {
                 PingRequester.keepalive(true)
                 GameShell.resetDrawCache()
             } else if (ComponentMinimap.mapAssetLoadingPercentage == 60) {
-                if (WorldMap.MAP_AREA_RESOURCE.validFile(WorldMap.staticElement!!.filenamePrefix + "_staticelements")) {
-                    if (!WorldMap.MAP_AREA_RESOURCE.isCached(WorldMap.staticElement!!.filenamePrefix + "_staticelements")) {
+                if (WorldMap.MAP_AREA_RESOURCE!!.validFile(WorldMap.staticElement!!.filenamePrefix + "_staticelements")) {
+                    if (!WorldMap.MAP_AREA_RESOURCE!!.isCached(WorldMap.staticElement!!.filenamePrefix + "_staticelements")) {
                         return
                     }
 
-                    WorldMap.staticElements = StaticElementTypeList.list(WorldMap.MAP_AREA_RESOURCE, WorldMap.staticElement!!.filenamePrefix + "_staticelements", client.memberWorld)
+                    WorldMap.staticElements = StaticElementTypeList.list(WorldMap.MAP_AREA_RESOURCE!!, WorldMap.staticElement!!.filenamePrefix + "_staticelements", client.memberWorld)
                 } else {
                     WorldMap.staticElements = StaticElements(0)
                 }
@@ -534,7 +534,7 @@ object WorldMapSub1 {
         if (!aBool8027) {
             var category = collection.getFirst() as? WorldMapCategory
             while (category != null) {
-                val mecType = WorldMap.MECTYPE_LIST.list(category.mecId)
+                val mecType = WorldMap.MECTYPE_LIST!!.list(category.mecId)
                 if (shouldDraw(mecType)) {
                     val bool7 = renderIconsAndNames(toolkit, category, mecType)
                     if (bool7) {
@@ -548,7 +548,7 @@ object WorldMapSub1 {
 
     @JvmStatic
     fun shouldDraw(mecType: MECType?): Boolean {
-        return mecType != null && mecType.displayedOnWorldmap && mecType.shouldDraw(WorldMap.PLAYER_VAR_PROVIDER) &&
+        return mecType != null && mecType.displayedOnWorldmap && mecType.shouldDraw(WorldMap.PLAYER_VAR_PROVIDER!!) &&
                aClass4658025.get(mecType.mectypeId.toLong()) == null && aClass4658029.get(mecType.anInt2718.toLong()) == null
     }
 
@@ -662,8 +662,8 @@ object WorldMapSub1 {
     fun method12538(): WorldMapCategory? {
         aClass4608030.reinitialize(WorldMap.worldMapCategories)
         val category = aClass4608030.nextAndReset() as? WorldMapCategory ?: return null
-        val mectype = WorldMap.MECTYPE_LIST.list(category.mecId)
-        return if (mectype != null && mectype.visible && mectype.shouldDraw(WorldMap.PLAYER_VAR_PROVIDER)) {
+        val mectype = WorldMap.MECTYPE_LIST!!.list(category.mecId)
+        return if (mectype != null && mectype.visible && mectype.shouldDraw(WorldMap.PLAYER_VAR_PROVIDER!!)) {
             category
         } else {
             WorldMap.method11595()

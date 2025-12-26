@@ -79,7 +79,7 @@ object WorldMapTrigger {
         if (WorldMapSub1.isInteractive && clickzones != null) {
             var mecClickzone = clickzones.getFirst() as ClickzoneMEC?
             while (mecClickzone != null) {
-                val mec = WorldMap.MECTYPE_LIST.list(mecClickzone.category.mecId)
+                val mec = WorldMap.MECTYPE_LIST!!.list(mecClickzone.category.mecId)
                 val mecId = mecClickzone.category.mecId.toLong()
                 if (mecClickzone.mouseWithin(x, y)) {
                     if (mec.minimenuActions[4] != null) {

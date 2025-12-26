@@ -88,7 +88,7 @@ object WorldMapOverview {
 
                 var mapCategory = WorldMap.worldMapCategories.getFirst() as WorldMapCategory?
                 while (mapCategory != null) {
-                    val mectype: MECType? = WorldMap.MECTYPE_LIST.list(mapCategory.mecId)
+                    val mectype: MECType? = WorldMap.MECTYPE_LIST!!.list(mapCategory.mecId)
                     if (WorldMapSub1.shouldDraw(mectype)) {
                         if (mapCategory.mecId == WorldMapSub1.someMecId) {
                             val mecStartX = scaledWidth * mapCategory.absX / WorldMap.mapSizeX + adjustedX
