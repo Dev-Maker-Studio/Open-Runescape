@@ -346,7 +346,7 @@ object ComponentMinimap {
 
     @JvmStatic
     fun drawCompass(component: Component, clipLeft: Int, clipTop: Int) {
-        val sprite: InteractiveComponentSprite? = component.addInteractiveSprite(Renderers.activeToolkit)
+        val sprite: InteractiveComponentSprite? = component.addInteractiveSprite(Renderers.activeToolkit!!)
         if (sprite != null) {
             Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, component.width + clipLeft, clipTop + component.height)
             if (minimapState < 3) {

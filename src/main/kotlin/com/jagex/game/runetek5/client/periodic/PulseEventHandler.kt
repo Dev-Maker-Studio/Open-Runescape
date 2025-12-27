@@ -125,7 +125,7 @@ object PulseEventHandler {
                 IF_SETTEXT -> {
                     val component = Component.fromHash(value.toInt())
                     if (event.string != component!!.text) {
-                        component.text = event.string
+                        component.text = event.string!!
                         Component.redrawComponent(component)
                     }
                 }
@@ -135,7 +135,7 @@ object PulseEventHandler {
                     val primaryModel = event.secondary
                     val secondaryModel = event.tertiary
                     if (mediaType != component!!.mediaType || primaryModel != component.primaryMediaId || secondaryModel != component.secondaryMediaId) {
-                        component.mediaType = mediaType
+                        component.mediaType = mediaType!!
                         component.primaryMediaId = primaryModel
                         component.secondaryMediaId = secondaryModel
                         component.npcCustomisation = null

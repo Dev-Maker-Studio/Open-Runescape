@@ -1107,7 +1107,7 @@ object PacketDecoder {
                 val newSettings: IFEvents?
                 if (currentSettings == null) {
                     if (slot == -1) {
-                        newSettings = IFEvents(settings, Component.fromHash(interfaceHash).targetParams.interfaceId)
+                        newSettings = IFEvents(settings, Component.fromHash(interfaceHash)!!.targetParams!!.interfaceId)
                     } else {
                         newSettings = IFEvents(settings, -1)
                     }
@@ -1137,7 +1137,7 @@ object PacketDecoder {
                 val newSettings: IFEvents?
                 if (currentSettings == null) {
                     if (slot == -1) {
-                        newSettings = IFEvents(Component.fromHash(interfaceHash).targetParams.settingsHash, interfaceId)
+                        newSettings = IFEvents(Component.fromHash(interfaceHash)!!.targetParams!!.settingsHash, interfaceId)
                     } else {
                         newSettings = IFEvents(0, interfaceId)
                     }
@@ -2151,7 +2151,7 @@ object PacketDecoder {
             parent2Def = Component.fromHash(fromParentUid)
             if (parent2Def != null) {
                 Component.redrawComponent(parent2Def)
-                Component.method483(Interface.INTERFACES!![parent2Def.idHash ushr 16], parent2Def, true)
+                Component.method483(Interface.INTERFACES!![parent2Def.idHash ushr 16]!!, parent2Def, true)
             }
             if (client.BASE_WINDOW_ID != -1) {
                 Interface.openSub(client.BASE_WINDOW_ID, 1)

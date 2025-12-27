@@ -462,8 +462,9 @@ class Interface(
             return if (client.getComponentSettings(component).getUseOptionFlags() == 0) {
                 null
             } else {
-                if (component.targetVerb != null && !component.targetVerb.trim().isEmpty()) {
-                    component.targetVerb
+                val targetVerb = component.targetVerb
+                if (targetVerb != null && !targetVerb.trim().isEmpty()) {
+                    targetVerb
                 } else {
                     if (client.DISPLAY_HIDDEN_MENU_OPTIONS) "Hidden-use" else null
                 }

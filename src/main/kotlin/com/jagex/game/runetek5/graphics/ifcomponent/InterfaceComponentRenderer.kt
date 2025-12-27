@@ -194,10 +194,11 @@ object InterfaceComponentRenderer {
                                 continue
                             }
                             if (component.contentType == MINIMAP && client.MAP_LOADING_STAGE == 1) {
-                                if (component.addInteractiveSprite(Renderers.activeToolkit) != null) {
+                                val toolkit = Renderers.activeToolkit
+                                if (component.addInteractiveSprite(toolkit!!) != null) {
                                     SoundEffectPlayer.updatePlayers()
-                                    ComponentMinimap.drawMinimap(Renderers.activeToolkit!!, component, startX, startY)
-                                    Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
+                                    ComponentMinimap.drawMinimap(toolkit, component, startX, startY)
+                                    toolkit.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                 }
                                 continue
                             }
@@ -210,9 +211,10 @@ object InterfaceComponentRenderer {
                                 continue
                             }
                             if (component.contentType == COMPASS) {
-                                if (component.addInteractiveSprite(Renderers.activeToolkit) != null) {
+                                val toolkit = Renderers.activeToolkit
+                                if (component.addInteractiveSprite(toolkit!!) != null) {
                                     ComponentMinimap.drawCompass(component, startX, startY)
-                                    Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
+                                    toolkit.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                 }
                                 continue
                             }
@@ -242,8 +244,9 @@ object InterfaceComponentRenderer {
                                 Renderers.activeToolkit!!.method8525(GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
                             }
                             drawComponents(components, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
-                            if (component.itemSlots != null) {
-                                drawComponents(component.itemSlots, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
+                            val itemSlots = component.itemSlots
+                            if (itemSlots != null) {
+                                drawComponents(itemSlots, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
                             }
                             val subInterface = client.OPEN_INTERFACES.get(component.idHash.toLong())
                             if (subInterface != null) {
@@ -286,7 +289,7 @@ object InterfaceComponentRenderer {
                                     Renderers.activeToolkit!!.drawRectangleOutline(startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or (component.color and 0xffffff), 1)
                                 }
                             } else if (component.type == ComponentType.TEXT) {
-                                val fontRenderer = component.getFontRenderer(StaticMethods.initializedFontcombos, client.FONT_PROVIDER)
+                                val fontRenderer = component.getFontRenderer(StaticMethods.initializedFontcombos!!, client.FONT_PROVIDER)
                                 if (fontRenderer == null) {
                                     if (Component.missingMedia) {
                                         Component.redrawComponent(component)
@@ -305,10 +308,7 @@ object InterfaceComponentRenderer {
                                         }
                                     }
                                     if (component.anInt1435 != -1) {
-                                        itemDisplayText = SoundResourceManager.method2550(component.anInt1435)
-                                        if (itemDisplayText == null) {
-                                            itemDisplayText = ""
-                                        }
+                                        itemDisplayText = SoundResourceManager.method2550(component.anInt1435)!!
                                     }
                                     if (component === client.aClass1187352) {
                                         itemDisplayText = LocalizedText.PLEASE_WAIT.translate(client.CURRENT_LANGUAGE)
@@ -328,7 +328,7 @@ object InterfaceComponentRenderer {
                                 }
                             } else if (component.type == ComponentType.SPRITE) {
                                 if (component.skyboxId >= 0) {
-                                    component.calculateLighting(TypeLists.SKYBOX, TypeLists.SUN)!!.render(Renderers.activeToolkit!!, startX, startY, component.width, component.height, component.sunRotationX shl 3, component.sunRotationY shl 3)
+                                    component.calculateLighting(TypeLists.SKYBOX!!, TypeLists.SUN!!)!!.render(Renderers.activeToolkit!!, startX, startY, component.width, component.height, component.sunRotationX shl 3, component.sunRotationY shl 3)
                                 } else {
                                     val sprite: NativeSprite?
                                     if (component.containerItemId != -1) {
@@ -406,7 +406,8 @@ object InterfaceComponentRenderer {
                                     if (lineHeight >= 0 && lineHeight < 2048) {
                                         val player = PlayerUpdate.players[lineHeight]
                                         if (player != null && (lineHeight == PlayerUpdate.myPlayerIndex || Utils.stringToInt(player.displayName!!) == component.secondaryMediaId)) {
-                                            renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit, functionMask, TypeLists.BAS, TypeLists.IDK, TypeLists.NPC, TypeLists.OBJ, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, player.playerAppearance)
+                                            val toolkit = Renderers.activeToolkit
+                                            renderedMediaModel = component.getAnimatedMediaModel(toolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, player.playerAppearance)
                                             if (renderedMediaModel == null && Component.missingMedia) {
                                                 Component.redrawComponent(component)
                                             }
@@ -492,7 +493,8 @@ object InterfaceComponentRenderer {
                                         client.INTERFACE_MODEL_MATRIX.translate((component.offsetX shl 2).toFloat(), (i_31 + centerY + (component.offsetY shl 2)).toFloat(), (i_32 + (component.offsetY shl 2)).toFloat())
                                         client.INTERFACE_MODEL_MATRIX.rotate(1.0f, 0.0f, 0.0f, MathUtils.getTheta(component.spritePitch shl 3))
                                     }
-                                    component.cycleParticles(Renderers.activeToolkit, renderedMediaModel, client.INTERFACE_MODEL_MATRIX, client.cycles)
+                                    val toolkit = Renderers.activeToolkit
+                                    component.cycleParticles(toolkit!!, renderedMediaModel, client.INTERFACE_MODEL_MATRIX, client.cycles)
                                     if (client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.expandClipping(startX, startY, startX + component.width, startY + component.height)
                                     }
@@ -541,8 +543,9 @@ object InterfaceComponentRenderer {
         val componentWidth = if (component.scrollWidth != 0) component.scrollWidth else component.width
         val componentHeight = if (component.scrollHeight != 0) component.scrollHeight else component.height
         InterfaceRenderer.updateInterfaceDimensions(components, component.idHash, componentWidth, componentHeight, bool2)
-        if (component.itemSlots != null) {
-            InterfaceRenderer.updateInterfaceDimensions(component.itemSlots, component.idHash, componentWidth, componentHeight, bool2)
+        val itemSlots = component.itemSlots
+        if (itemSlots != null) {
+            InterfaceRenderer.updateInterfaceDimensions(itemSlots, component.idHash, componentWidth, componentHeight, bool2)
         }
         val subInterface = client.OPEN_INTERFACES.get(component.idHash.toLong())
         if (subInterface != null) {

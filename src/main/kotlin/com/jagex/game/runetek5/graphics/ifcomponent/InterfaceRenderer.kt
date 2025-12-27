@@ -125,7 +125,7 @@ object InterfaceRenderer {
 						var withinBoundaries = false
 						if (mouseX >= clipMinX && mouseY >= clipMinY && mouseX < clipMaxX && mouseY < clipMaxY) {
 							if (shouldAddSprite) {
-								val clickableSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit)
+								val clickableSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
 								if (clickableSprite != null && clickableSprite.width == childComponent.width && childComponent.height == clickableSprite.height) {
 									val mouseOffsetX = mouseX - componentX
 									val mouseOffsetY = mouseY - componentY
@@ -161,7 +161,7 @@ object InterfaceRenderer {
 
 						if (mouseRecord != null && mouseRecord.getClickType() == 0 && mouseRecord.getX() >= clipMinX && mouseRecord.getY() >= clipMinY && mouseRecord.getX() < clipMaxX && mouseRecord.getY() < clipMaxY) {
 							if (shouldAddSprite) {
-								val interactiveSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit)
+								val interactiveSprite = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
 								if (interactiveSprite != null) {
 									if (childComponent.width == interactiveSprite.width && childComponent.height == interactiveSprite.height) {
 										val spriteRelativeX = mouseRecord.getX() - componentX
@@ -187,14 +187,15 @@ object InterfaceRenderer {
 						}
 
 						if (childComponent.hasInteraction && !Console.isOpen()) {
-							for (keyIndex in childComponent.keyTriggeringAction.indices) {
+							for (keyIndex in childComponent.keyTriggeringAction!!.indices) {
 								var keyTriggered = false
 								var hasAction = false
-								if (childComponent.anIntArray1267[keyIndex] > 0) {
+								if (childComponent.anIntArray1267!![keyIndex] > 0) {
 									for (i in 0 until client.keyCachePointerPoss) {
-										if (childComponent.anIntArray1267[keyIndex] == client.KEYS_PRESSED[i].getCharacter().code) {
+										if (childComponent.anIntArray1267!![keyIndex] == client.KEYS_PRESSED[i].getCharacter().code) {
 											keyTriggered = true
-											if (childComponent.cycles == null || childComponent.cycles[keyIndex] <= client.cycles) {
+											val cycles = childComponent.cycles
+											if (cycles == null || cycles[keyIndex] <= client.cycles) {
 												hasAction = true
 											}
 											break
@@ -202,15 +203,16 @@ object InterfaceRenderer {
 									}
 								}
 
-								if (!keyTriggered && childComponent.keyTriggeringAction[keyIndex] != null) {
-									for (key in childComponent.keyTriggeringAction[keyIndex].indices) {
-										if (KeyRecorder.keyRecorder?.held(childComponent.keyTriggeringAction[keyIndex][key].toInt()) == true) {
+								if (!keyTriggered && childComponent.keyTriggeringAction!![keyIndex] != null) {
+									for (key in childComponent.keyTriggeringAction!![keyIndex]!!.indices) {
+										if (KeyRecorder.keyRecorder?.held(childComponent.keyTriggeringAction!![keyIndex]!![key].toInt()) == true) {
 											keyTriggered = true
-											if (childComponent.cycles != null && childComponent.cycles[keyIndex] > client.cycles) {
+											val cycles = childComponent.cycles
+											if (cycles != null && cycles[keyIndex] > client.cycles) {
 												break
 											}
 
-											val clickFunctionMask = childComponent.keyTriggerParams[keyIndex][key]
+											val clickFunctionMask = childComponent.keyTriggerParams!![keyIndex]!![key]
 											if (clickFunctionMask.toInt() == 0 || (clickFunctionMask.toInt() and 0x8 == 0 || !(KeyRecorder.keyRecorder?.held(86) == true) && !(KeyRecorder.keyRecorder?.held(82) == true) && !(KeyRecorder.keyRecorder?.held(81) == true)) && (clickFunctionMask.toInt() and 0x2 == 0 || KeyRecorder.keyRecorder?.held(86) == true) && (clickFunctionMask.toInt() and 0x1 == 0 || KeyRecorder.keyRecorder?.held(82) == true) && (clickFunctionMask.toInt() and 0x4 == 0 || KeyRecorder.keyRecorder?.held(81) == true)) {
 												hasAction = true
 												break
@@ -234,20 +236,21 @@ object InterfaceRenderer {
 										client.useOnTarget = childComponent.opBase + TextUtils.setTextColor(16777215)
 									}
 
-									val cycleProgress = childComponent.cycleSteps[keyIndex]
+									val cycleProgress = childComponent.cycleSteps!![keyIndex]
 									if (childComponent.cycles == null) {
-										childComponent.cycles = IntArray(childComponent.keyTriggeringAction.size)
+										childComponent.cycles = IntArray(childComponent.keyTriggeringAction!!.size)
 									}
 
 									if (cycleProgress != 0) {
-										childComponent.cycles[keyIndex] = cycleProgress + client.cycles
+										childComponent.cycles!![keyIndex] = cycleProgress + client.cycles
 									} else {
-										childComponent.cycles[keyIndex] = Int.MAX_VALUE
+										childComponent.cycles!![keyIndex] = Int.MAX_VALUE
 									}
 								}
 
-								if (!keyTriggered && childComponent.cycles != null) {
-									childComponent.cycles[keyIndex] = 0
+								val cycles = childComponent.cycles
+								if (!keyTriggered && cycles != null) {
+									cycles[keyIndex] = 0
 								}
 							}
 						}
@@ -334,7 +337,7 @@ object InterfaceRenderer {
 								}
 
 								if (childComponent.contentType == ComponentContentType.MINIMAP) {
-									val spriteVar = childComponent.addInteractiveSprite(Renderers.activeToolkit)
+									val spriteVar = childComponent.addInteractiveSprite(Renderers.activeToolkit!!)
 									if (spriteVar == null || ComponentMinimap.minimapState != 0 && ComponentMinimap.minimapState != 3 || MiniMenu.isOpen || mouseX < clipMinX || mouseY < clipMinY || mouseX >= clipMaxX || mouseY >= clipMaxY) {
 										continue
 									}
@@ -561,12 +564,13 @@ object InterfaceRenderer {
 
 							var hookrequest54: HookRequest
 							if (childComponent.onKey != null && client.keyCycle > childComponent.lastKeyCycle) {
-								if (childComponent.keyPressArray != null && client.keyCycle - childComponent.lastKeyCycle <= 32) {
+								val keyPressArray = childComponent.keyPressArray
+								if (keyPressArray != null && client.keyCycle - childComponent.lastKeyCycle <= 32) {
 									label969@ for (keyIndex in childComponent.lastKeyCycle until client.keyCycle) {
 										val i_25 = client.anIntArray7150[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.keyPressArray.indices) {
-											if (i_25 == childComponent.keyPressArray[i_26]) {
+										for (i_26 in keyPressArray.indices) {
+											if (i_25 == keyPressArray[i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
 												hookrequest54.params = childComponent.onKey
@@ -590,8 +594,8 @@ object InterfaceRenderer {
 									label945@ for (keyIndex in childComponent.lastMouseWheelCycle until client.mouseWheelCycle) {
 										val i_25 = client.recentMouseWheels[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.mouseWheelArray.indices) {
-											if (i_25 == childComponent.mouseWheelArray[i_26]) {
+										for (i_26 in childComponent.mouseWheelArray!!.indices) {
+											if (i_25 == childComponent.mouseWheelArray!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
 												hookrequest54.params = childComponent.onScrollWheel
@@ -615,8 +619,8 @@ object InterfaceRenderer {
 									label921@ for (keyIndex in childComponent.anInt1443 until client.pulseEventConfigsPtr) {
 										val i_25 = client.PULSE_EVENT_CONFIGS_CACHE[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.varps.indices) {
-											if (i_25 == childComponent.varps[i_26]) {
+										for (i_26 in childComponent.varps!!.indices) {
+											if (i_25 == childComponent.varps!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
 												hookrequest54.params = childComponent.anObjectArray1397
@@ -640,8 +644,8 @@ object InterfaceRenderer {
 									label897@ for (keyIndex in childComponent.anInt1444 until client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS) {
 										val i_25 = client.RECENTLY_USED_ITEM_CONTAINERS[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.mouseLeaveArrayParams.indices) {
-											if (i_25 == childComponent.mouseLeaveArrayParams[i_26]) {
+										for (i_26 in childComponent.mouseLeaveArrayParams!!.indices) {
+											if (i_25 == childComponent.mouseLeaveArrayParams!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
 												hookrequest54.params = childComponent.mouseLeaveScript
@@ -665,8 +669,8 @@ object InterfaceRenderer {
 									label873@ for (keyIndex in childComponent.anInt1445 until client.anInt7384) {
 										val i_25 = client.anIntArray7283[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.anIntArray1402.indices) {
-											if (i_25 == childComponent.anIntArray1402[i_26]) {
+										for (i_26 in childComponent.anIntArray1402!!.indices) {
+											if (i_25 == childComponent.anIntArray1402!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
 												hookrequest54.params = childComponent.anObjectArray1387
@@ -690,8 +694,8 @@ object InterfaceRenderer {
 									label849@ for (keyIndex in childComponent.anInt1448 until client.CLAN_VAR_COUNTER) {
 										val i_25 = client.CLAN_VAR_KEYS[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.anIntArray1408.indices) {
-											if (i_25 == childComponent.anIntArray1408[i_26]) {
+										for (i_26 in childComponent.anIntArray1408!!.indices) {
+											if (i_25 == childComponent.anIntArray1408!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
 												hookrequest54.params = childComponent.anObjectArray1407
@@ -780,14 +784,15 @@ object InterfaceRenderer {
 						}
 
 						if (childComponent.type == ComponentType.SPRITE && childComponent.skyboxId != -1) {
-							childComponent.calculateLighting(TypeLists.SKYBOX, TypeLists.SUN).method4217(Renderers.activeToolkit!!, childComponent.height, PreferenceManager.preferences?.skyboxes?.value ?: 0)
+							childComponent.calculateLighting(TypeLists.SKYBOX!!, TypeLists.SUN!!)!!.method4217(Renderers.activeToolkit!!, childComponent.height, PreferenceManager.preferences?.skyboxes?.value ?: 0)
 						}
 
 						Component.drawComponentObjSprite(childComponent)
 						if (childComponent.type == ComponentType.CONTAINER) {
 							processInterfaceCycle(parentInterface, childComponents, childComponent.idHash, clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
-							if (childComponent.itemSlots != null) {
-								processInterfaceCycle(parentInterface, childComponent.itemSlots, childComponent.idHash, clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
+							val itemSlots = childComponent.itemSlots
+							if (itemSlots != null) {
+								processInterfaceCycle(parentInterface, itemSlots, childComponent.idHash, clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
 							}
 
 							val subInterface = client.OPEN_INTERFACES[childComponent.idHash.toLong()]

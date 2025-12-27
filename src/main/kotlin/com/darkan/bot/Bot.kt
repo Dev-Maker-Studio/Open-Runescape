@@ -52,20 +52,10 @@ object Bot {
     private const val DEPOSIT_BOX_INTERFACE = 11
     private const val INVENTORY_INTERFACE = 679
 
-    const val randomMac = true
-
-    var TRIVIA_ENABLED = false
     var disableInterfaces = false
     var disableIncomingPackets = false
-    var usingSmartResponse = false
-    var safetyLogout = false
-
-    var currentTarget: NpcEntity? = null
 
     val responsePlayers = mutableListOf<String>()
-
-    var storedResponse = ""
-    var userspam = ""
 
     @JvmField
     var inventory = ContainerWrapper(ItemContainer())
@@ -76,12 +66,7 @@ object Bot {
     var password = ""
 
     var lastAnimated = System.currentTimeMillis()
-
-    var targetNpc: String? = null
-
     val optionsDialogue = arrayOfNulls<String>(5)
-
-    var moneyPouch: Int = 0
 
     @JvmStatic
     fun pulse() {

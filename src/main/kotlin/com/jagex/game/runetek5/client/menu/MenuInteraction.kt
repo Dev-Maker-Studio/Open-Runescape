@@ -346,8 +346,9 @@ object MenuInteraction {
                     InterfaceComponentRenderer.cancelInterfaceSelection()
                 }
 
-                if (aClass1184825 != null && client.anInt7297 == 0) {
-                    Component.redrawComponent(aClass1184825)
+                val component = aClass1184825
+                if (component != null && client.anInt7297 == 0) {
+                    Component.redrawComponent(component)
                 }
             }
         }

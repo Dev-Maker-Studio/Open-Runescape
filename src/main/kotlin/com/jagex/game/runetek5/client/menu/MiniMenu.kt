@@ -176,12 +176,12 @@ object MiniMenu {
             }
             val comp = InterfaceComponentRenderer.aClass118183
             if (comp != null) {
-                var fontRenderer = comp.getFontRenderer(StaticMethods.initializedFontcombos, client.FONT_PROVIDER)
+                var fontRenderer = comp.getFontRenderer(StaticMethods.initializedFontcombos!!, client.FONT_PROVIDER)
                 if (fontRenderer == null) {
                     fontRenderer = minimenuHeader
                 }
                 @Suppress("UNCHECKED_CAST")
-                fontRenderer.renderTextAntiMacro(menuText, InterfaceComponentRenderer.anInt195, InterfaceComponentRenderer.anInt179, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, client.RANDOMIZER, client.randomSeed, client.anIntArray7438, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.anInt195, InterfaceComponentRenderer.anInt179, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, client.RANDOMIZER, client.randomSeed, client.anIntArray7438, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
                 InterfaceComponentRenderer.inboundsComponentToTop(client.anIntArray7438[0], client.anIntArray7438[1], client.anIntArray7438[2], client.anIntArray7438[3])
             }
         }
