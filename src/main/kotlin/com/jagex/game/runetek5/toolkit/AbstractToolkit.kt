@@ -448,15 +448,14 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         @JvmStatic
         @Synchronized
         fun toolkitForType(renderMode: Int, gameCanvas: Canvas?, materialProvider: MaterialProvider?, shaderIndex: Js5ResourceProvider?, multiSamples: Int, screenWidth: Int, screenHeight: Int): AbstractToolkit {
-            val mode = if (renderMode == 1 || renderMode == 5) "GL" else if (renderMode == 0) "SM" else "DX"
+            val mode = if (renderMode == 1 || renderMode == 5) "GL" else if (renderMode == 0 || renderMode == 2) "SM" else "UNKNOWN"
             println("[AbstractToolkit] Entering render mode: $renderMode = $mode")
             return when (renderMode) {
                 0 -> SafeModeToolkit.createToolkit(gameCanvas, materialProvider, screenWidth, screenHeight)
                 2 -> SoftwareToolkit.createToolkit(gameCanvas, materialProvider, screenWidth, screenHeight)
                 1 -> OpenGlToolkit.createToolkitLd(gameCanvas, materialProvider, multiSamples)
                 5 -> OpenGlToolkit.createToolkitHd(gameCanvas, materialProvider, shaderIndex, multiSamples)
-                3 -> AbstractNativeToolkit.createToolkit(gameCanvas, materialProvider, shaderIndex, multiSamples)
-                else -> throw IllegalArgumentException("")
+                else -> throw IllegalArgumentException("Invalid toolkit option: $renderMode")
             }
         }
 

@@ -14,7 +14,8 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 import com.jagex.game.runetek5.buffer.NativeMemoryNode;
-import com.jagex.game.runetek5.buffer.NativeMemoryDX;
+import com.jagex.game.runetek5.toolkit.NativeParticleRenderer;
+import com.jagex.game.runetek5.toolkit.NativeToolkitBuffer;
 import com.jagex.game.runetek5.cache.node.LinkedList;
 import com.jagex.game.runetek5.cache.node.Node;
 import com.jagex.game.runetek5.cache.node.WeakReferenceMappingCache;
@@ -29,7 +30,7 @@ import com.jagex.game.runetek5.graphics.font.NativeFont;
 import com.jagex.game.runetek5.graphics.light.PointLight;
 import com.jagex.game.runetek5.graphics.model.Mesh;
 import com.jagex.game.runetek5.graphics.model.Model;
-import com.jagex.game.runetek5.graphics.model.ModelDX;
+import com.jagex.game.runetek5.graphics.model.ModelGL;
 import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper;
 import com.jagex.game.runetek5.graphics.shader.Shader;
 import com.jagex.game.runetek5.graphics.shader.ShaderLoader;
@@ -48,7 +49,6 @@ import com.jagex.game.runetek5.graphics.shader.program.impl.NativeParticleShader
 import com.jagex.game.runetek5.graphics.shader.program.impl.NativeSpriteShaderLd;
 import com.jagex.game.runetek5.graphics.shader.program.impl.NativeWaterfall;
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite;
-import com.jagex.game.runetek5.graphics.sprite.SpriteDX_Sub3;
 import com.jagex.game.runetek5.graphics.sprite.SpriteType;
 import com.jagex.game.runetek5.graphics.texture.AbstractCubeTextureGenerator;
 import com.jagex.game.runetek5.graphics.texture.AbstractNativeCubeTextureGenerator;
@@ -66,7 +66,6 @@ import com.jagex.game.runetek5.math.Matrix43;
 import com.jagex.game.runetek5.math.Matrix44;
 import com.jagex.game.runetek5.math.Vector3;
 import com.jagex.game.runetek5.scene.ground.Ground;
-import com.jagex.game.runetek5.scene.ground.GroundDX;
 import com.jagex.game.runetek5.scene.tile.WaterTile;
 import com.jagex.game.runetek5.toolkit.companion.Binding;
 import com.jagex.game.runetek5.toolkit.companion.BlendFuncMode;
@@ -74,8 +73,6 @@ import com.jagex.game.runetek5.toolkit.companion.MatrixMode;
 import com.jagex.game.runetek5.toolkit.companion.NativeStream;
 import com.jagex.game.runetek5.toolkit.companion.PrimitiveDrawMode;
 import com.jagex.game.runetek5.toolkit.companion.TextureCombineMode;
-import com.jagex.game.runetek5.toolkit.directx.DirectXBuffer;
-import com.jagex.game.runetek5.toolkit.directx.DirectXParticleRenderer;
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat;
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat;
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclaration;
@@ -195,8 +192,8 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
     public final boolean aBool8805;
     public int blendFuncType;
     public boolean aBool8681;
-    public final ModelDX[] copyByTypeSrc;
-    public final ModelDX[] copyByTypeDst;
+    public final Model[] copyByTypeSrc;
+    public final Model[] copyByTypeDst;
     public final Matrix44 aClass3848841;
     public final Matrix43 aClass2948842;
     public Js5ResourceProvider shaderResource;
@@ -211,7 +208,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
     public NativeWaterfall nativeWaterfall;
     public NativeBloomRenderer aClass328714;
     public AbstractWaterShader aClass418753;
-    public DirectXParticleRenderer particleRenderer;
+    public NativeParticleRenderer particleRenderer;
     public int nativeFunctionMask;
     public int shadowOffsetX;
     public int shadowOffsetZ;
@@ -233,9 +230,9 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
     public VertexDeclaration aClass708832;
     public VertexDeclaration aClass708836;
     public VertexDeclaration aClass708721;
-    public DirectXBuffer anInterface328834;
-    public SpriteDX_Sub3 aNativeSpriteSub38790;
-    public SpriteDX_Sub3 aNativeSpriteSub38791;
+    public NativeToolkitBuffer anInterface328834;
+    public NativeSprite aNativeSpriteSub38790;
+    public NativeSprite aNativeSpriteSub38791;
     public NativeStream anInterface48693;
 	public static final Matrix44 WORLD_VIEW_PROJECTION_MATRIX = new Matrix44();
 
@@ -322,8 +319,8 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
         this.enableAlphaTest = true;
         this.aBool8681 = false;
         new Stream();
-        this.copyByTypeSrc = new ModelDX[7];
-        this.copyByTypeDst = new ModelDX[7];
+        this.copyByTypeSrc = new Model[7];
+        this.copyByTypeDst = new Model[7];
         this.aClass3848841 = new Matrix44();
         this.aClass2948842 = new Matrix43();
         this.anInt8844 = -1;
@@ -368,23 +365,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
         setNativeHeap(getNativeMemory(131072));
     }
-    
-	public static AbstractToolkit createToolkit(Canvas canvas0, MaterialProvider interface221, Js5ResourceProvider index2, int i_3) {
-	    try {
-	        boolean jaclibIsLoaded = AbstractToolkit.isJaclibLoaded();
-	        if (!jaclibIsLoaded) {
-	            throw new RuntimeException("");
-	        } else if (!AbstractToolkit.getNativeLibraryLoader().loadIntoMemory("jagdx")) {
-	            throw new RuntimeException("");
-	        } else {
-	            AbstractToolkit toolkit = DirectXNativeToolkit.forCapabilities(canvas0, interface221, index2, Integer.valueOf(i_3));
-	            return toolkit;
-	        }
-	    } catch (Throwable throwable) {
-	        throw new RuntimeException("");
-	    }
-	}
-    
+
     public Matrix44 getTextureMatrix() {
         return this.textureMatrices[this.currentTextureSlot];
     }
@@ -497,7 +478,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
             }
         }
 
-        this.particleRenderer = new DirectXParticleRenderer(this);
+        this.particleRenderer = new NativeParticleRenderer(this);
         method13944();
         method14009();
         method14177();
@@ -511,7 +492,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
         this.anInterface48693.deallocate();
 
         for (int i_1 = 0; i_1 < 7; i_1++) {
-            this.copyByTypeDst[i_1].deallocate();
+            // Model deallocation removed (deallocate not in base Model class)
         }
 
         this.particleRenderer.deallocate();
@@ -520,9 +501,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public NativeSprite createNativeSprite(int i_1, int i_2, int i_3, int i_4, boolean bool5) {
-        SpriteDX_Sub3 class160Sub36 = new SpriteDX_Sub3(this, i_3, i_4, bool5, false);
-        class160Sub36.method2750(0, 0, i_3, i_4, i_1, i_2);
-        return class160Sub36;
+        throw new UnsupportedOperationException("createNativeSprite not implemented for this toolkit");
     }
 
     @Override
@@ -537,7 +516,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
             this.materialCache.reset();
 
             for (Node memory = this.activeNativeMemory.getTail(); memory != null; memory = this.activeNativeMemory.getPrevious()) {
-                ((NativeMemoryDX) memory).deallocate();
+                // Memory deallocation - type-specific handling removed
             }
 
             ColorUtil.resetTables(false, true);
@@ -712,21 +691,26 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public NativeMemoryNode getNativeMemory(int requiredCapacity) {
-        NativeMemoryDX nativeMemory = new NativeMemoryDX(requiredCapacity);
+        NativeMemoryNode nativeMemory = createNativeMemory(requiredCapacity);
         this.activeNativeMemory.insertTail(nativeMemory);
         return nativeMemory;
     }
 
+    protected abstract NativeMemoryNode createNativeMemory(int capacity);
+
+    protected abstract NativeHeap extractNativeHeap(NativeMemoryNode memoryNode);
+
     @Override
     public void setNativeHeap(NativeMemoryNode memoryNode) {
-        this.nativeHeap = ((NativeMemoryDX) memoryNode).nativeHeap;
+        // NativeHeap extraction - toolkit-specific implementation needed
+        this.nativeHeap = extractNativeHeap(memoryNode);
     }
 
     public NativeHeapBuffer generateNativeHeapBuffer(int initialCapacity, boolean allocateDirect) {
         return this.nativeHeap.createBuffer(initialCapacity, allocateDirect);
     }
 
-    public DirectXBuffer method13911(int i_1) {
+    public NativeToolkitBuffer method13911(int i_1) {
         if (this.anInterface328834.getCapacity() < i_1 * 2) {
             this.anInterface328834.create(i_1);
         }
@@ -771,7 +755,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public NativeSprite createNativeSprite(int[] ints_1, int i_2, int i_3, int i_4, int i_5, boolean bool6) {
-        return new SpriteDX_Sub3(this, i_4, i_5, ints_1, i_2, i_3);
+        throw new UnsupportedOperationException("createNativeSprite not implemented for this toolkit");
     }
 
     public Matrix44 getProjectionMatrix() {
@@ -787,7 +771,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public Model createModel(Mesh rsmesh1, int i_2, int i_3, int i_4, int i_5) {
-        return new ModelDX(this, rsmesh1, i_2, i_4, i_5, i_3);
+        throw new UnsupportedOperationException("createModel must be implemented by subclass");
     }
 
     @Override
@@ -797,7 +781,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public Ground createGround(int i_1, int i_2, int[][] ints_3, int[][] ints_4, int i_6, int i_7) {
-        return new GroundDX(this, i_6, i_7, i_1, i_2, ints_3, ints_4);
+        throw new UnsupportedOperationException("createGround not implemented for this toolkit");
     }
 
     @Override
@@ -1501,7 +1485,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     abstract void toggleMultisampling(boolean var1);
 
-    public abstract DirectXBuffer method13993(boolean var1);
+    public abstract NativeToolkitBuffer method13993(boolean var1);
 
     public abstract NativeStream createStream(boolean var1);
 
@@ -1516,7 +1500,7 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
         setDepthBuffering(true);
     }
 
-    public abstract void method13997(DirectXBuffer var1);
+    public abstract void method13997(NativeToolkitBuffer var1);
 
     public Matrix44 getEyePositionOsMatrix() {
         return this.matrixMode == MatrixMode.MODEL_VIEW ? this.aClass3848814 : aClass3848712;
@@ -1967,7 +1951,13 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
 
     @Override
     public NativeSprite generateEmptySprite(int i_1, int i_2, boolean bool3, boolean bool4) {
-        return new SpriteDX_Sub3(this, i_1, i_2, bool3, bool4);
+        throw new UnsupportedOperationException("generateEmptySprite not implemented for this toolkit");
+    }
+
+    protected abstract Model createModel(int i_1, int i_2, boolean bool3, boolean bool4);
+
+    protected NativeSprite createNativeSprite(TextureSampler sampler) {
+        throw new UnsupportedOperationException("createNativeSprite with TextureSampler not implemented for this toolkit");
     }
 
 
@@ -1992,15 +1982,15 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
         this.activeTextureSampler = createTextureSampler(1, 1, false, ints_3, 0, 0);
         ints_3[0] = ~0xffffff;
         this.anInterface68795 = createTextureSampler(1, 1, false, ints_3, 0, 0);
-        setNativeHeap(new NativeMemoryDX(262144));
+        setNativeHeap(getNativeMemory(262144));
         this.aClass708832 = method13995(new VertexDeclarationComponent[]{new VertexDeclarationComponent(new VertexDeclarationAction[]{VertexDeclarationAction.aClass69695, VertexDeclarationAction.aClass69692})});
         method13995(new VertexDeclarationComponent[]{new VertexDeclarationComponent(new VertexDeclarationAction[]{VertexDeclarationAction.aClass69695, VertexDeclarationAction.aClass69690})});
         this.aClass708836 = method13995(new VertexDeclarationComponent[]{new VertexDeclarationComponent(VertexDeclarationAction.aClass69695), new VertexDeclarationComponent(VertexDeclarationAction.aClass69690), new VertexDeclarationComponent(VertexDeclarationAction.aClass69692), new VertexDeclarationComponent(VertexDeclarationAction.NORMAL_POINTER_ACTION)});
         this.aClass708721 = method13995(new VertexDeclarationComponent[]{new VertexDeclarationComponent(VertexDeclarationAction.aClass69695), new VertexDeclarationComponent(VertexDeclarationAction.aClass69690), new VertexDeclarationComponent(VertexDeclarationAction.aClass69692)});
 
         for (int type = 0; type < 7; type++) {
-            this.copyByTypeSrc[type] = new ModelDX(this, 0, 0, false, false);
-            this.copyByTypeDst[type] = new ModelDX(this, 0, 0, true, true);
+            this.copyByTypeSrc[type] = createModel(0, 0, false, false);
+            this.copyByTypeDst[type] = createModel(0, 0, true, true);
         }
 
         method13895();
@@ -2009,8 +1999,8 @@ public abstract class AbstractNativeToolkit extends AbstractToolkit {
         getImageProducer();
         resetClipping();
         renderLastFrame();
-        this.aNativeSpriteSub38790 = new SpriteDX_Sub3(this, this.activeTextureSampler);
-        this.aNativeSpriteSub38791 = new SpriteDX_Sub3(this, this.anInterface68795);
+        this.aNativeSpriteSub38790 = createNativeSprite(this.activeTextureSampler);
+        this.aNativeSpriteSub38791 = createNativeSprite(this.anInterface68795);
         applyClearFlags(3, 0);
     }
 

@@ -1,19 +1,18 @@
-package com.jagex.game.runetek5.toolkit.directx
+package com.jagex.game.runetek5.toolkit
 
-import com.jagex.game.runetek5.graphics.model.particle.ParticleNode
 import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.graphics.model.particle.PointEntity
-import com.jagex.game.runetek5.graphics.shader.program.AbstractParticleShader
-import com.jagex.game.runetek5.math.Matrix44
-import com.jagex.game.runetek5.toolkit.AbstractNativeToolkit
 import com.jagex.game.runetek5.toolkit.companion.NativeStream
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclaration
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclarationAction
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclarationComponent
 import com.jagex.game.runetek5.utils.BufferUtils
-import java.nio.ByteBuffer
 
-class DirectXParticleRenderer(class505Sub21: AbstractNativeToolkit) {
+/**
+ * Native particle renderer.
+ * Note: Previously named DirectXParticleRenderer (incorrectly), used by both OpenGL and DirectX.
+ */
+class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
     var anInt509: Int = 0
     var anInt497: Int = 64
@@ -29,7 +28,7 @@ class DirectXParticleRenderer(class505Sub21: AbstractNativeToolkit) {
     val aClass70499: VertexDeclaration
     val anInterface4500: NativeStream
     val anInterface4510: NativeStream
-    val anInterface32511: DirectXBuffer
+    val anInterface32511: NativeToolkitBuffer
 
     init {
         anIntArray506 = IntArray(8191)

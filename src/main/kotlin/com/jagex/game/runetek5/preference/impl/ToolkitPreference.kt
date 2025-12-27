@@ -2,10 +2,9 @@ package com.jagex.game.runetek5.preference.impl
 
 import com.jagex.game.runetek5.preference.GamePreferences
 import com.jagex.game.runetek5.preference.Preference
-import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
 /**
- * Preference for selecting the graphics toolkit (Software, OpenGL, DirectX).
+ * Preference for selecting the graphics toolkit (Software, OpenGL).
  *
  * @author Steven - 17/09/2023
  */
@@ -47,11 +46,7 @@ class ToolkitPreference : Preference {
     }
 
     override fun canModify(value: Int): Int {
-        return if (value == 3 && !AbstractToolkit.getNativeLibraryLoader().isJagdxLoaded()) {
-            3
-        } else {
-            2
-        }
+        return 2
     }
 
     override fun getValue(): Int {

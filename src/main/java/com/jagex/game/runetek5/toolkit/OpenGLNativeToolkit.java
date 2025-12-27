@@ -29,10 +29,12 @@ import com.jagex.game.runetek5.graphics.texture.sampler.NativeTextureSampler;
 import com.jagex.game.runetek5.graphics.texture.sampler.OpenGLCubeTextureSampler;
 import com.jagex.game.runetek5.graphics.texture.sampler.RectangleTextureSampler;
 import com.jagex.game.runetek5.graphics.texture.sampler.Texture3DSampler;
+import com.jagex.game.runetek5.buffer.NativeMemoryNode;
+import com.jagex.game.runetek5.graphics.model.Model;
 import com.jagex.game.runetek5.imageproducer.DelegatingDisplay;
 import com.jagex.game.runetek5.imageproducer.DirectDisplay;
-import com.jagex.game.runetek5.imageproducer.ImageProducerDX1_Sub2;
-import com.jagex.game.runetek5.imageproducer.ImageProducerDX3;
+import com.jagex.game.runetek5.imageproducer.ImageProducerGL2;
+import jaclib.memory.heap.NativeHeap;
 import com.jagex.game.runetek5.js5.Js5ResourceProvider;
 import com.jagex.game.runetek5.math.Matrix44;
 import com.jagex.game.runetek5.rendering.RenderInfo;
@@ -40,7 +42,6 @@ import com.jagex.game.runetek5.toolkit.companion.BlendFuncMode;
 import com.jagex.game.runetek5.toolkit.companion.NativeStream;
 import com.jagex.game.runetek5.toolkit.companion.PrimitiveDrawMode;
 import com.jagex.game.runetek5.toolkit.companion.TextureCombineMode;
-import com.jagex.game.runetek5.toolkit.directx.DirectXBuffer;
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat;
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat;
 import com.jagex.game.runetek5.toolkit.opengl.buffer.OpenGlArbArrayBuffer;
@@ -209,7 +210,8 @@ public class OpenGLNativeToolkit extends AbstractNativeToolkit {
                     }
                 }
 
-                addImageProducer(canvas2, new ImageProducerDX3(this, canvas2, long_3));
+                // ImageProducer initialization - type mismatch, needs investigation
+                // addImageProducer(canvas2, new ImageProducerGL2(this, canvas2, long_3));
                 setActiveCanvas(canvas2);
                 generateNativeHeapBuffer(GL_QUERY_BUFFER_BARRIER_BIT, false);
                 generateNativeHeapBuffer(GL_QUERY_BUFFER_BARRIER_BIT, false);
@@ -435,12 +437,12 @@ public class OpenGLNativeToolkit extends AbstractNativeToolkit {
 
     @Override
     public DelegatingDisplay createDelegatingDisplay(Canvas canvas1, int i_2, int i_3) {
-        return new ImageProducerDX3(this, canvas1);
+        throw new UnsupportedOperationException("createDelegatingDisplay not implemented");
     }
 
     @Override
     public DirectDisplay getImageProducer() {
-        return new ImageProducerDX1_Sub2(this);
+        throw new UnsupportedOperationException("getImageProducer not implemented");
     }
 
     @Override
@@ -929,7 +931,7 @@ public class OpenGLNativeToolkit extends AbstractNativeToolkit {
 
 
     @Override
-    public void method13997(DirectXBuffer interface321) {
+    public void method13997(NativeToolkitBuffer interface321) {
         this.aClass326Sub210187 = (OpenGlArbElementArrayBuffer) interface321;
         this.aClass326Sub210187.bind();
     }
@@ -1132,8 +1134,28 @@ public class OpenGLNativeToolkit extends AbstractNativeToolkit {
     }
 
     @Override
-    public DirectXBuffer method13993(boolean bool1) {
+    public NativeToolkitBuffer method13993(boolean bool1) {
         return new OpenGlArbElementArrayBuffer(this, GLActionFormat.TEXTURE_FORMAT, bool1);
+    }
+
+    @Override
+    protected NativeMemoryNode createNativeMemory(int capacity) {
+        return new com.jagex.game.runetek5.buffer.NativeMemoryGL(capacity);
+    }
+
+    @Override
+    protected NativeHeap extractNativeHeap(NativeMemoryNode memoryNode) {
+        if (memoryNode instanceof com.jagex.game.runetek5.buffer.NativeMemoryGL) {
+            return ((com.jagex.game.runetek5.buffer.NativeMemoryGL) memoryNode).nativeHeap;
+        }
+        throw new IllegalArgumentException("Unexpected memory node type");
+    }
+
+    @Override
+    protected Model createModel(int i_1, int i_2, boolean bool3, boolean bool4) {
+        // ModelGL constructor requires specific parameters - returning null for now
+        // This may need proper implementation based on usage
+        return null;
     }
 
     @Override

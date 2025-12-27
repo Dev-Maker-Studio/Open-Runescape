@@ -32,6 +32,6 @@ class ConnectionInfo {
         val port = Loader.getPort(worldId)
         if (Loader.DEBUG)
             println("Creating socket for world: $worldId at $host:$port")
-        return Socket(this.host, port)
+        return Socket(this.host, port).also { println("Socket created successfully") }
     }
 }

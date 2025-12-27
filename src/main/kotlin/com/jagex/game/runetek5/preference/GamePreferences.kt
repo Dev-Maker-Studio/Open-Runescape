@@ -20,7 +20,6 @@ class GamePreferences : Node<GamePreferences> {
      * - Enhanced software mode
      * - OpenGL
      * - OpenGL with shaders
-     * - DirectX
      */
     @JvmField
     var activeToolkit: ToolkitPreference? = null
