@@ -51,10 +51,6 @@ class NativeLibraryLoader(@JvmField val nativeDllResource: Js5ResourceProvider) 
         return loadedLibraryExecutor.isEmpty()
     }
 
-    override fun isJagdxLoaded(): Boolean {
-        return loadedLibraryFiles.containsKey("jagdx")
-    }
-
     override fun loadIntoMemory(libraryName: String): Boolean {
         val executor = loadedLibraryExecutor[libraryName]
         if (executor != null) {

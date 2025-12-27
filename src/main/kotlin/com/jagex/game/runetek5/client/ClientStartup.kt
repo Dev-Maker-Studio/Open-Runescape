@@ -451,7 +451,6 @@ object ClientStartup {
             fullyCachedDependencies = CacheableDependencies.getAll()
             CacheableDependencies.DEFAULTS.inializeDependency(CacheableResource(Resource.DEFAULTS!!))
             CacheableDependencies.JAGGL.inializeDependency(CacheableDLL("jaggl"))
-            CacheableDependencies.JAGDX.inializeDependency(CacheableDLL("jagdx"))
             CacheableDependencies.SW3D.inializeDependency(CacheableDLL("sw3d"))
             CacheableDependencies.HW3D.inializeDependency(CacheableDLL("hw3d"))
             CacheableDependencies.JAGTHEORA.inializeDependency(CacheableDLL("jagtheora"))

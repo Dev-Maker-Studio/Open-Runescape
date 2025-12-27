@@ -7,6 +7,7 @@ object CacheableDependencies {
     @JvmField val DEFAULTS = Dependency(DependencyType.CONFIG)
     @JvmField val JACLIB = Dependency(DependencyType.NATIVE)
     @JvmField val JAGGL = Dependency(DependencyType.NATIVE)
+    //TODO DirectX deprecation: Remove JAGDX dependency once dependency checking is refactored
     @JvmField val JAGDX = Dependency(DependencyType.NATIVE)
     @JvmField val SW3D = Dependency(DependencyType.NATIVE)
     @JvmField val HW3D = Dependency(DependencyType.NATIVE)
@@ -39,6 +40,7 @@ object CacheableDependencies {
      */
     @JvmStatic
     fun getAll(): Array<Dependency> {
+        //TODO DirectX deprecation: Remove JAGDX from dependencies array once dependency checking is refactored
         return arrayOf(
             DEFAULTS, JACLIB, JAGGL, JAGDX, SW3D, HW3D, JAGTHEORA,
             SHADERS, MATERIALS, CONFIG, LOC, ENUM, NPC, OBJ, SEQ, GFX,
