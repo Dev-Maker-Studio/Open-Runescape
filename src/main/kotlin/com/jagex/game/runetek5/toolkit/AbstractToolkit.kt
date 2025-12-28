@@ -442,17 +442,13 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
             return toolkitForType(renderMode, canvasToDrawOn, materialProvider, shaderResource, multiSamples, screenWidth, screenHeight)
         }
 
-        /**
-         * Currently software mode does not work due to renamed native methods & potentially other issues
-         */
         @JvmStatic
         @Synchronized
         fun toolkitForType(renderMode: Int, gameCanvas: Canvas?, materialProvider: MaterialProvider?, shaderIndex: Js5ResourceProvider?, multiSamples: Int, screenWidth: Int, screenHeight: Int): AbstractToolkit {
-            val mode = if (renderMode == 1 || renderMode == 5) "GL" else if (renderMode == 0 || renderMode == 2) "SM" else "UNKNOWN"
+            val mode = if (renderMode == 1 || renderMode == 5) "GL" else if (renderMode == 0) "SM" else "UNKNOWN"
             println("[AbstractToolkit] Entering render mode: $renderMode = $mode")
             return when (renderMode) {
                 0 -> SafeModeToolkit.createToolkit(gameCanvas, materialProvider, screenWidth, screenHeight)
-                2 -> SoftwareToolkit.createToolkit(gameCanvas, materialProvider, screenWidth, screenHeight)
                 1 -> OpenGlToolkit.createToolkitLd(gameCanvas, materialProvider, multiSamples)
                 5 -> OpenGlToolkit.createToolkitHd(gameCanvas, materialProvider, shaderIndex, multiSamples)
                 else -> throw IllegalArgumentException("Invalid toolkit option: $renderMode")

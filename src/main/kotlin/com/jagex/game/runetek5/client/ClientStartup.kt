@@ -451,7 +451,11 @@ object ClientStartup {
             fullyCachedDependencies = CacheableDependencies.getAll()
             CacheableDependencies.DEFAULTS.inializeDependency(CacheableResource(Resource.DEFAULTS!!))
             CacheableDependencies.JAGGL.inializeDependency(CacheableDLL("jaggl"))
+            //TODO DirectX deprecation: Remove JAGDX initialization once dependency checking is refactored
+            CacheableDependencies.JAGDX.inializeDependency(CacheableDLL("jagdx"))
+            //TODO SW3D deprecation: Remove SW3D initialization once dependency checking is refactored
             CacheableDependencies.SW3D.inializeDependency(CacheableDLL("sw3d"))
+            //TODO SW3D deprecation: Remove HW3D initialization once dependency checking is refactored
             CacheableDependencies.HW3D.inializeDependency(CacheableDLL("hw3d"))
             CacheableDependencies.JAGTHEORA.inializeDependency(CacheableDLL("jagtheora"))
             CacheableDependencies.SHADERS.inializeDependency(CacheableResource(Resource.SHADER!!))

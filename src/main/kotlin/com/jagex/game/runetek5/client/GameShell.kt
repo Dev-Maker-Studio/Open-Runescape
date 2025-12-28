@@ -4,7 +4,6 @@ import com.jagex.game.launch.Loader
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.systeminfo.SystemInfo
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
-import com.jagex.game.runetek5.toolkit.sw3d.FinalizeCacheSw3d
 import com.jagex.game.runetek5.tools.TimeTools
 import com.jagex.game.runetek5.utils.FileOperations
 
@@ -783,7 +782,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
                 // NOOP
             }
         }
-        FinalizeCacheSw3d.shutdown()
+        // SW3D removed - no longer need FinalizeCacheSw3d.shutdown()
         if (AbstractToolkit.nativeLibraryLoaded()) {
             AbstractToolkit.getNativeLibraryLoader().shutdown()
         }

@@ -5,7 +5,6 @@ import com.jagex.game.runetek5.graphics.model.particle.Silhouette
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.scene.tile.Tile
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
-import com.jagex.game.runetek5.toolkit.SoftwareToolkit
 
 /**
  * Rename to Culling / SceneCulling?
@@ -118,7 +117,7 @@ open class Culling(
             }
         }
         cullingClustersCleared = false
-        cullingEnabled = scene.activeToolkit !is SoftwareToolkit
+        cullingEnabled = true // SW3D removed - culling always enabled
         if (cullingEnabled) {
             frustumCulling = FrustumCulling(this)
         }
