@@ -66,7 +66,7 @@ object DebugDisplay {
                     Console.writeLine("" + kbMemleft)
                 }
                 19 -> Console.writeLine(if (Resource.NATIVE_LIBRARY_LOADER!!.shutdown()) "Success" else "Failure")
-                20 -> LoginManager.GAME_CONNECTION_INFO.swap()
+                20 -> LoginManager.GAME_CONNECTION_INFO!!.swap()
                 22 -> Resource.remoteFileRequesterJs5!!.closeStream()
                 3 -> Resource.remoteFileRequesterJs5!!.requestTermination()
                 13 -> GameShell.gameCanvas!!.setLocation(50, 50)

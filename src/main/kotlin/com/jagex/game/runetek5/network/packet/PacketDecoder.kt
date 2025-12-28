@@ -2101,7 +2101,7 @@ object PacketDecoder {
                     var bool70 = false
                     val class6132 = FriendList.FRIENDS[i_6]
                     val class6134 = FriendList.FRIENDS[i_6 + 1]
-                    if (class6132!!.worldId != LoginManager.GAME_CONNECTION_INFO.worldId && class6134!!.worldId == LoginManager.GAME_CONNECTION_INFO.worldId) {
+                    if (class6132!!.worldId != LoginManager.GAME_CONNECTION_INFO!!.worldId && class6134!!.worldId == LoginManager.GAME_CONNECTION_INFO!!.worldId) {
                         bool70 = true
                     }
                     if (!bool70 && class6132!!.worldId == 0 && class6134!!.worldId != 0) {

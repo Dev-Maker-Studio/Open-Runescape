@@ -25,8 +25,8 @@ class WorldMeta {
             val size = buffer.readUSmart()
             LoginManager.WORLDS = Array(size) { WorldMeta() }
             for (i in 0 until size) {
-                LoginManager.WORLDS!![i].countryId = buffer.readUSmart()
-                LoginManager.WORLDS!![i].activity = buffer.readJagString()
+                LoginManager.WORLDS!![i]!!.countryId = buffer.readUSmart()
+                LoginManager.WORLDS!![i]!!.activity = buffer.readJagString()
                 if (Loader.DEBUG)
                     println("Worldlist set: " + LoginManager.WORLDS!![i])
             }

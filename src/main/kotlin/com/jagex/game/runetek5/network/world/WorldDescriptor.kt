@@ -17,7 +17,7 @@ open class WorldDescriptor : WorldDescriptorFlags() {
     @JvmField var ping = -1
 
     fun getWorld(): WorldMeta {
-        return LoginManager.WORLDS!![worldIndex]
+        return LoginManager.WORLDS!![worldIndex]!!
     }
 
     companion object {
@@ -125,7 +125,7 @@ open class WorldDescriptor : WorldDescriptorFlags() {
 
         @JvmStatic
         fun get_world(): WorldDescriptor? {
-            return getWorld(LoginManager.GAME_CONNECTION_INFO.worldId)
+            return getWorld(LoginManager.GAME_CONNECTION_INFO!!.worldId)
         }
 
         @JvmStatic
