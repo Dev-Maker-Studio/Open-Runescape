@@ -39,7 +39,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                     programString.append("#define ").append(shaderVariable.programVariableName).append(" ").append(shaderVariable.programVariableValue).append('\n')
                 }
             }
-            programString.append(String(toolkit.getGLShaderData(vertexShaderName)))
+            programString.append(String(toolkit.getGLShaderData(vertexShaderName!!)!!))
             vertexShaderProgramString = programString.toString()
         }
         if (shaderMapping.fragmentShaderName != null) {
@@ -52,7 +52,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                     programString.append("#define ").append(shaderVariable.programVariableName).append(" ").append(shaderVariable.programVariableValue).append('\n')
                 }
             }
-            programString.append(String(toolkit.getGLShaderData(fragmentShaderName)))
+            programString.append(String(toolkit.getGLShaderData(fragmentShaderName!!)!!))
             fragmentShaderProgramString = programString.toString()
         }
         ArrayUtils.setVariables(anIntArray9426, 0, anIntArray9426.size, -1)

@@ -72,7 +72,7 @@ abstract class MipmapTextureSampler(
 
     override fun bindTexture() {
         val slot = activeToolkit.getCurrentTextureSlot()
-        val type = activeToolkit.textureSlots[slot]
+        val type = activeToolkit.textureSlots!![slot]
         if (type != textureTarget) {
             if (type != 0) {
                 OpenGL.glBindTexture(type, 0)
@@ -80,7 +80,7 @@ abstract class MipmapTextureSampler(
             }
 
             OpenGL.glEnable(textureTarget)
-            activeToolkit.textureSlots[slot] = textureTarget
+            activeToolkit.textureSlots!![slot] = textureTarget
         }
 
         OpenGL.glBindTexture(textureTarget, texture)
