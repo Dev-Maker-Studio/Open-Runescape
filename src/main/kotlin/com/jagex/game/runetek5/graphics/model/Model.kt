@@ -552,17 +552,17 @@ abstract class Model {
             }
             for (faceIndex in 0 until numFaces) {
                 val face = faces!![faceIndex]
-                if (mesh.facesTexture[face].toInt() != -1) {
-                    val index = mesh.facesTexture[face].toInt() and 0xff
+                if (mesh.facesTexture!![face].toInt() != -1) {
+                    val index = mesh.facesTexture!![face].toInt() and 0xff
                     for (axis in 0..2) {
                         val verticeIndex: Short = when (axis) {
-                            0 -> mesh.facesA[face]
-                            1 -> mesh.facesB[face]
-                            else -> mesh.facesC[face]
+                            0 -> mesh.facesA!![face]
+                            1 -> mesh.facesB!![face]
+                            else -> mesh.facesC!![face]
                         }
-                        val x = mesh.verticesX[verticeIndex.toInt()]
-                        val y = mesh.verticesY[verticeIndex.toInt()]
-                        val z = mesh.verticesZ[verticeIndex.toInt()]
+                        val x = mesh.verticesX!![verticeIndex.toInt()]
+                        val y = mesh.verticesY!![verticeIndex.toInt()]
+                        val z = mesh.verticesZ!![verticeIndex.toInt()]
                         if (x < minX[index]) {
                             minX[index] = x
                         }
@@ -589,7 +589,7 @@ abstract class Model {
             centerZ = IntArray(numTexturedFaces)
             matrix = Array(numTexturedFaces) { FloatArray(0) }
             for (faceIndex in 0 until numTexturedFaces) {
-                val textureMapping = mesh.texturesMapping[faceIndex]
+                val textureMapping = mesh.texturesMapping!![faceIndex]
                 if (textureMapping > 0) {
                     centerX[faceIndex] = (minX[faceIndex] + maxX[faceIndex]) / 2
                     centerY[faceIndex] = (minY[faceIndex] + maxY[faceIndex]) / 2
@@ -598,7 +598,7 @@ abstract class Model {
                     val scaleY: Float
                     val scaleZ: Float
                     if (textureMapping.toInt() == 1) {
-                        val x = mesh.texturesScaleX[faceIndex].toInt()
+                        val x = mesh.texturesScaleX!![faceIndex].toInt()
                         if (x == 0) {
                             scaleX = 1.0f
                             scaleZ = 1.0f
@@ -609,17 +609,17 @@ abstract class Model {
                             scaleZ = 1.0f
                             scaleX = (-x) / 1024.0f
                         }
-                        scaleY = 64.0f / mesh.texturesScaleY[faceIndex]
+                        scaleY = 64.0f / mesh.texturesScaleY!![faceIndex]
                     } else if (textureMapping.toInt() == 2) {
-                        scaleX = 64.0f / mesh.texturesScaleX[faceIndex]
-                        scaleY = 64.0f / mesh.texturesScaleY[faceIndex]
-                        scaleZ = 64.0f / mesh.texturesScaleZ[faceIndex]
+                        scaleX = 64.0f / mesh.texturesScaleX!![faceIndex]
+                        scaleY = 64.0f / mesh.texturesScaleY!![faceIndex]
+                        scaleZ = 64.0f / mesh.texturesScaleZ!![faceIndex]
                     } else {
-                        scaleX = mesh.texturesScaleX[faceIndex] / 1024.0f
-                        scaleY = mesh.texturesScaleY[faceIndex] / 1024.0f
-                        scaleZ = mesh.texturesScaleZ[faceIndex] / 1024.0f
+                        scaleX = mesh.texturesScaleX!![faceIndex] / 1024.0f
+                        scaleY = mesh.texturesScaleY!![faceIndex] / 1024.0f
+                        scaleZ = mesh.texturesScaleZ!![faceIndex] / 1024.0f
                     }
-                    matrix[faceIndex] = createTextureMatrix(mesh.textureFaceX[faceIndex].toInt(), mesh.textureFaceY[faceIndex].toInt(), mesh.textureFaceZ[faceIndex].toInt(), mesh.texturesRotation[faceIndex].toInt() and 0xff, scaleX, scaleY, scaleZ)
+                    matrix[faceIndex] = createTextureMatrix(mesh.textureFaceX!![faceIndex].toInt(), mesh.textureFaceY!![faceIndex].toInt(), mesh.textureFaceZ!![faceIndex].toInt(), mesh.texturesRotation!![faceIndex].toInt() and 0xff, scaleX, scaleY, scaleZ)
                 }
             }
         }

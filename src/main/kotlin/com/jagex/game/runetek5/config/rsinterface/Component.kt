@@ -874,7 +874,7 @@ class Component {
                 if (model != null) {
                     functionMaskVar = toolkit.mergeFunctionMasks(functionMaskVar, model.getFunctionMask())
                 }
-                val mesh = Mesh.fromResource(Resource.MESH, this.primaryMediaId)
+                val mesh = Mesh.fromResource(Resource.MESH!!, this.primaryMediaId)
                 if (mesh == null) {
                     missingMedia = true
                     return null

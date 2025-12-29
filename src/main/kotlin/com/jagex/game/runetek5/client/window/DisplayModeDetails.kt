@@ -57,7 +57,7 @@ class DisplayModeDetails {
                     FontManager.debugOverlayFont,
                     FontManager.messageboxFont
                 )
-                val profilingMesh = Mesh.fromResource(Resource.MODEL, client.ENTITY_DEFAULTS.profilingMesh)
+                val profilingMesh = Mesh.fromResource(Resource.MODEL!!, client.ENTITY_DEFAULTS.profilingMesh)
                 val startTime = Utils.time()
                 Renderers.activeToolkit!!.resetClipping()
                 client.SUN_MATRIX.setViewPosition(0.0f, 256.0f, 0.0f)
@@ -71,7 +71,7 @@ class DisplayModeDetails {
                 Renderers.activeToolkit!!.setModelMatrix(renderMatrix)
                 Renderers.activeToolkit!!.updateSun(1.0f)
                 Renderers.activeToolkit!!.applyLighting(16777215, 0.5f, 0.5f, 20.0f, -50.0f, 30.0f)
-                val profilingModel = Renderers.activeToolkit!!.createModel(profilingMesh, 2048, 64, 64, 768)
+                val profilingModel = Renderers.activeToolkit!!.createModel(profilingMesh!!, 2048, 64, 64, 768)
                 var modelsDrawn = 0
                 Draw@ for (loops in 0 until 500) {
                     Renderers.activeToolkit!!.applyClearFlags(3, 0)

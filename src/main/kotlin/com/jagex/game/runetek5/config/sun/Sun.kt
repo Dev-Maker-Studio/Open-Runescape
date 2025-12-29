@@ -94,7 +94,7 @@ class Sun(
     }
 
     fun drawColoredSun(toolkit: AbstractToolkit, sun: Sun?) {
-        val mesh = Mesh.fromResource(TextureTypeList.modelResource, sunMaterialId)
+        val mesh = Mesh.fromResource(TextureTypeList.modelResource!!, sunMaterialId)
         if (mesh != null) {
             toolkit.getClipping(SUN_CLIPPING)
             toolkit.setClipping(0, 0, sunUseDimension, sunUseDimension)

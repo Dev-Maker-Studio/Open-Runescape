@@ -646,10 +646,10 @@ open class ItemType {
                 if (tertiaryMesh!!.version < 13) {
                     tertiaryMesh.upscale()
                 }
-                val meshesToCombine = arrayOf(primaryMesh, secondaryMesh, tertiaryMesh)
+                val meshesToCombine = arrayOf<Mesh?>(primaryMesh, secondaryMesh, tertiaryMesh)
                 primaryMesh = Mesh(meshesToCombine, 3)
             } else {
-                val meshesToCombine = arrayOf(primaryMesh, secondaryMesh)
+                val meshesToCombine = arrayOf<Mesh?>(primaryMesh, secondaryMesh)
                 primaryMesh = Mesh(meshesToCombine, 2)
             }
         }
@@ -742,7 +742,7 @@ open class ItemType {
             if (secondaryHeadMesh!!.version < 13) {
                 secondaryHeadMesh.upscale()
             }
-            val meshesToCombine = arrayOf(primaryHeadMesh, secondaryHeadMesh)
+            val meshesToCombine = arrayOf<Mesh?>(primaryHeadMesh, secondaryHeadMesh)
             primaryHeadMesh = Mesh(meshesToCombine, 2)
         }
         if (this.recolorSrc != null) {

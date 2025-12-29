@@ -39,7 +39,7 @@ class HintTrail(toolkit: AbstractToolkit, buffer: Packet, @JvmField val modelId:
     }
 
     fun getStationaryModel(toolkit: AbstractToolkit): Model? {
-        val mesh = Mesh.fromResource(Resource.MODEL, modelId)
+        val mesh = Mesh.fromResource(Resource.MODEL!!, modelId)
         if (mesh == null) {
             return null
         }

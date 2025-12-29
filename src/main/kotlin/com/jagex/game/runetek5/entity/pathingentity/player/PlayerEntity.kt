@@ -711,7 +711,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             var model = HintArrow.hintCache.get(fileId.toLong()) as Model?
             val modelFlags: Short = 2055
             if (model == null) {
-                val mesh = Mesh.fromResource(Resource.MODEL, fileId) ?: return null
+                val mesh = Mesh.fromResource(Resource.MODEL!!, fileId) ?: return null
                 if (mesh.version < 13) {
                     mesh.upscale()
                 }

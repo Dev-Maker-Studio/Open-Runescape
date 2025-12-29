@@ -293,7 +293,7 @@ class Skybox(
             if (archiveLoaded) {
                 toolkit.applyLighting(16777215, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f)
                 val mesh = Mesh.fromResource(TextureTypeList.modelResource!!, skyboxArchiveId)
-                skyModel = toolkit.createModel(mesh, 1099776, 0, 255, 1)
+                skyModel = toolkit.createModel(mesh!!, 1099776, 0, 255, 1)
                 val alpha = skyModel!!.getAlpha()
                 if (alpha == null) {
                     faceAlpha = null
