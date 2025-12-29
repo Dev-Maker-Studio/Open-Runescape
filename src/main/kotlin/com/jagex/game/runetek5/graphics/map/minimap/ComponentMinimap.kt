@@ -196,7 +196,7 @@ object ComponentMinimap {
                     rotation = (-Camera.camAngleY).toInt() and 0x3fff
                     i_11 = 4096
                 } else {
-                    val vector322: Vector3 = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords
+                    val vector322: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
                     absX = vector322.x.toInt()
                     absY = vector322.z.toInt()
                     rotation = (-Camera.camAngleY).toInt() + client.minimapRotation and 0x3fff
@@ -251,12 +251,12 @@ object ComponentMinimap {
                 HintRenderer.method3151(absX, absY, component, sprite, clipLeft, clipTop)
                 if (Camera.cameraCalculationType != 4) {
                     if (minimapFlagX != 0) {
-                        val sizeX = minimapFlagX * 4 + 2 - absX / 128 + (PlayerUpdate.MY_PLAYER.getSize() - 1) * 2
-                        val sizeY = 2 + minimapFlagY * 4 - absY / 128 + (PlayerUpdate.MY_PLAYER.getSize() - 1) * 2
+                        val sizeX = minimapFlagX * 4 + 2 - absX / 128 + (PlayerUpdate.MY_PLAYER!!.getSize() - 1) * 2
+                        val sizeY = 2 + minimapFlagY * 4 - absY / 128 + (PlayerUpdate.MY_PLAYER!!.getSize() - 1) * 2
                         drawEntity(component, dimension, clipLeft, clipTop, sizeX, sizeY, StaticMedia.mapflagSprites?.get(if (minimapContainsFlag) 1 else 0))
                     }
 
-                    if (!PlayerUpdate.MY_PLAYER.hidden) {
+                    if (!PlayerUpdate.MY_PLAYER!!.hidden) {
                         toolkit.clearPixels(clipLeft + component.width / 2 - 1, clipTop + component.height / 2 - 1, 3, 3, -1)
                     }
                 }
@@ -366,7 +366,7 @@ object ComponentMinimap {
         val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
         for (playerIndex in 0 until numPlayerIndices) {
             val player: PlayerEntity? = PlayerUpdate.players[playerIndices[playerIndex]]
-            if (player != null && player.hasAppearance() && !player.hidden && player != PlayerUpdate.MY_PLAYER && player.plane == PlayerUpdate.MY_PLAYER.plane) {
+            if (player != null && player.hasAppearance() && !player.hidden && player != PlayerUpdate.MY_PLAYER!! && player.plane == PlayerUpdate.MY_PLAYER!!.plane) {
                 val absolutePosition: Vector3 = player.getAbsolutePosition().coords
                 val sizeX = absolutePosition.x.toInt() / 128 - absX / 128
                 val sizeZ = absolutePosition.z.toInt() / 128 - absY / 128
@@ -385,7 +385,7 @@ object ComponentMinimap {
                         break
                     }
                 }
-                val onSameTeam = player.teamId != 0 && player.teamId == PlayerUpdate.MY_PLAYER.teamId
+                val onSameTeam = player.teamId != 0 && player.teamId == PlayerUpdate.MY_PLAYER!!.teamId
                 if (player.pMapdot) {
                     drawEntity(component, dimension, clipLeft, clipTop, sizeX, sizeZ, StaticMedia.mapdotSprites?.get(6))
                 } else if (onSameTeam) {
@@ -409,7 +409,7 @@ object ComponentMinimap {
             val node: ObjectNode? = client.NPC_MAP.get(client.NPC_UPDATE_INDICES[npcIndex].toLong()) as? ObjectNode
             if (node != null) {
                 val npcEntity = node.value as? NpcEntity
-                if (npcEntity != null && npcEntity.hasDefinition() && npcEntity.plane == PlayerUpdate.MY_PLAYER.plane) {
+                if (npcEntity != null && npcEntity.hasDefinition() && npcEntity.plane == PlayerUpdate.MY_PLAYER!!.plane) {
                     var npctype: NPCType? = npcEntity.definitions
                     if (npctype != null && npctype.alternativeIds != null) {
                         npctype = npctype.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
@@ -792,7 +792,7 @@ object ComponentMinimap {
                     val baseCoordinates: CoordGrid = mapRegion.getBaseCoordinates()
                     for (index in 0 until staticElements.elementCount) {
                         val bitpacked = staticElements.bitpackedPlacement[index]
-                        if (bitpacked shr 28 == PlayerUpdate.MY_PLAYER.plane.toInt()) {
+                        if (bitpacked shr 28 == PlayerUpdate.MY_PLAYER!!.plane.toInt()) {
                             val sceneX = (bitpacked shr 14 and 0x3fff) - baseCoordinates.x
                             val sceneY = (bitpacked and 0x3fff) - baseCoordinates.y
                             if (sceneX >= 0 && sceneX < regionDimensionX && sceneY >= 0 && sceneY < regionDimensionY) {
@@ -817,10 +817,10 @@ object ComponentMinimap {
 
     @JvmStatic
     fun drawGame(toolkit: AbstractToolkit) {
-        if (MAP_PLANE != PlayerUpdate.MY_PLAYER.plane.toInt() && Resource.mapRegion!!.getScene() != null) {
+        if (MAP_PLANE != PlayerUpdate.MY_PLAYER!!.plane.toInt() && Resource.mapRegion!!.getScene() != null) {
             Utils.time()
-            if (drawGame(toolkit, PlayerUpdate.MY_PLAYER.plane.toInt())) {
-                MAP_PLANE = PlayerUpdate.MY_PLAYER.plane.toInt()
+            if (drawGame(toolkit, PlayerUpdate.MY_PLAYER!!.plane.toInt())) {
+                MAP_PLANE = PlayerUpdate.MY_PLAYER!!.plane.toInt()
             }
         }
     }

@@ -104,7 +104,7 @@ object EntityUpdating {
             pathingEntity.resetXyIndex()
         }
 
-        if (PlayerUpdate.MY_PLAYER == pathingEntity && (abs.x.toInt() < 6144 || abs.z.toInt() < 6144 || abs.x.toInt() >= (Resource.mapRegion!!.getSceneSizeX() - 12) * 512 || abs.z.toInt() >= (Resource.mapRegion!!.getSceneSizeY() - 12) * 512)) {
+        if (PlayerUpdate.MY_PLAYER!! == pathingEntity && (abs.x.toInt() < 6144 || abs.z.toInt() < 6144 || abs.x.toInt() >= (Resource.mapRegion!!.getSceneSizeX() - 12) * 512 || abs.z.toInt() >= (Resource.mapRegion!!.getSceneSizeY() - 12) * 512)) {
             pathingEntity.currentSequence.update(-1)
             for (index in pathingEntity.spotAnimations.indices) {
                 pathingEntity.spotAnimations[index].spotAnimationId = -1
@@ -126,7 +126,7 @@ object EntityUpdating {
         val rotation = turnTo(pathingEntity)
         rotateEquipment(pathingEntity)
         PathingEntity.animateMovement(pathingEntity, moveType, turnDirection, rotation)
-        PlayerUpdate.animateMovement(pathingEntity, moveType)
+        PlayerUpdate.animateMovement(pathingEntity, moveType.toByte())
         PathingEntity.animateMovement(pathingEntity)
 
         val quaternion = QuaternionPool.newQuaternion()
@@ -184,7 +184,7 @@ object EntityUpdating {
                 }
 
                 val pathingEntity = entity as PathingEntity
-                if (pathingEntity.worldPriority < 0 || pathingEntity.drawCycle != client.timesSceneRendered && pathingEntity.plane != PlayerUpdate.MY_PLAYER.plane) {
+                if (pathingEntity.worldPriority < 0 || pathingEntity.drawCycle != client.timesSceneRendered && pathingEntity.plane != PlayerUpdate.MY_PLAYER!!.plane) {
                     continue
                 }
             }

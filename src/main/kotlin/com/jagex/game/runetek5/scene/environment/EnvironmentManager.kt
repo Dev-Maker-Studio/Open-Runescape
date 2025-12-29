@@ -79,7 +79,7 @@ class EnvironmentManager(
         if (!GameState.isLoggedOut(client.gameState) && !GameState.inLobby(client.gameState)) {
             var x = -1
             var y = -1
-            if (PlayerUpdate.MY_PLAYER != null) {
+            if (PlayerUpdate.MY_PLAYER!! != null) {
                 x = PlayerUpdate.MY_PLAYER!!.movementBaseX[0] shr 3
                 y = PlayerUpdate.MY_PLAYER!!.movementBaseY[0] shr 3
             }

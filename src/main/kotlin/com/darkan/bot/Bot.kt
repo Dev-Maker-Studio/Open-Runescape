@@ -369,7 +369,7 @@ object Bot {
     fun playerInList(username: String) =
         responsePlayers.any { it.equals(username, ignoreCase = true) }
 
-    fun getMyPlayer(): PlayerEntity = PlayerUpdate.MY_PLAYER
+    fun getMyPlayer(): PlayerEntity = PlayerUpdate.MY_PLAYER!!
 
     fun itemOnItem(fromItem: Int, fromSlot: Int, toItem: Int, toSlot: Int) {
         interfaceOnInterface(44498944, 44498944, fromSlot, toSlot, fromItem, toItem)
@@ -613,9 +613,9 @@ object Bot {
     fun getDistanceTo(strategy: RouteStrategy, alt: Boolean = false): Int {
         return Utils.findRouteDistance(
             getMyPlayer().endX.toInt(),
-            getMyPlayer().endZ.toInt(), PlayerUpdate.MY_PLAYER.size,
+            getMyPlayer().endZ.toInt(), PlayerUpdate.MY_PLAYER!!.size,
             strategy,
-            Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER.plane.toInt()),
+            Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER!!.plane.toInt()),
             alt,
             client.WALKING_STEPS_X,
             client.WALKING_STEPS_Y

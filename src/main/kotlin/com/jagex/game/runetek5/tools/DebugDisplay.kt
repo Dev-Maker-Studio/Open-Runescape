@@ -78,12 +78,12 @@ object DebugDisplay {
                     MapRegion.requestDebugMapUpdate()
                 }
                 26 -> {
-                    val abs = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords
+                    val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
                     Console.writeLine((abs.x.toInt() shr 9).toString() + " " + (abs.z.toInt() shr 9))
                 }
                 2 -> {
-                    val abs = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords
-                    Console.writeLine("" + Resource.mapRegion!!.getScene().localHeightmap[PlayerUpdate.MY_PLAYER.plane.toInt()].getHeight(abs.x.toInt() shr 9, abs.z.toInt() shr 9))
+                    val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
+                    Console.writeLine("" + Resource.mapRegion!!.getScene().localHeightmap[PlayerUpdate.MY_PLAYER!!.plane.toInt()].getHeight(abs.x.toInt() shr 9, abs.z.toInt() shr 9))
                 }
                 23 -> {
                     Console.writeLine(Component.NATIVE_SPRITE_CACHE.getCapacityLeft().toString() + " " + Component.NATIVE_SPRITE_CACHE.getCapacity())

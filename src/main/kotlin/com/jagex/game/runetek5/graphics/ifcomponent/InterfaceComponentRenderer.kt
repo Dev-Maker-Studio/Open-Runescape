@@ -423,9 +423,9 @@ object InterfaceComponentRenderer {
                                     }
                                 } else if (component.mediaType != MediaType.ITEM_CONTAINER_MALE && component.mediaType != MediaType.ITEM_CONTAINER_FEMALE) {
                                     if (component.animatingSequence != null && component.animatingSequence!!.hasType()) {
-                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, PlayerUpdate.MY_PLAYER.playerAppearance)
+                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, component.animatingSequence, PlayerUpdate.MY_PLAYER!!.playerAppearance)
                                     } else {
-                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, null, PlayerUpdate.MY_PLAYER.playerAppearance)
+                                        renderedMediaModel = component.getAnimatedMediaModel(Renderers.activeToolkit!!, functionMask, TypeLists.BAS!!, TypeLists.IDK!!, TypeLists.NPC!!, TypeLists.OBJ!!, VarProviders.PLAYER_VAR_PROVIDER, null, PlayerUpdate.MY_PLAYER!!.playerAppearance)
                                     }
                                     if (renderedMediaModel == null && Component.missingMedia) {
                                         Component.redrawComponent(component)

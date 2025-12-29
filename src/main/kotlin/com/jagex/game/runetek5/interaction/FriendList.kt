@@ -63,7 +63,7 @@ object FriendList {
                             }
                         }
                     }
-                    if (TextUtils.formatDisplayname(PlayerUpdate.MY_PLAYER.displayName!!) == formattedDisplayName) {
+                    if (TextUtils.formatDisplayname(PlayerUpdate.MY_PLAYER!!.displayName!!) == formattedDisplayName) {
                         ChatBox.writeGameMessage(LocalizedText.CANT_ADD_SELF_TO_FRIEND.translate(client.CURRENT_LANGUAGE)!!)
                     } else {
                         val context = client.getConnectionContext()
@@ -115,7 +115,7 @@ object FriendList {
                 return true
             }
         }
-        return displayName.equals(PlayerUpdate.MY_PLAYER.displayName, ignoreCase = true)
+        return displayName.equals(PlayerUpdate.MY_PLAYER!!.displayName, ignoreCase = true)
     }
 
     @JvmStatic

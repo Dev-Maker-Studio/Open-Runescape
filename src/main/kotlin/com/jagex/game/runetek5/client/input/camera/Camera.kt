@@ -115,7 +115,7 @@ object Camera {
 
     @JvmStatic
     fun method6286(multiplier: Long) {
-        val abs = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords
+        val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
         val x = abs.x.toInt() + cameraRandomisationH
         val y = abs.z.toInt() + cameraRandomisationV
         if (cameraBaseX - x < -2000 || cameraBaseX - x > 2000 || cameraBaseY - y < -2000 || cameraBaseY - y > 2000) {
@@ -265,7 +265,7 @@ object Camera {
                 yaw = client.CUSTOM_LOWEST_YAW[4] + 128
             }
             val i_4 = (camAngleY.toInt() + cameraRandomisationA) and 0x3fff
-            val abs = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords
+            val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
             setCameraPosition(
                 cameraBaseX, MapRegion.tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(),
                     PlayerUpdate.MY_PLAYER_PLANE

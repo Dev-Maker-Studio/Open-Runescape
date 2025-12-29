@@ -101,7 +101,7 @@ object PacketDecoder {
         } catch (e: Exception) {
             e.printStackTrace()
             val basePos = Resource.mapRegion!!.getBaseCoordinates()
-            val player = PlayerUpdate.MY_PLAYER
+            val player = PlayerUpdate.MY_PLAYER!!
 
             val opcodes = listOf(
                 connectionContext.currentPacket,
@@ -502,7 +502,7 @@ object PacketDecoder {
                 val i_35 = targetHash and 0xffff
                 val player117: PlayerEntity?
                 if (i_35 == PlayerUpdate.myPlayerIndex) {
-                    player117 = PlayerUpdate.MY_PLAYER
+                    player117 = PlayerUpdate.MY_PLAYER!!
                 } else {
                     player117 = PlayerUpdate.players[i_35]
                 }
@@ -697,7 +697,7 @@ object PacketDecoder {
             val speed = buffer.readUByte()
             val class282Sub47131 = client.NPC_MAP.get(npcIndex.toLong())
             if (class282Sub47131 != null) {
-                PlayerUpdate.animate(class282Sub47131.value as PathingEntity?, animationIds, speed, true)
+                PlayerUpdate.animate((class282Sub47131.value as PathingEntity?)!!, animationIds, speed, true)
             }
             context.currentPacket = null
             return true
@@ -738,7 +738,7 @@ object PacketDecoder {
             val playerIndex = buffer.readUShort()
             val player: PlayerEntity?
             if (playerIndex == PlayerUpdate.myPlayerIndex) {
-                player = PlayerUpdate.MY_PLAYER
+                player = PlayerUpdate.MY_PLAYER!!
             } else {
                 player = PlayerUpdate.players[playerIndex]
             }
@@ -855,7 +855,7 @@ object PacketDecoder {
                         friendsChatPlayers[index]!!.worldId = buffer.readUShort()
                         friendsChatPlayers[index]!!.rank = buffer.readByte()
                         friendsChatPlayers[index]!!.worldName = buffer.readString()
-                        if (friendsChatPlayers[index]!!.username == PlayerUpdate.MY_PLAYER.displayName) {
+                        if (friendsChatPlayers[index]!!.username == PlayerUpdate.MY_PLAYER!!.displayName) {
                             FriendsChat.MY_PLAYER_FC_RANK = friendsChatPlayers[index]!!.rank
                         }
                     }
@@ -972,8 +972,8 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.RESET_ALL_ANIMATIONS) {
             for (key in PlayerUpdate.players.indices) {
                 if (PlayerUpdate.players[key] != null) {
-                    PlayerUpdate.players[key].currentAnimations = null
-                    PlayerUpdate.players[key].currentSequence.update(-1)
+                    PlayerUpdate.players[key]!!.currentAnimations = null
+                    PlayerUpdate.players[key]!!.currentSequence.update(-1)
                 }
             }
             for (key in 0..<client.npcCount) {
@@ -1527,7 +1527,7 @@ object PacketDecoder {
                         FriendsChat.FC_PLAYERS!![i_12]!!.worldId = worldId
                         FriendsChat.FC_PLAYERS!![i_12]!!.rank = rank
                         FriendsChat.FC_PLAYERS!![i_12]!!.worldName = worldName
-                        if (username == PlayerUpdate.MY_PLAYER.displayName) {
+                        if (username == PlayerUpdate.MY_PLAYER!!.displayName) {
                             FriendsChat.MY_PLAYER_FC_RANK = rank
                         }
                         client.anInt7179 = client.anInt7347
@@ -1549,7 +1549,7 @@ object PacketDecoder {
                 }
                 FriendsChat.FC_PLAYERS!![i_12 + 1] = fcPlayer
                 FriendsChat.FC_PLAYER_COUNT++
-                if (username == PlayerUpdate.MY_PLAYER.displayName) {
+                if (username == PlayerUpdate.MY_PLAYER!!.displayName) {
                     FriendsChat.MY_PLAYER_FC_RANK = rank
                 }
             }

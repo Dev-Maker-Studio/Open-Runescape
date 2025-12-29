@@ -26,7 +26,7 @@ class ProjectileSpawnRequest(
                 if (source < 0) {
                     val playerId = -source - 1
                     entity = if (playerId == PlayerUpdate.myPlayerIndex) {
-                        PlayerUpdate.MY_PLAYER
+                        PlayerUpdate.MY_PLAYER!!
                     } else {
                         PlayerUpdate.players[playerId]
                     }

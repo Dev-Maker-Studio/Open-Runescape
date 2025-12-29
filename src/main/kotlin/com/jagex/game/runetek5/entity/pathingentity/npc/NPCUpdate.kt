@@ -226,8 +226,8 @@ object NPCUpdate {
 
             npcEntity.move(
                 i_12,
-                PlayerUpdate.MY_PLAYER.movementBaseX[0] + offX,
-                PlayerUpdate.MY_PLAYER.movementBaseY[0] + offY,
+                PlayerUpdate.MY_PLAYER!!.movementBaseX[0] + offX,
+                PlayerUpdate.MY_PLAYER!!.movementBaseY[0] + offY,
                 i_11 == 1,
                 npcEntity.getSize()
             )

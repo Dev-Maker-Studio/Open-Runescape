@@ -455,7 +455,7 @@ enum class UpdateZonePacket(val size: Int) {
     }
 
     private fun isPlayerWithinRange(x: Int, y: Int, range: Int): Boolean {
-        val player = PlayerUpdate.MY_PLAYER
+        val player = PlayerUpdate.MY_PLAYER!!
         return player.movementBaseX[0] in (x - range)..(x + range) &&
                 player.movementBaseY[0] in (y - range)..(y + range)
     }

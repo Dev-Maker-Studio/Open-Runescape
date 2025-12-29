@@ -1145,16 +1145,16 @@ object RouteFinder {
 
     @JvmStatic
     fun calculateRoute(destinationX: Int, destinationY: Int, bool2: Boolean, strategy: RouteStrategy): Boolean {
-        val baseX = PlayerUpdate.MY_PLAYER.movementBaseX[0]
-        val baseY = PlayerUpdate.MY_PLAYER.movementBaseY[0]
+        val baseX = PlayerUpdate.MY_PLAYER!!.movementBaseX[0]
+        val baseY = PlayerUpdate.MY_PLAYER!!.movementBaseY[0]
         if (baseX >= 0 && baseX < Resource.mapRegion!!.getSceneSizeX() && baseY >= 0 && baseY < Resource.mapRegion!!.getSceneSizeY()) {
             if (destinationX >= 0 && destinationX < Resource.mapRegion!!.getSceneSizeX() && destinationY >= 0 && destinationY < Resource.mapRegion!!.getSceneSizeY()) {
                 val executedStep = findRoute(
                     baseX,
                     baseY,
-                    PlayerUpdate.MY_PLAYER.getSize(),
+                    PlayerUpdate.MY_PLAYER!!.getSize(),
                     strategy,
-                    Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER.plane.toInt()),
+                    Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER!!.plane.toInt()),
                     bool2,
                     client.WALKING_STEPS_X,
                     client.WALKING_STEPS_Y

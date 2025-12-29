@@ -122,7 +122,7 @@ class Component {
         @JvmStatic
         fun prepareSequenceOnInterface(component: Component) {
             if (component.contentType == ComponentContentType.CONTENT_TYPE_328) {
-                if (PlayerUpdate.MY_PLAYER.displayName == null) {
+                if (PlayerUpdate.MY_PLAYER!!.displayName == null) {
                     component.primaryMediaId = 0
                     component.secondaryMediaId = 0
                 } else {
@@ -130,9 +130,9 @@ class Component {
                     component.spriteRoll = (Math.sin(client.cycles / 40.0) * 256.0).toInt() and 0x7ff
                     component.mediaType = MediaType.PLAYER_MODEL
                     component.primaryMediaId = PlayerUpdate.myPlayerIndex
-                    val displayName = PlayerUpdate.MY_PLAYER.displayName
+                    val displayName = PlayerUpdate.MY_PLAYER!!.displayName
                     component.secondaryMediaId = Utils.stringToInt(displayName!!)
-                    val movingSequence = PlayerUpdate.MY_PLAYER.movingSequence
+                    val movingSequence = PlayerUpdate.MY_PLAYER!!.movingSequence
                     if (movingSequence != null) {
                         if (component.animatingSequence == null) {
                             component.animatingSequence = InterfaceSequence()

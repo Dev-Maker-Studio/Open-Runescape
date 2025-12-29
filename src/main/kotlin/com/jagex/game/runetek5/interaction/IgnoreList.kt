@@ -62,7 +62,7 @@ object IgnoreList {
                             }
                         }
                     }
-                    if (TextUtils.formatDisplayname(PlayerUpdate.MY_PLAYER.displayName!!) == formattedDisplayName) {
+                    if (TextUtils.formatDisplayname(PlayerUpdate.MY_PLAYER!!.displayName!!) == formattedDisplayName) {
                         ChatBox.writeGameMessage(LocalizedText.CANT_ADD_SELF_TO_IGNORE.translate(client.CURRENT_LANGUAGE)!!)
                     } else {
                         val context = client.getConnectionContext()

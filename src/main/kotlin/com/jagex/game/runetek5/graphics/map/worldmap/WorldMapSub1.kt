@@ -149,9 +149,9 @@ object WorldMapSub1 {
                 val placement = IntArray(3)
                 var i_4 = -1
                 var i_5 = -1
-                val absolute: Vector3 = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords
+                val absolute: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
                 val base: CoordGrid = Resource.mapRegion!!.getBaseCoordinates()
-                if (WorldMap.staticElement!!.method14778(PlayerUpdate.MY_PLAYER.plane.toInt(), (absolute.x.toInt() shr 9) + base.x, (absolute.z.toInt() shr 9) + base.y, placement)) {
+                if (WorldMap.staticElement!!.method14778(PlayerUpdate.MY_PLAYER!!.plane.toInt(), (absolute.x.toInt() shr 9) + base.x, (absolute.z.toInt() shr 9) + base.y, placement)) {
                     i_4 = placement[1] - WorldMap.mapSquareAbsX
                     i_5 = placement[2] - WorldMap.mapSquareAbsY
                 }

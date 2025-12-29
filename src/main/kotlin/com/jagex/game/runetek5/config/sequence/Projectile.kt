@@ -125,7 +125,7 @@ class Projectile(
                 if (entitySource < 0) {
                     entityLockon = -entitySource - 1
                     if (entityLockon == PlayerUpdate.myPlayerIndex) {
-                        lockedOnEntity = PlayerUpdate.MY_PLAYER
+                        lockedOnEntity = PlayerUpdate.MY_PLAYER!!
                     } else {
                         lockedOnEntity = PlayerUpdate.players[entityLockon]
                     }

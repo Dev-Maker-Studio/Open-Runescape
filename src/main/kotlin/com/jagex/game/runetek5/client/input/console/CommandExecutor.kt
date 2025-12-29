@@ -89,8 +89,8 @@ object CommandExecutor {
                     val lookTotalX = base.x.toInt() + Camera.lookX
                     val lookTotalY = base.y.toInt() + Camera.lookY
 
-                    Console.writeLine("Pos: ${PlayerUpdate.MY_PLAYER.plane},${cameraX shr 6},${cameraY shr 6},${cameraX and 0x3f},${cameraY and 0x3f} Height: ${MapRegion.tileheightForAbsolutePosition(Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteY, PlayerUpdate.MY_PLAYER.plane.toInt()) - Camera.cameraPositionAbsoluteZ}")
-                    Console.writeLine("Look: ${PlayerUpdate.MY_PLAYER.plane},${lookTotalX shr 6},${lookTotalY shr 6},${lookTotalX and 0x3f},${lookTotalY and 0x3f} Height: ${MapRegion.tileheightForAbsolutePosition(Camera.lookX, Camera.lookY, PlayerUpdate.MY_PLAYER.plane.toInt()) - Camera.anInt1527}")
+                    Console.writeLine("Pos: ${PlayerUpdate.MY_PLAYER!!.plane},${cameraX shr 6},${cameraY shr 6},${cameraX and 0x3f},${cameraY and 0x3f} Height: ${MapRegion.tileheightForAbsolutePosition(Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteY, PlayerUpdate.MY_PLAYER!!.plane.toInt()) - Camera.cameraPositionAbsoluteZ}")
+                    Console.writeLine("Look: ${PlayerUpdate.MY_PLAYER!!.plane},${lookTotalX shr 6},${lookTotalY shr 6},${lookTotalX and 0x3f},${lookTotalY and 0x3f} Height: ${MapRegion.tileheightForAbsolutePosition(Camera.lookX, Camera.lookY, PlayerUpdate.MY_PLAYER!!.plane.toInt()) - Camera.anInt1527}")
                     return
                 }
             }
@@ -114,7 +114,7 @@ object CommandExecutor {
                         return
                     }
                     command.startsWith("clipmask") -> {
-                        val player = PlayerUpdate.MY_PLAYER
+                        val player = PlayerUpdate.MY_PLAYER!!
                         val collisionMap = Resource.mapRegion!!.getCollisionMap(player.plane.toInt())
                         val flags = collisionMap.collisionFlags[player.endX + 1][player.endZ + 1].toInt()
                         Console.writeLine("(${player.endX}, ${player.endZ}): $flags - ${CollisionMap.getFlags(flags)}")
@@ -125,7 +125,7 @@ object CommandExecutor {
                             val pixels = TypeLists.OBJ!!.list(itemId).getSpritePixels(
                                 Renderers.GPU_ITEM_RENDERER!!, Renderers.activeToolkit!!, 1, 1, -13623264,
                                 false, Component.StackMode.NONUM, Renderers.FONT_RENDERER!!,
-                                PlayerUpdate.MY_PLAYER.playerAppearance!!
+                                PlayerUpdate.MY_PLAYER!!.playerAppearance!!
                             )
                             try {
                                 val dimension = Math.sqrt(pixels!!.size.toDouble()).toInt() - 1

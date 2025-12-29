@@ -223,7 +223,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         abs.z = (size * 256 + movementBaseY[0] * 512).toFloat()
         setBasePosition(abs)
         abs.pushVectorStack()
-        if (this == PlayerUpdate.MY_PLAYER) {
+        if (this == PlayerUpdate.MY_PLAYER!!) {
             Resource.mapRegion!!.environmentManager.requestDirectEnvironmentTransition()
         }
 
@@ -493,7 +493,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         renderEmote = buffer.readUShort()
         username = buffer.readString()
         displayName = username
-        if (this == PlayerUpdate.MY_PLAYER) {
+        if (this == PlayerUpdate.MY_PLAYER!!) {
             PlayerUpdate.MY_PLAYER_USERNAME = username
         }
 
@@ -616,7 +616,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                 }
             }
 
-            if (this == PlayerUpdate.MY_PLAYER) {
+            if (this == PlayerUpdate.MY_PLAYER!!) {
                 for (index in PlayerUpdate.HINT_ARROWS.indices.reversed()) {
                     val hintArrow = PlayerUpdate.HINT_ARROWS[index]
                     if (hintArrow != null && hintArrow.modelId != -1) {
@@ -667,7 +667,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
 
             for (index in models.indices) {
                 if (models[index] != null) {
-                    models[index]!!.drawMatrixThreaded(renderingMatrix, boundingBoxPolygons!![index], if (this == PlayerUpdate.MY_PLAYER) ModelFunctionMaskGL.SMOOTH_EDGES else ModelFunctionMaskGL.EMPTY)
+                    models[index]!!.drawMatrixThreaded(renderingMatrix, boundingBoxPolygons!![index], if (this == PlayerUpdate.MY_PLAYER!!) ModelFunctionMaskGL.SMOOTH_EDGES else ModelFunctionMaskGL.EMPTY)
                 }
             }
 

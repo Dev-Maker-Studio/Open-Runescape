@@ -95,7 +95,7 @@ object PacketEncoder {
 
         for (i_6 in 0 until i_3) {
             val player7: PlayerEntity? = PlayerUpdate.players[ints_4[i_6]]
-            if (player7 != null && player7 !== PlayerUpdate.MY_PLAYER && player7.displayName != null && player7.displayName.equals(string_1, ignoreCase = true)) {
+            if (player7 != null && player7 !== PlayerUpdate.MY_PLAYER!! && player7.displayName != null && player7.displayName.equals(string_1, ignoreCase = true)) {
                 val outgoingpacket8: ClientProt? = when (i_0) {
                     1 -> ClientProt.PLAYER_OP1
                     4 -> ClientProt.PLAYER_OP4
@@ -499,7 +499,7 @@ object PacketEncoder {
             val indices = PlayerUpdate.OUT_PLAYER_INDICES
             for (i in 0 until count) {
                 val player6: PlayerEntity? = PlayerUpdate.players[indices[i]]
-                if (player6 != null && player6.displayName != null && player6.displayName.equals(string_0, ignoreCase = true) && (player6 === PlayerUpdate.MY_PLAYER && (USE_OPTIONS_FLAGS and 0x10) != 0 || (USE_OPTIONS_FLAGS and 0x8) != 0)) {
+                if (player6 != null && player6.displayName != null && player6.displayName.equals(string_0, ignoreCase = true) && (player6 === PlayerUpdate.MY_PLAYER!! && (USE_OPTIONS_FLAGS and 0x10) != 0 || (USE_OPTIONS_FLAGS and 0x8) != 0)) {
                     val packet = createPacket(ClientProt.IF_ON_PLAYER, client.GAME_CONNECTION_CONTEXT.isaac)
                     packet.buffer.writeShort(client.anInt7345)
                     packet.buffer.writeShortLittle(indices[i])
@@ -546,7 +546,8 @@ object PacketEncoder {
                 } catch (exception: Exception) {
                     // NOOP
                 }
-                val url = URL(StaticMethods.initialApplet!!.getCodeBase(), "clienterror.ws?c=" + SystemInfo.clientBuild + "&cs=" + SystemInfo.clientBuildSub + "&u=" + (if (PlayerUpdate.MY_PLAYER_USERNAME != null) Utils.formatRequestParameter(PlayerUpdate.MY_PLAYER_USERNAME) else "" + StaticMethods.aLong10459) + "&v1=" + Utils.formatRequestParameter(vendor) + "&v2=" + Utils.formatRequestParameter(version) + "&e=" + errorString)
+                val username = PlayerUpdate.MY_PLAYER_USERNAME
+                val url = URL(StaticMethods.initialApplet!!.getCodeBase(), "clienterror.ws?c=" + SystemInfo.clientBuild + "&cs=" + SystemInfo.clientBuildSub + "&u=" + (if (username != null) Utils.formatRequestParameter(username) else "" + StaticMethods.aLong10459) + "&v1=" + Utils.formatRequestParameter(vendor) + "&v2=" + Utils.formatRequestParameter(version) + "&e=" + errorString)
                 val dataInputStream = DataInputStream(url.openStream())
                 dataInputStream.read()
                 dataInputStream.close()

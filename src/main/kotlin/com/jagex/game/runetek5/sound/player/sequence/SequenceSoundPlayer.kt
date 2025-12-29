@@ -15,7 +15,7 @@ object SequenceSoundPlayer {
     fun playSequenceSound(seqtype: SeqType?, frameId: Int, sceneObject: SceneGraphEntity) {
         val frameSounds = seqtype?.frameSounds
         if (AreaSoundPlayer.AREA_SOUND_CACHE_SIZE < 50 && seqtype != null && frameSounds != null && frameId < frameSounds.size
-            && frameSounds[frameId] != null && sceneObject.plane == PlayerUpdate.MY_PLAYER.plane
+            && frameSounds[frameId] != null && sceneObject.plane == PlayerUpdate.MY_PLAYER!!.plane
         ) {
             val frameSoundsForId = frameSounds[frameId]!!
             val bitpacked = frameSoundsForId[0]
@@ -38,7 +38,7 @@ object SequenceSoundPlayer {
 
             val volume = seqtype.frameSoundVolume?.get(frameId) ?: 255
             if (positionOffset == 0) {
-                if (sceneObject == PlayerUpdate.MY_PLAYER) {
+                if (sceneObject == PlayerUpdate.MY_PLAYER!!) {
                     if (seqtype.vorbis) {
                         AreaSoundPlayer.playSoundVorbis(soundId, timesRepeat, 0, volume, false, sampleRate)
                     } else {
@@ -46,7 +46,7 @@ object SequenceSoundPlayer {
                     }
                 }
             } else {
-                if (sceneObject == PlayerUpdate.MY_PLAYER) {
+                if (sceneObject == PlayerUpdate.MY_PLAYER!!) {
                     if (PreferenceManager.preferences!!.soundEffectVolume!!.getValue() == 0) {
                         return
                     }
@@ -57,7 +57,7 @@ object SequenceSoundPlayer {
                 val absolute: Vector3 = sceneObject.getAbsolutePosition().coords
                 val sceneX = ((absolute.x.toInt() - 256) shr 9)
                 val sceneZ = ((absolute.z.toInt() - 256) shr 9)
-                val bitpackedPosition = if (sceneObject == PlayerUpdate.MY_PLAYER) 0 else positionOffset + (sceneZ shl 8) + (sceneObject.plane.toInt() shl 24) + (sceneX shl 16)
+                val bitpackedPosition = if (sceneObject == PlayerUpdate.MY_PLAYER!!) 0 else positionOffset + (sceneZ shl 8) + (sceneObject.plane.toInt() shl 24) + (sceneX shl 16)
                 AreaSoundPlayer.AREA_SOUND_CACHE[++AreaSoundPlayer.AREA_SOUND_CACHE_SIZE - 1] = AreaSound((if (seqtype.vorbis) 2 else 1).toByte(), soundId, timesRepeat, 0, volume, bitpackedPosition, sampleRate, sceneObject)
             }
         }

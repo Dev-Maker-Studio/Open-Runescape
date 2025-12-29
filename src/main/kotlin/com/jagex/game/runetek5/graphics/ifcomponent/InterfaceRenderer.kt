@@ -373,8 +373,8 @@ object InterfaceRenderer {
 										mapX = (worldX shr 2) + (client.anInt7262 shr 9)
 										mapY = (client.anInt7376 shr 9) - (worldY shr 2)
 									} else {
-										val playerSizeOffset = (PlayerUpdate.MY_PLAYER.size - 1) * 256
-										val playerPosition = PlayerUpdate.MY_PLAYER.getAbsolutePosition().coords
+										val playerSizeOffset = (PlayerUpdate.MY_PLAYER!!.size - 1) * 256
+										val playerPosition = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
 										mapX = (playerPosition.x.toInt() - playerSizeOffset shr 9) + (worldX shr 2)
 										mapY = (playerPosition.z.toInt() - playerSizeOffset shr 9) - (worldY shr 2)
 									}

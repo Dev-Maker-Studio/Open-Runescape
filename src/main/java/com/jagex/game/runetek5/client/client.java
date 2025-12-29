@@ -2008,7 +2008,7 @@ public class client extends GameShell {
                     int rotation = EntityUpdating.turnTo(npc);
                     EntityUpdating.rotateEquipment(npc);
                     PathingEntity.animateMovement(npc, EntityUpdating.currentMovementType, EntityUpdating.turnDirectionIndex, rotation);
-                    PlayerUpdate.animateMovement(npc, EntityUpdating.currentMovementType);
+                    PlayerUpdate.animateMovement(npc, (byte) EntityUpdating.currentMovementType);
                     PathingEntity.animateMovement(npc);
                     Quaternion quaternion = QuaternionPool.newQuaternion();
                     quaternion.rotateEuler(MathUtils.getTheta(npc.yaw.getRotation()), MathUtils.getTheta(npc.pitch.getRotation()), MathUtils.getTheta(npc.roll.getRotation()));

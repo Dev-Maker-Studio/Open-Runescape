@@ -201,7 +201,7 @@ object SoundEffectPlayer {
 	            if (hearDistanceDelta > 0 && minHearDistance > 0) {
 	                volume = preferedVolume * (minHearDistance - hearDistanceDelta) / minHearDistance
 	            }
-	            PlayerUpdate.MY_PLAYER.getSize()
+	            PlayerUpdate.MY_PLAYER!!.getSize()
 	            var i_11 = 8192
 	            val i_12 = (ambientSound.absStartX + ambientSound.absEndX) / 2 - absX
 	            val i_13 = (ambientSound.absStartY + ambientSound.absEndY) / 2 - absY
