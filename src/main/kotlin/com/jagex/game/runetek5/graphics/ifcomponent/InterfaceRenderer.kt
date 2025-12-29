@@ -307,7 +307,7 @@ object InterfaceRenderer {
 										while (overhead != null) {
 											if (mouseX >= overhead.startX && mouseX < overhead.endX && mouseY >= overhead.startY && mouseY < overhead.endY) {
 												MiniMenu.resetEntries()
-												PathingEntity.interfaceComponentOnEntity(overhead.pathingEntity)
+												PathingEntity.interfaceComponentOnEntity(overhead.pathingEntity!!)
 											}
 											overhead = client.ENTITY_OVERHEADS.getNext() as EntityOverhead?
 										}
@@ -373,7 +373,7 @@ object InterfaceRenderer {
 										mapX = (worldX shr 2) + (client.anInt7262 shr 9)
 										mapY = (client.anInt7376 shr 9) - (worldY shr 2)
 									} else {
-										val playerSizeOffset = (PlayerUpdate.MY_PLAYER!!.size - 1) * 256
+										val playerSizeOffset = (PlayerUpdate.MY_PLAYER!!.getSize() - 1) * 256
 										val playerPosition = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
 										mapX = (playerPosition.x.toInt() - playerSizeOffset shr 9) + (worldX shr 2)
 										mapY = (playerPosition.z.toInt() - playerSizeOffset shr 9) - (worldY shr 2)

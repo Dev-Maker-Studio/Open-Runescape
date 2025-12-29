@@ -613,7 +613,7 @@ object Bot {
     fun getDistanceTo(strategy: RouteStrategy, alt: Boolean = false): Int {
         return Utils.findRouteDistance(
             getMyPlayer().endX.toInt(),
-            getMyPlayer().endZ.toInt(), PlayerUpdate.MY_PLAYER!!.size,
+            getMyPlayer().endZ.toInt(), PlayerUpdate.MY_PLAYER!!.getSize(),
             strategy,
             Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER!!.plane.toInt()),
             alt,
@@ -623,7 +623,7 @@ object Bot {
     }
 
     fun getDistanceTo(npc: NpcEntity) =
-        getDistanceTo(RouteStrategies.forNpc(npc.movementBaseX[0], npc.movementBaseY[0], npc.size, npc.size))
+        getDistanceTo(RouteStrategies.forNpc(npc.movementBaseX[0], npc.movementBaseY[0], npc.getSize(), npc.getSize()))
 
     fun getDistanceTo(tile: Tile) =
         getDistanceTo(RouteStrategies.forFixedTile(tile.x - getBaseX(), tile.y - getBaseY()))

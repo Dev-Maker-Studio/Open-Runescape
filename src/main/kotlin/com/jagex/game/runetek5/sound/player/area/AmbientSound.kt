@@ -321,8 +321,8 @@ class AmbientSound : Node<AmbientSound>() {
                     sizeX = locType.sizeY
                     sizeY = locType.sizeX
                 }
-                soundEffectNode.absEndX = (sizeX + baseX) shl 9
-                soundEffectNode.absEndY = (sizeY + baseY) shl 9
+                soundEffectNode.absEndX  = ((sizeX + baseX).toInt()) shl 9
+                soundEffectNode.absEndY  = ((sizeY + baseY).toInt()) shl 9
                 soundEffectNode.soundEffectId = locType.soundId
                 soundEffectNode.instrumentSoundEffect = locType.instrumentSoundEffect
                 soundEffectNode.ambientSoundMinHearDistance = locType.soundRadius shl 9
@@ -350,8 +350,8 @@ class AmbientSound : Node<AmbientSound>() {
                     npcType = npcType.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
                 }
                 if (npcType != null) {
-                    soundEffectNode.absEndX = (baseX + npcType!!.size) shl 9
-                    soundEffectNode.absEndY = (baseY + npcType.size) shl 9
+                    soundEffectNode.absEndX = ((baseX + npcType!!.size).toInt()) shl 9
+                    soundEffectNode.absEndY  = ((baseY + npcType.size).toInt()) shl 9
                     soundEffectNode.soundEffectId = SoundEffectPlayer.getSoundEffectId(npc)
                     soundEffectNode.instrumentSoundEffect = npcType.instrumentSoundEffect
                     soundEffectNode.ambientSoundMinHearDistance = npcType.ambientSoundMinHearDistance shl 9
@@ -363,8 +363,8 @@ class AmbientSound : Node<AmbientSound>() {
                 NPC_AMBIENT_SOUNDS.addFirst(soundEffectNode)
             } else if (player != null) {
                 soundEffectNode.playerEntity = player
-                soundEffectNode.absEndX = (baseX + player.size) shl 9
-                soundEffectNode.absEndY = (baseY + player.size) shl 9
+                soundEffectNode.absEndX = ((baseX + player.getSize()).toInt()) shl 9
+                soundEffectNode.absEndY  = ((baseY + player.getSize()).toInt()) shl 9
                 soundEffectNode.soundEffectId = SoundEffectPlayer.getSoundEffectId(player)
                 soundEffectNode.instrumentSoundEffect = player.instrumentSoundEffect
                 soundEffectNode.ambientSoundMinHearDistance = player.isNpc shl 9

@@ -299,12 +299,12 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
 
     fun method16133(toolkit: AbstractToolkit, initialFunctionMask: Int): Boolean {
         var functionMask = initialFunctionMask
-        val bastype = bastype
+        val bastype = getBastype()
         val currSeq = if (currentSequence.hasType() && !currentSequence.hasSpeed()) currentSequence else null
         val moveAnimation = if (!movingSequence.hasType() || aBool10573 || movingSequence.hasType && currSeq != null) null else movingSequence
-        val x = bastype.anInt2786
-        val z = bastype.anInt2829
-        if (x != 0 || z != 0 || bastype.anInt2824 != 0 || bastype.anInt2827 != 0) {
+        val x = getBastype().anInt2786
+        val z = getBastype().anInt2829
+        if (x != 0 || z != 0 || getBastype().anInt2824 != 0 || getBastype().anInt2827 != 0) {
             functionMask = functionMask or DISPLACE_X or DISPLACE_Y or DISPLACE_Z
         }
 
@@ -352,7 +352,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         if (x == 0 && z == 0) {
             hillChange(rotation, getSize() shl 9, getSize() shl 9, 0, 0)
         } else {
-            hillChange(rotation, x, z, bastype.anInt2813, bastype.anInt2790)
+            hillChange(rotation, x, z, getBastype().anInt2813, getBastype().anInt2790)
             if (rotateX != 0) {
                 model.xaxisRotateWithoutNormals(rotateX)
             }
@@ -371,7 +371,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         }
 
         if (!aBool10573) {
-            displace(toolkit, bastype, functionMask, x, z, rotation)
+            displace(toolkit, getBastype(), functionMask, x, z, rotation)
         }
 
         return true
@@ -565,7 +565,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         }
 
         if (movingSequence.hasType() && movingSequence.hasType) {
-            val basType = bastype
+            val basType = getBastype()
             if (!basType.isStandAnimation(movingSequence.getId())) {
                 movingSequence.update(-1)
                 movingSequence.hasType = false
@@ -597,7 +597,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             var renderedEntity: RenderedEntity? = null
             hasPreferedPriorities = false
             if (PreferenceManager.preferences!!.characterShadows!!.getValue() == 1) {
-                val bastype = bastype
+                val bastype = getBastype()
                 if (bastype.rendersShadow && (playerAppearance!!.morphism == -1 || TypeLists.NPC!!.list(playerAppearance!!.morphism).shadowed)) {
                     val shadowSequence = if (currentSequence.hasType() && currentSequence.hasSpeed()) currentSequence else null
                     val shadowMovement = if (movingSequence.hasType() && (!movingSequence.hasType || shadowSequence == null)) movingSequence else null
