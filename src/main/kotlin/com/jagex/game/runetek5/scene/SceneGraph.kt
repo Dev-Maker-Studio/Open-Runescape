@@ -39,7 +39,7 @@ open class SceneGraph(
     hideOverlay: Boolean,
     regionMap: SettingsBits,
     val environmentManager: EnvironmentManager
-) : MapLoader(scene, dimensionZ, dimensionX, dimensionY, hideOverlay, TypeLists.FLO, TypeLists.FLU, regionMap) {
+) : MapLoader(scene, dimensionZ, dimensionX, dimensionY, hideOverlay, TypeLists.FLO!!, TypeLists.FLU!!, regionMap) {
 
     companion object {
         @JvmStatic
