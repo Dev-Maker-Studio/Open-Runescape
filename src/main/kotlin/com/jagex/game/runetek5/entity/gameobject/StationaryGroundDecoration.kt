@@ -107,7 +107,7 @@ class StationaryGroundDecoration(
         val heightsCurrentLvl: Ground
         val heightsNextLvl: Ground?
         if (this.underwater) {
-            heightsCurrentLvl = super.scene!!.underwaterHeightmap[collisionPlaneInt]!!
+            heightsCurrentLvl = super.scene!!.underwaterHeightmap!![collisionPlaneInt]!!
             heightsNextLvl = super.scene!!.surfaceHeightmap[0]
         } else {
             heightsCurrentLvl = super.scene!!.surfaceHeightmap[collisionPlaneInt]!!

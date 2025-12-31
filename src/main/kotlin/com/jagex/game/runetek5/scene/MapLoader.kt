@@ -170,9 +170,9 @@ open class MapLoader(
                 }
             }
             if (blendFloor) {
-                addBlendedTiles(toolkit, scene.localHeightmap[z], z, paletteIndices, if (z == 0) heightsCurrentLvl else null, if (z == 0) heightsNextLvl else null)
+                addBlendedTiles(toolkit, scene.localHeightmap[z]!!, z, paletteIndices, if (z == 0) heightsCurrentLvl else null, if (z == 0) heightsNextLvl else null)
             } else {
-                addRegularTile(scene.localHeightmap[z], z, paletteIndices, if (z == 0) heightsCurrentLvl else null, if (z == 0) heightsNextLvl else null)
+                addRegularTile(scene.localHeightmap[z]!!, z, paletteIndices, if (z == 0) heightsCurrentLvl else null, if (z == 0) heightsNextLvl else null)
             }
             underlayIds[z] = emptyArray()
             overlayIds[z] = emptyArray()
@@ -188,7 +188,7 @@ open class MapLoader(
             }
         }
         for (z in 0 until regionSizeZ) {
-            scene.localHeightmap[z].resetLight()
+            scene.localHeightmap[z]!!.resetLight()
         }
     }
 

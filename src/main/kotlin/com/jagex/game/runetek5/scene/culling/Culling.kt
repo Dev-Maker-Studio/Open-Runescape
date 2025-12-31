@@ -159,8 +159,8 @@ open class Culling(
             val endX = startX + scene.fullTileDimension
             val startY = y shl scene.tileUnits
             val endY = startY + scene.fullTileDimension
-            val heightSouthWest = scene.surfaceHeightmap[z].getHeight(x, y)
-            val heightNorthEast = scene.surfaceHeightmap[z].getHeight(x + 1, y + 1)
+            val heightSouthWest = scene.surfaceHeightmap!![ z]!!.getHeight(x, y)
+            val heightNorthEast = scene.surfaceHeightmap!![ z]!!.getHeight(x + 1, y + 1)
             diagonalWallCulling[wallCullingCursorPosition++] = CullingCluster(
                 scene, 8, z,
                 startX, endX, endX, startX, heightSouthWest, heightNorthEast, heightNorthEast - cullY, heightSouthWest - cullY,
@@ -173,8 +173,8 @@ open class Culling(
             val endX = startX - scene.fullTileDimension
             val startY = y shl scene.tileUnits
             val endY = scene.fullTileDimension + startY
-            val heightSouthEast = scene.surfaceHeightmap[z].getHeight(x + 1, y)
-            val heightNorthWest = scene.surfaceHeightmap[z].getHeight(x, y + 1)
+            val heightSouthEast = scene.surfaceHeightmap!![ z]!!.getHeight(x + 1, y)
+            val heightNorthWest = scene.surfaceHeightmap!![ z]!!.getHeight(x, y + 1)
             diagonalWallCulling[wallCullingCursorPosition++] = CullingCluster(
                 scene, displacement, z,
                 startX, endX, endX, startX, heightSouthEast, heightNorthWest, heightNorthWest - cullY, heightSouthEast - cullY,
@@ -303,24 +303,24 @@ open class Culling(
             val upscaledZ = y shl scene.tileUnits
             if (isCulled(
                     upscaledX + 1,
-                    scene.localHeightmap[plane].getHeight(x, y),
+                    scene.localHeightmap!![ plane]!!.getHeight(x, y),
                     upscaledZ + 1,
                     upscaledX - 1 + scene.fullTileDimension,
-                    scene.localHeightmap[plane].getHeight(x + 1, y + 1),
+                    scene.localHeightmap!![ plane]!!.getHeight(x + 1, y + 1),
                     upscaledZ - 1 + scene.fullTileDimension,
                     upscaledX + 1,
-                    scene.localHeightmap[plane].getHeight(x, y + 1),
+                    scene.localHeightmap!![ plane]!!.getHeight(x, y + 1),
                     upscaledZ - 1 + scene.fullTileDimension
                 ) &&
                 isCulled(
                     upscaledX + 1,
-                    scene.localHeightmap[plane].getHeight(x, y),
+                    scene.localHeightmap!![ plane]!!.getHeight(x, y),
                     upscaledZ + 1,
                     upscaledX - 1 + scene.fullTileDimension,
-                    scene.localHeightmap[plane].getHeight(x + 1, y),
+                    scene.localHeightmap!![ plane]!!.getHeight(x + 1, y),
                     upscaledZ + 1,
                     upscaledX - 1 + scene.fullTileDimension,
-                    scene.localHeightmap[plane].getHeight(x + 1, y + 1),
+                    scene.localHeightmap!![ plane]!!.getHeight(x + 1, y + 1),
                     upscaledZ - 1 + scene.fullTileDimension
                 )
             ) {
@@ -343,7 +343,7 @@ open class Culling(
             }
             val upscaledX = x shl scene.tileUnits
             val upscaledY = y shl scene.tileUnits
-            return boundaryCulled(upscaledX, scene.localHeightmap[z].getHeight(x, y), upscaledY, scene.fullTileDimension, minY, scene.fullTileDimension)
+            return boundaryCulled(upscaledX, scene.localHeightmap!![ z]!!.getHeight(x, y), upscaledY, scene.fullTileDimension, minY, scene.fullTileDimension)
         }
         return false
     }
@@ -378,7 +378,7 @@ open class Culling(
             }
             val upscaledX = x shl scene.tileUnits
             val upscaledY = y shl scene.tileUnits
-            val groundHeight = scene.localHeightmap[z].getHeight(x, y) - 1
+            val groundHeight = scene.localHeightmap!![ z]!!.getHeight(x, y) - 1
             val wallDrawHeight = groundHeight + wall.getMinY()
             if (wall.cullingType.toInt() == 1) {
                 return (isCulled(upscaledX, groundHeight, upscaledY, upscaledX, wallDrawHeight, upscaledY, upscaledX, wallDrawHeight, scene.fullTileDimension + upscaledY) &&
@@ -733,19 +733,19 @@ open class Culling(
                             var yEnd = sceneY
                             val zEnd = scenePlane
                             var nextTile = scene.tiles[scenePlane][sceneX][sceneY - 1]
-                            val count = scene.surfaceHeightmap[scenePlane].getHeight(sceneX, sceneY)
-                            while (nextTile != null && nextTile.cullY.toInt() < 0 && nextTile.cullY.toInt() == tile.cullY.toInt() && nextTile.cullX.toInt() == tile.cullX.toInt() && count == scene.surfaceHeightmap[scenePlane].getHeight(sceneX, yStart - 1) && (yStart - 1 <= 0 || count == scene.surfaceHeightmap[scenePlane].getHeight(sceneX, yStart - 2)) && yEnd - yStart <= 10) {
+                            val count = scene.surfaceHeightmap!![ scenePlane]!!.getHeight(sceneX, sceneY)
+                            while (nextTile != null && nextTile.cullY.toInt() < 0 && nextTile.cullY.toInt() == tile.cullY.toInt() && nextTile.cullX.toInt() == tile.cullX.toInt() && count == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(sceneX, yStart - 1) && (yStart - 1 <= 0 || count == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(sceneX, yStart - 2)) && yEnd - yStart <= 10) {
                                 yStart--
                                 nextTile = scene.tiles[scenePlane][sceneX][yStart - 1]
                             }
                             nextTile = scene.tiles[scenePlane][sceneX][yEnd + 1]
-                            while (yEnd < scene.sceneDimensionY && nextTile != null && nextTile.cullY.toInt() < 0 && nextTile.cullY.toInt() == tile.cullY.toInt() && nextTile.cullX.toInt() == tile.cullX.toInt() && count == scene.surfaceHeightmap[scenePlane].getHeight(sceneX, yEnd + 1) && (yEnd + 1 >= scene.sceneDimensionY || count == scene.surfaceHeightmap[scenePlane].getHeight(sceneX, yEnd + 2)) && yEnd - yStart <= 10) {
+                            while (yEnd < scene.sceneDimensionY && nextTile != null && nextTile.cullY.toInt() < 0 && nextTile.cullY.toInt() == tile.cullY.toInt() && nextTile.cullX.toInt() == tile.cullX.toInt() && count == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(sceneX, yEnd + 1) && (yEnd + 1 >= scene.sceneDimensionY || count == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(sceneX, yEnd + 2)) && yEnd - yStart <= 10) {
                                 yEnd++
                                 nextTile = scene.tiles[scenePlane][sceneX][yEnd + 1]
                             }
-                            val highestSouthWest = scene.surfaceHeightmap[if (hasBridge) scenePlane + 1 else scenePlane].getHeight(sceneX, yStart)
+                            val highestSouthWest = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(sceneX, yStart)
                             val i_14 = highestSouthWest + tile.cullY
-                            val heighestNorthWest = scene.surfaceHeightmap[if (hasBridge) scenePlane + 1 else scenePlane].getHeight(sceneX, yEnd + 1)
+                            val heighestNorthWest = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(sceneX, yEnd + 1)
                             val i_16 = heighestNorthWest + tile.cullY
                             val mainX = sceneX shl scene.tileUnits
                             val tileEndY2 = yStart shl scene.tileUnits
@@ -767,13 +767,13 @@ open class Culling(
                             var xEnd = sceneX
                             val zEnd = scenePlane
                             var nextTile = scene.tiles[scenePlane][sceneX - 1][sceneY]
-                            val drawHeight = scene.surfaceHeightmap[scenePlane].getHeight(sceneX, sceneY)
+                            val drawHeight = scene.surfaceHeightmap!![ scenePlane]!!.getHeight(sceneX, sceneY)
                             while (nextTile != null &&
                                 nextTile.interactiveSideViewHeightOffset.toInt() < 0 &&
                                 nextTile.interactiveSideViewHeightOffset.toInt() == tile.interactiveSideViewHeightOffset.toInt() &&
                                 nextTile.cullZ.toInt() == tile.cullZ.toInt() &&
-                                drawHeight == scene.surfaceHeightmap[scenePlane].getHeight(xStart - 1, sceneY) &&
-                                (xStart - 1 <= 0 || drawHeight == scene.surfaceHeightmap[scenePlane].getHeight(xStart - 2, sceneY)) &&
+                                drawHeight == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(xStart - 1, sceneY) &&
+                                (xStart - 1 <= 0 || drawHeight == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(xStart - 2, sceneY)) &&
                                 xEnd - xStart <= 10
                             ) {
                                 xStart--
@@ -782,16 +782,16 @@ open class Culling(
                             nextTile = scene.tiles[scenePlane][xEnd + 1][sceneY]
                             while (xEnd < scene.sceneDimensionX && nextTile != null && nextTile.interactiveSideViewHeightOffset.toInt() < 0 &&
                                 nextTile.interactiveSideViewHeightOffset.toInt() == tile.interactiveSideViewHeightOffset.toInt() &&
-                                nextTile.cullZ.toInt() == tile.cullZ.toInt() && drawHeight == scene.surfaceHeightmap[scenePlane].getHeight(xEnd + 1, sceneY) &&
-                                (xEnd + 1 >= scene.sceneDimensionX || drawHeight == scene.surfaceHeightmap[scenePlane].getHeight(xEnd + 2, sceneY)) &&
+                                nextTile.cullZ.toInt() == tile.cullZ.toInt() && drawHeight == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(xEnd + 1, sceneY) &&
+                                (xEnd + 1 >= scene.sceneDimensionX || drawHeight == scene.surfaceHeightmap!![ scenePlane]!!.getHeight(xEnd + 2, sceneY)) &&
                                 xEnd - xStart <= 10
                             ) {
                                 xEnd++
                                 nextTile = scene.tiles[scenePlane][xEnd + 1][sceneY]
                             }
-                            val heightSouthWest = scene.surfaceHeightmap[if (hasBridge) scenePlane + 1 else scenePlane].getHeight(xStart, sceneY)
+                            val heightSouthWest = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(xStart, sceneY)
                             val i_14 = heightSouthWest + tile.interactiveSideViewHeightOffset
-                            val heightSouthEast = scene.surfaceHeightmap[if (hasBridge) scenePlane + 1 else scenePlane].getHeight(xEnd + 1, sceneY)
+                            val heightSouthEast = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(xEnd + 1, sceneY)
                             val i_16 = heightSouthEast + tile.interactiveSideViewHeightOffset
                             val startX = xStart shl scene.tileUnits
                             val endX = (xEnd shl scene.tileUnits) + scene.fullTileDimension

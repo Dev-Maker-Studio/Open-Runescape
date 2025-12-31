@@ -484,7 +484,7 @@ object MiniMenu {
                     if (plane < 3 && ((mapRegion.getSettingsBits().tileFunctionMasks[1][sceneX][sceneZ].toInt() and 0x2) != 0)) {
                         plane++
                     }
-                    val height = scene.surfaceHeightmap[plane].getAverageHeight(absX.toInt(), absZ.toInt())
+                    val height = scene.surfaceHeightmap!![plane]!!.getAverageHeight(absX.toInt(), absZ.toInt())
                     if (height < absY) {
                         if (i_6 >= 2) {
                             return f_8 - 0.1F + method288(f_12, f_13, f_14, absX, absY, absZ, i_6 - 1) * 0.1F

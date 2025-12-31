@@ -1264,13 +1264,13 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                         if (toggleRoofs) {
                             ++plane
                         }
-                        return Resource.mapRegion!!.getScene().localHeightmap[plane].getAverageHeight(absX, absZ)
+                        return Resource.mapRegion!!.getScene().localHeightmap!![plane]!!.getAverageHeight(absX, absZ)
                     }
                     return 0
                 }
                 return 0
             }
-            return Resource.mapRegion!!.getScene().localHeightmap[plane].getAverageHeight(absX, absZ)
+            return Resource.mapRegion!!.getScene().localHeightmap!![plane]!!.getAverageHeight(absX, absZ)
         }
 
         /**

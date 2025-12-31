@@ -148,10 +148,10 @@ class StationaryInteractiveObject(
         val class3906: Ground
         val class3907: Ground?
         if (aBool10536) {
-            class3906 = scene!!.underwaterHeightmap[collisionPlane.toInt()]
+            class3906 = scene!!.underwaterHeightmap!![collisionPlane.toInt()]!!
             class3907 = scene!!.surfaceHeightmap[0]
         } else {
-            class3906 = scene!!.surfaceHeightmap[collisionPlane.toInt()]
+            class3906 = scene!!.surfaceHeightmap!![collisionPlane.toInt()]!!
             class3907 = if (collisionPlane < 3) {
                 scene!!.surfaceHeightmap[collisionPlane + 1]
             } else {

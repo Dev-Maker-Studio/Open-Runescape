@@ -121,10 +121,10 @@ class Particle(
                 plane = tile.plane.toInt()
             }
 
-            val heightCurrentLvl = grounds[plane].getHeight(sceneX, sceneY)
+            val heightCurrentLvl = grounds[plane]!!.getHeight(sceneX, sceneY)
             val heightNextLvl: Int
             if (plane < scene.regionSizeZ - 1) {
-                heightNextLvl = grounds[plane + 1].getHeight(sceneX, sceneY)
+                heightNextLvl = grounds[plane + 1]!!.getHeight(sceneX, sceneY)
             } else {
                 heightNextLvl = heightCurrentLvl - (8 shl scene.tileUnits)
             }
@@ -134,7 +134,7 @@ class Particle(
                     kill()
                     return
                 }
-                if (producerType.lowestDisplayPlane >= 0 && posY > grounds[producerType.lowestDisplayPlane].getHeight(sceneX, sceneY)) {
+                if (producerType.lowestDisplayPlane >= 0 && posY > grounds[producerType.lowestDisplayPlane]!!.getHeight(sceneX, sceneY)) {
                     kill()
                     return
                 }
@@ -142,18 +142,18 @@ class Particle(
                     kill()
                     return
                 }
-                if (producerType.highestDisplayPlane >= 0 && posY < grounds[producerType.highestDisplayPlane + 1].getHeight(sceneX, sceneY)) {
+                if (producerType.highestDisplayPlane >= 0 && posY < grounds[producerType.highestDisplayPlane + 1]!!.getHeight(sceneX, sceneY)) {
                     kill()
                     return
                 }
             }
             var lastRenderedPlane = scene.regionSizeZ - 1
-            while (lastRenderedPlane > 0 && posY > grounds[lastRenderedPlane].getHeight(sceneX, sceneY)) {
+            while (lastRenderedPlane > 0 && posY > grounds[lastRenderedPlane]!!.getHeight(sceneX, sceneY)) {
                 lastRenderedPlane--
             }
-            if (producerType.aBool541 && lastRenderedPlane == 0 && posY > grounds[0].getHeight(sceneX, sceneY)) {
+            if (producerType.aBool541 && lastRenderedPlane == 0 && posY > grounds[0]!!.getHeight(sceneX, sceneY)) {
                 kill()
-            } else if (lastRenderedPlane == scene.regionSizeZ - 1 && grounds[lastRenderedPlane].getHeight(sceneX, sceneY) - posY > 8 shl scene.tileUnits) {
+            } else if (lastRenderedPlane == scene.regionSizeZ - 1 && grounds[lastRenderedPlane]!!.getHeight(sceneX, sceneY) - posY > 8 shl scene.tileUnits) {
                 kill()
             } else {
                 tile = scene.tiles[lastRenderedPlane][sceneX][sceneY]

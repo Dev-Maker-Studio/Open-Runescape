@@ -60,7 +60,7 @@ object GroundItemUpdating {
                 } else {
                     var groundItem = Resource.mapRegion!!.getScene().removeGroundItem(plane, x, y) as GroundItem?
                     if (groundItem == null) {
-                        groundItem = GroundItem(Resource.mapRegion!!.getScene(), x shl 9, Resource.mapRegion!!.getScene().localHeightmap[plane].getHeight(x, y), y shl 9, plane, plane)
+                        groundItem = GroundItem(Resource.mapRegion!!.getScene(), x shl 9, Resource.mapRegion!!.getScene().localHeightmap!![plane]!!.getHeight(x, y), y shl 9, plane, plane)
                     } else {
                         groundItem.itemId = -1
                         groundItem.lastId = -1

@@ -116,7 +116,7 @@ class StationaryWallDecoration(
         val groundNextLvl: Ground?
 
         if (underwater) {
-            groundCurrentLvl = scene!!.underwaterHeightmap[collisionPlane.toInt()]
+            groundCurrentLvl = scene!!.underwaterHeightmap!![collisionPlane.toInt()]!!
             groundNextLvl = scene!!.surfaceHeightmap[0]
         } else {
             groundCurrentLvl = scene!!.surfaceHeightmap[collisionPlane.toInt()]

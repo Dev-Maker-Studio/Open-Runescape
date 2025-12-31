@@ -641,7 +641,7 @@ object ComponentMinimap {
                             }
                         }
                         // FIXME: better names for the parameters
-                        scene.surfaceHeightmap[z].renderMinimapFloor(centerOffsetX.toInt(), centerOffsetY.toInt(), positionXOffset, positionYOffset, i_26, altIndex, visibleTiles)
+                        scene.surfaceHeightmap!![z]!!.renderMinimapFloor(centerOffsetX.toInt(), centerOffsetY.toInt(), positionXOffset, positionYOffset, i_26, altIndex, visibleTiles)
                         if (!MapRegion.visualizeClippedTilesOnMinimap) {
                             for (offsetX in -4 until halfRegionDimension) {
                                 for (offsetY in -4 until halfRegionDimension) {

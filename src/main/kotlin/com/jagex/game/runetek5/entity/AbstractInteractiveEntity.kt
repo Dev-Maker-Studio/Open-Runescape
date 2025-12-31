@@ -44,25 +44,25 @@ abstract class AbstractInteractiveEntity(
         var lightCount = 0
         LoopLights@ for (x in startX.toInt()..endX.toInt()) {
             for (y in startZ.toInt()..endZ.toInt()) {
-                val currentLightUid = scene!!.tileLightUids[plane.toInt()][x][y]
+                val currentLightUid = scene!!.tileLightUids!![plane.toInt()][x][y]
                 var uidStep = 0L
 
                 while (uidStep <= 48L) {
                     val slot = (currentLightUid ushr uidStep.toInt() and 0xffffL).toInt()
                     if (slot <= 0) break
 
-                    val positionedLight = scene!!.lightSlotOccupant[slot - 1]
+                    val positionedLight = scene!!.lightSlotOccupant!![ slot - 1]
 
                     var isDuplicate = false
                     for (loopPlane in 0 until lightCount) {
-                        if (cycledLightNodes[loopPlane] == positionedLight.pointLight) {
+                        if (cycledLightNodes[loopPlane]!! == positionedLight!!.pointLight) {
                             isDuplicate = true
                             break
                         }
                     }
 
                     if (!isDuplicate) {
-                        cycledLightNodes[lightCount++] = positionedLight.pointLight
+                        cycledLightNodes[lightCount++] = positionedLight!!.pointLight
                         if (lightCount == 4) break@LoopLights
                     }
 
@@ -96,10 +96,10 @@ abstract class AbstractInteractiveEntity(
             var planeIndex = 0
             while (planeIndex < lightCount) {
                 var foundInAdjacent = false
-                var lightUid = scene!!.tileLightUids[planeIndex][startX_adj][startY_adj]
+                var lightUid = scene!!.tileLightUids!![planeIndex][startX_adj][startY_adj]
                 while (lightUid != 0L) {
-                    val positionedLight = scene!!.lightSlotOccupant[((lightUid and 0xffffL) - 1L).toInt()]
-                    if (cycledLightNodes[planeIndex] == positionedLight.pointLight) {
+                    val positionedLight = scene!!.lightSlotOccupant!![ ((lightUid and 0xffffL) - 1L).toInt()]
+                    if (cycledLightNodes[planeIndex]!! == positionedLight!!.pointLight) {
                         foundInAdjacent = true
                         break
                     }
@@ -107,10 +107,10 @@ abstract class AbstractInteractiveEntity(
                 }
 
                 if (!foundInAdjacent) {
-                    lightUid = scene!!.tileLightUids[planeIndex][endX_adj][endY_adj]
+                    lightUid = scene!!.tileLightUids!![planeIndex][endX_adj][endY_adj]
                     while (lightUid != 0L) {
-                        val positionedLight = scene!!.lightSlotOccupant[((lightUid and 0xffffL) - 1L).toInt()]
-                        if (cycledLightNodes[planeIndex] == positionedLight.pointLight) {
+                        val positionedLight = scene!!.lightSlotOccupant!![ ((lightUid and 0xffffL) - 1L).toInt()]
+                        if (cycledLightNodes[planeIndex]!! == positionedLight!!.pointLight) {
                             foundInAdjacent = true
                             break
                         }

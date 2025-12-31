@@ -208,7 +208,7 @@ open class SceneGraph(
                 yB = baseY + 1
             }
             val surfaceGround = scene.localHeightmap[locPlane]
-            val averageHeight = (surfaceGround.getHeight(xA, yA) + surfaceGround.getHeight(xB, yA) + surfaceGround.getHeight(xA, yB) + surfaceGround.getHeight(xB, yB)) shr 2
+            val averageHeight = (surfaceGround!!.getHeight(xA, yA) + surfaceGround!!.getHeight(xB, yA) + surfaceGround!!.getHeight(xA, yB) + surfaceGround!!.getHeight(xB, yB)) shr 2
             val sceneX = (baseX shl 9) + (locSizeX shl 8)
             val sceneY = (baseY shl 9) + (locSizeY shl 8)
             val applyShading = lowDetailShadows && !overlayHidden && locType.delayShading
@@ -235,7 +235,7 @@ open class SceneGraph(
                     }
                 } else if (locShape != ObjectShapes.SCENERY_INTERACT.shape && locShape != ObjectShapes.GROUND_INTERACT.shape) {
                     if (!ObjectShapes.isRoof(locShape) && !ObjectShapes.isRoofEdge(locShape)) {
-                        if (!addWall(toolkit, locShape, locRotation, stationary, locType, sequenceId, logicHeight, locPlane, sceneX, averageHeight, sceneY, baseX, baseY, applyShading, surfaceGround, collisionMap, locSizeX, locSizeY)) {
+                        if (!addWall(toolkit, locShape, locRotation, stationary, locType, sequenceId, logicHeight, locPlane, sceneX, averageHeight, sceneY, baseX, baseY, applyShading, surfaceGround!!, collisionMap, locSizeX, locSizeY)) {
                             addWallDecoration(toolkit, locShape, locRotation, stationary, locType, sequenceId, logicHeight, locPlane, sceneX, averageHeight, sceneY, baseX, baseY)
                         }
                     } else {
@@ -280,7 +280,7 @@ open class SceneGraph(
                             }
                             for (baseXOffset in 0..locSizeX) {
                                 for (baseYOffset in 0..locSizeY) {
-                                    surfaceGround.setTileShadow(baseXOffset + baseX, baseY + baseYOffset, displacementVar)
+                                    surfaceGround!!.setTileShadow(baseXOffset + baseX, baseY + baseYOffset, displacementVar)
                                 }
                             }
                         }

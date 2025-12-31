@@ -56,7 +56,7 @@ abstract class SceneGraphEntity(
 
     open fun getActiveLights(x: Int, y: Int, lights: Array<PointLight?>): Int {
         if (scene == null) return 0
-        val tileLightBaseUid = scene!!.tileLightUids[plane.toInt()][x][y]
+        val tileLightBaseUid = scene!!.tileLightUids!![plane.toInt()][x][y]
         var uidShift = 0L
         var lightCount = 0
         while (uidShift <= 48L) {
@@ -64,7 +64,7 @@ abstract class SceneGraphEntity(
             if (slot <= 0) {
                 break
             }
-            lights[lightCount++] = scene!!.lightSlotOccupant[slot - 1].pointLight
+            lights[lightCount++] = scene!!.lightSlotOccupant!![slot - 1]!!.pointLight
             uidShift += 16L
         }
         for (lightIndex in lightCount until 4) {

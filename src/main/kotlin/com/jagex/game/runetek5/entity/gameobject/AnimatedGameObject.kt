@@ -80,9 +80,10 @@ class AnimatedGameObject(
     }
 
     fun removeShadow() {
-        if (shadow != null) {
+        val shadowLocal = shadow
+        if (shadowLocal != null) {
             val abs = entityNode.getAbsolutePosition().coords
-            Resource.mapRegion!!.getScene().removeShadow(shadow, heightLevel.toInt(), abs.x.toInt(), abs.z.toInt(), castShadowAtPlane)
+            Resource.mapRegion!!.getScene().removeShadow(shadowLocal, heightLevel.toInt(), abs.x.toInt(), abs.z.toInt(), castShadowAtPlane)
             castShadowAtPlane = null
             shadow = null
         }
@@ -197,15 +198,16 @@ class AnimatedGameObject(
         }
         val scenePosition = entityNode.getAbsolutePosition().coords
         val scene = Resource.mapRegion!!.getScene()
-        if (hasShadow) {
-            scene.removeShadow(shadow, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), castShadowAtPlane)
+        val shadowLocal = shadow
+        if (hasShadow && shadowLocal != null) {
+            scene.removeShadow(shadowLocal, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), castShadowAtPlane)
             aBool1552 = false
         }
-        val currentHeight = scene.localHeightmap[heightLevel.toInt()]
+        val currentHeight = scene.localHeightmap!![heightLevel.toInt()]!!
         val nextHeight: Ground? = if (overlayHidden) {
-            scene.surfaceHeightmap[0]
+            scene.surfaceHeightmap!![0]
         } else {
-            if (heightLevel < 3) scene.localHeightmap[heightLevel + 1] else null
+            if (heightLevel < 3) scene.localHeightmap!![heightLevel + 1] else null
         }
         var model: Model? = null
         if (sequence.hasType()) {
@@ -231,8 +233,11 @@ class AnimatedGameObject(
                         castShadowAtPlane = BooleanArray(4)
                     }
                     shadow = model.createShadowSprite(shadow)
-                    scene.renderShadows(shadow, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), castShadowAtPlane)
-                    aBool1552 = true
+                    val shadowLocal = shadow
+                    if (shadowLocal != null) {
+                        scene.renderShadows(shadowLocal, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), castShadowAtPlane)
+                        aBool1552 = true
+                    }
                 }
                 modelMinY = model.getMinY()
                 model.getSize3d()
@@ -266,12 +271,17 @@ class AnimatedGameObject(
                 model = pairModel
                 if (hasShadow) {
                     shadow = pair.companionObject as Shadow?
-                    castShadowAtPlane = null
-                    scene.renderShadows(shadow, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), null)
-                    aBool1552 = true
+                    val shadowLocal = shadow
+                    if (shadowLocal != null) {
+                        castShadowAtPlane = null
+                        scene.renderShadows(shadowLocal, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), null)
+                        aBool1552 = true
+                    }
                 }
-                modelMinY = model!!.getMinY()
-                model.getSize3d()
+                if (model != null) {
+                    modelMinY = model.getMinY()
+                    model.getSize3d()
+                }
             } else {
                 castShadowAtPlane = null
                 shadow = null

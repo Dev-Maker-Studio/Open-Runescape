@@ -348,7 +348,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun mergeFunctionMasks(functionMaskA: Int, functionMaskB: Int): Int
 
-    abstract fun copyLights(lightCount: Int, lights: Array<PointLight>)
+    abstract fun copyLights(lightCount: Int, lights: Array<PointLight>?)
 
     fun createNativeSprite(pixels: IntArray, width: Int, useWidth: Int, useHeight: Int): NativeSprite {
         return createNativeSprite(pixels, 0, width, useWidth, useHeight, true)

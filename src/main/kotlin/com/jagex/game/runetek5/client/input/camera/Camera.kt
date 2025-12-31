@@ -90,8 +90,8 @@ object Camera {
                     if (localLighting != null) {
                         lighting = (localLighting[x][y].toInt() and 0xff) * 8 shl 2
                     }
-                    if (scene.localHeightmap != null && scene.localHeightmap[plane] != null) {
-                        val drawOffset = tileHeight - (scene.localHeightmap[plane].getHeight(x, y) - lighting)
+                    if (scene.localHeightmap != null && scene.localHeightmap!![plane] != null) {
+                        val drawOffset = tileHeight - (scene.localHeightmap!![plane]!!.getHeight(x, y) - lighting)
                         if (drawOffset > highestDrawHeightOffset) {
                             highestDrawHeightOffset = drawOffset
                         }

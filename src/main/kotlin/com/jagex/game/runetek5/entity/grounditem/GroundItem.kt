@@ -172,20 +172,20 @@ class GroundItem(
         val renderingMatrix = toolkit.getRenderingMatrix()
         renderingMatrix.reset()
         if (anInt10422 == 0) {
-            val class39011 = scene!!.localHeightmap[collisionPlane.toInt()]
+            val class39011 = scene!!.localHeightmap!![collisionPlane.toInt()]!!
             val i_12 = size3d shl 1
             val i_14 = -i_12 / 2
             val i_15 = -i_12 / 2
-            val i_16 = class39011.getAverageHeight(i_14 + vector33.x.toInt(), i_15 + vector33.z.toInt())
+            val i_16 = class39011!!.getAverageHeight(i_14 + vector33.x.toInt(), i_15 + vector33.z.toInt())
             val i_17 = i_12 / 2
             val i_18 = -i_12 / 2
-            val i_19 = class39011.getAverageHeight(i_17 + vector33.x.toInt(), i_18 + vector33.z.toInt())
+            val i_19 = class39011!!.getAverageHeight(i_17 + vector33.x.toInt(), i_18 + vector33.z.toInt())
             val i_20 = -i_12 / 2
             val i_21 = i_12 / 2
-            val i_22 = class39011.getAverageHeight(i_20 + vector33.x.toInt(), i_21 + vector33.z.toInt())
+            val i_22 = class39011!!.getAverageHeight(i_20 + vector33.x.toInt(), i_21 + vector33.z.toInt())
             val i_23 = i_12 / 2
             val i_24 = i_12 / 2
-            val i_25 = class39011.getAverageHeight(i_23 + vector33.x.toInt(), i_24 + vector33.z.toInt())
+            val i_25 = class39011!!.getAverageHeight(i_23 + vector33.x.toInt(), i_24 + vector33.z.toInt())
             val i_26 = min(i_16, i_19)
             val i_27 = min(i_22, i_25)
             val i_28 = min(i_19, i_25)

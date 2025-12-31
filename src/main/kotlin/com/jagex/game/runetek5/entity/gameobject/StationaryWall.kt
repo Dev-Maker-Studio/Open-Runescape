@@ -141,10 +141,10 @@ class StationaryWall(
         val currentLevel: Ground
         val nextLevel: Ground?
         if (aBool10525) {
-            currentLevel = scene!!.underwaterHeightmap[collisionPlane.toInt()]
+            currentLevel = scene!!.underwaterHeightmap!![collisionPlane.toInt()]!!
             nextLevel = scene!!.surfaceHeightmap[0]
         } else {
-            currentLevel = scene!!.surfaceHeightmap[collisionPlane.toInt()]
+            currentLevel = scene!!.surfaceHeightmap!![collisionPlane.toInt()]!!
             nextLevel = if (collisionPlane < 3) {
                 scene!!.surfaceHeightmap[collisionPlane + 1]
             } else {
