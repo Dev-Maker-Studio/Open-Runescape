@@ -5,8 +5,8 @@ import com.jagex.game.runetek5.framebuffer.NativeRenderBuffer
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_FRAMEBUFFER
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_RENDERBUFFER
+import com.jagex.game.runetek5.toolkit.opengl.GL_FRAMEBUFFER
+import com.jagex.game.runetek5.toolkit.opengl.GL_RENDERBUFFER
 import jaggl.OpenGL
 
 /**

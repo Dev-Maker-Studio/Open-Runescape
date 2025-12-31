@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.graphics.texture.sampler.MipmapTextureSampler
 import com.jagex.game.runetek5.graphics.texture.sampler.TextureSampler
 import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.unidentified.Class111
 import com.jagex.game.runetek5.utils.ArrayUtils
 import jaggl.OpenGL

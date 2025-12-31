@@ -50,6 +50,22 @@
 			<attribute name="gradle.buildServer" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="javax.annotation"/>
+			<attribute name="artifactId" value="javax.annotation-api"/>
+			<attribute name="version" value="1.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/78fde5db1c92786448170b351d8f8868acabd2ce/kotlin-daemon-embeddable-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-daemon-embeddable/2.2.21/16fcf2c9b829ea17a68ee270d9dcb9b0c01b6f5c/kotlin-daemon-embeddable-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-daemon-embeddable"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/jetbrains/annotations/23.0.0/annotations-23.0.0.jar" sourcepath="/home/trent/.m2/repository/org/jetbrains/annotations/23.0.0/annotations-23.0.0-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
@@ -58,44 +74,20 @@
 			<attribute name="version" value="23.0.0"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-windows/3.0.2/2dd9aa4fafc1a19ff41254dcec32744d1fdeb993/darklaf-windows-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-windows/3.0.2/a9531bc3742ea20c4d2e9a6be52f57a6df3eb845/darklaf-windows-3.0.2-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar" sourcepath="/home/trent/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-windows"/>
-			<attribute name="version" value="3.0.2"/>
+			<attribute name="groupId" value="aopalliance"/>
+			<attribute name="artifactId" value="aopalliance"/>
+			<attribute name="version" value="1.0"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/swing-extensions-laf-support/0.1.3/b079b9ddca06049e18c409695dba09373f4ee9f4/swing-extensions-laf-support-0.1.3.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/swing-extensions-laf-support/0.1.3/8826ae52099334392affd6ed822d8011008f4b2/swing-extensions-laf-support-0.1.3-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-repository-metadata/3.8.8/3afc94fb7373b7658d96c83b83d534534737e70d/maven-repository-metadata-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-repository-metadata/3.8.8/92ff1bf17e3222b068855a763be78f9ac2630782/maven-repository-metadata-3.8.8-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="swing-extensions-laf-support"/>
-			<attribute name="version" value="0.1.3"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-compatibility/3.0.2/abd9a97189bfd029887ef3d0a46b9c9e28ba0e3e/darklaf-compatibility-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-compatibility/3.0.2/fad6fdb4d857da3691dc181ec5ceae6325259ec8/darklaf-compatibility-3.0.2-sources.jar">
-		<attributes>
-			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-compatibility"/>
-			<attribute name="version" value="3.0.2"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-core/3.0.2/933f1ee7f75244513af3ae2729d2d37dc64fa1c6/darklaf-core-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-core/3.0.2/dcf653b2a3061ee0ceb0c9e3e6916e18dcf06613/darklaf-core-3.0.2-sources.jar">
-		<attributes>
-			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-core"/>
-			<attribute name="version" value="3.0.2"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-iconset/3.0.2/d63d2153b98f01fc5572d4a24d52f77d1bf2d1ab/darklaf-iconset-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-iconset/3.0.2/1aaccc76fbd95cfa74c1d69bbe6059edcce85018/darklaf-iconset-3.0.2-sources.jar">
-		<attributes>
-			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-iconset"/>
-			<attribute name="version" value="3.0.2"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-repository-metadata"/>
+			<attribute name="version" value="3.8.8"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-native-utils/3.0.2/6875f465b267edc94482b4a95cb2f22549b60b0c/darklaf-native-utils-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-native-utils/3.0.2/19c4f81bc477d79e4de4fc187bbe3bec43c827c8/darklaf-native-utils-3.0.2-sources.jar">
@@ -106,12 +98,36 @@
 			<attribute name="version" value="3.0.2"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.9.0/91448df39c558f7c6147b8bd8db01debe16e0cc1/kotlinx-serialization-core-jvm-1.9.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.9.0/372502ccd2ac059cecf808dbbdffed6ba8589b13/kotlinx-serialization-core-jvm-1.9.0-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-spi/1.9.22/c3101acaa4ec053557028cf1917f1d22112b100d/maven-resolver-spi-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-spi/1.9.22/b86961f4834de86f80a6149e8e27a5c1e31c6ae2/maven-resolver-spi-1.9.22-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="org.jetbrains.kotlinx"/>
-			<attribute name="artifactId" value="kotlinx-serialization-core-jvm"/>
-			<attribute name="version" value="1.9.0"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-spi"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-util/1.9.22/d5febed69ca2fe0dacffec95b6cb0760b0270fd1/maven-resolver-util-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-util/1.9.22/2104be21b22f90efb68d41e42834f62dec2ff3eb/maven-resolver-util-1.9.22-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-util"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-jvm-host/2.2.21/b0b02149189a464377d43edeec373a63ee798462/kotlin-scripting-jvm-host-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-jvm-host/2.2.21/fa65be1da0a2ced39f765af705f25e1c07b7a1cb/kotlin-scripting-jvm-host-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-scripting-jvm-host"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.wagon/wagon-http-shared/3.5.3/635c3d5718a70e3ecfd78f2fef99bb6e0abaed58/wagon-http-shared-3.5.3.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.wagon/wagon-http-shared/3.5.3/3516a1fb845c0db8dc01a5d272e2f57194b8a1e2/wagon-http-shared-3.5.3-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.wagon"/>
+			<attribute name="artifactId" value="wagon-http-shared"/>
+			<attribute name="version" value="3.5.3"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/fa374a986e128314c3db00a20aae55f72a258511/kotlin-stdlib-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.2.21/bd4e3cc059a403f4a0a4f8543c66b1535976956/kotlin-stdlib-2.2.21-sources.jar">
@@ -122,20 +138,12 @@
 			<attribute name="version" value="2.2.21"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-property-loader/3.0.2/6f64b41c9f724120a7193d443bb82ad604d1b888/darklaf-property-loader-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-property-loader/3.0.2/7b790f5cd6f5f86324ac368dbf36b45ccef6d499/darklaf-property-loader-3.0.2-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-compat-qual/2.0.0/fc89b03860d11d6213d0154a62bcd1c2f69b9efa/checker-compat-qual-2.0.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-compat-qual/2.0.0/eb7f7d588d0aef07a2c89178053c2a9e4613947f/checker-compat-qual-2.0.0-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-property-loader"/>
-			<attribute name="version" value="3.0.2"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-macos/3.0.2/f29df7247d905a41cb4311fba2783ff5a2541611/darklaf-macos-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-macos/3.0.2/dd79927a057afb4d42c4c3fae11daeabeed86f64/darklaf-macos-3.0.2-sources.jar">
-		<attributes>
-			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-macos"/>
-			<attribute name="version" value="3.0.2"/>
+			<attribute name="groupId" value="org.checkerframework"/>
+			<attribute name="artifactId" value="checker-compat-qual"/>
+			<attribute name="version" value="2.0.0"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.9.0/aea6f7d49fe5c458f8963ee6d4bdaf4a459ab3e7/kotlinx-serialization-json-jvm-1.9.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm/1.9.0/99d2ebf61a026c8bc66241a0dfdbf9274c61581e/kotlinx-serialization-json-jvm-1.9.0-sources.jar">
@@ -146,12 +154,28 @@
 			<attribute name="version" value="1.9.0"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.8.1/kotlinx-coroutines-core-1.8.1.jar" sourcepath="/home/trent/.m2/repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.8.1/kotlinx-coroutines-core-1.8.1-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.slf4j/jcl-over-slf4j/1.7.36/d877e195a05aca4a2f1ad2ff14bfec1393af4b5e/jcl-over-slf4j-1.7.36.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.slf4j/jcl-over-slf4j/1.7.36/91b21b162173dfc6bb676bc7f4865cdd268eac68/jcl-over-slf4j-1.7.36-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="org.jetbrains.kotlinx"/>
-			<attribute name="artifactId" value="kotlinx-coroutines-core"/>
-			<attribute name="version" value="1.8.1"/>
+			<attribute name="groupId" value="org.slf4j"/>
+			<attribute name="artifactId" value="jcl-over-slf4j"/>
+			<attribute name="version" value="1.7.36"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-compiler-embeddable/2.2.21/3d287b3a20b5ca9582d01f973733cfc5e5a363d6/kotlin-scripting-compiler-embeddable-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-compiler-embeddable/2.2.21/8a67a9d3695c150091ef926ae5b05adcae307e64/kotlin-scripting-compiler-embeddable-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-scripting-compiler-embeddable"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-settings/3.8.8/1e835f080004e81a6646eb5ea123c4c556ea3f74/maven-settings-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-settings/3.8.8/55dfbf58c2f5d2056ca16e34f4cb8bf4e1d9c88/maven-settings-3.8.8-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-settings"/>
+			<attribute name="version" value="3.8.8"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-theme/3.0.2/ed564b4b8977b20994c3f469cf567f31e9396316/darklaf-theme-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-theme/3.0.2/96ce7b9d2b85f6027e3e83dffb06c267a0b90142/darklaf-theme-3.0.2-sources.jar">
@@ -186,6 +210,430 @@
 			<attribute name="version" value="3.0.2"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-named-locks/1.9.22/121433b079aad9be7ed266b19f2122eeb0e2d111/maven-resolver-named-locks-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-named-locks/1.9.22/a895484a847cd468b1e8e8150f51f1e8ebb38e5c/maven-resolver-named-locks-1.9.22-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-named-locks"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-builder-support/3.8.8/7cc533b63eb0db3235c17e02d90be6feac957e56/maven-builder-support-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-builder-support/3.8.8/dba36fef7b642f9f7bd7b822e5e22cc29182a1f8/maven-builder-support-3.8.8-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-builder-support"/>
+			<attribute name="version" value="3.8.8"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-theme-spec/3.0.2/dfb03b61151096f0996d23c6a515100e366e7f8/darklaf-theme-spec-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-theme-spec/3.0.2/1f7cbb7b2a41c58ad34a0711fd1972f6d752059e/darklaf-theme-spec-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-theme-spec"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/b13aed5cf8412f9ee9d1e4db21bdcfebcc24f606/kotlin-compiler-embeddable-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-compiler-embeddable/2.2.21/651f42a3cc16a6ef29a7615875d50cf1369d0f1c/kotlin-compiler-embeddable-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-compiler-embeddable"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-windows/3.0.2/2dd9aa4fafc1a19ff41254dcec32744d1fdeb993/darklaf-windows-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-windows/3.0.2/a9531bc3742ea20c4d2e9a6be52f57a6df3eb845/darklaf-windows-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-windows"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-artifact/3.8.8/c4324db6f73f14e1327da2a1acec293d75212ae7/maven-artifact-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-artifact/3.8.8/512cca9b6114716017ab79ace9b239eb55fd382b/maven-artifact-3.8.8-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-artifact"/>
+			<attribute name="version" value="3.8.8"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.inject/0.3.5/org.eclipse.sisu.inject-0.3.5.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.eclipse.sisu"/>
+			<attribute name="artifactId" value="org.eclipse.sisu.inject"/>
+			<attribute name="version" value="0.3.5"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-classworlds/2.6.0/8587e80fcb38e70b70fae8d5914b6376bfad6259/plexus-classworlds-2.6.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-classworlds/2.6.0/fbe2837de2d316ac86b3625754d1eac369f1a1e4/plexus-classworlds-2.6.0-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.codehaus.plexus"/>
+			<attribute name="artifactId" value="plexus-classworlds"/>
+			<attribute name="version" value="2.6.0"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-iconset/3.0.2/d63d2153b98f01fc5572d4a24d52f77d1bf2d1ab/darklaf-iconset-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-iconset/3.0.2/1aaccc76fbd95cfa74c1d69bbe6059edcce85018/darklaf-iconset-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-iconset"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14.jar" sourcepath="/home/trent/.m2/repository/org/codehaus/mojo/animal-sniffer-annotations/1.14/animal-sniffer-annotations-1.14-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.codehaus.mojo"/>
+			<attribute name="artifactId" value="animal-sniffer-annotations"/>
+			<attribute name="version" value="1.14"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar" sourcepath="/home/trent/.m2/repository/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.google.j2objc"/>
+			<attribute name="artifactId" value="j2objc-annotations"/>
+			<attribute name="version" value="1.1"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-sec-dispatcher/2.0/f89c5080614ffd0764e49861895dbedde1b47237/plexus-sec-dispatcher-2.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-sec-dispatcher/2.0/76c86bce1880407b21bb614274ae23294eedb1b1/plexus-sec-dispatcher-2.0-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.codehaus.plexus"/>
+			<attribute name="artifactId" value="plexus-sec-dispatcher"/>
+			<attribute name="version" value="2.0"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-property-loader/3.0.2/6f64b41c9f724120a7193d443bb82ad604d1b888/darklaf-property-loader-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-property-loader/3.0.2/7b790f5cd6f5f86324ac368dbf36b45ccef6d499/darklaf-property-loader-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-property-loader"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.slf4j"/>
+			<attribute name="artifactId" value="slf4j-api"/>
+			<attribute name="version" value="1.7.36"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-dependencies/2.2.21/ceeb8915721321ee5f016313285afd4d5e93b2c6/kotlin-scripting-dependencies-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-dependencies/2.2.21/b4fd56526916e6e803160441f65f5ffdc9f9fb8e/kotlin-scripting-dependencies-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-scripting-dependencies"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-connector-basic/1.9.22/574b1f6d76c2c1f7ff66ccc17ff2c94e0a53545/maven-resolver-connector-basic-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-connector-basic/1.9.22/f4aeb723f0e70d7b5155c9e0f9f396ea8e077217/maven-resolver-connector-basic-1.9.22-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-connector-basic"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/codehaus/plexus/plexus-utils/3.4.1/plexus-utils-3.4.1.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.codehaus.plexus"/>
+			<attribute name="artifactId" value="plexus-utils"/>
+			<attribute name="version" value="3.4.1"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-impl/1.9.22/19b7a728c9000f8db615f64552d95fe74b413617/maven-resolver-impl-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-impl/1.9.22/9a01d0406adff89a87666a9569f8a9691dae5256/maven-resolver-impl-1.9.22-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-impl"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.5/org.eclipse.sisu.plexus-0.3.5.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.eclipse.sisu"/>
+			<attribute name="artifactId" value="org.eclipse.sisu.plexus"/>
+			<attribute name="version" value="0.3.5"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.wagon/wagon-provider-api/3.5.3/39c44ebb3945dee359665272d8acb83f9460491b/wagon-provider-api-3.5.3.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.wagon/wagon-provider-api/3.5.3/d73dd22d819ee1f0bf642f1b6eff1949f1ca8138/wagon-provider-api-3.5.3-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.wagon"/>
+			<attribute name="artifactId" value="wagon-provider-api"/>
+			<attribute name="version" value="3.5.3"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.google.inject/guice/4.2.2/fa13659f9128f4c011c8e1d06f137083b4876377/guice-4.2.2-no_aop.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.google.inject/guice/4.2.2/ffd85e2a6ab1f015b16fc766ced990fd260024a4/guice-4.2.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.google.inject"/>
+			<attribute name="artifactId" value="guice"/>
+			<attribute name="version" value="4.2.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.shared"/>
+			<attribute name="artifactId" value="maven-shared-utils"/>
+			<attribute name="version" value="3.3.4"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.1.3/39b109f2cd352b2d71b52a3b5a1a9850e1dc304b/error_prone_annotations-2.1.3.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.1.3/990fe1fd48078a2befecdfcebcad8e6e1bd195a0/error_prone_annotations-2.1.3-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.google.errorprone"/>
+			<attribute name="artifactId" value="error_prone_annotations"/>
+			<attribute name="version" value="2.1.3"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-platform-preferences/3.0.2/5e9e287f60bd5bedb2c5cc6420201080a4879e4d/darklaf-platform-preferences-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-platform-preferences/3.0.2/c85f8bcb3c6bb8d84b2373a084881fae81617fe0/darklaf-platform-preferences-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-platform-preferences"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-jvm/2.2.21/144a2d8fc77a7e95ba7a7b6992091a60baf2e0dc/kotlin-scripting-jvm-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-jvm/2.2.21/9f8b466128490859cc039034d8d45d2ec27d59e2/kotlin-scripting-jvm-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-scripting-jvm"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.commons"/>
+			<attribute name="artifactId" value="commons-lang3"/>
+			<attribute name="version" value="3.8.1"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-compatibility/3.0.2/abd9a97189bfd029887ef3d0a46b9c9e28ba0e3e/darklaf-compatibility-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-compatibility/3.0.2/fad6fdb4d857da3691dc181ec5ceae6325259ec8/darklaf-compatibility-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-compatibility"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-compiler-impl-embeddable/2.2.21/5f81790732711563152ec587631f160e9e6cb6fa/kotlin-scripting-compiler-impl-embeddable-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-compiler-impl-embeddable/2.2.21/4ed151d772e6ba63112a45c597f4daf32197463/kotlin-scripting-compiler-impl-embeddable-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-scripting-compiler-impl-embeddable"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-core/3.0.2/933f1ee7f75244513af3ae2729d2d37dc64fa1c6/darklaf-core-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-core/3.0.2/dcf653b2a3061ee0ceb0c9e3e6916e18dcf06613/darklaf-core-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-core"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-api/1.9.22/756660687ea077b85be02b019d593ef2758e7db6/maven-resolver-api-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-api/1.9.22/43a4f927bd9b619539a31ae1aece5bbbe5dd9a67/maven-resolver-api-1.9.22-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-api"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.httpcomponents"/>
+			<attribute name="artifactId" value="httpcore"/>
+			<attribute name="version" value="4.4.16"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.8.1/kotlinx-coroutines-core-1.8.1.jar" sourcepath="/home/trent/.m2/repository/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.8.1/kotlinx-coroutines-core-1.8.1-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlinx"/>
+			<attribute name="artifactId" value="kotlinx-coroutines-core"/>
+			<attribute name="version" value="1.8.1"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-core/3.8.8/6248a474f9dfe20356e822708938b83d850132a6/maven-core-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-core/3.8.8/27966000fd1d10a44c73535710dbc5ed4e56a267/maven-core-3.8.8-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-core"/>
+			<attribute name="version" value="3.8.8"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.httpcomponents"/>
+			<attribute name="artifactId" value="httpclient"/>
+			<attribute name="version" value="4.5.14"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-dependencies-maven/2.2.21/4dae1fbe071a629d556ba71b60a89cdba9aa5735/kotlin-scripting-dependencies-maven-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-dependencies-maven/2.2.21/3eff903f87f581e6784b6ddb23c88aff3a24a070/kotlin-scripting-dependencies-maven-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-scripting-dependencies-maven"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/25.1-android/bdaab946ca5ad20253502d873ba0c3313d141036/guava-25.1-android.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/25.1-android/a1fe5380cc1f2979e434c3b6ff43d69328ab4686/guava-25.1-android-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.google.guava"/>
+			<attribute name="artifactId" value="guava"/>
+			<attribute name="version" value="25.1-android"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.wagon/wagon-http/3.5.3/673d54e78f83c4700c8250a48c61f4c70eef9bc3/wagon-http-3.5.3.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.wagon/wagon-http/3.5.3/4138148d43fa050d355f12478aafc71ecf4af583/wagon-http-3.5.3-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.wagon"/>
+			<attribute name="artifactId" value="wagon-http"/>
+			<attribute name="version" value="3.5.3"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-common/2.2.21/9d3b00063626c0775dd91d1fc5c699d5a6e62e4e/kotlin-scripting-common-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-scripting-common/2.2.21/e4a2702b09963b0191bb534f67c001130a889286/kotlin-scripting-common-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-scripting-common"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/io.github.classgraph/classgraph/4.8.177/16a989307ba5123d159f4d307f95a2f1752f41be/classgraph-4.8.177.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/io.github.classgraph/classgraph/4.8.177/5a017e2d1de7f275ce3aab7c18e590aa5e1a8a52/classgraph-4.8.177-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="io.github.classgraph"/>
+			<attribute name="artifactId" value="classgraph"/>
+			<attribute name="version" value="4.8.177"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-transport-wagon/1.9.22/721d6a8e3ed937461cd673134f83aeac5a79e715/maven-resolver-transport-wagon-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-transport-wagon/1.9.22/cabed875c8bb749f341f1d385d6e4cf9c2ec5674/maven-resolver-transport-wagon-1.9.22-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-transport-wagon"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-settings-builder/3.8.8/fb0f7b5e2474564c2c0f5b456897fa5c06c0a5d9/maven-settings-builder-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-settings-builder/3.8.8/3d6c424541dd19fbc82d1510c702c73bf0ee1678/maven-settings-builder-3.8.8-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-settings-builder"/>
+			<attribute name="version" value="3.8.8"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-plugin-api/3.8.8/a5709000fe497efe5f3dc1317eabb15b22a614fb/maven-plugin-api-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-plugin-api/3.8.8/5639cf299b7661b35232c242cf2b700c58272dd3/maven-plugin-api-3.8.8-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-plugin-api"/>
+			<attribute name="version" value="3.8.8"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/swing-extensions-laf-support/0.1.3/b079b9ddca06049e18c409695dba09373f4ee9f4/swing-extensions-laf-support-0.1.3.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/swing-extensions-laf-support/0.1.3/8826ae52099334392affd6ed822d8011008f4b2/swing-extensions-laf-support-0.1.3-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="swing-extensions-laf-support"/>
+			<attribute name="version" value="0.1.3"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/e9b021c4e335e4ed7a7e3b32285249ae6bb3a6c8/kotlin-script-runtime-2.2.21.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-script-runtime/2.2.21/9fd152237f8e70e308db519da3e2a2f4becc7471/kotlin-script-runtime-2.2.21-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-script-runtime"/>
+			<attribute name="version" value="2.2.21"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.18.0/44084ef756763795b31c578403dd028ff4a22950/commons-io-2.18.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.18.0/9ab23bf96cc41b731cb123fbee97198f901af68e/commons-io-2.18.0-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="commons-io"/>
+			<attribute name="artifactId" value="commons-io"/>
+			<attribute name="version" value="2.18.0"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar" sourcepath="/home/trent/.m2/repository/javax/inject/javax.inject/1/javax.inject-1-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="javax.inject"/>
+			<attribute name="artifactId" value="javax.inject"/>
+			<attribute name="version" value="1"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.9.0/91448df39c558f7c6147b8bd8db01debe16e0cc1/kotlinx-serialization-core-jvm-1.9.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-core-jvm/1.9.0/372502ccd2ac059cecf808dbbdffed6ba8589b13/kotlinx-serialization-core-jvm-1.9.0-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlinx"/>
+			<attribute name="artifactId" value="kotlinx-serialization-core-jvm"/>
+			<attribute name="version" value="1.9.0"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-macos/3.0.2/f29df7247d905a41cb4311fba2783ff5a2541611/darklaf-macos-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-macos/3.0.2/dd79927a057afb4d42c4c3fae11daeabeed86f64/darklaf-macos-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.github.weisj"/>
+			<attribute name="artifactId" value="darklaf-macos"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.26/plexus-interpolation-1.26.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.codehaus.plexus"/>
+			<attribute name="artifactId" value="plexus-interpolation"/>
+			<attribute name="version" value="1.26"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar" sourcepath="/home/trent/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="com.google.code.findbugs"/>
+			<attribute name="artifactId" value="jsr305"/>
+			<attribute name="version" value="3.0.2"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/org/jetbrains/kotlin/kotlin-reflect/1.6.10/kotlin-reflect-1.6.10.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.jetbrains.kotlin"/>
+			<attribute name="artifactId" value="kotlin-reflect"/>
+			<attribute name="version" value="1.6.10"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-cipher/2.0/425ea8e534716b4bff1ea90f39bd76be951d651b/plexus-cipher-2.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-cipher/2.0/2550c3b8ecf65d1981b7a9096b1fa2ffb437b95d/plexus-cipher-2.0-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.codehaus.plexus"/>
+			<attribute name="artifactId" value="plexus-cipher"/>
+			<attribute name="version" value="2.0"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-transport-file/1.9.22/929bc40b340290a7a94306ee0591d106d9261b28/maven-resolver-transport-file-1.9.22.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven.resolver/maven-resolver-transport-file/1.9.22/f659dd2d5595742fdd8fa96eb8f51e0d058702bb/maven-resolver-transport-file-1.9.22-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven.resolver"/>
+			<attribute name="artifactId" value="maven-resolver-transport-file"/>
+			<attribute name="version" value="1.9.22"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-platform-base/3.0.2/9a5792605f6ae29857444bfbbe2a3a358a21d377/darklaf-platform-base-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-platform-base/3.0.2/fa939230a13caaf499890b7fff05f84fa6ef4178/darklaf-platform-base-3.0.2-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
@@ -202,28 +650,36 @@
 			<attribute name="version" value="0.0.9"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-theme-spec/3.0.2/dfb03b61151096f0996d23c6a515100e366e7f8/darklaf-theme-spec-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-theme-spec/3.0.2/1f7cbb7b2a41c58ad34a0711fd1972f6d752059e/darklaf-theme-spec-3.0.2-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-component-annotations/2.1.0/2f2147a6cc6a119a1b51a96f31d45c557f6244b9/plexus-component-annotations-2.1.0.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.codehaus.plexus/plexus-component-annotations/2.1.0/ec57f4c03eca1ebf1a9de9b49a8d54a7e4057ba7/plexus-component-annotations-2.1.0-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-theme-spec"/>
-			<attribute name="version" value="3.0.2"/>
+			<attribute name="groupId" value="org.codehaus.plexus"/>
+			<attribute name="artifactId" value="plexus-component-annotations"/>
+			<attribute name="version" value="2.1.0"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-platform-preferences/3.0.2/5e9e287f60bd5bedb2c5cc6420201080a4879e4d/darklaf-platform-preferences-3.0.2.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/darklaf-platform-preferences/3.0.2/c85f8bcb3c6bb8d84b2373a084881fae81617fe0/darklaf-platform-preferences-3.0.2-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-resolver-provider/3.8.8/27404d68acc4aba35a57b37a249eec415522f9c0/maven-resolver-provider-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-resolver-provider/3.8.8/43cf2fd86534a6955734d7fbc382f48f2401ad1b/maven-resolver-provider-3.8.8-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="com.github.weisj"/>
-			<attribute name="artifactId" value="darklaf-platform-preferences"/>
-			<attribute name="version" value="3.0.2"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-resolver-provider"/>
+			<attribute name="version" value="3.8.8"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/io.github.classgraph/classgraph/4.8.177/16a989307ba5123d159f4d307f95a2f1752f41be/classgraph-4.8.177.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/io.github.classgraph/classgraph/4.8.177/5a017e2d1de7f275ce3aab7c18e590aa5e1a8a52/classgraph-4.8.177-sources.jar">
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model-builder/3.8.8/f512aa9f9a55d89ddee8d14daf329634ab13039b/maven-model-builder-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model-builder/3.8.8/f129e54f4a533d6f91e2e2e0febe47dbf26f274e/maven-model-builder-3.8.8-sources.jar">
 		<attributes>
 			<attribute name="gradle.buildServer" value="true"/>
-			<attribute name="groupId" value="io.github.classgraph"/>
-			<attribute name="artifactId" value="classgraph"/>
-			<attribute name="version" value="4.8.177"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-model-builder"/>
+			<attribute name="version" value="3.8.8"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model/3.8.8/f9094a6d900109c8d943390c635d3f1c82e6a680/maven-model-3.8.8.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/org.apache.maven/maven-model/3.8.8/1055f6aa527d31a30d0858da5a717be74d2d54b/maven-model-3.8.8-sources.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="org.apache.maven"/>
+			<attribute name="artifactId" value="maven-model"/>
+			<attribute name="version" value="3.8.8"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/swing-extensions-visual-padding/0.1.3/8f0fd12d6eaca8b4beb4a4cfe19b8d04cf592d97/swing-extensions-visual-padding-0.1.3.jar" sourcepath="/home/trent/.gradle/caches/modules-2/files-2.1/com.github.weisj/swing-extensions-visual-padding/0.1.3/63ce45abbfb3bf05f82ca285a06ba96c72f48883/swing-extensions-visual-padding-0.1.3-sources.jar">
@@ -232,6 +688,14 @@
 			<attribute name="groupId" value="com.github.weisj"/>
 			<attribute name="artifactId" value="swing-extensions-visual-padding"/>
 			<attribute name="version" value="0.1.3"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/trent/.m2/repository/commons-codec/commons-codec/1.11/commons-codec-1.11.jar">
+		<attributes>
+			<attribute name="gradle.buildServer" value="true"/>
+			<attribute name="groupId" value="commons-codec"/>
+			<attribute name="artifactId" value="commons-codec"/>
+			<attribute name="version" value="1.11"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin/default"/>

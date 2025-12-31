@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.toolkit.opengl.buffer
 
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
 import com.jagex.game.runetek5.toolkit.companion.NativeStream
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_ARRAY_BUFFER
+import com.jagex.game.runetek5.toolkit.opengl.GL_ARRAY_BUFFER
 import jaclib.memory.Source
 
 /**

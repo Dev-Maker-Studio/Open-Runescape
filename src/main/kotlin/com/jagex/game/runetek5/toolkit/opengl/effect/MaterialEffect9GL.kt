@@ -7,9 +7,8 @@ import com.jagex.game.runetek5.graphics.texture.OpenGlArbCubeMapTexture
 import com.jagex.game.runetek5.graphics.texture.OpenGlTexture
 import com.jagex.game.runetek5.graphics.texture.water.TextureContainerGL
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_FRAGMENT_SHADER
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_VERTEX_SHADER
-
+import com.jagex.game.runetek5.toolkit.opengl.GL_FRAGMENT_SHADER
+import com.jagex.game.runetek5.toolkit.opengl.GL_VERTEX_SHADER
 import jaggl.OpenGL
 
 class MaterialEffect9GL(

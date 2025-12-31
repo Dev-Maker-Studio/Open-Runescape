@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.graphics.font
 
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit

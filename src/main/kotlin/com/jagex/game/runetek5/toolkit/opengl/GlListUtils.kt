@@ -1,8 +1,7 @@
 package com.jagex.game.runetek5.toolkit.opengl
 
 import jaggl.OpenGL
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
-
+import com.jagex.game.runetek5.toolkit.opengl.*
 /**
  * @author Brainpower 04/03/2023
  */

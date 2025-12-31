@@ -2,8 +2,7 @@ package com.jagex.game.runetek5.toolkit.opengl.buffer
 
 import com.jagex.game.runetek5.buffer.ElementsBufferGL
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_ELEMENT_ARRAY_BUFFER
-
+import com.jagex.game.runetek5.toolkit.opengl.GL_ELEMENT_ARRAY_BUFFER
 /**
  *
  * @author Steven - 13/09/2023

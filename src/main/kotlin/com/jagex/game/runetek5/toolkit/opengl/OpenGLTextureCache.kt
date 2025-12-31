@@ -5,8 +5,7 @@ import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.material.MaterialTypeList
 import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
-
+import com.jagex.game.runetek5.toolkit.opengl.*
 /**
  * Cache for OpenGL 2D textures with material support.
  */

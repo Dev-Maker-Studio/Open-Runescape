@@ -5,17 +5,17 @@ import com.jagex.game.runetek5.graphics.texture.OpenGlTexture
 import com.jagex.game.runetek5.graphics.texture.water.TextureContainerGL
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GlListUtils
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_EYE_LINEAR
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_EYE_PLANE
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_OBJECT_LINEAR
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_OBJECT_PLANE
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_R
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_S
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_T
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_TEXTURE_GEN_MODE
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_TEXTURE_GEN_R
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_TEXTURE_GEN_S
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_TEXTURE_GEN_T
+import com.jagex.game.runetek5.toolkit.opengl.GL_EYE_LINEAR
+import com.jagex.game.runetek5.toolkit.opengl.GL_EYE_PLANE
+import com.jagex.game.runetek5.toolkit.opengl.GL_OBJECT_LINEAR
+import com.jagex.game.runetek5.toolkit.opengl.GL_OBJECT_PLANE
+import com.jagex.game.runetek5.toolkit.opengl.GL_R
+import com.jagex.game.runetek5.toolkit.opengl.GL_S
+import com.jagex.game.runetek5.toolkit.opengl.GL_T
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_GEN_MODE
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_GEN_R
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_GEN_S
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_GEN_T
 import jaggl.OpenGL
 
 /**

@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.graphics.texture.OpenGlTexture
 import com.jagex.game.runetek5.graphics.texture.water.TextureContainerGL
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GlListUtils
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.toolkit.opengl.ProgramGL
 import com.jagex.game.launch.Loader
 import jaggl.OpenGL

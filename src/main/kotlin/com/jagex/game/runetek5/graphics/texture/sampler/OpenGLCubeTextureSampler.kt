@@ -3,8 +3,8 @@ package com.jagex.game.runetek5.graphics.texture.sampler
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_TEXTURE_CUBE_MAP
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_TEXTURE_CUBE_MAP_POSITIVE_X
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_CUBE_MAP
+import com.jagex.game.runetek5.toolkit.opengl.GL_TEXTURE_CUBE_MAP_POSITIVE_X
 import jaggl.OpenGL
 
 class OpenGLCubeTextureSampler(

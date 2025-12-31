@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.graphics.texture.sampler
 
 import com.jagex.game.runetek5.graphics.texture.TextureFramebufferGenerator
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_FRAMEBUFFER
+import com.jagex.game.runetek5.toolkit.opengl.GL_FRAMEBUFFER
 import jaggl.OpenGL
 
 class FrameBufferRectangleTexture(

@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.imageproducer.IntegratedGraphicsDisplayGL
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import jaggl.OpenGL
 
 class Class170(val activeToolkit: OpenGlToolkit) {

@@ -15,8 +15,7 @@ import jaclib.memory.Stream
 import jaclib.memory.heap.NativeHeapBuffer
 import jaggl.OpenGL
 
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
-
+import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.buffer.ArrayBufferGL
 
 class GroundMaterialGL(

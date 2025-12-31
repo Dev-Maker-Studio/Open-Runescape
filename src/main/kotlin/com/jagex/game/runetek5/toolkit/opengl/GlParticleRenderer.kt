@@ -10,8 +10,7 @@ import com.jagex.game.runetek5.toolkit.opengl.buffer.GlBitBuffer
 import com.jagex.game.runetek5.utils.BufferUtils
 
 import jaggl.OpenGL
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
-
+import com.jagex.game.runetek5.toolkit.opengl.*
 class GlParticleRenderer {
 
     var arrayBuffer: ArrayBufferGL? = null

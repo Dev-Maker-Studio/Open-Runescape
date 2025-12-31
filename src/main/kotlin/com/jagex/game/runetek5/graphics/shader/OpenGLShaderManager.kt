@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.graphics.shader
 
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import jaggl.OpenGL
 
 /**

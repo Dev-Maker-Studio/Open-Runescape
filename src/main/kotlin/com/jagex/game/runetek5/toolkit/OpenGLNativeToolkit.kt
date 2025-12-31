@@ -50,8 +50,7 @@ import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclarationCompon
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclarationGL
 import com.jagex.game.runetek5.utils.MathUtils
 import com.jagex.game.runetek5.utils.Utils
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
-
+import com.jagex.game.runetek5.toolkit.opengl.*
 open class OpenGLNativeToolkit(
     opengl1: OpenGL,
     canvas2: Canvas,

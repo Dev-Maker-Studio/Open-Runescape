@@ -2,8 +2,7 @@ package com.jagex.game.runetek5.toolkit.opengl.buffer
 
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
-
+import com.jagex.game.runetek5.toolkit.opengl.*
 /**
  * OpenGL ARB (Architecture Review Board) extension element array buffer.
  * Used for index buffers in OpenGL rendering.

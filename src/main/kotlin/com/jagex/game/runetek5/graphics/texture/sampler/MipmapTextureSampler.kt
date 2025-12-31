@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.graphics.texture.OpenGlTexture
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import jaggl.OpenGL
 
 abstract class MipmapTextureSampler(

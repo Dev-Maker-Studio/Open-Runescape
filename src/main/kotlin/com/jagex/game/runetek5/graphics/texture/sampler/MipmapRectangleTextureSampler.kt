@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.graphics.texture.sampler
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.framebuffer.FrameBuffer
 import jaggl.OpenGL
 

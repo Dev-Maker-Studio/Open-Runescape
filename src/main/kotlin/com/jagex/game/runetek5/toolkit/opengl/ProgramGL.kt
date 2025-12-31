@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.toolkit.opengl
 
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_VERTEX_PROGRAM_ARB
+import com.jagex.game.runetek5.toolkit.opengl.GL_VERTEX_PROGRAM_ARB
 import jaggl.OpenGL
 
 class ProgramGL(

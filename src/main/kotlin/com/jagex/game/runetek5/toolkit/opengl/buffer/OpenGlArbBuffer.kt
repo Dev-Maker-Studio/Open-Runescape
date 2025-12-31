@@ -2,10 +2,9 @@ package com.jagex.game.runetek5.toolkit.opengl.buffer
 
 import com.jagex.game.runetek5.buffer.NativeBuffer
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_STATIC_DRAW
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_STREAM_DRAW
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.GL_WRITE_ONLY
-
+import com.jagex.game.runetek5.toolkit.opengl.GL_STATIC_DRAW
+import com.jagex.game.runetek5.toolkit.opengl.GL_STREAM_DRAW
+import com.jagex.game.runetek5.toolkit.opengl.GL_WRITE_ONLY
 import jaclib.memory.Source
 import jaclib.memory.heap.NativeHeapBuffer
 import jaggl.OpenGL

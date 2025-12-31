@@ -4,8 +4,7 @@ import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 import com.jagex.game.runetek5.utils.MathUtils
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
-
+import com.jagex.game.runetek5.toolkit.opengl.*
 class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
 
     @JvmField val singleWidth: Int

@@ -7,7 +7,7 @@ import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
-import com.jagex.game.runetek5.toolkit.opengl.OpenGLConventions.*
+import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.toolkit.opengl.ProgramGL
 import jaggl.OpenGL
 
