@@ -91,7 +91,7 @@ class StationaryWall(
             if (shadowed || locType.dynamicTint) {
                 model = model!!.copy(0.toByte(), i_14, false)
                 if (locType.dynamicTint) {
-                    val tint = Resource.mapRegion!!.getDynamicTint()
+                    val tint = Resource.mapRegion!!.dynamicTint
                     model!!.tint(tint.hue, tint.saturation, tint.lightness, tint.opacity)
                 }
             }

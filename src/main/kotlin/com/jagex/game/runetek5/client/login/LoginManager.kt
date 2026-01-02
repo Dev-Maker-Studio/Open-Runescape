@@ -493,8 +493,8 @@ object LoginManager {
                             PLAYER_DOB = buffer.readMedium()
                             client.memberWorld = buffer.readUByte() == 1
                             client.aString3643 = buffer.readString()
-                            Resource.mapRegion!!.loctypeList.setMember(client.memberWorld)
-                            Resource.mapRegionLoaderTask!!.region.loctypeList.setMember(client.memberWorld)
+                            Resource.mapRegion!!.loctypeList!!.setMember(client.memberWorld)
+                            Resource.mapRegionLoaderTask!!.region.loctypeList!!.setMember(client.memberWorld)
                             TypeLists.OBJ!!.setMembersOnly(client.memberWorld)
                             TypeLists.NPC!!.setMember(client.memberWorld)
                         } else {
@@ -1098,7 +1098,7 @@ object LoginManager {
             client.GRAND_EXCHANGE_SLOTS[index] = GrandExchangeSlot()
         }
 
-        Resource.mapRegion!!.environmentManager.requestDirectEnvironmentTransition()
+        Resource.mapRegion!!.environmentManager!!.requestDirectEnvironmentTransition()
         client.sendCameraAngleToServer = true
         client.recolorPalette = ShortArray(256).also {
             ObjectType.locRecolorPalette = it

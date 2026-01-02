@@ -72,13 +72,13 @@ object Camera {
         while (camAngleY < 0.0f) {
             camAngleY += 16384.0f
         }
-        val settingsBits = Resource.mapRegion!!.getSettingsBits()
-        val scene = Resource.mapRegion!!.getScene()
+        val settingsBits = Resource.mapRegion!!.settingsBits
+        val scene = Resource.mapRegion!!.getScene()!!
         val playerSceneX = cameraBaseX shr 9
         val playerSceneY = cameraBaseY shr 9
         val tileHeight = MapRegion.tileheightForAbsolutePosition(cameraBaseX, cameraBaseY, PlayerUpdate.MY_PLAYER_PLANE)
         var highestDrawHeightOffset = 0
-        if (playerSceneX > 3 && playerSceneY > 3 && playerSceneX < Resource.mapRegion!!.getSceneSizeX() - 4 && playerSceneY < Resource.mapRegion!!.getSceneSizeY() - 4) {
+        if (playerSceneX > 3 && playerSceneY > 3 && playerSceneX < Resource.mapRegion!!.sceneSizeX - 4 && playerSceneY < Resource.mapRegion!!.sceneSizeY - 4) {
             for (x in playerSceneX - 4..playerSceneX + 4) {
                 for (y in playerSceneY - 4..playerSceneY + 4) {
                     var plane = PlayerUpdate.MY_PLAYER_PLANE
@@ -87,8 +87,8 @@ object Camera {
                     }
                     var lighting = 0
                     val localLighting = Resource.mapRegion!!.getLocalLighting(plane)
-                    if (localLighting != null) {
-                        lighting = (localLighting[x][y].toInt() and 0xff) * 8 shl 2
+                    if (localLighting != null && localLighting[x] != null) {
+                        lighting = (localLighting[x]!![y].toInt() and 0xff) * 8 shl 2
                     }
                     if (scene.localHeightmap != null && scene.localHeightmap!![plane] != null) {
                         val drawOffset = tileHeight - (scene.localHeightmap!![plane]!!.getHeight(x, y) - lighting)

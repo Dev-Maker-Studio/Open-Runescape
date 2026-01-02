@@ -18,11 +18,11 @@ class GroundItemFetcher(
             val coords = Resource.mapRegion!!.getBaseCoordinates()
             val sceneX = this.itemPosition.x - coords.x
             val sceneY = this.itemPosition.y - coords.y
-            if (sceneX >= 0 && sceneY >= 0 && sceneX < Resource.mapRegion!!.getSceneSizeX() && sceneY < Resource.mapRegion!!.getSceneSizeY()) {
+            if (sceneX >= 0 && sceneY >= 0 && sceneX < Resource.mapRegion!!.sceneSizeX && sceneY < Resource.mapRegion!!.sceneSizeY) {
                 var node = wrapper.groundItems.getFirst() as GroundItemNode?
                 while (node != null) {
                     if (node.id == this.groundItemId) {
-                        return Resource.mapRegion!!.getScene().getGroundItem(this.itemPosition.plane, sceneX, sceneY) as GroundItem
+                        return Resource.mapRegion!!.getScene()!!.getGroundItem(this.itemPosition.plane, sceneX, sceneY) as GroundItem
                     }
                     node = wrapper.groundItems.next() as GroundItemNode?
                 }

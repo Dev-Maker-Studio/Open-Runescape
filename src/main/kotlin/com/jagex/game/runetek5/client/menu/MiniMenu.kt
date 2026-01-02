@@ -472,16 +472,16 @@ object MiniMenu {
         var f_14 = 0.0F
         val mapRegion = Resource.mapRegion
         if (mapRegion != null) {
-            val scene = mapRegion.getScene()
+            val scene = mapRegion.getScene()!!
             while (f_8 < 1.1F) {
                 val absX = f_8 * f_9 + deltaX
                 val absY = f_10 * f_8 + deltaY
                 val absZ = deltaZ + f_8 * f_11
                 val sceneX = (absX.toInt()) shr 9
                 val sceneZ = (absZ.toInt()) shr 9
-                if (sceneX > 0 && sceneZ > 0 && sceneX < mapRegion.getSceneSizeX() && sceneZ < mapRegion.getSceneSizeY()) {
+                if (sceneX > 0 && sceneZ > 0 && sceneX < mapRegion.sceneSizeX && sceneZ < mapRegion.sceneSizeY) {
                     var plane = PlayerUpdate.MY_PLAYER!!.plane.toInt()
-                    if (plane < 3 && ((mapRegion.getSettingsBits().tileFunctionMasks[1][sceneX][sceneZ].toInt() and 0x2) != 0)) {
+                    if (plane < 3 && ((mapRegion.settingsBits.tileFunctionMasks[1][sceneX][sceneZ].toInt() and 0x2) != 0)) {
                         plane++
                     }
                     val height = scene.surfaceHeightmap!![plane]!!.getAverageHeight(absX.toInt(), absZ.toInt())

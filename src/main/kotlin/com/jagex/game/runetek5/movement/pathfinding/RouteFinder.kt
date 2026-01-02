@@ -1147,8 +1147,8 @@ object RouteFinder {
     fun calculateRoute(destinationX: Int, destinationY: Int, bool2: Boolean, strategy: RouteStrategy): Boolean {
         val baseX = PlayerUpdate.MY_PLAYER!!.movementBaseX[0]
         val baseY = PlayerUpdate.MY_PLAYER!!.movementBaseY[0]
-        if (baseX >= 0 && baseX < Resource.mapRegion!!.getSceneSizeX() && baseY >= 0 && baseY < Resource.mapRegion!!.getSceneSizeY()) {
-            if (destinationX >= 0 && destinationX < Resource.mapRegion!!.getSceneSizeX() && destinationY >= 0 && destinationY < Resource.mapRegion!!.getSceneSizeY()) {
+        if (baseX >= 0 && baseX < Resource.mapRegion!!.sceneSizeX && baseY >= 0 && baseY < Resource.mapRegion!!.sceneSizeY) {
+            if (destinationX >= 0 && destinationX < Resource.mapRegion!!.sceneSizeX && destinationY >= 0 && destinationY < Resource.mapRegion!!.sceneSizeY) {
                 val executedStep = findRoute(
                     baseX,
                     baseY,

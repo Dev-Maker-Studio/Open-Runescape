@@ -25,12 +25,12 @@ class IFSubObjectPosition(
         val base = Resource.mapRegion!!.getBaseCoordinates()
         val x = this.position.x - base.x
         val y = this.position.y - base.y
-        if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.getSceneSizeX() && y < Resource.mapRegion!!.getSceneSizeY()) {
+        if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
             return when (getObjectType()) {
-                0 -> Resource.mapRegion!!.getScene().getWall(z, x, y) as GameObject?
-                1 -> Resource.mapRegion!!.getScene().getPrimaryWallDecoration(z, x, y) as GameObject?
-                2 -> Resource.mapRegion!!.getScene().getInteractiveObject(z, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
-                3 -> Resource.mapRegion!!.getScene().getGroundDecoration(z, x, y) as GameObject?
+                0 -> Resource.mapRegion!!.getScene()!!.getWall(z, x, y) as GameObject?
+                1 -> Resource.mapRegion!!.getScene()!!.getPrimaryWallDecoration(z, x, y) as GameObject?
+                2 -> Resource.mapRegion!!.getScene()!!.getInteractiveObject(z, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
+                3 -> Resource.mapRegion!!.getScene()!!.getGroundDecoration(z, x, y) as GameObject?
                 else -> null
             }
         }

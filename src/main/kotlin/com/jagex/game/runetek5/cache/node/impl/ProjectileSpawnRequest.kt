@@ -47,7 +47,7 @@ class ProjectileSpawnRequest(
                     }
                 }
             }
-            val scene = Resource.mapRegion!!.getScene()
+            val scene = Resource.mapRegion!!.getScene()!!
             if (scene != null) {
                 val projectile = Projectile(
                     scene, spotAnimId, UpdateZonePacket.UPDATE_ZONE_PLANE, UpdateZonePacket.UPDATE_ZONE_PLANE,

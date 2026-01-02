@@ -34,7 +34,7 @@ object DebugDisplay {
                 8 -> Console.close()
                 24 -> Console.writeLine("" + GameShell.FPS)
                 28 -> {
-                    val culling = Resource.mapRegion!!.getScene().culling
+                    val culling = Resource.mapRegion!!.getScene()!!.culling
                     culling.cullingEnabled = !culling.cullingEnabled
                 }
                 7 -> client.DRAW_DEBUG = true
@@ -83,7 +83,7 @@ object DebugDisplay {
                 }
                 2 -> {
                     val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
-                    Console.writeLine("" + Resource.mapRegion!!.getScene().localHeightmap!![PlayerUpdate.MY_PLAYER!!.plane.toInt()]!!.getHeight(abs.x.toInt() shr 9, abs.z.toInt() shr 9))
+                    Console.writeLine("" + Resource.mapRegion!!.getScene()!!.localHeightmap!![PlayerUpdate.MY_PLAYER!!.plane.toInt()]!!.getHeight(abs.x.toInt() shr 9, abs.z.toInt() shr 9))
                 }
                 23 -> {
                     Console.writeLine(Component.NATIVE_SPRITE_CACHE.getCapacityLeft().toString() + " " + Component.NATIVE_SPRITE_CACHE.getCapacity())

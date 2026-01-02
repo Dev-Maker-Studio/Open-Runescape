@@ -66,7 +66,7 @@ class StationaryWallDecoration(
             if (locType.dynamicTint) {
                 model = model!!.copy(0.toByte(), functionMask, false)
                 if (locType.dynamicTint) {
-                    val dynamicTint: DynamicTint = Resource.mapRegion!!.getDynamicTint()
+                    val dynamicTint: DynamicTint = Resource.mapRegion!!.dynamicTint
                     model!!.tint(dynamicTint.hue, dynamicTint.saturation, dynamicTint.lightness, dynamicTint.opacity)
                 }
             }

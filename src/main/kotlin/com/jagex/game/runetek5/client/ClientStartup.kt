@@ -583,9 +583,9 @@ object ClientStartup {
         client.defaultMenuCursor = -1
         CursorTypeList.setCustomCursor(CursorManager.defaultCursorId)
         PlayerUpdate.MY_PLAYER = PlayerEntity(null)
-        PlayerUpdate.MY_PLAYER!!.setBasePosition((Resource.mapRegion!!.getSceneSizeX() * 512 / 2).toFloat(), 0.0f, (Resource.mapRegion!!.getSceneSizeY() * 512 / 2).toFloat())
-        PlayerUpdate.MY_PLAYER!!.movementBaseX!![0] = Resource.mapRegion!!.getSceneSizeX() / 2
-        PlayerUpdate.MY_PLAYER!!.movementBaseY!![0] = Resource.mapRegion!!.getSceneSizeY() / 2
+        PlayerUpdate.MY_PLAYER!!.setBasePosition((Resource.mapRegion!!.sceneSizeX * 512 / 2).toFloat(), 0.0f, (Resource.mapRegion!!.sceneSizeY * 512 / 2).toFloat())
+        PlayerUpdate.MY_PLAYER!!.movementBaseX!![0] = Resource.mapRegion!!.sceneSizeX / 2
+        PlayerUpdate.MY_PLAYER!!.movementBaseY!![0] = Resource.mapRegion!!.sceneSizeY / 2
         Camera.cameraPositionAbsoluteY = 0
         Camera.cameraPositionAbsoluteX = 0
         if (Camera.cameraCalculationType == 5) {

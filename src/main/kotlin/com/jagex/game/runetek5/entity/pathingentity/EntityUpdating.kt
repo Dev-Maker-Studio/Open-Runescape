@@ -89,7 +89,7 @@ object EntityUpdating {
         }
 
         val abs = pathingEntity.getAbsolutePosition().coords
-        if (abs.x.toInt() < 512 || abs.z.toInt() < 512 || abs.x.toInt() >= (Resource.mapRegion!!.getSceneSizeX() - 1) * 512 || abs.z.toInt() >= (Resource.mapRegion!!.getSceneSizeY() - 1) * 512) {
+        if (abs.x.toInt() < 512 || abs.z.toInt() < 512 || abs.x.toInt() >= (Resource.mapRegion!!.sceneSizeX - 1) * 512 || abs.z.toInt() >= (Resource.mapRegion!!.sceneSizeY - 1) * 512) {
             pathingEntity.currentSequence.update(-1)
             for (index in pathingEntity.spotAnimations.indices) {
                 pathingEntity.spotAnimations[index].spotAnimationId = -1
@@ -104,7 +104,7 @@ object EntityUpdating {
             pathingEntity.resetXyIndex()
         }
 
-        if (PlayerUpdate.MY_PLAYER!! == pathingEntity && (abs.x.toInt() < 6144 || abs.z.toInt() < 6144 || abs.x.toInt() >= (Resource.mapRegion!!.getSceneSizeX() - 12) * 512 || abs.z.toInt() >= (Resource.mapRegion!!.getSceneSizeY() - 12) * 512)) {
+        if (PlayerUpdate.MY_PLAYER!! == pathingEntity && (abs.x.toInt() < 6144 || abs.z.toInt() < 6144 || abs.x.toInt() >= (Resource.mapRegion!!.sceneSizeX - 12) * 512 || abs.z.toInt() >= (Resource.mapRegion!!.sceneSizeY - 12) * 512)) {
             pathingEntity.currentSequence.update(-1)
             for (index in pathingEntity.spotAnimations.indices) {
                 pathingEntity.spotAnimations[index].spotAnimationId = -1

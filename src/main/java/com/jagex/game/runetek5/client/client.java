@@ -1597,7 +1597,7 @@ public class client extends GameShell {
 
         try {
             CoordGrid base = Resource.mapRegion.getBaseCoordinates();
-            debug = debug + base.x + "," + base.y + "," + Resource.mapRegion.getSceneSizeX() + "," + Resource.mapRegion.getSceneSizeY() + " ";
+            debug = debug + base.x + "," + base.y + "," + Resource.mapRegion.sceneSizeX + "," + Resource.mapRegion.sceneSizeY + " ";
             if (PlayerUpdate.MY_PLAYER != null) {
                 debug = debug + PlayerUpdate.MY_PLAYER_PLANE + "," + (PlayerUpdate.MY_PLAYER.movementBaseX[0] + base.x) + "," + (PlayerUpdate.MY_PLAYER.movementBaseY[0] + base.y) + " ";
             } else {
@@ -1976,14 +1976,14 @@ public class client extends GameShell {
                             int y = random2 + npc.movementBaseY[0];
                             if (x < 0) {
                                 x = 0;
-                            } else if (x > Resource.mapRegion.getSceneSizeX() - size - 1) {
-                                x = Resource.mapRegion.getSceneSizeX() - size - 1;
+                            } else if (x > Resource.mapRegion.sceneSizeX - size - 1) {
+                                x = Resource.mapRegion.sceneSizeX - size - 1;
                             }
 
                             if (y < 0) {
                                 y = 0;
-                            } else if (y > Resource.mapRegion.getSceneSizeY() - size - 1) {
-                                y = Resource.mapRegion.getSceneSizeY() - size - 1;
+                            } else if (y > Resource.mapRegion.sceneSizeY - size - 1) {
+                                y = Resource.mapRegion.sceneSizeY - size - 1;
                             }
 
                             int numSteps = RouteFinder.findRoute(npc.movementBaseX[0], npc.movementBaseY[0], size, RouteStrategies.forNpc(x, y, size, size),
@@ -2025,7 +2025,7 @@ public class client extends GameShell {
                 Camera.calculateCutsceneCameraPosition();
             }
 
-            if (Camera.cameraPositionAbsoluteX >> 9 < 14 || Camera.cameraPositionAbsoluteX >> 9 >= Resource.mapRegion.getSceneSizeX() - 14 || Camera.cameraPositionAbsoluteY >> 9 < 14 || Camera.cameraPositionAbsoluteY >> 9 >= Resource.mapRegion.getSceneSizeY() - 14) {
+            if (Camera.cameraPositionAbsoluteX >> 9 < 14 || Camera.cameraPositionAbsoluteX >> 9 >= Resource.mapRegion.sceneSizeX - 14 || Camera.cameraPositionAbsoluteY >> 9 < 14 || Camera.cameraPositionAbsoluteY >> 9 >= Resource.mapRegion.sceneSizeY - 14) {
                 Resource.mapRegion.initialize(new RegionLoadRequest(RegionLoadingType.ANIMATED_LOGIN_SCREEN, null));
             }
         }
@@ -2142,8 +2142,8 @@ public class client extends GameShell {
                 if (!aBool7321) {
                     clearPixels = true;
                 }
-            } else if ((int) abs.x < 0 || (int) abs.x >= Resource.mapRegion.getSceneSizeX() * 512
-                    || (int) abs.z < 0 || (int) abs.z >= Resource.mapRegion.getSceneSizeY() * 512) {
+            } else if ((int) abs.x < 0 || (int) abs.x >= Resource.mapRegion.sceneSizeX * 512
+                    || (int) abs.z < 0 || (int) abs.z >= Resource.mapRegion.sceneSizeY * 512) {
                 clearPixels = true;
             }
             if (clearPixels) {

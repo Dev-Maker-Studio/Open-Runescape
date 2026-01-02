@@ -702,7 +702,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         val absolute = getAbsolutePosition()
         val tileX = absolute.coords.x.toInt() shr 9
         val tileZ = absolute.coords.z.toInt() shr 9
-        if (super.scene != null && tileX >= 1 && tileZ >= 1 && tileX <= Resource.mapRegion!!.getSceneSizeX() - 1 && tileZ <= Resource.mapRegion!!.getSceneSizeY() - 1) {
+        if (super.scene != null && tileX >= 1 && tileZ >= 1 && tileX <= Resource.mapRegion!!.sceneSizeX - 1 && tileZ <= Resource.mapRegion!!.sceneSizeY - 1) {
             val tile = super.scene!!.tiles[super.plane.toInt()][tileX][tileZ]
             if (tile != null && tile.groundDecoration != null) {
                 return tile.groundDecoration!!.floorOffsetY + y
@@ -1032,7 +1032,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
         @JvmStatic
         fun getLargestEntity(plane: Int, x: Int, z: Int): PathingEntity? {
-            val tile = Resource.mapRegion!!.getScene().tiles[plane][x][z] ?: return null
+            val tile = Resource.mapRegion!!.getScene()!!.tiles[plane][x][z] ?: return null
 
             var biggestEntity: PathingEntity? = null
             var size = -1
@@ -1234,16 +1234,16 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
         @JvmStatic
         fun calculateAvgHeightInclRoofs(absX: Int, absZ: Int, nextAbsX: Int, nextAbsZ: Int, plane: Int): Int {
-            if (Resource.mapRegion!!.getScene() == null) {
+            if (Resource.mapRegion!!.getScene()!! == null) {
                 return 0
             }
             var plane = plane
             if (plane < 3) {
-                val settingsBits = Resource.mapRegion!!.getSettingsBits()
+                val settingsBits = Resource.mapRegion!!.settingsBits
                 val sceneX = absX shr 9
                 val sceneZ = absZ shr 9
-                if (nextAbsX >= 0 && nextAbsZ >= 0 && nextAbsX <= Resource.mapRegion!!.getSceneSizeX() - 1 && nextAbsZ <= Resource.mapRegion!!.getSceneSizeY() - 1) {
-                    if (sceneX >= 1 && sceneZ >= 1 && sceneX <= Resource.mapRegion!!.getSceneSizeX() - 1 && sceneZ <= Resource.mapRegion!!.getSceneSizeY() - 1) {
+                if (nextAbsX >= 0 && nextAbsZ >= 0 && nextAbsX <= Resource.mapRegion!!.sceneSizeX - 1 && nextAbsZ <= Resource.mapRegion!!.sceneSizeY - 1) {
+                    if (sceneX >= 1 && sceneZ >= 1 && sceneX <= Resource.mapRegion!!.sceneSizeX - 1 && sceneZ <= Resource.mapRegion!!.sceneSizeY - 1) {
                         var toggleRoofs = ((settingsBits.tileFunctionMasks[1][absX shr 9][absZ shr 9].toInt()) and 0x2) != 0
                         var bool10: Boolean
                         var bool11: Boolean
@@ -1264,13 +1264,13 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                         if (toggleRoofs) {
                             ++plane
                         }
-                        return Resource.mapRegion!!.getScene().localHeightmap!![plane]!!.getAverageHeight(absX, absZ)
+                        return Resource.mapRegion!!.getScene()!!.localHeightmap!![plane]!!.getAverageHeight(absX, absZ)
                     }
                     return 0
                 }
                 return 0
             }
-            return Resource.mapRegion!!.getScene().localHeightmap!![plane]!!.getAverageHeight(absX, absZ)
+            return Resource.mapRegion!!.getScene()!!.localHeightmap!![plane]!!.getAverageHeight(absX, absZ)
         }
 
         /**

@@ -649,7 +649,7 @@ object PlayerUpdate {
                     }
                     player.plane = ((i_9 + player.plane) and 0x3).toByte()
                     player.collisionPlane = player.plane
-                    if (Resource.mapRegion!!.getSettingsBits().areRoofsHidden(baseX, baseY)) {
+                    if (Resource.mapRegion!!.settingsBits.areRoofsHidden(baseX, baseY)) {
                         player.collisionPlane = (player.collisionPlane.toInt() + 1).toByte()
                     }
                     if (myPlayerIndex == updateIndex && player.plane != MY_PLAYER_PLANE.toByte()) {
@@ -671,7 +671,7 @@ object PlayerUpdate {
                     }
                     player.plane = ((playerPlane + player.plane) and 0x3).toByte()
                     player.collisionPlane = player.plane
-                    if (Resource.mapRegion!!.getSettingsBits().areRoofsHidden(baseX, baseY)) {
+                    if (Resource.mapRegion!!.settingsBits.areRoofsHidden(baseX, baseY)) {
                         player.collisionPlane = (player.collisionPlane.toInt() + 1).toByte()
                     }
                     if (myPlayerIndex == updateIndex) {
@@ -731,7 +731,7 @@ object PlayerUpdate {
             player.movementTypes[0] = PLAYER_MOVEMENT_TYPES[playerPtr]
             player.plane = playerHeight.toByte()
             player.collisionPlane = playerHeight.toByte()
-            if (Resource.mapRegion!!.getSettingsBits().areRoofsHidden(baseX, baseY)) {
+            if (Resource.mapRegion!!.settingsBits.areRoofsHidden(baseX, baseY)) {
                 player.collisionPlane = (player.collisionPlane.toInt() + 1).toByte()
             }
             player.move(baseX, baseY)
@@ -934,7 +934,7 @@ object PlayerUpdate {
         MY_PLAYER_PLANE = player.plane.toInt()
         player.plane = playerPlane
         player.collisionPlane = playerPlane
-        if (Resource.mapRegion!!.getSettingsBits().areRoofsHidden(player.movementBaseX[0], player.movementBaseY[0])) {
+        if (Resource.mapRegion!!.settingsBits.areRoofsHidden(player.movementBaseX[0], player.movementBaseY[0])) {
             player.collisionPlane = (player.collisionPlane.toInt() + 1).toByte()
         }
         if (APPEARANCE_BUFFERS[myPlayer] != null) {
@@ -1017,7 +1017,7 @@ object PlayerUpdate {
     fun findRoute(player: PlayerEntity, destX: Int, destY: Int, moveType: Byte) {
         val rbx = player.movementBaseX[0]
         val rby = player.movementBaseY[0]
-        if (rbx >= 0 && rbx < Resource.mapRegion!!.getSceneSizeX() && rby >= 0 && rby < Resource.mapRegion!!.getSceneSizeY() && destX >= 0 && destX < Resource.mapRegion!!.getSceneSizeX() && destY >= 0 && destY < Resource.mapRegion!!.getSceneSizeY()) {
+        if (rbx >= 0 && rbx < Resource.mapRegion!!.sceneSizeX && rby >= 0 && rby < Resource.mapRegion!!.sceneSizeY && destX >= 0 && destX < Resource.mapRegion!!.sceneSizeX && destY >= 0 && destY < Resource.mapRegion!!.sceneSizeY) {
             val i_7 = RouteFinder.findRoute(rbx, rby, player.getSize(), RouteStrategies.forFixedTile(destX, destY), Resource.mapRegion!!.getCollisionMap(player.plane.toInt()), true, client.WALKING_STEPS_X, client.WALKING_STEPS_Y)
             if (i_7 in 1..3) {
                 for (index in 0 until i_7 - 1) {
@@ -1049,7 +1049,7 @@ object PlayerUpdate {
                 player5.worldPriority = -1
             } else {
                 player5.calculatePosition()
-                if (player5.startX >= 0 && player5.startZ >= 0 && player5.endX < Resource.mapRegion!!.getSceneSizeX() && player5.endZ < Resource.mapRegion!!.getSceneSizeY()) {
+                if (player5.startX >= 0 && player5.startZ >= 0 && player5.endX < Resource.mapRegion!!.sceneSizeX && player5.endZ < Resource.mapRegion!!.sceneSizeY) {
                     player5.aBool10573 = player5.movingSequence.hasType && animate
                     if (player5 == MY_PLAYER) {
                         player5.worldPriority = Integer.MAX_VALUE
@@ -1079,7 +1079,7 @@ object PlayerUpdate {
             val npc = (client.NPC_MAP[client.NPC_UPDATE_INDICES[npcIndex].toLong()]!!.value as NpcEntity)
             if (npc.hasDefinition() && npc.definitions!!.hasTransformations(VarProviders.PLAYER_VAR_PROVIDER)) {
                 npc.calculatePosition()
-                if (npc.startX >= 0 && npc.startZ >= 0 && npc.endX < Resource.mapRegion!!.getSceneSizeX() && npc.endZ < Resource.mapRegion!!.getSceneSizeY()) {
+                if (npc.startX >= 0 && npc.startZ >= 0 && npc.endX < Resource.mapRegion!!.sceneSizeX && npc.endZ < Resource.mapRegion!!.sceneSizeY) {
                     var drawPriority = 0
                     if (!npc.isHidden) {
                         drawPriority++
@@ -1137,8 +1137,8 @@ object PlayerUpdate {
     fun updateDrawPriority(plane: Int) {
         val numPlayerIndices = NUM_OUT_PLAYER_INDICES
         val playerIndices = OUT_PLAYER_INDICES
-        val drawPriority = Resource.mapRegion!!.getDrawPriority()
-        val drawPrioritySharedby = Resource.mapRegion!!.getDrawPrioritySharedby()
+        val drawPriority = Resource.mapRegion!!.drawPriority
+        val drawPrioritySharedby = Resource.mapRegion!!.drawPrioritySharedby
         val totalIndices: Int
         totalIndices = if (client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
@@ -1211,8 +1211,8 @@ object PlayerUpdate {
     fun method11629(plane: Int) {
         val numPlayerIndices = NUM_OUT_PLAYER_INDICES
         val playerIndices = OUT_PLAYER_INDICES
-        val drawPriority = Resource.mapRegion!!.getDrawPriority()
-        val drawPrioritySharedby = Resource.mapRegion!!.getDrawPrioritySharedby()
+        val drawPriority = Resource.mapRegion!!.drawPriority
+        val drawPrioritySharedby = Resource.mapRegion!!.drawPrioritySharedby
         val totalIndices: Int
         totalIndices = if (client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
@@ -1296,7 +1296,7 @@ object PlayerUpdate {
 
             entity.isHidden = false
             entity.setBasePosition(abs.x, MapRegion.tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), entity.plane.toInt()).toFloat(), abs.z)
-            Resource.mapRegion!!.getScene().addInteractive(entity, true)
+            Resource.mapRegion!!.getScene()!!.addInteractive(entity, true)
         }
 
     }
@@ -1356,7 +1356,7 @@ object PlayerUpdate {
             }
 
             entity.setBasePosition(abs.x, MapRegion.tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), entity.plane.toInt()).toFloat(), abs.z)
-            Resource.mapRegion!!.getScene().addInteractive(entity as AbstractInteractiveEntity, true)
+            Resource.mapRegion!!.getScene()!!.addInteractive(entity as AbstractInteractiveEntity, true)
         }
 
     }

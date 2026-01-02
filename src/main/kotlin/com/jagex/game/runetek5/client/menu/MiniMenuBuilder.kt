@@ -210,7 +210,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     val i_3 = mouseX - MiniMenu.anInt180
     val i_4 = mouseY - MiniMenu.anInt181
 
-    if (Resource.mapRegion?.getScene() != null && (!client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
+    if (Resource.mapRegion?.getScene()!! != null && (!client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
         var x = -1
         var y = -1
 
@@ -237,7 +237,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
             x = (posX + (PlayerUpdate.MY_PLAYER!!.getSize() - 1 shl 8)) shr 9
             y = (posY + (PlayerUpdate.MY_PLAYER!!.getSize() - 1 shl 8)) shr 9
             val plane = PlayerUpdate.MY_PLAYER!!.plane
-            if (plane < 3 && ((Resource.mapRegion?.getSettingsBits()?.tileFunctionMasks?.get(1)?.get(posX shr 9)?.get(posY shr 9)?.toInt() ?: 0) and 0x2) != 0) {
+            if (plane < 3 && ((Resource.mapRegion?.settingsBits?.tileFunctionMasks?.get(1)?.get(posX shr 9)?.get(posY shr 9)?.toInt() ?: 0) and 0x2) != 0) {
                 // Empty block
             }
         }
@@ -298,7 +298,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
         }
     }
 
-    val scene = Resource.mapRegion?.getScene() ?: return
+    val scene = Resource.mapRegion?.getScene()!! ?: return
     val interactiveEntities = scene.interactiveEntities
     val renderedEntity = interactiveEntities.entities
 

@@ -83,10 +83,10 @@ class EnvironmentManager(
                 x = PlayerUpdate.MY_PLAYER!!.movementBaseX[0] shr 3
                 y = PlayerUpdate.MY_PLAYER!!.movementBaseY[0] shr 3
             }
-            if (x >= 0 && x < mapregion.getSceneSizeX() shr 3 && y >= 0 && y < mapregion.getSceneSizeY() shr 3) {
+            if (x >= 0 && x < mapregion.sceneSizeX shr 3 && y >= 0 && y < mapregion.sceneSizeY shr 3) {
                 chunkEnvironmentUpdate(x, y, ENVIRONMENT_UPDATE_DURATION)
             } else {
-                chunkEnvironmentUpdate(mapregion.getSceneSizeX() shr 4, mapregion.getSceneSizeY() shr 4, 0)
+                chunkEnvironmentUpdate(mapregion.sceneSizeX shr 4, mapregion.sceneSizeY shr 4, 0)
             }
         } else {
             chunkEnvironmentUpdate(Camera.cameraPositionAbsoluteX shr 12, Camera.cameraPositionAbsoluteY shr 12, ENVIRONMENT_UPDATE_DURATION)
@@ -136,7 +136,7 @@ class EnvironmentManager(
     }
 
     fun applySun() {
-        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness!!.getValue() * 0.1f + Resource.mapRegion!!.getRandomColorOffset()) * this.environment.sunAmbient)
+        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness!!.getValue() * 0.1f + Resource.mapRegion!!.randomColorOffset) * this.environment.sunAmbient)
         this.activeToolkit.applyLighting(this.environment.sunColour, this.environment.sunLight, this.environment.sunBacklight, (this.sunPosition.x.toInt() shl 2).toFloat(), (this.sunPosition.y.toInt() shl 2).toFloat(), (this.sunPosition.z.toInt() shl 2).toFloat())
         this.activeToolkit.setSunCubeTexture(this.environment.sunCubeTexture)
     }
@@ -156,7 +156,7 @@ class EnvironmentManager(
     }
 
     fun prepareLights() {
-        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness!!.getValue() * 0.1f + Resource.mapRegion!!.getRandomColorOffset()) * 1.1523438f)
+        this.activeToolkit.updateSun((0.7f + PreferenceManager.preferences!!.brightness!!.getValue() * 0.1f + Resource.mapRegion!!.randomColorOffset) * 1.1523438f)
         this.activeToolkit.applyLighting(DEFAULT_SUN_COLOR, 0.69921875f, 1.2f, -200.0f, -240.0f, -200.0f)
         this.activeToolkit.calculateFog(DEFAULT_FOG_COLOR, -1, 0)
         defaultSunCubeTexture?.let { this.activeToolkit.setSunCubeTexture(it) }

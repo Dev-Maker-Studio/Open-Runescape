@@ -33,7 +33,7 @@ class CutscenePositionedGfx(buffer: Packet) : AbstractCutsceneSpotAnimation(buff
             height++
         }
 
-        val gfx = SpotAnimation(Resource.mapRegion!!.getScene(), super.gfxId, 0, this.plane, height, absX,
+        val gfx = SpotAnimation(Resource.mapRegion!!.getScene()!!, super.gfxId, 0, this.plane, height, absX,
             MapRegion.tileheightForAbsolutePosition(absX, absY, this.plane) - super.displayHeight, absY, this.x, this.x, this.y, this.y, super.rotation, false)
         client.ACTIVE_GFX.put(PositionedGfx(gfx), (this.x.toLong() shl 16) or this.y.toLong())
     }

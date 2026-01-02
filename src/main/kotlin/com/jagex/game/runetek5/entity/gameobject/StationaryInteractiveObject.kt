@@ -104,7 +104,7 @@ class StationaryInteractiveObject(
             if (aBool10543 || objectdefinitions4.dynamicTint) {
                 interactiveModel = interactiveModel!!.copy(0.toByte(), i_18, false)
                 if (objectdefinitions4.dynamicTint) {
-                    val class34120 = Resource.mapRegion!!.getDynamicTint()
+                    val class34120 = Resource.mapRegion!!.dynamicTint
                     interactiveModel!!.tint(class34120.hue, class34120.saturation, class34120.lightness, class34120.opacity)
                 }
             }

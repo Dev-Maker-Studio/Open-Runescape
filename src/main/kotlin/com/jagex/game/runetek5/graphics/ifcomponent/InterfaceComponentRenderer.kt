@@ -463,8 +463,8 @@ object InterfaceComponentRenderer {
                                     client.SUN_MATRIX.reset()
                                     Renderers.activeToolkit!!.setSunPosition(client.SUN_MATRIX)
                                     val matrix44 = Renderers.activeToolkit!!.method8449()
-                                    val viewRangeStart = Resource.mapRegion!!.getViewRangeStart()
-                                    var viewRangeEnd = Resource.mapRegion!!.getViewRangeEnd()
+                                    val viewRangeStart = Resource.mapRegion!!.viewRangeStart
+                                    var viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
                                     viewRangeEnd += component.spriteScale
                                     if (component.usesOrthogonal) {
                                         if (component.hasOrigin) {

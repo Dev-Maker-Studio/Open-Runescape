@@ -352,8 +352,8 @@ object StaticMethods {
 
     @JvmStatic
     fun method3850(matrix440: Matrix44, centerX: Float, centerY: Float, f_4: Float, f_5: Float, width: Int, length: Int) {
-        val viewRangeEnd = Resource.mapRegion!!.getViewRangeEnd()
-        val viewRangeStart = Resource.mapRegion!!.getViewRangeStart()
+        val viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
+        val viewRangeStart = Resource.mapRegion!!.viewRangeStart
         matrix440.method6531(centerX, centerY, f_4, f_5, viewRangeStart.toFloat(), viewRangeEnd.toFloat(), width.toFloat(), length.toFloat())
     }
 

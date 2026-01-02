@@ -224,7 +224,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         setBasePosition(abs)
         abs.pushVectorStack()
         if (this == PlayerUpdate.MY_PLAYER!!) {
-            Resource.mapRegion!!.environmentManager.requestDirectEnvironmentTransition()
+            Resource.mapRegion!!.environmentManager!!.requestDirectEnvironmentTransition()
         }
 
         if (particleSystem != null) {
@@ -747,9 +747,9 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         @JvmStatic
         fun uploadScene() {
             if (!sceneUploaded) {
-                MapRegion.upload(Resource.mapRegion!!.scene.surfaceTiles)
-                if (Resource.mapRegion!!.scene.waterTiles != null) {
-                    MapRegion.upload(Resource.mapRegion!!.scene.waterTiles)
+                MapRegion.upload(Resource.mapRegion!!.scene!!.surfaceTiles as Array<Array<Array<Tile?>?>?>)
+                if (Resource.mapRegion!!.scene!!.waterTiles != null) {
+                    MapRegion.upload(Resource.mapRegion!!.scene!!.waterTiles as Array<Array<Array<Tile?>?>?>)
                 }
                 sceneUploaded = true
             }

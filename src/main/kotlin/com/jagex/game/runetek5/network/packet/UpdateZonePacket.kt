@@ -109,7 +109,7 @@ enum class UpdateZonePacket(val size: Int) {
                     unlink()
                 }
             } else {
-                val scene = Resource.mapRegion!!.getScene()
+                val scene = Resource.mapRegion!!.getScene()!!
                 if (scene != null) {
                     val tileX = x * 512 + 256
                     val tileY = y * 512 + 256
@@ -153,11 +153,11 @@ enum class UpdateZonePacket(val size: Int) {
         var angle = buffer.readUByte().let { if (it == 255) -1 else it }
         var slope = buffer.readUShort()
 
-        val sceneSize = Resource.mapRegion!!.getSceneSizeX()
+        val sceneSize = Resource.mapRegion!!.sceneSizeX
         if (shouldProcessUpdate() &&
             localX in 0 until sceneSize * 2 && localY in 0 until sceneSize * 2 &&
-            xOff in 0 until Resource.mapRegion!!.getSceneSizeY() * 2 &&
-            yOff in 0 until Resource.mapRegion!!.getSceneSizeY() * 2 &&
+            xOff in 0 until Resource.mapRegion!!.sceneSizeY * 2 &&
+            yOff in 0 until Resource.mapRegion!!.sceneSizeY * 2 &&
             spotAnimId != 65535) {
 
             localX *= 256
@@ -191,13 +191,13 @@ enum class UpdateZonePacket(val size: Int) {
         var angle = buffer.readUByte().let { if (it == 255) -1 else it }
         var slope = buffer.readUShort()
 
-        val sceneSize = Resource.mapRegion!!.getSceneSizeX()
+        val sceneSize = Resource.mapRegion!!.sceneSizeX
         if (shouldProcessUpdate() &&
             localX in 0 until sceneSize && localY in 0 until sceneSize &&
             xOff in 0 until sceneSize && yOff in 0 until sceneSize &&
             spotAnimId != 65535) {
 
-            val scene = Resource.mapRegion!!.getScene()
+            val scene = Resource.mapRegion!!.getScene()!!
             if (scene != null) {
                 localX = localX * 512 + 256
                 localY = localY * 512 + 256
@@ -450,8 +450,8 @@ enum class UpdateZonePacket(val size: Int) {
     }
 
     private fun isWithinScene(x: Int, y: Int): Boolean {
-        return x in 0 until Resource.mapRegion!!.getSceneSizeX() &&
-                y in 0 until Resource.mapRegion!!.getSceneSizeY()
+        return x in 0 until Resource.mapRegion!!.sceneSizeX &&
+                y in 0 until Resource.mapRegion!!.sceneSizeY
     }
 
     private fun isPlayerWithinRange(x: Int, y: Int, range: Int): Boolean {

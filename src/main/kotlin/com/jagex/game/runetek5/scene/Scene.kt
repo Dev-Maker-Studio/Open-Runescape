@@ -1462,7 +1462,7 @@ class Scene(
                 // Always
                 resetSettingsBits(0.toByte())
                 initializeRoofSettings(512)
-                if (Resource.mapRegion!!.getScene() != null) {
+                if (Resource.mapRegion!!.getScene()!! != null) {
                     method570()
                 }
             } else {
@@ -1477,10 +1477,10 @@ class Scene(
         @JvmStatic
         fun method570() {
             var i_1 = 0
-            val scene = Resource.mapRegion!!.getScene()
-            for (sceneX in 0 until Resource.mapRegion!!.getSceneSizeX()) {
-                for (sceneY in 0 until Resource.mapRegion!!.getSceneSizeY()) {
-                    if (MapRegion.calculateVisibilityAdjustments(scene!!.tiles, i_1, sceneX, sceneY, true)) {
+            val scene = Resource.mapRegion!!.getScene()!!
+            for (sceneX in 0 until Resource.mapRegion!!.sceneSizeX) {
+                for (sceneY in 0 until Resource.mapRegion!!.sceneSizeY) {
+                    if (MapRegion.calculateVisibilityAdjustments(scene!!.tiles as Array<Array<Array<Tile>?>?>?, i_1, sceneX, sceneY, true)) {
                         i_1++
                     }
                     if (i_1 >= 512) {
@@ -1501,14 +1501,14 @@ class Scene(
 
         @JvmStatic
         fun resetSettingsBits(defaultSettings: Byte) {
-            var settingsBits = Resource.mapRegion!!.getBits()
+            var settingsBits = Resource.mapRegion!!.bits
             if (settingsBits == null) {
-                settingsBits = Array(4) { Array(Resource.mapRegion!!.getSceneSizeX()) { ByteArray(Resource.mapRegion!!.getSceneSizeY()) } }
+                settingsBits = Array(4) { Array(Resource.mapRegion!!.sceneSizeX) { ByteArray(Resource.mapRegion!!.sceneSizeY) } }
                 Resource.mapRegion!!.setActiveSettingsBits(settingsBits)
             }
             for (plane in 0..3) {
-                for (x in 0 until Resource.mapRegion!!.getSceneSizeX()) {
-                    for (y in 0 until Resource.mapRegion!!.getSceneSizeY()) {
+                for (x in 0 until Resource.mapRegion!!.sceneSizeX) {
+                    for (y in 0 until Resource.mapRegion!!.sceneSizeY) {
                         settingsBits[plane][x][y] = defaultSettings
                     }
                 }

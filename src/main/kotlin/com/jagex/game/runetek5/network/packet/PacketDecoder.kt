@@ -428,7 +428,7 @@ object PacketDecoder {
                 val fromPlane = targetHash shr 28 and 0x3
                 val x = (targetHash shr 14 and 0x3fff) - base.x
                 val y = (targetHash and 0x3fff) - base.y
-                if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.getSceneSizeX() && y < Resource.mapRegion!!.getSceneSizeY()) {
+                if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
                     if (reqGfxId == -1) {
                         val positionedGfx = client.ACTIVE_GFX.get(x.toLong() shl 16 or y.toLong())
                         if (positionedGfx != null) {
@@ -436,12 +436,12 @@ object PacketDecoder {
                             positionedGfx.unlink()
                         }
                     } else {
-                        val scene = Resource.mapRegion!!.getScene()
+                        val scene = Resource.mapRegion!!.getScene()!!
                         if (scene != null) {
                             val tileX = x * 512 + 256
                             val tileY = y * 512 + 256
                             var toPlane = fromPlane
-                            if (fromPlane < 3 && Resource.mapRegion!!.getSettingsBits().areRoofsHidden(x, y)) {
+                            if (fromPlane < 3 && Resource.mapRegion!!.settingsBits.areRoofsHidden(x, y)) {
                                 toPlane = fromPlane + 1
                             }
                             val spotAnimation = SpotAnimation(scene, reqGfxId, speed, fromPlane, toPlane, tileX, MapRegion.tileheightForAbsolutePosition(tileX, tileY, fromPlane) - height, tileY, x, x, y, y, rotation, setting2)
@@ -955,14 +955,14 @@ object PacketDecoder {
                 i_6 -= coordgrid114.x
                 if (i_6 < 0) {
                     i_6 = 0
-                } else if (i_6 >= Resource.mapRegion!!.getSceneSizeX()) {
-                    i_6 = Resource.mapRegion!!.getSceneSizeX()
+                } else if (i_6 >= Resource.mapRegion!!.sceneSizeX) {
+                    i_6 = Resource.mapRegion!!.sceneSizeX
                 }
                 i_7 -= coordgrid114.y
                 if (i_7 < 0) {
                     i_7 = 0
-                } else if (i_7 >= Resource.mapRegion!!.getSceneSizeY()) {
-                    i_7 = Resource.mapRegion!!.getSceneSizeY()
+                } else if (i_7 >= Resource.mapRegion!!.sceneSizeY) {
+                    i_7 = Resource.mapRegion!!.sceneSizeY
                 }
                 PingRequester.anInt5864 = (i_6 shl 9) + 256
                 StaticMethods.anInt833 = (i_7 shl 9) + 256
@@ -1152,7 +1152,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.HINT_TRAIL) {
             val idx = buffer.readUByte()
             val modelId = buffer.readBigSmart()
-            val scene = Resource.mapRegion!!.getScene()
+            val scene = Resource.mapRegion!!.getScene()!!
             if (scene != null) {
                 if (client.HINT_TRAILS[idx] != null) {
                     client.HINT_TRAILS[idx].removeFromScene(scene)
@@ -1248,7 +1248,7 @@ object PacketDecoder {
                 val y = absY - base.y
                 if (plane == UpdateZonePacket.UPDATE_ZONE_PLANE && x >= UpdateZonePacket.UPDATE_ZONE_X && x < UpdateZonePacket.UPDATE_ZONE_X + 8 && y >= UpdateZonePacket.UPDATE_ZONE_Y && y < UpdateZonePacket.UPDATE_ZONE_Y + 8) {
                     groundItems.unlink()
-                    if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.getSceneSizeX() && y < Resource.mapRegion!!.getSceneSizeY()) {
+                    if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
                         GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y)
                     }
                 }
@@ -1377,7 +1377,7 @@ object PacketDecoder {
             var localY = y - base.y * 2
             var xOff = xDist + localX
             var yOff = yDist + localY
-            if (localX >= 0 && localY >= 0 && localX < Resource.mapRegion!!.getSceneSizeX() * 2 && localY < Resource.mapRegion!!.getSceneSizeX() * 2 && xOff >= 0 && yOff >= 0 && xOff < Resource.mapRegion!!.getSceneSizeY() * 2 && yOff < Resource.mapRegion!!.getSceneSizeY() * 2 && spotAnimId != 65535) {
+            if (localX >= 0 && localY >= 0 && localX < Resource.mapRegion!!.sceneSizeX * 2 && localY < Resource.mapRegion!!.sceneSizeX * 2 && xOff >= 0 && yOff >= 0 && xOff < Resource.mapRegion!!.sceneSizeY * 2 && yOff < Resource.mapRegion!!.sceneSizeY * 2 && spotAnimId != 65535) {
                 localX *= 256
                 localY *= 256
                 xOff *= 256
@@ -2167,10 +2167,10 @@ object PacketDecoder {
             MiniMenu.close()
             MiniMenu.resetEntries()
             val flags = buffer.readUShort()
-            MapRegion.CUTSCENE_MAP_XTEAS = Array<IntArray?>(flags) { IntArray(4) }
+            MapRegion.CUTSCENE_MAP_XTEAS = Array<IntArray>(flags) { IntArray(4) }
             for (i_6 in 0..<flags) {
                 for (i_7 in 0..3) {
-                    MapRegion.CUTSCENE_MAP_XTEAS[i_6][i_7] = buffer.readInt()
+                    MapRegion.CUTSCENE_MAP_XTEAS!![i_6][i_7] = buffer.readInt()
                 }
             }
             val i_6 = buffer.readUByte()

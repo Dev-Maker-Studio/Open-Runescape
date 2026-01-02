@@ -48,23 +48,23 @@ object GroundItemUpdating {
         val base = Resource.mapRegion!!.getBaseCoordinates()
         val absX = base.x + x
         val absY = base.y + y
-        if (Resource.mapRegion!!.getScene() != null && Resource.mapRegion!!.loadingType != RegionLoadingType.CUTSCENE && x >= 0 && y >= 0 && x < Resource.mapRegion!!.getSceneSizeX() && y < Resource.mapRegion!!.getSceneSizeY()) {
+        if (Resource.mapRegion!!.getScene()!! != null && Resource.mapRegion!!.loadingType != RegionLoadingType.CUTSCENE && x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
             val hash = plane.toLong() shl 28 or (absY.toLong() shl 14) or absX.toLong()
             val node = client.GROUND_ITEMS.get(hash)
             if (node == null) {
-                Resource.mapRegion!!.getScene().removeGroundItem(plane, x, y)
+                Resource.mapRegion!!.getScene()!!.removeGroundItem(plane, x, y)
             } else {
                 val groundItemNode = node.groundItems.first() as GroundItemNode?
                 if (groundItemNode == null) {
-                    Resource.mapRegion!!.getScene().removeGroundItem(plane, x, y)
+                    Resource.mapRegion!!.getScene()!!.removeGroundItem(plane, x, y)
                 } else {
-                    var groundItem = Resource.mapRegion!!.getScene().removeGroundItem(plane, x, y) as GroundItem?
+                    var groundItem = Resource.mapRegion!!.getScene()!!.removeGroundItem(plane, x, y) as GroundItem?
                     if (groundItem == null) {
-                        groundItem = GroundItem(Resource.mapRegion!!.getScene(), x shl 9, Resource.mapRegion!!.getScene().localHeightmap!![plane]!!.getHeight(x, y), y shl 9, plane, plane)
+                        groundItem = GroundItem(Resource.mapRegion!!.getScene()!!, x shl 9, Resource.mapRegion!!.getScene()!!.localHeightmap!![plane]!!.getHeight(x, y), y shl 9, plane, plane)
                     } else {
                         groundItem.itemId = -1
                         groundItem.lastId = -1
-                        groundItem.scene = Resource.mapRegion!!.getScene()
+                        groundItem.scene = Resource.mapRegion!!.getScene()!!
                     }
 
                     groundItem.nodeId = groundItemNode.id
@@ -96,11 +96,11 @@ object GroundItemUpdating {
                     groundItem.anInt10422 = 0
                     groundItem.plane = plane.toByte()
                     groundItem.collisionPlane = plane.toByte()
-                    if (Resource.mapRegion!!.getSettingsBits().areRoofsHidden(x, y)) {
+                    if (Resource.mapRegion!!.settingsBits.areRoofsHidden(x, y)) {
                         groundItem.collisionPlane = (groundItem.collisionPlane + 1).toByte()
                     }
 
-                    Resource.mapRegion!!.getScene().addGroundItem(plane, x, y, height, groundItem)
+                    Resource.mapRegion!!.getScene()!!.addGroundItem(plane, x, y, height, groundItem)
                 }
             }
         }

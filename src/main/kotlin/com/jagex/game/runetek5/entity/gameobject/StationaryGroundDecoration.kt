@@ -63,7 +63,7 @@ class StationaryGroundDecoration(
             if (hasShadow || loctype.dynamicTint) {
                 this.model = this.model!!.copy(0.toByte(), functionMask, false)
                 if (loctype.dynamicTint) {
-                    val dynamicTint = Resource.mapRegion!!.getDynamicTint()
+                    val dynamicTint = Resource.mapRegion!!.dynamicTint
                     this.model!!.tint(dynamicTint.hue, dynamicTint.saturation, dynamicTint.lightness, dynamicTint.opacity)
                 }
             }

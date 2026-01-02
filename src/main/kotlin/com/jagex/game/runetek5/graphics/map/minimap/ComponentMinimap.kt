@@ -92,7 +92,7 @@ object ComponentMinimap {
 
     @JvmStatic
     fun drawLocOnMinimap(toolkit: AbstractToolkit, plane: Int, sceneX: Int, sceneY: Int, x: Int, y: Int, colorNoActions: Int, colorHasActions: Int) {
-        val scene: Scene = Resource.mapRegion!!.getScene()
+        val scene: Scene = Resource.mapRegion!!.getScene()!!
         var sceneObject: GameObject? = scene.getWall(plane, sceneX, sceneY) as? GameObject
         if (sceneObject != null) {
             val locType: ObjectType = Resource.mapRegion!!.getLoctypeList().list(sceneObject.id)
@@ -204,7 +204,7 @@ object ComponentMinimap {
                 }
 
                 val i_12 = absX / 128 + 48
-                val i_13 = 48 + Resource.mapRegion!!.getSceneSizeY() * 4 - absY / 128
+                val i_13 = 48 + Resource.mapRegion!!.sceneSizeY * 4 - absY / 128
                 minimapBackground!!.rotate(clipLeft + component.width / 2.0F, clipTop + component.height / 2.0F, i_12.toFloat(), i_13.toFloat(), i_11, rotation shl 2, dimension, clipLeft, clipTop)
                 val staticElements: StaticElements = Resource.mapRegion!!.getStaticElements()
 
@@ -551,10 +551,10 @@ object ComponentMinimap {
         if (!abstractToolkit.readyForRendering()) {
             return false
         }
-        val regionDimensionX = Resource.mapRegion!!.getSceneSizeX()
-        val regionDimensionY = Resource.mapRegion!!.getSceneSizeY()
-        val settingsBits: SettingsBits = Resource.mapRegion!!.getSettingsBits()
-        val scene: Scene = Resource.mapRegion!!.getScene()
+        val regionDimensionX = Resource.mapRegion!!.sceneSizeX
+        val regionDimensionY = Resource.mapRegion!!.sceneSizeY
+        val settingsBits: SettingsBits = Resource.mapRegion!!.settingsBits
+        val scene: Scene = Resource.mapRegion!!.getScene()!!
         var halfRegionDimension = regionDimensionX / 2
         var mapSpritesCached = true
         for (x in 0 until regionDimensionX) {
@@ -817,7 +817,7 @@ object ComponentMinimap {
 
     @JvmStatic
     fun drawGame(toolkit: AbstractToolkit) {
-        if (MAP_PLANE != PlayerUpdate.MY_PLAYER!!.plane.toInt() && Resource.mapRegion!!.getScene() != null) {
+        if (MAP_PLANE != PlayerUpdate.MY_PLAYER!!.plane.toInt() && Resource.mapRegion!!.getScene()!! != null) {
             Utils.time()
             if (drawGame(toolkit, PlayerUpdate.MY_PLAYER!!.plane.toInt())) {
                 MAP_PLANE = PlayerUpdate.MY_PLAYER!!.plane.toInt()

@@ -83,7 +83,7 @@ class AnimatedGameObject(
         val shadowLocal = shadow
         if (shadowLocal != null) {
             val abs = entityNode.getAbsolutePosition().coords
-            Resource.mapRegion!!.getScene().removeShadow(shadowLocal, heightLevel.toInt(), abs.x.toInt(), abs.z.toInt(), castShadowAtPlane)
+            Resource.mapRegion!!.getScene()!!.removeShadow(shadowLocal, heightLevel.toInt(), abs.x.toInt(), abs.z.toInt(), castShadowAtPlane)
             castShadowAtPlane = null
             shadow = null
         }
@@ -197,7 +197,7 @@ class AnimatedGameObject(
             return null
         }
         val scenePosition = entityNode.getAbsolutePosition().coords
-        val scene = Resource.mapRegion!!.getScene()
+        val scene = Resource.mapRegion!!.getScene()!!
         val shadowLocal = shadow
         if (hasShadow && shadowLocal != null) {
             scene.removeShadow(shadowLocal, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), castShadowAtPlane)

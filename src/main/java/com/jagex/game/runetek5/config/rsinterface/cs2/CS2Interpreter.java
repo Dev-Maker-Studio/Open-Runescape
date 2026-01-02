@@ -6234,14 +6234,14 @@ public class CS2Interpreter {
         i_3 -= coordgrid5.x;
         if (i_3 < 0) {
             i_3 = 0;
-        } else if (i_3 >= Resource.mapRegion.getSceneSizeX()) {
-            i_3 = Resource.mapRegion.getSceneSizeX();
+        } else if (i_3 >= Resource.mapRegion.sceneSizeX) {
+            i_3 = Resource.mapRegion.sceneSizeX;
         }
         i_4 -= coordgrid5.y;
         if (i_4 < 0) {
             i_4 = 0;
-        } else if (i_4 >= Resource.mapRegion.getSceneSizeY()) {
-            i_4 = Resource.mapRegion.getSceneSizeY();
+        } else if (i_4 >= Resource.mapRegion.sceneSizeY) {
+            i_4 = Resource.mapRegion.sceneSizeY;
         }
         client.anInt7262 = (i_3 << 9) + 256;
         client.anInt7376 = (i_4 << 9) + 256;
@@ -8215,14 +8215,14 @@ public class CS2Interpreter {
             i_3 -= coordgrid5.x;
             if (i_3 < 0) {
                 i_3 = 0;
-            } else if (i_3 >= Resource.mapRegion.getSceneSizeX()) {
-                i_3 = Resource.mapRegion.getSceneSizeX();
+            } else if (i_3 >= Resource.mapRegion.sceneSizeX) {
+                i_3 = Resource.mapRegion.sceneSizeX;
             }
             i_4 -= coordgrid5.y;
             if (i_4 < 0) {
                 i_4 = 0;
-            } else if (i_4 >= Resource.mapRegion.getSceneSizeY()) {
-                i_4 = Resource.mapRegion.getSceneSizeY();
+            } else if (i_4 >= Resource.mapRegion.sceneSizeY) {
+                i_4 = Resource.mapRegion.sceneSizeY;
             }
             PingRequester.anInt5864 = (i_3 << 9) + 256;
             StaticMethods.anInt833 = (i_4 << 9) + 256;
