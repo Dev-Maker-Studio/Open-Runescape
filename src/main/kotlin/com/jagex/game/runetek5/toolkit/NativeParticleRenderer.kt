@@ -133,7 +133,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         var child = particleTree.child
         i_7 = 0
         nativeToolkit.method13997(anInterface32511)
-        val class10314 = nativeToolkit.abstractParticleShader
+        val class10314 = nativeToolkit.abstractParticleShader!!
         class10314.method1788(AbstractNativeToolkit.WORLD_VIEW_PROJECTION_MATRIX)
         class10314.textureCoordinateMatrix.identity()
         class10314.diffuseColor = -1
@@ -193,7 +193,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
                 child = child.child
             }
 
-            class10314.diffuseSampler = nativeToolkit.materialCache.getTextureSampler(if (materialId >= 0) materialId else -1)
+            class10314.diffuseSampler = nativeToolkit.materialCache!!.getTextureSampler(if (materialId >= 0) materialId else -1)
             if (hasLightAdjustment && nativeToolkit.lightIntensity != currentLightIntensity) {
                 nativeToolkit.updateSun(currentLightIntensity)
             } else if (nativeToolkit.lightIntensity != 1.0f) {
@@ -412,7 +412,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         nativeToolkit.setStreamSource(0, anInterface4500)
         nativeToolkit.setStreamSource(1, anInterface4510)
         nativeToolkit.setVertexDeclaration(aClass70499)
-        val particleShader = nativeToolkit.abstractParticleShader
+        val particleShader = nativeToolkit.abstractParticleShader!!
         particleShader.method1787(i_3)
     }
 

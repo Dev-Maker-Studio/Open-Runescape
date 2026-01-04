@@ -51,7 +51,8 @@ class NativeCubeTextureGenerator(
                 MATERIAL_PIXELS[index] = nativeToolkit.materialProvider!!.getPixels(MATERIAL_IDS[index], 1.0f, largestSize, largestSize, false)
             }
 
-            nativeCubeTexture = nativeToolkit.generateNativeCubeTexture(largestSize, mipmappingEnabled, MATERIAL_PIXELS)
+            @Suppress("UNCHECKED_CAST")
+            nativeCubeTexture = nativeToolkit.generateNativeCubeTexture(largestSize, mipmappingEnabled, MATERIAL_PIXELS as Array<IntArray>)
         }
 
         return nativeCubeTexture!!

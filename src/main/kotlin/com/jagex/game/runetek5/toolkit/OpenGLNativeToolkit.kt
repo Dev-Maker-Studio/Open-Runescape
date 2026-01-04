@@ -11,6 +11,7 @@ import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.framebuffer.RenderBuffer
 import com.jagex.game.runetek5.graphics.light.PointLight
+import com.jagex.game.runetek5.graphics.model.ModelGL
 import com.jagex.game.runetek5.graphics.shader.Shader
 import com.jagex.game.runetek5.graphics.shader.ShaderGL
 import com.jagex.game.runetek5.graphics.shader.ShaderLoader
@@ -300,7 +301,7 @@ open class OpenGLNativeToolkit(
 
     override fun loadShader(string_1: String): Shader? {
         val shaderData = getGLShaderData(string_1) ?: return null
-        val class1143 = createShader(shaderData)
+        val class1143 = createShader(shaderData) ?: return null
         return ShaderGL(this, class1143)
     }
 
@@ -439,7 +440,7 @@ open class OpenGLNativeToolkit(
 
         var index = 0
         while (index < lastSceneLightCount) {
-            val lightSource = lightSources!![index]
+            val lightSource = lightSources!![index]!!
             val color = lightSource.color
             val lightUnit = index + GL_LIGHT2
             val alpha = lightSource.getAlpha() / 255.0f
@@ -471,16 +472,16 @@ open class OpenGLNativeToolkit(
         return method14064(class1501, class762, i_3, i_4)
     }
 
-    override fun createNativeTexture(class1501: GLFormat, i_2: Int, i_3: Int, floats_5: FloatArray?): NativeTextureSampler {
+    override fun createNativeTexture(class1501: GLFormat, i_2: Int, i_3: Int, floats_5: FloatArray): NativeTextureSampler {
         if (!GLARBTextureNonPowerOfTwo && (!OpenGlTexture.isPowerOfTwo(i_2) || !OpenGlTexture.isPowerOfTwo(i_3))) {
             if (GLARBTextureRectangle) {
-                return MipmapRectangleTextureSampler(this, class1501, i_2, i_3, floats_5!!)
+                return MipmapRectangleTextureSampler(this, class1501, i_2, i_3, floats_5)
             }
             val sampler2d = MipmapTextureSampler2D(this, class1501, GLActionFormat.FLOAT_32_ARB, MathUtils.nextPowerOfTwo(i_2), MathUtils.nextPowerOfTwo(i_3))
-            sampler2d.method14494(i_2, i_3, floats_5!!, class1501)
+            sampler2d.method14494(i_2, i_3, floats_5, class1501)
             return sampler2d
         }
-        return MipmapTextureSampler2D(this, class1501, i_2, i_3, floats_5!!)
+        return MipmapTextureSampler2D(this, class1501, i_2, i_3, floats_5)
     }
 
     override fun method14064(class1501: GLFormat, class762: GLActionFormat, i_3: Int, i_4: Int): RectangleTextureSampler {
@@ -495,8 +496,8 @@ open class OpenGLNativeToolkit(
         }
     }
 
-    override fun generateNativeCubeTexture(sizeXy: Int, mipmapsGenerated: Boolean, ints_3: Array<IntArray>?): CubeTextureSampler {
-        return OpenGLCubeTextureSampler(this, sizeXy, mipmapsGenerated, ints_3!!)
+    override fun generateNativeCubeTexture(sizeXy: Int, mipmapsGenerated: Boolean, ints_3: Array<IntArray>): CubeTextureSampler {
+        return OpenGLCubeTextureSampler(this, sizeXy, mipmapsGenerated, ints_3)
     }
 
     override fun method13962(class1501: GLFormat, bytes_6: ByteArray): Texture3DSampler {
@@ -508,11 +509,11 @@ open class OpenGLNativeToolkit(
     }
 
     override fun setTextureColorStage() {
-        OpenGL.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, getTextureCombineMode(textureRgbCombineModes[currentTextureSlot]))
+        OpenGL.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, getTextureCombineMode(textureRgbCombineModes!![currentTextureSlot]))
     }
 
     override fun setTextureAlphaStage() {
-        OpenGL.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, getTextureCombineMode(textureAlphaCombineModes[currentTextureSlot]))
+        OpenGL.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, getTextureCombineMode(textureAlphaCombineModes!![currentTextureSlot]))
     }
 
     override fun method13970(i_1: Int, class672: TextureStageState) {
@@ -805,8 +806,8 @@ open class OpenGLNativeToolkit(
 
     override fun setTextureMatrix() {
         OpenGL.glMatrixMode(GL_TEXTURE)
-        if (textureStates[currentTextureSlot] != TextureState.INITIALIZE) {
-            OpenGL.glLoadMatrixf(textureMatrices[currentTextureSlot].copyInto(currentTextureMatrix), 0)
+        if (textureStates!![currentTextureSlot] != TextureState.INITIALIZE) {
+            OpenGL.glLoadMatrixf(textureMatrices!![currentTextureSlot].copyInto(currentTextureMatrix), 0)
         } else {
             OpenGL.glLoadIdentity()
         }
@@ -842,7 +843,7 @@ open class OpenGLNativeToolkit(
         }
     }
 
-    override fun setupGraphics() {
+    fun setupGraphicsGL() {
         // Set depth function
         OpenGL.glDepthFunc(GL_LEQUAL)
 
@@ -1026,10 +1027,10 @@ open class OpenGLNativeToolkit(
         throw IllegalArgumentException("Unexpected memory node type")
     }
 
-    override fun createModel(i_1: Int, i_2: Int, bool3: Boolean, bool4: Boolean): Model? {
-        // ModelGL constructor requires specific parameters - returning null for now
-        // This may need proper implementation based on usage
-        return null
+    override fun createModel(i_1: Int, i_2: Int, bool3: Boolean, bool4: Boolean): Model {
+        // TODO: ModelGL expects OpenGlToolkit, not AbstractNativeToolkit. This needs architectural refactoring.
+        // For now, we need to use a different approach or modify ModelGL to accept AbstractToolkit.
+        throw UnsupportedOperationException("createModel not yet supported in OpenGLNativeToolkit - ModelGL requires OpenGlToolkit")
     }
 
     override fun setTextureOnCurrentSlot() {
@@ -1053,16 +1054,16 @@ open class OpenGLNativeToolkit(
         return RenderInfo(vendor, "OpenGL", combinedOpenglVersion, gpuManufactorer!!, 0L)
     }
 
-    override fun createNativeTextureSampler(class1501: GLFormat, width: Int, height: Int, bool4: Boolean, pixels: ByteArray): NativeTextureSampler {
+    override fun createNativeTextureSampler(class1501: GLFormat, width: Int, height: Int, bool4: Boolean, pixels: ByteArray?): NativeTextureSampler {
         if (!GLARBTextureNonPowerOfTwo && (!OpenGlTexture.isPowerOfTwo(width) || !OpenGlTexture.isPowerOfTwo(height))) {
             if (GLARBTextureRectangle) {
-                return MipmapRectangleTextureSampler(this, class1501, width, height, pixels)
+                return MipmapRectangleTextureSampler(this, class1501, width, height, pixels!!)
             }
             val sampler2d = MipmapTextureSampler2D(this, class1501, GLActionFormat.PIXEL_FORMAT, MathUtils.nextPowerOfTwo(width), MathUtils.nextPowerOfTwo(height))
-            sampler2d.method52(0, 0, width, height, pixels, class1501, 0, 0)
+            sampler2d.method52(0, 0, width, height, pixels!!, class1501, 0, 0)
             return sampler2d
         }
-        return MipmapTextureSampler2D(this, class1501, width, height, bool4, pixels)
+        return MipmapTextureSampler2D(this, class1501, width, height, bool4, pixels!!)
     }
 
     override fun method13954(class1501: GLFormat, class762: GLActionFormat): Boolean {

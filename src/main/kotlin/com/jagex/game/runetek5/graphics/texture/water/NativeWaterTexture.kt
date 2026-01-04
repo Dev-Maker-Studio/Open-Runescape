@@ -53,9 +53,9 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 }
             } else {
                 var bytes = DataBuffer.unpackDataBuffer(anObject482, false)
-                waterSampler3d = activeToolkit.method13962(GLFormat.aClass1501952, bytes)
+                waterSampler3d = activeToolkit.method13962(GLFormat.aClass1501952, bytes!!)
                 bytes = DataBuffer.unpackDataBuffer(anObject477, false)
-                billowSampler = activeToolkit.method13962(GLFormat.aClass1501952, bytes)
+                billowSampler = activeToolkit.method13962(GLFormat.aClass1501952, bytes!!)
             }
         }
     }

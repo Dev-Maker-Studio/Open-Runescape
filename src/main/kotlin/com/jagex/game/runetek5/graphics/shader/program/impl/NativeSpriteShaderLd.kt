@@ -36,8 +36,8 @@ class NativeSpriteShaderLd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
         activeToolkit.method13969(1, TextureStageState.aClass67677)
         activeToolkit.method13973().copyFrom(aClass384440)
         activeToolkit.setTextureState(TextureState.PARTIAL_COPY_LAST)
-        activeToolkit.setStreamSource(0, anInterface4445)
-        activeToolkit.setVertexDeclaration(aClass70447)
+        activeToolkit.setStreamSource(0, anInterface4445!!)
+        activeToolkit.setVertexDeclaration(aClass70447!!)
         activeToolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLE_FAN, anInt446, 2)
     }
 

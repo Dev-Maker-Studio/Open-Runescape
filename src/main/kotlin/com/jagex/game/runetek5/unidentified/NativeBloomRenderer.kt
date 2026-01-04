@@ -104,8 +104,8 @@ class NativeBloomRenderer(
     }
 
     fun drawTriangles() {
-        this.toolkit.setStreamSource(0, this.anInterface4376)
-        this.toolkit.setVertexDeclaration(this.aClass70377)
+        this.toolkit.setStreamSource(0, this.anInterface4376!!)
+        this.toolkit.setVertexDeclaration(this.aClass70377!!)
         this.toolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLES, 0, 1)
     }
 

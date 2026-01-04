@@ -106,7 +106,7 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
         activeShader!!.loadProgram(activeShader!!.createSingleMapping()!!)
         activeShader!!.setActiveMapping()
         activeShader!!.loadTextureSampler(normalSamplerAttribute!!, 0, nativeWaterTexture.normalSampler!!)
-        activeShader!!.loadTextureSampler(envMapSamplerAttribute!!, 1, toolkit.getEnvironmentMapSampler())
+        activeShader!!.loadTextureSampler(envMapSamplerAttribute!!, 1, toolkit.getEnvironmentMapSampler()!!)
         activeShader!!.loadMatrix(waterViewingPlaneMatrixAttribute!!, waterViewingPlaneMatrix)
         activeShader!!.loadTextureMatrix(textureCoordinateMatrixAttribute!!, textureCoordinateMatrix)
         val speed = 1 shl (effectParam1 and 0x3)

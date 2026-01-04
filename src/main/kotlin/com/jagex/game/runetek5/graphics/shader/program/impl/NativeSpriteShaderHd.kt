@@ -88,8 +88,8 @@ class NativeSpriteShaderHd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
         spriteShader!!.setTextureCoordinateMatrix(activeUniformLocations!![3], aClass384440)
         spriteShader!!.load4f(activeUniformLocations!![5], mulColour.x, mulColour.y, mulColour.z, mulColour.w)
         spriteShader!!.load4f(activeUniformLocations!![6], addColour.x, addColour.y, addColour.z, addColour.w)
-        activeToolkit.setStreamSource(0, anInterface4445)
-        activeToolkit.setVertexDeclaration(aClass70447)
+        activeToolkit.setStreamSource(0, anInterface4445!!)
+        activeToolkit.setVertexDeclaration(aClass70447!!)
         activeToolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLE_FAN, anInt446, 2)
     }
 
