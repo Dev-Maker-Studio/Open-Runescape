@@ -15,7 +15,7 @@ object VorbisSoundManager {
                 SoundTrigger.playVorbis(fileId, bool2)
             } else {
                 val vorbisnode = VorbisNode(fileId, VorbisFileReference(Resource.VORBIS!!, fileId), i_1, bool2)
-                vorbisnode.vfReference.setLanguage(client.CURRENT_LANGUAGE.lowercaseAbbreviation)
+                vorbisnode.vfReference.setLanguage(client.CURRENT_LANGUAGE!!.lowercaseAbbreviation)
                 StaticMethods.INDEX36_FILE_CACHE.put(vorbisnode, fileId.toLong())
             }
         }

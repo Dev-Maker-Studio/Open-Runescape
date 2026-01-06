@@ -157,7 +157,7 @@ object MiniMenu {
         if ((entryCount >= 2 || client.interfaceSelectionActive) && client.draggingComponent == null) {
             var menuText: String
             if (client.interfaceSelectionActive && entryCount < 2) {
-                menuText = client.useOnType + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE) + client.useOnTarget + " " + "->"
+                menuText = client.useOnType + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + client.useOnTarget + " " + "->"
             } else if (KeyDownCommand.minimenuKeyDown() && entryCount > 2) {
                 menuText = getTextFrom(aCacheableNodeSub79445!!)
             } else {
@@ -172,7 +172,7 @@ object MiniMenu {
                 }
             }
             if (entryCount > 2) {
-                menuText = menuText + TextUtils.setTextColor(16777215) + " / " + (entryCount - 2) + LocalizedText.MORE_OPTIONS.translate(client.CURRENT_LANGUAGE)
+                menuText = menuText + TextUtils.setTextColor(16777215) + " / " + (entryCount - 2) + LocalizedText.MORE_OPTIONS.translate(client.CURRENT_LANGUAGE!!)
             }
             val comp = InterfaceComponentRenderer.aClass118183
             if (comp != null) {
@@ -293,12 +293,12 @@ object MiniMenu {
         val colorName = menuEntry.coloredName
         return if (aString != null && !aString.isEmpty())
             if (colorName != null && !colorName.isEmpty())
-                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE) + colorName + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE) + aString
+                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + colorName + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + aString
             else
-                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE) + aString
+                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + aString
         else
             if (colorName != null && !colorName.isEmpty())
-                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE) + colorName
+                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + colorName
             else
                 menuEntry.action
     }
@@ -511,7 +511,7 @@ object MiniMenu {
     fun method4908(toolkit: AbstractToolkit) {
         val fillColor = -10660793
         AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, fillColor)
-        minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE), StaticMethods.anInt3555 + 3, StaticMethods.anInt2300 + 14, fillColor, -1)
+        minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE!!), StaticMethods.anInt3555 + 3, StaticMethods.anInt2300 + 14, fillColor, -1)
         val mouseX = MouseRecord.recorder!!.getMouseX()
         val mouseY = MouseRecord.recorder!!.getMouseY()
         var i_5: Int
@@ -762,7 +762,7 @@ object MiniMenu {
             fontrenderer7 = minimenuHeader
         }
         val fontmetrics8 = FontMetrics.getForMinimenu()
-        NativeSprite.method12680(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE)!!)
+        NativeSprite.method12680(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE!!)!!)
         var alpha = 255 - StaticMethods.anInt2262 - NativeSprite.anInt156
         if (alpha < 0) {
             alpha = 0
@@ -894,7 +894,7 @@ object MiniMenu {
 
     @JvmStatic
     fun addCancelOption() {
-        cancelOption = MiniMenuEntry(LocalizedText.CANCEL.translate(client.CURRENT_LANGUAGE)!!, "", client.defaultMenuCursor, 1006, -1, 0L, 0, 0, true, false, 0L, true)
+        cancelOption = MiniMenuEntry(LocalizedText.CANCEL.translate(client.CURRENT_LANGUAGE!!)!!, "", client.defaultMenuCursor, 1006, -1, 0L, 0, 0, true, false, 0L, true)
     }
 
     @JvmField

@@ -164,7 +164,7 @@ class Component {
                         if (component.itemSlots != null) {
                             update(component.itemSlots!!, component.idHash)
                         }
-                        val subinterface = client.OPEN_INTERFACES[component.idHash.toLong()]
+                        val subinterface = client.OPEN_INTERFACES!![component.idHash.toLong()]
                         if (subinterface != null) {
                             update(subinterface.subInterfaceId)
                         }
@@ -192,7 +192,7 @@ class Component {
 
         @JvmStatic
         fun getCursor(component: Component, option: Int): Int {
-            return if (!client.getComponentSettings(component).clickOptionEnabled(option) && component.params == null)
+            return if (!client.getComponentSettings(component)!!.clickOptionEnabled(option) && component.params == null)
                 -1
             else
                 if (component.opCursors != null && component.opCursors!!.size > option) component.opCursors!![option] else -1
@@ -215,7 +215,7 @@ class Component {
 
         @JvmStatic
         fun componentMenuOption(component: Component, option: Int): String? {
-            return if (!client.getComponentSettings(component).clickOptionEnabled(option) && component.params == null)
+            return if (!client.getComponentSettings(component)!!.clickOptionEnabled(option) && component.params == null)
                 null
             else
                 if (component.options != null && component.options!!.size > option && component.options!![option] != null && component.options!![option]!!.trim().isNotEmpty())

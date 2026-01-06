@@ -56,8 +56,8 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
     if (PlayerUpdate.MY_PLAYER!! == player) {
         if (client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x10) != 0) {
             MiniMenu.addEntry(
-                client.useOnType,
-                "${client.useOnTarget} -> ${TextUtils.setTextColor(16777215)}${LocalizedText.SELF.translate(client.CURRENT_LANGUAGE)}",
+                client.useOnType!!,
+                "${client.useOnTarget} -> ${TextUtils.setTextColor(16777215)}${LocalizedText.SELF.translate(client.CURRENT_LANGUAGE!!)}",
                 MiniMenu.useOnCursor,
                 16,
                 -1,
@@ -82,9 +82,9 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                     }
                 }
                 val level = if (client.CURRENT_GAME == Game.STELLAR_DAWN) {
-                    LocalizedText.RATING_.translate(client.CURRENT_LANGUAGE)
+                    LocalizedText.RATING_.translate(client.CURRENT_LANGUAGE!!)
                 } else {
-                    LocalizedText.MINIMENU_LEVEL.translate(client.CURRENT_LANGUAGE)
+                    LocalizedText.MINIMENU_LEVEL.translate(client.CURRENT_LANGUAGE!!)
                 }
                 val combatColor = if (combatColorDisplayed) {
                     TextUtils.calculateCombatBasedColor(player.combatLevel, PlayerUpdate.MY_PLAYER!!.combatLevel)
@@ -98,12 +98,12 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                 }
             }
             -1 -> player.getUsernameWithTitle()
-            else -> "${player.getUsernameWithTitle()} (${LocalizedText.SKILL_.translate(client.CURRENT_LANGUAGE)}${player.elo})"
+            else -> "${player.getUsernameWithTitle()} (${LocalizedText.SKILL_.translate(client.CURRENT_LANGUAGE!!)}${player.elo})"
         }
 
         if (client.interfaceSelectionActive && !onDifferentPlane && (USE_OPTIONS_FLAGS and 0x8) != 0) {
             MiniMenu.addEntry(
-                client.useOnType,
+                client.useOnType!!,
                 "${client.useOnTarget} -> ${TextUtils.setTextColor(16777215)}$username",
                 MiniMenu.useOnCursor,
                 15,
@@ -138,7 +138,7 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                 client.PLAYER_OPTIONS[index]?.let { option ->
                     var attackClickType: Short = 0
                     if (Game.RUNESCAPE == client.CURRENT_GAME &&
-                        option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE), ignoreCase = true)) {
+                        option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
                         attackClickType = if (client.REDUCE_ATTACK_PRIORITY && player.combatLevel > PlayerUpdate.MY_PLAYER!!.combatLevel) {
                             2000
                         } else if (PlayerUpdate.MY_PLAYER!!.teamId != 0 && player.teamId != 0) {
@@ -247,7 +247,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                 val component = Component.listIcomponent(client.anInt56, client.anInt7345)
                 if (component != null) {
                     MiniMenu.addEntry(
-                        client.useOnType,
+                        client.useOnType!!,
                         " -> ",
                         MiniMenu.useOnCursor,
                         59,
@@ -266,7 +266,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
             } else {
                 if (SHOW_FACE_HERE) {
                     MiniMenu.addEntry(
-                        LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE)!!,
+                        LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE!!)!!,
                         "",
                         -1,
                         60,
@@ -470,7 +470,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                 if ((USE_OPTIONS_FLAGS and 0x1) != 0 &&
                                     (param == null || objtype.getCs2Integer(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
                                     MiniMenu.addEntry(
-                                        client.useOnType,
+                                        client.useOnType!!,
                                         "${client.useOnTarget} -> ${TextUtils.setTextColor(color)}${objtype.name}",
                                         MiniMenu.useOnCursor,
                                         17,
@@ -548,7 +548,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                         if ((USE_OPTIONS_FLAGS and 0x4) != 0 &&
                             (attributedefault62 == null || loctype.getParamsInt(MiniMenu.USE_INTERFACE_ID, attributedefault62.defaultInt) != attributedefault62.defaultInt)) {
                             MiniMenu.addEntry(
-                                client.useOnType,
+                                client.useOnType!!,
                                 "${client.useOnTarget} -> ${TextUtils.setTextColor(65535)}${loctype.name}",
                                 MiniMenu.useOnCursor,
                                 2,
@@ -617,11 +617,11 @@ fun interfaceComponentHovered(component: Component) {
             TypeLists.PARAMS?.list(MiniMenu.USE_INTERFACE_ID)
         } else null
 
-        if (client.getComponentSettings(component).isTargetableByUse() &&
+        if (client.getComponentSettings(component)!!.isTargetableByUse() &&
             (USE_OPTIONS_FLAGS and 0x20) != 0 &&
             (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
             MiniMenu.addEntry(
-                client.useOnType,
+                client.useOnType!!,
                 "${client.useOnTarget} -> ${component.opBase}",
                 MiniMenu.useOnCursor,
                 58,
@@ -695,8 +695,8 @@ fun interfaceComponentHovered(component: Component) {
         }
     }
 
-    if (client.getComponentSettings(component).continueOptionEnabled()) {
-        val text = component.resumeText ?: LocalizedText.CONTINUE.translate(client.CURRENT_LANGUAGE)!!
+    if (client.getComponentSettings(component)!!.continueOptionEnabled()) {
+        val text = component.resumeText ?: LocalizedText.CONTINUE.translate(client.CURRENT_LANGUAGE!!)!!
         MiniMenu.addEntry(
             text!!,
             "",
@@ -729,9 +729,9 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
     if (npcType?.visible == true) {
         if (npc.modifiedCbLvl != 0) {
             val level = if (client.CURRENT_GAME == Game.STELLAR_DAWN) {
-                LocalizedText.RATING_.translate(client.CURRENT_LANGUAGE)
+                LocalizedText.RATING_.translate(client.CURRENT_LANGUAGE!!)
             } else {
-                LocalizedText.MINIMENU_LEVEL.translate(client.CURRENT_LANGUAGE)
+                LocalizedText.MINIMENU_LEVEL.translate(client.CURRENT_LANGUAGE!!)
             }
             name = "$name${TextUtils.calculateCombatBasedColor(npc.modifiedCbLvl, PlayerUpdate.MY_PLAYER!!.combatLevel)} ($level${npc.modifiedCbLvl})"
         }
@@ -744,7 +744,7 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
             if ((USE_OPTIONS_FLAGS and 0x2) != 0 &&
                 (paramtype == null || npcType.getCs2Value(MiniMenu.USE_INTERFACE_ID, paramtype.defaultInt) != paramtype.defaultInt)) {
                 MiniMenu.addEntry(
-                    client.useOnType,
+                    client.useOnType!!,
                     "${client.useOnTarget} -> ${TextUtils.setTextColor(16776960)}$name",
                     MiniMenu.useOnCursor,
                     8,
@@ -771,8 +771,8 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                     val option = npcOptions[actionIndex]
                     if (option != null &&
                         (npcType.gameType.toInt() == 0 ||
-                         (!option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE), ignoreCase = true) &&
-                          !option.equals(LocalizedText.EXAMINE.translate(client.CURRENT_LANGUAGE), ignoreCase = true)))) {
+                         (!option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true) &&
+                          !option.equals(LocalizedText.EXAMINE.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)))) {
 
                         val clickType = when (actionIndex) {
                             0 -> 9
@@ -790,7 +790,7 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                             else -> CursorManager.defaultAttackCursor
                         }
 
-                        val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE), ignoreCase = true)) {
+                        val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
                             npcType.attackCursor
                         } else {
                             cursor
@@ -817,8 +817,8 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                     for (actionIndex in npcOptions.indices) {
                         val option = npcOptions[actionIndex]
                         if (option != null &&
-                            (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE), ignoreCase = true) ||
-                             option.equals(LocalizedText.EXAMINE.translate(client.CURRENT_LANGUAGE), ignoreCase = true))) {
+                            (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true) ||
+                             option.equals(LocalizedText.EXAMINE.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true))) {
 
                             val attackClickPriority = if (npc.modifiedCbLvl > PlayerUpdate.MY_PLAYER!!.combatLevel) 2000 else 0
 
@@ -842,7 +842,7 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                                 else -> CursorManager.defaultAttackCursor
                             }
 
-                            val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE), ignoreCase = true)) {
+                            val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
                                 npcType.attackCursor
                             } else {
                                 cursor

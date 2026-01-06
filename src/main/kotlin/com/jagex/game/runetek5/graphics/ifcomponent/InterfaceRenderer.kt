@@ -102,12 +102,13 @@ object InterfaceRenderer {
 
 				val withinClipBounds = clipMinX < clipMaxX && clipMinY < clipMaxY
 
-				if (childComponent.type != ComponentType.CONTAINER && !childComponent.hasScript && client.getComponentSettings(childComponent).settingsHash == 0 && childComponent != client.selectedComponent && !childComponent.isIgnoredContentType()) {
+				if (childComponent.type != ComponentType.CONTAINER && !childComponent.hasScript && client.getComponentSettings(childComponent)!!.settingsHash == 0 && childComponent != client.selectedComponent && !childComponent.isIgnoredContentType()) {
 					if (withinClipBounds) {
 						Component.drawComponentObjSprite(childComponent)
 					}
 				} else if (!isComponentHidden(childComponent)) {
-					if (childComponent == client.draggingComponent && client.hasDepthFlags(client.draggingComponent)) {
+					val dragging = client.draggingComponent
+					if (childComponent == dragging && dragging != null && client.hasDepthFlags(dragging)) {
 						client.isDraggingComponent = true
 						client.dragStartX = componentX
 						client.dragStartY = componentY
@@ -192,7 +193,7 @@ object InterfaceRenderer {
 								var hasAction = false
 								if (childComponent.anIntArray1267!![keyIndex] > 0) {
 									for (i in 0 until client.keyCachePointerPoss) {
-										if (childComponent.anIntArray1267!![keyIndex] == client.KEYS_PRESSED[i].getCharacter().code) {
+										if (childComponent.anIntArray1267!![keyIndex] == client.KEYS_PRESSED[i]!!.getCharacter().code) {
 											keyTriggered = true
 											val cycles = childComponent.cycles
 											if (cycles == null || cycles[keyIndex] <= client.cycles) {
@@ -226,7 +227,7 @@ object InterfaceRenderer {
 										Interface.ifOptionInteract(keyIndex + 1, childComponent.idHash, childComponent.slotId, "")
 									} else if (keyIndex == 10) {
 										InterfaceComponentRenderer.cancelInterfaceSelection()
-										val childEvents = client.getComponentSettings(childComponent)
+										val childEvents = client.getComponentSettings(childComponent)!!
 										setUseOptionFlags(childComponent, childEvents.getUseOptionFlags(), childEvents.interfaceId)
 										client.useOnType = Interface.getUseOptionString(childComponent)
 										if (client.useOnType == null) {
@@ -259,7 +260,7 @@ object InterfaceRenderer {
 							method12221(childComponent, mouseRecord?.getX()?.minus(componentX) ?: 0, mouseRecord?.getY()?.minus(componentY) ?: 0)
 						}
 
-						if (client.draggingComponent != null && childComponent != client.draggingComponent && withinBoundaries && client.getComponentSettings(childComponent).dragEnabled()) {
+						if (client.draggingComponent != null && childComponent != client.draggingComponent && withinBoundaries && client.getComponentSettings(childComponent)!!.dragEnabled()) {
 							client.hoveredComponent = childComponent
 						}
 
@@ -267,8 +268,9 @@ object InterfaceRenderer {
 							client.isComponentSelected = true
 							client.selectedComponentX = componentX
 							client.selectedComponentY = componentY
-							client.selectedComponentWidth = client.selectedComponent.width
-							client.selectedComponentHeight = client.selectedComponent.height
+							val selected = client.selectedComponent
+							client.selectedComponentWidth = selected!!.width
+							client.selectedComponentHeight = selected.height
 						}
 
 						if (childComponent.hasScript || childComponent.contentType != null) {
@@ -382,7 +384,7 @@ object InterfaceRenderer {
 									if (client.interfaceSelectionActive && USE_OPTIONS_FLAGS and 0x40 != 0) {
 										val interfaceComponent = Component.listIcomponent(client.anInt56, client.anInt7345)
 										if (interfaceComponent != null) {
-											MiniMenu.addEntry(client.useOnType, " ->", MiniMenu.useOnCursor, 59, childComponent.containerItemId, 1, mapX, mapY, true, false, (childComponent.slotId or childComponent.idHash).toLong(), true)
+											MiniMenu.addEntry(client.useOnType!!, " ->", MiniMenu.useOnCursor, 59, childComponent.containerItemId, 1, mapX, mapY, true, false, (childComponent.slotId or childComponent.idHash).toLong(), true)
 										} else {
 											InterfaceComponentRenderer.cancelInterfaceSelection()
 										}
@@ -390,7 +392,7 @@ object InterfaceRenderer {
 									}
 
 									if (Game.STELLAR_DAWN == client.CURRENT_GAME) {
-										MiniMenu.addEntry(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE), "", -1, 60, -1, 1, mapX, mapY, true, false, 0, true)
+										MiniMenu.addEntry(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE!!), "", -1, 60, -1, 1, mapX, mapY, true, false, 0, true)
 									}
 
                                     translatedUptext?.let { MiniMenu.addEntry(it, "", CursorManager.activeCursorId, 23, -1, 1, mapX, mapY, true, false, 0, true) }
@@ -768,8 +770,8 @@ object InterfaceRenderer {
 								for (keyIndex in 0 until client.keyCachePointerPoss) {
 									val hookrequest44 = HookRequest()
 									hookrequest44.source = childComponent
-									hookrequest44.typedKeyCode = client.KEYS_PRESSED[keyIndex].getCode()
-									hookrequest44.typedKeyChar = client.KEYS_PRESSED[keyIndex].getCharacter().code
+									hookrequest44.typedKeyCode = client.KEYS_PRESSED[keyIndex]!!.getCode()
+									hookrequest44.typedKeyChar = client.KEYS_PRESSED[keyIndex]!!.getCharacter().code
 									hookrequest44.params = childComponent.anObjectArray1292
 									client.PENDING_HOOK_REQUESTS.addFirst(hookrequest44)
 								}
@@ -795,7 +797,7 @@ object InterfaceRenderer {
 								processInterfaceCycle(parentInterface, itemSlots, childComponent.idHash, clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
 							}
 
-							val subInterface = client.OPEN_INTERFACES[childComponent.idHash.toLong()]
+							val subInterface = client.OPEN_INTERFACES!![childComponent.idHash.toLong()]
 							if (subInterface != null) {
 								if (Game.RUNESCAPE == client.CURRENT_GAME && subInterface.overlay == 0 && !MiniMenu.isOpen && withinBoundaries && !client.DISPLAY_HIDDEN_MENU_OPTIONS) {
 									MiniMenu.resetEntries()
@@ -888,7 +890,7 @@ object InterfaceRenderer {
 		if (interfaceComponent.aspectHeightType.toInt() == 4) {
 			interfaceComponent.height = interfaceComponent.width * interfaceComponent.aspectY / interfaceComponent.aspectX
 		}
-		if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(interfaceComponent).settingsHash != 0 || interfaceComponent.type == ComponentType.CONTAINER)) {
+		if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(interfaceComponent)!!.settingsHash != 0 || interfaceComponent.type == ComponentType.CONTAINER)) {
 			if (interfaceComponent.height < 5 && interfaceComponent.width < 5) {
 				interfaceComponent.height = 5
 				interfaceComponent.width = 5
@@ -927,7 +929,7 @@ object InterfaceRenderer {
 	@JvmStatic
 	fun isComponentHidden(component: Component): Boolean {
 		if (client.DISPLAY_HIDDEN_MENU_OPTIONS) {
-			if (client.getComponentSettings(component).settingsHash != 0) {
+			if (client.getComponentSettings(component)!!.settingsHash != 0) {
 				return false
 			}
 			if (component.type == ComponentType.CONTAINER) {

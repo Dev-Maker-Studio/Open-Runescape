@@ -50,7 +50,7 @@ class VarcTypeList(
         fun readVarcIntPreferences() {
             var jagexFilesystem: JFS32? = null
             try {
-                jagexFilesystem = PreferenceManager.loadPreferenceFile("2", client.CURRENT_GAME.name, false)
+                jagexFilesystem = PreferenceManager.loadPreferenceFile("2", client.CURRENT_GAME!!.name, false)
                 val data = ByteArray(jagexFilesystem.length().toInt())
                 var seekOffset: Int
                 var position = 0

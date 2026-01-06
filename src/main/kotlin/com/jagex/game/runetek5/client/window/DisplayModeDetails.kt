@@ -39,11 +39,11 @@ class DisplayModeDetails {
 
         @JvmStatic
         fun getProfilingPerformance(toolkitValue: Int, profilingTime: Int): Int {
-            if (client.ENTITY_DEFAULTS.profilingMesh == -1) {
+            if (client.ENTITY_DEFAULTS!!.profilingMesh == -1) {
                 return 1
             }
             if (toolkitValue != PreferenceManager.preferences!!.activeToolkit!!.getValue()) {
-                client.loadAssets(toolkitValue, LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE), true)
+                client.loadAssets(toolkitValue, LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE!!), true)
                 if (PreferenceManager.preferences!!.activeToolkit!!.getValue() != toolkitValue) {
                     return -1
                 }
@@ -51,13 +51,13 @@ class DisplayModeDetails {
             try {
                 val dimension = GameShell.gameCanvas!!.size
                 MessageBox.draw(
-                    LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE),
+                    LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE!!),
                     true,
                     Renderers.activeToolkit!!,
                     FontManager.debugOverlayFont,
                     FontManager.messageboxFont
                 )
-                val profilingMesh = Mesh.fromResource(Resource.MODEL!!, client.ENTITY_DEFAULTS.profilingMesh)
+                val profilingMesh = Mesh.fromResource(Resource.MODEL!!, client.ENTITY_DEFAULTS!!.profilingMesh)
                 val startTime = Utils.time()
                 Renderers.activeToolkit!!.resetClipping()
                 client.SUN_MATRIX.setViewPosition(0.0f, 256.0f, 0.0f)

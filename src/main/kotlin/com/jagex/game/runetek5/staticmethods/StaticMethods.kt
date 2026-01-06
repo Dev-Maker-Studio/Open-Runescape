@@ -540,9 +540,9 @@ object StaticMethods {
 
     @JvmStatic
     fun method4653(mouseX: Int, mouseY: Int) {
-        if (client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712!!.action.equals(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE)))) {
+        if (client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712!!.action.equals(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE!!)))) {
             val fontMetrics = FontMetrics.getForMinimenu()
-            var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE)!!)
+            var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE!!)!!)
             val i_5: Int
             var i_7: Int
             if (!MiniMenu.aBool162) {

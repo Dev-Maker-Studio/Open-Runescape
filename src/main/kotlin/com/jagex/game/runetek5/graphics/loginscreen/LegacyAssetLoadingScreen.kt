@@ -89,7 +89,7 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
     override fun draw() {
         if (!resourcesUnavailable && font == null) {
             try {
-                val resourceNames = Utils.split(client.loginScreenImageResourceNames, ',')
+                val resourceNames = Utils.split(client.loginScreenImageResourceNames!!, ',')
                 if (resourceNames.size != 23) {
                     resourcesUnavailable = true
                 }

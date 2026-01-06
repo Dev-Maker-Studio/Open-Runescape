@@ -18,7 +18,7 @@ object FriendsChat {
     @JvmStatic
     fun kickPlayer(username: String) {
         if (FC_PLAYERS != null) {
-            val connection: BufferedConnectionContext = client.getConnectionContext()
+            val connection: BufferedConnectionContext = client.connectionContext
             val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.FC_KICK, connection.isaac)
             packet.buffer.writeByte(TextUtils.getLength(username))
             packet.buffer.writeString(username)
@@ -28,7 +28,7 @@ object FriendsChat {
 
     @JvmStatic
     fun setRank(username: String, rank: Int) {
-        val connection: BufferedConnectionContext = client.getConnectionContext()
+        val connection: BufferedConnectionContext = client.connectionContext
         val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.FC_SET_RANK, connection.isaac)
         packet.buffer.writeByte(1 + TextUtils.getLength(username))
         packet.buffer.writeByteSubtract(rank)

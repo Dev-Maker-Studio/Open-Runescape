@@ -82,7 +82,7 @@ object Console {
         anInt2230 = FontMetrics.aClass4143438!!.topPadding + FontMetrics.aClass4143438!!.bottomPadding + 2
         anInt2222 = FontManager.messageboxFont!!.topPadding + FontManager.messageboxFont!!.bottomPadding + 2
         displayedOutput = Array(500) { "" }
-        writeLine(LocalizedText.DEVELOPER_CONSOLE_INTRO.translate(client.CURRENT_LANGUAGE)!!)
+        writeLine(LocalizedText.DEVELOPER_CONSOLE_INTRO.translate(client.CURRENT_LANGUAGE!!)!!)
     }
 
     @JvmStatic
@@ -103,10 +103,10 @@ object Console {
         if (displayedOutput == null) {
             initialize()
         }
-        client.ACTIVE_TIMEZONE_CALENDER.time = Date(Utils.time())
-        val hour = client.ACTIVE_TIMEZONE_CALENDER[Calendar.HOUR_OF_DAY]
-        val minute = client.ACTIVE_TIMEZONE_CALENDER[Calendar.MINUTE]
-        val second = client.ACTIVE_TIMEZONE_CALENDER[Calendar.SECOND]
+        client.ACTIVE_TIMEZONE_CALENDER!!.time = Date(Utils.time())
+        val hour = client.ACTIVE_TIMEZONE_CALENDER!![Calendar.HOUR_OF_DAY]
+        val minute = client.ACTIVE_TIMEZONE_CALENDER!![Calendar.MINUTE]
+        val second = client.ACTIVE_TIMEZONE_CALENDER!![Calendar.SECOND]
         val timeDisplay = "${hour / 10}${hour % 10}:${minute / 10}${minute % 10}:${second / 10}${second % 10}"
         val commandParts = Utils.split(command, '\n')
         for (index in commandParts.indices) {
@@ -185,9 +185,9 @@ object Console {
         }
         for (index in 0 until client.keyCachePointerPoss) {
             val keyRecord = client.KEYS_PRESSED[index]
-            val code = keyRecord.getCode()
-            val character = keyRecord.getCharacter()
-            val flags = keyRecord.getFlags()
+            val code = keyRecord!!.getCode()
+            val character = keyRecord!!.getCharacter()
+            val flags = keyRecord!!.getFlags()
             if (code == 84) {
                 executeCommand(false)
             }
@@ -238,7 +238,7 @@ object Console {
                 adjustCommandString()
                 commandLength = commandString.length
             } else if (TextUtils.isAlphabeticalOrNumeric(character) || "\\/.:, _-+[]~@".indexOf(character) != -1) {
-                commandString = commandString.substring(0, commandLength) + client.KEYS_PRESSED[index].getCharacter() + commandString.substring(commandLength)
+                commandString = commandString.substring(0, commandLength) + client.KEYS_PRESSED[index]!!.getCharacter() + commandString.substring(commandLength)
                 commandLength++
             }
         }

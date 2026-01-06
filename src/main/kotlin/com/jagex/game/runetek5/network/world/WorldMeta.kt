@@ -96,7 +96,7 @@ class WorldMeta {
                     if (!WorldConnection.WORLD_PING_REQUESTS.containsKey(worldIdx)) {
                         val world = WorldDescriptor.getWorld(worldIdx)
                         if (world != null && world.ping == -1 && !WorldConnection.WORLD_PING_REQUESTS.containsKey(worldIdx)) {
-                            val request = client.PING_REQUESTER.createPingRequest(world.ipAddress)
+                            val request = client.PING_REQUESTER!!.createPingRequest(world.ipAddress)
                             request.startTime = System.currentTimeMillis()
 
                             WorldConnection.WORLD_PING_REQUESTS[worldIdx] = request

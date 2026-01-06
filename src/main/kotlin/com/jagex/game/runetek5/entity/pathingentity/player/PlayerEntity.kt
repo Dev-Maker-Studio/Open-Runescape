@@ -233,7 +233,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     override fun privateMessagesEnabled(): Boolean {
-        return client.ENTITY_DEFAULTS.enablePlayerMessages
+        return client.ENTITY_DEFAULTS!!.enablePlayerMessages
     }
 
     override fun getSize(): Int {
@@ -330,13 +330,13 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             var unusedSlots: Int
             unusedSlots = 50 - bodyModelCount
             while (unusedSlots > client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES) {
-                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA[client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = ByteArray(102400)
+                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA!![client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = ByteArray(102400)
                 client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES++
             }
 
             while (unusedSlots < client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES) {
                 client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES--
-                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA[client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = null
+                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA!![client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = null
             }
         } else if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE) {
             client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA = arrayOfNulls(50)
@@ -378,7 +378,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     fun sendChat(string_1: String, i_2: Int, i_3: Int) {
-        setHintDetails(string_1, i_2, i_3, GameShell.gameCyclesPerSecond() * client.ENTITY_DEFAULTS.playerMessageDuration)
+        setHintDetails(string_1, i_2, i_3, GameShell.gameCyclesPerSecond() * client.ENTITY_DEFAULTS!!.playerMessageDuration)
     }
 
     override fun getCS2Index(): Int {

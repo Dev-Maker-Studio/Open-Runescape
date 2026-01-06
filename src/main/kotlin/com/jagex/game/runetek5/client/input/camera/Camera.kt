@@ -473,13 +473,13 @@ object Camera {
             val from = FloatArray(3)
             val i_4 = client.anInt7279 * 2
             for (dir in 0 until 3) {
-                val i_17 = client.anIntArrayArrayArray7302[client.anInt7277][i_4][dir] * 3
-                val i_7 = client.anIntArrayArrayArray7302[client.anInt7277][i_4 + 1][dir] * 3
-                val i_8 = (client.anIntArrayArrayArray7302[client.anInt7277][i_4 + 2][dir] - (client.anIntArrayArrayArray7302[client.anInt7277][i_4 + 3][dir] - client.anIntArrayArrayArray7302[client.anInt7277][i_4 + 2][dir])) * 3
-                val i_9 = client.anIntArrayArrayArray7302[client.anInt7277][i_4][dir]
+                val i_17 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![dir] * 3
+                val i_7 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 1]!![dir] * 3
+                val i_8 = (client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![dir] - (client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 3]!![dir] - client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![dir])) * 3
+                val i_9 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![dir]
                 val i_10 = i_7 - i_17
                 val i_18 = i_17 - i_7 * 2 + i_8
-                val i_12 = client.anIntArrayArrayArray7302[client.anInt7277][i_4 + 2][dir] - i_9 + i_7 - i_8
+                val i_12 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![dir] - i_9 + i_7 - i_8
                 from[dir] = i_9 + ((i_12 * f_2 + i_18) * f_2 + i_10) * f_2
             }
             val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
@@ -489,13 +489,13 @@ object Camera {
             val to = FloatArray(3)
             val i_7 = client.anInt7280 * 2
             for (dir in 0 until 3) {
-                val i_9 = client.anIntArrayArrayArray7302[client.anInt7448][i_7][dir] * 3
-                val i_10 = client.anIntArrayArrayArray7302[client.anInt7448][i_7 + 1][dir] * 3
-                val i_18 = (client.anIntArrayArrayArray7302[client.anInt7448][i_7 + 2][dir] - (client.anIntArrayArrayArray7302[client.anInt7448][i_7 + 3][dir] - client.anIntArrayArrayArray7302[client.anInt7448][i_7 + 2][dir])) * 3
-                val i_12 = client.anIntArrayArrayArray7302[client.anInt7448][i_7][dir]
+                val i_9 = client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7]!![dir] * 3
+                val i_10 = client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 1]!![dir] * 3
+                val i_18 = (client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 2]!![dir] - (client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 3]!![dir] - client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 2]!![dir])) * 3
+                val i_12 = client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7]!![dir]
                 val i_13 = i_10 - i_9
                 val i_14 = i_9 - i_10 * 2 + i_18
-                val i_15 = i_10 + (client.anIntArrayArrayArray7302[client.anInt7448][i_7 + 2][dir] - i_12) - i_18
+                val i_15 = i_10 + (client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 2]!![dir] - i_12) - i_18
                 to[dir] = f_2 * ((i_14 + f_2 * i_15) * f_2 + i_13) + i_12
             }
             val deltaX = to[0] - from[0]
@@ -504,7 +504,7 @@ object Camera {
             val d_11 = sqrt((deltaY * deltaY + deltaX * deltaX).toDouble())
             cameraYaw = (atan2(deltaZ.toDouble(), d_11) * 2607.5945876176133).toInt() and 0x3fff
             cameraRoll = (-atan2(deltaX.toDouble(), deltaY.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-            cameraPitch = ((client.anIntArrayArrayArray7302[client.anInt7277][i_4 + 2][3] - client.anIntArrayArrayArray7302[client.anInt7277][i_4][3]) * client.anInt7256 shr 16) + client.anIntArrayArrayArray7302[client.anInt7277][i_4][3]
+            cameraPitch = ((client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![3] - client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![3]) * client.anInt7256 shr 16) + client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![3]
         }
     }
 

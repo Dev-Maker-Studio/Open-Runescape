@@ -239,13 +239,13 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         this.worldPriority = 0
         this.anInt10325 = 0
         this.hitCachePtr = 0
-        this.activeHitsplatIds = IntArray(client.ENTITY_DEFAULTS.maximumHits)
-        this.hitsplatText = IntArray(client.ENTITY_DEFAULTS.maximumHits)
-        this.hitsplatCustomText = arrayOfNulls(client.ENTITY_DEFAULTS.maximumHits)
-        this.hitsplatCycles = IntArray(client.ENTITY_DEFAULTS.maximumHits)
-        this.soakHitsplatIds = IntArray(client.ENTITY_DEFAULTS.maximumHits)
-        this.soakHitsplatText = IntArray(client.ENTITY_DEFAULTS.maximumHits)
-        this.soakHitsplatCustomText = arrayOfNulls(client.ENTITY_DEFAULTS.maximumHits)
+        this.activeHitsplatIds = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
+        this.hitsplatText = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
+        this.hitsplatCustomText = arrayOfNulls(client.ENTITY_DEFAULTS!!.maximumHits)
+        this.hitsplatCycles = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
+        this.soakHitsplatIds = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
+        this.soakHitsplatText = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
+        this.soakHitsplatCustomText = arrayOfNulls(client.ENTITY_DEFAULTS!!.maximumHits)
         this.entityHitbars = EntityNodeList<EntityHitbar>()
         this.faceEntity = -1
         this.currentAnimations = null
@@ -576,7 +576,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         var clearCurrentHits = true
         var hasPrerequisites = true
 
-        for (index in 0 until client.ENTITY_DEFAULTS.maximumHits) {
+        for (index in 0 until client.ENTITY_DEFAULTS!!.maximumHits) {
             if (this.hitsplatCycles[index] > currentCycles) {
                 clearCurrentHits = false
             } else {
@@ -606,7 +606,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 displayedNumber = this.hitsplatText[0]
             }
 
-            for (index in 1 until client.ENTITY_DEFAULTS.maximumHits) {
+            for (index in 1 until client.ENTITY_DEFAULTS!!.maximumHits) {
                 if (hitDisplayType == 0) {
                     if (this.hitsplatCycles[index] < displayedNumber) {
                         hitIndex = index
@@ -626,9 +626,9 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 this.hitCachePtr = 0
             }
 
-            for (hitCount in 0 until client.ENTITY_DEFAULTS.maximumHits) {
+            for (hitCount in 0 until client.ENTITY_DEFAULTS!!.maximumHits) {
                 val index = this.hitCachePtr
-                this.hitCachePtr = ((this.hitCachePtr + 1) % client.ENTITY_DEFAULTS.maximumHits).toByte()
+                this.hitCachePtr = ((this.hitCachePtr + 1) % client.ENTITY_DEFAULTS!!.maximumHits).toByte()
                 if (this.hitsplatCycles[index.toInt()] <= currentCycles) {
                     hitIndex = index.toInt()
                     break
@@ -673,7 +673,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             entityHitbar = this.entityHitbars.getNext() as EntityHitbar?
         }
 
-        if (current != null || count < client.ENTITY_DEFAULTS.maxHitbars) {
+        if (current != null || count < client.ENTITY_DEFAULTS!!.maxHitbars) {
             val newEntityHitbar = EntityHitbar(hitbarType)
             if (next == null) {
                 this.entityHitbars.getPrevious(newEntityHitbar)
@@ -682,7 +682,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             }
 
             newEntityHitbar.updateHitbar(currentCycle + delay, fromPercentage, toPercentage, lifetimeCycles)
-            if (count >= client.ENTITY_DEFAULTS.maxHitbars) {
+            if (count >= client.ENTITY_DEFAULTS!!.maxHitbars) {
                 current!!.unlinkNode()
             }
         }

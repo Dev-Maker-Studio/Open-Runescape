@@ -279,7 +279,7 @@ object EntityUpdating {
                 }
 
                 if (!bool94) {
-                    drawY -= client.ENTITY_DEFAULTS.anInt7028 + 2
+                    drawY -= client.ENTITY_DEFAULTS!!.anInt7028 + 2
                 }
 
                 if (!pathingEntity.isHidden) {
@@ -350,7 +350,7 @@ object EntityUpdating {
                 }
 
                 // Hitsplat rendering
-                for (hitsplatIndex in 0 until client.ENTITY_DEFAULTS.maximumHits) {
+                for (hitsplatIndex in 0 until client.ENTITY_DEFAULTS!!.maximumHits) {
                     val cycle = pathingEntity.hitsplatCycles[hitsplatIndex]
                     val hitplatId = pathingEntity.activeHitsplatIds[hitsplatIndex]
                     var hitsplatType: HitSplatType? = null
@@ -380,8 +380,8 @@ object EntityUpdating {
                             HintRenderer.calculateHintForSceneobject(pathingEntity as SceneGraphEntity, i_116)
 
                             if (client.HINT_POSITION[0] > -1.0f) {
-                                client.HINT_POSITION[0] += client.ENTITY_DEFAULTS.hitOffsetsX!![hitsplatIndex]
-                                client.HINT_POSITION[1] += client.ENTITY_DEFAULTS.hitOffsetsY!![hitsplatIndex]
+                                client.HINT_POSITION[0] += client.ENTITY_DEFAULTS!!.hitOffsetsX!![hitsplatIndex]
+                                client.HINT_POSITION[1] += client.ENTITY_DEFAULTS!!.hitOffsetsY!![hitsplatIndex]
 
                                 var i_27 = 0
                                 var i_28 = 0
@@ -750,11 +750,11 @@ object EntityUpdating {
             }
 
             client.HINT_Y[hintIndex] = hintY
-            val drawnText = client.HINT_DETAILS[hintIndex].getText()
+            val drawnText = client.HINT_DETAILS[hintIndex]!!.getText()
 
             if (client.anInt7351 == 0) {
                 var color = 16776960
-                val i_18 = client.HINT_DETAILS[hintIndex].getColorType()
+                val i_18 = client.HINT_DETAILS[hintIndex]!!.getColorType()
 
                 if (i_18 < 6) {
                     color = client.anIntArray7148[i_18]
@@ -769,7 +769,7 @@ object EntityUpdating {
                     color = if (client.timesSceneRendered % 20 < 10) 45056 else 8454016
                 }
                 if (i_18 == 9) {
-                    val i_19 = 150 - client.HINT_DETAILS[hintIndex].getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex].getTotalTicksVisible()
+                    val i_19 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     if (i_19 < 50) {
                         color = i_19 * 1280 + 16711680
                     } else if (i_19 < 100) {
@@ -779,7 +779,7 @@ object EntityUpdating {
                     }
                 }
                 if (i_18 == 10) {
-                    val i_19 = 150 - client.HINT_DETAILS[hintIndex].getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex].getTotalTicksVisible()
+                    val i_19 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     if (i_19 < 50) {
                         color = i_19 * 5 + 16711680
                     } else if (i_19 < 100) {
@@ -789,7 +789,7 @@ object EntityUpdating {
                     }
                 }
                 if (i_18 == 11) {
-                    val i_19 = 150 - client.HINT_DETAILS[hintIndex].getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex].getTotalTicksVisible()
+                    val i_19 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     if (i_19 < 50) {
                         color = 16777215 - i_19 * 327685
                     } else if (i_19 < 100) {
@@ -800,7 +800,7 @@ object EntityUpdating {
                 }
 
                 val drawColor = color or 0xFF000000.toInt()
-                val drawType = client.HINT_DETAILS[hintIndex].getDrawType()
+                val drawType = client.HINT_DETAILS[hintIndex]!!.getDrawType()
 
                 if (drawType == 0) {
                     // All regular text: no effects / plain color effects (red:) / cyan / flash1 / flash2 / flash3 / glow1 / glow2 / glow3
@@ -816,12 +816,12 @@ object EntityUpdating {
                 }
                 if (drawType == 3) {
                     // Shake effect (shake:texthere)
-                    val i_21 = 150 - client.HINT_DETAILS[hintIndex].getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex].getTotalTicksVisible()
+                    val i_21 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, client.timesSceneRendered, i_21)
                 }
                 if (drawType == 4) {
                     // Scroll effect (scroll:texthere)
-                    val i_21 = 150 - client.HINT_DETAILS[hintIndex].getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex].getTotalTicksVisible()
+                    val i_21 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     val i_116 = i_21 * (FontMetrics.aClass4143438!!.getWidthNoSprites(drawnText!!) + 100) / 150
                     Renderers.activeToolkit!!.expandClipping(clipLeft + hintX - 50, clipTop, clipLeft + hintX + 50, height + clipTop)
                     MiniMenu.minimenuHeader!!.renderPlain(drawnText, clipLeft + hintX + 50 - i_116, hintY + clipTop, drawColor, 0xFF000000.toInt())
@@ -829,7 +829,7 @@ object EntityUpdating {
                 }
                 if (drawType == 5) {
                     // Slide effect (slide:texthere)
-                    val i_21 = 150 - client.HINT_DETAILS[hintIndex].getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex].getTotalTicksVisible()
+                    val i_21 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     var i_116 = 0
                     if (i_21 < 25) {
                         i_116 = i_21 - 25

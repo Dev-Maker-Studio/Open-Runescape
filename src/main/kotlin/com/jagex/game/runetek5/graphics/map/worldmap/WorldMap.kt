@@ -1188,9 +1188,9 @@ object WorldMap {
             val centerX = width / 2 + left
             val centerY = top + height / 2 - 18 - b_7
             toolkit.drawFilledRectangle(left, top, width, height, 0xff000000.toInt(), 0)
-            toolkit.drawRectangleOutline(centerX - 152, centerY, 304, 34, client.DEBUG_BG_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX].getRGB(), 0)
-            toolkit.drawFilledRectangle(centerX - 150, centerY + 2, ComponentMinimap.mapAssetLoadingPercentage * 3, 30, client.DEBUG_LOAD_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX].getRGB(), 0)
-            MiniMenu.minimenuHeader!!.renderCentered(LocalizedText.LOADING.translate(client.CURRENT_LANGUAGE), centerX, b_7 + centerY, client.aColorArray7200[client.DEBUG_DISPLAY_COLOR_INDEX].getRGB(), -1)
+            toolkit.drawRectangleOutline(centerX - 152, centerY, 304, 34, client.DEBUG_BG_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), 0)
+            toolkit.drawFilledRectangle(centerX - 150, centerY + 2, ComponentMinimap.mapAssetLoadingPercentage * 3, 30, client.DEBUG_LOAD_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), 0)
+            MiniMenu.minimenuHeader!!.renderCentered(LocalizedText.LOADING.translate(client.CURRENT_LANGUAGE!!), centerX, b_7 + centerY, client.aColorArray7200[client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), -1)
         } else {
             val i_17 = WorldMapSub1.anInt5123 - (width / mapZoom).toInt()
             val i_8 = (height / mapZoom).toInt() + WorldMapSub1.anInt5624

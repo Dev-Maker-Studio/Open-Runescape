@@ -36,7 +36,7 @@ enum class ServerEnvironment(
             if (client.affiliateP != null) {
                 affiliate = "/p=" + client.affiliateP
             }
-            val mainSite = client.CURRENT_GAME.name + ".com"
+            val mainSite = client.CURRENT_GAME!!.name + ".com"
             return "http://$web.$mainSite/l=${client.CURRENT_LANGUAGE}/a=${client.AFFILIATE}$affiliate/"
         }
 

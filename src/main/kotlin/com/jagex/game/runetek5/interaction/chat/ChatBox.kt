@@ -122,7 +122,7 @@ object ChatBox {
             PRIVATE_FILTER = ChatFilter.FRIENDS_ONLY
         }
         TRADE_FILTER = executor.intStack[executor.intStackPtr + 2]
-        val context = client.getConnectionContext()
+        val context = client.connectionContext
         val packet = PacketEncoder.createPacket(ClientProt.CHAT_SETFILTER, context.isaac)
         packet.buffer.writeByte(PUBLIC_FILTER)
         packet.buffer.writeByte(PRIVATE_FILTER!!.id)

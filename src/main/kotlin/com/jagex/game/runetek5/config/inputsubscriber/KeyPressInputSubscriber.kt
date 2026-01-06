@@ -13,7 +13,7 @@ class KeyPressInputSubscriber(
     override fun valid(mouseRecord: MouseRecord?, keyRecords: Array<KeyRecord?>?, count: Int, keyrecorder: KeyRecorder?): Boolean {
         for (index in 0 until count.coerceAtMost(keyRecords?.size ?: 0)) {
             val keyRecord = keyRecords?.get(index)
-            if (keyRecord != null && keyRecord.getCode() == this.code && keyRecord.getFlags() == this.flags) {
+            if (keyRecord != null && keyRecord!!.getCode() == this.code && keyRecord!!.getFlags() == this.flags) {
                 return true
             }
         }

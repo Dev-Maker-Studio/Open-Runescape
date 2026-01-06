@@ -107,7 +107,7 @@ object InterfaceComponentRenderer {
             if (component != null && (component.parentId == i_1 || i_1 == -1412584499 && component === client.draggingComponent)) {
                 val componentReference: Int
                 if (i_8 == -1) {
-                    client.INTERFACE_BG_COMPONENTS[client.anInt7407].setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height)
+                    client.INTERFACE_BG_COMPONENTS[client.anInt7407]!!.setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height)
                     componentReference = ++client.anInt7407 - 1
                 } else {
                     componentReference = i_8
@@ -121,13 +121,13 @@ object InterfaceComponentRenderer {
                     val drawX = component.x + offsetX
                     val drawY = component.y + offsetY
                     var drawTransparency = component.transparency
-                    if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component).settingsHash != 0 || component.type == ComponentType.CONTAINER) && drawTransparency > 127) {
+                    if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER) && drawTransparency > 127) {
                         drawTransparency = 127
                     }
                     val startX: Int
                     val startY: Int
                     if (component === client.draggingComponent) {
-                        if (i_1 != -1412584499 && (component.anUnkSetting11 == Component.UnkSetting1.UNK_2 || component.anUnkSetting11 == Component.UnkSetting1.UNK_0 || client.getComponentSettings(component).ignoresDepthFlags())) {
+                        if (i_1 != -1412584499 && (component.anUnkSetting11 == Component.UnkSetting1.UNK_2 || component.anUnkSetting11 == Component.UnkSetting1.UNK_0 || client.getComponentSettings(component)!!.ignoresDepthFlags())) {
                             aClass118Array3772 = components
                             anInt4822 = offsetX
                             anInt5157 = offsetY
@@ -150,7 +150,7 @@ object InterfaceComponentRenderer {
                             if (dragY + component.height > client.selectedComponentY + client.selectedComponentHeight) {
                                 dragY = client.selectedComponentHeight + client.selectedComponentY - component.height
                             }
-                            if (client.getComponentSettings(component).ignoresDepthFlags()) {
+                            if (client.getComponentSettings(component)!!.ignoresDepthFlags()) {
                                 inboundsComponentToTop(dragX, dragY, component.width, component.height)
                             }
                             startX = dragX
@@ -248,7 +248,7 @@ object InterfaceComponentRenderer {
                             if (itemSlots != null) {
                                 drawComponents(itemSlots, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
                             }
-                            val subInterface = client.OPEN_INTERFACES.get(component.idHash.toLong())
+                            val subInterface = client.OPEN_INTERFACES!!.get(component.idHash.toLong())
                             if (subInterface != null) {
                                 Component.method3629(subInterface.subInterfaceId, clipStartX, clipStartY, endX, endY, startX, startY, componentReference)
                             }
@@ -311,7 +311,7 @@ object InterfaceComponentRenderer {
                                         itemDisplayText = SoundResourceManager.method2550(component.anInt1435)!!
                                     }
                                     if (component === client.aClass1187352) {
-                                        itemDisplayText = LocalizedText.PLEASE_WAIT.translate(client.CURRENT_LANGUAGE)
+                                        itemDisplayText = LocalizedText.PLEASE_WAIT.translate(client.CURRENT_LANGUAGE!!)
                                         color = component.color
                                     }
                                     if (client.CLIP_INTERFACES) {
@@ -547,7 +547,7 @@ object InterfaceComponentRenderer {
         if (itemSlots != null) {
             InterfaceRenderer.updateInterfaceDimensions(itemSlots, component.idHash, componentWidth, componentHeight, bool2)
         }
-        val subInterface = client.OPEN_INTERFACES.get(component.idHash.toLong())
+        val subInterface = client.OPEN_INTERFACES!!.get(component.idHash.toLong())
         if (subInterface != null) {
             InterfaceRenderer.updateInterfaceDimensions(subInterface.subInterfaceId, componentWidth, componentHeight, bool2)
         }
@@ -598,7 +598,7 @@ object InterfaceComponentRenderer {
         } else {
             component.y = y - component.height - (y * component.basePositionY shr 14)
         }
-        if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component).settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
+        if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
             if (component.x < 0) {
                 component.x = 0
             } else if (component.x + component.width > x) {
@@ -643,7 +643,7 @@ object InterfaceComponentRenderer {
     @JvmStatic
     fun inboundsComponentToTop(x: Int, y: Int, offsetX: Int, offsetY: Int) {
         for (index in 0 until client.anInt7407) {
-            val rectangle = client.INTERFACE_BG_COMPONENTS[index]
+            val rectangle = client.INTERFACE_BG_COMPONENTS[index] ?: continue
             if (rectangle.x + rectangle.width > x && rectangle.x < x + offsetX && rectangle.height + rectangle.y > y && rectangle.y < offsetY + y) {
                 client.IS_COMPONENT_ON_TOP[index] = true
             }

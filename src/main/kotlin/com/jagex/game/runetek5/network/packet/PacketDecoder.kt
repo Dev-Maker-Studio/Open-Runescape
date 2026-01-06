@@ -221,7 +221,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SET_CURSOR) {
-            InterfaceRenderer.translatedUptext = if (context.currentPacketSize > 2) buffer.readString() else LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE)
+            InterfaceRenderer.translatedUptext = if (context.currentPacketSize > 2) buffer.readString() else LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE!!)
             CursorManager.activeCursorId = if (context.currentPacketSize > 0) buffer.readUShort() else -1
             if (CursorManager.activeCursorId == 65535) {
                 CursorManager.activeCursorId = -1
@@ -254,9 +254,9 @@ object PacketDecoder {
                 }
             } else {
                 if (nonGuest) {
-                    client.CLAN_CHANNEL = ClanChannel(buffer)
+                    client.CLAN_CHANNEL = ClanChannel(buffer)!!
                 } else {
-                    client.LISTENED_CLAN_CHANNEL = ClanChannel(buffer)
+                    client.LISTENED_CLAN_CHANNEL = ClanChannel(buffer)!!
                 }
             }
             context.currentPacket = null
@@ -977,8 +977,8 @@ object PacketDecoder {
                 }
             }
             for (key in 0..<client.npcCount) {
-                (client.NPC_ARRAY[key].value as PathingEntity).currentAnimations = null
-                (client.NPC_ARRAY[key].value as PathingEntity).currentSequence.update(-1)
+                (client.NPC_ARRAY[key]!!.value as PathingEntity).currentAnimations = null
+                (client.NPC_ARRAY[key]!!.value as PathingEntity).currentSequence.update(-1)
             }
             context.currentPacket = null
             return true
@@ -1155,12 +1155,12 @@ object PacketDecoder {
             val scene = Resource.mapRegion!!.getScene()!!
             if (scene != null) {
                 if (client.HINT_TRAILS[idx] != null) {
-                    client.HINT_TRAILS[idx].removeFromScene(scene)
+                    client.HINT_TRAILS[idx]!!.removeFromScene(scene)
                     client.HINT_TRAILS[idx] = null
                 }
                 if (modelId != -1) {
                     client.HINT_TRAILS[idx] = HintTrail(Renderers.activeToolkit!!, buffer, modelId)
-                    client.HINT_TRAILS[idx].addTo(scene)
+                    client.HINT_TRAILS[idx]!!.addTo(scene)
                 }
             }
             context.currentPacket = null
@@ -1419,9 +1419,9 @@ object PacketDecoder {
                 }
             } else {
                 if (bool91) {
-                    client.CLAN_SETTINGS = ClanSettings(buffer)
+                    client.CLAN_SETTINGS = ClanSettings(buffer)!!
                 } else {
-                    client.GUEST_CLAN_SETTINGS = ClanSettings(buffer)
+                    client.GUEST_CLAN_SETTINGS = ClanSettings(buffer)!!
                 }
             }
             context.currentPacket = null
@@ -1567,13 +1567,12 @@ object PacketDecoder {
             client.anInt7395 = client.anInt7347
             val bool91 = buffer.readUByte() == 1
             val delta = ClanChannelDelta(buffer)
-            val clanChannel: ClanChannel
-            if (bool91) {
-                clanChannel = client.CLAN_CHANNEL
+            val clanChannel: ClanChannel? = if (bool91) {
+                client.CLAN_CHANNEL
             } else {
-                clanChannel = client.LISTENED_CLAN_CHANNEL
+                client.LISTENED_CLAN_CHANNEL
             }
-            delta.apply(clanChannel)
+            clanChannel?.let { delta.apply(it) }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.REGION) {
@@ -1611,12 +1610,13 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_CLOSESUB) {
             val parentInterface = buffer.readInt()
             client.requestVarVerifyid()
-            val subInterface = client.OPEN_INTERFACES.get(parentInterface.toLong())
+            val subInterface = client.OPEN_INTERFACES!!.get(parentInterface.toLong())
             if (subInterface != null) {
                 Interface.closeChildInterface(subInterface, true, false)
             }
-            if (client.aClass1187352 != null) {
-                Component.redrawComponent(client.aClass1187352)
+            val comp1187352 = client.aClass1187352
+            if (comp1187352 != null) {
+                Component.redrawComponent(comp1187352)
                 client.aClass1187352 = null
             }
             context.currentPacket = null
@@ -1702,13 +1702,12 @@ object PacketDecoder {
             client.anInt7192 = client.anInt7347
             val clanSettings = buffer.readUByte() == 1
             val delta = ClanSettingsDelta(buffer)
-            val settings: ClanSettings
-            if (clanSettings) {
-                settings = client.CLAN_SETTINGS
+            val settings: ClanSettings? = if (clanSettings) {
+                client.CLAN_SETTINGS
             } else {
-                settings = client.GUEST_CLAN_SETTINGS
+                client.GUEST_CLAN_SETTINGS
             }
-            delta.queueUpdates(settings)
+            settings?.let { delta.queueUpdates(it) }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MINIMAP_FLAG) {
@@ -2135,14 +2134,14 @@ object PacketDecoder {
             val fromParentUid = buffer.readUIntInverseMiddle()
             val toParentUid = buffer.readInt()
             client.requestVarVerifyid()
-            val toSub = client.OPEN_INTERFACES.get(toParentUid.toLong())
-            val fromSub = client.OPEN_INTERFACES.get(fromParentUid.toLong())
+            val toSub = client.OPEN_INTERFACES!!.get(toParentUid.toLong())
+            val fromSub = client.OPEN_INTERFACES!!.get(fromParentUid.toLong())
             if (fromSub != null) {
                 Interface.closeChildInterface(fromSub, toSub == null || toSub.subInterfaceId != fromSub.subInterfaceId, false)
             }
             if (toSub != null) {
                 toSub.unlink()
-                client.OPEN_INTERFACES.put(toSub, fromParentUid.toLong())
+                client.OPEN_INTERFACES!!.put(toSub, fromParentUid.toLong())
             }
             var parent2Def = Component.fromHash(toParentUid)
             if (parent2Def != null) {

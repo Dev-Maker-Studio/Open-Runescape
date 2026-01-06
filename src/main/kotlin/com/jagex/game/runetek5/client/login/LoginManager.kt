@@ -169,13 +169,13 @@ object LoginManager {
                         val seedBlock = encodeClientSeed()
                         seedBlock.writeByte(StaticMethods.anInt76)
                         seedBlock.writeShort((Math.random() * 9.9999999E7).toInt())
-                        seedBlock.writeByte(client.CURRENT_LANGUAGE.getValue())
+                        seedBlock.writeByte(client.CURRENT_LANGUAGE!!.getValue())
                         seedBlock.writeInt(client.AFFILIATE)
                         for (i in 0 until 6) {
                             seedBlock.writeInt((Math.random() * 9.9999999E7).toInt())
                         }
                         seedBlock.writeLong(client.aLong7409)
-                        seedBlock.writeByte(client.CURRENT_GAME.id)
+                        seedBlock.writeByte(client.CURRENT_GAME!!.id)
                         seedBlock.writeByte((Math.random() * 9.9999999E7).toInt())
                         seedBlock.applyRSA()
                         tcpPacket.buffer.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition)
@@ -289,7 +289,7 @@ object LoginManager {
                         loginBlock.writeShort(GameShell.screenCanvasHeight * -969250379)
                         loginBlock.writeByte(PreferenceManager.preferences!!.antiAliasingPreview!!.value)
                         pushRandomDat(loginBlock)
-                        loginBlock.writeString(client.affiliateP)
+                        loginBlock.writeString(client.affiliateP!!)
                         loginBlock.writeInt(client.AFFILIATE)
                         val preferenceBlock = PreferenceManager.preferences!!.encode()
                         loginBlock.writeByte(preferenceBlock.currentPosition)
@@ -300,17 +300,18 @@ object LoginManager {
                         loginBlock.writeBytes(systemInfoBlock.buffer, 0, systemInfoBlock.buffer.size)
                         loginBlock.writeInt(client.varVerifyId)
                         loginBlock.writeLong(client.aLong7153)
-                        loginBlock.writeString(client.aString5555)
-                        loginBlock.writeByte(if (client.aString7156 == null) 0 else 1)
-                        if (client.aString7156 != null) {
-                            loginBlock.writeString(client.aString7156)
+                        loginBlock.writeString(client.aString5555!!)
+                        val str7156 = client.aString7156
+                        loginBlock.writeByte(if (str7156 == null) 0 else 1)
+                        if (str7156 != null) {
+                            loginBlock.writeString(str7156)
                         }
                         loginBlock.writeByte(if (Resource.NATIVE_LIBRARY_LOADER!!.isJagtheoraLoaded()) 1 else 0)
                         loginBlock.writeByte(if (client.isApplet) 1 else 0)
                         loginBlock.writeByte(if (client.aBool7160) 1 else 0)
                         loginBlock.writeByte(client.anInt2831)
                         loginBlock.writeInt(client.anInt7163)
-                        loginBlock.writeString(client.aString7164)
+                        loginBlock.writeString(client.aString7164!!)
                         loginBlock.writeByte(if (WorldConnection.CONNECTION_INFO != null && GAME_CONNECTION_INFO!!.worldId == WorldConnection.CONNECTION_INFO!!.worldId) 0 else 1)
                         val worldId = GAME_CONNECTION_INFO!!.worldId
                         loginBlock.writeInt(worldId)
@@ -338,17 +339,17 @@ object LoginManager {
                                 loginBlock.writeLong(aLong77)
                             }
                         }
-                        loginBlock.writeByte(client.CURRENT_GAME.id)
-                        loginBlock.writeByte(client.CURRENT_LANGUAGE.getValue())
+                        loginBlock.writeByte(client.CURRENT_GAME!!.id)
+                        loginBlock.writeByte(client.CURRENT_LANGUAGE!!.getValue())
                         pushRandomDat(loginBlock)
-                        loginBlock.writeString(client.affiliateP)
+                        loginBlock.writeString(client.affiliateP!!)
                         val preferenceBlock = PreferenceManager.preferences!!.encode()
                         loginBlock.writeByte(preferenceBlock.currentPosition)
                         loginBlock.writeBytes(preferenceBlock.buffer, 0, preferenceBlock.currentPosition)
-                        loginBlock.writeString(client.aString5555)
+                        loginBlock.writeString(client.aString5555!!)
                         loginBlock.writeInt(client.AFFILIATE)
                         loginBlock.writeInt(client.anInt7163)
-                        loginBlock.writeString(client.aString7164)
+                        loginBlock.writeString(client.aString7164!!)
                         writeResourceCrc(loginBlock)
                     }
                     loginBlock.encryptXtea(clientSeed!!, startPositionLoginBlock, loginBlock.currentPosition)
@@ -670,8 +671,8 @@ object LoginManager {
     fun method6160() {
         lobbyStage = LobbyStage.LOGGING_IN_LOBBY
         CURRENT_CONNECTION_CONTEXT = client.LOBBY_CONNECTION_CONTEXT
-        if (client.base64Url != null) {
-            val buffer = Packet(client.base64Url)
+        client.base64Url?.let { url ->
+            val buffer = Packet(url)
             aLong77 = buffer.readLong()
             aLong86 = buffer.readLong()
         }
@@ -697,21 +698,21 @@ object LoginManager {
             if (client.BASE_WINDOW_ID != -1) {
                 Interface.unloadInterface(client.BASE_WINDOW_ID)
             }
-            var subInterface = client.OPEN_INTERFACES.first()
+            var subInterface = client.OPEN_INTERFACES!!.first()
             while (subInterface != null) {
                 if (!subInterface.linked()) {
-                    subInterface = client.OPEN_INTERFACES.first()
+                    subInterface = client.OPEN_INTERFACES!!.first()
                     if (subInterface == null) {
                         break
                     }
                 }
                 Interface.closeChildInterface(subInterface, true, false)
-                subInterface = client.OPEN_INTERFACES.next()
+                subInterface = client.OPEN_INTERFACES!!.next()
             }
             client.BASE_WINDOW_ID = -1
             client.OPEN_INTERFACES = IterableNodeMap(8)
             Interface.initializeTables()
-            client.BASE_WINDOW_ID = client.ENTITY_DEFAULTS.lobbyWindow
+            client.BASE_WINDOW_ID = client.ENTITY_DEFAULTS!!.lobbyWindow
             WindowMode.interfaceResize(false)
             GameShell.setComponentsOnTop()
             Component.runScriptsIfLoaded(client.BASE_WINDOW_ID, null)
@@ -939,7 +940,7 @@ object LoginManager {
         PlayerUpdate.MY_PLAYER = null
 
         for (index in 0 until client.npcCount) {
-            val pathingEntity = client.NPC_ARRAY[index].value as PathingEntity?
+            val pathingEntity = client.NPC_ARRAY[index]!!.value as PathingEntity?
             if (pathingEntity != null) {
                 pathingEntity.faceEntity = -1
             }
@@ -1064,16 +1065,16 @@ object LoginManager {
             Interface.unloadInterface(client.BASE_WINDOW_ID)
         }
 
-        var subInterface = client.OPEN_INTERFACES.first()
+        var subInterface = client.OPEN_INTERFACES!!.first()
         while (subInterface != null) {
             if (!subInterface.linked()) {
-                subInterface = client.OPEN_INTERFACES.first()
+                subInterface = client.OPEN_INTERFACES!!.first()
                 if (subInterface == null) {
                     break
                 }
             }
             Interface.closeChildInterface(subInterface, true, false)
-            subInterface = client.OPEN_INTERFACES.next()
+            subInterface = client.OPEN_INTERFACES!!.next()
         }
 
         client.BASE_WINDOW_ID = -1
@@ -1105,7 +1106,7 @@ object LoginManager {
             NPCType.npcRecolorPalette = it
             ItemType.recolorPalette = it
         }
-        InterfaceRenderer.translatedUptext = LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE)
+        InterfaceRenderer.translatedUptext = LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE!!)
         PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.removeRoofsOptionOverride!!, PreferenceManager.preferences!!.removeRoofs!!.value)
         client.varVerifyId = 0
         MiniMenu.reset()
@@ -1160,8 +1161,8 @@ object LoginManager {
     fun method7022() {
         lobbyStage = LobbyStage.LOBBY_TO_WORLD
         CURRENT_CONNECTION_CONTEXT = client.GAME_CONNECTION_CONTEXT
-        if (client.base64Url != null) {
-            val rsbytebuffer1 = Packet(client.base64Url)
+        client.base64Url?.let { url ->
+            val rsbytebuffer1 = Packet(url)
             aLong77 = rsbytebuffer1.readLong()
             aLong86 = rsbytebuffer1.readLong()
         }

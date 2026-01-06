@@ -31,13 +31,13 @@ object FriendList {
                         val friend = FRIENDS[index]!!
                         val friendFormattedDisplayName = TextUtils.formatDisplayname(friend.displayName)
                         if (friendFormattedDisplayName != null && friendFormattedDisplayName == formattedDisplayName) {
-                            ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_ON_FRIENDS_LIST.translate(client.CURRENT_LANGUAGE)!!)
+                            ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_ON_FRIENDS_LIST.translate(client.CURRENT_LANGUAGE!!)!!)
                             return
                         }
                         if (friend.previousDisplayName != null) {
                             val friendFormattedUsername = TextUtils.formatDisplayname(friend.previousDisplayName)
                             if (friendFormattedUsername != null && friendFormattedUsername == formattedDisplayName) {
-                                ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_ON_FRIENDS_LIST.translate(client.CURRENT_LANGUAGE)!!)
+                                ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_ON_FRIENDS_LIST.translate(client.CURRENT_LANGUAGE!!)!!)
                                 return
                             }
                         }
@@ -47,8 +47,8 @@ object FriendList {
                         val ignoreFilteredDisplayName = TextUtils.formatDisplayname(ignore.unfilteredUsername!!)
                         if (ignoreFilteredDisplayName != null && ignoreFilteredDisplayName == formattedDisplayName) {
                             ChatBox.writeGameMessage(
-                                LocalizedText.PLEASE_REMOVE_IGNORE.translate(client.CURRENT_LANGUAGE)!!
-                                        + displayName + LocalizedText.FROM_IGNORE_FIRST.translate(client.CURRENT_LANGUAGE)!!
+                                LocalizedText.PLEASE_REMOVE_IGNORE.translate(client.CURRENT_LANGUAGE!!)!!
+                                        + displayName + LocalizedText.FROM_IGNORE_FIRST.translate(client.CURRENT_LANGUAGE!!)!!
                             )
                             return
                         }
@@ -56,17 +56,17 @@ object FriendList {
                             val ignoreFormattedDisplayName = TextUtils.formatDisplayname(ignore.displayName)
                             if (ignoreFormattedDisplayName != null && ignoreFormattedDisplayName == formattedDisplayName) {
                                 ChatBox.writeGameMessage(
-                                    LocalizedText.PLEASE_REMOVE_IGNORE.translate(client.CURRENT_LANGUAGE)!!
-                                            + displayName + LocalizedText.FROM_IGNORE_FIRST.translate(client.CURRENT_LANGUAGE)!!
+                                    LocalizedText.PLEASE_REMOVE_IGNORE.translate(client.CURRENT_LANGUAGE!!)!!
+                                            + displayName + LocalizedText.FROM_IGNORE_FIRST.translate(client.CURRENT_LANGUAGE!!)!!
                                 )
                                 return
                             }
                         }
                     }
                     if (TextUtils.formatDisplayname(PlayerUpdate.MY_PLAYER!!.displayName!!) == formattedDisplayName) {
-                        ChatBox.writeGameMessage(LocalizedText.CANT_ADD_SELF_TO_FRIEND.translate(client.CURRENT_LANGUAGE)!!)
+                        ChatBox.writeGameMessage(LocalizedText.CANT_ADD_SELF_TO_FRIEND.translate(client.CURRENT_LANGUAGE!!)!!)
                     } else {
-                        val context = client.getConnectionContext()
+                        val context = client.connectionContext
                         val packet = PacketEncoder.createPacket(ClientProt.ADD_FRIEND, context.isaac)
                         packet.buffer.writeByte(TextUtils.getLength(displayName))
                         packet.buffer.writeString(displayName)
@@ -74,7 +74,7 @@ object FriendList {
                     }
                 }
             } else {
-                ChatBox.writeGameMessage(LocalizedText.FRIEND_LIST_FULL.translate(client.CURRENT_LANGUAGE)!!)
+                ChatBox.writeGameMessage(LocalizedText.FRIEND_LIST_FULL.translate(client.CURRENT_LANGUAGE!!)!!)
             }
         }
     }
@@ -93,7 +93,7 @@ object FriendList {
                             System.arraycopy(FRIENDS, index + 1, FRIENDS, index, FRIEND_COUNT - index)
                         }
                         client.anInt7386 = client.anInt7347
-                        val context = client.getConnectionContext()
+                        val context = client.connectionContext
                         val packet = PacketEncoder.createPacket(ClientProt.REMOVE_FRIEND, context.isaac)
                         packet.buffer.writeByte(TextUtils.getLength(displayName))
                         packet.buffer.writeString(displayName)

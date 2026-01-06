@@ -114,7 +114,7 @@ object Bot {
     fun continueDialogue() = clickDialogue(1184, 18)
 
     fun interfaceOpen(id: Int): Boolean {
-        val iterator = HashTableIterator<SubInterface>(client.OPEN_INTERFACES)
+        val iterator = HashTableIterator<SubInterface>(client.OPEN_INTERFACES!!)
         for (inter in iterator) {
             if (inter?.subInterfaceId == id) return true
         }
@@ -537,7 +537,7 @@ object Bot {
 
     fun clickButton(interfaceId: Int, componentId: Int, slotId: Int, slotId2: Int, clickType: Int) {
         val interfaceHash = interfaceId shl 16 or componentId
-        val context = client.getConnectionContext()
+        val context = client.connectionContext
 
         val prot = when (clickType) {
             1 -> ClientProt.IF_OP1
@@ -588,7 +588,7 @@ object Bot {
     fun command(message: String) = chat(";;$message", 0, 0)
 
     fun chat(message: String, color: Int, effect: Int) {
-        val context = client.getConnectionContext()
+        val context = client.connectionContext
         val packet = PacketEncoder.createPacket(ClientProt.CHAT, context.isaac)
         packet.buffer.writeByte(0)
         val startIndex = packet.buffer.currentPosition

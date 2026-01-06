@@ -68,12 +68,12 @@ class EntityHitbar(
         }
 
         if (adjustedHitbar == null) {
-            if (hitbarCount < client.ENTITY_DEFAULTS.anInt7030) {
+            if (hitbarCount < client.ENTITY_DEFAULTS!!.anInt7030) {
                 entityList.getPrevious(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles))
             }
         } else {
             replace(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles), adjustedHitbar)
-            if (hitbarCount >= client.ENTITY_DEFAULTS.anInt7030) {
+            if (hitbarCount >= client.ENTITY_DEFAULTS!!.anInt7030) {
                 entityList.getFirst()!!.unlinkNode()
             }
         }

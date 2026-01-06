@@ -243,9 +243,10 @@ object MenuInteraction {
 
             if (clickType == 30 && client.aClass1187352 == null) {
                 PacketEncoder.continueInterfacePressed(attr2, attr1)
-                client.aClass1187352 = Component.listIcomponent(attr2, attr1)
-                if (client.aClass1187352 != null) {
-                    Component.redrawComponent(client.aClass1187352)
+                val comp = Component.listIcomponent(attr2, attr1)
+                client.aClass1187352 = comp
+                if (comp != null) {
+                    Component.redrawComponent(comp)
                 }
             }
 

@@ -114,7 +114,7 @@ object ClientStartup {
     fun initialize(): Int {
         if (PreferenceManager.preferences!!.safeMode!!.getValue() == 0) {
             for (i in 0 until client.keyCachePointerPoss) {
-                if (client.KEYS_PRESSED[i].getCharacter().code == 115 || client.KEYS_PRESSED[i].getCharacter().code == 83) {
+                if (client.KEYS_PRESSED[i]!!.getCharacter().code == 115 || client.KEYS_PRESSED[i]!!.getCharacter().code == 83) {
                     PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.safeMode!!, 1)
                     client.safemodeForcedDuringStartup = true
                     break
@@ -300,13 +300,13 @@ object ClientStartup {
             TypeLists.IDK = IdkTypeList(Resource.CONFIG!!, Resource.MODEL!!)
             TypeLists.CONTAINER = ItemContainerTypeList(Resource.CONFIG!!)
             TypeLists.LIGHT = LightTypeList(Resource.CONFIG!!)
-            TypeLists.LOC = ObjectTypeList(client.CURRENT_GAME, client.CURRENT_LANGUAGE, Resource.LOC!!, Resource.MODEL!!)
+            TypeLists.LOC = ObjectTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, Resource.LOC!!, Resource.MODEL!!)
             Resource.mapRegion!!.setLoctypelist(TypeLists.LOC!!)
-            Resource.mapRegionLoaderTask!!.initializeRegion(ObjectTypeList(client.CURRENT_GAME, client.CURRENT_LANGUAGE, Resource.LOC!!, Resource.MODEL!!))
+            Resource.mapRegionLoaderTask!!.initializeRegion(ObjectTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, Resource.LOC!!, Resource.MODEL!!))
             TypeLists.MEC = MECTypeList(Resource.CONFIG!!, Resource.SPRITES!!)
             TypeLists.MAP_SPRITE = MapSpriteTypeList(Resource.CONFIG!!, Resource.SPRITES!!)
-            TypeLists.NPC = NpcTypeList(client.CURRENT_GAME, client.CURRENT_LANGUAGE, Resource.NPC!!, Resource.MODEL!!)
-            TypeLists.OBJ = ItemTypeList(client.CURRENT_GAME, client.CURRENT_LANGUAGE, TypeLists.PARAMS!!, Resource.OBJ!!, Resource.MODEL!!)
+            TypeLists.NPC = NpcTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, Resource.NPC!!, Resource.MODEL!!)
+            TypeLists.OBJ = ItemTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, TypeLists.PARAMS!!, Resource.OBJ!!, Resource.MODEL!!)
             TypeLists.QUEST = QuestTypeList(Resource.CONFIG!!)
             TypeLists.SEQ = SeqTypeList(Resource.SEQ!!, Resource.FRAME_SET!!, Resource.FRAME_BASE!!)
             TypeLists.SKYBOX = SkyboxTypeList(Resource.CONFIG!!)
@@ -558,16 +558,16 @@ object ClientStartup {
             if (client.BASE_WINDOW_ID != -1) {
                 Interface.unloadInterface(client.BASE_WINDOW_ID)
             }
-            var subInterface: SubInterface? = client.OPEN_INTERFACES.first()
+            var subInterface: SubInterface? = client.OPEN_INTERFACES!!.first()
             while (subInterface != null) {
                 if (!subInterface.linked()) {
-                    subInterface = client.OPEN_INTERFACES.first()
+                    subInterface = client.OPEN_INTERFACES!!.first()
                     if (subInterface == null) {
                         break
                     }
                 }
                 Interface.closeChildInterface(subInterface, true, false)
-                subInterface = client.OPEN_INTERFACES.next()
+                subInterface = client.OPEN_INTERFACES!!.next()
             }
             client.BASE_WINDOW_ID = -1
             client.OPEN_INTERFACES = IterableNodeMap(8)

@@ -151,7 +151,7 @@ class Interface(
             if (!bool2 && client.BASE_WINDOW_ID != -1) {
                 openSub(client.BASE_WINDOW_ID, 1)
             }
-            val openInterfaceIt = HashTableIterator<SubInterface>(client.OPEN_INTERFACES)
+            val openInterfaceIt = HashTableIterator<SubInterface>(client.OPEN_INTERFACES!!)
             var child = openInterfaceIt.first() as SubInterface?
             while (child != null) {
                 if (!child.linked()) {
@@ -177,7 +177,7 @@ class Interface(
             ints2: IntArray?,
             bool3: Boolean
         ): SubInterface {
-            val currentSubInterface = client.OPEN_INTERFACES.get(parentId.toLong()) as SubInterface?
+            val currentSubInterface = client.OPEN_INTERFACES!!.get(parentId.toLong()) as SubInterface?
             if (currentSubInterface != null) {
                 closeChildInterface(
                     currentSubInterface,
@@ -185,7 +185,7 @@ class Interface(
                     bool3
                 )
             }
-            client.OPEN_INTERFACES.put(subInterface, parentId.toLong())
+            client.OPEN_INTERFACES!!.put(subInterface, parentId.toLong())
             resetComponentSequences(subInterface.subInterfaceId, ints2)
             val parentComponent = Component.fromHash(parentId)
             if (parentComponent != null) {
@@ -377,8 +377,8 @@ class Interface(
                     hookRequest.params = component.params
                     CS2Executor.executeHookInner(hookRequest)
                 }
-                if (client.getComponentSettings(component).clickOptionEnabled(option - 1)) {
-                    val connection = client.getConnectionContext()
+                if (client.getComponentSettings(component)!!.clickOptionEnabled(option - 1)) {
+                    val connection = client.connectionContext
                     if (client.gameState == GameState.UNK_0 || client.gameState == GameState.LOGGED_INGAME) {
                         var packet: TcpPacket
                         when (option) {
@@ -445,7 +445,7 @@ class Interface(
             }
             if (!inter.preventInteraction) {
                 val interfaceId = component.idHash ushr 16
-                val subInterfaces = HashTableIterator<SubInterface>(client.OPEN_INTERFACES)
+                val subInterfaces = HashTableIterator<SubInterface>(client.OPEN_INTERFACES!!)
                 var sub = subInterfaces.first() as SubInterface?
                 while (sub != null) {
                     if (interfaceId == sub.subInterfaceId) {
@@ -459,7 +459,7 @@ class Interface(
 
         @JvmStatic
         fun getUseOptionString(component: Component): String? {
-            return if (client.getComponentSettings(component).getUseOptionFlags() == 0) {
+            return if (client.getComponentSettings(component)!!.getUseOptionFlags() == 0) {
                 null
             } else {
                 val targetVerb = component.targetVerb
@@ -480,7 +480,7 @@ class Interface(
                         if (component.itemSlots != null) {
                             method2591(component.itemSlots!!, i1)
                         }
-                        val subInterface = client.OPEN_INTERFACES.get(component.idHash.toLong()) as SubInterface?
+                        val subInterface = client.OPEN_INTERFACES!!.get(component.idHash.toLong()) as SubInterface?
                         if (subInterface != null) {
                             openSub(subInterface.subInterfaceId, i1)
                         }

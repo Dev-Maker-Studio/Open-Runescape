@@ -321,7 +321,7 @@ object CommandExecutor {
 
             // Unknown command
             if (client.gameState != GameState.LOGGED_INGAME) {
-                Console.writeLine("${LocalizedText.UNKNOWN_DEV_COMMAND.translate(client.CURRENT_LANGUAGE)}$command")
+                Console.writeLine("${LocalizedText.UNKNOWN_DEV_COMMAND.translate(client.CURRENT_LANGUAGE!!)}$command")
             }
         } catch (exception: Exception) {
             Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(client.CURRENT_LANGUAGE!!)!!)

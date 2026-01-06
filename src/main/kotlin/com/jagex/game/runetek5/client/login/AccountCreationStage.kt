@@ -86,8 +86,8 @@ class AccountCreationStage {
                         packet.buffer.writeShort(client.AFFILIATE)
                         packet.buffer.writeLong(client.aLong7153)
                         packet.buffer.writeString(client.aString5555!!)
-                        packet.buffer.writeByte(client.CURRENT_LANGUAGE.getValue())
-                        packet.buffer.writeByte(client.CURRENT_GAME.id)
+                        packet.buffer.writeByte(client.CURRENT_LANGUAGE!!.getValue())
+                        packet.buffer.writeByte(client.CURRENT_GAME!!.id)
                         LoginManager.pushRandomDat(packet.buffer)
                         val string_5 = client.aString7156
                         packet.buffer.writeByte(if (string_5 == null) 0 else 1)

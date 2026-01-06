@@ -329,7 +329,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
     }
 
     fun method16164(string_1: String) {
-        val i_5 = GameShell.gameCyclesPerSecond() * client.ENTITY_DEFAULTS.npcMessageDuration
+        val i_5 = GameShell.gameCyclesPerSecond() * client.ENTITY_DEFAULTS!!.npcMessageDuration
         setHintDetails(string_1, 0, 0, i_5)
     }
 
@@ -411,7 +411,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
     }
 
     override fun privateMessagesEnabled(): Boolean {
-        return client.ENTITY_DEFAULTS.npcMessagesEnabled
+        return client.ENTITY_DEFAULTS!!.npcMessagesEnabled
     }
 
     override fun getHintDetails(): HintDetails? {

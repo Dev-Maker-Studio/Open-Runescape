@@ -418,8 +418,8 @@ object TextUtils {
             charIndex -= 3
         }
         return when {
-            unformatted.length > 9 -> " ${setTextColor(65408)}${unformatted.substring(0, unformatted.length - 8)}${LocalizedText.M.translate(client.CURRENT_LANGUAGE)} ($unformatted)</col>"
-            unformatted.length > 6 -> " ${setTextColor(16777215)}${unformatted.substring(0, unformatted.length - 4)}${LocalizedText.K.translate(client.CURRENT_LANGUAGE)} ($unformatted)</col>"
+            unformatted.length > 9 -> " ${setTextColor(65408)}${unformatted.substring(0, unformatted.length - 8)}${LocalizedText.M.translate(client.CURRENT_LANGUAGE!!)} ($unformatted)</col>"
+            unformatted.length > 6 -> " ${setTextColor(16777215)}${unformatted.substring(0, unformatted.length - 4)}${LocalizedText.K.translate(client.CURRENT_LANGUAGE!!)} ($unformatted)</col>"
             else -> " ${setTextColor(16776960)}$unformatted</col>"
         }
     }

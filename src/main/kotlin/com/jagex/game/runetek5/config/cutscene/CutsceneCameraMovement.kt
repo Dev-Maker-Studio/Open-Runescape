@@ -72,6 +72,7 @@ class CutsceneCameraMovement(packet: Packet) {
             keyframeData[i * 2 + 1][3] = timestamps[i]
         }
 
-        client.anIntArrayArrayArray7302[pathIndex] = keyframeData
+        @Suppress("UNCHECKED_CAST")
+        client.anIntArrayArrayArray7302!![pathIndex] = keyframeData as Array<IntArray?>
     }
 }

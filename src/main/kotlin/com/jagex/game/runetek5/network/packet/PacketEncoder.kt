@@ -59,7 +59,7 @@ object PacketEncoder {
 
     @JvmStatic
     fun sendJoinFriendchatPacket() {
-        val connectionContext = client.getConnectionContext()
+        val connectionContext = client.connectionContext
         val tcpPacket = createPacket(ClientProt.FC_JOIN, connectionContext.isaac)
         tcpPacket.buffer.writeByte(0)
         connectionContext.queuePacket(tcpPacket)
@@ -119,7 +119,7 @@ object PacketEncoder {
         }
 
         if (!bool5) {
-            ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(client.CURRENT_LANGUAGE) + string_1)
+            ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(client.CURRENT_LANGUAGE!!) + string_1)
         }
     }
 
@@ -220,7 +220,7 @@ object PacketEncoder {
         if (client.CLAN_CHANNEL != null && i_0 >= 0 && i_0 < client.CLAN_CHANNEL!!.numPlayers) {
             val class572: ClanChannelPlayer? = client.CLAN_CHANNEL!!.players?.get(i_0)
             if (class572 != null && class572.rank.toInt() == -1) {
-                val class1843 = client.getConnectionContext()
+                val class1843 = client.connectionContext
                 val tcpmessage4 = createPacket(ClientProt.UNUSED_CLAN_OP, class1843.isaac)
                 tcpmessage4.buffer.writeByte(2 + TextUtils.getLength(class572.name ?: ""))
                 tcpmessage4.buffer.writeShort(i_0)
@@ -254,7 +254,7 @@ object PacketEncoder {
 
     @JvmStatic
     fun method11404(string_0: String?, string_1: String?, string_2: String?, bool3: Boolean, bool4: Boolean) {
-        val class1846 = client.getConnectionContext()
+        val class1846 = client.connectionContext
         if (class1846.getConnection() != null) {
             val tcpmessage7 = createPacket(ClientProt.LOBBY_HYPERLINK, class1846.isaac)
             tcpmessage7.buffer.writeShort(TextUtils.getLength(string_0 ?: "") + TextUtils.getLength(string_1 ?: "") + TextUtils.getLength(string_2 ?: "") + 1)
@@ -276,7 +276,7 @@ object PacketEncoder {
     @JvmStatic
     fun method3345(string_0: String?) {
         if (!string_0.isNullOrEmpty()) {
-            val class1842 = client.getConnectionContext()
+            val class1842 = client.connectionContext
             val tcpmessage3 = createPacket(ClientProt.FC_JOIN, class1842.isaac)
             tcpmessage3.buffer.writeByte(TextUtils.getLength(string_0 ?: ""))
             tcpmessage3.buffer.writeString(string_0 ?: "")
@@ -313,7 +313,7 @@ object PacketEncoder {
             val ccPlayer: ClanChannelPlayer? = cc.players?.get(playerIndex)
             if (ccPlayer != null && ccPlayer.rank.toInt() == -1) {
                 val ccPlayerName: String? = ccPlayer.name
-                val connection = client.getConnectionContext()
+                val connection = client.connectionContext
                 val packet = createPacket(ClientProt.CLANCHANNEL_KICKUSER, connection.isaac)
                 packet.buffer.writeByte(3 + TextUtils.getLength(ccPlayerName ?: ""))
                 packet.buffer.writeByte(if (mainCC) 1 else 0)
@@ -328,10 +328,10 @@ object PacketEncoder {
     fun closeInterface() {
         val packet = createPacket(ClientProt.CLOSE_INTERFACE, client.GAME_CONNECTION_CONTEXT.isaac)
         client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
-        var subInterface: SubInterface? = client.OPEN_INTERFACES.first()
+        var subInterface: SubInterface? = client.OPEN_INTERFACES!!.first()
         while (subInterface != null) {
             if (!subInterface.linked()) {
-                subInterface = client.OPEN_INTERFACES.first()
+                subInterface = client.OPEN_INTERFACES!!.first()
                 if (subInterface == null) {
                     break
                 }
@@ -339,10 +339,11 @@ object PacketEncoder {
             if (subInterface.overlay == 0) {
                 Interface.closeChildInterface(subInterface, true, true)
             }
-            subInterface = client.OPEN_INTERFACES.next()
+            subInterface = client.OPEN_INTERFACES!!.next()
         }
-        if (client.aClass1187352 != null) {
-            Component.redrawComponent(client.aClass1187352)
+        val comp1187352 = client.aClass1187352
+        if (comp1187352 != null) {
+            Component.redrawComponent(comp1187352)
             client.aClass1187352 = null
         }
     }
@@ -402,7 +403,7 @@ object PacketEncoder {
     fun writeVarcPreferences() {
         var preferenceFile: JFS32? = null
         try {
-            preferenceFile = PreferenceManager.loadPreferenceFile("2", client.CURRENT_GAME.name, true)
+            preferenceFile = PreferenceManager.loadPreferenceFile("2", client.CURRENT_GAME!!.name, true)
             val buffer = Packet(client.VARCS_BOOLS_LOADED * 6 + 3)
             buffer.writeByte(1)
             buffer.writeShort(client.VARCS_BOOLS_LOADED)
@@ -436,7 +437,7 @@ object PacketEncoder {
             tcpPacket.buffer.writeShort(client.maximumHeldKeys * 4)
 
             for (index in 0 until client.maximumHeldKeys) {
-                val record: KeyRecord = client.KEY_RECORDS[index]
+                val record: KeyRecord = client.KEY_RECORDS[index]!!
                 var timeBetweenClicks = record.getTimeSubmitted() - MouseActionServer.lastSubmitted
                 if (timeBetweenClicks > 16777215L) {
                     timeBetweenClicks = 16777215L
@@ -514,7 +515,7 @@ object PacketEncoder {
                 }
             }
             if (!bool2) {
-                ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(client.CURRENT_LANGUAGE) + string_0)
+                ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(client.CURRENT_LANGUAGE!!) + string_0)
             }
             if (client.interfaceSelectionActive) {
                 InterfaceComponentRenderer.cancelInterfaceSelection()

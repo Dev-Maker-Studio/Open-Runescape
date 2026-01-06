@@ -573,7 +573,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             return false
         }
         if (!this.asyncMaploading && this.currentLoadingStage != RegionLoadingStage.LOADING) {
-            MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(client.CURRENT_LANGUAGE) + "<br>" + "(100%)", true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
+            MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(client.CURRENT_LANGUAGE!!) + "<br>" + "(100%)", true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
         }
         this.currentLoadingStage = RegionLoadingStage.PREPARE_DISPLAY
         if (!this.asyncMaploading) {
@@ -785,7 +785,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         for (index in client.HINT_TRAILS.indices) {
             if (client.HINT_TRAILS[index] != null) {
-                client.HINT_TRAILS[index].addTo(this.scene)
+                client.HINT_TRAILS[index]!!.addTo(this.scene)
             }
         }
         Scene.setRoofOverride()
@@ -992,8 +992,8 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.baseX = BaseX
             this.baseY = BaseY
             if (!this.asyncMaploading) {
-                client.setGameState(newGamestate)
-                MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(client.CURRENT_LANGUAGE), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
+                client.setGameState(newGamestate!!)
+                MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(client.CURRENT_LANGUAGE!!), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
             }
             if (this.baseCoordinates != null) {
                 this.lastCoordgrid = this.baseCoordinates
@@ -1478,11 +1478,11 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
                 if (PlayerUpdate.MY_PLAYER_PLANE != 3) {
                     for (index in 0..1) {
-                        client.visibleBelowDrawheight[index] = -1000000
-                        client.visibleAboveX[index] = 1000000
-                        client.visibleBelowX[index] = 0
-                        client.visibleAboveY[index] = 1000000
-                        client.visibleBelowY[index] = 0
+                        client.visibleBelowDrawheight!![index] = -1000000
+                        client.visibleAboveX!![index] = 1000000
+                        client.visibleBelowX!![index] = 0
+                        client.visibleAboveY!![index] = 1000000
+                        client.visibleBelowY!![index] = 0
                     }
 
                     val absolutePosition: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
@@ -1888,20 +1888,20 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
                 if (visibilityUpdate) {
                     val floorHeight = Resource.mapRegion!!.getScene()!!!!.localHeightmap[PlayerUpdate.MY_PLAYER_PLANE + 1]!!.getHeight(tileBaseX, tileBaseY)
-                    if (client.visibleBelowDrawheight[anInt1234] < floorHeight) {
-                        client.visibleBelowDrawheight[anInt1234] = floorHeight
+                    if (client.visibleBelowDrawheight!![anInt1234] < floorHeight) {
+                        client.visibleBelowDrawheight!![anInt1234] = floorHeight
                     }
                     val upscaledX = tileBaseX shl 9
                     val upscaledY = tileBaseY shl 9
-                    if (client.visibleAboveX[anInt1234] > upscaledX) {
-                        client.visibleAboveX[anInt1234] = upscaledX
-                    } else if (client.visibleBelowX[anInt1234] < upscaledX) {
-                        client.visibleBelowX[anInt1234] = upscaledX
+                    if (client.visibleAboveX!![anInt1234] > upscaledX) {
+                        client.visibleAboveX!![anInt1234] = upscaledX
+                    } else if (client.visibleBelowX!![anInt1234] < upscaledX) {
+                        client.visibleBelowX!![anInt1234] = upscaledX
                     }
-                    if (client.visibleAboveY[anInt1234] > upscaledY) {
-                        client.visibleAboveY[anInt1234] = upscaledY
-                    } else if (client.visibleBelowY[anInt1234] < upscaledY) {
-                        client.visibleBelowY[anInt1234] = upscaledY
+                    if (client.visibleAboveY!![anInt1234] > upscaledY) {
+                        client.visibleAboveY!![anInt1234] = upscaledY
+                    } else if (client.visibleBelowY!![anInt1234] < upscaledY) {
+                        client.visibleBelowY!![anInt1234] = upscaledY
                     }
                 }
                 if (!renderOnLowerZ) {
@@ -1960,12 +1960,12 @@ class MapRegion(var asyncMaploading: Boolean) {
                     }
                 }
             }
-            if (client.visibleBelowDrawheight[anInt1234] != -1000000) {
-                client.visibleBelowDrawheight[anInt1234] += 40
-                client.visibleAboveX[anInt1234] -= 512
-                client.visibleBelowX[anInt1234] += 512
-                client.visibleBelowY[anInt1234] += 512
-                client.visibleAboveY[anInt1234] -= 512
+            if (client.visibleBelowDrawheight!![anInt1234] != -1000000) {
+                client.visibleBelowDrawheight!![anInt1234] += 40
+                client.visibleAboveX!![anInt1234] -= 512
+                client.visibleBelowX!![anInt1234] += 512
+                client.visibleBelowY!![anInt1234] += 512
+                client.visibleAboveY!![anInt1234] -= 512
             }
             return true
         }

@@ -193,7 +193,7 @@ object Resource {
         if (GameShell.cacheFileData != null) {
             cacheFile = Decompressor(indexId, GameShell.cacheFileData!!, FileOnDisk.cacheFileIndices!![indexId]!!)
         }
-        remoteFileWorkersByIndex!![indexId] = client.requestManager.getWorker(indexId, cacheFile, referenceTableDecompressor)
+        remoteFileWorkersByIndex!![indexId] = client.requestManager!!.getWorker(indexId, cacheFile, referenceTableDecompressor)
         remoteFileWorkersByIndex!![indexId]!!.reset()
         return Js5ResourceProvider(remoteFileWorkersByIndex!![indexId]!!, directMemoryMode, loadType)
     }
