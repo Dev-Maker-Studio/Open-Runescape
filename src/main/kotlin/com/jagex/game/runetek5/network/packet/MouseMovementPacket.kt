@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.network.packet
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.utils.Utils
 
@@ -16,7 +16,7 @@ class MouseMovementPacket : AbstractMousePacket() {
      * @return The first mouse record in the queue, or null if empty
      */
     fun getRecord(): MouseRecord? {
-        return client.MOUSE_MOVEMENTS.getFirst() as? MouseRecord
+        return Client.MOUSE_MOVEMENTS.getFirst() as? MouseRecord
     }
 
     override fun canSubmit(): Boolean {
@@ -24,7 +24,7 @@ class MouseMovementPacket : AbstractMousePacket() {
     }
 
     override fun createPacketBase(): TcpPacket {
-        return PacketEncoder.createPacket(ClientProt.MOVE_MOUSE_2, client.GAME_CONNECTION_CONTEXT.isaac)
+        return PacketEncoder.createPacket(ClientProt.MOVE_MOUSE_2, Client.GAME_CONNECTION_CONTEXT.isaac)
     }
 
     override fun writeConstantValue(packet: Packet, record: MouseRecord) {
@@ -58,9 +58,9 @@ class MouseMovementPacket : AbstractMousePacket() {
         val clickType: Byte = if (record.getClickType() == 2) 1 else 0
 
         // Create and send packet
-        val packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeIntLittle(positionX or (positionY shl 16))
         packet.buffer.writeShort(timeDelta or (clickType.toInt() shl 15))
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 }

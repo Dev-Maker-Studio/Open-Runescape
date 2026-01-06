@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.client.input.console
 
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.GameState
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.MiniMenu
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.font.FontMetrics
@@ -82,7 +82,7 @@ object Console {
         anInt2230 = FontMetrics.aClass4143438!!.topPadding + FontMetrics.aClass4143438!!.bottomPadding + 2
         anInt2222 = FontManager.messageboxFont!!.topPadding + FontManager.messageboxFont!!.bottomPadding + 2
         displayedOutput = Array(500) { "" }
-        writeLine(LocalizedText.DEVELOPER_CONSOLE_INTRO.translate(client.CURRENT_LANGUAGE!!)!!)
+        writeLine(LocalizedText.DEVELOPER_CONSOLE_INTRO.translate(Client.CURRENT_LANGUAGE!!)!!)
     }
 
     @JvmStatic
@@ -103,10 +103,10 @@ object Console {
         if (displayedOutput == null) {
             initialize()
         }
-        client.ACTIVE_TIMEZONE_CALENDER!!.time = Date(Utils.time())
-        val hour = client.ACTIVE_TIMEZONE_CALENDER!![Calendar.HOUR_OF_DAY]
-        val minute = client.ACTIVE_TIMEZONE_CALENDER!![Calendar.MINUTE]
-        val second = client.ACTIVE_TIMEZONE_CALENDER!![Calendar.SECOND]
+        Client.ACTIVE_TIMEZONE_CALENDER!!.time = Date(Utils.time())
+        val hour = Client.ACTIVE_TIMEZONE_CALENDER!![Calendar.HOUR_OF_DAY]
+        val minute = Client.ACTIVE_TIMEZONE_CALENDER!![Calendar.MINUTE]
+        val second = Client.ACTIVE_TIMEZONE_CALENDER!![Calendar.SECOND]
         val timeDisplay = "${hour / 10}${hour % 10}:${minute / 10}${minute % 10}:${second / 10}${second % 10}"
         val commandParts = Utils.split(command, '\n')
         for (index in commandParts.indices) {
@@ -173,18 +173,18 @@ object Console {
             }
             pausedAtCommandIndex = -1
         }
-        if (client.anInt7191 != 0) {
-            anInt2223 -= client.anInt7191 * 5
+        if (Client.anInt7191 != 0) {
+            anInt2223 -= Client.anInt7191 * 5
             if (anInt2223 >= consoleMessageCount) {
                 anInt2223 = consoleMessageCount - 1
             }
             if (anInt2223 < 0) {
                 anInt2223 = 0
             }
-            client.anInt7191 = 0
+            Client.anInt7191 = 0
         }
-        for (index in 0 until client.keyCachePointerPoss) {
-            val keyRecord = client.KEYS_PRESSED[index]
+        for (index in 0 until Client.keyCachePointerPoss) {
+            val keyRecord = Client.KEYS_PRESSED[index]
             val code = keyRecord!!.getCode()
             val character = keyRecord!!.getCharacter()
             val flags = keyRecord!!.getFlags()
@@ -238,12 +238,12 @@ object Console {
                 adjustCommandString()
                 commandLength = commandString.length
             } else if (TextUtils.isAlphabeticalOrNumeric(character) || "\\/.:, _-+[]~@".indexOf(character) != -1) {
-                commandString = commandString.substring(0, commandLength) + client.KEYS_PRESSED[index]!!.getCharacter() + commandString.substring(commandLength)
+                commandString = commandString.substring(0, commandLength) + Client.KEYS_PRESSED[index]!!.getCharacter() + commandString.substring(commandLength)
                 commandLength++
             }
         }
-        client.keyCachePointerPoss = 0
-        client.maximumHeldKeys = 0
+        Client.keyCachePointerPoss = 0
+        Client.maximumHeldKeys = 0
         GameShell.setComponentsOnTop()
     }
 
@@ -308,7 +308,7 @@ object Console {
         MiniMenu.minimenuHeader!!.renderPlain("--> ${formatCommand(commandString)}", 10, 350 - FontMetrics.aClass4143438!!.bottomPadding - 1, -1, 0xffffff.inv())
         if (GameShell.appletHasFocus) {
             var lineColor = -1
-            if (client.cycles % 30 > 15) {
+            if (Client.cycles % 30 > 15) {
                 lineColor = 16777215
             }
             toolkit.drawOpaqueVerticalLine(10 + FontMetrics.aClass4143438!!.getWidthNoSprites("--> ${formatCommand(commandString).substring(0, commandLength)}"), 350 - FontMetrics.aClass4143438!!.bottomPadding - 11, 12, lineColor)

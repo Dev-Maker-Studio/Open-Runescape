@@ -1,9 +1,8 @@
 package com.jagex.game.runetek5.entity.gameobject
 
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
-import com.jagex.game.runetek5.config.TypeResult
 import com.jagex.game.runetek5.config.`object`.ObjectTypeCustomisation
 import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.config.`object`.ObjectTypeList
@@ -12,12 +11,9 @@ import com.jagex.game.runetek5.config.sequence.Sequence
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
-import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
-import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystem
 import com.jagex.game.runetek5.graphics.shadow.Shadow
 import com.jagex.game.runetek5.math.Matrix43
-import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.scene.ground.Ground
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.vardomain.VarProviders
@@ -95,19 +91,19 @@ class AnimatedGameObject(
         if ((particleSystem == null || particleSystem!!.isDisabled) && (emitters != null || effectiveVertices != null)) {
             var locType: ObjectType? = loctypelist.list(locId)
             if (locType!!.alternativeIds != null) {
-                locType = locType.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
+                locType = locType.getMultiLoc(if (Client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
             }
             if (locType != null) {
-                particleSystem = ParticleSystem.get(client.cycles, true)
+                particleSystem = ParticleSystem.get(Client.cycles, true)
             }
         }
 
         if (particleSystem != null) {
             model.updateParticlePosition(projectionMatrix)
             if (performCycle) {
-                particleSystem!!.performCycle(renderer, client.cycles.toLong(), emitters, effectiveVertices)
+                particleSystem!!.performCycle(renderer, Client.cycles.toLong(), emitters, effectiveVertices)
             } else {
-                particleSystem!!.setCurrentCycle(client.cycles.toLong())
+                particleSystem!!.setCurrentCycle(Client.cycles.toLong())
             }
             particleSystem!!.setLogicHeight(logicHeight.toInt())
         }
@@ -123,7 +119,7 @@ class AnimatedGameObject(
             var computedLoc: ObjectType? = loctypelist.list(locId)
             var originalLoc: ObjectType? = computedLoc
             if (computedLoc!!.alternativeIds != null) {
-                computedLoc = computedLoc.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
+                computedLoc = computedLoc.getMultiLoc(if (Client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
             }
             if (computedLoc == null) {
                 return
@@ -164,7 +160,7 @@ class AnimatedGameObject(
             sequence.resetSequence()
         } else {
             sequence.animateSequence(randomSequenceId, 0, additionalAnimationFlag, replay)
-            currentCycle = client.cycles
+            currentCycle = Client.cycles
             aBool1552 = false
             pairModel = null
         }
@@ -175,7 +171,7 @@ class AnimatedGameObject(
         var hasShadow = hasShadow
         var loctype: ObjectType? = loctypelist.list(locId)
         if (loctype!!.alternativeIds != null) {
-            loctype = loctype.getMultiLoc(if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
+            loctype = loctype.getMultiLoc(if (Client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER)
         }
         if (loctype == null) {
             removeShadow()
@@ -295,7 +291,7 @@ class AnimatedGameObject(
 
     fun method2133() {
         if (sequence.hasType()) {
-            if (sequence.progressCycle(client.cycles - currentCycle)) {
+            if (sequence.progressCycle(Client.cycles - currentCycle)) {
                 if (PreferenceManager.preferences!!.sceneryShadows!!.getValue() == 2) {
                     aBool1552 = false
                 }
@@ -308,7 +304,7 @@ class AnimatedGameObject(
         } else {
             animate(false, -1, 0)
         }
-        currentCycle = client.cycles
+        currentCycle = Client.cycles
     }
 
     fun getAnimatedShadowedModel(toolkit: AbstractToolkit) {

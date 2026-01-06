@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.graphics.loginscreen.component
 
 import com.jagex.game.runetek5.client.GameShell
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.gametip.component.TipsSprite
 import com.jagex.game.runetek5.graphics.loginscreen.DrawableItem
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -25,8 +25,8 @@ class Class43(
 
     override fun draw(draw: Boolean) {
         if (draw) {
-            val width = max(GameShell.screenCanvasWidth, client.GAME_WIDTH)
-            val height = max(GameShell.screenCanvasHeight * -969250379, client.GAME_HEIGHT)
+            val width = max(GameShell.screenCanvasWidth, Client.GAME_WIDTH)
+            val height = max(GameShell.screenCanvasHeight * -969250379, Client.GAME_HEIGHT)
             val scaleWidth = this.nativeSprite!!.getSpriteWidth()
             val scaleHeight = this.nativeSprite!!.getSpriteHeight()
             var x = 0

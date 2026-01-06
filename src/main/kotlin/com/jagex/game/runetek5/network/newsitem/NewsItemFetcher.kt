@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.network.newsitem
 
 import com.jagex.game.runetek5.client.ServerEnvironment
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.WorldConnection
 import java.io.BufferedReader
 import java.io.DataInputStream
@@ -54,7 +54,7 @@ class NewsItemFetcher : Runnable {
             val reader = BufferedReader(
                 InputStreamReader(
                     DataInputStream(
-                        URL("http://${WorldConnection.GAME_CONNECTION!!.host}:$port/news.ws?game=${client.CURRENT_GAME!!.id}")
+                        URL("http://${WorldConnection.GAME_CONNECTION!!.host}:$port/news.ws?game=${Client.CURRENT_GAME!!.id}")
                             .openStream()
                     )
                 )

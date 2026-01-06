@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.config
 import com.jagex.game.runetek5.cache.Decompressor
 import com.jagex.game.runetek5.cache.FileOnDisk
 import com.jagex.game.runetek5.client.GameShell
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.graphics.font.HelveticaFont
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.js5.library.NativeLibraryLoader
@@ -193,7 +193,7 @@ object Resource {
         if (GameShell.cacheFileData != null) {
             cacheFile = Decompressor(indexId, GameShell.cacheFileData!!, FileOnDisk.cacheFileIndices!![indexId]!!)
         }
-        remoteFileWorkersByIndex!![indexId] = client.requestManager!!.getWorker(indexId, cacheFile, referenceTableDecompressor)
+        remoteFileWorkersByIndex!![indexId] = Client.requestManager!!.getWorker(indexId, cacheFile, referenceTableDecompressor)
         remoteFileWorkersByIndex!![indexId]!!.reset()
         return Js5ResourceProvider(remoteFileWorkersByIndex!![indexId]!!, directMemoryMode, loadType)
     }

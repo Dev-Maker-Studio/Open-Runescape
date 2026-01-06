@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.scene
 
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.NodeCollection
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.`object`.ObjectTypeCustomisation
 import com.jagex.game.runetek5.entity.gameobject.GameObject
@@ -135,7 +135,7 @@ class LocAction : Node<LocAction>() {
                     gameObject = scene.getPrimaryWallDecoration(action.plane, action.x, action.y) as GameObject?
                 }
                 if (action.gameObjectType == 2) {
-                    gameObject = scene.getInteractiveObject(action.plane, action.x, action.y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
+                    gameObject = scene.getInteractiveObject(action.plane, action.x, action.y, Client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
                 }
                 if (action.gameObjectType == 3) {
                     gameObject = scene.getGroundDecoration(action.plane, action.x, action.y) as GameObject?

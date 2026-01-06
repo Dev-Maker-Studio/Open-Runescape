@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.tools
 
 import com.jagex.game.runetek5.client.ServerEnvironment
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.systeminfo.SystemInfo
 import java.awt.Desktop
 import java.net.URI
@@ -69,7 +69,7 @@ object Browser {
     @JvmStatic
     fun openBrowserErrorscreenOpenjs() {
         val url = errorWebsiteBaseUrl ?: ServerEnvironment.getUrl()
-        openOpenjs(url, false, client.aBool7158)
+        openOpenjs(url, false, Client.aBool7158)
     }
 
     @JvmStatic

@@ -31,7 +31,6 @@ import com.jagex.game.runetek5.client.window.ApplicationType
 import com.jagex.game.runetek5.client.window.WindowSettings
 import com.jagex.game.runetek5.client.window.WindowMode
 import com.jagex.game.runetek5.network.packet.PacketEncoder
-import com.jagex.game.runetek5.rendering.RenderInfo
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.utils.Utils
 
@@ -328,7 +327,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         @JvmStatic
         fun setComponentsOnTop() {
             for (componentIndex in 0 until 107) {
-                client.IS_COMPONENT_ON_TOP[componentIndex] = true
+                Client.IS_COMPONENT_ON_TOP[componentIndex] = true
             }
         }
     }

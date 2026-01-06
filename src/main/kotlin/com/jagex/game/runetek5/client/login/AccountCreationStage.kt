@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.client.login
 import com.jagex.game.launch.Loader.Companion.MAJOR_BUILD
 import com.jagex.game.launch.Loader.Companion.MINOR_BUILD
 import com.jagex.game.runetek5.client.GameState
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Identifiable
 import com.jagex.game.runetek5.network.AsyncConnection
 import com.jagex.game.runetek5.network.WorldConnection
@@ -37,7 +37,7 @@ class AccountCreationStage {
 
         @JvmStatic
         fun method297() {
-            client.LOBBY_CONNECTION_CONTEXT.closeConnection()
+            Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
             if (anInt134 < 2) {
                 WorldConnection.LOBBY_CONNECTION_INFO!!.swap()
                 anInt133 = 0
@@ -46,7 +46,7 @@ class AccountCreationStage {
             } else {
                 ACCOUNT_CREATION_STAGE = null
                 RECEIVED_RESPONSE = AccountCreationResponseOpcodes.aClass4835731
-                client.setGameState(GameState.UNK_5)
+                Client.setGameState(GameState.UNK_5)
             }
         }
 
@@ -67,13 +67,13 @@ class AccountCreationStage {
                     }
 
                     if (ACCOUNT_CREATION_STAGE == REQUEST) {
-                        client.LOBBY_CONNECTION_CONTEXT.init(
+                        Client.LOBBY_CONNECTION_CONTEXT.init(
                             AsyncConnection.createAsyncConnection(
                                 WorldConnection.LOBBY_CONNECTION_INFO!!.createSocket(),
                                 15000
                             ), WorldConnection.LOBBY_CONNECTION_INFO!!.host!!
                         )
-                        client.LOBBY_CONNECTION_CONTEXT.clearAllQueuedPackets()
+                        Client.LOBBY_CONNECTION_CONTEXT.clearAllQueuedPackets()
                         val packet = TcpPacket.createLoginPacket()
                         packet.buffer.writeByte(LoginProt.CREATE_ACCOUNT_CONNECT.id)
                         packet.buffer.writeShort(0)
@@ -82,14 +82,14 @@ class AccountCreationStage {
                         packet.buffer.writeShort(MINOR_BUILD)
                         LOGIN_XTEAS = PacketEncoder.generateSeed(packet)
                         val i_4 = packet.buffer.currentPosition
-                        packet.buffer.writeString(client.aString7164!!)
-                        packet.buffer.writeShort(client.AFFILIATE)
-                        packet.buffer.writeLong(client.aLong7153)
-                        packet.buffer.writeString(client.aString5555!!)
-                        packet.buffer.writeByte(client.CURRENT_LANGUAGE!!.getValue())
-                        packet.buffer.writeByte(client.CURRENT_GAME!!.id)
+                        packet.buffer.writeString(Client.aString7164!!)
+                        packet.buffer.writeShort(Client.AFFILIATE)
+                        packet.buffer.writeLong(Client.aLong7153)
+                        packet.buffer.writeString(Client.aString5555!!)
+                        packet.buffer.writeByte(Client.CURRENT_LANGUAGE!!.getValue())
+                        packet.buffer.writeByte(Client.CURRENT_GAME!!.id)
                         LoginManager.pushRandomDat(packet.buffer)
-                        val string_5 = client.aString7156
+                        val string_5 = Client.aString7156
                         packet.buffer.writeByte(if (string_5 == null) 0 else 1)
                         if (string_5 != null) {
                             packet.buffer.writeString(string_5)
@@ -99,43 +99,43 @@ class AccountCreationStage {
                         packet.buffer.currentPosition += 7
                         packet.buffer.encryptXtea(LOGIN_XTEAS!!, i_4, packet.buffer.currentPosition)
                         packet.buffer.writeShortLength(packet.buffer.currentPosition - dataStartOffset)
-                        client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
-                        client.LOBBY_CONNECTION_CONTEXT.flush()
+                        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
+                        Client.LOBBY_CONNECTION_CONTEXT.flush()
                         ACCOUNT_CREATION_STAGE = RESPONSE
                     }
 
                     if (RESPONSE == ACCOUNT_CREATION_STAGE) {
-                        if (client.LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
+                        if (Client.LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
                             method297()
-                        } else if (client.LOBBY_CONNECTION_CONTEXT.getConnection()!!.available(1)) {
-                            client.LOBBY_CONNECTION_CONTEXT.getConnection()!!
-                                .read(client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, 1)
+                        } else if (Client.LOBBY_CONNECTION_CONTEXT.getConnection()!!.available(1)) {
+                            Client.LOBBY_CONNECTION_CONTEXT.getConnection()!!
+                                .read(Client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, 1)
                             RECEIVED_RESPONSE = Identifiable.identify(
                                 AccountCreationResponseOpcodes.getValues(),
-                                client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.buffer[0].toInt() and 0xff
+                                Client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.buffer[0].toInt() and 0xff
                             ) as AccountCreationResponseOpcodes
                             if (RECEIVED_RESPONSE != AccountCreationResponseOpcodes.CONTINUE) {
-                                client.LOBBY_CONNECTION_CONTEXT.closeConnection()
+                                Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
                             } else {
-                                client.LOBBY_CONNECTION_CONTEXT.isaac = Isaac(LOGIN_XTEAS!!)
+                                Client.LOBBY_CONNECTION_CONTEXT.isaac = Isaac(LOGIN_XTEAS!!)
                                 val seed = IntArray(4)
 
                                 for (index in 0..3) {
                                     seed[index] = LOGIN_XTEAS!![index] + 50
                                 }
 
-                                client.LOBBY_CONNECTION_CONTEXT.instreamEncryption = Isaac(seed)
-                                client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.setIsaacCipher(client.LOBBY_CONNECTION_CONTEXT.instreamEncryption)
-                                client.setGameState(GameState.IN_ACCOUNT_CREATION)
-                                client.LOBBY_CONNECTION_CONTEXT.clearAllQueuedPackets()
-                                client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0
-                                client.LOBBY_CONNECTION_CONTEXT.lastPacket = null
-                                client.LOBBY_CONNECTION_CONTEXT.secondLastPacket = null
-                                client.LOBBY_CONNECTION_CONTEXT.thirdLastPacket = null
-                                client.LOBBY_CONNECTION_CONTEXT.idleReadPulses = 0
+                                Client.LOBBY_CONNECTION_CONTEXT.instreamEncryption = Isaac(seed)
+                                Client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.setIsaacCipher(Client.LOBBY_CONNECTION_CONTEXT.instreamEncryption)
+                                Client.setGameState(GameState.IN_ACCOUNT_CREATION)
+                                Client.LOBBY_CONNECTION_CONTEXT.clearAllQueuedPackets()
+                                Client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.currentPosition = 0
+                                Client.LOBBY_CONNECTION_CONTEXT.lastPacket = null
+                                Client.LOBBY_CONNECTION_CONTEXT.secondLastPacket = null
+                                Client.LOBBY_CONNECTION_CONTEXT.thirdLastPacket = null
+                                Client.LOBBY_CONNECTION_CONTEXT.idleReadPulses = 0
                             }
 
-                            client.LOBBY_CONNECTION_CONTEXT.currentPacket = null
+                            Client.LOBBY_CONNECTION_CONTEXT.currentPacket = null
                             ACCOUNT_CREATION_STAGE = null
                         }
                     }

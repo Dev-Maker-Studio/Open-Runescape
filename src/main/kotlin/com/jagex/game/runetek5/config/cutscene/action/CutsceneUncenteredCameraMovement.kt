@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.config.cutscene.action
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 
@@ -21,6 +21,6 @@ class CutsceneUncenteredCameraMovement(buffer: Packet) : CutsceneAction(buffer) 
     override fun perform() {
         Camera.moveCamera(this.localX, this.localY, this.moveZ, 100, 100, false)
         Camera.setAngle(this.angleX, this.angleY, 0)
-        client.aBool7321 = true
+        Client.aBool7321 = true
     }
 }

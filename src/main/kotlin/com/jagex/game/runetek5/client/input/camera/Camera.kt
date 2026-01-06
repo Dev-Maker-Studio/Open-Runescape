@@ -1,16 +1,12 @@
 package com.jagex.game.runetek5.client.input.camera
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.math.Matrix44
-import com.jagex.game.runetek5.math.Vector3
-import com.jagex.game.runetek5.movement.CoordGrid
 import com.jagex.game.runetek5.network.PingRequester
 import com.jagex.game.runetek5.scene.MapRegion
-import com.jagex.game.runetek5.scene.SettingsBits
-import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.utils.MathUtils
 import kotlin.math.atan2
@@ -156,15 +152,15 @@ object Camera {
             }
             cameraBaseY += offset
         }
-        camAngleY += client.aFloat7266 * multiplier / 6.0f
-        camAngleX += client.aFloat7284 * multiplier / 6.0f
+        camAngleY += Client.aFloat7266 * multiplier / 6.0f
+        camAngleX += Client.aFloat7284 * multiplier / 6.0f
         processCamera()
     }
 
     @JvmStatic
     fun method4974(long_0: Long) {
-        val i_2 = client.anInt7262
-        val i_3 = client.anInt7376
+        val i_2 = Client.anInt7262
+        val i_3 = Client.anInt7376
         var i_4: Int
         var i_5: Int
         if (i_2 != cameraBaseX) {
@@ -199,8 +195,8 @@ object Camera {
             }
             cameraBaseY += i_5
         }
-        camAngleY += 8.0f * (client.aFloat7266 * long_0 / 40.0f)
-        camAngleX += 8.0f * (long_0 * client.aFloat7284 / 40.0f)
+        camAngleY += 8.0f * (Client.aFloat7266 * long_0 / 40.0f)
+        camAngleX += 8.0f * (long_0 * Client.aFloat7284 / 40.0f)
         processCamera()
     }
 
@@ -246,12 +242,12 @@ object Camera {
             cameraPitch = pitchShifted
         }
         processCamera()
-        client.sendCameraAngleToServer = true
+        Client.sendCameraAngleToServer = true
     }
 
     @JvmStatic
     fun method3920(i_0: Int) {
-        val i_2 = client.cycles - client.anInt7429
+        val i_2 = Client.cycles - Client.anInt7429
         if (i_2 >= 100) {
             cameraCalculationType = 2
             StaticMethods.anInt833 = -1
@@ -261,8 +257,8 @@ object Camera {
             if (regularLowestYaw shr 8 > yaw) {
                 yaw = regularLowestYaw shr 8
             }
-            if (client.CAM_SHAKING[4] && client.CUSTOM_LOWEST_YAW[4] + 128 > yaw) {
-                yaw = client.CUSTOM_LOWEST_YAW[4] + 128
+            if (Client.CAM_SHAKING[4] && Client.CUSTOM_LOWEST_YAW[4] + 128 > yaw) {
+                yaw = Client.CUSTOM_LOWEST_YAW[4] + 128
             }
             val i_4 = (camAngleY.toInt() + cameraRandomisationA) and 0x3fff
             val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
@@ -295,7 +291,7 @@ object Camera {
         } else if (gameAreaHeightDelta > 100) {
             gameAreaHeightDelta = 100
         }
-        val zoomModifier = (client.aShort7324 - client.aShort7394) * gameAreaHeightDelta / 100 + client.aShort7394
+        val zoomModifier = (Client.aShort7324 - Client.aShort7394) * gameAreaHeightDelta / 100 + Client.aShort7394
         var baseDeltaYAdjusted = baseDeltaY * zoomModifier shr 8
         val rotationX = 16384 - yaw and 0x3fff
         val rotationZ = 16384 - pitch and 0x3fff
@@ -458,28 +454,28 @@ object Camera {
 
     @JvmStatic
     fun calculateCutsceneCameraPosition() {
-        if (client.anInt7277 != -1 && client.anInt7448 != -1) {
-            val i_1 = ((client.anInt7182 - client.anInt7327) * client.anInt7256 shr 16) + client.anInt7327
-            client.anInt7256 += i_1
-            if (client.anInt7256 >= 65535) {
-                client.anInt7256 = 65535
-                client.aBool7355 = !client.aBool7285
-                client.aBool7285 = true
+        if (Client.anInt7277 != -1 && Client.anInt7448 != -1) {
+            val i_1 = ((Client.anInt7182 - Client.anInt7327) * Client.anInt7256 shr 16) + Client.anInt7327
+            Client.anInt7256 += i_1
+            if (Client.anInt7256 >= 65535) {
+                Client.anInt7256 = 65535
+                Client.aBool7355 = !Client.aBool7285
+                Client.aBool7285 = true
             } else {
-                client.aBool7355 = false
-                client.aBool7285 = false
+                Client.aBool7355 = false
+                Client.aBool7285 = false
             }
-            val f_2 = client.anInt7256 / 65535.0f
+            val f_2 = Client.anInt7256 / 65535.0f
             val from = FloatArray(3)
-            val i_4 = client.anInt7279 * 2
+            val i_4 = Client.anInt7279 * 2
             for (dir in 0 until 3) {
-                val i_17 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![dir] * 3
-                val i_7 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 1]!![dir] * 3
-                val i_8 = (client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![dir] - (client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 3]!![dir] - client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![dir])) * 3
-                val i_9 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![dir]
+                val i_17 = Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4]!![dir] * 3
+                val i_7 = Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4 + 1]!![dir] * 3
+                val i_8 = (Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4 + 2]!![dir] - (Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4 + 3]!![dir] - Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4 + 2]!![dir])) * 3
+                val i_9 = Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4]!![dir]
                 val i_10 = i_7 - i_17
                 val i_18 = i_17 - i_7 * 2 + i_8
-                val i_12 = client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![dir] - i_9 + i_7 - i_8
+                val i_12 = Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4 + 2]!![dir] - i_9 + i_7 - i_8
                 from[dir] = i_9 + ((i_12 * f_2 + i_18) * f_2 + i_10) * f_2
             }
             val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
@@ -487,15 +483,15 @@ object Camera {
             cameraPositionAbsoluteZ = from[1].toInt() * -1
             cameraPositionAbsoluteY = from[2].toInt() - baseCoords.y * 512
             val to = FloatArray(3)
-            val i_7 = client.anInt7280 * 2
+            val i_7 = Client.anInt7280 * 2
             for (dir in 0 until 3) {
-                val i_9 = client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7]!![dir] * 3
-                val i_10 = client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 1]!![dir] * 3
-                val i_18 = (client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 2]!![dir] - (client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 3]!![dir] - client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 2]!![dir])) * 3
-                val i_12 = client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7]!![dir]
+                val i_9 = Client.anIntArrayArrayArray7302!![Client.anInt7448]!![i_7]!![dir] * 3
+                val i_10 = Client.anIntArrayArrayArray7302!![Client.anInt7448]!![i_7 + 1]!![dir] * 3
+                val i_18 = (Client.anIntArrayArrayArray7302!![Client.anInt7448]!![i_7 + 2]!![dir] - (Client.anIntArrayArrayArray7302!![Client.anInt7448]!![i_7 + 3]!![dir] - Client.anIntArrayArrayArray7302!![Client.anInt7448]!![i_7 + 2]!![dir])) * 3
+                val i_12 = Client.anIntArrayArrayArray7302!![Client.anInt7448]!![i_7]!![dir]
                 val i_13 = i_10 - i_9
                 val i_14 = i_9 - i_10 * 2 + i_18
-                val i_15 = i_10 + (client.anIntArrayArrayArray7302!![client.anInt7448]!![i_7 + 2]!![dir] - i_12) - i_18
+                val i_15 = i_10 + (Client.anIntArrayArrayArray7302!![Client.anInt7448]!![i_7 + 2]!![dir] - i_12) - i_18
                 to[dir] = f_2 * ((i_14 + f_2 * i_15) * f_2 + i_13) + i_12
             }
             val deltaX = to[0] - from[0]
@@ -504,17 +500,17 @@ object Camera {
             val d_11 = sqrt((deltaY * deltaY + deltaX * deltaX).toDouble())
             cameraYaw = (atan2(deltaZ.toDouble(), d_11) * 2607.5945876176133).toInt() and 0x3fff
             cameraRoll = (-atan2(deltaX.toDouble(), deltaY.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-            cameraPitch = ((client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4 + 2]!![3] - client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![3]) * client.anInt7256 shr 16) + client.anIntArrayArrayArray7302!![client.anInt7277]!![i_4]!![3]
+            cameraPitch = ((Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4 + 2]!![3] - Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4]!![3]) * Client.anInt7256 shr 16) + Client.anIntArrayArrayArray7302!![Client.anInt7277]!![i_4]!![3]
         }
     }
 
     @JvmStatic
     fun smoothReset() {
         for (index in 0 until 5) {
-            client.CAM_SHAKING[index] = false
+            Client.CAM_SHAKING[index] = false
         }
-        client.anInt7277 = -1
-        client.anInt7448 = -1
+        Client.anInt7277 = -1
+        Client.anInt7448 = -1
         moveCameraSpeed = 0
         moveCameraAngle = 0
         cameraCalculationType = 2
@@ -525,17 +521,17 @@ object Camera {
     @JvmStatic
     fun method12606() {
         for (index in 0 until 5) {
-            client.CAM_SHAKING[index] = false
+            Client.CAM_SHAKING[index] = false
         }
 
-        client.anInt7277 = -1
-        client.anInt7448 = -1
+        Client.anInt7277 = -1
+        Client.anInt7448 = -1
         moveCameraSpeed = 0
         moveCameraAngle = 0
         cameraCalculationType = 1
         StaticMethods.anInt833 = -1
         PingRequester.anInt5864 = -1
-        client.anInt7429 = client.cycles
+        Client.anInt7429 = Client.cycles
         anInt2349 = cameraPositionAbsoluteX
         anInt9461 = cameraPositionAbsoluteZ
         anInt9575 = cameraPositionAbsoluteY

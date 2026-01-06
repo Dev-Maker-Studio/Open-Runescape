@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.IntNode
 import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.NodeCollection
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.cutscene.action.*
 import com.jagex.game.runetek5.network.packet.AbstractMousePacket
@@ -196,10 +196,10 @@ object CutsceneTypeList {
         activeCutsceneLoadingstage = null
         activeCutsceneId = -1
         if (StaticMethods.aBool826) {
-            client.aShort7214 = StaticMethods.aShort828
-            client.aShort7474 = StaticMethods.aShort829
-            client.aShort7276 = AbstractMousePacket.aShort7079
-            client.aShort7441 = StaticMethods.aShort830
+            Client.aShort7214 = StaticMethods.aShort828
+            Client.aShort7474 = StaticMethods.aShort829
+            Client.aShort7276 = AbstractMousePacket.aShort7079
+            Client.aShort7441 = StaticMethods.aShort830
             StaticMethods.aBool826 = false
         }
     }

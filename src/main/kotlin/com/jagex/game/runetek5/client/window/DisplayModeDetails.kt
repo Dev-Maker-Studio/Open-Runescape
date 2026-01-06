@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.client.window
 
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.model.Mesh
@@ -39,11 +39,11 @@ class DisplayModeDetails {
 
         @JvmStatic
         fun getProfilingPerformance(toolkitValue: Int, profilingTime: Int): Int {
-            if (client.ENTITY_DEFAULTS!!.profilingMesh == -1) {
+            if (Client.ENTITY_DEFAULTS!!.profilingMesh == -1) {
                 return 1
             }
             if (toolkitValue != PreferenceManager.preferences!!.activeToolkit!!.getValue()) {
-                client.loadAssets(toolkitValue, LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE!!), true)
+                Client.loadAssets(toolkitValue, LocalizedText.PROFILING.translate(Client.CURRENT_LANGUAGE!!), true)
                 if (PreferenceManager.preferences!!.activeToolkit!!.getValue() != toolkitValue) {
                     return -1
                 }
@@ -51,17 +51,17 @@ class DisplayModeDetails {
             try {
                 val dimension = GameShell.gameCanvas!!.size
                 MessageBox.draw(
-                    LocalizedText.PROFILING.translate(client.CURRENT_LANGUAGE!!),
+                    LocalizedText.PROFILING.translate(Client.CURRENT_LANGUAGE!!),
                     true,
                     Renderers.activeToolkit!!,
                     FontManager.debugOverlayFont,
                     FontManager.messageboxFont
                 )
-                val profilingMesh = Mesh.fromResource(Resource.MODEL!!, client.ENTITY_DEFAULTS!!.profilingMesh)
+                val profilingMesh = Mesh.fromResource(Resource.MODEL!!, Client.ENTITY_DEFAULTS!!.profilingMesh)
                 val startTime = Utils.time()
                 Renderers.activeToolkit!!.resetClipping()
-                client.SUN_MATRIX.setViewPosition(0.0f, 256.0f, 0.0f)
-                Renderers.activeToolkit!!.setSunPosition(client.SUN_MATRIX)
+                Client.SUN_MATRIX.setViewPosition(0.0f, 256.0f, 0.0f)
+                Renderers.activeToolkit!!.setSunPosition(Client.SUN_MATRIX)
                 val renderMatrix = Renderers.activeToolkit!!.method8449()
                 renderMatrix.method6531(
                     (dimension.width / 2f), (dimension.height / 2f), 512.0f, 512.0f,
@@ -77,13 +77,13 @@ class DisplayModeDetails {
                     Renderers.activeToolkit!!.applyClearFlags(3, 0)
                     for (i_12 in 15 downTo 0) {
                         for (i_13 in 0..i_12) {
-                            client.INTERFACE_MODEL_MATRIX.setViewPosition(
+                            Client.INTERFACE_MODEL_MATRIX.setViewPosition(
                                 512.0f * (i_13 - i_12 / 2.0f),
                                 0.0f,
                                 ((i_12 + 1) * 512).toFloat()
                             )
                             profilingModel!!.drawMatrixThreaded(
-                                client.INTERFACE_MODEL_MATRIX,
+                                Client.INTERFACE_MODEL_MATRIX,
                                 null,
                                 ModelFunctionMaskGL.EMPTY
                             )

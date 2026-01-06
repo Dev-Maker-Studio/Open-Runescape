@@ -64,8 +64,8 @@ object CommandExecutor {
                     return
                 }
                 command.equals("displayfps", ignoreCase = true) -> {
-                    client.DRAW_DEBUG = !client.DRAW_DEBUG
-                    Console.writeLine(if (client.DRAW_DEBUG) "FPS on" else "FPS off")
+                    Client.DRAW_DEBUG = !Client.DRAW_DEBUG
+                    Console.writeLine(if (Client.DRAW_DEBUG) "FPS on" else "FPS off")
                     return
                 }
                 command.equals("renderer", ignoreCase = true) -> {
@@ -96,7 +96,7 @@ object CommandExecutor {
             }
 
             // Privileged commands (dev environment or staff)
-            if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE || client.PLAYER_RIGHTS >= 2) {
+            if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE || Client.PLAYER_RIGHTS >= 2) {
                 when {
                     command.equals("wm1", ignoreCase = true) -> {
                         WindowMode.requestWindowMode(1, -1, -1, false)
@@ -182,15 +182,15 @@ object CommandExecutor {
                         return
                     }
                     command.equals("clientdrop", ignoreCase = true) -> {
-                        when (client.gameState) {
+                        when (Client.gameState) {
                             GameState.LOGGED_INGAME -> WorldConnection.dropClient()
-                            GameState.LOADING_PLEASE_WAIT -> client.GAME_CONNECTION_CONTEXT.dropped = true
+                            GameState.LOADING_PLEASE_WAIT -> Client.GAME_CONNECTION_CONTEXT.dropped = true
                             else -> {}
                         }
                         return
                     }
                     command.equals("breakcon", ignoreCase = true) -> {
-                        client.connectionContexts.forEach { context ->
+                        Client.connectionContexts.forEach { context ->
                             context.getConnection()?.drop()
                         }
                         Resource.remoteFileRequesterJs5!!.dropConnection()
@@ -308,34 +308,34 @@ object CommandExecutor {
                 }
 
                 // Send command to server if in-game
-                if (client.gameState == GameState.LOGGED_INGAME) {
-                    val clientPacket = PacketEncoder.createPacket(ClientProt.COMMAND, client.GAME_CONNECTION_CONTEXT.isaac)
+                if (Client.gameState == GameState.LOGGED_INGAME) {
+                    val clientPacket = PacketEncoder.createPacket(ClientProt.COMMAND, Client.GAME_CONNECTION_CONTEXT.isaac)
                     clientPacket.buffer.writeByte(command.length + 3)
                     clientPacket.buffer.writeByte(if (bool1) 1 else 0)
                     clientPacket.buffer.writeByte(if (save) 1 else 0)
                     clientPacket.buffer.writeString(command)
-                    client.GAME_CONNECTION_CONTEXT.queuePacket(clientPacket)
+                    Client.GAME_CONNECTION_CONTEXT.queuePacket(clientPacket)
                     return
                 }
             }
 
             // Unknown command
-            if (client.gameState != GameState.LOGGED_INGAME) {
-                Console.writeLine("${LocalizedText.UNKNOWN_DEV_COMMAND.translate(client.CURRENT_LANGUAGE!!)}$command")
+            if (Client.gameState != GameState.LOGGED_INGAME) {
+                Console.writeLine("${LocalizedText.UNKNOWN_DEV_COMMAND.translate(Client.CURRENT_LANGUAGE!!)}$command")
             }
         } catch (exception: Exception) {
-            Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(client.CURRENT_LANGUAGE!!)!!)
+            Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(Client.CURRENT_LANGUAGE!!)!!)
             exception.printStackTrace()
         }
     }
 
     private fun handleToolkitSwitch(toolkit: Int) {
-        client.loadAssets(toolkit, false)
+        Client.loadAssets(toolkit, false)
         if (PreferenceManager.preferences!!.activeToolkit!!.getValue() == toolkit) {
             Console.writeLine("Success")
             PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, toolkit)
             PreferenceManager.savePreferences()
-            client.preferencesSavedOnServer = false
+            Client.preferencesSavedOnServer = false
         } else {
             Console.writeLine("Failure")
         }

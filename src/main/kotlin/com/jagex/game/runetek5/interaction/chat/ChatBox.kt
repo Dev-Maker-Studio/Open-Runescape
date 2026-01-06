@@ -4,18 +4,15 @@ import com.darkan.bot.scripts.ScriptExecutor
 import com.darkan.bot.scripts.event.Chat
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.client.ChatMessageType
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.config.quest.QuestType
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
-import com.jagex.game.runetek5.network.BufferedConnectionContext
 import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
-import com.jagex.game.runetek5.network.packet.TcpPacket
 import com.jagex.game.runetek5.rendering.Renderers
 
 /**
@@ -48,7 +45,7 @@ object ChatBox {
         }
         CHAT_LINES[0] = line
         NUM_CHAT_LINES++
-        client.anInt7391 = client.anInt7347
+        Client.anInt7391 = Client.anInt7347
     }
 
     @JvmStatic
@@ -122,7 +119,7 @@ object ChatBox {
             PRIVATE_FILTER = ChatFilter.FRIENDS_ONLY
         }
         TRADE_FILTER = executor.intStack[executor.intStackPtr + 2]
-        val context = client.connectionContext
+        val context = Client.connectionContext
         val packet = PacketEncoder.createPacket(ClientProt.CHAT_SETFILTER, context.isaac)
         packet.buffer.writeByte(PUBLIC_FILTER)
         packet.buffer.writeByte(PRIVATE_FILTER!!.id)

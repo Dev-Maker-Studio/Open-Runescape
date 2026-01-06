@@ -2,23 +2,19 @@ package com.jagex.game.runetek5.entity.pathingentity
 
 import com.jagex.game.launch.Loader
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.npcHovered
 import com.jagex.game.runetek5.client.menu.playerHovered
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.bas.BasType
-import com.jagex.game.runetek5.config.hitbar.HitbarType
-import com.jagex.game.runetek5.config.hitsplat.HitSplatType
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.Interface
 import com.jagex.game.runetek5.config.sequence.*
-import com.jagex.game.runetek5.config.sequence.spot.SpotAnimType
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity
 import com.jagex.game.runetek5.entity.PathingEntitySpotAnimation
 import com.jagex.game.runetek5.entity.EntityNode
 import com.jagex.game.runetek5.entity.EntityNodeList
-import com.jagex.game.runetek5.entity.InteractiveEntityContainer
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
@@ -32,10 +28,6 @@ import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
 import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystem
 import com.jagex.game.runetek5.math.Matrix43
-import com.jagex.game.runetek5.math.Vector3
-import com.jagex.game.runetek5.movement.CoordinateSpace
-import com.jagex.game.runetek5.scene.SettingsBits
-import com.jagex.game.runetek5.scene.tile.Tile
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.MathUtils
@@ -239,13 +231,13 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         this.worldPriority = 0
         this.anInt10325 = 0
         this.hitCachePtr = 0
-        this.activeHitsplatIds = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
-        this.hitsplatText = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
-        this.hitsplatCustomText = arrayOfNulls(client.ENTITY_DEFAULTS!!.maximumHits)
-        this.hitsplatCycles = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
-        this.soakHitsplatIds = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
-        this.soakHitsplatText = IntArray(client.ENTITY_DEFAULTS!!.maximumHits)
-        this.soakHitsplatCustomText = arrayOfNulls(client.ENTITY_DEFAULTS!!.maximumHits)
+        this.activeHitsplatIds = IntArray(Client.ENTITY_DEFAULTS!!.maximumHits)
+        this.hitsplatText = IntArray(Client.ENTITY_DEFAULTS!!.maximumHits)
+        this.hitsplatCustomText = arrayOfNulls(Client.ENTITY_DEFAULTS!!.maximumHits)
+        this.hitsplatCycles = IntArray(Client.ENTITY_DEFAULTS!!.maximumHits)
+        this.soakHitsplatIds = IntArray(Client.ENTITY_DEFAULTS!!.maximumHits)
+        this.soakHitsplatText = IntArray(Client.ENTITY_DEFAULTS!!.maximumHits)
+        this.soakHitsplatCustomText = arrayOfNulls(Client.ENTITY_DEFAULTS!!.maximumHits)
         this.entityHitbars = EntityNodeList<EntityHitbar>()
         this.faceEntity = -1
         this.currentAnimations = null
@@ -464,7 +456,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             }
 
             if ((this.particleSystem == null || this.particleSystem!!.isDisabled) && (modelsWithEmissiveTriangles > 0 || modelsWithEffectiveVertices > 0)) {
-                this.particleSystem = ParticleSystem.get(client.cycles, true)
+                this.particleSystem = ParticleSystem.get(Client.cycles, true)
             }
 
             if (this.particleSystem != null) {
@@ -504,11 +496,11 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                     }
                 }
 
-                this.particleSystem!!.performCycle(toolkit, client.cycles.toLong(), emissiveTriangles, effectiveVertices)
+                this.particleSystem!!.performCycle(toolkit, Client.cycles.toLong(), emissiveTriangles, effectiveVertices)
                 this.particlesInitialized = true
             }
         } else if (this.particleSystem != null) {
-            this.particleSystem!!.setCurrentCycle(client.cycles.toLong())
+            this.particleSystem!!.setCurrentCycle(Client.cycles.toLong())
         }
 
         if (this.particleSystem != null) {
@@ -576,7 +568,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         var clearCurrentHits = true
         var hasPrerequisites = true
 
-        for (index in 0 until client.ENTITY_DEFAULTS!!.maximumHits) {
+        for (index in 0 until Client.ENTITY_DEFAULTS!!.maximumHits) {
             if (this.hitsplatCycles[index] > currentCycles) {
                 clearCurrentHits = false
             } else {
@@ -606,7 +598,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 displayedNumber = this.hitsplatText[0]
             }
 
-            for (index in 1 until client.ENTITY_DEFAULTS!!.maximumHits) {
+            for (index in 1 until Client.ENTITY_DEFAULTS!!.maximumHits) {
                 if (hitDisplayType == 0) {
                     if (this.hitsplatCycles[index] < displayedNumber) {
                         hitIndex = index
@@ -626,9 +618,9 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 this.hitCachePtr = 0
             }
 
-            for (hitCount in 0 until client.ENTITY_DEFAULTS!!.maximumHits) {
+            for (hitCount in 0 until Client.ENTITY_DEFAULTS!!.maximumHits) {
                 val index = this.hitCachePtr
-                this.hitCachePtr = ((this.hitCachePtr + 1) % client.ENTITY_DEFAULTS!!.maximumHits).toByte()
+                this.hitCachePtr = ((this.hitCachePtr + 1) % Client.ENTITY_DEFAULTS!!.maximumHits).toByte()
                 if (this.hitsplatCycles[index.toInt()] <= currentCycles) {
                     hitIndex = index.toInt()
                     break
@@ -673,7 +665,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             entityHitbar = this.entityHitbars.getNext() as EntityHitbar?
         }
 
-        if (current != null || count < client.ENTITY_DEFAULTS!!.maxHitbars) {
+        if (current != null || count < Client.ENTITY_DEFAULTS!!.maxHitbars) {
             val newEntityHitbar = EntityHitbar(hitbarType)
             if (next == null) {
                 this.entityHitbars.getPrevious(newEntityHitbar)
@@ -682,7 +674,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             }
 
             newEntityHitbar.updateHitbar(currentCycle + delay, fromPercentage, toPercentage, lifetimeCycles)
-            if (count >= client.ENTITY_DEFAULTS!!.maxHitbars) {
+            if (count >= Client.ENTITY_DEFAULTS!!.maxHitbars) {
                 current!!.unlinkNode()
             }
         }
@@ -773,10 +765,10 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     fun method15818(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
         if (!initInterface()) {
             if (i_1 != -1) {
-                client.IS_COMPONENT_ON_TOP[i_1] = true
+                Client.IS_COMPONENT_ON_TOP[i_1] = true
             } else {
                 for (i_9 in 0..106) {
-                    client.IS_COMPONENT_ON_TOP[i_9] = true
+                    Client.IS_COMPONENT_ON_TOP[i_9] = true
                 }
             }
         } else {
@@ -1117,7 +1109,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 }
                 sequence.hasType = false
             } else {
-                val walkDirection = client.NPC_TURN_DIRECTIONS[turnDirectIndex] - animable.yaw.rotation and 0x3fff
+                val walkDirection = Client.NPC_TURN_DIRECTIONS[turnDirectIndex] - animable.yaw.rotation and 0x3fff
                 if (moveType == MovementType.RUNNING.id.toInt() && basType.runningSequence != -1) {
                     if (walkDirection > 2048 && walkDirection <= 6144 && basType.runDir1 != -1) {
                         sequence.animate(basType.runDir1)
@@ -1169,7 +1161,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
         @JvmStatic
         fun forceMovementType1(entity: PathingEntity) {
-            val cyclesLeft = entity.forceMovementT1Delay - client.cycles
+            val cyclesLeft = entity.forceMovementT1Delay - Client.cycles
             val i_3 = entity.forceMovementT1XOff * 512 + entity.getSize() * 256
             val i_4 = entity.forceMovementT1YOff * 512 + entity.getSize() * 256
             val abs = entity.getAbsolutePosition().coords
@@ -1185,9 +1177,9 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         @JvmStatic
         fun forceMovementType2(entity: PathingEntity) {
             val sequence = entity.currentSequence
-            if (entity.forceMovementT2Delay == client.cycles || !sequence.hasType() || sequence.method7585(1)) {
+            if (entity.forceMovementT2Delay == Client.cycles || !sequence.hasType() || sequence.method7585(1)) {
                 val duration = entity.forceMovementT2Delay - entity.forceMovementT1Delay
-                val cyclesPassed = client.cycles - entity.forceMovementT1Delay
+                val cyclesPassed = Client.cycles - entity.forceMovementT1Delay
                 val x1 = entity.forceMovementT1XOff * 512 + entity.getSize() * 256
                 val y1 = entity.forceMovementT1YOff * 512 + entity.getSize() * 256
                 val x2 = entity.forceMovementT2XOff * 512 + entity.getSize() * 256
@@ -1409,12 +1401,12 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                         val seqType = spotanimSequence.getType()
                         if (spotType.replay) {
                             if (seqType!!.interruptType == 3) {
-                                if (pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= client.cycles && pathingEntity.forceMovementT2Delay < client.cycles) {
+                                if (pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= Client.cycles && pathingEntity.forceMovementT2Delay < Client.cycles) {
                                     spotanimSequence.update(-1)
                                     pathingEntity.spotAnimations[index].spotAnimationId = -1
                                     continue
                                 }
-                            } else if (seqType!!.interruptType == 1 && pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= client.cycles && pathingEntity.forceMovementT2Delay < client.cycles) {
+                            } else if (seqType!!.interruptType == 1 && pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= Client.cycles && pathingEntity.forceMovementT2Delay < Client.cycles) {
                                 continue
                             }
                         }
@@ -1430,13 +1422,13 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 Update@ while (true) {
                     val currentSeqType = currentSequence.getType()
                     if (currentSeqType!!.interruptType == 3) {
-                        if (pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= client.cycles && pathingEntity.forceMovementT2Delay < client.cycles) {
+                        if (pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= Client.cycles && pathingEntity.forceMovementT2Delay < Client.cycles) {
                             pathingEntity.currentAnimations = null
                             currentSequence.update(-1)
                             break
                         }
                     } else if (currentSeqType!!.interruptType == 1) {
-                        if (pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= client.cycles && pathingEntity.forceMovementT2Delay < client.cycles) {
+                        if (pathingEntity.previousMovementStepsLeft > 0 && pathingEntity.forceMovementT1Delay <= Client.cycles && pathingEntity.forceMovementT2Delay < Client.cycles) {
                             currentSequence.setSpeed(1)
                             break
                         }

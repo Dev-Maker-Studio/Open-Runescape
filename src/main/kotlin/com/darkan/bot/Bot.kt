@@ -5,7 +5,7 @@ import com.darkan.bot.utils.*
 import com.jagex.game.launch.Loader
 import com.jagex.game.runetek5.cache.node.HashTableIterator
 import com.jagex.game.runetek5.client.GameState
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.console.Console
 import com.jagex.game.runetek5.client.input.keyboard.KeyDownCommand
 import com.jagex.game.runetek5.client.login.LoginManager
@@ -114,7 +114,7 @@ object Bot {
     fun continueDialogue() = clickDialogue(1184, 18)
 
     fun interfaceOpen(id: Int): Boolean {
-        val iterator = HashTableIterator<SubInterface>(client.OPEN_INTERFACES!!)
+        val iterator = HashTableIterator<SubInterface>(Client.OPEN_INTERFACES!!)
         for (inter in iterator) {
             if (inter?.subInterfaceId == id) return true
         }
@@ -307,17 +307,17 @@ object Bot {
             else -> null
         } ?: return
 
-        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(prot, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShort(getPlayerPid(username))
         packet.buffer.writeByteSubtract(0)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun sendText(string: String) {
-        val packet = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeByte(string.length + 1)
         packet.buffer.writeString(string)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun addResponsePlayer(username: String) {
@@ -343,7 +343,7 @@ object Bot {
     }
 
     fun sendItemOnObject(itemId: Int, objectId: Int, x: Int, y: Int) {
-        val packet = PacketEncoder.createPacket(ClientProt.IF_ON_OBJECT, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(ClientProt.IF_ON_OBJECT, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShortAddLittle(x)
         packet.buffer.writeByteSubtract(if (KeyDownCommand.runKeyDown()) 1 else 0)
         packet.buffer.writeIntMiddle(objectId)
@@ -351,14 +351,14 @@ object Bot {
         packet.buffer.writeShortLittle(itemId)
         packet.buffer.writeShortAdd(inventory.getSlotByItem(itemId))
         packet.buffer.writeShortLittle(y)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun clickDialogue(id: Int) {
-        val packet = PacketEncoder.createPacket(ClientProt.IF_CONTINUE, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(ClientProt.IF_CONTINUE, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeIntMiddle(id)
         packet.buffer.writeShortAddLittle(-1)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun clickSkillDialogue(option: Int) = clickDialogue(905, option + 13)
@@ -396,14 +396,14 @@ object Bot {
     }
 
     fun interfaceOnInterface(fromIf: Int, toIf: Int, fromSlot: Int, toSlot: Int, fromItem: Int, toItem: Int) {
-        val packet = PacketEncoder.createPacket(ClientProt.IF_ON_IF, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(ClientProt.IF_ON_IF, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShortAddLittle(toSlot)
         packet.buffer.writeShortLittle(fromSlot)
         packet.buffer.writeShortAddLittle(toItem)
         packet.buffer.writeIntLittle(toIf)
         packet.buffer.writeIntInverseMiddle(fromIf)
         packet.buffer.writeShortLittle(fromItem)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun activateQuickprayers() = clickButton(749, 4)
@@ -537,7 +537,7 @@ object Bot {
 
     fun clickButton(interfaceId: Int, componentId: Int, slotId: Int, slotId2: Int, clickType: Int) {
         val interfaceHash = interfaceId shl 16 or componentId
-        val context = client.connectionContext
+        val context = Client.connectionContext
 
         val prot = when (clickType) {
             1 -> ClientProt.IF_OP1
@@ -576,19 +576,19 @@ object Bot {
             else -> return
         }
 
-        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(prot, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShortAddLittle(item.id)
         packet.buffer.writeByteInverse(if (KeyDownCommand.runKeyDown()) 1 else 0)
         packet.buffer.writeShort(item.position.y)
         packet.buffer.writeShortAdd(item.position.x)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
         RouteFinder.routeToGrounditem(item.position.x, item.position.y)
     }
 
     fun command(message: String) = chat(";;$message", 0, 0)
 
     fun chat(message: String, color: Int, effect: Int) {
-        val context = client.connectionContext
+        val context = Client.connectionContext
         val packet = PacketEncoder.createPacket(ClientProt.CHAT, context.isaac)
         packet.buffer.writeByte(0)
         val startIndex = packet.buffer.currentPosition
@@ -601,7 +601,7 @@ object Bot {
 
     fun walkTo(tile: Tile) {
         val packet = PacketEncoder.walkToTile(tile.x - getBaseX(), tile.y - getBaseY(), 0)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet!!)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet!!)
         RouteFinder.calculateRoute(
             tile.x - getBaseX(),
             tile.y - getBaseY(),
@@ -617,8 +617,8 @@ object Bot {
             strategy,
             Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER!!.plane.toInt()),
             alt,
-            client.WALKING_STEPS_X,
-            client.WALKING_STEPS_Y
+            Client.WALKING_STEPS_X,
+            Client.WALKING_STEPS_Y
         )
     }
 
@@ -642,7 +642,7 @@ object Bot {
         for (hitbar in entity.entityHitbars) {
             val bar = hitbar as? EntityHitbar ?: continue
             if (bar.hitbarType != hitbarDef) continue
-            val update = bar.method12600(client.cycles)
+            val update = bar.method12600(Client.cycles)
             if (update != null) return update.toPercentage
         }
         return -1
@@ -652,7 +652,7 @@ object Bot {
         if (entity.faceEntity == -1) return null
         return when {
             entity.faceEntity < 32768 -> {
-                val node = client.NPC_MAP.get(entity.faceEntity.toLong())
+                val node = Client.NPC_MAP.get(entity.faceEntity.toLong())
                 node?.value as? NpcEntity
             }
             else -> PlayerUpdate.players[entity.faceEntity - 32768]
@@ -743,12 +743,12 @@ object Bot {
             else -> return
         }
 
-        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(prot, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShort(tile.y)
         packet.buffer.writeShort(tile.x)
         packet.buffer.writeInt(objectId)
         packet.buffer.writeByteAdd(if (KeyDownCommand.runKeyDown()) 1 else 0)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun getBaseX() = Resource.mapRegion!!.getBaseCoordinates().x
@@ -762,9 +762,9 @@ object Bot {
     fun getPid(entity: PathingEntity) = entity.playerIndex
 
     private inline fun findNPC(predicate: (NpcEntity) -> Boolean): NpcEntity? {
-        for (i in 0 until client.npcCount) {
-            val idx = client.NPC_INDICES[i].toLong()
-            val node = client.NPC_MAP.get(idx) ?: continue
+        for (i in 0 until Client.npcCount) {
+            val idx = Client.NPC_INDICES[i].toLong()
+            val node = Client.NPC_MAP.get(idx) ?: continue
             val npc = node.value as? NpcEntity ?: continue
             if (predicate(npc)) return npc
         }
@@ -826,13 +826,13 @@ object Bot {
             else -> return
         }
 
-        val node = client.NPC_MAP.get(index.toLong()) ?: return
+        val node = Client.NPC_MAP.get(index.toLong()) ?: return
         val npc = node.value as? NpcEntity ?: return
 
-        val packet = PacketEncoder.createPacket(prot, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(prot, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeShort(index)
         packet.buffer.writeByte(if (KeyDownCommand.runKeyDown()) 1 else 0)
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
         RouteFinder.calculateRoute(npc.movementBaseX[0], npc.movementBaseY[0], true, RouteStrategies.forPlayer(npc.movementBaseX[0], npc.movementBaseY[0], npc.getSize(), npc.getSize()));
     }
 
@@ -861,7 +861,7 @@ object Bot {
         }
     }
 
-    fun isLoggedOut() = GameState.isLoggedOut(client.gameState)
+    fun isLoggedOut() = GameState.isLoggedOut(Client.gameState)
 
     fun getGroundItems(): List<Item> {
         val items = mutableListOf<Item>()
@@ -870,7 +870,7 @@ object Bot {
                 val positionHash = (getMyPlayer().plane.toLong() shl 28 or
                                    ((y + getBaseY()).toLong() shl 14) or
                                    (x + getBaseX()).toLong())
-                val deque = client.GROUND_ITEMS.get(positionHash) ?: continue
+                val deque = Client.GROUND_ITEMS.get(positionHash) ?: continue
                 for (groundItems in deque.groundItems) {
                     val gi = groundItems as? GroundItemNode ?: continue
                     items.add(Item(gi.id, gi.amount, Tile(x + getBaseX(), y + getBaseY(), getMyPlayer().plane.toInt())))
@@ -885,7 +885,7 @@ object Bot {
         for (x in 0 until 104) {
             for (y in 0 until 104) {
                 val plane = getMyPlayer().plane.toInt()
-                var obj: GameObject? = Resource.mapRegion!!.getScene()!!.getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
+                var obj: GameObject? = Resource.mapRegion!!.getScene()!!.getInteractiveObject(plane, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
 
                 if (obj == null)
                     obj = Resource.mapRegion!!.getScene()!!.getGroundDecoration(plane, x, y) as GameObject?
@@ -963,7 +963,7 @@ object Bot {
             "npcnext" -> { println(getClosestNPC("fishing spot")); getNPCs().forEach { println(it.definitions!!.name) } }
             "objnext" -> { println(getClosestObject("Fur stall")); println("Number found: ${getObjectsNearby("Fur stall").size}"); clickClosestObject("Fur stall") }
             "nearbyobjects" -> { Console.writeLine("Objects found: ${getObjectsNearby(cmd[1]).size}, Ids: "); getObjectsNearby(cmd[1]).forEach { Console.writeLine("ID: ${it.id}, Coords: X${it.x} Y${it.y} Z${it.z}") } }
-            "objonme" -> println((Resource.mapRegion!!.getScene()!!.getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject)?.id)
+            "objonme" -> println((Resource.mapRegion!!.getScene()!!.getInteractiveObject(getMyPlayer().plane.toInt(), getMyPlayer().endX.toInt(), getMyPlayer().endZ.toInt(), Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject)?.id)
 
             // Debug & Toggles
             "togglepackets" -> { disableIncomingPackets = !disableIncomingPackets; Console.writeLine("Disabled packets: $disableIncomingPackets") }
@@ -983,7 +983,7 @@ object Bot {
                 for (x in 0 until 104) {
                     for (y in 0 until 104) {
                         val plane = getMyPlayer().plane.toInt()
-                        var obj: GameObject? = Resource.mapRegion!!.getScene()!!.getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+                        var obj: GameObject? = Resource.mapRegion!!.getScene()!!.getInteractiveObject(plane, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
                         if (obj == null) obj = Resource.mapRegion!!.getScene()!!.getGroundDecoration(plane, x, y) as? GameObject
                         if (obj == null) obj = Resource.mapRegion!!.getScene()!!.getWall(plane, x, y) as? GameObject
                         if (obj == null) obj = Resource.mapRegion!!.getScene()!!.getPrimaryWallDecoration(plane, x, y) as? GameObject
@@ -1017,11 +1017,11 @@ object Bot {
         return animId != 11975
     }
 
-    fun getXp(skillId: Int) = client.SKILL_XP[skillId]
-    fun getLevel(skillId: Int) = client.SKILL_LEVEL_VISIBLE[skillId]
+    fun getXp(skillId: Int) = Client.SKILL_XP[skillId]
+    fun getLevel(skillId: Int) = Client.SKILL_LEVEL_VISIBLE[skillId]
 
     fun sendLogout(lobby: Boolean) {
-        client.logout(if (lobby) LoginManager.currentlyInLobby else false)
+        Client.logout(if (lobby) LoginManager.currentlyInLobby else false)
     }
 
     fun getXPForLevel(level: Int): Int {
@@ -1037,8 +1037,8 @@ object Bot {
 
     fun getNPCs(): List<NpcEntity> {
         val npcs = mutableListOf<NpcEntity>()
-        for (i in 0 until client.npcCount) {
-            val npcNode = client.NPC_ARRAY[i]
+        for (i in 0 until Client.npcCount) {
+            val npcNode = Client.NPC_ARRAY[i]
             npcNode?.value?.let { npcs.add(it as NpcEntity) }
         }
         return npcs
@@ -1130,10 +1130,10 @@ object Bot {
     }
 
     fun sendClick() {
-        val packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, client.GAME_CONNECTION_CONTEXT.isaac)
+        val packet = PacketEncoder.createPacket(ClientProt.MOUSE_CLICK, Client.GAME_CONNECTION_CONTEXT.isaac)
         packet.buffer.writeIntLittle(Utils.random(0, 400) or (Utils.random(0, 400) shl 16))
         packet.buffer.writeShort(5 or (10 shl 0))
-        client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     fun loginLobby(un: String, pw: String) = LoginManager.lobbyLogin(un, pw)

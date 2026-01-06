@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.sound
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.midi.VorbisNode
 import com.jagex.game.runetek5.sound.jagtheora.VorbisFileReference
@@ -11,11 +11,11 @@ object VorbisSoundManager {
     @JvmStatic
     fun method1575(fileId: Int, i_1: Int, bool2: Boolean) {
         if (StaticMethods.INDEX36_FILE_CACHE[fileId.toLong()] == null) {
-            if (!client.jagtheoraLoaded) {
+            if (!Client.jagtheoraLoaded) {
                 SoundTrigger.playVorbis(fileId, bool2)
             } else {
                 val vorbisnode = VorbisNode(fileId, VorbisFileReference(Resource.VORBIS!!, fileId), i_1, bool2)
-                vorbisnode.vfReference.setLanguage(client.CURRENT_LANGUAGE!!.lowercaseAbbreviation)
+                vorbisnode.vfReference.setLanguage(Client.CURRENT_LANGUAGE!!.lowercaseAbbreviation)
                 StaticMethods.INDEX36_FILE_CACHE.put(vorbisnode, fileId.toLong())
             }
         }

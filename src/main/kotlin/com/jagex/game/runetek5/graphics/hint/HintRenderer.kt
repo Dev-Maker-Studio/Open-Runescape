@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.graphics.hint
 
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.rsinterface.Component
@@ -10,11 +10,8 @@ import com.jagex.game.runetek5.entity.AbstractInteractiveEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.gameobject.GameObject
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
-import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
-import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
-import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.MapRegion
 import com.jagex.game.runetek5.utils.MathUtils
@@ -37,10 +34,10 @@ object HintRenderer {
             val arrow = arrows[index] ?: continue
             if (arrow.targetType == 2) {
                 calculateHintArrowPlacement(arrow.plane, arrow.x, arrow.y, arrow.height * 2)
-                if (client.HINT_POSITION[0] > -1.0f && client.cycles % 20 < 10) {
+                if (Client.HINT_POSITION[0] > -1.0f && Client.cycles % 20 < 10) {
                     val arrowSprite = StaticMedia.hintHeadiconSprites!![arrow.arrowSprite]
-                    val drawX = (client.HINT_POSITION[0] + x - 12.0f).toInt()
-                    val drawY = (client.HINT_POSITION[1] + y - 28.0f).toInt()
+                    val drawX = (Client.HINT_POSITION[0] + x - 12.0f).toInt()
+                    val drawY = (Client.HINT_POSITION[1] + y - 28.0f).toInt()
                     arrowSprite.draw(drawX, drawY)
                 }
             }
@@ -60,23 +57,23 @@ object HintRenderer {
         if (!calculateProjection && (absX < 512 || absY < 512 ||
                     absX > (mapRegion!!.sceneSizeX - 2) * 512 || absY > (mapRegion.sceneSizeY - 2) * 512)
         ) {
-            client.HINT_POSITION[1] = -1.0f
-            client.HINT_POSITION[0] = -1.0f
+            Client.HINT_POSITION[1] = -1.0f
+            Client.HINT_POSITION[0] = -1.0f
         } else {
             val drawHeight = MapRegion.tileheightForAbsolutePosition(absX, absY, plane) - floorOffset
             val toolkit = Renderers.activeToolkit!!
-            client.SUN_MATRIX.copyFrom(toolkit.copySunPosition())
-            client.SUN_MATRIX.translate(translateSunX.toFloat(), 0.0f, 0.0f)
-            toolkit.setSunPosition(client.SUN_MATRIX)
+            Client.SUN_MATRIX.copyFrom(toolkit.copySunPosition())
+            Client.SUN_MATRIX.translate(translateSunX.toFloat(), 0.0f, 0.0f)
+            toolkit.setSunPosition(Client.SUN_MATRIX)
             if (calculateProjection) {
-                toolkit.calculateProjection(absX.toFloat(), drawHeight.toFloat(), absY.toFloat(), client.HINT_POSITION)
+                toolkit.calculateProjection(absX.toFloat(), drawHeight.toFloat(), absY.toFloat(), Client.HINT_POSITION)
             } else {
-                toolkit.computeWorldToScreen(absX.toFloat(), drawHeight.toFloat(), absY.toFloat(), client.HINT_POSITION)
+                toolkit.computeWorldToScreen(absX.toFloat(), drawHeight.toFloat(), absY.toFloat(), Client.HINT_POSITION)
             }
-            client.SUN_MATRIX.translate(-translateSunX.toFloat(), 0.0f, 0.0f)
-            toolkit.setSunPosition(client.SUN_MATRIX)
-            client.HINT_POSITION[0] -= client.hintArrowOffsetX
-            client.HINT_POSITION[1] -= client.hintArrowOffsetY
+            Client.SUN_MATRIX.translate(-translateSunX.toFloat(), 0.0f, 0.0f)
+            toolkit.setSunPosition(Client.SUN_MATRIX)
+            Client.HINT_POSITION[0] -= Client.hintArrowOffsetX
+            Client.HINT_POSITION[1] -= Client.hintArrowOffsetY
         }
     }
 
@@ -127,9 +124,9 @@ object HintRenderer {
 
         for (index in hintArrows.indices) {
             val arrow = hintArrows[index] ?: continue
-            if (arrow.targetType != 0 && client.cycles % 20 < 10) {
+            if (arrow.targetType != 0 && Client.cycles % 20 < 10) {
                 if (arrow.targetType == 1) {
-                    val objectNode = client.NPC_MAP[arrow.targetIndex.toLong()] as? ObjectNode
+                    val objectNode = Client.NPC_MAP[arrow.targetIndex.toLong()] as? ObjectNode
                     if (objectNode != null) {
                         val npc = objectNode.value as NpcEntity
                         val abs = npc.getAbsolutePosition().coords
@@ -176,15 +173,15 @@ object HintRenderer {
             val angle = if (Camera.cameraCalculationType == 4) {
                 Camera.camAngleY.toInt() and 0x3fff
             } else {
-                (Camera.camAngleY.toInt() + client.minimapRotation) and 0x3fff
+                (Camera.camAngleY.toInt() + Client.minimapRotation) and 0x3fff
             }
 
             var sinAngle = MathUtils.SINE[angle]
             var cosAngle = MathUtils.COSINE[angle]
 
             if (Camera.cameraCalculationType != 4) {
-                sinAngle = sinAngle * 256 / (client.minimapZoom + 256)
-                cosAngle = cosAngle * 256 / (client.minimapZoom + 256)
+                sinAngle = sinAngle * 256 / (Client.minimapZoom + 256)
+                cosAngle = cosAngle * 256 / (Client.minimapZoom + 256)
             }
 
             val dx = (cosAngle * x + y * sinAngle) shr 14

@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.rendering
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontMetrics
@@ -122,8 +122,8 @@ object MessageBox {
                 if (textH < MessageBox.minimalTextHeight) {
                     textH = MessageBox.minimalTextHeight
                 }
-                val drawX = anchorX!!.calculateDrawX(textW, client.GAME_WIDTH) + paddingLeft
-                val drawY = anchorY!!.calculateDrawY(textH, client.GAME_HEIGHT) + paddingTop
+                val drawX = anchorX!!.calculateDrawX(textW, Client.GAME_WIDTH) + paddingLeft
+                val drawY = anchorY!!.calculateDrawY(textH, Client.GAME_HEIGHT) + paddingTop
                 toolkit.generateSprite(boxFilledBackground, false).method2772(drawX + outlineCornerSprite!!.width, drawY + outlineCornerSprite!!.height, textW - outlineCornerSprite!!.width * 2, textH - outlineCornerSprite!!.height * 2, 1, 0, 0)
                 toolkit.generateSprite(outlineCornerSprite, true).draw(drawX, drawY)
                 outlineCornerSprite!!.flipHorizontal()

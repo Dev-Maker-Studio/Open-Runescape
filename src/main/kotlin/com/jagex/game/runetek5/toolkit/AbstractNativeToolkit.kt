@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.buffer.NativeMemoryNode
 import com.jagex.game.runetek5.cache.node.LinkedList
 import com.jagex.game.runetek5.cache.node.WeakReferenceMappingCache
 import com.jagex.game.runetek5.client.GraphicsCache
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.material.NativeMaterialCache
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
@@ -1841,7 +1841,7 @@ abstract class AbstractNativeToolkit(
         fun drawLoadingPleaseWaitHardware() {
             GraphicsCache.resetWorldmapCaches(false)
             if (AbstractToolkit.activeRenderMode >= 0 && AbstractToolkit.activeRenderMode != 0) {
-                client.loadAssets(AbstractToolkit.activeRenderMode, false)
+                Client.loadAssets(AbstractToolkit.activeRenderMode, false)
                 AbstractToolkit.activeRenderMode = -1
             }
         }

@@ -33,11 +33,11 @@ enum class ServerEnvironment(
                 else -> {}
             }
             var affiliate = ""
-            if (client.affiliateP != null) {
-                affiliate = "/p=" + client.affiliateP
+            if (Client.affiliateP != null) {
+                affiliate = "/p=" + Client.affiliateP
             }
-            val mainSite = client.CURRENT_GAME!!.name + ".com"
-            return "http://$web.$mainSite/l=${client.CURRENT_LANGUAGE}/a=${client.AFFILIATE}$affiliate/"
+            val mainSite = Client.CURRENT_GAME!!.name + ".com"
+            return "http://$web.$mainSite/l=${Client.CURRENT_LANGUAGE}/a=${Client.AFFILIATE}$affiliate/"
         }
 
         @JvmStatic

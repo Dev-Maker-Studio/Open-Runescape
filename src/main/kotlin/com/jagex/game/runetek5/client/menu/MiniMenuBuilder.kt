@@ -2,19 +2,16 @@ package com.jagex.game.runetek5.client.menu
 
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.Game
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.client.input.mouse.CursorManager
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.config.npc.NPCType
-import com.jagex.game.runetek5.config.item.ItemType
-import com.jagex.game.runetek5.config.param.ParamType
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.Interface
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity
-import com.jagex.game.runetek5.entity.RenderedEntity
 import com.jagex.game.runetek5.entity.gameobject.GameObject
 import com.jagex.game.runetek5.entity.grounditem.GroundItem
 import com.jagex.game.runetek5.entity.grounditem.GroundItemNode
@@ -24,11 +21,7 @@ import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceComponentRenderer
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceRenderer
-import com.jagex.game.runetek5.math.Matrix44
-import com.jagex.game.runetek5.math.Vector3
-import com.jagex.game.runetek5.movement.CoordGrid
 import com.jagex.game.runetek5.scene.MapLoader
-import com.jagex.game.runetek5.scene.InteractiveEntityCache
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.tools.LocalizedText
@@ -54,10 +47,10 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
     if (MiniMenu.entryCount >= 412) return
 
     if (PlayerUpdate.MY_PLAYER!! == player) {
-        if (client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x10) != 0) {
+        if (Client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x10) != 0) {
             MiniMenu.addEntry(
-                client.useOnType!!,
-                "${client.useOnTarget} -> ${TextUtils.setTextColor(16777215)}${LocalizedText.SELF.translate(client.CURRENT_LANGUAGE!!)}",
+                Client.useOnType!!,
+                "${Client.useOnTarget} -> ${TextUtils.setTextColor(16777215)}${LocalizedText.SELF.translate(Client.CURRENT_LANGUAGE!!)}",
                 MiniMenu.useOnCursor,
                 16,
                 -1,
@@ -81,10 +74,10 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                         combatColorDisplayed = false
                     }
                 }
-                val level = if (client.CURRENT_GAME == Game.STELLAR_DAWN) {
-                    LocalizedText.RATING_.translate(client.CURRENT_LANGUAGE!!)
+                val level = if (Client.CURRENT_GAME == Game.STELLAR_DAWN) {
+                    LocalizedText.RATING_.translate(Client.CURRENT_LANGUAGE!!)
                 } else {
-                    LocalizedText.MINIMENU_LEVEL.translate(client.CURRENT_LANGUAGE!!)
+                    LocalizedText.MINIMENU_LEVEL.translate(Client.CURRENT_LANGUAGE!!)
                 }
                 val combatColor = if (combatColorDisplayed) {
                     TextUtils.calculateCombatBasedColor(player.combatLevel, PlayerUpdate.MY_PLAYER!!.combatLevel)
@@ -98,13 +91,13 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                 }
             }
             -1 -> player.getUsernameWithTitle()
-            else -> "${player.getUsernameWithTitle()} (${LocalizedText.SKILL_.translate(client.CURRENT_LANGUAGE!!)}${player.elo})"
+            else -> "${player.getUsernameWithTitle()} (${LocalizedText.SKILL_.translate(Client.CURRENT_LANGUAGE!!)}${player.elo})"
         }
 
-        if (client.interfaceSelectionActive && !onDifferentPlane && (USE_OPTIONS_FLAGS and 0x8) != 0) {
+        if (Client.interfaceSelectionActive && !onDifferentPlane && (USE_OPTIONS_FLAGS and 0x8) != 0) {
             MiniMenu.addEntry(
-                client.useOnType!!,
-                "${client.useOnTarget} -> ${TextUtils.setTextColor(16777215)}$username",
+                Client.useOnType!!,
+                "${Client.useOnTarget} -> ${TextUtils.setTextColor(16777215)}$username",
                 MiniMenu.useOnCursor,
                 15,
                 -1,
@@ -135,11 +128,11 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
             )
         } else {
             for (index in 7 downTo 0) {
-                client.PLAYER_OPTIONS[index]?.let { option ->
+                Client.PLAYER_OPTIONS[index]?.let { option ->
                     var attackClickType: Short = 0
-                    if (Game.RUNESCAPE == client.CURRENT_GAME &&
-                        option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
-                        attackClickType = if (client.REDUCE_ATTACK_PRIORITY && player.combatLevel > PlayerUpdate.MY_PLAYER!!.combatLevel) {
+                    if (Game.RUNESCAPE == Client.CURRENT_GAME &&
+                        option.equals(LocalizedText.ATTACK.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
+                        attackClickType = if (Client.REDUCE_ATTACK_PRIORITY && player.combatLevel > PlayerUpdate.MY_PLAYER!!.combatLevel) {
                             2000
                         } else if (PlayerUpdate.MY_PLAYER!!.teamId != 0 && player.teamId != 0) {
                             if (player.teamId == PlayerUpdate.MY_PLAYER!!.teamId) 2000 else 0
@@ -148,13 +141,13 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                         } else {
                             0
                         }
-                    } else if (client.PLAYER_OPTION_REDUCED_PRIORITY[index]) {
+                    } else if (Client.PLAYER_OPTION_REDUCED_PRIORITY[index]) {
                         attackClickType = 2000
                     }
 
-                    val clickType = (client.aShortArray7239[index] + attackClickType).toShort()
-                    val cursor = if (client.PLAYER_OPTION_CURSORS[index] != -1) {
-                        client.PLAYER_OPTION_CURSORS[index]
+                    val clickType = (Client.aShortArray7239[index] + attackClickType).toShort()
+                    val cursor = if (Client.PLAYER_OPTION_CURSORS[index] != -1) {
+                        Client.PLAYER_OPTION_CURSORS[index]
                     } else {
                         CursorManager.defaultAttackCursor
                     }
@@ -210,7 +203,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     val i_3 = mouseX - MiniMenu.anInt180
     val i_4 = mouseY - MiniMenu.anInt181
 
-    if (Resource.mapRegion?.getScene()!! != null && (!client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
+    if (Resource.mapRegion?.getScene()!! != null && (!Client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
         var x = -1
         var y = -1
 
@@ -243,11 +236,11 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
         }
 
         if (x != -1 && y != -1) {
-            if (client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x40) != 0) {
-                val component = Component.listIcomponent(client.anInt56, client.anInt7345)
+            if (Client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x40) != 0) {
+                val component = Component.listIcomponent(Client.anInt56, Client.anInt7345)
                 if (component != null) {
                     MiniMenu.addEntry(
-                        client.useOnType!!,
+                        Client.useOnType!!,
                         " -> ",
                         MiniMenu.useOnCursor,
                         59,
@@ -266,7 +259,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
             } else {
                 if (SHOW_FACE_HERE) {
                     MiniMenu.addEntry(
-                        LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE!!)!!,
+                        LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)!!,
                         "",
                         -1,
                         60,
@@ -303,7 +296,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     val renderedEntity = interactiveEntities.entities
 
     for (reference in renderedEntity) {
-        if ((client.playingAltGame || reference.entity?.plane == PlayerUpdate.MY_PLAYER!!.plane) &&
+        if ((Client.playingAltGame || reference.entity?.plane == PlayerUpdate.MY_PLAYER!!.plane) &&
             reference.hovered(toolkit, mouseX, mouseY)) {
 
             val entity = reference.entity ?: continue
@@ -331,12 +324,12 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                         val plrStartX = pAbs.x.toInt() - (entity.getSize() - 1 shl 8)
                         val plrStartZ = pAbs.z.toInt() - (entity.getSize() - 1 shl 8)
 
-                        for (actionCode in 0 until client.NPC_UPDATE_INDEX) {
-                            val npcNode = client.NPC_MAP?.get(client.NPC_UPDATE_INDICES[actionCode].toLong()) as? ObjectNode
+                        for (actionCode in 0 until Client.NPC_UPDATE_INDEX) {
+                            val npcNode = Client.NPC_MAP?.get(Client.NPC_UPDATE_INDICES[actionCode].toLong()) as? ObjectNode
                             if (npcNode != null) {
                                 val npcEntity = npcNode.value as? NpcEntity
                                 val npcDef = npcEntity?.definitions
-                                if (npcEntity != null && npcDef != null && npcEntity.clientCycles != client.cycles && npcEntity.isHidden) {
+                                if (npcEntity != null && npcDef != null && npcEntity.clientCycles != Client.cycles && npcEntity.isHidden) {
                                     val nAbs = npcEntity.getAbsolutePosition()?.coords ?: continue
                                     val npcAbsX = nAbs.x.toInt() - (npcDef.size - 1 shl 8)
                                     val npcAbsY = nAbs.z.toInt() - (npcDef.size - 1 shl 8)
@@ -346,7 +339,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                         npcAbsY >= plrStartZ &&
                                         npcDef.size <= entity.getSize() - (npcAbsY - plrStartZ shr 9)) {
                                         npcHovered(npcEntity, entity.plane != PlayerUpdate.MY_PLAYER!!.plane)
-                                        npcEntity.clientCycles = client.cycles
+                                        npcEntity.clientCycles = Client.cycles
                                     }
                                 }
                             }
@@ -357,7 +350,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
 
                         for (index in 0 until numIndices) {
                             val playerEntity = PlayerUpdate.players[indices[index]]
-                            if (playerEntity != null && playerEntity.clientCycles != client.cycles &&
+                            if (playerEntity != null && playerEntity.clientCycles != Client.cycles &&
                                 entity != playerEntity && playerEntity.isHidden) {
 
                                 val playerAbsPos = playerEntity.getAbsolutePosition()?.coords ?: continue
@@ -369,17 +362,17 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                     playerAbsZ >= plrStartZ &&
                                     playerEntity.getSize() <= entity.getSize() - (playerAbsZ - plrStartZ shr 9)) {
                                     playerHovered(playerEntity, entity.plane != PlayerUpdate.MY_PLAYER!!.plane)
-                                    playerEntity.clientCycles = client.cycles
+                                    playerEntity.clientCycles = Client.cycles
                                 }
                             }
                         }
                     }
 
-                    if (entity.clientCycles == client.cycles) {
+                    if (entity.clientCycles == Client.cycles) {
                         continue
                     }
                     playerHovered(entity, entity.plane != PlayerUpdate.MY_PLAYER!!.plane)
-                    entity.clientCycles = client.cycles
+                    entity.clientCycles = Client.cycles
                 }
 
                 is NpcEntity -> {
@@ -393,12 +386,12 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                             val npcAbsStartX = npcAbsPos.x.toInt() - (entityDef.size - 1 shl 8)
                             val npcAbsStartZ = npcAbsPos.z.toInt() - (entityDef.size - 1 shl 8)
 
-                            for (npcIndex in 0 until client.NPC_UPDATE_INDEX) {
-                                val npcNode = client.NPC_MAP?.get(client.NPC_UPDATE_INDICES[npcIndex].toLong()) as? ObjectNode
+                            for (npcIndex in 0 until Client.NPC_UPDATE_INDEX) {
+                                val npcNode = Client.NPC_MAP?.get(Client.NPC_UPDATE_INDICES[npcIndex].toLong()) as? ObjectNode
                                 if (npcNode != null) {
                                     val npc = npcNode.value as? NpcEntity
                                     val npcDef2 = npc?.definitions
-                                    if (npc != null && npcDef2 != null && npc.clientCycles != client.cycles && entity != npc && npc.isHidden) {
+                                    if (npc != null && npcDef2 != null && npc.clientCycles != Client.cycles && entity != npc && npc.isHidden) {
                                         val vector337 = npc.getAbsolutePosition()?.coords ?: continue
                                         val i_12 = vector337.x.toInt() - (npcDef2.size - 1 shl 8)
                                         val i_13 = vector337.z.toInt() - (npcDef2.size - 1 shl 8)
@@ -408,7 +401,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                             i_13 >= npcAbsStartZ &&
                                             npcDef2.size <= entityDef.size - (i_13 - npcAbsStartZ shr 9)) {
                                             npcHovered(npc, entity.plane != PlayerUpdate.MY_PLAYER!!.plane)
-                                            npc.clientCycles = client.cycles
+                                            npc.clientCycles = Client.cycles
                                         }
                                     }
                                 }
@@ -419,7 +412,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
 
                             for (index in 0 until numIndices) {
                                 val player = PlayerUpdate.players[playerIndices[index]]
-                                if (player != null && player.clientCycles != client.cycles && player.isHidden) {
+                                if (player != null && player.clientCycles != Client.cycles && player.isHidden) {
                                     val abs = player.getAbsolutePosition()?.coords ?: continue
                                     val posX2 = abs.x.toInt() - (player.getSize() - 1 shl 8)
                                     val posZ2 = abs.z.toInt() - (player.getSize() - 1 shl 8)
@@ -429,24 +422,24 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                         posZ2 >= npcAbsStartZ &&
                                         player.getSize() <= entityDef.size - (posZ2 - npcAbsStartZ shr 9)) {
                                         playerHovered(player, entity.plane != PlayerUpdate.MY_PLAYER!!.plane)
-                                        player.clientCycles = client.cycles
+                                        player.clientCycles = Client.cycles
                                     }
                                 }
                             }
                         }
 
-                        if (entity.clientCycles == client.cycles) {
+                        if (entity.clientCycles == Client.cycles) {
                             continue
                         }
                         npcHovered(entity, entity.plane != PlayerUpdate.MY_PLAYER!!.plane)
-                        entity.clientCycles = client.cycles
+                        entity.clientCycles = Client.cycles
                     }
                 }
 
                 is GroundItem -> {
                     val posX = startX + regionBase.x
                     val posY = startZ + regionBase.y
-                    val groundItems = client.GROUND_ITEMS?.get(
+                    val groundItems = Client.GROUND_ITEMS?.get(
                         (entity.plane.toLong() shl 28) or (posY.toLong() shl 14) or posX.toLong()
                     ) as? GroundItemWrapper
 
@@ -462,7 +455,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                 else -> TypeLists.INTERACTION_DEFAULTS?.tooltipColorF2p ?: 0
                             }
 
-                            if (client.interfaceSelectionActive && entity.plane == PlayerUpdate.MY_PLAYER!!.plane) {
+                            if (Client.interfaceSelectionActive && entity.plane == PlayerUpdate.MY_PLAYER!!.plane) {
                                 val param = if (MiniMenu.USE_INTERFACE_ID != -1) {
                                     TypeLists.PARAMS?.list(MiniMenu.USE_INTERFACE_ID)
                                 } else null
@@ -470,8 +463,8 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                                 if ((USE_OPTIONS_FLAGS and 0x1) != 0 &&
                                     (param == null || objtype.getCs2Integer(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
                                     MiniMenu.addEntry(
-                                        client.useOnType!!,
-                                        "${client.useOnTarget} -> ${TextUtils.setTextColor(color)}${objtype.name}",
+                                        Client.useOnType!!,
+                                        "${Client.useOnTarget} -> ${TextUtils.setTextColor(color)}${objtype.name}",
                                         MiniMenu.useOnCursor,
                                         17,
                                         -1,
@@ -540,7 +533,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                         continue
                     }
 
-                    if (client.interfaceSelectionActive && entity.plane == PlayerUpdate.MY_PLAYER!!.plane) {
+                    if (Client.interfaceSelectionActive && entity.plane == PlayerUpdate.MY_PLAYER!!.plane) {
                         val attributedefault62 = if (MiniMenu.USE_INTERFACE_ID != -1) {
                             TypeLists.PARAMS?.list(MiniMenu.USE_INTERFACE_ID)
                         } else null
@@ -548,8 +541,8 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
                         if ((USE_OPTIONS_FLAGS and 0x4) != 0 &&
                             (attributedefault62 == null || loctype.getParamsInt(MiniMenu.USE_INTERFACE_ID, attributedefault62.defaultInt) != attributedefault62.defaultInt)) {
                             MiniMenu.addEntry(
-                                client.useOnType!!,
-                                "${client.useOnTarget} -> ${TextUtils.setTextColor(65535)}${loctype.name}",
+                                Client.useOnType!!,
+                                "${Client.useOnTarget} -> ${TextUtils.setTextColor(65535)}${loctype.name}",
                                 MiniMenu.useOnCursor,
                                 2,
                                 -1,
@@ -612,17 +605,17 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
 
 @JvmName("interfaceComponentHovered")
 fun interfaceComponentHovered(component: Component) {
-    if (client.interfaceSelectionActive) {
+    if (Client.interfaceSelectionActive) {
         val param = if (MiniMenu.USE_INTERFACE_ID != -1) {
             TypeLists.PARAMS?.list(MiniMenu.USE_INTERFACE_ID)
         } else null
 
-        if (client.getComponentSettings(component)!!.isTargetableByUse() &&
+        if (Client.getComponentSettings(component)!!.isTargetableByUse() &&
             (USE_OPTIONS_FLAGS and 0x20) != 0 &&
             (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
             MiniMenu.addEntry(
-                client.useOnType!!,
-                "${client.useOnTarget} -> ${component.opBase}",
+                Client.useOnType!!,
+                "${Client.useOnTarget} -> ${component.opBase}",
                 MiniMenu.useOnCursor,
                 58,
                 component.containerItemId,
@@ -695,8 +688,8 @@ fun interfaceComponentHovered(component: Component) {
         }
     }
 
-    if (client.getComponentSettings(component)!!.continueOptionEnabled()) {
-        val text = component.resumeText ?: LocalizedText.CONTINUE.translate(client.CURRENT_LANGUAGE!!)!!
+    if (Client.getComponentSettings(component)!!.continueOptionEnabled()) {
+        val text = component.resumeText ?: LocalizedText.CONTINUE.translate(Client.CURRENT_LANGUAGE!!)!!
         MiniMenu.addEntry(
             text!!,
             "",
@@ -728,15 +721,15 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
 
     if (npcType?.visible == true) {
         if (npc.modifiedCbLvl != 0) {
-            val level = if (client.CURRENT_GAME == Game.STELLAR_DAWN) {
-                LocalizedText.RATING_.translate(client.CURRENT_LANGUAGE!!)
+            val level = if (Client.CURRENT_GAME == Game.STELLAR_DAWN) {
+                LocalizedText.RATING_.translate(Client.CURRENT_LANGUAGE!!)
             } else {
-                LocalizedText.MINIMENU_LEVEL.translate(client.CURRENT_LANGUAGE!!)
+                LocalizedText.MINIMENU_LEVEL.translate(Client.CURRENT_LANGUAGE!!)
             }
             name = "$name${TextUtils.calculateCombatBasedColor(npc.modifiedCbLvl, PlayerUpdate.MY_PLAYER!!.combatLevel)} ($level${npc.modifiedCbLvl})"
         }
 
-        if (client.interfaceSelectionActive && !samePlaneAsPlayer) {
+        if (Client.interfaceSelectionActive && !samePlaneAsPlayer) {
             val paramtype = if (MiniMenu.USE_INTERFACE_ID != -1) {
                 TypeLists.PARAMS?.list(MiniMenu.USE_INTERFACE_ID)
             } else null
@@ -744,8 +737,8 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
             if ((USE_OPTIONS_FLAGS and 0x2) != 0 &&
                 (paramtype == null || npcType.getCs2Value(MiniMenu.USE_INTERFACE_ID, paramtype.defaultInt) != paramtype.defaultInt)) {
                 MiniMenu.addEntry(
-                    client.useOnType!!,
-                    "${client.useOnTarget} -> ${TextUtils.setTextColor(16776960)}$name",
+                    Client.useOnType!!,
+                    "${Client.useOnTarget} -> ${TextUtils.setTextColor(16776960)}$name",
                     MiniMenu.useOnCursor,
                     8,
                     -1,
@@ -762,7 +755,7 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
 
         if (!samePlaneAsPlayer) {
             var npcOptions = npcType.actions
-            if (client.prefixMinimenuOps) {
+            if (Client.prefixMinimenuOps) {
                 npcOptions = MiniMenu.prefixWithIndex(npcOptions)
             }
 
@@ -771,8 +764,8 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                     val option = npcOptions[actionIndex]
                     if (option != null &&
                         (npcType.gameType.toInt() == 0 ||
-                         (!option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true) &&
-                          !option.equals(LocalizedText.EXAMINE.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)))) {
+                         (!option.equals(LocalizedText.ATTACK.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true) &&
+                          !option.equals(LocalizedText.EXAMINE.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true)))) {
 
                         val clickType = when (actionIndex) {
                             0 -> 9
@@ -790,7 +783,7 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                             else -> CursorManager.defaultAttackCursor
                         }
 
-                        val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
+                        val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
                             npcType.attackCursor
                         } else {
                             cursor
@@ -817,8 +810,8 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                     for (actionIndex in npcOptions.indices) {
                         val option = npcOptions[actionIndex]
                         if (option != null &&
-                            (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true) ||
-                             option.equals(LocalizedText.EXAMINE.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true))) {
+                            (option.equals(LocalizedText.ATTACK.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true) ||
+                             option.equals(LocalizedText.EXAMINE.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true))) {
 
                             val attackClickPriority = if (npc.modifiedCbLvl > PlayerUpdate.MY_PLAYER!!.combatLevel) 2000 else 0
 
@@ -842,7 +835,7 @@ fun npcHovered(npc: NpcEntity, samePlaneAsPlayer: Boolean) {
                                 else -> CursorManager.defaultAttackCursor
                             }
 
-                            val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
+                            val actualCursor = if (option.equals(LocalizedText.ATTACK.translate(Client.CURRENT_LANGUAGE!!), ignoreCase = true)) {
                                 npcType.attackCursor
                             } else {
                                 cursor

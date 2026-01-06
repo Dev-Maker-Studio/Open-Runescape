@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.client.GameState
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
@@ -76,7 +76,7 @@ class EnvironmentManager(
     }
 
     fun updateAtmosphere(mapregion: MapRegion) {
-        if (!GameState.isLoggedOut(client.gameState) && !GameState.inLobby(client.gameState)) {
+        if (!GameState.isLoggedOut(Client.gameState) && !GameState.inLobby(Client.gameState)) {
             var x = -1
             var y = -1
             if (PlayerUpdate.MY_PLAYER!! != null) {

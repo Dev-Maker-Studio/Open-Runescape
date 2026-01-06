@@ -1,10 +1,9 @@
 package com.jagex.game.runetek5.scene
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.entity.grounditem.GroundItem
 import com.jagex.game.runetek5.entity.grounditem.GroundItemNode
-import com.jagex.game.runetek5.entity.grounditem.GroundItemWrapper
 import com.jagex.game.runetek5.movement.CoordGrid
 
 class GroundItemFetcher(
@@ -13,7 +12,7 @@ class GroundItemFetcher(
 ) {
 
     fun getGroundItem(): GroundItem? {
-        val wrapper = client.GROUND_ITEMS.get((this.itemPosition.plane.toLong() shl 28) or (this.itemPosition.y.toLong() shl 14) or this.itemPosition.x.toLong())
+        val wrapper = Client.GROUND_ITEMS.get((this.itemPosition.plane.toLong() shl 28) or (this.itemPosition.y.toLong() shl 14) or this.itemPosition.x.toLong())
         if (wrapper != null) {
             val coords = Resource.mapRegion!!.getBaseCoordinates()
             val sceneX = this.itemPosition.x - coords.x

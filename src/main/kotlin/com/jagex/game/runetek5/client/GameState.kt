@@ -48,8 +48,8 @@ enum class GameState {
         @JvmStatic
         @JvmName("method12426")
         fun method12426() {
-            if (client.gameState == UNK_5 && !LoginManager.method3360() && !AccountCreationStage.method1466()) {
-                client.setGameState(UNK_8)
+            if (Client.gameState == UNK_5 && !LoginManager.method3360() && !AccountCreationStage.method1466()) {
+                Client.setGameState(UNK_8)
             }
         }
 
@@ -67,25 +67,25 @@ enum class GameState {
         @JvmStatic
         @JvmName("method6270")
         fun method6270() {
-            if (StaticMethods.method4180(client.gameState)) {
-                if (client.LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
-                    client.setGameState(UNK_14)
+            if (StaticMethods.method4180(Client.gameState)) {
+                if (Client.LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
+                    Client.setGameState(UNK_14)
                 } else {
-                    client.setGameState(UNK_0)
+                    Client.setGameState(UNK_0)
                 }
-            } else if (client.gameState != UNK_14 && client.gameState != UNK_19) {
-                if (client.gameState == UNK_12) {
-                    client.setGameState(UNK_5)
+            } else if (Client.gameState != UNK_14 && Client.gameState != UNK_19) {
+                if (Client.gameState == UNK_12) {
+                    Client.setGameState(UNK_5)
                 }
             } else {
-                client.setGameState(UNK_5)
+                Client.setGameState(UNK_5)
             }
         }
 
         @JvmStatic
         @JvmName("method6693")
         fun method6693(): Boolean {
-            return client.gameState == UNK_5 && !LoginManager.method3360() && !AccountCreationStage.method1466()
+            return Client.gameState == UNK_5 && !LoginManager.method3360() && !AccountCreationStage.method1466()
         }
 
         /**
@@ -118,7 +118,7 @@ enum class GameState {
          */
         @JvmStatic
         fun isIngame(): Boolean {
-            return !isOnloginScreen(client.gameState)
+            return !isOnloginScreen(Client.gameState)
         }
 
         /**

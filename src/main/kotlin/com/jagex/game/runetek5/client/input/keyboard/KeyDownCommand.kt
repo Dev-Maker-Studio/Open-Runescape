@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.client.input.keyboard
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.inputsubscriber.InputSubscriber
@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.config.inputsubscriber.KeyHoldInputSubscriber
 object KeyDownCommand {
     @JvmStatic
     fun isActive(subscriber: InputSubscriber?, mouseRecord: MouseRecord?): Boolean {
-        return subscriber != null && subscriber.valid(mouseRecord, client.KEY_RECORDS, client.maximumHeldKeys, KeyRecorder.keyRecorder)
+        return subscriber != null && subscriber.valid(mouseRecord, Client.KEY_RECORDS, Client.maximumHeldKeys, KeyRecorder.keyRecorder)
     }
 
     @JvmStatic

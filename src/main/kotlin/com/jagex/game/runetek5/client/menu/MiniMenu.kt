@@ -6,11 +6,10 @@ import com.jagex.game.runetek5.cache.node.NodeCollection
 import com.jagex.game.runetek5.cache.node.NodeIterator
 import com.jagex.game.runetek5.cache.node.Queue
 import com.jagex.game.runetek5.cache.node.QueueIterator
-import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.client.GameShell
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.keyboard.KeyDownCommand
 import com.jagex.game.runetek5.client.input.mouse.Mouse
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
@@ -26,7 +25,6 @@ import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceComponentRenderer
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
 import com.jagex.game.runetek5.interaction.chat.ChatBox
-import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.tools.LocalizedText
@@ -154,10 +152,10 @@ object MiniMenu {
 
     @JvmStatic
     fun method4800() {
-        if ((entryCount >= 2 || client.interfaceSelectionActive) && client.draggingComponent == null) {
+        if ((entryCount >= 2 || Client.interfaceSelectionActive) && Client.draggingComponent == null) {
             var menuText: String
-            if (client.interfaceSelectionActive && entryCount < 2) {
-                menuText = client.useOnType + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + client.useOnTarget + " " + "->"
+            if (Client.interfaceSelectionActive && entryCount < 2) {
+                menuText = Client.useOnType + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + Client.useOnTarget + " " + "->"
             } else if (KeyDownCommand.minimenuKeyDown() && entryCount > 2) {
                 menuText = getTextFrom(aCacheableNodeSub79445!!)
             } else {
@@ -172,17 +170,17 @@ object MiniMenu {
                 }
             }
             if (entryCount > 2) {
-                menuText = menuText + TextUtils.setTextColor(16777215) + " / " + (entryCount - 2) + LocalizedText.MORE_OPTIONS.translate(client.CURRENT_LANGUAGE!!)
+                menuText = menuText + TextUtils.setTextColor(16777215) + " / " + (entryCount - 2) + LocalizedText.MORE_OPTIONS.translate(Client.CURRENT_LANGUAGE!!)
             }
             val comp = InterfaceComponentRenderer.aClass118183
             if (comp != null) {
-                var fontRenderer = comp.getFontRenderer(StaticMethods.initializedFontcombos!!, client.FONT_PROVIDER)
+                var fontRenderer = comp.getFontRenderer(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
                 if (fontRenderer == null) {
                     fontRenderer = minimenuHeader
                 }
                 @Suppress("UNCHECKED_CAST")
-                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.anInt195, InterfaceComponentRenderer.anInt179, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, client.RANDOMIZER, client.randomSeed, client.anIntArray7438, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
-                InterfaceComponentRenderer.inboundsComponentToTop(client.anIntArray7438[0], client.anIntArray7438[1], client.anIntArray7438[2], client.anIntArray7438[3])
+                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.anInt195, InterfaceComponentRenderer.anInt179, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.anIntArray7438, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+                InterfaceComponentRenderer.inboundsComponentToTop(Client.anIntArray7438[0], Client.anIntArray7438[1], Client.anIntArray7438[2], Client.anIntArray7438[3])
             }
         }
     }
@@ -293,12 +291,12 @@ object MiniMenu {
         val colorName = menuEntry.coloredName
         return if (aString != null && !aString.isEmpty())
             if (colorName != null && !colorName.isEmpty())
-                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + colorName + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + aString
+                menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + colorName + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + aString
             else
-                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + aString
+                menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + aString
         else
             if (colorName != null && !colorName.isEmpty())
-                menuEntry.action + LocalizedText.DELIMITER.translate(client.CURRENT_LANGUAGE!!) + colorName
+                menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + colorName
             else
                 menuEntry.action
     }
@@ -314,7 +312,7 @@ object MiniMenu {
                 quests = TypeLists.OBJ!!.list(menuEntry.itemId).quests
             }
             Mouse.isClicktypeNpc(menuEntry.clickType) -> {
-                val objectNode = client.NPC_MAP.get((menuEntry.entityUid).toLong())
+                val objectNode = Client.NPC_MAP.get((menuEntry.entityUid).toLong())
                 if (objectNode != null) {
                     val npcEntity = objectNode.value as NpcEntity
                     var npcType: NPCType? = npcEntity.definitions
@@ -350,7 +348,7 @@ object MiniMenu {
     @JvmStatic
     fun addEntry(action: String, coloredName: String?, cursor: Int, clickType: Int, id: Int, long_5: Long, i_7: Int, i_8: Int, bool9: Boolean, bool10: Boolean, bitpacked: Long, bool13: Boolean) {
         if (!isOpen && entryCount < 520) {
-            val resolvedCursor = if (cursor != -1) cursor else client.defaultMenuCursor
+            val resolvedCursor = if (cursor != -1) cursor else Client.defaultMenuCursor
             val menuEntry = MiniMenuEntry(action ?: "", coloredName ?: "", resolvedCursor, clickType, id, long_5, i_7, i_8, bool9, bool10, bitpacked, bool13)
             addEntry(menuEntry)
         }
@@ -511,7 +509,7 @@ object MiniMenu {
     fun method4908(toolkit: AbstractToolkit) {
         val fillColor = -10660793
         AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, fillColor)
-        minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE!!), StaticMethods.anInt3555 + 3, StaticMethods.anInt2300 + 14, fillColor, -1)
+        minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!), StaticMethods.anInt3555 + 3, StaticMethods.anInt2300 + 14, fillColor, -1)
         val mouseX = MouseRecord.recorder!!.getMouseX()
         val mouseY = MouseRecord.recorder!!.getMouseY()
         var i_5: Int
@@ -617,7 +615,7 @@ object MiniMenu {
 
     @JvmStatic
     fun getMinimenuCursor(): Int {
-        if (client.draggingComponent == null) {
+        if (Client.draggingComponent == null) {
             if (!isOpen) {
                 if (TypeLists.INTERACTION_DEFAULTS!!.minimenuCursor) { // own cursor?
                     if (aCacheableNodeSub7168 != null) {
@@ -740,8 +738,8 @@ object MiniMenu {
         val i_5 = anInt1104 - 3
         val b_6 = 20
         if (FontMetrics.aFontRenderer2348 == null || StaticMedia.aClass4142200 == null) {
-            FontMetrics.aFontRenderer2348 = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, StaticMethods.anInt2982, true, true) as? AbstractFontRenderer
-            StaticMedia.aClass4142200 = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, StaticMethods.anInt2982)
+            FontMetrics.aFontRenderer2348 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.anInt2982, true, true) as? AbstractFontRenderer
+            StaticMedia.aClass4142200 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.anInt2982)
             if (FontMetrics.aFontRenderer2348 != null && StaticMedia.aClass4142200 != null) {
                 close()
                 var i_15 = i_4 / 2 + i_2
@@ -762,7 +760,7 @@ object MiniMenu {
             fontrenderer7 = minimenuHeader
         }
         val fontmetrics8 = FontMetrics.getForMinimenu()
-        NativeSprite.method12680(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE!!)!!)
+        NativeSprite.method12680(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
         var alpha = 255 - StaticMethods.anInt2262 - NativeSprite.anInt156
         if (alpha < 0) {
             alpha = 0
@@ -894,7 +892,7 @@ object MiniMenu {
 
     @JvmStatic
     fun addCancelOption() {
-        cancelOption = MiniMenuEntry(LocalizedText.CANCEL.translate(client.CURRENT_LANGUAGE!!)!!, "", client.defaultMenuCursor, 1006, -1, 0L, 0, 0, true, false, 0L, true)
+        cancelOption = MiniMenuEntry(LocalizedText.CANCEL.translate(Client.CURRENT_LANGUAGE!!)!!, "", Client.defaultMenuCursor, 1006, -1, 0L, 0, 0, true, false, 0L, true)
     }
 
     @JvmField
@@ -912,7 +910,7 @@ object MiniMenu {
             text += ChatBox.addQuestChatIcons(questIds)
         }
         @Suppress("UNCHECKED_CAST")
-        fontRenderer?.method386(text, i_2 + 3, i_6, i_101, client.RANDOMIZER, client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+        fontRenderer?.method386(text, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
         if (entry.aBool9577) {
             StaticMedia.otherLevelSprite!!.draw(5 + i_2 + fontmetrics9.getWidthNoSprites(text), i_6 - fontmetrics9.topPadding)
         }

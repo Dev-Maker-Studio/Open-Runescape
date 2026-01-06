@@ -283,9 +283,9 @@ class WindowMode @Throws(Exception::class) constructor() {
                 if (requestedWindowMode != 1) {
                     canvasAdjustment()
                 } else {
-                    GameShell.screenCanvasWidth = client.GAME_WIDTH
-                    GameShell.gameCanvasX = (resizableScreenWidth - client.GAME_WIDTH) / 2
-                    GameShell.screenCanvasHeight = client.GAME_HEIGHT * -1929118563
+                    GameShell.screenCanvasWidth = Client.GAME_WIDTH
+                    GameShell.gameCanvasX = (resizableScreenWidth - Client.GAME_WIDTH) / 2
+                    GameShell.screenCanvasHeight = Client.GAME_HEIGHT * -1929118563
                     GameShell.gameCanvasY = 0
                 }
                 if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE && GameShell.screenCanvasWidth < 1024) {
@@ -304,14 +304,14 @@ class WindowMode @Throws(Exception::class) constructor() {
                     exitFullscreen()
                 }
                 fullScreenWindowMode = requestedWindowMode >= 2
-                if (client.BASE_WINDOW_ID != -1) {
+                if (Client.BASE_WINDOW_ID != -1) {
                     interfaceResize(true)
                 }
-                if (client.GAME_CONNECTION_CONTEXT.connection != null && GameState.isRenderingScene(client.gameState)) {
+                if (Client.GAME_CONNECTION_CONTEXT.connection != null && GameState.isRenderingScene(Client.gameState)) {
                     PacketEncoder.sendWindowmodePreferenceToServer()
                 }
                 for (componentIndex in 0 until 107) {
-                    client.IS_COMPONENT_ON_TOP[componentIndex] = true
+                    Client.IS_COMPONENT_ON_TOP[componentIndex] = true
                 }
                 redrawWindowBackground = true
             }
@@ -319,7 +319,7 @@ class WindowMode @Throws(Exception::class) constructor() {
 
         @JvmStatic
         fun interfaceResize(hasBaseWindowId: Boolean) {
-            InterfaceRenderer.updateInterfaceDimensions(client.BASE_WINDOW_ID, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, hasBaseWindowId)
+            InterfaceRenderer.updateInterfaceDimensions(Client.BASE_WINDOW_ID, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, hasBaseWindowId)
         }
 
         @JvmStatic
@@ -371,12 +371,12 @@ class WindowMode @Throws(Exception::class) constructor() {
         fun exitFullscreen() {
             if (Renderers.activeToolkit!!.replaceCanvasOnDisplayUpdate()) {
                 Renderers.activeToolkit!!.removeCanvas(GameShell.gameCanvas!!)
-                client.buildCanvasComponents()
+                Client.buildCanvasComponents()
                 val canvasDimension = GameShell.gameCanvas!!.size
                 Renderers.activeToolkit!!.ensureImageproducerCreated(GameShell.gameCanvas!!, canvasDimension.width, canvasDimension.height)
                 Renderers.activeToolkit!!.setActiveCanvas(GameShell.gameCanvas!!)
             } else {
-                client.loadAssets(PreferenceManager.preferences!!.activeToolkit!!.value, false)
+                Client.loadAssets(PreferenceManager.preferences!!.activeToolkit!!.value, false)
             }
             GameShell.setComponentsOnTop()
         }
@@ -441,9 +441,9 @@ class WindowMode @Throws(Exception::class) constructor() {
                         if (getWindowMode() != 1) {
                             canvasAdjustment()
                         } else {
-                            GameShell.screenCanvasWidth = client.GAME_WIDTH
-                            GameShell.gameCanvasX = (resizableScreenWidth - client.GAME_WIDTH) / 2
-                            GameShell.screenCanvasHeight = client.GAME_HEIGHT * -1929118563
+                            GameShell.screenCanvasWidth = Client.GAME_WIDTH
+                            GameShell.gameCanvasX = (resizableScreenWidth - Client.GAME_WIDTH) / 2
+                            GameShell.screenCanvasHeight = Client.GAME_HEIGHT * -1929118563
                             GameShell.gameCanvasY = 0
                         }
                         if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE && GameShell.screenCanvasWidth < 1024) {
@@ -460,7 +460,7 @@ class WindowMode @Throws(Exception::class) constructor() {
                         } else {
                             GameShell.gameCanvas!!.setLocation(GameShell.gameCanvasX, GameShell.gameCanvasY)
                         }
-                        if (client.BASE_WINDOW_ID != -1) {
+                        if (Client.BASE_WINDOW_ID != -1) {
                             interfaceResize(true)
                         }
                         fillWindowRect()

@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.config
 import java.util.Arrays
 
 import com.jagex.game.runetek5.client.ServerEnvironment
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.bas.BasTypeList
 import com.jagex.game.runetek5.config.clanvar.ClanVarTypeList
 import com.jagex.game.runetek5.config.clanvarsettings.ClanVarSettingsTypeList
@@ -124,9 +124,9 @@ object TypeLists {
         StaticMethods.initializedFontcombos!!.sweepCache()
         HintArrow.sweepCache()
         PathingEntity.sweepPathingEntityModelcache()
-        client.OVERHEAD_SPRITES.clean(5)
+        Client.OVERHEAD_SPRITES.clean(5)
         ChatBox.CHAT_ICONS.clean(5)
-        client.DUMMY.clean(5)
+        Client.DUMMY.clean(5)
     }
 
     @JvmStatic
@@ -161,16 +161,16 @@ object TypeLists {
             StaticMethods.initializedFontcombos!!.resetCache()
             ItemContainer.resetContainerItemCache()
             if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE) {
-                Arrays.fill(client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA, null)
-                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES = 0
+                Arrays.fill(Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA, null)
+                Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES = 0
             }
             Resource.mapRegion!!.getEnvironmentManager().reset()
             HintArrow.resetCache()
             PathingEntity.resetPathingentityModels()
             ParticleProducerType.method3166()
             ParticleType.method5757()
-            client.DUMMY.reset()
-            client.OVERHEAD_SPRITES.reset()
+            Client.DUMMY.reset()
+            Client.OVERHEAD_SPRITES.reset()
             ChatBox.CHAT_ICONS.reset()
         }
         CS2Executor.resetCs2Cache()
@@ -208,8 +208,8 @@ object TypeLists {
         StaticMethods.initializedFontcombos!!.clearCacheQueue()
         HintArrow.clearHintarrows()
         PathingEntity.clearQueue()
-        client.OVERHEAD_SPRITES.resize()
+        Client.OVERHEAD_SPRITES.resize()
         ChatBox.CHAT_ICONS.resize()
-        client.DUMMY.resize()
+        Client.DUMMY.resize()
     }
 }

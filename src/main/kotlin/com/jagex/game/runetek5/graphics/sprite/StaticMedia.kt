@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.graphics.sprite
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.MiniMenu
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.font.FontMetrics
@@ -216,14 +216,14 @@ object StaticMedia {
 
     @JvmStatic
     fun drawClickCross() {
-        val x = client.crossX
-        val y = client.crossY
-        if (client.crossType == 1) {
-            val sprite = crossSprites!![client.crossSpritePtr / 100]
+        val x = Client.crossX
+        val y = Client.crossY
+        if (Client.crossType == 1) {
+            val sprite = crossSprites!![Client.crossSpritePtr / 100]
             sprite.draw(x - 8, y - 8)
         }
-        if (client.crossType == 2) {
-            val sprite = crossSprites!![client.crossSpritePtr / 100 + 4]
+        if (Client.crossType == 2) {
+            val sprite = crossSprites!![Client.crossSpritePtr / 100 + 4]
             sprite.draw(x - 8, y - 8)
         }
     }

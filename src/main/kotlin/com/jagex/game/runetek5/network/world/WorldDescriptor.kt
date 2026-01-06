@@ -1,8 +1,7 @@
 package com.jagex.game.runetek5.network.world
 
-import com.darkan.bot.Bot
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.login.LoginManager
 import com.jagex.game.runetek5.network.WorldConnection
 import com.jagex.game.runetek5.network.packet.PacketEncoder
@@ -56,12 +55,12 @@ open class WorldDescriptor : WorldDescriptorFlags() {
 
                 return playersWorld1 - playersWorld2
             } else if (type == 2) {
-                return TextUtils.method7557(world1.getWorld().activity!!, world2.getWorld().activity!!, client.CURRENT_LANGUAGE!!)
+                return TextUtils.method7557(world1.getWorld().activity!!, world2.getWorld().activity!!, Client.CURRENT_LANGUAGE!!)
             } else if (type == 3) {
                 return if ("-" == world1.unknown) (if ("-" == world2.unknown) 0 else (if (bool3) -1 else 1)) else (if ("-" == world2.unknown) (if (bool3) 1 else -1) else TextUtils.method7557(
                     world1.unknown!!,
                     world2.unknown!!,
-                    client.CURRENT_LANGUAGE!!
+                    Client.CURRENT_LANGUAGE!!
                 ))
             } else if (type == 4) {
                 return if (world1.isLootshare()) (if (world2.isLootshare()) 0 else 1) else (if (world2.isLootshare()) -1 else 0)

@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.network
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.NodeCollection
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.packet.ServerProt
 import com.jagex.game.runetek5.network.packet.TcpPacket
 import com.jagex.game.runetek5.tools.Isaac
@@ -94,7 +94,7 @@ class BufferedConnectionContext {
     }
 
     fun cycle() {
-        if (client.cycles % 50 == 0) {
+        if (Client.cycles % 50 == 0) {
             outBytesPerSec = wrote
             wrote = 0
             inBytesPerSec = read

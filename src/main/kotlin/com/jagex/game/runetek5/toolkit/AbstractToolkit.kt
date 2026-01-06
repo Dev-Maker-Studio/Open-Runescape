@@ -4,7 +4,7 @@ import java.awt.*
 import java.util.Hashtable
 
 import com.jagex.game.runetek5.buffer.NativeMemoryNode
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
@@ -512,16 +512,16 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
             } else if (i_6 > 100) {
                 i_6 = 100
             }
-            var i_7 = (client.aShort7437 - client.aShort7436) * i_6 / 100 + client.aShort7436
+            var i_7 = (Client.aShort7437 - Client.aShort7436) * i_6 / 100 + Client.aShort7436
             val i_8 = h * i_7 * 512 / (w * 334)
             val i_9: Int
             val i_10: Int
             val s_11: Short
-            if (i_8 < client.aShort7214) {
-                s_11 = client.aShort7214
+            if (i_8 < Client.aShort7214) {
+                s_11 = Client.aShort7214
                 i_7 = s_11.toInt() * w * 334 / (h * 512)
-                if (i_7 > client.aShort7441) {
-                    i_7 = client.aShort7441.toInt()
+                if (i_7 > Client.aShort7441) {
+                    i_7 = Client.aShort7441.toInt()
                     i_9 = h * i_7 * 512 / (s_11 * 334)
                     i_10 = (w - i_9) / 2
                     if (resetPixels) {
@@ -532,11 +532,11 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
                     x += i_10
                     w -= i_10 * 2
                 }
-            } else if (i_8 > client.aShort7474) {
-                s_11 = client.aShort7474
+            } else if (i_8 > Client.aShort7474) {
+                s_11 = Client.aShort7474
                 i_7 = s_11.toInt() * w * 334 / (h * 512)
-                if (i_7 < client.aShort7276) {
-                    i_7 = client.aShort7276.toInt()
+                if (i_7 < Client.aShort7276) {
+                    i_7 = Client.aShort7276.toInt()
                     i_9 = s_11 * w * 334 / (i_7 * 512)
                     i_10 = (h - i_9) / 2
                     if (resetPixels) {
@@ -548,11 +548,11 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
                     h -= i_10 * 2
                 }
             }
-            client.anInt7451 = h * i_7 / 334
-            client.hintArrowOffsetX = x
-            client.hintArrowOffsetY = y
-            client.gameAreaWidth = w
-            client.gameAreaHeight = h
+            Client.anInt7451 = h * i_7 / 334
+            Client.hintArrowOffsetX = x
+            Client.hintArrowOffsetY = y
+            Client.gameAreaWidth = w
+            Client.gameAreaHeight = h
         }
 
         @JvmStatic

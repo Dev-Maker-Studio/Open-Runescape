@@ -5,7 +5,6 @@ import com.jagex.game.runetek5.client.periodic.PulseEventQueue
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.Identifiable
 import com.jagex.game.runetek5.config.`object`.ObjectShapes
-import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
 import com.jagex.game.runetek5.scene.CollisionFlag
@@ -1156,14 +1155,14 @@ object RouteFinder {
                     strategy,
                     Resource.mapRegion!!.getCollisionMap(PlayerUpdate.MY_PLAYER!!.plane.toInt()),
                     bool2,
-                    client.WALKING_STEPS_X,
-                    client.WALKING_STEPS_Y
+                    Client.WALKING_STEPS_X,
+                    Client.WALKING_STEPS_Y
                 )
                 if (executedStep < 1) {
                     return false
                 }
-                ComponentMinimap.minimapFlagX = client.WALKING_STEPS_X[executedStep - 1]
-                ComponentMinimap.minimapFlagY = client.WALKING_STEPS_Y[executedStep - 1]
+                ComponentMinimap.minimapFlagX = Client.WALKING_STEPS_X[executedStep - 1]
+                ComponentMinimap.minimapFlagY = Client.WALKING_STEPS_Y[executedStep - 1]
                 ComponentMinimap.minimapContainsFlag = false
                 PulseEventQueue.delayedClearMinimapFlagUpdate()
                 return true
@@ -1174,7 +1173,7 @@ object RouteFinder {
 
     @JvmStatic
     fun routeToGrounditem(x: Int, y: Int) {
-        if (Game.STELLAR_DAWN != client.CURRENT_GAME) {
+        if (Game.STELLAR_DAWN != Client.CURRENT_GAME) {
             if (!calculateRoute(x, y, false, RouteStrategies.forGroundItem(x, y))) {
                 calculateRoute(x, y, false, RouteStrategies.forPlayer(x, y, 1, 1))
             }

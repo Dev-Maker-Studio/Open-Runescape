@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.network
 
 import com.jagex.game.runetek5.client.GameState
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.world.WorldDescriptor
 import java.util.concurrent.ConcurrentHashMap
 
@@ -45,12 +45,12 @@ object WorldConnection {
      */
     @JvmStatic
     fun dropClient() {
-        if (!GameState.inLobby(client.gameState) && !GameState.isLoggedOut(client.gameState)) {
-            gameConnection = client.GAME_CONNECTION_CONTEXT.getConnection()
-            client.GAME_CONNECTION_CONTEXT.reset()
-            client.setGameState(GameState.UNK_10)
+        if (!GameState.inLobby(Client.gameState) && !GameState.isLoggedOut(Client.gameState)) {
+            gameConnection = Client.GAME_CONNECTION_CONTEXT.getConnection()
+            Client.GAME_CONNECTION_CONTEXT.reset()
+            Client.setGameState(GameState.UNK_10)
         } else {
-            client.logout(false)
+            Client.logout(false)
         }
     }
 

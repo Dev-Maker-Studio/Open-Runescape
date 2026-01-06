@@ -7,16 +7,12 @@ import com.jagex.game.runetek5.cache.node.Queue
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.JSObjectManager
 import com.jagex.game.runetek5.client.ServerEnvironment
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.MiniMenu
-import com.jagex.game.runetek5.config.flo.FloType
 import com.jagex.game.runetek5.config.flo.FloTypeList
-import com.jagex.game.runetek5.config.flu.FluType
 import com.jagex.game.runetek5.config.flu.FluTypeList
 import com.jagex.game.runetek5.config.`object`.ObjectShapes
-import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.config.`object`.ObjectTypeList
-import com.jagex.game.runetek5.config.mapsprite.MapSpriteType
 import com.jagex.game.runetek5.config.mapsprite.MapSpriteTypeList
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.mec.MECType
@@ -25,7 +21,6 @@ import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.staticelements.StaticElements
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
-import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
@@ -1188,9 +1183,9 @@ object WorldMap {
             val centerX = width / 2 + left
             val centerY = top + height / 2 - 18 - b_7
             toolkit.drawFilledRectangle(left, top, width, height, 0xff000000.toInt(), 0)
-            toolkit.drawRectangleOutline(centerX - 152, centerY, 304, 34, client.DEBUG_BG_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), 0)
-            toolkit.drawFilledRectangle(centerX - 150, centerY + 2, ComponentMinimap.mapAssetLoadingPercentage * 3, 30, client.DEBUG_LOAD_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), 0)
-            MiniMenu.minimenuHeader!!.renderCentered(LocalizedText.LOADING.translate(client.CURRENT_LANGUAGE!!), centerX, b_7 + centerY, client.aColorArray7200[client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), -1)
+            toolkit.drawRectangleOutline(centerX - 152, centerY, 304, 34, Client.DEBUG_BG_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), 0)
+            toolkit.drawFilledRectangle(centerX - 150, centerY + 2, ComponentMinimap.mapAssetLoadingPercentage * 3, 30, Client.DEBUG_LOAD_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), 0)
+            MiniMenu.minimenuHeader!!.renderCentered(LocalizedText.LOADING.translate(Client.CURRENT_LANGUAGE!!), centerX, b_7 + centerY, Client.aColorArray7200[Client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), -1)
         } else {
             val i_17 = WorldMapSub1.anInt5123 - (width / mapZoom).toInt()
             val i_8 = (height / mapZoom).toInt() + WorldMapSub1.anInt5624
@@ -1210,7 +1205,7 @@ object WorldMap {
                     ServerEnvironment.anInt9282 = 20
                 }
             }
-            if (client.DRAW_DEBUG) {
+            if (Client.DRAW_DEBUG) {
                 var textX = left + width - 5
                 var textY = top + height - 8
                 FontManager.debugOverlayFont!!.renderLeftAligned("Fps:" + GameShell.FPS, textX, textY, 16776960, -1)

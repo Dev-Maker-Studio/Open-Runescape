@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.client.input.mouse
 
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.client.GameState
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 
 abstract class MouseRecord : Node<MouseRecord>() {
 
@@ -18,7 +18,7 @@ abstract class MouseRecord : Node<MouseRecord>() {
 
         @JvmStatic
         fun record(record: MouseRecord) {
-            if (!GameState.isRenderingScene(client.gameState)) {
+            if (!GameState.isRenderingScene(Client.gameState)) {
                 record.pushToTop()
             } else {
                 MouseActionServer.MOVE_PACKET.append(record)

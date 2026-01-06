@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.rendering
 import com.jagex.game.runetek5.buffer.NativeMemoryNode
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.window.WindowMode
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
@@ -81,7 +81,7 @@ object Renderers {
                 } catch (throwable: Throwable) {
                     val toolkitSetting = PreferenceManager.preferences!!.activeToolkit!!.getValue()
                     if (toolkitSetting == 2) {
-                        client.renderWithCpu = true
+                        Client.renderWithCpu = true
                     }
                     PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.activeToolkit!!, 0)
                     prepareForRendering(toolkitSetting, topleftScreenText, verifySettingsPreUpdate)
@@ -128,8 +128,8 @@ object Renderers {
         }
         Resource.mapRegion!!.resetAtmosphere()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
-        client.preferencesSavedOnServer = false
-        client.needsResize = true
+        Client.preferencesSavedOnServer = false
+        Client.needsResize = true
         WindowMode.activeDisplayModeDetails = null
         activeToolkit!!.resetDepthClippingMask()
     }

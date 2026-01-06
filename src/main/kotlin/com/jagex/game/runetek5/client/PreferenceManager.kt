@@ -25,10 +25,10 @@ object PreferenceManager {
     @JvmStatic
     fun getGamePreferences(): GamePreferences {
         var fileSystem: JFS32? = null
-        var prefs = GamePreferences(client.CURRENT_GAME!!)
+        var prefs = GamePreferences(Client.CURRENT_GAME!!)
 
         try {
-            fileSystem = loadPreferenceFile("", client.CURRENT_GAME!!.name, false)
+            fileSystem = loadPreferenceFile("", Client.CURRENT_GAME!!.name, false)
             val fsBytes = ByteArray(fileSystem.length().toInt())
 
             var offset = 0
@@ -40,7 +40,7 @@ object PreferenceManager {
                 offset += seekOffset
             }
 
-            prefs = GamePreferences(Packet(fsBytes), client.CURRENT_GAME!!)
+            prefs = GamePreferences(Packet(fsBytes), Client.CURRENT_GAME!!)
         } catch (exception: Exception) {
             // NOOP
         }
@@ -89,7 +89,7 @@ object PreferenceManager {
         var preferenceFile: JFS32? = null
 
         try {
-            preferenceFile = loadPreferenceFile("", client.CURRENT_GAME!!.name, true)
+            preferenceFile = loadPreferenceFile("", Client.CURRENT_GAME!!.name, true)
             val preferenceBuffer = preferences!!.encode()
             preferenceFile.write(preferenceBuffer.buffer, 0, preferenceBuffer.currentPosition)
         } catch (exception: Exception) {
@@ -125,7 +125,7 @@ object PreferenceManager {
         }
         if (preferences!!.activeToolkit!!.getValue() != 2) {
             preferences!!.setValue(preferences!!.toolkit!!, 2)
-            client.loadAssets(2, false)
+            Client.loadAssets(2, false)
         } else {
             preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
         }
@@ -156,7 +156,7 @@ object PreferenceManager {
 
         if (preferences!!.activeToolkit!!.getValue() != renderMode) {
             preferences!!.setValue(preferences!!.toolkit!!, renderMode)
-            client.loadAssets(renderMode, false)
+            Client.loadAssets(renderMode, false)
         } else {
             preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
         }
@@ -193,7 +193,7 @@ object PreferenceManager {
         }
         if (preferences!!.activeToolkit!!.getValue() != 0) {
             preferences!!.setValue(preferences!!.toolkit!!, 0)
-            client.loadAssets(0, false)
+            Client.loadAssets(0, false)
         } else {
             preferences!!.verifySettings(preferences!!.activeToolkit!!, true)
         }
@@ -226,7 +226,7 @@ object PreferenceManager {
         preferences!!.setValue(preferences!!.graphics!!, 1)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
-        client.needsResize = true
+        Client.needsResize = true
     }
 
     @JvmStatic
@@ -254,7 +254,7 @@ object PreferenceManager {
         preferences!!.setValue(preferences!!.graphics!!, 2)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
-        client.needsResize = true
+        Client.needsResize = true
     }
 
     @JvmStatic
@@ -282,7 +282,7 @@ object PreferenceManager {
         preferences!!.setValue(preferences!!.graphics!!, 3)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
-        client.needsResize = true
+        Client.needsResize = true
     }
 
     @JvmStatic
@@ -310,7 +310,7 @@ object PreferenceManager {
         preferences!!.setValue(preferences!!.graphics!!, 4)
         GraphicsCache.resetGraphicCaches()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()
-        client.needsResize = true
+        Client.needsResize = true
     }
 
     @JvmStatic

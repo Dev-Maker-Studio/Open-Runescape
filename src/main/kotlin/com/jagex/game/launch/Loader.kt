@@ -3,7 +3,7 @@ package com.jagex.game.launch
 import com.darkan.bot.Bot
 import com.darkan.bot.UI
 import com.darkan.bot.initializeUI
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.world.WorldDescriptor
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -92,7 +92,7 @@ class Loader : Panel() {
         System.setProperty("sun.java2d.win.uiScaleY", "1.0")
         System.setProperty("sun.java2d.uiScale.enabled", "false")
         loadParams()
-        val clnt = client()
+        val clnt = Client()
         clnt.supplyApplet(this)
         clnt.init()
         clnt.start()

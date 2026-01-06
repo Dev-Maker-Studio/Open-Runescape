@@ -1,9 +1,8 @@
 package com.jagex.game.runetek5.cache.node.impl
 
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
-import com.jagex.game.runetek5.config.bas.BasType
 import com.jagex.game.runetek5.config.sequence.Projectile
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
@@ -32,7 +31,7 @@ class ProjectileSpawnRequest(
                     }
                 } else {
                     val npcIndex = source - 1
-                    val npcObjectNode = client.NPC_MAP.get(npcIndex.toLong())
+                    val npcObjectNode = Client.NPC_MAP.get(npcIndex.toLong())
                     if (npcObjectNode != null) {
                         entity = npcObjectNode.value
                     }
@@ -51,10 +50,10 @@ class ProjectileSpawnRequest(
             if (scene != null) {
                 val projectile = Projectile(
                     scene, spotAnimId, UpdateZonePacket.UPDATE_ZONE_PLANE, UpdateZonePacket.UPDATE_ZONE_PLANE,
-                    localX, localY, adjustedStartHeight, startTime + client.cycles, endTime + client.cycles, angle, slope, source, lockOn, endHeight, useFloorHeight, basOffIdx
+                    localX, localY, adjustedStartHeight, startTime + Client.cycles, endTime + Client.cycles, angle, slope, source, lockOn, endHeight, useFloorHeight, basOffIdx
                 )
-                projectile.start(absX, absY, MapRegion.tileheightForAbsolutePosition(absX, absY, UpdateZonePacket.UPDATE_ZONE_PLANE) - endHeight, startTime + client.cycles)
-                client.PROJECTILES.addFirst(ProjectileSpawnRequest(projectile))
+                projectile.start(absX, absY, MapRegion.tileheightForAbsolutePosition(absX, absY, UpdateZonePacket.UPDATE_ZONE_PLANE) - endHeight, startTime + Client.cycles)
+                Client.PROJECTILES.addFirst(ProjectileSpawnRequest(projectile))
             }
         }
     }

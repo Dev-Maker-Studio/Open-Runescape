@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.JFS32
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
@@ -50,7 +50,7 @@ class VarcTypeList(
         fun readVarcIntPreferences() {
             var jagexFilesystem: JFS32? = null
             try {
-                jagexFilesystem = PreferenceManager.loadPreferenceFile("2", client.CURRENT_GAME!!.name, false)
+                jagexFilesystem = PreferenceManager.loadPreferenceFile("2", Client.CURRENT_GAME!!.name, false)
                 val data = ByteArray(jagexFilesystem.length().toInt())
                 var seekOffset: Int
                 var position = 0

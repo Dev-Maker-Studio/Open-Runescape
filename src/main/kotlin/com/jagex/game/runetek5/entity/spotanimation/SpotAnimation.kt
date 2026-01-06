@@ -1,20 +1,16 @@
 package com.jagex.game.runetek5.entity.spotanimation
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.sequence.EntitySequence
 import com.jagex.game.runetek5.config.sequence.Sequence
-import com.jagex.game.runetek5.config.sequence.spot.SpotAnimType
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity
 import com.jagex.game.runetek5.entity.RenderedEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL
-import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
-import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystem
-import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.graphics.model.particle.Silhouette
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.scene.RenderedEntityCache
@@ -134,11 +130,11 @@ class SpotAnimation(
         val vertices = gfxModel.getEffectiveVertices()
 
         if ((particleSystem == null || particleSystem!!.isDisabled) && (emitter != null || vertices != null)) {
-            particleSystem = ParticleSystem.get(client.cycles, true)
+            particleSystem = ParticleSystem.get(Client.cycles, true)
         }
 
         particleSystem?.let {
-            it.performCycle(toolkit, client.cycles.toLong(), emitter, vertices)
+            it.performCycle(toolkit, Client.cycles.toLong(), emitter, vertices)
             it.setLogicHeight(plane.toInt())
         }
     }

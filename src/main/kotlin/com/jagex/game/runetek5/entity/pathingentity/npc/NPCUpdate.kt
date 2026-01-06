@@ -1,8 +1,7 @@
 package com.jagex.game.runetek5.entity.pathingentity.npc
 
-import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.MiniMenu
 import com.jagex.game.runetek5.config.Identifiable
 import com.jagex.game.runetek5.config.Resource
@@ -21,21 +20,21 @@ object NPCUpdate {
 
     @JvmStatic
     fun decode(largeView: Boolean) {
-        client.localNpcCount = 0
-        client.npcListSize = 0
-        client.npcUpdateCycle++
+        Client.localNpcCount = 0
+        Client.npcListSize = 0
+        Client.npcUpdateCycle++
 
         decodeAddRemove()
         decodeUpdate(largeView)
         decodeMasks()
 
         var isUnlinked = false
-        for (index in 0 until client.localNpcCount) {
-            val npcIndice = client.LOCAL_NPC_INDICES[index]
-            val objectNode = client.NPC_MAP?.get(npcIndice.toLong()) as? ObjectNode
+        for (index in 0 until Client.localNpcCount) {
+            val npcIndice = Client.LOCAL_NPC_INDICES[index]
+            val objectNode = Client.NPC_MAP?.get(npcIndice.toLong()) as? ObjectNode
             val npcEntity = objectNode?.value as? NpcEntity
 
-            if (npcEntity != null && npcEntity.lastUpdate != client.npcUpdateCycle) {
+            if (npcEntity != null && npcEntity.lastUpdate != Client.npcUpdateCycle) {
                 if (MiniMenu.isOpen && MiniMenu.containsEntryForNpc(npcIndice)) {
                     MiniMenu.close()
                 }
@@ -49,40 +48,40 @@ object NPCUpdate {
         }
 
         if (isUnlinked) {
-            val i_3 = client.npcCount
-            client.npcCount = client.NPC_MAP?.size() ?: 0
+            val i_3 = Client.npcCount
+            Client.npcCount = Client.NPC_MAP?.size() ?: 0
             var i_4 = 0
 
-            val iterator = client.NPC_MAP?.iterator()
+            val iterator = Client.NPC_MAP?.iterator()
             if (iterator != null) {
                 while (iterator.hasNext()) {
                     val node = iterator.next() as ObjectNode
-                    client.NPC_ARRAY[i_4++] = node
+                    Client.NPC_ARRAY[i_4++] = node
                 }
             }
 
-            for (npcIndex in client.npcCount until i_3) {
-                client.NPC_ARRAY[npcIndex] = null
+            for (npcIndex in Client.npcCount until i_3) {
+                Client.NPC_ARRAY[npcIndex] = null
             }
         }
 
-        require(client.GAME_CONNECTION_CONTEXT.receivedBuffer.currentPosition == client.GAME_CONNECTION_CONTEXT.currentPacketSize) {
-            "${client.GAME_CONNECTION_CONTEXT.receivedBuffer.currentPosition} ${client.GAME_CONNECTION_CONTEXT.currentPacketSize}"
+        require(Client.GAME_CONNECTION_CONTEXT.receivedBuffer.currentPosition == Client.GAME_CONNECTION_CONTEXT.currentPacketSize) {
+            "${Client.GAME_CONNECTION_CONTEXT.receivedBuffer.currentPosition} ${Client.GAME_CONNECTION_CONTEXT.currentPacketSize}"
         }
 
-        for (updateIndex in 0 until client.NPC_UPDATE_INDEX) {
-            requireNotNull(client.NPC_MAP?.get(client.NPC_UPDATE_INDICES[updateIndex].toLong())) {
-                "$updateIndex ${client.NPC_UPDATE_INDEX}"
+        for (updateIndex in 0 until Client.NPC_UPDATE_INDEX) {
+            requireNotNull(Client.NPC_MAP?.get(Client.NPC_UPDATE_INDICES[updateIndex].toLong())) {
+                "$updateIndex ${Client.NPC_UPDATE_INDEX}"
             }
         }
 
-        require(client.npcCount - client.NPC_UPDATE_INDEX == 0) {
-            "${client.npcCount - client.NPC_UPDATE_INDEX}"
+        require(Client.npcCount - Client.NPC_UPDATE_INDEX == 0) {
+            "${Client.npcCount - Client.NPC_UPDATE_INDEX}"
         }
 
-        for (npcIndex in 0 until client.npcCount) {
-            val pathingEntity = client.NPC_ARRAY[npcIndex]?.value as? PathingEntity
-            require(pathingEntity?.lastUpdate == client.npcUpdateCycle) {
+        for (npcIndex in 0 until Client.npcCount) {
+            val pathingEntity = Client.NPC_ARRAY[npcIndex]?.value as? PathingEntity
+            require(pathingEntity?.lastUpdate == Client.npcUpdateCycle) {
                 "${pathingEntity?.playerIndex}"
             }
         }
@@ -90,51 +89,51 @@ object NPCUpdate {
 
     @JvmStatic
     fun decodeAddRemove() {
-        val buffer = client.GAME_CONNECTION_CONTEXT.receivedBuffer
+        val buffer = Client.GAME_CONNECTION_CONTEXT.receivedBuffer
         buffer.initBitAccess()
 
         val size = buffer.readBits(8)
-        if (size < client.NPC_UPDATE_INDEX) {
-            for (i in size until client.NPC_UPDATE_INDEX) {
-                client.LOCAL_NPC_INDICES[++client.localNpcCount - 1] = client.NPC_UPDATE_INDICES[i]
+        if (size < Client.NPC_UPDATE_INDEX) {
+            for (i in size until Client.NPC_UPDATE_INDEX) {
+                Client.LOCAL_NPC_INDICES[++Client.localNpcCount - 1] = Client.NPC_UPDATE_INDICES[i]
             }
         }
 
-        require(size <= client.NPC_UPDATE_INDEX)
+        require(size <= Client.NPC_UPDATE_INDEX)
 
-        client.NPC_UPDATE_INDEX = 0
+        Client.NPC_UPDATE_INDEX = 0
         for (i in 0 until size) {
-            val updateIndice = client.NPC_UPDATE_INDICES[i]
-            val npc = (client.NPC_MAP?.get(updateIndice.toLong()) as? ObjectNode)?.value as? NpcEntity
+            val updateIndice = Client.NPC_UPDATE_INDICES[i]
+            val npc = (Client.NPC_MAP?.get(updateIndice.toLong()) as? ObjectNode)?.value as? NpcEntity
                 ?: continue
 
             val updateRequired = buffer.readBits(1)
             if (updateRequired == 0) {
-                client.NPC_UPDATE_INDICES[++client.NPC_UPDATE_INDEX - 1] = updateIndice
-                npc.lastUpdate = client.npcUpdateCycle
+                Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = updateIndice
+                npc.lastUpdate = Client.npcUpdateCycle
             } else {
                 val moveSpeed = buffer.readBits(2)
                 when (moveSpeed) {
                     0 -> {
                         // Standing still
-                        client.NPC_UPDATE_INDICES[++client.NPC_UPDATE_INDEX - 1] = updateIndice
-                        npc.lastUpdate = client.npcUpdateCycle
-                        client.NPC_INDICES[++client.npcListSize - 1] = updateIndice
+                        Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = updateIndice
+                        npc.lastUpdate = Client.npcUpdateCycle
+                        Client.NPC_INDICES[++Client.npcListSize - 1] = updateIndice
                     }
                     1 -> {
-                        client.NPC_UPDATE_INDICES[++client.NPC_UPDATE_INDEX - 1] = updateIndice
-                        npc.lastUpdate = client.npcUpdateCycle
+                        Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = updateIndice
+                        npc.lastUpdate = Client.npcUpdateCycle
                         val movementDirection = Identifiable.identify(NPCDirection.values(), buffer.readBits(3)) as NPCDirection
                         npc.move(movementDirection, MovementType.WALKING.id.toInt())
                         val i_9 = buffer.readBits(1)
                         if (i_9 == 1) {
-                            client.NPC_INDICES[++client.npcListSize - 1] = updateIndice
+                            Client.NPC_INDICES[++Client.npcListSize - 1] = updateIndice
                         }
                     }
                     2 -> {
                         // General movement
-                        client.NPC_UPDATE_INDICES[++client.NPC_UPDATE_INDEX - 1] = updateIndice
-                        npc.lastUpdate = client.npcUpdateCycle
+                        Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = updateIndice
+                        npc.lastUpdate = Client.npcUpdateCycle
                         if (buffer.readBits(1) == 1) {
                             val firstMovementDirection = Identifiable.identify(NPCDirection.values(), buffer.readBits(3)) as NPCDirection
                             npc.move(firstMovementDirection, MovementType.RUNNING.id.toInt())
@@ -146,12 +145,12 @@ object NPCUpdate {
                         }
                         val i_11 = buffer.readBits(1)
                         if (i_11 == 1) {
-                            client.NPC_INDICES[++client.npcListSize - 1] = updateIndice
+                            Client.NPC_INDICES[++Client.npcListSize - 1] = updateIndice
                         }
                     }
                     3 -> {
                         // Teleport
-                        client.LOCAL_NPC_INDICES[++client.localNpcCount - 1] = updateIndice
+                        Client.LOCAL_NPC_INDICES[++Client.localNpcCount - 1] = updateIndice
                     }
                 }
             }
@@ -160,30 +159,30 @@ object NPCUpdate {
 
     @JvmStatic
     fun decodeUpdate(largeView: Boolean) {
-        val bitBuffer = client.GAME_CONNECTION_CONTEXT.receivedBuffer
-        while (bitBuffer.readableBits(client.GAME_CONNECTION_CONTEXT.currentPacketSize) >= 15) {
+        val bitBuffer = Client.GAME_CONNECTION_CONTEXT.receivedBuffer
+        while (bitBuffer.readableBits(Client.GAME_CONNECTION_CONTEXT.currentPacketSize) >= 15) {
             val npcIndex = bitBuffer.readBits(15)
             if (npcIndex == 32767) {
                 break
             }
 
             var requiresRotating = false
-            var cachedNpc = client.NPC_MAP?.get(npcIndex.toLong()) as? ObjectNode
+            var cachedNpc = Client.NPC_MAP?.get(npcIndex.toLong()) as? ObjectNode
             val npcEntity: NpcEntity
 
             if (cachedNpc == null) {
                 npcEntity = NpcEntity(Resource.mapRegion?.getScene()!!)
                 npcEntity.playerIndex = npcIndex
                 cachedNpc = ObjectNode(npcEntity)
-                client.NPC_MAP?.put(cachedNpc, npcIndex.toLong())
-                client.NPC_ARRAY[++client.npcCount - 1] = cachedNpc
+                Client.NPC_MAP?.put(cachedNpc, npcIndex.toLong())
+                Client.NPC_ARRAY[++Client.npcCount - 1] = cachedNpc
                 requiresRotating = true
             } else {
                 npcEntity = cachedNpc.value as NpcEntity
             }
 
-            client.NPC_UPDATE_INDICES[++client.NPC_UPDATE_INDEX - 1] = npcIndex
-            npcEntity.lastUpdate = client.npcUpdateCycle
+            Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = npcIndex
+            npcEntity.lastUpdate = Client.npcUpdateCycle
 
             val definitions = npcEntity.definitions
             if (definitions != null && definitions.hasSoundEffects()) {
@@ -192,7 +191,7 @@ object NPCUpdate {
 
             val add = bitBuffer.readBits(1)
             if (add == 1) {
-                client.NPC_INDICES[++client.npcListSize - 1] = npcIndex
+                Client.NPC_INDICES[++Client.npcListSize - 1] = npcIndex
             }
 
             val offY = if (largeView) {
@@ -249,11 +248,11 @@ object NPCUpdate {
 
     @JvmStatic
     fun decodeMasks() {
-        val buffer = client.GAME_CONNECTION_CONTEXT.receivedBuffer
+        val buffer = Client.GAME_CONNECTION_CONTEXT.receivedBuffer
 
-        for (listIndex in 0 until client.npcListSize) {
-            val npcIndice = client.NPC_INDICES[listIndex]
-            val npc = (client.NPC_MAP?.get(npcIndice.toLong()) as? ObjectNode)?.value as? NpcEntity
+        for (listIndex in 0 until Client.npcListSize) {
+            val npcIndice = Client.NPC_INDICES[listIndex]
+            val npc = (Client.NPC_MAP?.get(npcIndice.toLong()) as? ObjectNode)?.value as? NpcEntity
                 ?: continue
 
             var updateFlag = buffer.readUByte()
@@ -322,8 +321,8 @@ object NPCUpdate {
                 npc.forceMovementT1YOff = buffer.readByteAdd().toInt()
                 npc.forceMovementT2XOff = buffer.readByteInverse().toInt()
                 npc.forceMovementT2YOff = buffer.readByteAdd().toInt()
-                npc.forceMovementT1Delay = buffer.readUShortLittle() + client.cycles
-                npc.forceMovementT2Delay = buffer.readUShortLittle() + client.cycles
+                npc.forceMovementT1Delay = buffer.readUShortLittle() + Client.cycles
+                npc.forceMovementT2Delay = buffer.readUShortLittle() + Client.cycles
                 npc.forceMoveDirection = buffer.readUShortAddLittle()
                 npc.forceMovementT1XOff = npc.forceMovementT1XOff + npc.movementBaseX[0]
                 npc.forceMovementT1YOff = npc.forceMovementT1YOff + npc.movementBaseY[0]
@@ -440,7 +439,7 @@ object NPCUpdate {
                         }
 
                         val delay = buffer.readUSmart()
-                        npc.applyHit(hitsplatId, hitText, hitCustomText, soakHitsplatId, soakText, soakCustomText, client.cycles, delay)
+                        npc.applyHit(hitsplatId, hitText, hitCustomText, soakHitsplatId, soakText, soakCustomText, Client.cycles, delay)
                     }
                 }
 
@@ -453,7 +452,7 @@ object NPCUpdate {
                             val delay = buffer.readUSmart()
                             val fromPercentage = buffer.readUByteSubtract()
                             val toPercentage = if (lifetimeCycles > 0) buffer.readUByteAdd() else fromPercentage
-                            npc.displayHitbar(hitbarId, client.cycles, lifetimeCycles, delay, fromPercentage, toPercentage)
+                            npc.displayHitbar(hitbarId, Client.cycles, lifetimeCycles, delay, fromPercentage, toPercentage)
                         } else {
                             npc.hideHitbar(hitbarId)
                         }
@@ -566,8 +565,8 @@ object NPCUpdate {
                 npc.saturation = buffer.readByte()
                 npc.lightness = buffer.readByte()
                 npc.opacity = buffer.readUByteSubtract().toByte()
-                npc.tintStartCycle = client.cycles + buffer.readUShortLittle()
-                npc.tintEndCycle = client.cycles + buffer.readUShort()
+                npc.tintStartCycle = Client.cycles + buffer.readUShortLittle()
+                npc.tintEndCycle = Client.cycles + buffer.readUShort()
             }
 
             // Modified name
@@ -621,9 +620,9 @@ object NPCUpdate {
 
     @JvmStatic
     fun moveNpcs() {
-        for (index in 0 until client.NPC_UPDATE_INDEX) {
-            val npcRef = client.NPC_UPDATE_INDICES[index]
-            val objectNode = client.NPC_MAP?.get(npcRef.toLong()) as? ObjectNode
+        for (index in 0 until Client.NPC_UPDATE_INDEX) {
+            val npcRef = Client.NPC_UPDATE_INDICES[index]
+            val objectNode = Client.NPC_MAP?.get(npcRef.toLong()) as? ObjectNode
             if (objectNode != null) {
                 val npc = objectNode.value as? NpcEntity
                 if (npc != null) {

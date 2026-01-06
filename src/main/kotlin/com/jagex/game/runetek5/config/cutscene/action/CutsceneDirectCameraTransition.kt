@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.config.cutscene.action
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
@@ -32,15 +32,15 @@ class CutsceneDirectCameraTransition(buffer: Packet) : CutsceneAction(buffer) {
     override fun perform() {
         CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS!![this.anInt9299].loadIntoClientCameraPath(0)
         CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS!![this.anInt9300].loadIntoClientCameraPath(1)
-        client.anInt7277 = 0
-        client.anInt7279 = this.anInt9301
-        client.anInt7256 = 0
-        client.anInt7327 = this.anInt9303
-        client.anInt7182 = this.anInt9304
-        client.anInt7448 = 1
-        client.anInt7280 = this.anInt9302
+        Client.anInt7277 = 0
+        Client.anInt7279 = this.anInt9301
+        Client.anInt7256 = 0
+        Client.anInt7327 = this.anInt9303
+        Client.anInt7182 = this.anInt9304
+        Client.anInt7448 = 1
+        Client.anInt7280 = this.anInt9302
         Camera.cameraCalculationType = 3
         Camera.calculateCutsceneCameraPosition()
-        client.aBool7321 = true
+        Client.aBool7321 = true
     }
 }

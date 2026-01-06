@@ -3,7 +3,6 @@ package com.jagex.game.runetek5.network.packet
 import com.darkan.bot.Bot
 import com.darkan.bot.UI
 import com.darkan.bot.scripts.ScriptExecutor
-import com.darkan.bot.scripts.event.Varc
 import com.darkan.bot.scripts.event.XPDrop
 import com.darkan.bot.utils.Skill
 import com.jagex.game.runetek5.botdetection.ReflectionCheckManager
@@ -18,7 +17,6 @@ import com.jagex.game.runetek5.client.input.console.Console
 import com.jagex.game.runetek5.client.input.mouse.CursorManager
 import com.jagex.game.runetek5.client.login.*
 import com.jagex.game.runetek5.client.menu.MiniMenu
-import com.jagex.game.runetek5.client.menu.SHOW_FACE_HERE
 import com.jagex.game.runetek5.client.periodic.PulseEventQueue
 import com.jagex.game.runetek5.client.window.WindowMode
 import com.jagex.game.runetek5.config.Identifiable
@@ -91,7 +89,7 @@ object PacketDecoder {
             decode(connectionContext)
         } catch (e: IOException) {
             e.printStackTrace()
-            if (client.gameState == GameState.UNK_7) {
+            if (Client.gameState == GameState.UNK_7) {
                 connectionContext.reset()
                 false
             } else {
@@ -115,7 +113,7 @@ object PacketDecoder {
 
             val debug = "$opcodes ${connectionContext.currentPacketSize},${player.movementBaseX[0] + basePos.x},${player.movementBaseY[0] + basePos.y} $bufferSample"
             PacketEncoder.sendErrorToServer(debug, e)
-            client.logout(false)
+            Client.logout(false)
             true
         }
     }
@@ -189,7 +187,7 @@ object PacketDecoder {
         if (context.currentPacket == ServerProt.IF_SETMODEL) {
             val componentHash = buffer.readInt()
             val primaryModelId = buffer.readUIntInverseMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcontentUpdate(componentHash, 1, primaryModelId, -1)
             context.currentPacket = null
             return true
@@ -212,16 +210,16 @@ object PacketDecoder {
                 val itemId = buffer.readUShortAddLittle()
                 ItemContainer.setItemInContainer(itemContainer, slot, itemId - 1, amount, isNegativeKey)
             }
-            client.RECENTLY_USED_ITEM_CONTAINERS[++client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = itemContainer
+            Client.RECENTLY_USED_ITEM_CONTAINERS[++Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = itemContainer
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SET_DRAW_ORDER) {
-            client.requestVarVerifyid()
-            client.prioritizePlayerDraw = buffer.readUByteInverse() == 1
+            Client.requestVarVerifyid()
+            Client.prioritizePlayerDraw = buffer.readUByteInverse() == 1
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SET_CURSOR) {
-            InterfaceRenderer.translatedUptext = if (context.currentPacketSize > 2) buffer.readString() else LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE!!)
+            InterfaceRenderer.translatedUptext = if (context.currentPacketSize > 2) buffer.readString() else LocalizedText.WALK_HERE.translate(Client.CURRENT_LANGUAGE!!)
             CursorManager.activeCursorId = if (context.currentPacketSize > 0) buffer.readUShort() else -1
             if (CursorManager.activeCursorId == 65535) {
                 CursorManager.activeCursorId = -1
@@ -231,12 +229,12 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.CAM_FORCEANGLE) {
             val angleY = buffer.readUShortAdd()
             val angleX = buffer.readUShortAddLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Camera.setAngle(angleX, angleY, 0)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.LOGOUT_FULL) {
-            client.logout(false)
+            Client.logout(false)
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.MAP_PROJANIM_HALFSQ) {
@@ -244,19 +242,19 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLANCHANNEL_FULL) {
-            client.anInt7395 = client.anInt7347
+            Client.anInt7395 = Client.anInt7347
             val nonGuest = buffer.readUByte() == 1
             if (context.currentPacketSize == 1) {
                 if (nonGuest) {
-                    client.CLAN_CHANNEL = null
+                    Client.CLAN_CHANNEL = null
                 } else {
-                    client.LISTENED_CLAN_CHANNEL = null
+                    Client.LISTENED_CLAN_CHANNEL = null
                 }
             } else {
                 if (nonGuest) {
-                    client.CLAN_CHANNEL = ClanChannel(buffer)!!
+                    Client.CLAN_CHANNEL = ClanChannel(buffer)!!
                 } else {
-                    client.LISTENED_CLAN_CHANNEL = ClanChannel(buffer)!!
+                    Client.LISTENED_CLAN_CHANNEL = ClanChannel(buffer)!!
                 }
             }
             context.currentPacket = null
@@ -264,12 +262,12 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.UPDATE_GE_SLOT) {
             val key = buffer.readUByte()
             if (buffer.readUByte() == 0) {
-                client.GRAND_EXCHANGE_SLOTS[key] = GrandExchangeSlot()
+                Client.GRAND_EXCHANGE_SLOTS[key] = GrandExchangeSlot()
             } else {
                 buffer.currentPosition--
-                client.GRAND_EXCHANGE_SLOTS[key] = GrandExchangeSlot(buffer)
+                Client.GRAND_EXCHANGE_SLOTS[key] = GrandExchangeSlot(buffer)
             }
-            client.anInt7320 = client.anInt7347
+            Client.anInt7320 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETANGLE) {
@@ -277,14 +275,14 @@ object PacketDecoder {
             val pitch = buffer.readUShortLittle()
             val roll = buffer.readUShortLittle()
             val scale = buffer.readUShortAddLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfangleUpdate(componentHash, pitch, roll, scale)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETTEXT) {
             val text = buffer.readString()
             val componentHash = buffer.readUIntMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIftextUpdate(componentHash, text)
             context.currentPacket = null
             return true
@@ -295,17 +293,17 @@ object PacketDecoder {
             val type = buffer.readUByteSubtract()
             val key2 = buffer.readInt()
             val key1 = buffer.readInt()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             if (type == 2) {
-                client.setLoadingWorldMap()
+                Client.setLoadingWorldMap()
             }
             val xteas = intArrayOf(key1, key2, key3, key4)
-            client.BASE_WINDOW_ID = interfaceId
+            Client.BASE_WINDOW_ID = interfaceId
             Interface.resetComponentSequences(interfaceId, xteas)
             WindowMode.interfaceResize(false)
-            Component.runScriptsIfLoaded(client.BASE_WINDOW_ID, xteas)
+            Component.runScriptsIfLoaded(Client.BASE_WINDOW_ID, xteas)
             for (index in 0..106) {
-                client.IS_COMPONENT_ON_TOP[index] = true
+                Client.IS_COMPONENT_ON_TOP[index] = true
             }
             context.currentPacket = null
             return true
@@ -313,26 +311,26 @@ object PacketDecoder {
             val primaryModelId = buffer.readUShortAdd()
             val componentHash = buffer.readUIntMiddle()
             val secondaryModelId = buffer.readUIntMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcontentUpdate(componentHash, 5, primaryModelId, secondaryModelId)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CAM_SMOOTHRESET) {
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Camera.smoothReset()
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARCSTR_SMALL) {
             val string_63 = buffer.readString()
             val flags = buffer.readUShortAddLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityVarcstringUpdate(flags, string_63)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETSCROLLPOS) {
             val key = buffer.readUShort()
             val flags = buffer.readInt()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfscrollposUpdate(flags, key)
             context.currentPacket = null
             return true
@@ -355,15 +353,15 @@ object PacketDecoder {
                     }
                     break
                 }
-                if (client.CHAT_MESSAGE_UNIQUE_HASHES[i_81] == messageUniqueHash) {
+                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_81] == messageUniqueHash) {
                     ignore = true
                     break
                 }
                 ++i_81
             }
             if (!ignore) {
-                client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = messageUniqueHash
-                client.anInt7389 = (client.anInt7389 + 1) % 100
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.anInt7389] = messageUniqueHash
+                Client.anInt7389 = (Client.anInt7389 + 1) % 100
                 val qcMessage = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(qcMsgId).fillDynamicValues(buffer)
                 if (rights == 2) {
                     ChatBox.writeMessage(ChatMessageType.PRIVATE_QUICKCHAT, 0, TextUtils.getCrown(1) + crownedName, TextUtils.getCrown(1) + name, crownedName, qcMessage, null, qcMsgId)
@@ -378,7 +376,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_SETCOLOR) {
             val key = buffer.readUIntLittle()
             val flags = buffer.readUShortAdd()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcolorUpdate(key, flags)
             context.currentPacket = null
             return true
@@ -395,15 +393,15 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.RUN_ENERGY) {
-            client.RUN_ENERGY = buffer.readUByte()
-            client.anInt7397 = client.anInt7347
+            Client.RUN_ENERGY = buffer.readUByte()
+            Client.anInt7397 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERHEAD_OTHER) {
             val key = buffer.readInt()
             val flags = buffer.readUShortAddLittle()
             val i_6 = buffer.readUIntMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcontentUpdate(i_6, 3, flags, key)
             context.currentPacket = null
             return true
@@ -430,7 +428,7 @@ object PacketDecoder {
                 val y = (targetHash and 0x3fff) - base.y
                 if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
                     if (reqGfxId == -1) {
-                        val positionedGfx = client.ACTIVE_GFX.get(x.toLong() shl 16 or y.toLong())
+                        val positionedGfx = Client.ACTIVE_GFX.get(x.toLong() shl 16 or y.toLong())
                         if (positionedGfx != null) {
                             positionedGfx.objectGfx.resetCycle()
                             positionedGfx.unlink()
@@ -445,13 +443,13 @@ object PacketDecoder {
                                 toPlane = fromPlane + 1
                             }
                             val spotAnimation = SpotAnimation(scene, reqGfxId, speed, fromPlane, toPlane, tileX, MapRegion.tileheightForAbsolutePosition(tileX, tileY, fromPlane) - height, tileY, x, x, y, y, rotation, setting2)
-                            client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
+                            Client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
                         }
                     }
                 }
             } else if (targetHash shr 29 != 0) {
                 val npcId = targetHash and 0xffff
-                val npcObject = client.NPC_MAP.get(npcId.toLong())
+                val npcObject = Client.NPC_MAP.get(npcId.toLong())
                 if (npcObject != null) {
                     val npc = npcObject.value as NpcEntity
                     val npcGfx = npc.spotAnimations[idk]
@@ -561,14 +559,14 @@ object PacketDecoder {
             val viewZ = buffer.readUByteAdd()
             val i_7 = buffer.readUByteInverse()
             val i_8 = buffer.readUByteSubtract()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Camera.lookat(viewX, viewZ, viewY, i_8, i_7)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.aClass3754368) {
             val key = buffer.readUByte()
             val flags = buffer.readUShortAdd()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             VorbisSoundManager.method1575(flags, key, true)
             context.currentPacket = null
             return true
@@ -614,8 +612,8 @@ object PacketDecoder {
             if (bool66) {
                 var string_137 = rsbytebuffer127.readString()
                 if (string_137.isEmpty()) string_137 = url
-                if (!client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) Browser.openOpenjs(string_137, true, client.aBool7158)
-            } else Browser.openOpenjs(url, true, client.aBool7158)
+                if (!Client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) Browser.openOpenjs(string_137, true, Client.aBool7158)
+            } else Browser.openOpenjs(url, true, Client.aBool7158)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CAM_SHAKE) {
@@ -624,12 +622,12 @@ object PacketDecoder {
             val i_6 = buffer.readUByteInverse()
             val i_7 = buffer.readUByteInverse()
             val i_8 = buffer.readUByteSubtract()
-            client.requestVarVerifyid()
-            client.CAM_SHAKING[i_6] = true
-            client.anIntArray7268[i_6] = i_7
-            client.CUSTOM_LOWEST_YAW[i_6] = key
-            client.anIntArray7462[i_6] = i_8
-            client.anIntArray7435[i_6] = flags
+            Client.requestVarVerifyid()
+            Client.CAM_SHAKING[i_6] = true
+            Client.anIntArray7268[i_6] = i_7
+            Client.CUSTOM_LOWEST_YAW[i_6] = key
+            Client.anIntArray7462[i_6] = i_8
+            Client.anIntArray7435[i_6] = flags
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_PLAYER_GROUP) {
@@ -642,7 +640,7 @@ object PacketDecoder {
             val i_7 = buffer.readUByte()
             var ignore = false
             if (i_7 <= 1) {
-                if ((!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
+                if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
                     if (IgnoreList.contains(str92)) {
                         ignore = true
                     }
@@ -695,7 +693,7 @@ object PacketDecoder {
                 animationIds[i_6] = buffer.readUIntLittle()
             }
             val speed = buffer.readUByte()
-            val class282Sub47131 = client.NPC_MAP.get(npcIndex.toLong())
+            val class282Sub47131 = Client.NPC_MAP.get(npcIndex.toLong())
             if (class282Sub47131 != null) {
                 PlayerUpdate.animate((class282Sub47131.value as PathingEntity?)!!, animationIds, speed, true)
             }
@@ -705,14 +703,14 @@ object PacketDecoder {
             val y = buffer.readShortAdd()
             val component = buffer.readUIntInverseMiddle()
             val x = buffer.readShortAddLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfpositionUpdate(component, x, y)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.DYNAMIC_MAP_REGION) {
             val bitBuffer = Bit(context.currentPacketSize)
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize)
-            client.resetCutscenes()
+            Client.resetCutscenes()
             if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
                 Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.INSTANCE, bitBuffer))
             } else {
@@ -721,16 +719,16 @@ object PacketDecoder {
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.DEPRECATED_52_CLIENTPACKET_97) {
-            client.aByte7458 = buffer.readByte()
-            if (client.aByte7458.toInt() == 0 || client.aByte7458.toInt() == 1) {
-                client.aBool7323 = true
+            Client.aByte7458 = buffer.readByte()
+            if (Client.aByte7458.toInt() == 0 || Client.aByte7458.toInt() == 1) {
+                Client.aBool7323 = true
             }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETNPCHEAD) {
             val key = buffer.readUIntLittle()
             val flags = buffer.readUIntMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcontentUpdate(key, 2, flags, -1)
             context.currentPacket = null
             return true
@@ -749,7 +747,7 @@ object PacketDecoder {
                 if (player.displayName != null && player.playerAppearance != null) {
                     var bool69 = false
                     if (icon <= 1) {
-                        if (!isQuickchat && (client.USERDETAIL_QUICKCHAT && !client.VERIFIED_EMAIL_ADDRESS || client.IS_QUICKCHAT_ONLY)) {
+                        if (!isQuickchat && (Client.USERDETAIL_QUICKCHAT && !Client.VERIFIED_EMAIL_ADDRESS || Client.IS_QUICKCHAT_ONLY)) {
                             bool69 = true
                         } else if (IgnoreList.contains(player.displayName)) {
                             bool69 = true
@@ -792,17 +790,17 @@ object PacketDecoder {
             WorldConnection.connectionInfo = LoginManager.GAME_CONNECTION_INFO
             WorldConnection.reconnectingWorld = reconnecting
             LoginManager.setGameHost(port, host)
-            client.setGameState(GameState.UNK_17)
+            Client.setGameState(GameState.UNK_17)
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.LOGOUT_LOBBY) {
-            client.logout(LoginManager.currentlyInLobby)
+            Client.logout(LoginManager.currentlyInLobby)
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARC_LARGE) {
             val key = buffer.readUShortLittle()
             val flags = buffer.readUIntInverseMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityClientvarcUpdate(key, flags)
             context.currentPacket = null
             return true
@@ -816,12 +814,12 @@ object PacketDecoder {
             val absolutePosition = CoordGrid(buffer.readUIntMiddle())
             val xtea2 = buffer.readUIntMiddle()
             val itemId = buffer.readUShortAddLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Interface.openSub(interfaceId, IFSubActiveGroundItem(subInterfaceId, overlay, GroundItemFetcher(absolutePosition, itemId)), intArrayOf(xtea1, xtea2, xtea3, xtea4), false)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.FRIENDS_CHAT_CHANNEL) {
-            client.anInt7179 = client.anInt7347
+            Client.anInt7179 = Client.anInt7347
             if (context.currentPacketSize == 0) {
                 FriendsChat.FC_NAME = null
                 FriendsChat.FC_OWNER_NAME = null
@@ -882,7 +880,7 @@ object PacketDecoder {
                 return true
             }
         } else if (context.currentPacket == ServerProt.CAM_RESET) {
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Camera.method12606()
             context.currentPacket = null
             return true
@@ -893,7 +891,7 @@ object PacketDecoder {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = string_88
-            client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
+            Client.CLAN_VAR_KEYS[++Client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MUSIC_TRACK) {
@@ -909,7 +907,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_SETCLICKMASK) {
             val bool91 = buffer.readUByteSubtract() == 1
             val flags = buffer.readUIntLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfclickmaskUpdate(flags, bool91)
             context.currentPacket = null
             return true
@@ -930,7 +928,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.CLEAR_VARPS) {
             VarProviders.PLAYER_VAR_PROVIDER.reset()
-            client.pulseEventConfigsPtr += 32
+            Client.pulseEventConfigsPtr += 32
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.TILE_MESSAGE) {
@@ -938,13 +936,13 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.PLAYER_WEIGHT) {
-            client.RUN_WEIGHT = buffer.readShort()
-            client.anInt7397 = client.anInt7347
+            Client.RUN_WEIGHT = buffer.readShort()
+            Client.anInt7397 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.aClass3754399) {
             val key = buffer.readUIntLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             if (key == -1) {
                 PingRequester.anInt5864 = -1
                 StaticMethods.anInt833 = -1
@@ -976,9 +974,9 @@ object PacketDecoder {
                     PlayerUpdate.players[key]!!.currentSequence.update(-1)
                 }
             }
-            for (key in 0..<client.npcCount) {
-                (client.NPC_ARRAY[key]!!.value as PathingEntity).currentAnimations = null
-                (client.NPC_ARRAY[key]!!.value as PathingEntity).currentSequence.update(-1)
+            for (key in 0..<Client.npcCount) {
+                (Client.NPC_ARRAY[key]!!.value as PathingEntity).currentAnimations = null
+                (Client.NPC_ARRAY[key]!!.value as PathingEntity).currentSequence.update(-1)
             }
             context.currentPacket = null
             return true
@@ -991,12 +989,12 @@ object PacketDecoder {
             val i_11 = buffer.readUShort()
             val long_53 = long_51 + (long_49 shl 32)
             var bool14 = false
-            val class282Sub4102 = if (nonGuest) client.CLAN_CHANNEL else client.LISTENED_CLAN_CHANNEL
+            val class282Sub4102 = if (nonGuest) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
             if (class282Sub4102 == null) {
                 bool14 = true
             } else {
                 for (i_34 in 0..99) {
-                    if (long_53 == client.CHAT_MESSAGE_UNIQUE_HASHES[i_34]) {
+                    if (long_53 == Client.CHAT_MESSAGE_UNIQUE_HASHES[i_34]) {
                         bool14 = true
                         break
                     }
@@ -1004,8 +1002,8 @@ object PacketDecoder {
                 if (i_10 <= 1 && IgnoreList.contains(string_88)) bool14 = true
             }
             if (!bool14) {
-                client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_53
-                client.anInt7389 = (client.anInt7389 + 1) % 100
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.anInt7389] = long_53
+                Client.anInt7389 = (Client.anInt7389 + 1) % 100
                 val string_17 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_11).fillDynamicValues(buffer)
                 val messageType = if (nonGuest) ChatMessageType.CLAN_QUICKCHAT else ChatMessageType.GUEST_CLAN_QUICKCHAT
                 if (i_10 != 2 && i_10 != 3) {
@@ -1027,7 +1025,7 @@ object PacketDecoder {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = long_47
-            client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
+            Client.CLAN_VAR_KEYS[++Client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_FRIENDS_CHAT) {
@@ -1052,15 +1050,15 @@ object PacketDecoder {
                     }
                     break
                 }
-                if (client.CHAT_MESSAGE_UNIQUE_HASHES[i_82] == long_57) {
+                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_82] == long_57) {
                     bool115 = true
                     break
                 }
                 ++i_82
             }
             if (!bool115) {
-                client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_57
-                client.anInt7389 = (client.anInt7389 + 1) % 100
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.anInt7389] = long_57
+                Client.anInt7389 = (Client.anInt7389 + 1) % 100
                 val string_41 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_77).fillDynamicValues(buffer)
                 if (i_35 == 2) {
                     ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + str92, string_88, string_41, TextUtils.decodeUidName(long_28), i_77)
@@ -1086,7 +1084,7 @@ object PacketDecoder {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = flags
-            client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
+            Client.CLAN_VAR_KEYS[++Client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETTARGETPARAM) {
@@ -1100,10 +1098,10 @@ object PacketDecoder {
                 fromSlot = -1
             }
             val settings = buffer.readUIntLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             for (slot in fromSlot..toSlot) {
                 val slots = slot + (interfaceHash.toLong() shl 32)
-                val currentSettings = client.ICOMPONENT_SETTINGS_SLOTS.get(slots) as IFEvents?
+                val currentSettings = Client.ICOMPONENT_SETTINGS_SLOTS.get(slots) as IFEvents?
                 val newSettings: IFEvents?
                 if (currentSettings == null) {
                     if (slot == -1) {
@@ -1115,7 +1113,7 @@ object PacketDecoder {
                     newSettings = IFEvents(settings, currentSettings.interfaceId)
                     currentSettings.unlink()
                 }
-                client.ICOMPONENT_SETTINGS_SLOTS.put(newSettings, slots)
+                Client.ICOMPONENT_SETTINGS_SLOTS.put(newSettings, slots)
             }
             context.currentPacket = null
             return true
@@ -1130,10 +1128,10 @@ object PacketDecoder {
             if (fromSlot == 65535) {
                 fromSlot = -1
             }
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             for (slot in fromSlot..toSlot) {
                 val slots = slot + (interfaceHash.toLong() shl 32)
-                val currentSettings = client.ICOMPONENT_SETTINGS_SLOTS.get(slots) as IFEvents?
+                val currentSettings = Client.ICOMPONENT_SETTINGS_SLOTS.get(slots) as IFEvents?
                 val newSettings: IFEvents?
                 if (currentSettings == null) {
                     if (slot == -1) {
@@ -1145,7 +1143,7 @@ object PacketDecoder {
                     newSettings = IFEvents(currentSettings.settingsHash, interfaceId)
                     currentSettings.unlink()
                 }
-                client.ICOMPONENT_SETTINGS_SLOTS.put(newSettings, slots)
+                Client.ICOMPONENT_SETTINGS_SLOTS.put(newSettings, slots)
             }
             context.currentPacket = null
             return true
@@ -1154,13 +1152,13 @@ object PacketDecoder {
             val modelId = buffer.readBigSmart()
             val scene = Resource.mapRegion!!.getScene()!!
             if (scene != null) {
-                if (client.HINT_TRAILS[idx] != null) {
-                    client.HINT_TRAILS[idx]!!.removeFromScene(scene)
-                    client.HINT_TRAILS[idx] = null
+                if (Client.HINT_TRAILS[idx] != null) {
+                    Client.HINT_TRAILS[idx]!!.removeFromScene(scene)
+                    Client.HINT_TRAILS[idx] = null
                 }
                 if (modelId != -1) {
-                    client.HINT_TRAILS[idx] = HintTrail(Renderers.activeToolkit!!, buffer, modelId)
-                    client.HINT_TRAILS[idx]!!.addTo(scene)
+                    Client.HINT_TRAILS[idx] = HintTrail(Renderers.activeToolkit!!, buffer, modelId)
+                    Client.HINT_TRAILS[idx]!!.addTo(scene)
                 }
             }
             context.currentPacket = null
@@ -1190,7 +1188,7 @@ object PacketDecoder {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
             ClanVarTypeList.CLAN_VARS!![key] = b_84.toInt()
-            client.CLAN_VAR_KEYS[++client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
+            Client.CLAN_VAR_KEYS[++Client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.GROUND_ITEM_REVEAL) {
@@ -1202,16 +1200,16 @@ object PacketDecoder {
             val flags = buffer.readUShortLittle()
             val isNegativeKey = (key and 0x1) == 1
             ItemContainer.deleteItemContainer(flags, isNegativeKey)
-            client.RECENTLY_USED_ITEM_CONTAINERS[++client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = flags
+            Client.RECENTLY_USED_ITEM_CONTAINERS[++Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = flags
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_REBOOT_TIMER) {
-            if (GameState.inLobby(client.gameState)) {
-                client.REBOOT_TIMER = (buffer.readUShort() * 2.5f).toInt()
+            if (GameState.inLobby(Client.gameState)) {
+                Client.REBOOT_TIMER = (buffer.readUShort() * 2.5f).toInt()
             } else {
-                client.REBOOT_TIMER = buffer.readUShort() * 30
+                Client.REBOOT_TIMER = buffer.readUShort() * 30
             }
-            client.anInt7397 = client.anInt7347
+            Client.anInt7397 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MIDI_SONG_LOCATION) {
@@ -1239,7 +1237,7 @@ object PacketDecoder {
             UpdateZonePacket.UPDATE_ZONE_Y = buffer.readByte().toInt() shl 3
             UpdateZonePacket.UPDATE_ZONE_PLANE = buffer.readUByte()
             val base = Resource.mapRegion!!.getBaseCoordinates()
-            var groundItems = client.GROUND_ITEMS.first()
+            var groundItems = Client.GROUND_ITEMS.first()
             while (groundItems != null) {
                 val plane = (groundItems.pointer shr 28 and 0x3L).toInt()
                 val absX = (groundItems.pointer and 0x3fffL).toInt()
@@ -1252,7 +1250,7 @@ object PacketDecoder {
                         GroundItemUpdating.removeGroundItem(UpdateZonePacket.UPDATE_ZONE_PLANE, x, y)
                     }
                 }
-                groundItems = client.GROUND_ITEMS.next()
+                groundItems = Client.GROUND_ITEMS.next()
             }
             var locAction: LocAction?
             locAction = LocAction.pendingRemovals.first() as LocAction?
@@ -1285,7 +1283,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.SHOW_FACE_HERE) {
             val showFaceHere = buffer.readUByte() == 1
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             com.jagex.game.runetek5.client.menu.SHOW_FACE_HERE = showFaceHere
             context.currentPacket = null
             return true
@@ -1404,31 +1402,31 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.aClass3754362) { //request packet 37?
             val key = buffer.readUShortAddLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             StaticMethods.method1563(key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLANSETTINGS_FULL) {
-            client.anInt7192 = client.anInt7347
+            Client.anInt7192 = Client.anInt7347
             val bool91 = buffer.readUByte() == 1
             if (context.currentPacketSize == 1) {
                 if (bool91) {
-                    client.CLAN_SETTINGS = null
+                    Client.CLAN_SETTINGS = null
                 } else {
-                    client.GUEST_CLAN_SETTINGS = null
+                    Client.GUEST_CLAN_SETTINGS = null
                 }
             } else {
                 if (bool91) {
-                    client.CLAN_SETTINGS = ClanSettings(buffer)!!
+                    Client.CLAN_SETTINGS = ClanSettings(buffer)!!
                 } else {
-                    client.GUEST_CLAN_SETTINGS = ClanSettings(buffer)!!
+                    Client.GUEST_CLAN_SETTINGS = ClanSettings(buffer)!!
                 }
             }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.aClass3754457) {
             val key = buffer.readUShort()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             StaticMethods.setVorbisSound(key)
             context.currentPacket = null
             return true
@@ -1451,7 +1449,7 @@ object PacketDecoder {
                 }
                 ItemContainer.setItemInContainer(key, i_7, i_8 - 1, i_9, isNegativeKey)
             }
-            client.RECENTLY_USED_ITEM_CONTAINERS[++client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = key
+            Client.RECENTLY_USED_ITEM_CONTAINERS[++Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = key
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.PING) {
@@ -1476,8 +1474,8 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.TRIGGER_ONDIALOGABORT) {
-            if (client.BASE_WINDOW_ID != -1) {
-                Interface.openSub(client.BASE_WINDOW_ID, 0)
+            if (Client.BASE_WINDOW_ID != -1) {
+                Interface.openSub(Client.BASE_WINDOW_ID, 0)
             }
             context.currentPacket = null
             return true
@@ -1530,7 +1528,7 @@ object PacketDecoder {
                         if (username == PlayerUpdate.MY_PLAYER!!.displayName) {
                             FriendsChat.MY_PLAYER_FC_RANK = rank
                         }
-                        client.anInt7179 = client.anInt7347
+                        Client.anInt7179 = Client.anInt7347
                         context.currentPacket = null
                         return true
                     }
@@ -1553,24 +1551,24 @@ object PacketDecoder {
                     FriendsChat.MY_PLAYER_FC_RANK = rank
                 }
             }
-            client.anInt7179 = client.anInt7347
+            Client.anInt7179 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETHIDE) {
             val key = buffer.readUByteAdd()
             val flags = buffer.readInt()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfhide(flags, key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLANCHANNEL_DELTA) {
-            client.anInt7395 = client.anInt7347
+            Client.anInt7395 = Client.anInt7347
             val bool91 = buffer.readUByte() == 1
             val delta = ClanChannelDelta(buffer)
             val clanChannel: ClanChannel? = if (bool91) {
-                client.CLAN_CHANNEL
+                Client.CLAN_CHANNEL
             } else {
-                client.LISTENED_CLAN_CHANNEL
+                Client.LISTENED_CLAN_CHANNEL
             }
             clanChannel?.let { delta.apply(it) }
             context.currentPacket = null
@@ -1578,7 +1576,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.REGION) {
             val bitBuffer = Bit(context.currentPacketSize)
             System.arraycopy(context.receivedBuffer.buffer, context.receivedBuffer.currentPosition, bitBuffer.buffer, 0, context.currentPacketSize)
-            client.resetCutscenes()
+            Client.resetCutscenes()
             if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
                 Resource.mapRegionLoaderTask!!.requestMapUpdate(RegionLoadRequest(RegionLoadingType.STANDARD, bitBuffer))
             } else {
@@ -1593,7 +1591,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_SETANIM) {
             val key = buffer.readUIntInverseMiddle()
             val flags = buffer.readInt()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfanimUpdate(flags, key)
             context.currentPacket = null
             return true
@@ -1609,15 +1607,15 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.IF_CLOSESUB) {
             val parentInterface = buffer.readInt()
-            client.requestVarVerifyid()
-            val subInterface = client.OPEN_INTERFACES!!.get(parentInterface.toLong())
+            Client.requestVarVerifyid()
+            val subInterface = Client.OPEN_INTERFACES!!.get(parentInterface.toLong())
             if (subInterface != null) {
                 Interface.closeChildInterface(subInterface, true, false)
             }
-            val comp1187352 = client.aClass1187352
+            val comp1187352 = Client.aClass1187352
             if (comp1187352 != null) {
                 Component.redrawComponent(comp1187352)
-                client.aClass1187352 = null
+                Client.aClass1187352 = null
             }
             context.currentPacket = null
             return true
@@ -1625,29 +1623,29 @@ object PacketDecoder {
             val xp = buffer.readInt()
             val skillId = buffer.readUByte()
             val level = buffer.readUByte()
-            if (xp > client.SKILL_XP[skillId]) {
-                val event = XPDrop(Skill.entries[skillId], xp - client.SKILL_XP[skillId])
+            if (xp > Client.SKILL_XP[skillId]) {
+                val event = XPDrop(Skill.entries[skillId], xp - Client.SKILL_XP[skillId])
                 ScriptExecutor.pushEvent(event)
                 if (Bot.ENABLED) {
                     UI.updateXpTable(event.skill, event.gainedXp)
                 }
             }
-            client.SKILL_XP[skillId] = xp
-            client.SKILL_LEVEL_VISIBLE[skillId] = level
-            client.SKILL_LEVEL_ACTUAL[skillId] = 1
+            Client.SKILL_XP[skillId] = xp
+            Client.SKILL_LEVEL_VISIBLE[skillId] = level
+            Client.SKILL_LEVEL_ACTUAL[skillId] = 1
             val maxLevel = SkillConstants.SKILL_MAX_LEVEL[skillId] - 1
             for (i in 0..<maxLevel) {
                 if (xp >= SkillConstants.SKILL_XP_FOR_LEVEL[i]) {
-                    client.SKILL_LEVEL_ACTUAL[skillId] = i + 2
+                    Client.SKILL_LEVEL_ACTUAL[skillId] = i + 2
                 }
             }
-            client.anIntArray7283[++client.anInt7384 - 1 and 0x1f] = skillId
+            Client.anIntArray7283[++Client.anInt7384 - 1 and 0x1f] = skillId
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.aClass3754453) {
             val b_100 = buffer.readByte()
             val flags = buffer.readUByteInverse()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             StaticMethods.method14501(b_100.toInt(), flags)
             context.currentPacket = null
             return true
@@ -1660,14 +1658,14 @@ object PacketDecoder {
             val flags = buffer.readUShortLittle()
             val i_6 = buffer.readUShortLittle()
             val i_7 = buffer.readUByte()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfrecol(key, i_7, flags, i_6)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETTEXTANTIMACRO) {
             val enabled = buffer.readUByteSubtract() == 1
             val componentHash = buffer.readUIntInverseMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.prioritySetIftextantimacro(componentHash, enabled)
             context.currentPacket = null
             return true
@@ -1682,7 +1680,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_DOB) {
             LoginManager.PLAYER_DOB = buffer.readMedium()
-            client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1
+            Client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_PLAYER) {
@@ -1694,18 +1692,18 @@ object PacketDecoder {
             val interfaceId = buffer.readUIntMiddle()
             val i_10 = buffer.readUIntMiddle()
             val playerIndex = buffer.readUShortLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Interface.openSub(interfaceId, IFSubActivePlayer(subInterfaceId, overlay, playerIndex), intArrayOf(i_6, i_8, i_10, key), false)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLANSETTINGS_DELTA) {
-            client.anInt7192 = client.anInt7347
+            Client.anInt7192 = Client.anInt7347
             val clanSettings = buffer.readUByte() == 1
             val delta = ClanSettingsDelta(buffer)
             val settings: ClanSettings? = if (clanSettings) {
-                client.CLAN_SETTINGS
+                Client.CLAN_SETTINGS
             } else {
-                client.GUEST_CLAN_SETTINGS
+                Client.GUEST_CLAN_SETTINGS
             }
             settings?.let { delta.queueUpdates(it) }
             context.currentPacket = null
@@ -1727,7 +1725,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.OUTDATED_SET_THEORA_STRING_SOMETHING) {
             val key = buffer.readUShortAdd()
             val flags = buffer.readUIntLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityT17Update(flags, key)
             context.currentPacket = null
             return true
@@ -1739,7 +1737,7 @@ object PacketDecoder {
             val i_8 = buffer.readUIntLittle()
             val topUid = buffer.readInt()
             val overlay = buffer.readUByteInverse()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Interface.openSub(topUid, SubInterface(subId, overlay), intArrayOf(key, i_6, flags, i_8), false)
             context.currentPacket = null
             return true
@@ -1764,9 +1762,9 @@ object PacketDecoder {
                 if ("null".equals(option, ignoreCase = true)) {
                     option = null
                 }
-                client.PLAYER_OPTIONS[slot - 1] = option
-                client.PLAYER_OPTION_CURSORS[slot - 1] = cursor
-                client.PLAYER_OPTION_REDUCED_PRIORITY[slot - 1] = onTop == 0
+                Client.PLAYER_OPTIONS[slot - 1] = option
+                Client.PLAYER_OPTION_CURSORS[slot - 1] = cursor
+                Client.PLAYER_OPTION_REDUCED_PRIORITY[slot - 1] = onTop == 0
             }
             context.currentPacket = null
             return true
@@ -1777,7 +1775,7 @@ object PacketDecoder {
             }
             val interfaceHash = buffer.readInt()
             val amount = buffer.readUIntInverseMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfitemUpdate(interfaceHash, itemId, amount)
             val defs = TypeLists.OBJ!!.list(itemId)
             PulseEventQueue.priorityIfangleUpdate(interfaceHash, defs.modelRotationX, defs.modelRotationY, defs.modelZoom)
@@ -1789,7 +1787,7 @@ object PacketDecoder {
             val usernameMeme = buffer.readUShortAdd()
             val idKit2 = buffer.readUShortAdd()
             val interfaceHash = buffer.readUIntInverseMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcontentUpdate(interfaceHash, 7, idKit1 shl 16 or idKit2, usernameMeme)
             context.currentPacket = null
             return true
@@ -1799,7 +1797,7 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERMODEL) {
             val key = buffer.readUIntMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcontentUpdate(key, 5, PlayerUpdate.myPlayerIndex, 0)
             context.currentPacket = null
             return true
@@ -1832,19 +1830,19 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.FRIENDLIST_LOADED) {
             FriendList.LOADED = 1
-            client.anInt7386 = client.anInt7347
+            Client.anInt7386 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERHEAD) {
             val key = buffer.readUIntLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfcontentUpdate(key, 3, PlayerUpdate.myPlayerIndex, 0)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.JCOINS_UPDATE) {
             val key = buffer.readUIntLittle()
-            if (key != client.JCOINS) {
-                client.JCOINS = key
+            if (key != Client.JCOINS) {
+                Client.JCOINS = key
                 CS2Executor.executeTrigger(ClientTriggerType.JCOINS_CHANGED, -1, -1)
             }
             context.currentPacket = null
@@ -1875,7 +1873,7 @@ object PacketDecoder {
             while (true) {
                 if (i_15 >= 100) {
                     if (i_11 <= 1) {
-                        if ((!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
+                        if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
                             if (IgnoreList.contains(str92)) {
                                 bool14 = true
                             }
@@ -1885,15 +1883,15 @@ object PacketDecoder {
                     }
                     break
                 }
-                if (client.CHAT_MESSAGE_UNIQUE_HASHES[i_15] == long_53) {
+                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_15] == long_53) {
                     bool14 = true
                     break
                 }
                 ++i_15
             }
             if (!bool14) {
-                client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_53
-                client.anInt7389 = (client.anInt7389 + 1) % 100
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.anInt7389] = long_53
+                Client.anInt7389 = (Client.anInt7389 + 1) % 100
                 val string_118 = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
                 if (i_11 == 2) {
                     ChatBox.writeMessage(ChatMessageType.PRIVATE_STAFF, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + str92, string_88, string_118, null, -1)
@@ -1908,21 +1906,21 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARC_SMALL) {
             val b_100 = buffer.readByteSubtract()
             val flags = buffer.readUShortLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityClientvarcUpdate(flags, b_100.toInt())
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETTEXTFONT) {
             val key = buffer.readInt()
             val flags = buffer.readUIntMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIffontUpdate(flags, key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETGRAPHIC) {
             val key = buffer.readUIntInverseMiddle()
             val flags = buffer.readUIntInverseMiddle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfgraphicUpdate(flags, key)
             context.currentPacket = null
             return true
@@ -1930,7 +1928,7 @@ object PacketDecoder {
             val key = buffer.readUShort()
             val flags = buffer.readUShort()
             val i_6 = buffer.readUShort()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             var i_8: Int
             if (Interface.INTERFACES!![key] != null) {
                 for (i_7 in flags..<i_6) {
@@ -1956,7 +1954,7 @@ object PacketDecoder {
             val constantSpeed = buffer.readUByteSubtract()
             val moveZ = buffer.readUShortLittle() shl 2
             val variableSpeed = buffer.readUByteAdd()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Camera.moveCamera(localX, localY, moveZ, constantSpeed, variableSpeed, true)
             context.currentPacket = null
             return true
@@ -1968,25 +1966,25 @@ object PacketDecoder {
             val i_10 = buffer.readUByte()
             val long_55 = long_51 + (long_49 shl 32)
             var bool112 = false
-            val class282Sub437 = if (bool91) client.CLAN_CHANNEL else client.LISTENED_CLAN_CHANNEL
+            val class282Sub437 = if (bool91) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
             if (class282Sub437 == null) {
                 bool112 = true
             } else {
                 for (i_81 in 0..99) { //TODO validate this logic
-                    if (client.CHAT_MESSAGE_UNIQUE_HASHES[i_81] == long_55) {
+                    if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_81] == long_55) {
                         bool112 = true
                         break
                     }
                 }
                 if (i_10 <= 1) {
-                    if ((!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
+                    if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
                         if (IgnoreList.contains(string_88)) bool112 = true
                     } else bool112 = true
                 }
             }
             if (!bool112) {
-                client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_55
-                client.anInt7389 = (client.anInt7389 + 1) % 100
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.anInt7389] = long_55
+                Client.anInt7389 = (Client.anInt7389 + 1) % 100
                 val string_101 = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
                 val i_34 = if (bool91) ChatMessageType.CLAN_CHAT else ChatMessageType.GUEST_CLAN_CHAT
                 if (i_10 != 2 && i_10 != 3) {
@@ -2016,7 +2014,7 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.REDUCE_ATTACK_PRIORITY) {
-            client.REDUCE_ATTACK_PRIORITY = buffer.readUByteAdd() == 1
+            Client.REDUCE_ATTACK_PRIORITY = buffer.readUByteAdd() == 1
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.FRIEND_STATUS) {
@@ -2041,7 +2039,7 @@ object PacketDecoder {
                         if (displayName == friend!!.displayName) {
                             if (world != friend!!.worldId) {
                                 var announce = true
-                                var statusUpdate = client.PLAYER_LOGINSTATE_UPDATES.getFirst() as LoginStateUpdate?
+                                var statusUpdate = Client.PLAYER_LOGINSTATE_UPDATES.getFirst() as LoginStateUpdate?
                                 while (statusUpdate != null) {
                                     if (statusUpdate.username == displayName) {
                                         if (world != 0 && statusUpdate.actionType.toInt() == 0) {
@@ -2052,10 +2050,10 @@ object PacketDecoder {
                                             announce = false
                                         }
                                     }
-                                    statusUpdate = client.PLAYER_LOGINSTATE_UPDATES.getNext() as LoginStateUpdate?
+                                    statusUpdate = Client.PLAYER_LOGINSTATE_UPDATES.getNext() as LoginStateUpdate?
                                 }
                                 if (announce) {
-                                    client.PLAYER_LOGINSTATE_UPDATES.offer(LoginStateUpdate(displayName, world))
+                                    Client.PLAYER_LOGINSTATE_UPDATES.offer(LoginStateUpdate(displayName, world))
                                 }
                                 friend!!.worldId = world
                             }
@@ -2090,7 +2088,7 @@ object PacketDecoder {
                 }
             }
             FriendList.LOADED = 2
-            client.anInt7386 = client.anInt7347
+            Client.anInt7386 = Client.anInt7347
             var bool91 = false
             var flags = FriendList.FRIEND_COUNT
             while (flags > 0) {
@@ -2133,15 +2131,15 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_MOVESUB) {
             val fromParentUid = buffer.readUIntInverseMiddle()
             val toParentUid = buffer.readInt()
-            client.requestVarVerifyid()
-            val toSub = client.OPEN_INTERFACES!!.get(toParentUid.toLong())
-            val fromSub = client.OPEN_INTERFACES!!.get(fromParentUid.toLong())
+            Client.requestVarVerifyid()
+            val toSub = Client.OPEN_INTERFACES!!.get(toParentUid.toLong())
+            val fromSub = Client.OPEN_INTERFACES!!.get(fromParentUid.toLong())
             if (fromSub != null) {
                 Interface.closeChildInterface(fromSub, toSub == null || toSub.subInterfaceId != fromSub.subInterfaceId, false)
             }
             if (toSub != null) {
                 toSub.unlink()
-                client.OPEN_INTERFACES!!.put(toSub, fromParentUid.toLong())
+                Client.OPEN_INTERFACES!!.put(toSub, fromParentUid.toLong())
             }
             var parent2Def = Component.fromHash(toParentUid)
             if (parent2Def != null) {
@@ -2152,17 +2150,17 @@ object PacketDecoder {
                 Component.redrawComponent(parent2Def)
                 Component.method483(Interface.INTERFACES!![parent2Def.idHash ushr 16]!!, parent2Def, true)
             }
-            if (client.BASE_WINDOW_ID != -1) {
-                Interface.openSub(client.BASE_WINDOW_ID, 1)
+            if (Client.BASE_WINDOW_ID != -1) {
+                Interface.openSub(Client.BASE_WINDOW_ID, 1)
             }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CUTSCENE) {
             val key = buffer.readUShort()
-            client.cycleCutsceneLoaded = -1
-            client.CURRENT_CUTSCENE = key
-            client.MAP_LOADING_STAGE = 3
-            Resource.CUTSCENE!!.isFileCached(client.CURRENT_CUTSCENE)
+            Client.cycleCutsceneLoaded = -1
+            Client.CURRENT_CUTSCENE = key
+            Client.MAP_LOADING_STAGE = 3
+            Resource.CUTSCENE!!.isFileCached(Client.CURRENT_CUTSCENE)
             MiniMenu.close()
             MiniMenu.resetEntries()
             val flags = buffer.readUShort()
@@ -2201,7 +2199,7 @@ object PacketDecoder {
             val subInterfaceId = buffer.readUShortAddLittle()
             val i_10 = buffer.readInt()
             val i_11 = buffer.readInt()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Interface.openSub(interfaceId, IFSubActiveNpc(subInterfaceId, overlay, npcIndex), intArrayOf(i_11, flags, i_10, i_8), false)
             context.currentPacket = null
             return true
@@ -2226,13 +2224,13 @@ object PacketDecoder {
                     }
                 }
             }
-            client.anInt7386 = client.anInt7347
+            Client.anInt7386 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARCSTR_LARGE) {
             val key = buffer.readUShortLittle()
             val string_88 = buffer.readString()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityVarcstringUpdate(key, string_88)
             context.currentPacket = null
             return true
@@ -2257,7 +2255,7 @@ object PacketDecoder {
             while (true) {
                 if (i_34 >= 100) {
                     if (i_35 <= 1) {
-                        if ((!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
+                        if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
                             if (IgnoreList.contains(str92)) {
                                 bool16 = true
                             }
@@ -2267,15 +2265,15 @@ object PacketDecoder {
                     }
                     break
                 }
-                if (long_60 == client.CHAT_MESSAGE_UNIQUE_HASHES[i_34]) {
+                if (long_60 == Client.CHAT_MESSAGE_UNIQUE_HASHES[i_34]) {
                     bool16 = true
                     break
                 }
                 ++i_34
             }
             if (!bool16) {
-                client.CHAT_MESSAGE_UNIQUE_HASHES[client.anInt7389] = long_60
-                client.anInt7389 = (client.anInt7389 + 1) % 100
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.anInt7389] = long_60
+                Client.anInt7389 = (Client.anInt7389 + 1) % 100
                 val string_17 = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
                 if (i_35 != 2 && i_35 != 3) {
                     if (i_35 == 1) {
@@ -2298,7 +2296,7 @@ object PacketDecoder {
             val objFlags = buffer.readUByteSubtract()
             val shape = objFlags shr 2
             val rotation = objFlags and 0x3
-            val type = client.OBJECT_TYPE_SLOTS[shape]
+            val type = Client.OBJECT_TYPE_SLOTS[shape]
             val base = Resource.mapRegion!!.getBaseCoordinates()
             x -= base.x
             y -= base.y
@@ -2325,7 +2323,7 @@ object PacketDecoder {
                 class1089.displayName = buffer.readString()
                 class1089.temporary = false
             }
-            client.anInt7386 = client.anInt7347
+            Client.anInt7386 = Client.anInt7347
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETRETEX) {
@@ -2333,12 +2331,12 @@ object PacketDecoder {
             val flags = buffer.readUShort()
             val i_6 = buffer.readUByteSubtract()
             val i_7 = buffer.readUIntLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityIfretex(i_7, i_6, flags, key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SET_TARGET) {
-            client.ENTITY_TARGET = buffer.readShortLittle() //reads same identifier as projectile (index+1 for npc and -index-1 for player)
+            Client.ENTITY_TARGET = buffer.readShortLittle() //reads same identifier as projectile (index+1 for npc and -index-1 for player)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_OBJECT) {
@@ -2354,7 +2352,7 @@ object PacketDecoder {
             val xtea4 = buffer.readInt()
             val absolutePosition = CoordGrid(buffer.readUIntInverseMiddle())
             val objectId = buffer.readInt()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             Interface.openSub(interfaceId, IFSubActiveObject(subInterfaceId, overlay, IFSubObjectPosition(absolutePosition, type, objectId)), intArrayOf(xtea1, xtea2, xtea3, xtea4), false)
             context.currentPacket = null
             return true
@@ -2370,8 +2368,8 @@ object PacketDecoder {
             buffer.readBytes(bytes_64, context.currentPacketSize)
             val string_88 = Utils.readString(bytes_64, 0, context.currentPacketSize)
             val str92 = "opensn"
-            if (!client.isApplet || !Browser.openBrowser(string_88, 1, str92)) {
-                Browser.openBrowser(string_88, true, str92, client.aBool7158)
+            if (!Client.isApplet || !Browser.openBrowser(string_88, 1, str92)) {
+                Browser.openBrowser(string_88, true, str92, Client.aBool7158)
             }
             context.currentPacket = null
             return true
@@ -2379,7 +2377,7 @@ object PacketDecoder {
             val key = buffer.readUShortAdd()
             val flags = buffer.readUIntInverseMiddle()
             val i_6 = buffer.readUShortLittle()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             PulseEventQueue.priorityT13Update(flags, key + (i_6 shl 16))
             context.currentPacket = null
             return true
@@ -2394,7 +2392,7 @@ object PacketDecoder {
                 }
             }
             arr_26[0] = buffer.readInt()
-            client.requestVarVerifyid()
+            Client.requestVarVerifyid()
             val hookrequest27 = HookRequest()
             hookrequest27.params = arr_26
             CS2Executor.executeHookInner(hookrequest27)
@@ -2406,7 +2404,7 @@ object PacketDecoder {
             return true
         } else {
             PacketEncoder.sendErrorToServer((if (context.currentPacket != null) context.currentPacket!!.opcode else -1).toString() + "," + (if (context.secondLastPacket != null) context.secondLastPacket!!.opcode else -1) + "," + (if (context.thirdLastPacket != null) context.thirdLastPacket!!.opcode else -1) + " " + context.currentPacketSize, RuntimeException())
-            client.logout(false)
+            Client.logout(false)
             return true
         }
     }

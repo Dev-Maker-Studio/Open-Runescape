@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.entity.pathingentity
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.hitbar.HitbarType
 import com.jagex.game.runetek5.entity.EntityNode
 import com.jagex.game.runetek5.entity.EntityNodeList
@@ -68,12 +68,12 @@ class EntityHitbar(
         }
 
         if (adjustedHitbar == null) {
-            if (hitbarCount < client.ENTITY_DEFAULTS!!.anInt7030) {
+            if (hitbarCount < Client.ENTITY_DEFAULTS!!.anInt7030) {
                 entityList.getPrevious(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles))
             }
         } else {
             replace(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles), adjustedHitbar)
-            if (hitbarCount >= client.ENTITY_DEFAULTS!!.anInt7030) {
+            if (hitbarCount >= Client.ENTITY_DEFAULTS!!.anInt7030) {
                 entityList.getFirst()!!.unlinkNode()
             }
         }

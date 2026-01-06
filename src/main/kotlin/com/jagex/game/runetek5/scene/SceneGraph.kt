@@ -2,10 +2,9 @@ package com.jagex.game.runetek5.scene
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.config.light.LightType
 import com.jagex.game.runetek5.config.`object`.ObjectShapes
 import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.config.`object`.ObjectTypeList
@@ -22,7 +21,6 @@ import com.jagex.game.runetek5.entity.gameobject.StationaryInteractiveObject
 import com.jagex.game.runetek5.entity.gameobject.StationaryWall
 import com.jagex.game.runetek5.entity.gameobject.StationaryWallDecoration
 import com.jagex.game.runetek5.graphics.light.FlickeringEffect
-import com.jagex.game.runetek5.graphics.light.PointLight
 import com.jagex.game.runetek5.entity.AbstractInteractiveEntity
 import com.jagex.game.runetek5.scene.environment.EnvironmentManager
 import com.jagex.game.runetek5.scene.environment.Environment
@@ -146,7 +144,7 @@ open class SceneGraph(
                         }
                     }
                 } else if (type == 2) {
-                    val interactive = Resource.mapRegion!!.getScene()!!!!.getInteractiveObject(plane, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+                    val interactive = Resource.mapRegion!!.getScene()!!!!.getInteractiveObject(plane, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
                     if (interactive != null) {
                         var shapeVar = shape
                         if (shape == 11) {
@@ -876,7 +874,7 @@ open class SceneGraph(
             gameObject = scene.getPrimaryWallDecoration(z, x, y) as? GameObject
         }
         if (type == 2) {
-            gameObject = scene.getInteractiveObject(z, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+            gameObject = scene.getInteractiveObject(z, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
         }
         if (type == 3) {
             gameObject = scene.getGroundDecoration(z, x, y) as? GameObject
@@ -1096,7 +1094,7 @@ open class SceneGraph(
                     scene.removeSecondaryWallDecoration(z, x, y)
                 }
                 2 -> {
-                    scene.removeInteractiveOnCondition(z, x, y, client.INTERACTIVE_OBJECT_COMPARABLE)
+                    scene.removeInteractiveOnCondition(z, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE)
                     if (locType.blocksMovement != 0 && x + locType.sizeX < regionSizeX && y + locType.sizeX < regionSizeY && x + locType.sizeY < regionSizeX && y + locType.sizeY < regionSizeY) {
                         clipping.unflagBlocked(x, y, locType.sizeX, locType.sizeY, rotation, locType.blocksProjectiles, !locType.ignoreClipOnAltRoute)
                     }

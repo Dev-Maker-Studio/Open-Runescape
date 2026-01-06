@@ -1,20 +1,16 @@
 package com.jagex.game.runetek5.entity.pathingentity.player
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.PreferenceManager
 import com.jagex.game.runetek5.client.ServerEnvironment
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.config.bas.BasType
 import com.jagex.game.runetek5.config.item.ItemType
 import com.jagex.game.runetek5.config.item.ItemTypeCustomisation
 import com.jagex.game.runetek5.config.sequence.MovementType
-import com.jagex.game.runetek5.config.sequence.MovingSequence
 import com.jagex.game.runetek5.config.sequence.Sequence
-import com.jagex.game.runetek5.config.sequence.spot.SpotAnimType
 import com.jagex.game.runetek5.entity.RenderedEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
@@ -28,14 +24,11 @@ import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISPLACE_Y
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.DISPLACE_Z
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask.TINT
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL
-import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.graphics.model.particle.Silhouette
 import com.jagex.game.runetek5.interaction.FriendList
 import com.jagex.game.runetek5.interaction.chat.ChatBox
 import com.jagex.game.runetek5.math.Matrix43
-import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.math.Vector3Pool
-import com.jagex.game.runetek5.movement.CoordinateSpace
 import com.jagex.game.runetek5.scene.MapRegion
 import com.jagex.game.runetek5.scene.RenderedEntityCache
 import com.jagex.game.runetek5.scene.Scene
@@ -233,7 +226,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     override fun privateMessagesEnabled(): Boolean {
-        return client.ENTITY_DEFAULTS!!.enablePlayerMessages
+        return Client.ENTITY_DEFAULTS!!.enablePlayerMessages
     }
 
     override fun getSize(): Int {
@@ -309,7 +302,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         }
 
         val rotation = yaw.getRotation()
-        val tintModel = opacity.toInt() != 0 && client.cycles >= tintStartCycle && client.cycles < tintEndCycle
+        val tintModel = opacity.toInt() != 0 && Client.cycles >= tintStartCycle && Client.cycles < tintEndCycle
         if (tintModel) {
             functionMask = functionMask or TINT
         }
@@ -329,18 +322,18 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE && bodyModelCount < 50) {
             var unusedSlots: Int
             unusedSlots = 50 - bodyModelCount
-            while (unusedSlots > client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES) {
-                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA!![client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = ByteArray(102400)
-                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES++
+            while (unusedSlots > Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES) {
+                Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA!![Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = ByteArray(102400)
+                Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES++
             }
 
-            while (unusedSlots < client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES) {
-                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES--
-                client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA!![client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = null
+            while (unusedSlots < Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES) {
+                Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES--
+                Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA!![Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES] = null
             }
         } else if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LIVE) {
-            client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA = arrayOfNulls(50)
-            client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES = 0
+            Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA = arrayOfNulls(50)
+            Client.TEST_ENVIRONMENT_APPEARANCE_OVERRIDES = 0
         }
 
         if (model == null) {
@@ -378,7 +371,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     fun sendChat(string_1: String, i_2: Int, i_3: Int) {
-        setHintDetails(string_1, i_2, i_3, GameShell.gameCyclesPerSecond() * client.ENTITY_DEFAULTS!!.playerMessageDuration)
+        setHintDetails(string_1, i_2, i_3, GameShell.gameCyclesPerSecond() * Client.ENTITY_DEFAULTS!!.playerMessageDuration)
     }
 
     override fun getCS2Index(): Int {
@@ -429,7 +422,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         skullId = buffer.readByte().toInt()
         prayerHeadIconId = buffer.readByte().toInt()
         hidden = buffer.readByte().toInt() == 1
-        if (ServerEnvironment.SERVER_ENVIRONMENT == ServerEnvironment.LIVE && client.PLAYER_RIGHTS >= 2) {
+        if (ServerEnvironment.SERVER_ENVIRONMENT == ServerEnvironment.LIVE && Client.PLAYER_RIGHTS >= 2) {
             hidden = false
         }
 
@@ -621,7 +614,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                     val hintArrow = PlayerUpdate.HINT_ARROWS[index]
                     if (hintArrow != null && hintArrow.modelId != -1) {
                         if (hintArrow.targetType == 1) {
-                            val objectNode = client.NPC_MAP.get(hintArrow.targetIndex.toLong())
+                            val objectNode = Client.NPC_MAP.get(hintArrow.targetIndex.toLong())
                             if (objectNode != null) {
                                 val npcEntity = objectNode.value as NpcEntity
                                 val abs = Vector3Pool.delta(npcEntity.getAbsolutePosition().coords, PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords)
@@ -684,7 +677,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                 models[index] = null
             }
 
-            drawCycle = client.timesSceneRendered
+            drawCycle = Client.timesSceneRendered
             return renderedEntity
         }
         return null

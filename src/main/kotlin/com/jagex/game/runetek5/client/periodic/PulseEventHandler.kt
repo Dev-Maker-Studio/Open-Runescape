@@ -4,7 +4,7 @@ import com.darkan.bot.scripts.ScriptExecutor
 import com.darkan.bot.scripts.event.Varc
 import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.Queue
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.ComponentType
 import com.jagex.game.runetek5.config.sequence.InterfaceSequence
@@ -104,7 +104,7 @@ object PulseEventHandler {
         var configIndex = VarProviders.PLAYER_VAR_PROVIDER.service(true)
         while (configIndex != -1) {
             PlayerUpdate.method8333(configIndex)
-            client.PULSE_EVENT_CONFIGS_CACHE[++client.pulseEventConfigsPtr - 1 and 0x1f] = configIndex
+            Client.PULSE_EVENT_CONFIGS_CACHE[++Client.pulseEventConfigsPtr - 1 and 0x1f] = configIndex
             configIndex = VarProviders.PLAYER_VAR_PROVIDER.service(false)
         }
         var event = getNextExecutedEvent()
@@ -115,12 +115,12 @@ object PulseEventHandler {
                 CLIENT_SETVARC -> {
                     ScriptExecutor.pushEvent(Varc(value.toInt(), VarcTypeList.VARC_INT!![value.toInt()], event.primary))
                     VarcTypeList.VARC_INT!![value.toInt()] = event.primary
-                    client.clientIsActive = client.clientIsActive or VarcTypeList.VARC_BOOL!![value.toInt()]
-                    client.anIntArray7150!![++client.keyCycle - 1 and 0x1f] = value.toInt()
+                    Client.clientIsActive = Client.clientIsActive or VarcTypeList.VARC_BOOL!![value.toInt()]
+                    Client.anIntArray7150!![++Client.keyCycle - 1 and 0x1f] = value.toInt()
                 }
                 CLIENT_SETVARCSTR -> {
                     VarcTypeList.VARC_STRING!![value.toInt()] = event.string
-                    client.recentMouseWheels!![++client.mouseWheelCycle - 1 and 0x1f] = value.toInt()
+                    Client.recentMouseWheels!![++Client.mouseWheelCycle - 1 and 0x1f] = value.toInt()
                 }
                 IF_SETTEXT -> {
                     val component = Component.fromHash(value.toInt())

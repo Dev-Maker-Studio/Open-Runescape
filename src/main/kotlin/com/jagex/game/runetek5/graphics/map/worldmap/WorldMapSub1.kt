@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.client.GraphicsCache
 import com.jagex.game.runetek5.client.JSObjectManager
 import com.jagex.game.runetek5.client.PreferenceManager
 import com.jagex.game.runetek5.client.ServerEnvironment
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.material.MaterialProvider
@@ -97,7 +97,7 @@ object WorldMapSub1 {
     fun reset(i_0: Int, i_1: Int, i_2: Int, bool3: Boolean) {
         if (PreferenceManager.preferences?.activeToolkit?.getValue() != 0) {
             AbstractToolkit.activeRenderMode = PreferenceManager.preferences?.activeToolkit?.getValue() ?: 0
-            client.loadAssets(0, true)
+            Client.loadAssets(0, true)
         } else {
             GraphicsCache.resetWorldmapCaches(false)
         }
@@ -243,7 +243,7 @@ object WorldMapSub1 {
                         return
                     }
 
-                    WorldMap.staticElements = StaticElementTypeList.list(WorldMap.MAP_AREA_RESOURCE!!, WorldMap.staticElement!!.filenamePrefix + "_staticelements", client.memberWorld)
+                    WorldMap.staticElements = StaticElementTypeList.list(WorldMap.MAP_AREA_RESOURCE!!, WorldMap.staticElement!!.filenamePrefix + "_staticelements", Client.memberWorld)
                 } else {
                     WorldMap.staticElements = StaticElements(0)
                 }

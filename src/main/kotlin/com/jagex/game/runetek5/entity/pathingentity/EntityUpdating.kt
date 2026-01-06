@@ -2,19 +2,14 @@ package com.jagex.game.runetek5.entity.pathingentity
 
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.GameShell
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.MiniMenu
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.config.bas.BasType
-import com.jagex.game.runetek5.config.cutscene.CutsceneEntity
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
-import com.jagex.game.runetek5.config.hitbar.HitbarType
 import com.jagex.game.runetek5.config.hitsplat.HitSplatType
 import com.jagex.game.runetek5.config.npc.NPCType
 import com.jagex.game.runetek5.config.sequence.MovementType
-import com.jagex.game.runetek5.config.sequence.SeqType
-import com.jagex.game.runetek5.config.sequence.spot.SpotAnimType
 import com.jagex.game.runetek5.entity.EntityNodeList
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
@@ -23,17 +18,13 @@ import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.font.FontMetrics
-import com.jagex.game.runetek5.graphics.hint.HintArrow
-import com.jagex.game.runetek5.graphics.hint.HintDetails
 import com.jagex.game.runetek5.graphics.hint.HintRenderer
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
-import com.jagex.game.runetek5.math.Quaternion
 import com.jagex.game.runetek5.math.QuaternionPool
 import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.math.Vector3Pool
-import com.jagex.game.runetek5.movement.CoordGrid
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.MapRegion
 import com.jagex.game.runetek5.staticmethods.StaticMethods
@@ -56,16 +47,16 @@ object EntityUpdating {
 
     @JvmStatic
     fun method12366(i_0: Int, startX: Int, startY: Int, endX: Int, endY: Int, drawX: Int, drawY: Int) {
-        if (client.MAP_LOADING_STAGE == 1) {
+        if (Client.MAP_LOADING_STAGE == 1) {
             val playerIndiceCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
             val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
             for (index in 0 until playerIndiceCount) {
                 val player = PlayerUpdate.players[playerIndices[index]]
                 player?.method15818(i_0, startX, startY, endX, endY, drawX, drawY)
             }
-            for (index in 0 until client.NPC_UPDATE_INDEX) {
-                val npcKey = client.NPC_UPDATE_INDICES[index]
-                val npcObjectNode = client.NPC_MAP.get(npcKey.toLong())
+            for (index in 0 until Client.NPC_UPDATE_INDEX) {
+                val npcKey = Client.NPC_UPDATE_INDICES[index]
+                val npcObjectNode = Client.NPC_MAP.get(npcKey.toLong())
                 if (npcObjectNode != null) {
                     (npcObjectNode.value as PathingEntity).method15818(i_0, startX, startY, endX, endY, drawX, drawY)
                 }
@@ -78,9 +69,9 @@ object EntityUpdating {
         var moveType = MovementType.STATIONARY.id.toInt()
         var turnDirection = 0
 
-        if (pathingEntity.forceMovementT1Delay > client.cycles) {
+        if (pathingEntity.forceMovementT1Delay > Client.cycles) {
             PathingEntity.forceMovementType1(pathingEntity)
-        } else if (pathingEntity.forceMovementT2Delay >= client.cycles) {
+        } else if (pathingEntity.forceMovementT2Delay >= Client.cycles) {
             PathingEntity.forceMovementType2(pathingEntity)
         } else {
             updatePosition(pathingEntity, cutscene)
@@ -139,25 +130,25 @@ object EntityUpdating {
     fun drawEntitites(clipLeft: Int, clipTop: Int, width: Int, height: Int) {
         val playerIndiceCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
         val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
-        client.currentHintPtr = 0
+        Client.currentHintPtr = 0
 
-        val maxIndex: Int = if (client.MAP_LOADING_STAGE == 4) {
+        val maxIndex: Int = if (Client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
         } else {
-            playerIndiceCount + client.NPC_UPDATE_INDEX
+            playerIndiceCount + Client.NPC_UPDATE_INDEX
         }
 
         var entity: Any?
         for (id in 0 until maxIndex) {
             var npctype: NPCType? = null
 
-            if (client.MAP_LOADING_STAGE == 4) {
+            if (Client.MAP_LOADING_STAGE == 4) {
                 val cutsceneEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![id]
                 if (!cutsceneEntity.initialized) {
                     continue
                 }
                 entity = cutsceneEntity.getEntity()
-                if ((entity as PathingEntity).drawCycle != client.timesSceneRendered) {
+                if ((entity as PathingEntity).drawCycle != Client.timesSceneRendered) {
                     continue
                 }
                 if (cutsceneEntity.id >= 0) {
@@ -173,7 +164,7 @@ object EntityUpdating {
                 if (id < playerIndiceCount) {
                     entity = PlayerUpdate.players[playerIndices[id]]
                 } else {
-                    entity = (client.NPC_MAP.get(client.NPC_UPDATE_INDICES[id - playerIndiceCount].toLong()) as ObjectNode).value
+                    entity = (Client.NPC_MAP.get(Client.NPC_UPDATE_INDICES[id - playerIndiceCount].toLong()) as ObjectNode).value
                     npctype = (entity as NpcEntity).definitions
                     if (npctype!!.alternativeIds != null) {
                         npctype = npctype!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
@@ -184,7 +175,7 @@ object EntityUpdating {
                 }
 
                 val pathingEntity = entity as PathingEntity
-                if (pathingEntity.worldPriority < 0 || pathingEntity.drawCycle != client.timesSceneRendered && pathingEntity.plane != PlayerUpdate.MY_PLAYER!!.plane) {
+                if (pathingEntity.worldPriority < 0 || pathingEntity.drawCycle != Client.timesSceneRendered && pathingEntity.plane != PlayerUpdate.MY_PLAYER!!.plane) {
                     continue
                 }
             }
@@ -192,26 +183,26 @@ object EntityUpdating {
             val pathingEntity = entity as PathingEntity
             HintRenderer.calculateHintForSceneobject(pathingEntity as SceneGraphEntity, pathingEntity.getIconHeight())
 
-            if (client.HINT_POSITION[0] >= 0.0F) {
+            if (Client.HINT_POSITION[0] >= 0.0F) {
                 if (pathingEntity.privateMessagesEnabled()) {
                     val details = pathingEntity.getHintDetails()
-                    if (details != null && client.currentHintPtr < client.MAX_HINTS) {
-                        client.HINT_WIDTH[client.currentHintPtr] = FontMetrics.aClass4143438!!.getWidthNoSprites(details.getText()!!) / 2
-                        client.HINT_X[client.currentHintPtr] = client.HINT_POSITION[0].toInt()
-                        client.HINT_Y[client.currentHintPtr] = client.HINT_POSITION[1].toInt()
-                        client.HINT_DETAILS[client.currentHintPtr] = details
-                        client.currentHintPtr++
+                    if (details != null && Client.currentHintPtr < Client.MAX_HINTS) {
+                        Client.HINT_WIDTH[Client.currentHintPtr] = FontMetrics.aClass4143438!!.getWidthNoSprites(details.getText()!!) / 2
+                        Client.HINT_X[Client.currentHintPtr] = Client.HINT_POSITION[0].toInt()
+                        Client.HINT_Y[Client.currentHintPtr] = Client.HINT_POSITION[1].toInt()
+                        Client.HINT_DETAILS[Client.currentHintPtr] = details
+                        Client.currentHintPtr++
                     }
                 }
 
-                var drawY = (clipTop + client.HINT_POSITION[1]).toInt()
+                var drawY = (clipTop + Client.HINT_POSITION[1]).toInt()
                 drawY -= FontMetrics.aClass4143438!!.topPadding
                 var bool94 = false
 
                 if (!pathingEntity.isHidden && !pathingEntity.entityHitbars.isEmpty()) {
                     var entityHitbar = pathingEntity.entityHitbars.getFirst() as EntityHitbar?
                     while (entityHitbar != null) {
-                        val displayDetails = entityHitbar.method12600(client.cycles)
+                        val displayDetails = entityHitbar.method12600(Client.cycles)
                         if (displayDetails == null) {
                             if (entityHitbar.method12602()) {
                                 entityHitbar.unlinkNode()
@@ -232,7 +223,7 @@ object EntityUpdating {
 
                             if (redBar != null && greenBar != null) {
                                 var alpha = 255
-                                val i_23 = client.cycles - displayDetails.discardAtCycle
+                                val i_23 = Client.cycles - displayDetails.discardAtCycle
                                 val i_24 = greenBar.getWidth() * displayDetails.toPercentage / 255
                                 val i_116: Int
 
@@ -254,7 +245,7 @@ object EntityUpdating {
                                 }
 
                                 val i_25 = redBar.getHeight()
-                                val drawX = (client.HINT_POSITION[0] + clipLeft - (redBar.getWidth() shr 1)).toInt()
+                                val drawX = (Client.HINT_POSITION[0] + clipLeft - (redBar.getWidth() shr 1)).toInt()
                                 drawY -= i_25
 
                                 if (alpha >= 0 && alpha < 255) {
@@ -279,7 +270,7 @@ object EntityUpdating {
                 }
 
                 if (!bool94) {
-                    drawY -= client.ENTITY_DEFAULTS!!.anInt7028 + 2
+                    drawY -= Client.ENTITY_DEFAULTS!!.anInt7028 + 2
                 }
 
                 if (!pathingEntity.isHidden) {
@@ -288,19 +279,19 @@ object EntityUpdating {
                         if (playerEntity.skullId != -1) {
                             val skullSprite = StaticMedia.headiconPkSprites!![playerEntity.skullId]
                             drawY -= skullSprite.getHeight()
-                            skullSprite.draw((client.HINT_POSITION[0] + clipLeft - 12.0F).toInt(), drawY)
+                            skullSprite.draw((Client.HINT_POSITION[0] + clipLeft - 12.0F).toInt(), drawY)
                             drawY -= 2
                         }
                         if (playerEntity.prayerHeadIconId != -1) {
                             val prayerSprite = StaticMedia.headiconPrayerSprites!![playerEntity.prayerHeadIconId]
                             drawY -= prayerSprite.getHeight()
-                            prayerSprite.draw((client.HINT_POSITION[0] + clipLeft - 12.0F).toInt(), drawY)
+                            prayerSprite.draw((Client.HINT_POSITION[0] + clipLeft - 12.0F).toInt(), drawY)
                             drawY -= 2
                         }
                     } else if (npctype.headIcons >= 0 && npctype.headIcons < StaticMedia.headiconPrayerSprites!!.size) {
                         val nativesprite120 = StaticMedia.headiconPrayerSprites!![npctype.headIcons]
                         drawY -= nativesprite120.getHeight()
-                        nativesprite120.draw((clipLeft + client.HINT_POSITION[0] - (nativesprite120.getWidth() shr 1)).toInt(), drawY)
+                        nativesprite120.draw((clipLeft + Client.HINT_POSITION[0] - (nativesprite120.getWidth() shr 1)).toInt(), drawY)
                         drawY -= 2
                     }
                 }
@@ -315,7 +306,7 @@ object EntityUpdating {
                                 if (playerArrow.getHeight() > i_15) {
                                     i_15 = playerArrow.getHeight()
                                 }
-                                playerArrow.draw((clipLeft + client.HINT_POSITION[0] - 12.0F).toInt(), drawY - playerArrow.getHeight())
+                                playerArrow.draw((clipLeft + Client.HINT_POSITION[0] - 12.0F).toInt(), drawY - playerArrow.getHeight())
                             }
                         }
                         if (i_15 > 0) {
@@ -327,7 +318,7 @@ object EntityUpdating {
                     var i_15 = 0
                     for (index in PlayerUpdate.HINT_ARROWS.indices) {
                         val arrow = PlayerUpdate.HINT_ARROWS[index]
-                        if (arrow != null && arrow.targetType == 1 && client.NPC_UPDATE_INDICES[id - playerIndiceCount] == arrow.targetIndex) {
+                        if (arrow != null && arrow.targetType == 1 && Client.NPC_UPDATE_INDICES[id - playerIndiceCount] == arrow.targetIndex) {
                             val npcArrow = StaticMedia.hintHeadiconSprites!![arrow.arrowSprite]
                             if (npcArrow.getHeight() > i_15) {
                                 i_15 = npcArrow.getHeight()
@@ -336,10 +327,10 @@ object EntityUpdating {
                                 true
                             } else {
                                 val i_21 = GameShell.gameCyclesPerSecond() * 1000 / arrow.denominator / 2
-                                client.cycles % (i_21 * 2) < i_21
+                                Client.cycles % (i_21 * 2) < i_21
                             }
                             if (shouldDraw) {
-                                npcArrow.draw((clipLeft + client.HINT_POSITION[0] - 12.0F).toInt(), drawY - npcArrow.getHeight())
+                                npcArrow.draw((clipLeft + Client.HINT_POSITION[0] - 12.0F).toInt(), drawY - npcArrow.getHeight())
                             }
                         }
                     }
@@ -350,14 +341,14 @@ object EntityUpdating {
                 }
 
                 // Hitsplat rendering
-                for (hitsplatIndex in 0 until client.ENTITY_DEFAULTS!!.maximumHits) {
+                for (hitsplatIndex in 0 until Client.ENTITY_DEFAULTS!!.maximumHits) {
                     val cycle = pathingEntity.hitsplatCycles[hitsplatIndex]
                     val hitplatId = pathingEntity.activeHitsplatIds[hitsplatIndex]
                     var hitsplatType: HitSplatType? = null
                     var cyclesVisible = 0
 
                     if (hitplatId >= 0) {
-                        if (cycle <= client.cycles) {
+                        if (cycle <= Client.cycles) {
                             continue
                         }
                         hitsplatType = TypeLists.HITSPLAT!!.list(pathingEntity.activeHitsplatIds[hitsplatIndex])
@@ -372,16 +363,16 @@ object EntityUpdating {
                         soakHitsplat = TypeLists.HITSPLAT!!.list(soakHitsplatId)
                     }
 
-                    if (cycle - cyclesVisible <= client.cycles) {
+                    if (cycle - cyclesVisible <= Client.cycles) {
                         if (hitsplatType == null) {
                             pathingEntity.hitsplatCycles[hitsplatIndex] = -1
                         } else {
                             val i_116 = pathingEntity.getIconHeight() / 2
                             HintRenderer.calculateHintForSceneobject(pathingEntity as SceneGraphEntity, i_116)
 
-                            if (client.HINT_POSITION[0] > -1.0f) {
-                                client.HINT_POSITION[0] += client.ENTITY_DEFAULTS!!.hitOffsetsX!![hitsplatIndex]
-                                client.HINT_POSITION[1] += client.ENTITY_DEFAULTS!!.hitOffsetsY!![hitsplatIndex]
+                            if (Client.HINT_POSITION[0] > -1.0f) {
+                                Client.HINT_POSITION[0] += Client.ENTITY_DEFAULTS!!.hitOffsetsX!![hitsplatIndex]
+                                Client.HINT_POSITION[1] += Client.ENTITY_DEFAULTS!!.hitOffsetsY!![hitsplatIndex]
 
                                 var i_27 = 0
                                 var i_28 = 0
@@ -412,8 +403,8 @@ object EntityUpdating {
                                     if (i_49 > i_47) {
                                         i_47 = i_49
                                     }
-                                    nativesprite48.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                    i_31 = client.HITSPLAT_SIZE_CACHE[0]
+                                    nativesprite48.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    i_31 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 val nativesprite106 = hitsplatType.method3836(Renderers.activeToolkit!!)
@@ -423,8 +414,8 @@ object EntityUpdating {
                                     if (i_50 > i_47) {
                                         i_47 = i_50
                                     }
-                                    nativesprite106.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                    i_32 = client.HITSPLAT_SIZE_CACHE[0]
+                                    nativesprite106.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    i_32 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 val nativesprite107 = hitsplatType.method3832(Renderers.activeToolkit!!)
@@ -434,8 +425,8 @@ object EntityUpdating {
                                     if (i_51 > i_47) {
                                         i_47 = i_51
                                     }
-                                    nativesprite107.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                    i_33 = client.HITSPLAT_SIZE_CACHE[0]
+                                    nativesprite107.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    i_33 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 val nativesprite108 = hitsplatType.method3838(Renderers.activeToolkit!!)
@@ -446,8 +437,8 @@ object EntityUpdating {
                                     if (i_52 > i_47) {
                                         i_47 = i_52
                                     }
-                                    nativesprite108.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                    i_34 = client.HITSPLAT_SIZE_CACHE[0]
+                                    nativesprite108.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    i_34 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 if (soakHitsplat != null) {
@@ -458,8 +449,8 @@ object EntityUpdating {
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite35.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                        i_43 = client.HITSPLAT_SIZE_CACHE[0]
+                                        nativesprite35.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        i_43 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                     nativesprite36 = soakHitsplat.method3836(Renderers.activeToolkit!!)
                                     if (nativesprite36 != null) {
@@ -468,8 +459,8 @@ object EntityUpdating {
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite36.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                        i_44 = client.HITSPLAT_SIZE_CACHE[0]
+                                        nativesprite36.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        i_44 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                     nativesprite37 = soakHitsplat.method3832(Renderers.activeToolkit!!)
                                     if (nativesprite37 != null) {
@@ -478,8 +469,8 @@ object EntityUpdating {
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite37.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                        i_45 = client.HITSPLAT_SIZE_CACHE[0]
+                                        nativesprite37.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        i_45 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                     nativesprite38 = soakHitsplat.method3838(Renderers.activeToolkit!!)
                                     if (nativesprite38 != null) {
@@ -488,8 +479,8 @@ object EntityUpdating {
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite38.cacheSizeInto(client.HITSPLAT_SIZE_CACHE)
-                                        i_46 = client.HITSPLAT_SIZE_CACHE[0]
+                                        nativesprite38.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        i_46 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                 }
 
@@ -502,8 +493,8 @@ object EntityUpdating {
                                 var fontmetrics58: FontMetrics?
 
                                 if (fontId >= 0) {
-                                    fontrenderer57 = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, fontId, true, hitsplatType.hasColor) as AbstractFontRenderer?
-                                    fontmetrics58 = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, fontId)
+                                    fontrenderer57 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId, true, hitsplatType.hasColor) as AbstractFontRenderer?
+                                    fontmetrics58 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId)
                                     if (fontrenderer57 != null && fontmetrics58 != null) {
                                         fontrenderer109 = fontrenderer57
                                         fontmetrics54 = fontmetrics58
@@ -513,8 +504,8 @@ object EntityUpdating {
                                 if (soakHitsplat != null) {
                                     fontId = soakHitsplat.fontId
                                     if (fontId >= 0) {
-                                        fontrenderer57 = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, fontId, true, soakHitsplat.hasColor) as AbstractFontRenderer?
-                                        fontmetrics58 = StaticMethods.initializedFontcombos!!.list(client.FONT_PROVIDER, fontId)
+                                        fontrenderer57 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId, true, soakHitsplat.hasColor) as AbstractFontRenderer?
+                                        fontmetrics58 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId)
                                         if (fontrenderer57 != null && fontmetrics58 != null) {
                                             soakFont = fontrenderer57
                                             fontmetrics55 = fontmetrics58
@@ -601,11 +592,11 @@ object EntityUpdating {
                                     }
                                 }
 
-                                i_76 = pathingEntity.hitsplatCycles[hitsplatIndex] - client.cycles
+                                i_76 = pathingEntity.hitsplatCycles[hitsplatIndex] - Client.cycles
                                 val i_77 = hitsplatType.anInt2846 - i_76 * hitsplatType.anInt2846 / hitsplatType.cyclesVisible
                                 val i_78 = i_76 * hitsplatType.anInt2833 / hitsplatType.cyclesVisible + -hitsplatType.anInt2833
-                                val i_79 = (clipLeft + client.HINT_POSITION[0] - (i_65 shr 1) + i_77).toInt()
-                                val i_80 = (i_78 + (client.HINT_POSITION[1] + clipTop - 12.0F)).toInt()
+                                val i_79 = (clipLeft + Client.HINT_POSITION[0] - (i_65 shr 1) + i_77).toInt()
+                                val i_80 = (i_78 + (Client.HINT_POSITION[1] + clipTop - 12.0F)).toInt()
                                 var i_81 = i_80
                                 var i_82 = i_80 + i_47
                                 val i_83 = i_80 + hitsplatType.anInt2832 + 15
@@ -716,60 +707,60 @@ object EntityUpdating {
             }
         }
 
-        for (index in 0 until client.anInt7304) {
-            val ptr = client.ENTITY_INDEX_REFERENCES[index]
+        for (index in 0 until Client.anInt7304) {
+            val ptr = Client.ENTITY_INDEX_REFERENCES[index]
             entity = if (ptr < 2048) {
                 PlayerUpdate.players[ptr]
             } else {
-                (client.NPC_MAP.get((ptr - 2048).toLong()) as ObjectNode).value
+                (Client.NPC_MAP.get((ptr - 2048).toLong()) as ObjectNode).value
             }
-            val i_92 = client.NPC_INDEX_REFERENCES[index]
+            val i_92 = Client.NPC_INDEX_REFERENCES[index]
             val obj14: Any? = if (i_92 < 2048) {
                 PlayerUpdate.players[i_92]
             } else {
-                (client.NPC_MAP.get((i_92 - 2048).toLong()) as ObjectNode).value
+                (Client.NPC_MAP.get((i_92 - 2048).toLong()) as ObjectNode).value
             }
             method7140(entity as PathingEntity, obj14 as PathingEntity, --((entity as PathingEntity).anInt10319), clipLeft, clipTop)
         }
 
         val padding = FontMetrics.aClass4143438!!.bottomPadding + FontMetrics.aClass4143438!!.topPadding + 2
-        for (hintIndex in 0 until client.currentHintPtr) {
-            val hintX = client.HINT_X[hintIndex]
-            var hintY = client.HINT_Y[hintIndex]
-            val hintWidth = client.HINT_WIDTH[hintIndex]
+        for (hintIndex in 0 until Client.currentHintPtr) {
+            val hintX = Client.HINT_X[hintIndex]
+            var hintY = Client.HINT_Y[hintIndex]
+            val hintWidth = Client.HINT_WIDTH[hintIndex]
             var loop = true
 
             while (loop) {
                 loop = false
                 for (index in 0 until hintIndex) {
-                    if (hintY + 2 > client.HINT_Y[index] - padding && hintY - padding < client.HINT_Y[index] + 2 && hintX - hintWidth < client.HINT_WIDTH[index] + client.HINT_X[index] && hintX + hintWidth > client.HINT_X[index] - client.HINT_WIDTH[index] && client.HINT_Y[index] - padding < hintY) {
-                        hintY = client.HINT_Y[index] - padding
+                    if (hintY + 2 > Client.HINT_Y[index] - padding && hintY - padding < Client.HINT_Y[index] + 2 && hintX - hintWidth < Client.HINT_WIDTH[index] + Client.HINT_X[index] && hintX + hintWidth > Client.HINT_X[index] - Client.HINT_WIDTH[index] && Client.HINT_Y[index] - padding < hintY) {
+                        hintY = Client.HINT_Y[index] - padding
                         loop = true
                     }
                 }
             }
 
-            client.HINT_Y[hintIndex] = hintY
-            val drawnText = client.HINT_DETAILS[hintIndex]!!.getText()
+            Client.HINT_Y[hintIndex] = hintY
+            val drawnText = Client.HINT_DETAILS[hintIndex]!!.getText()
 
-            if (client.anInt7351 == 0) {
+            if (Client.anInt7351 == 0) {
                 var color = 16776960
-                val i_18 = client.HINT_DETAILS[hintIndex]!!.getColorType()
+                val i_18 = Client.HINT_DETAILS[hintIndex]!!.getColorType()
 
                 if (i_18 < 6) {
-                    color = client.anIntArray7148[i_18]
+                    color = Client.anIntArray7148[i_18]
                 }
                 if (i_18 == 6) {
-                    color = if (client.timesSceneRendered % 20 < 10) 16711680 else 16776960
+                    color = if (Client.timesSceneRendered % 20 < 10) 16711680 else 16776960
                 }
                 if (i_18 == 7) {
-                    color = if (client.timesSceneRendered % 20 < 10) 255 else 65535
+                    color = if (Client.timesSceneRendered % 20 < 10) 255 else 65535
                 }
                 if (i_18 == 8) {
-                    color = if (client.timesSceneRendered % 20 < 10) 45056 else 8454016
+                    color = if (Client.timesSceneRendered % 20 < 10) 45056 else 8454016
                 }
                 if (i_18 == 9) {
-                    val i_19 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    val i_19 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     if (i_19 < 50) {
                         color = i_19 * 1280 + 16711680
                     } else if (i_19 < 100) {
@@ -779,7 +770,7 @@ object EntityUpdating {
                     }
                 }
                 if (i_18 == 10) {
-                    val i_19 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    val i_19 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     if (i_19 < 50) {
                         color = i_19 * 5 + 16711680
                     } else if (i_19 < 100) {
@@ -789,7 +780,7 @@ object EntityUpdating {
                     }
                 }
                 if (i_18 == 11) {
-                    val i_19 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    val i_19 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     if (i_19 < 50) {
                         color = 16777215 - i_19 * 327685
                     } else if (i_19 < 100) {
@@ -800,7 +791,7 @@ object EntityUpdating {
                 }
 
                 val drawColor = color or 0xFF000000.toInt()
-                val drawType = client.HINT_DETAILS[hintIndex]!!.getDrawType()
+                val drawType = Client.HINT_DETAILS[hintIndex]!!.getDrawType()
 
                 if (drawType == 0) {
                     // All regular text: no effects / plain color effects (red:) / cyan / flash1 / flash2 / flash3 / glow1 / glow2 / glow3
@@ -808,20 +799,20 @@ object EntityUpdating {
                 }
                 if (drawType == 1) {
                     // Wave effect (wave:texthere)
-                    MiniMenu.minimenuHeader!!.renderCenteredWave(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, client.timesSceneRendered)
+                    MiniMenu.minimenuHeader!!.renderCenteredWave(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered)
                 }
                 if (drawType == 2) {
                     // Wave2 effect (wave2:texthere)
-                    MiniMenu.minimenuHeader!!.renderCenteredWave2(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, client.timesSceneRendered)
+                    MiniMenu.minimenuHeader!!.renderCenteredWave2(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered)
                 }
                 if (drawType == 3) {
                     // Shake effect (shake:texthere)
-                    val i_21 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, client.timesSceneRendered, i_21)
+                    val i_21 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered, i_21)
                 }
                 if (drawType == 4) {
                     // Scroll effect (scroll:texthere)
-                    val i_21 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    val i_21 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     val i_116 = i_21 * (FontMetrics.aClass4143438!!.getWidthNoSprites(drawnText!!) + 100) / 150
                     Renderers.activeToolkit!!.expandClipping(clipLeft + hintX - 50, clipTop, clipLeft + hintX + 50, height + clipTop)
                     MiniMenu.minimenuHeader!!.renderPlain(drawnText, clipLeft + hintX + 50 - i_116, hintY + clipTop, drawColor, 0xFF000000.toInt())
@@ -829,7 +820,7 @@ object EntityUpdating {
                 }
                 if (drawType == 5) {
                     // Slide effect (slide:texthere)
-                    val i_21 = 150 - client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    val i_21 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
                     var i_116 = 0
                     if (i_21 < 25) {
                         i_116 = i_21 - 25
@@ -856,7 +847,7 @@ object EntityUpdating {
         if (current.faceEntity != -1) {
             var facingEntity: Any? = null
             if (current.faceEntity < 32768) {
-                val facingNpc = client.NPC_MAP.get(current.faceEntity.toLong())
+                val facingNpc = Client.NPC_MAP.get(current.faceEntity.toLong())
                 if (facingNpc != null) {
                     facingEntity = facingNpc.value
                 }
@@ -899,20 +890,20 @@ object EntityUpdating {
     fun method7140(pathingEntity: PathingEntity, pathingNpc: PathingEntity, i_2: Int, clipLeft: Int, clipTop: Int) {
         val overheadSpriteId = pathingNpc.getOverheadSprite()
         if (overheadSpriteId != -1) {
-            var overheadSprites = client.OVERHEAD_SPRITES.get(overheadSpriteId.toLong()) as NativeSprite?
+            var overheadSprites = Client.OVERHEAD_SPRITES.get(overheadSpriteId.toLong()) as NativeSprite?
             if (overheadSprites == null) {
                 val overheadSpriteTypes = SpriteType.decodeGroup(Resource.SPRITES, overheadSpriteId)
                 if (overheadSpriteTypes == null) {
                     return
                 }
                 overheadSprites = Renderers.activeToolkit!!.generateSprite(overheadSpriteTypes[0], true)
-                client.OVERHEAD_SPRITES.put(overheadSprites, overheadSpriteId.toLong())
+                Client.OVERHEAD_SPRITES.put(overheadSprites, overheadSpriteId.toLong())
             }
 
             val abs = pathingEntity.getAbsolutePosition().coords
             HintRenderer.calculateHintArrowPlacement(pathingEntity.plane.toInt(), abs.x.toInt(), abs.z.toInt(), pathingEntity.getSize() * 256, 0, false)
-            var drawX = (clipLeft + client.HINT_POSITION[0] - 18.0F).toInt()
-            var drawY = (clipTop + client.HINT_POSITION[1] - 16.0F - 54.0F).toInt()
+            var drawX = (clipLeft + Client.HINT_POSITION[0] - 18.0F).toInt()
+            var drawY = (clipTop + Client.HINT_POSITION[1] - 16.0F - 54.0F).toInt()
             drawX += i_2 / 4 * 18
             drawY += i_2 % 4 * 18
             overheadSprites.draw(drawX, drawY)
@@ -927,7 +918,7 @@ object EntityUpdating {
             class275Sub215.startY = drawY
             class275Sub215.endX = drawX + 16
             class275Sub215.endY = drawY + 16
-            client.ENTITY_OVERHEADS.offer(class275Sub215)
+            Client.ENTITY_OVERHEADS.offer(class275Sub215)
         }
     }
 
@@ -952,17 +943,17 @@ object EntityUpdating {
 
     @JvmStatic
     fun method14519() {
-        var overhead = client.ENTITY_OVERHEADS.get() as EntityOverhead?
+        var overhead = Client.ENTITY_OVERHEADS.get() as EntityOverhead?
         while (overhead != null) {
             method8695(overhead)
-            overhead = client.ENTITY_OVERHEADS.get() as EntityOverhead?
+            overhead = Client.ENTITY_OVERHEADS.get() as EntityOverhead?
         }
 
         val fromPlane: Byte = 0
         val toPlane: Byte = 3
         var plane: Int
 
-        if (client.MAP_LOADING_STAGE == 4) {
+        if (Client.MAP_LOADING_STAGE == 4) {
             for (plane in fromPlane.toInt()..toPlane.toInt()) {
                 PlayerUpdate.method11629(plane)
             }
@@ -973,7 +964,7 @@ object EntityUpdating {
                 PlayerUpdate.updateDrawPriority(plane)
                 PlayerUpdate.method11629(plane)
             }
-            client.method11750()
+            Client.method11750()
         }
         PlayerUpdate.method11619()
     }
@@ -1231,7 +1222,7 @@ object EntityUpdating {
                             }
                             lastAbsolutePosition = player.getAbsolutePosition().coords
                         } else {
-                            val npcReference = client.NPC_MAP.get(bitpacked.toLong())
+                            val npcReference = Client.NPC_MAP.get(bitpacked.toLong())
                             if (npcReference == null) {
                                 current.rotateEquipment(equipIndex, -1)
                                 continue

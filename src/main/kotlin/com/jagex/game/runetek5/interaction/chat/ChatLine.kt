@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.interaction.chat
 
 import com.jagex.game.runetek5.client.ChatMessageType
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 
 /**
  * [J]
@@ -31,7 +31,7 @@ class ChatLine(
     @JvmField var message: String? = null
 
     init {
-        this.time = client.cycles
+        this.time = Client.cycles
         this.type = type
         this.effectFlags = effectFlags
         this.crownedName = crownedName
@@ -44,7 +44,7 @@ class ChatLine(
 
     fun set(type: ChatMessageType?, effectFlags: Int, crownedName: String?, name: String?, simpleName: String?, clan: String?, quickchatMessageId: Int, message: String?) {
         this.identifier = ChatBox.getChatlineIdentifier()
-        this.time = client.cycles
+        this.time = Client.cycles
         this.type = type
         this.effectFlags = effectFlags
         this.crownedName = crownedName

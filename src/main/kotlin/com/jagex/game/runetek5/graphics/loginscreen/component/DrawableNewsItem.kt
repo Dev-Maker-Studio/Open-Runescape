@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.graphics.loginscreen.component
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.MiniMenu
 import com.jagex.game.runetek5.config.gametip.component.OutlinedNewsItem
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
@@ -23,8 +23,8 @@ class DrawableNewsItem(
     override fun draw(bool1: Boolean) {
         val newsitem = newsItemFetcher.get(outlinedNewsItem.newsitemId) ?: return
 
-        var x = outlinedNewsItem.horizontalAnchor.calculateDrawX(outlinedNewsItem.width, client.GAME_WIDTH) + outlinedNewsItem.offsetX
-        var y = outlinedNewsItem.verticalAnchor.calculateDrawY(outlinedNewsItem.height, client.GAME_HEIGHT) + outlinedNewsItem.offsetY
+        var x = outlinedNewsItem.horizontalAnchor.calculateDrawX(outlinedNewsItem.width, Client.GAME_WIDTH) + outlinedNewsItem.offsetX
+        var y = outlinedNewsItem.verticalAnchor.calculateDrawY(outlinedNewsItem.height, Client.GAME_HEIGHT) + outlinedNewsItem.offsetY
 
         if (outlinedNewsItem.drawOutline) {
             Renderers.activeToolkit!!.drawRectangleOutline(

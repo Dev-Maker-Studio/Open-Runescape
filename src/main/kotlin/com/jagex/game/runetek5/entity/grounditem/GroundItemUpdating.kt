@@ -1,10 +1,9 @@
 package com.jagex.game.runetek5.entity.grounditem
 
 import com.jagex.game.runetek5.cache.node.Node
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.movement.CoordGrid
 import com.jagex.game.runetek5.scene.MapRegion
 import com.jagex.game.runetek5.scene.RegionLoadingType
 
@@ -13,10 +12,10 @@ object GroundItemUpdating {
     @JvmStatic
     fun addGroundItem(z: Int, x: Int, y: Int, addedGroundItem: GroundItemNode) {
         val uid = z.toLong() shl 28 or (y.toLong() shl 14) or x.toLong()
-        var groundItemWrapper = client.GROUND_ITEMS.get(uid)
+        var groundItemWrapper = Client.GROUND_ITEMS.get(uid)
         if (groundItemWrapper == null) {
             groundItemWrapper = GroundItemWrapper()
-            client.GROUND_ITEMS.put(groundItemWrapper, uid)
+            Client.GROUND_ITEMS.put(groundItemWrapper, uid)
         } else {
             val addedObjType = TypeLists.OBJ!!.list(addedGroundItem.id)
             var addedItemValue = addedObjType.value
@@ -50,7 +49,7 @@ object GroundItemUpdating {
         val absY = base.y + y
         if (Resource.mapRegion!!.getScene()!! != null && Resource.mapRegion!!.loadingType != RegionLoadingType.CUTSCENE && x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
             val hash = plane.toLong() shl 28 or (absY.toLong() shl 14) or absX.toLong()
-            val node = client.GROUND_ITEMS.get(hash)
+            val node = Client.GROUND_ITEMS.get(hash)
             if (node == null) {
                 Resource.mapRegion!!.getScene()!!.removeGroundItem(plane, x, y)
             } else {

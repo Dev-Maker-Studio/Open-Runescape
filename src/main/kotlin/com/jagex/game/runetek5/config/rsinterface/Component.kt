@@ -8,16 +8,14 @@ import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.NodeCollection
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.bas.BasTypeList
 import com.jagex.game.runetek5.config.identitykit.IdkTypeList
 import com.jagex.game.runetek5.config.npc.NpcTypeList
-import com.jagex.game.runetek5.config.item.ItemType
 import com.jagex.game.runetek5.config.item.ItemTypeList
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.config.sequence.InterfaceSequence
-import com.jagex.game.runetek5.config.sequence.MovingSequence
 import com.jagex.game.runetek5.config.sequence.Sequence
 import com.jagex.game.runetek5.config.skybox.SkyboxTypeList
 import com.jagex.game.runetek5.config.sun.SunTypeList
@@ -34,8 +32,6 @@ import com.jagex.game.runetek5.graphics.light.Skybox
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.MediaType
-import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
-import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystem
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
@@ -127,7 +123,7 @@ class Component {
                     component.secondaryMediaId = 0
                 } else {
                     component.spritePitch = 150
-                    component.spriteRoll = (Math.sin(client.cycles / 40.0) * 256.0).toInt() and 0x7ff
+                    component.spriteRoll = (Math.sin(Client.cycles / 40.0) * 256.0).toInt() and 0x7ff
                     component.mediaType = MediaType.PLAYER_MODEL
                     component.primaryMediaId = PlayerUpdate.myPlayerIndex
                     val displayName = PlayerUpdate.MY_PLAYER!!.displayName
@@ -164,7 +160,7 @@ class Component {
                         if (component.itemSlots != null) {
                             update(component.itemSlots!!, component.idHash)
                         }
-                        val subinterface = client.OPEN_INTERFACES!![component.idHash.toLong()]
+                        val subinterface = Client.OPEN_INTERFACES!![component.idHash.toLong()]
                         if (subinterface != null) {
                             update(subinterface.subInterfaceId)
                         }
@@ -174,7 +170,7 @@ class Component {
                             component.animatingSequence = InterfaceSequence()
                             component.animatingSequence!!.update(component.animation)
                         }
-                        if (component.animatingSequence!!.progressCycle(client.animatingStep) && component.animatingSequence!!.needsReset()) {
+                        if (component.animatingSequence!!.progressCycle(Client.animatingStep) && component.animatingSequence!!.needsReset()) {
                             component.animatingSequence!!.reset()
                         }
                     }
@@ -192,7 +188,7 @@ class Component {
 
         @JvmStatic
         fun getCursor(component: Component, option: Int): Int {
-            return if (!client.getComponentSettings(component)!!.clickOptionEnabled(option) && component.params == null)
+            return if (!Client.getComponentSettings(component)!!.clickOptionEnabled(option) && component.params == null)
                 -1
             else
                 if (component.opCursors != null && component.opCursors!!.size > option) component.opCursors!![option] else -1
@@ -215,18 +211,18 @@ class Component {
 
         @JvmStatic
         fun componentMenuOption(component: Component, option: Int): String? {
-            return if (!client.getComponentSettings(component)!!.clickOptionEnabled(option) && component.params == null)
+            return if (!Client.getComponentSettings(component)!!.clickOptionEnabled(option) && component.params == null)
                 null
             else
                 if (component.options != null && component.options!!.size > option && component.options!![option] != null && component.options!![option]!!.trim().isNotEmpty())
                     component.options!![option]
                 else
-                    if (client.DISPLAY_HIDDEN_MENU_OPTIONS) "Hidden-$option" else null
+                    if (Client.DISPLAY_HIDDEN_MENU_OPTIONS) "Hidden-$option" else null
         }
 
         @JvmStatic
         fun getDepthChild(icomponentdefinitions0: Component): Component? {
-            var icomponentdefinitions2 = client.method11634(icomponentdefinitions0)
+            var icomponentdefinitions2 = Client.method11634(icomponentdefinitions0)
             if (icomponentdefinitions2 == null) {
                 icomponentdefinitions2 = icomponentdefinitions0.depthChildOverride
             }
@@ -257,10 +253,10 @@ class Component {
         fun method3629(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
             if (!Interface.interfaceLoaded(i_0, null)) {
                 if (i_7 != -1) {
-                    client.IS_COMPONENT_ON_TOP[i_7] = true
+                    Client.IS_COMPONENT_ON_TOP[i_7] = true
                 } else {
                     for (i_9 in 0 until 107) {
-                        client.IS_COMPONENT_ON_TOP[i_9] = true
+                        Client.IS_COMPONENT_ON_TOP[i_9] = true
                     }
                 }
             } else {
@@ -294,8 +290,8 @@ class Component {
 
         @JvmStatic
         fun redrawComponent(component: Component) {
-            if (component.lastRenderedCycle == client.anInt7408) {
-                client.IS_COMPONENT_ON_TOP[component.cacheReference] = true
+            if (component.lastRenderedCycle == Client.anInt7408) {
+                Client.IS_COMPONENT_ON_TOP[component.cacheReference] = true
             }
         }
     }

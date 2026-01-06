@@ -5,7 +5,7 @@ import java.awt.EventQueue
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.client.GameShell
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.graphics.font.FontManager
@@ -383,7 +383,7 @@ class SystemInfo : Node<SystemInfo>() {
         fun drawDebugInformation(x: Int, y: Int, inter: Component) {
             val currDrawX = inter.width + x
             var currDrawY = y + 15
-            if (client.DRAW_DEBUG) {
+            if (Client.DRAW_DEBUG) {
                 var fpsColor = -256
                 if (GameShell.FPS < 20) {
                     fpsColor = -65536
@@ -399,7 +399,7 @@ class SystemInfo : Node<SystemInfo>() {
                 }
                 FontManager.debugOverlayFont!!.renderLeftAligned("Mem:$freeMem/${totalMem}k", currDrawX, currDrawY, memColor, -1)
                 currDrawY += 15
-                val gamePing = client.GAME_CONNECTION_CONTEXT!!.pinger.getPing()
+                val gamePing = Client.GAME_CONNECTION_CONTEXT!!.pinger.getPing()
                 var gamePingStr = "N/A"
                 if (gamePing != -1L) {
                     gamePingStr = gamePing.toString() + "ms"
@@ -407,9 +407,9 @@ class SystemInfo : Node<SystemInfo>() {
                         gamePingStr = TextUtils.setTextColor(16711680) + gamePingStr + TextUtils.setTextColor(16776960)
                     }
                 }
-                FontManager.debugOverlayFont!!.renderLeftAligned("Game: In:" + client.GAME_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + client.GAME_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + gamePingStr, currDrawX, currDrawY, -256, -1)
+                FontManager.debugOverlayFont!!.renderLeftAligned("Game: In:" + Client.GAME_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + Client.GAME_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + gamePingStr, currDrawX, currDrawY, -256, -1)
                 currDrawY += 15
-                val lobbyPing = client.LOBBY_CONNECTION_CONTEXT!!.pinger.getPing()
+                val lobbyPing = Client.LOBBY_CONNECTION_CONTEXT!!.pinger.getPing()
                 var lobbyPingStr = "N/A"
                 if (lobbyPing != -1L) {
                     lobbyPingStr = lobbyPing.toString() + "ms"
@@ -417,7 +417,7 @@ class SystemInfo : Node<SystemInfo>() {
                         lobbyPingStr = TextUtils.setTextColor(16711680) + lobbyPingStr + TextUtils.setTextColor(16776960)
                     }
                 }
-                FontManager.debugOverlayFont!!.renderLeftAligned("Lobby: In:" + client.LOBBY_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + client.LOBBY_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + lobbyPingStr, currDrawX, currDrawY, -256, -1)
+                FontManager.debugOverlayFont!!.renderLeftAligned("Lobby: In:" + Client.LOBBY_CONNECTION_CONTEXT!!.inBytesPerSec + "B/s Out:" + Client.LOBBY_CONNECTION_CONTEXT!!.outBytesPerSec + "B/s Ping:" + lobbyPingStr, currDrawX, currDrawY, -256, -1)
                 currDrawY += 15
                 val i_19 = Renderers.activeToolkit!!.getOffheap() / 1024
                 FontManager.debugOverlayFont!!.renderLeftAligned("Offheap:${i_19}k", currDrawX, currDrawY, if (i_19 > 65536) -65536 else -256, -1)

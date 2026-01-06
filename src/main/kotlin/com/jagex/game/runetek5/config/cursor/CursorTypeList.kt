@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.lru.LRUCache
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.mouse.CursorManager
 import com.jagex.game.runetek5.config.SharedConfigsType
 import com.jagex.game.runetek5.config.TypeLists
@@ -80,7 +80,7 @@ class CursorTypeList(
             if (PreferenceManager.preferences!!.customCursor!!.getValue() == 0) {
                 cursor = -1
             }
-            if (cursor != client.CURRENT_CURSOR) {
+            if (cursor != Client.CURRENT_CURSOR) {
                 if (cursor != -1) {
                     val cursortype = TypeLists.CURSOR!!.list(cursor)
                     val spritetype = cursortype.getSprite()
@@ -92,14 +92,14 @@ class CursorTypeList(
                             spritetype.heightSum(),
                             Point(cursortype.hotspotPointX, cursortype.hotspotPointY)
                         )
-                        client.CURRENT_CURSOR = cursor
+                        Client.CURRENT_CURSOR = cursor
                     } else {
                         cursor = -1
                     }
                 }
-                if (cursor == -1 && client.CURRENT_CURSOR != -1) {
+                if (cursor == -1 && Client.CURRENT_CURSOR != -1) {
                     CursorManager.instance!!.setCustomCursor(GameShell.gameCanvas!!, null, -1, -1, Point())
-                    client.CURRENT_CURSOR = -1
+                    Client.CURRENT_CURSOR = -1
                 }
             }
         }

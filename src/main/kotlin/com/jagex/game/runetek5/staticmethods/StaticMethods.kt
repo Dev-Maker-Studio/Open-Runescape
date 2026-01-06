@@ -141,15 +141,15 @@ object StaticMethods {
 
     @JvmStatic
     fun drawTileMessages(x: Int, y: Int) {
-        var msg = client.TILE_MESSAGES.getFirst() as TileMessage?
+        var msg = Client.TILE_MESSAGES.getFirst() as TileMessage?
         while (msg != null) {
-            if (client.cycles >= msg.lastCycle) {
+            if (Client.cycles >= msg.lastCycle) {
                 msg.unlinkNode()
             } else {
                 HintRenderer.calculateHintArrowPlacement(msg.plane, (msg.absoluteX shl 9) + 256, (msg.absoluteY shl 9) + 256, msg.tileHeight * 2)
-                MiniMenu.minimenuHeader!!.renderCentered(msg.minimenuText, (x + client.HINT_POSITION[0]).toInt(), (y + client.HINT_POSITION[1]).toInt(), 0xffffff.inv() or msg.minimenuColor, 0)
+                MiniMenu.minimenuHeader!!.renderCentered(msg.minimenuText, (x + Client.HINT_POSITION[0]).toInt(), (y + Client.HINT_POSITION[1]).toInt(), 0xffffff.inv() or msg.minimenuColor, 0)
             }
-            msg = client.TILE_MESSAGES.getNext() as TileMessage?
+            msg = Client.TILE_MESSAGES.getNext() as TileMessage?
         }
     }
 
@@ -175,7 +175,7 @@ object StaticMethods {
     @JvmStatic
     fun method7039() {
         InterfaceComponentRenderer.aClass118Array3772 = null
-        Component.method3629(client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
+        Component.method3629(Client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
         if (InterfaceComponentRenderer.aClass118Array3772 != null) {
             val arr_1 = InterfaceComponentRenderer.aClass118Array3772
             val i_2 = -1412584499
@@ -185,10 +185,10 @@ object StaticMethods {
             val i_6 = GameShell.screenCanvasHeight * -969250379
             val i_7 = InterfaceComponentRenderer.anInt4822
             val i_8 = InterfaceComponentRenderer.anInt5157
-            val i_9: Int = if (client.selectedComponent == client.frameComponent) {
+            val i_9: Int = if (Client.selectedComponent == Client.frameComponent) {
                 -1
             } else {
-                client.selectedComponent!!.cacheReference
+                Client.selectedComponent!!.cacheReference
             }
 
             InterfaceComponentRenderer.drawComponents(arr_1!!, i_2, b_3, b_4, i_5, i_6, i_7, i_8, i_9, true)
@@ -385,10 +385,10 @@ object StaticMethods {
 
     @JvmStatic
     fun method8146() {
-        if (!client.aBool7269) {
-            client.aFloat7266 += (-24.0f - client.aFloat7266) / 2.0f
-            client.sendCameraAngleToServer = true
-            client.aBool7269 = true
+        if (!Client.aBool7269) {
+            Client.aFloat7266 += (-24.0f - Client.aFloat7266) / 2.0f
+            Client.sendCameraAngleToServer = true
+            Client.aBool7269 = true
         }
     }
 
@@ -400,17 +400,17 @@ object StaticMethods {
             }
 
             anInt76 = i_0
-            client.LOBBY_CONNECTION_CONTEXT!!.closeConnection()
-            client.setGameState(GameState.UNK_14)
+            Client.LOBBY_CONNECTION_CONTEXT!!.closeConnection()
+            Client.setGameState(GameState.UNK_14)
         }
     }
 
     @JvmStatic
     fun method16114() {
-        if (!client.aBool7331) {
-            client.aFloat7284 += (-12.0f - client.aFloat7284) / 2.0f
-            client.sendCameraAngleToServer = true
-            client.aBool7331 = true
+        if (!Client.aBool7331) {
+            Client.aFloat7284 += (-12.0f - Client.aFloat7284) / 2.0f
+            Client.sendCameraAngleToServer = true
+            Client.aBool7331 = true
         }
     }
 
@@ -484,16 +484,16 @@ object StaticMethods {
 
     @JvmStatic
     fun method3953() {
-        aShort828 = client.aShort7214
-        aShort829 = client.aShort7474
-        AbstractMousePacket.aShort7079 = client.aShort7276
-        aShort830 = client.aShort7441
+        aShort828 = Client.aShort7214
+        aShort829 = Client.aShort7474
+        AbstractMousePacket.aShort7079 = Client.aShort7276
+        aShort830 = Client.aShort7441
         aBool826 = true
         if (anInt824 != 0 && CutsceneTypeList.anInt825 != 0) {
-            client.aShort7276 = 334
-            client.aShort7441 = 334
-            client.aShort7474 = (anInt824 * 512 / CutsceneTypeList.anInt825).toShort()
-            client.aShort7214 = client.aShort7474
+            Client.aShort7276 = 334
+            Client.aShort7441 = 334
+            Client.aShort7474 = (anInt824 * 512 / CutsceneTypeList.anInt825).toShort()
+            Client.aShort7214 = Client.aShort7474
         }
     }
 
@@ -515,10 +515,10 @@ object StaticMethods {
 
     @JvmStatic
     fun method4166() {
-        if (!client.aBool7331) {
-            client.aFloat7284 += (12.0f - client.aFloat7284) / 2.0f
-            client.sendCameraAngleToServer = true
-            client.aBool7331 = true
+        if (!Client.aBool7331) {
+            Client.aFloat7284 += (12.0f - Client.aFloat7284) / 2.0f
+            Client.sendCameraAngleToServer = true
+            Client.aBool7331 = true
         }
     }
 
@@ -535,14 +535,14 @@ object StaticMethods {
         }
         val string_13 = MiniMenu.formatTag(class282Sub50Sub157)
         @Suppress("UNCHECKED_CAST")
-        fontrenderer8.method386(string_13, i_2 + 3, i_6, i_101, client.RANDOMIZER, client.randomSeed, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
+        fontrenderer8.method386(string_13, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
     }
 
     @JvmStatic
     fun method4653(mouseX: Int, mouseY: Int) {
-        if (client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712!!.action.equals(LocalizedText.FACE_HERE.translate(client.CURRENT_LANGUAGE!!)))) {
+        if (Client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712!!.action.equals(LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)))) {
             val fontMetrics = FontMetrics.getForMinimenu()
-            var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(client.CURRENT_LANGUAGE!!)!!)
+            var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
             val i_5: Int
             var i_7: Int
             if (!MiniMenu.aBool162) {

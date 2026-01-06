@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.graphics.loginscreen.component
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.gametip.component.AnchoredTextMeta
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontMetrics
@@ -19,8 +19,8 @@ class AnchoredText(
 
     override fun draw(draw: Boolean) {
         if (draw) {
-            val x = this.item.anchorX.calculateDrawX(this.item.width, client.GAME_WIDTH) + this.item.offsetX
-            val y = this.item.anchorY.calculateDrawY(this.item.height, client.GAME_HEIGHT) + this.item.offsetY
+            val x = this.item.anchorX.calculateDrawX(this.item.width, Client.GAME_WIDTH) + this.item.offsetX
+            val y = this.item.anchorY.calculateDrawY(this.item.height, Client.GAME_HEIGHT) + this.item.offsetY
             this.frontRenderer!!.drawText(this.item.tipText, x, y, this.item.width, this.item.height, this.item.textColor, this.item.textShadowColor,
                 this.item.textAllignment, this.item.textVerticalAllignment, this.item.lineSpacing, null, null, null, 0, 0)
         }

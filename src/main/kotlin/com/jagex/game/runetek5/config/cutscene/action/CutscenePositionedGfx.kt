@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.config.cutscene.action
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.sequence.PositionedGfx
 import com.jagex.game.runetek5.entity.spotanimation.SpotAnimation
@@ -35,6 +35,6 @@ class CutscenePositionedGfx(buffer: Packet) : AbstractCutsceneSpotAnimation(buff
 
         val gfx = SpotAnimation(Resource.mapRegion!!.getScene()!!, super.gfxId, 0, this.plane, height, absX,
             MapRegion.tileheightForAbsolutePosition(absX, absY, this.plane) - super.displayHeight, absY, this.x, this.x, this.y, this.y, super.rotation, false)
-        client.ACTIVE_GFX.put(PositionedGfx(gfx), (this.x.toLong() shl 16) or this.y.toLong())
+        Client.ACTIVE_GFX.put(PositionedGfx(gfx), (this.x.toLong() shl 16) or this.y.toLong())
     }
 }

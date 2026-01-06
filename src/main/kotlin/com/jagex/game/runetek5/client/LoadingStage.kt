@@ -84,7 +84,7 @@ class LoadingStage(
                 plainLoginScreenRenderer = AssetLoadingScreenRenderer()
                 plainLoginScreenRenderer!!.initialize(
                     LOADING_STAGE_CHANGED,
-                    stage.primaryTextDisplay.translate(client.CURRENT_LANGUAGE!!),
+                    stage.primaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!),
                     stage.primaryCompletionDisplay,
                     stage
                 )
@@ -108,7 +108,7 @@ class LoadingStage(
             val loadingPercent = ClientStartup.initialize()
 
             if (loadingStage === LOADING_STAGE) {
-                LOADING_TEXT = LOADING_STAGE!!.primaryTextDisplay.translate(client.CURRENT_LANGUAGE!!)
+                LOADING_TEXT = LOADING_STAGE!!.primaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!)
                 if (LOADING_STAGE!!.aBool4718) {
                     displayedLoadingPercentage = loadingPercent * (LOADING_STAGE!!.secondaryCompletionDisplay - LOADING_STAGE!!.primaryCompletionDisplay) / 100 + LOADING_STAGE!!.primaryCompletionDisplay
                 }
@@ -117,9 +117,9 @@ class LoadingStage(
                 }
             } else if (LOADING_STAGE === PREPARE_PLAYER) {
                 plainLoginScreenRenderer = null
-                client.setGameState(GameState.UNK_5)
+                Client.setGameState(GameState.UNK_5)
             } else {
-                LOADING_TEXT = loadingStage!!.secondaryTextDisplay.translate(client.CURRENT_LANGUAGE!!)
+                LOADING_TEXT = loadingStage!!.secondaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!)
                 if (LOADING_STAGE!!.aBool4694) {
                     LOADING_TEXT = "$LOADING_TEXT${loadingStage.secondaryCompletionDisplay}%"
                 }
@@ -136,7 +136,7 @@ class LoadingStage(
                     for (index in (lastDisplayedGametip + 1) until tips.size) {
                         if (tips[index].calculateLoadingPercent() >= 100 &&
                             index - 1 == lastDisplayedGametip &&
-                            client.gameState != GameState.UNK_4 &&
+                            Client.gameState != GameState.UNK_4 &&
                             renderer.replaceComponent()) {
 
                             try {

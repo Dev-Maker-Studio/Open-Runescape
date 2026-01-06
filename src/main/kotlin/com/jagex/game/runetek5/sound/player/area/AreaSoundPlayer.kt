@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.sound.player.area
 
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.cutscene.action.CutsceneBasicMovement
@@ -11,7 +11,6 @@ import com.jagex.game.runetek5.config.midi.instrument.MusicSample
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.math.Vector3Pool
-import com.jagex.game.runetek5.movement.CoordGrid
 import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.sound.SoundResourceManager
@@ -166,9 +165,9 @@ object AreaSoundPlayer {
             SoundEffectPlayer.soundJinglePlaying = false
             SoundEffectPlayer.jingleStream = null
         } else if (PreferenceManager.preferences!!.musicVolume!!.getValue() != 0 && currentMusicArchive != -1 && !SongReference.method1966()) {
-            val musicEndedPacket = PacketEncoder.createPacket(ClientProt.SOUND_EFFECT_MUSIC_ENDED, client.GAME_CONNECTION_CONTEXT.isaac)
+            val musicEndedPacket = PacketEncoder.createPacket(ClientProt.SOUND_EFFECT_MUSIC_ENDED, Client.GAME_CONNECTION_CONTEXT.isaac)
             musicEndedPacket.buffer.writeInt(currentMusicArchive)
-            client.GAME_CONNECTION_CONTEXT.queuePacket(musicEndedPacket)
+            Client.GAME_CONNECTION_CONTEXT.queuePacket(musicEndedPacket)
             currentMusicArchive = -1
         }
     }

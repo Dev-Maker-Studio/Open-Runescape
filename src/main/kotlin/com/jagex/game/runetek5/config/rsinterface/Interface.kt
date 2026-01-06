@@ -2,7 +2,6 @@ package com.jagex.game.runetek5.config.rsinterface
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.HashTableIterator
-import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.client.*
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.client.menu.MiniMenu
@@ -12,7 +11,6 @@ import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceRenderer
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
-import com.jagex.game.runetek5.network.BufferedConnectionContext
 import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.network.packet.TcpPacket
@@ -148,10 +146,10 @@ class Interface(
                 Component.redrawComponent(component)
             }
             MiniMenu.method420()
-            if (!bool2 && client.BASE_WINDOW_ID != -1) {
-                openSub(client.BASE_WINDOW_ID, 1)
+            if (!bool2 && Client.BASE_WINDOW_ID != -1) {
+                openSub(Client.BASE_WINDOW_ID, 1)
             }
-            val openInterfaceIt = HashTableIterator<SubInterface>(client.OPEN_INTERFACES!!)
+            val openInterfaceIt = HashTableIterator<SubInterface>(Client.OPEN_INTERFACES!!)
             var child = openInterfaceIt.first() as SubInterface?
             while (child != null) {
                 if (!child.linked()) {
@@ -177,7 +175,7 @@ class Interface(
             ints2: IntArray?,
             bool3: Boolean
         ): SubInterface {
-            val currentSubInterface = client.OPEN_INTERFACES!!.get(parentId.toLong()) as SubInterface?
+            val currentSubInterface = Client.OPEN_INTERFACES!!.get(parentId.toLong()) as SubInterface?
             if (currentSubInterface != null) {
                 closeChildInterface(
                     currentSubInterface,
@@ -185,15 +183,15 @@ class Interface(
                     bool3
                 )
             }
-            client.OPEN_INTERFACES!!.put(subInterface, parentId.toLong())
+            Client.OPEN_INTERFACES!!.put(subInterface, parentId.toLong())
             resetComponentSequences(subInterface.subInterfaceId, ints2)
             val parentComponent = Component.fromHash(parentId)
             if (parentComponent != null) {
                 Component.redrawComponent(parentComponent)
             }
-            if (client.aClass1187352 != null) {
-                Component.redrawComponent(client.aClass1187352!!)
-                client.aClass1187352 = null
+            if (Client.aClass1187352 != null) {
+                Component.redrawComponent(Client.aClass1187352!!)
+                Client.aClass1187352 = null
             }
             MiniMenu.method420()
             if (parentComponent != null) {
@@ -202,8 +200,8 @@ class Interface(
             if (!bool3) {
                 Component.runScriptsIfLoaded(subInterface.subInterfaceId, ints2)
             }
-            if (!bool3 && client.BASE_WINDOW_ID != -1) {
-                openSub(client.BASE_WINDOW_ID, 1)
+            if (!bool3 && Client.BASE_WINDOW_ID != -1) {
+                openSub(Client.BASE_WINDOW_ID, 1)
             }
             return subInterface
         }
@@ -285,12 +283,12 @@ class Interface(
 
         @JvmStatic
         fun method14650(i0: Int) {
-            var node = client.ICOMPONENT_SETTINGS_SLOTS.first()
+            var node = Client.ICOMPONENT_SETTINGS_SLOTS.first()
             while (node != null) {
                 if (i0 == (node.pointer shr 48 and 0xffffL).toInt()) {
                     node.unlink()
                 }
-                node = client.ICOMPONENT_SETTINGS_SLOTS.next()
+                node = Client.ICOMPONENT_SETTINGS_SLOTS.next()
             }
         }
 
@@ -332,24 +330,24 @@ class Interface(
 
         @JvmStatic
         fun ifHover() {
-            if (client.BASE_WINDOW_ID != -1) {
+            if (Client.BASE_WINDOW_ID != -1) {
                 var x = MouseRecord.recorder!!.getMouseX()
                 var y = MouseRecord.recorder!!.getMouseY()
-                val record = client.MOUSE_MOVEMENTS.first() as MouseRecord?
+                val record = Client.MOUSE_MOVEMENTS.first() as MouseRecord?
                 if (record != null) {
                     x = record.getX()
                     y = record.getY()
                 }
-                if (client.draggingComponent != null && client.frameComponent == client.selectedComponent) {
-                    client.isComponentSelected = true
-                    client.selectedComponentX = 0
-                    client.selectedComponentY = 0
-                    client.selectedComponentWidth = GameShell.screenCanvasWidth
-                    client.selectedComponentHeight = GameShell.screenCanvasHeight * -969250379
+                if (Client.draggingComponent != null && Client.frameComponent == Client.selectedComponent) {
+                    Client.isComponentSelected = true
+                    Client.selectedComponentX = 0
+                    Client.selectedComponentY = 0
+                    Client.selectedComponentWidth = GameShell.screenCanvasWidth
+                    Client.selectedComponentHeight = GameShell.screenCanvasHeight * -969250379
                 }
                 openSub(
                     null,
-                    client.BASE_WINDOW_ID,
+                    Client.BASE_WINDOW_ID,
                     0,
                     0,
                     GameShell.screenCanvasWidth,
@@ -377,9 +375,9 @@ class Interface(
                     hookRequest.params = component.params
                     CS2Executor.executeHookInner(hookRequest)
                 }
-                if (client.getComponentSettings(component)!!.clickOptionEnabled(option - 1)) {
-                    val connection = client.connectionContext
-                    if (client.gameState == GameState.UNK_0 || client.gameState == GameState.LOGGED_INGAME) {
+                if (Client.getComponentSettings(component)!!.clickOptionEnabled(option - 1)) {
+                    val connection = Client.connectionContext
+                    if (Client.gameState == GameState.UNK_0 || Client.gameState == GameState.LOGGED_INGAME) {
                         var packet: TcpPacket
                         when (option) {
                             1 -> {
@@ -445,7 +443,7 @@ class Interface(
             }
             if (!inter.preventInteraction) {
                 val interfaceId = component.idHash ushr 16
-                val subInterfaces = HashTableIterator<SubInterface>(client.OPEN_INTERFACES!!)
+                val subInterfaces = HashTableIterator<SubInterface>(Client.OPEN_INTERFACES!!)
                 var sub = subInterfaces.first() as SubInterface?
                 while (sub != null) {
                     if (interfaceId == sub.subInterfaceId) {
@@ -459,14 +457,14 @@ class Interface(
 
         @JvmStatic
         fun getUseOptionString(component: Component): String? {
-            return if (client.getComponentSettings(component)!!.getUseOptionFlags() == 0) {
+            return if (Client.getComponentSettings(component)!!.getUseOptionFlags() == 0) {
                 null
             } else {
                 val targetVerb = component.targetVerb
                 if (targetVerb != null && !targetVerb.trim().isEmpty()) {
                     targetVerb
                 } else {
-                    if (client.DISPLAY_HIDDEN_MENU_OPTIONS) "Hidden-use" else null
+                    if (Client.DISPLAY_HIDDEN_MENU_OPTIONS) "Hidden-use" else null
                 }
             }
         }
@@ -480,7 +478,7 @@ class Interface(
                         if (component.itemSlots != null) {
                             method2591(component.itemSlots!!, i1)
                         }
-                        val subInterface = client.OPEN_INTERFACES!!.get(component.idHash.toLong()) as SubInterface?
+                        val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong()) as SubInterface?
                         if (subInterface != null) {
                             openSub(subInterface.subInterfaceId, i1)
                         }

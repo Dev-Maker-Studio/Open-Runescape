@@ -19,7 +19,6 @@ import com.jagex.game.runetek5.config.`object`.ObjectTypeCustomisation
 import com.jagex.game.runetek5.config.`object`.ObjectTypeList
 import com.jagex.game.runetek5.config.mapsprite.MapSpriteTypeList
 import com.jagex.game.runetek5.config.npc.NPCType
-import com.jagex.game.runetek5.config.sequence.PositionedGfx
 import com.jagex.game.runetek5.config.sequence.Projectile
 import com.jagex.game.runetek5.config.staticelements.StaticElementTypeList
 import com.jagex.game.runetek5.config.staticelements.StaticElements
@@ -206,16 +205,16 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.underwaterLocArchives[index] = -1
         }
         val newGamestate: GameState?
-        if (client.gameState == GameState.UNK_5) {
+        if (Client.gameState == GameState.UNK_5) {
             newGamestate = GameState.UNK_11
-        } else if (client.gameState == GameState.UNK_7) {
+        } else if (Client.gameState == GameState.UNK_7) {
             newGamestate = GameState.UNK_6
-        } else if (client.gameState == GameState.UNK_0) {
+        } else if (Client.gameState == GameState.UNK_0) {
             newGamestate = GameState.UNK_2
-        } else if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
+        } else if (Client.gameState == GameState.IN_ACCOUNT_CREATION) {
             newGamestate = GameState.UNK_9
         } else {
-            throw RuntimeException("" + client.gameState)
+            throw RuntimeException("" + Client.gameState)
         }
         performUpdate(mapBaseX, mapBaseY, newGamestate, false)
     }
@@ -523,7 +522,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                 if (!worldMapLocal.isCached(worldMapTypeLocal.filenamePrefix + "_staticelements")) {
                     this.missingMapCount++
                 } else {
-                    this.staticElements = StaticElementTypeList.list(worldMapLocal, worldMapTypeLocal.filenamePrefix + "_staticelements", client.memberWorld)
+                    this.staticElements = StaticElementTypeList.list(worldMapLocal, worldMapTypeLocal.filenamePrefix + "_staticelements", Client.memberWorld)
                 }
             } else {
                 this.staticElements = StaticElements(0)
@@ -573,7 +572,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             return false
         }
         if (!this.asyncMaploading && this.currentLoadingStage != RegionLoadingStage.LOADING) {
-            MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(client.CURRENT_LANGUAGE!!) + "<br>" + "(100%)", true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
+            MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!) + "<br>" + "(100%)", true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
         }
         this.currentLoadingStage = RegionLoadingStage.PREPARE_DISPLAY
         if (!this.asyncMaploading) {
@@ -586,8 +585,8 @@ class MapRegion(var asyncMaploading: Boolean) {
                     playerEntity.scene = null
                 }
             }
-            for (index in client.NPC_ARRAY.indices) {
-                val npcObjectNode: ObjectNode? = client.NPC_ARRAY[index]
+            for (index in Client.NPC_ARRAY.indices) {
+                val npcObjectNode: ObjectNode? = Client.NPC_ARRAY[index]
                 if (npcObjectNode != null) {
                     (npcObjectNode.value as SceneGraphEntity).scene = null
                 }
@@ -617,7 +616,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         this.scene = Scene(Renderers.activeToolkit!!, this.sceneSizeX, this.sceneSizeY, buildAreaChunks, hasUnderwaterMap, Renderers.activeToolkit!!.getMaxLights() > 0)
         this.scene!!.setUnderwater(false)
         this.scene!!.empty1()
-        if (client.sceneDummyOp != 0) {
+        if (Client.sceneDummyOp != 0) {
             this.scene!!.empty2()
         } else {
             this.scene!!.empty2()
@@ -759,10 +758,10 @@ class MapRegion(var asyncMaploading: Boolean) {
             Resource.mapRegionLoaderTask!!.setMapRegion(mapRegion)
             async = true
             Utils.time()
-            synchronized(client.ASYNC_MAPLOADING_LOCK) {
-                client.maploadingLockTaken = true
+            synchronized(Client.ASYNC_MAPLOADING_LOCK) {
+                Client.maploadingLockTaken = true
                 try {
-                    (client.ASYNC_MAPLOADING_LOCK as Object).wait()
+                    (Client.ASYNC_MAPLOADING_LOCK as Object).wait()
                 } catch (interruptedException: InterruptedException) {
                     // NOOP
                 }
@@ -783,17 +782,17 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
             }
         }
-        for (index in client.HINT_TRAILS.indices) {
-            if (client.HINT_TRAILS[index] != null) {
-                client.HINT_TRAILS[index]!!.addTo(this.scene)
+        for (index in Client.HINT_TRAILS.indices) {
+            if (Client.HINT_TRAILS[index] != null) {
+                Client.HINT_TRAILS[index]!!.addTo(this.scene)
             }
         }
         Scene.setRoofOverride()
         LocAction.onRegionChanged()
-        if (GameShell.getApplicationType() == ApplicationType.APPLET && client.GAME_CONNECTION_CONTEXT.getConnection() != null && client.gameState == GameState.LOADING_PLEASE_WAIT) {
-            val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.UNK_82, client.GAME_CONNECTION_CONTEXT.isaac)
+        if (GameShell.getApplicationType() == ApplicationType.APPLET && Client.GAME_CONNECTION_CONTEXT.getConnection() != null && Client.gameState == GameState.LOADING_PLEASE_WAIT) {
+            val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.UNK_82, Client.GAME_CONNECTION_CONTEXT.isaac)
             packet.buffer.writeInt(1057001181)
-            client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+            Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
         }
         if (!this.loadingType!!.constructedMap()) {
             val regionStartX = (this.baseX - (this.sceneSizeX shr 4)) / 8
@@ -811,19 +810,19 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
             }
         }
-        if (client.gameState == GameState.UNK_11) {
-            client.setGameState(GameState.UNK_5)
-        } else if (client.gameState == GameState.UNK_2) {
-            client.setGameState(GameState.UNK_0)
-        } else if (client.gameState == GameState.UNK_6) {
-            client.setGameState(GameState.UNK_7)
-        } else if (client.gameState == GameState.UNK_9) {
-            client.setGameState(GameState.IN_ACCOUNT_CREATION)
+        if (Client.gameState == GameState.UNK_11) {
+            Client.setGameState(GameState.UNK_5)
+        } else if (Client.gameState == GameState.UNK_2) {
+            Client.setGameState(GameState.UNK_0)
+        } else if (Client.gameState == GameState.UNK_6) {
+            Client.setGameState(GameState.UNK_7)
+        } else if (Client.gameState == GameState.UNK_9) {
+            Client.setGameState(GameState.IN_ACCOUNT_CREATION)
         } else {
-            client.setGameState(GameState.LOGGED_INGAME)
-            if (client.GAME_CONNECTION_CONTEXT.getConnection() != null) {
-                val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.REGION_LOADED_CONFIRM, client.GAME_CONNECTION_CONTEXT.isaac)
-                client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+            Client.setGameState(GameState.LOGGED_INGAME)
+            if (Client.GAME_CONNECTION_CONTEXT.getConnection() != null) {
+                val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.REGION_LOADED_CONFIRM, Client.GAME_CONNECTION_CONTEXT.isaac)
+                Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
             }
         }
 
@@ -833,8 +832,8 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.debugRegionLoadtime = false
         }
         if (async) {
-            synchronized(client.MAP_REGION_LOADER_LOCK) {
-                (client.MAP_REGION_LOADER_LOCK as Object).notify()
+            synchronized(Client.MAP_REGION_LOADER_LOCK) {
+                (Client.MAP_REGION_LOADER_LOCK as Object).notify()
             }
         }
         return true
@@ -974,26 +973,26 @@ class MapRegion(var asyncMaploading: Boolean) {
     fun resetNonCutsceneEntities() {
         if (this.loadingType != RegionLoadingType.CUTSCENE && this.previousLoadingType != RegionLoadingType.CUTSCENE) {
             if (this.loadingType == RegionLoadingType.INSTANCE || this.loadingType == RegionLoadingType.INSTANCE_LARGE || this.previousLoadingType != this.loadingType && (this.loadingType == RegionLoadingType.STANDARD || this.previousLoadingType == RegionLoadingType.STANDARD)) {
-                client.NPC_UPDATE_INDEX = 0
-                client.npcCount = 0
-                client.NPC_MAP.clear()
+                Client.NPC_UPDATE_INDEX = 0
+                Client.npcCount = 0
+                Client.NPC_MAP.clear()
             }
             this.previousLoadingType = this.loadingType
         }
     }
 
     fun performUpdate(BaseX: Int, BaseY: Int, newGamestate: GameState?, forcedPositionUpdate: Boolean) {
-        if (client.MAP_LOADING_STAGE == 2) {
+        if (Client.MAP_LOADING_STAGE == 2) {
             check(!this.asyncMaploading)
-            client.MAP_LOADING_STAGE = 1
-            client.CURRENT_CUTSCENE = -1
+            Client.MAP_LOADING_STAGE = 1
+            Client.CURRENT_CUTSCENE = -1
         }
         if (forcedPositionUpdate || this.baseX != BaseX || BaseY != this.baseY) {
             this.baseX = BaseX
             this.baseY = BaseY
             if (!this.asyncMaploading) {
-                client.setGameState(newGamestate!!)
-                MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(client.CURRENT_LANGUAGE!!), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
+                Client.setGameState(newGamestate!!)
+                MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
             }
             if (this.baseCoordinates != null) {
                 this.lastCoordgrid = this.baseCoordinates
@@ -1013,8 +1012,8 @@ class MapRegion(var asyncMaploading: Boolean) {
         val deltaX = this.baseCoordinates!!.x - this.lastCoordgrid!!.x
         val deltaY = this.baseCoordinates!!.y - this.lastCoordgrid!!.y
         if (requestedGamestate == GameState.LOADING_PLEASE_WAIT) {
-            for (npcIndex in 0..<client.npcCount) {
-                val objectNode: ObjectNode? = client.NPC_ARRAY[npcIndex]
+            for (npcIndex in 0..<Client.npcCount) {
+                val objectNode: ObjectNode? = Client.NPC_ARRAY[npcIndex]
                 if (objectNode != null) {
                     val npcEntity: NpcEntity? = objectNode.value as NpcEntity?
                     for (index in npcEntity!!.movementBaseX.indices) {
@@ -1030,11 +1029,11 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
         } else {
             var copyExisting = false
-            client.NPC_UPDATE_INDEX = 0
+            Client.NPC_UPDATE_INDEX = 0
             val x = this.sceneSizeX * 512 - 512
             val y = this.sceneSizeY * 512 - 512
-            for (npcIndex in 0..<client.npcCount) {
-                val objectNode: ObjectNode? = client.NPC_ARRAY[npcIndex]
+            for (npcIndex in 0..<Client.npcCount) {
+                val objectNode: ObjectNode? = Client.NPC_ARRAY[npcIndex]
                 if (objectNode != null) {
                     val npcEntity: NpcEntity? = objectNode.value as NpcEntity?
                     val abs: Vector3 = Vector3Pool.vector3From(npcEntity!!.getAbsolutePosition().coords)
@@ -1051,7 +1050,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                             }
                         }
                         if (hasUpdate) {
-                            client.NPC_UPDATE_INDICES[++client.NPC_UPDATE_INDEX - 1] = npcEntity!!.playerIndex
+                            Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = npcEntity!!.playerIndex
                         } else {
                             npcEntity!!.setDirection(null)
                             objectNode.unlink()
@@ -1066,13 +1065,13 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
             }
             if (copyExisting) {
-                client.npcCount = client.NPC_MAP.size()
+                Client.npcCount = Client.NPC_MAP.size()
                 var count = 0
                 var objectNode: ObjectNode?
-                val npcIt= client.NPC_MAP.iterator()
+                val npcIt= Client.NPC_MAP.iterator()
                 while (npcIt.hasNext()) {
                     objectNode = npcIt.next()
-                    client.NPC_ARRAY[count++] = objectNode
+                    Client.NPC_ARRAY[count++] = objectNode
                 }
             }
         }
@@ -1118,7 +1117,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
             action = LocAction.pendingCustomizations.next() as LocAction?
         }
-        var groundItems: GroundItemWrapper? = client.GROUND_ITEMS.first()
+        var groundItems: GroundItemWrapper? = Client.GROUND_ITEMS.first()
         while (groundItems != null) {
             val rotation = (groundItems.pointer shr 28 and 0x3L).toInt()
             val sceneX = (groundItems.pointer and 0x3fffL).toInt()
@@ -1134,7 +1133,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                     groundItems.unlink()
                 }
             }
-            groundItems = client.GROUND_ITEMS.next()
+            groundItems = Client.GROUND_ITEMS.next()
         }
         if (ComponentMinimap.minimapFlagX != 0) {
             ComponentMinimap.minimapFlagX -= deltaX
@@ -1143,8 +1142,8 @@ class MapRegion(var asyncMaploading: Boolean) {
         AreaSoundPlayer.initialize()
         AmbientSound.unlinkSounds(false)
         if (requestedGamestate == GameState.LOADING_PLEASE_WAIT) {
-            client.anInt7262 -= deltaX * 512
-            client.anInt7376 -= deltaY * 512
+            Client.anInt7262 -= deltaX * 512
+            Client.anInt7376 -= deltaY * 512
             Camera.cameraBaseX -= deltaX * 512
             Camera.cameraBaseY -= deltaY * 512
             if (Camera.cameraCalculationType != 4) {
@@ -1165,9 +1164,9 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         MiniMenu.reset()
         ComponentMinimap.reset()
-        client.ACTIVE_GFX.clear()
-        client.PROJECTILES.remove_all()
-        client.TILE_MESSAGES.unlink()
+        Client.ACTIVE_GFX.clear()
+        Client.PROJECTILES.remove_all()
+        Client.TILE_MESSAGES.unlink()
         ParticleSystemManager.destroy()
     }
 
@@ -1295,19 +1294,19 @@ class MapRegion(var asyncMaploading: Boolean) {
         for (mapIndex in 0..<npcMapCount) {
             if (this.npcSpawnBuffer!![mapIndex] != null) {
                 var cursorPosition = -1
-                for (cursor in 0..<client.npcSpawnCursorPos) {
-                    if (client.npcSpawnMaps[cursor] == this.regionIds[mapIndex]) {
+                for (cursor in 0..<Client.npcSpawnCursorPos) {
+                    if (Client.npcSpawnMaps[cursor] == this.regionIds[mapIndex]) {
                         cursorPosition = cursor
                         break
                     }
                 }
                 if (cursorPosition == -1) {
-                    client.npcSpawnMaps[client.npcSpawnCursorPos] = this.regionIds[mapIndex]
-                    cursorPosition = ++client.npcSpawnCursorPos - 1
+                    Client.npcSpawnMaps[Client.npcSpawnCursorPos] = this.regionIds[mapIndex]
+                    cursorPosition = ++Client.npcSpawnCursorPos - 1
                 }
                 val stream = Packet(this.npcSpawnBuffer!![mapIndex]!!)
                 var index = 0
-                while (stream.currentPosition < this.npcSpawnBuffer!![mapIndex]!!.size && index < 511 && client.NPC_UPDATE_INDEX < 1023) {
+                while (stream.currentPosition < this.npcSpawnBuffer!![mapIndex]!!.size && index < 511 && Client.NPC_UPDATE_INDEX < 1023) {
                     val slot = cursorPosition or (index++ shl 6)
                     val i_8 = stream.readUShort()
                     val plane = i_8 shr 14
@@ -1316,15 +1315,15 @@ class MapRegion(var asyncMaploading: Boolean) {
                     val i_12 = (this.regionIds[mapIndex] shr 8) * 64 - this.baseCoordinates!!.x + i_10
                     val i_13 = (this.regionIds[mapIndex] and 0xff) * 64 - this.baseCoordinates!!.y + i_11
                     val npcType: NPCType = TypeLists.NPC!!.list(stream.readUShort())
-                    val npcObjectNode: ObjectNode? = client.NPC_MAP.get(slot.toLong())
+                    val npcObjectNode: ObjectNode? = Client.NPC_MAP.get(slot.toLong())
                     if (npcObjectNode == null && (npcType.walkingFlags.toInt() and 0x1) > 0 && i_12 >= 0 && i_12 + npcType.size < this.sceneSizeX && i_13 >= 0 && i_13 + npcType.size < this.sceneSizeY) {
                         val npcEntity: NpcEntity = NpcEntity(this.scene)
                         npcEntity.playerIndex = slot
                         val npcEntityObjectNode = ObjectNode(npcEntity)
-                        client.NPC_MAP.put(npcEntityObjectNode, slot.toLong())
-                        client.NPC_ARRAY[++client.npcCount - 1] = npcEntityObjectNode
-                        client.NPC_UPDATE_INDICES[++client.NPC_UPDATE_INDEX - 1] = slot
-                        npcEntity.lastUpdate = client.cycles
+                        Client.NPC_MAP.put(npcEntityObjectNode, slot.toLong())
+                        Client.NPC_ARRAY[++Client.npcCount - 1] = npcEntityObjectNode
+                        Client.NPC_UPDATE_INDICES[++Client.NPC_UPDATE_INDEX - 1] = slot
+                        npcEntity.lastUpdate = Client.cycles
                         npcEntity.setDirection(npcType)
                         npcEntity.setSize(npcEntity.definitions!!.size)
                         npcEntity.turnDirection = npcEntity.definitions!!.turnDirection shl 3
@@ -1391,16 +1390,16 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.baseY = mapRegion.baseY
             this.sceneSizeX = mapRegion.sceneSizeX
             this.sceneSizeY = mapRegion.sceneSizeY
-        } else if (client.gameState == GameState.UNK_5) {
-            client.setGameState(GameState.UNK_11)
-        } else if (client.gameState == GameState.UNK_0) {
-            client.setGameState(GameState.UNK_2)
-        } else if (client.gameState == GameState.UNK_7) {
-            client.setGameState(GameState.UNK_6)
-        } else if (client.gameState == GameState.LOGGED_INGAME) {
-            client.setGameState(GameState.LOADING_PLEASE_WAIT)
-        } else if (client.gameState == GameState.IN_ACCOUNT_CREATION) {
-            client.setGameState(GameState.UNK_9)
+        } else if (Client.gameState == GameState.UNK_5) {
+            Client.setGameState(GameState.UNK_11)
+        } else if (Client.gameState == GameState.UNK_0) {
+            Client.setGameState(GameState.UNK_2)
+        } else if (Client.gameState == GameState.UNK_7) {
+            Client.setGameState(GameState.UNK_6)
+        } else if (Client.gameState == GameState.LOGGED_INGAME) {
+            Client.setGameState(GameState.LOADING_PLEASE_WAIT)
+        } else if (Client.gameState == GameState.IN_ACCOUNT_CREATION) {
+            Client.setGameState(GameState.UNK_9)
         }
     }
 
@@ -1454,7 +1453,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             if (gameObject != null) {
                 fullyCached = fullyCached and MapSpriteTypeList.isCached(gameObject)
             }
-            gameObject = scene.getInteractiveObject(z, x, y, client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
+            gameObject = scene.getInteractiveObject(z, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE) as GameObject?
             if (gameObject != null) {
                 fullyCached = fullyCached and MapSpriteTypeList.isCached(gameObject)
             }
@@ -1469,8 +1468,8 @@ class MapRegion(var asyncMaploading: Boolean) {
         fun handleRoofDisplay() {
             if (PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue() == 2) {
                 val settingsBits = Resource.mapRegion!!.bits
-                val b_2 = (client.timesSceneRendered - 4 and 0xff).toByte()
-                val x: Int = client.timesSceneRendered % Resource.mapRegion!!.sceneSizeX
+                val b_2 = (Client.timesSceneRendered - 4 and 0xff).toByte()
+                val x: Int = Client.timesSceneRendered % Resource.mapRegion!!.sceneSizeX
                 for (plane in 0..3) {
                     for (y in 0..<Resource.mapRegion!!.sceneSizeY) {
                         settingsBits!![plane]!![x]!![y] = b_2
@@ -1478,11 +1477,11 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
                 if (PlayerUpdate.MY_PLAYER_PLANE != 3) {
                     for (index in 0..1) {
-                        client.visibleBelowDrawheight!![index] = -1000000
-                        client.visibleAboveX!![index] = 1000000
-                        client.visibleBelowX!![index] = 0
-                        client.visibleAboveY!![index] = 1000000
-                        client.visibleBelowY!![index] = 0
+                        Client.visibleBelowDrawheight!![index] = -1000000
+                        Client.visibleAboveX!![index] = 1000000
+                        Client.visibleBelowX!![index] = 0
+                        Client.visibleAboveY!![index] = 1000000
+                        Client.visibleBelowY!![index] = 0
                     }
 
                     val absolutePosition: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
@@ -1681,7 +1680,7 @@ class MapRegion(var asyncMaploading: Boolean) {
 
         @JvmStatic
         fun addGfxsToScene() {
-            for (positionedGfx in client.ACTIVE_GFX) {
+            for (positionedGfx in Client.ACTIVE_GFX) {
                 val objectGfx: SpotAnimation = positionedGfx.objectGfx
                 if (Resource.mapRegion!!.getScene()!! != null && objectGfx.notAccelerated()) {
                     Resource.mapRegion!!.getScene()!!!!.addInteractive(objectGfx, true)
@@ -1691,7 +1690,7 @@ class MapRegion(var asyncMaploading: Boolean) {
 
         @JvmStatic
         fun cycleGfx() {
-            for (positionedGfx in client.ACTIVE_GFX) {
+            for (positionedGfx in Client.ACTIVE_GFX) {
                 val spotAnimation: SpotAnimation = positionedGfx.objectGfx
                 spotAnimation.progressCycle()
                 if (spotAnimation.needsReset()) {
@@ -1703,30 +1702,30 @@ class MapRegion(var asyncMaploading: Boolean) {
 
         @JvmStatic
         fun addProjectileSpawnsToScene() {
-            var spawnRequest: ProjectileSpawnRequest? = client.PROJECTILES.getFirst() as ProjectileSpawnRequest?
+            var spawnRequest: ProjectileSpawnRequest? = Client.PROJECTILES.getFirst() as ProjectileSpawnRequest?
             while (spawnRequest != null) {
                 val projectile: Projectile = spawnRequest.projectile
-                if (client.cycles > projectile.cyclesUntilDisappear) {
+                if (Client.cycles > projectile.cyclesUntilDisappear) {
                     spawnRequest.unlink()
                     projectile.nextParticleCycle()
-                } else if (client.cycles >= projectile.cycleToSpawnAt) {
+                } else if (Client.cycles >= projectile.cycleToSpawnAt) {
                     projectile.cycle()
                     if (projectile.entityLockOn > 0) {
-                        if (client.MAP_LOADING_STAGE == 4) {
+                        if (Client.MAP_LOADING_STAGE == 4) {
                             val animable3: PathingEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![projectile.entityLockOn - 1].getEntity()
                             if (animable3 != null) {
                                 val abs: Vector3 = animable3.getAbsolutePosition().coords
                                 if (abs.x.toInt() >= 0 && abs.x.toInt() < Resource.mapRegion!!.sceneSizeX * 512 && abs.z.toInt() >= 0 && abs.z.toInt() < Resource.mapRegion!!.sceneSizeY * 512) {
-                                    projectile.start(abs.x.toInt(), abs.z.toInt(), tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), animable3.plane.toInt()) - projectile.endHeight, client.cycles)
+                                    projectile.start(abs.x.toInt(), abs.z.toInt(), tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), animable3.plane.toInt()) - projectile.endHeight, Client.cycles)
                                 }
                             }
                         } else {
-                            val objectNode: ObjectNode? = client.NPC_MAP.get((projectile.entityLockOn - 1).toLong())
+                            val objectNode: ObjectNode? = Client.NPC_MAP.get((projectile.entityLockOn - 1).toLong())
                             if (objectNode != null) {
                                 val npcEntity: NpcEntity? = objectNode.value as NpcEntity?
                                 val abs: Vector3 = npcEntity!!.getAbsolutePosition().coords
                                 if (abs.x.toInt() >= 0 && abs.x.toInt() < Resource.mapRegion!!.sceneSizeX * 512 && abs.z.toInt() >= 0 && abs.z.toInt() < Resource.mapRegion!!.sceneSizeY * 512) {
-                                    projectile.start(abs.x.toInt(), abs.z.toInt(), tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), projectile.plane.toInt()) - projectile.endHeight, client.cycles)
+                                    projectile.start(abs.x.toInt(), abs.z.toInt(), tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), projectile.plane.toInt()) - projectile.endHeight, Client.cycles)
                                 }
                             }
                         }
@@ -1742,14 +1741,14 @@ class MapRegion(var asyncMaploading: Boolean) {
                         if (player != null) {
                             val abs: Vector3 = player.getAbsolutePosition().coords
                             if (abs.x.toInt() >= 0 && abs.x.toInt() < Resource.mapRegion!!.sceneSizeX * 512 && abs.z.toInt() >= 0 && abs.z.toInt() < Resource.mapRegion!!.sceneSizeY * 512) {
-                                projectile.start(abs.x.toInt(), abs.z.toInt(), tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), projectile.plane.toInt()) - projectile.endHeight, client.cycles)
+                                projectile.start(abs.x.toInt(), abs.z.toInt(), tileheightForAbsolutePosition(abs.x.toInt(), abs.z.toInt(), projectile.plane.toInt()) - projectile.endHeight, Client.cycles)
                             }
                         }
                     }
-                    projectile.animate(client.animatingStep)
+                    projectile.animate(Client.animatingStep)
                     Resource.mapRegion!!.getScene()!!!!.addInteractive(projectile, true)
                 }
-                spawnRequest = client.PROJECTILES.next() as ProjectileSpawnRequest?
+                spawnRequest = Client.PROJECTILES.next() as ProjectileSpawnRequest?
             }
         }
 
@@ -1802,7 +1801,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         // Something with roofs? - TODO: fix the horrible naming in this
         fun calculateVisibilityAdjustments(regionTiles: Array<Array<Array<Tile>?>?>?, anInt1234: Int, baseX: Int, baseY: Int, hideRoofs: Boolean): Boolean {
             val settingBits = Resource.mapRegion!!.bits
-            val setting = if (hideRoofs) 1 else (client.timesSceneRendered and 0xff).toByte()
+            val setting = if (hideRoofs) 1 else (Client.timesSceneRendered and 0xff).toByte()
             if (settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![baseX]!![baseY] == setting) {
                 return false
             }
@@ -1812,15 +1811,15 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
             var currentPosition = 0
             var position = 1
-            client.bigX[0] = baseX
-            client.bigY[0] = baseY
+            Client.bigX[0] = baseX
+            Client.bigY[0] = baseY
             settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![baseX]!![baseY] = setting
             while (position != currentPosition) {
-                val tileBaseX: Int = client.bigX[currentPosition] and 0xffff
-                val bitpackedTypeRotA: Int = client.bigX[currentPosition] shr 16 and 0xff
-                val sceneXHashB: Int = client.bigX[currentPosition] shr 24 and 0xff
-                var tileBaseY: Int = client.bigY[currentPosition] and 0xffff
-                val bitpackedTypeRotB: Int = client.bigY[currentPosition] shr 16 and 0xff
+                val tileBaseX: Int = Client.bigX[currentPosition] and 0xffff
+                val bitpackedTypeRotA: Int = Client.bigX[currentPosition] shr 16 and 0xff
+                val sceneXHashB: Int = Client.bigX[currentPosition] shr 24 and 0xff
+                var tileBaseY: Int = Client.bigY[currentPosition] and 0xffff
+                val bitpackedTypeRotB: Int = Client.bigY[currentPosition] shr 16 and 0xff
                 currentPosition = currentPosition + 1 and 0xfff
                 val renderOnLowerZ = (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX][tileBaseY].toInt() and 0x4) == 0
                 var visibilityUpdate = false
@@ -1888,84 +1887,84 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
                 if (visibilityUpdate) {
                     val floorHeight = Resource.mapRegion!!.getScene()!!!!.localHeightmap[PlayerUpdate.MY_PLAYER_PLANE + 1]!!.getHeight(tileBaseX, tileBaseY)
-                    if (client.visibleBelowDrawheight!![anInt1234] < floorHeight) {
-                        client.visibleBelowDrawheight!![anInt1234] = floorHeight
+                    if (Client.visibleBelowDrawheight!![anInt1234] < floorHeight) {
+                        Client.visibleBelowDrawheight!![anInt1234] = floorHeight
                     }
                     val upscaledX = tileBaseX shl 9
                     val upscaledY = tileBaseY shl 9
-                    if (client.visibleAboveX!![anInt1234] > upscaledX) {
-                        client.visibleAboveX!![anInt1234] = upscaledX
-                    } else if (client.visibleBelowX!![anInt1234] < upscaledX) {
-                        client.visibleBelowX!![anInt1234] = upscaledX
+                    if (Client.visibleAboveX!![anInt1234] > upscaledX) {
+                        Client.visibleAboveX!![anInt1234] = upscaledX
+                    } else if (Client.visibleBelowX!![anInt1234] < upscaledX) {
+                        Client.visibleBelowX!![anInt1234] = upscaledX
                     }
-                    if (client.visibleAboveY!![anInt1234] > upscaledY) {
-                        client.visibleAboveY!![anInt1234] = upscaledY
-                    } else if (client.visibleBelowY!![anInt1234] < upscaledY) {
-                        client.visibleBelowY!![anInt1234] = upscaledY
+                    if (Client.visibleAboveY!![anInt1234] > upscaledY) {
+                        Client.visibleAboveY!![anInt1234] = upscaledY
+                    } else if (Client.visibleBelowY!![anInt1234] < upscaledY) {
+                        Client.visibleBelowY!![anInt1234] = upscaledY
                     }
                 }
                 if (!renderOnLowerZ) {
                     if (tileBaseX >= 1 && setting != settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX - 1]!![tileBaseY]) {
-                        client.bigX[position] = tileBaseX - 1 or 0x120000 or -754974720
-                        client.bigY[position] = tileBaseY or 0x130000
+                        Client.bigX[position] = tileBaseX - 1 or 0x120000 or -754974720
+                        Client.bigY[position] = tileBaseY or 0x130000
                         position = position + 1 and 0xfff
                         settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX - 1]!![tileBaseY] = setting
                     }
                     if (++tileBaseY < Resource.mapRegion!!.sceneSizeY) {
                         if (tileBaseX - 1 >= 0 && setting != settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX - 1]!![tileBaseY] && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX][tileBaseY].toInt() and 0x4) == 0 && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX - 1][tileBaseY - 1].toInt() and 0x4) == 0) {
-                            client.bigX[position] = tileBaseX - 1 or 0x120000 or 0x52000000
-                            client.bigY[position] = tileBaseY or 0x130000
+                            Client.bigX[position] = tileBaseX - 1 or 0x120000 or 0x52000000
+                            Client.bigY[position] = tileBaseY or 0x130000
                             position = position + 1 and 0xfff
                             settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX - 1]!![tileBaseY] = setting
                         }
                         if (setting != settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX]!![tileBaseY]) {
-                            client.bigX[position] = tileBaseX or 0x520000 or 0x13000000
-                            client.bigY[position] = tileBaseY or 0x530000
+                            Client.bigX[position] = tileBaseX or 0x520000 or 0x13000000
+                            Client.bigY[position] = tileBaseY or 0x530000
                             position = position + 1 and 0xfff
                             settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX]!![tileBaseY] = setting
                         }
                         if (tileBaseX + 1 < Resource.mapRegion!!.sceneSizeX && settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX + 1]!![tileBaseY] != setting && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX][tileBaseY].toInt() and 0x4) == 0 && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX + 1][tileBaseY - 1].toInt() and 0x4) == 0) {
-                            client.bigX[position] = tileBaseX + 1 or 0x520000 or -1845493760
-                            client.bigY[position] = tileBaseY or 0x530000
+                            Client.bigX[position] = tileBaseX + 1 or 0x520000 or -1845493760
+                            Client.bigY[position] = tileBaseY or 0x530000
                             position = position + 1 and 0xfff
                             settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX + 1]!![tileBaseY] = setting
                         }
                     }
                     tileBaseY--
                     if (tileBaseX + 1 < Resource.mapRegion!!.sceneSizeX && setting != settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX + 1]!![tileBaseY]) {
-                        client.bigX[position] = tileBaseX + 1 or 0x920000 or 0x53000000
-                        client.bigY[position] = tileBaseY or 0x930000
+                        Client.bigX[position] = tileBaseX + 1 or 0x920000 or 0x53000000
+                        Client.bigY[position] = tileBaseY or 0x930000
                         position = position + 1 and 0xfff
                         settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX + 1]!![tileBaseY] = setting
                     }
                     if (--tileBaseY >= 0) {
                         if (tileBaseX - 1 >= 0 && setting != settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX - 1]!![tileBaseY] && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX][tileBaseY].toInt() and 0x4) == 0 && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX - 1][tileBaseY + 1].toInt() and 0x4) == 0) {
-                            client.bigX[position] = tileBaseX - 1 or 0xd20000 or 0x12000000
-                            client.bigY[position] = tileBaseY or 0xd30000
+                            Client.bigX[position] = tileBaseX - 1 or 0xd20000 or 0x12000000
+                            Client.bigY[position] = tileBaseY or 0xd30000
                             position = position + 1 and 0xfff
                             settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX - 1]!![tileBaseY] = setting
                         }
                         if (setting != settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX]!![tileBaseY]) {
-                            client.bigX[position] = tileBaseX or 0xd20000 or -1828716544
-                            client.bigY[position] = tileBaseY or 0xd30000
+                            Client.bigX[position] = tileBaseX or 0xd20000 or -1828716544
+                            Client.bigY[position] = tileBaseY or 0xd30000
                             position = position + 1 and 0xfff
                             settingBits!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX]!![tileBaseY] = setting
                         }
                         if (tileBaseX + 1 < Resource.mapRegion!!.sceneSizeX && settingBits!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX + 1]!![tileBaseY] != setting && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX][tileBaseY].toInt() and 0x4) == 0 && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][tileBaseX + 1][tileBaseY + 1].toInt() and 0x4) == 0) {
-                            client.bigX[position] = tileBaseX + 1 or 0x920000 or -771751936
-                            client.bigY[position] = tileBaseY or 0x930000
+                            Client.bigX[position] = tileBaseX + 1 or 0x920000 or -771751936
+                            Client.bigY[position] = tileBaseY or 0x930000
                             position = position + 1 and 0xfff
                             settingBits!![PlayerUpdate.MY_PLAYER_PLANE]!![tileBaseX + 1]!![tileBaseY] = setting
                         }
                     }
                 }
             }
-            if (client.visibleBelowDrawheight!![anInt1234] != -1000000) {
-                client.visibleBelowDrawheight!![anInt1234] += 40
-                client.visibleAboveX!![anInt1234] -= 512
-                client.visibleBelowX!![anInt1234] += 512
-                client.visibleBelowY!![anInt1234] += 512
-                client.visibleAboveY!![anInt1234] -= 512
+            if (Client.visibleBelowDrawheight!![anInt1234] != -1000000) {
+                Client.visibleBelowDrawheight!![anInt1234] += 40
+                Client.visibleAboveX!![anInt1234] -= 512
+                Client.visibleBelowX!![anInt1234] += 512
+                Client.visibleBelowY!![anInt1234] += 512
+                Client.visibleAboveY!![anInt1234] -= 512
             }
             return true
         }

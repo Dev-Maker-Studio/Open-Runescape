@@ -3,9 +3,8 @@ package com.jagex.game.runetek5.graphics.loginscreen
 import com.jagex.game.runetek5.client.ClientStartup
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.LoadingStage
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.window.WindowMode
-import com.jagex.game.runetek5.imageproducer.DirectDisplay
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.FrameRenderException
@@ -126,7 +125,7 @@ class AssetLoadingScreenRenderer : Runnable {
                                 renderException.message + ClientStartup.activeClient!!.getDebugString(),
                                 renderException
                             )
-                            client.loadAssets(0, true)
+                            Client.loadAssets(0, true)
                         }
                     }
                     clear = false

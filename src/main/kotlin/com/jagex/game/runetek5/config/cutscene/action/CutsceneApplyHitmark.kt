@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.config.cutscene.action
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.cutscene.CutsceneAction
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
 
@@ -63,6 +63,6 @@ class CutsceneApplyHitmark(buffer: Packet) : CutsceneAction(buffer) {
 
     override fun perform() {
         val entity = CutsceneTypeList.CUTSCENE_ENTITIES!![entityIndex].getEntity()
-        entity.applyHit(hitsplatId, hitText, null, soakHitsplatId, soakText, null, client.cycles, 0)
+        entity.applyHit(hitsplatId, hitText, null, soakHitsplatId, soakText, null, Client.cycles, 0)
     }
 }

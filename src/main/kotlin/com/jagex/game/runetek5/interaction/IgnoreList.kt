@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.interaction
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.interaction.chat.ChatBox
 import com.jagex.game.runetek5.network.packet.ClientProt
@@ -22,7 +22,7 @@ object IgnoreList {
     fun add(displayName: String?, flag: Boolean) {
         if (displayName != null) {
             if (IGNORE_COUNT >= 100) {
-                ChatBox.writeGameMessage(LocalizedText.IGNORE_LIST_FULL.translate(client.CURRENT_LANGUAGE!!)!!)
+                ChatBox.writeGameMessage(LocalizedText.IGNORE_LIST_FULL.translate(Client.CURRENT_LANGUAGE!!)!!)
             } else {
                 val formattedDisplayName = TextUtils.formatDisplayname(displayName)
                 if (formattedDisplayName != null) {
@@ -30,13 +30,13 @@ object IgnoreList {
                         val ignore = IGNORED[index]!!
                         val formattedIgnoreUnfilteredUsername = TextUtils.formatDisplayname(ignore.unfilteredUsername!!)
                         if (formattedIgnoreUnfilteredUsername != null && formattedIgnoreUnfilteredUsername == formattedDisplayName) {
-                            ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_IGNORED.translate(client.CURRENT_LANGUAGE!!))
+                            ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_IGNORED.translate(Client.CURRENT_LANGUAGE!!))
                             return
                         }
                         if (ignore.displayName != null) {
                             val formattedIgnoreDisplayName = TextUtils.formatDisplayname(ignore.displayName)
                             if (formattedIgnoreDisplayName != null && formattedIgnoreDisplayName == formattedDisplayName) {
-                                ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_IGNORED.translate(client.CURRENT_LANGUAGE!!))
+                                ChatBox.writeGameMessage(displayName + LocalizedText.ALREADY_IGNORED.translate(Client.CURRENT_LANGUAGE!!))
                                 return
                             }
                         }
@@ -46,8 +46,8 @@ object IgnoreList {
                         val formattedFriendDisplayname = TextUtils.formatDisplayname(friend.displayName)
                         if (formattedFriendDisplayname != null && formattedFriendDisplayname == formattedDisplayName) {
                             ChatBox.writeGameMessage(
-                                LocalizedText.PLEASE_REMOVE.translate(client.CURRENT_LANGUAGE!!) + displayName
-                                        + LocalizedText.FROM_FRIENDS_FIRST.translate(client.CURRENT_LANGUAGE!!)
+                                LocalizedText.PLEASE_REMOVE.translate(Client.CURRENT_LANGUAGE!!) + displayName
+                                        + LocalizedText.FROM_FRIENDS_FIRST.translate(Client.CURRENT_LANGUAGE!!)
                             )
                             return
                         }
@@ -55,17 +55,17 @@ object IgnoreList {
                             val formattedFriendUsername = TextUtils.formatDisplayname(friend.previousDisplayName)
                             if (formattedFriendUsername != null && formattedFriendUsername == formattedDisplayName) {
                                 ChatBox.writeGameMessage(
-                                    LocalizedText.PLEASE_REMOVE.translate(client.CURRENT_LANGUAGE!!) + displayName
-                                            + LocalizedText.FROM_FRIENDS_FIRST.translate(client.CURRENT_LANGUAGE!!)
+                                    LocalizedText.PLEASE_REMOVE.translate(Client.CURRENT_LANGUAGE!!) + displayName
+                                            + LocalizedText.FROM_FRIENDS_FIRST.translate(Client.CURRENT_LANGUAGE!!)
                                 )
                                 return
                             }
                         }
                     }
                     if (TextUtils.formatDisplayname(PlayerUpdate.MY_PLAYER!!.displayName!!) == formattedDisplayName) {
-                        ChatBox.writeGameMessage(LocalizedText.CANT_ADD_SELF_TO_IGNORE.translate(client.CURRENT_LANGUAGE!!)!!)
+                        ChatBox.writeGameMessage(LocalizedText.CANT_ADD_SELF_TO_IGNORE.translate(Client.CURRENT_LANGUAGE!!)!!)
                     } else {
-                        val context = client.connectionContext
+                        val context = Client.connectionContext
                         val packet = PacketEncoder.createPacket(ClientProt.ADD_IGNORE, context.isaac)
                         packet.buffer.writeByte(TextUtils.getLength(displayName) + 1)
                         packet.buffer.writeString(displayName)
@@ -89,8 +89,8 @@ object IgnoreList {
                     if (TextUtils.matches(displayName, formattedDisplayName, unfilteredUsername, formattedIgnoredDisplayName, (-110).toByte())) {
                         if (--IGNORE_COUNT - index >= 0)
                             System.arraycopy(IGNORED, index + 1, IGNORED, index, IGNORE_COUNT - index)
-                        client.anInt7386 = client.anInt7347
-                        val context = client.connectionContext
+                        Client.anInt7386 = Client.anInt7347
+                        val context = Client.connectionContext
                         val packet = PacketEncoder.createPacket(ClientProt.REMOVE_IGNORE, context.isaac)
                         packet.buffer.writeByte(TextUtils.getLength(displayName))
                         packet.buffer.writeString(displayName)

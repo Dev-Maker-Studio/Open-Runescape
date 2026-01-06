@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.config.cutscene
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 
 /**
  * Stores camera movement keyframes for cutscenes.
@@ -73,6 +73,6 @@ class CutsceneCameraMovement(packet: Packet) {
         }
 
         @Suppress("UNCHECKED_CAST")
-        client.anIntArrayArrayArray7302!![pathIndex] = keyframeData as Array<IntArray?>
+        Client.anIntArrayArrayArray7302!![pathIndex] = keyframeData as Array<IntArray?>
     }
 }

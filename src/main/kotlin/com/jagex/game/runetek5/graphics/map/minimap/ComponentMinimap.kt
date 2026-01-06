@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.graphics.map.minimap
 import com.jagex.game.runetek5.cache.node.IntNode
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.GameShell
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.client.menu.MiniMenu
 import com.jagex.game.runetek5.config.Resource
@@ -140,7 +140,7 @@ object ComponentMinimap {
                 }
             }
         }
-        sceneObject = scene.getInteractiveObject(plane, sceneX, sceneY, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+        sceneObject = scene.getInteractiveObject(plane, sceneX, sceneY, Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
         if (sceneObject != null) {
             val loctype: ObjectType = Resource.mapRegion!!.getLoctypeList().list(sceneObject.id)
             val rotation = sceneObject.getRotation() and 0x3
@@ -191,16 +191,16 @@ object ComponentMinimap {
                 val rotation: Int
                 val i_11: Int
                 if (Camera.cameraCalculationType == 4) {
-                    absX = client.anInt7262
-                    absY = client.anInt7376
+                    absX = Client.anInt7262
+                    absY = Client.anInt7376
                     rotation = (-Camera.camAngleY).toInt() and 0x3fff
                     i_11 = 4096
                 } else {
                     val vector322: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
                     absX = vector322.x.toInt()
                     absY = vector322.z.toInt()
-                    rotation = (-Camera.camAngleY).toInt() + client.minimapRotation and 0x3fff
-                    i_11 = 4096 - client.minimapZoom * 16
+                    rotation = (-Camera.camAngleY).toInt() + Client.minimapRotation and 0x3fff
+                    i_11 = 4096 - Client.minimapZoom * 16
                 }
 
                 val i_12 = absX / 128 + 48
@@ -233,7 +233,7 @@ object ComponentMinimap {
                     drawMec(toolkit, dimension, component, clipLeft, clipTop, i_16, i_17, locType.mapCategoryid)
                 }
 
-                var groundItem: GroundItemWrapper? = client.GROUND_ITEMS.first() as? GroundItemWrapper
+                var groundItem: GroundItemWrapper? = Client.GROUND_ITEMS.first() as? GroundItemWrapper
                 while (groundItem != null) {
                     val plane = (groundItem.pointer shr 28 and 0x3L).toInt()
                     if (plane == MAP_PLANE) {
@@ -243,7 +243,7 @@ object ComponentMinimap {
                         val sizeZ = i_18 * 4 + 2 - absY / 128
                         drawEntity(component, dimension, clipLeft, clipTop, sizeX, sizeZ, StaticMedia.mapdotSprites?.get(0))
                     }
-                    groundItem = client.GROUND_ITEMS.next() as? GroundItemWrapper
+                    groundItem = Client.GROUND_ITEMS.next() as? GroundItemWrapper
                 }
 
                 drawNpcs(toolkit, absX, absY, component, dimension, clipLeft, clipTop)
@@ -274,7 +274,7 @@ object ComponentMinimap {
             if (Camera.cameraCalculationType == 4) {
                 rotation = Camera.camAngleY.toInt() and 0x3fff
             } else {
-                rotation = Camera.camAngleY.toInt() + client.minimapRotation and 0x3fff
+                rotation = Camera.camAngleY.toInt() + Client.minimapRotation and 0x3fff
             }
 
             val largestSize = Math.max(component.width / 2, component.height / 2) + 10
@@ -283,8 +283,8 @@ object ComponentMinimap {
                 var xan = MathUtils.SINE[rotation]
                 var zan = MathUtils.COSINE[rotation]
                 if (Camera.cameraCalculationType != 4) {
-                    xan = xan * 256 / (client.minimapZoom + 256)
-                    zan = zan * 256 / (client.minimapZoom + 256)
+                    xan = xan * 256 / (Client.minimapZoom + 256)
+                    zan = zan * 256 / (Client.minimapZoom + 256)
                 }
 
                 val w = zan * sizeX + sizeZ * xan shr 14
@@ -351,7 +351,7 @@ object ComponentMinimap {
             Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, component.width + clipLeft, clipTop + component.height)
             if (minimapState < 3) {
                 var i_5 = (-Camera.camAngleY).toInt()
-                i_5 = i_5 + client.minimapRotation * 2 and 0x3fff
+                i_5 = i_5 + Client.minimapRotation * 2 and 0x3fff
                 i_5 = i_5 shl 2
                 StaticMedia.compassSprite!!.drawRotatedSprite(component.width / 2.0F + clipLeft, component.height / 2.0F + clipTop, i_5, sprite.surface, clipLeft, clipTop)
             } else {
@@ -405,8 +405,8 @@ object ComponentMinimap {
 
     @JvmStatic
     fun drawNpcs(toolkit: AbstractToolkit, offsetX: Int, offsetY: Int, component: Component, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
-        for (npcIndex in 0 until client.NPC_UPDATE_INDEX) {
-            val node: ObjectNode? = client.NPC_MAP.get(client.NPC_UPDATE_INDICES[npcIndex].toLong()) as? ObjectNode
+        for (npcIndex in 0 until Client.NPC_UPDATE_INDEX) {
+            val node: ObjectNode? = Client.NPC_MAP.get(Client.NPC_UPDATE_INDICES[npcIndex].toLong()) as? ObjectNode
             if (node != null) {
                 val npcEntity = node.value as? NpcEntity
                 if (npcEntity != null && npcEntity.hasDefinition() && npcEntity.plane == PlayerUpdate.MY_PLAYER!!.plane) {
@@ -444,13 +444,13 @@ object ComponentMinimap {
                     if (Camera.cameraCalculationType == 4) {
                         rotation2 = Camera.camAngleY.toInt() and 0x3fff
                     } else {
-                        rotation2 = Camera.camAngleY.toInt() + client.minimapRotation and 0x3fff
+                        rotation2 = Camera.camAngleY.toInt() + Client.minimapRotation and 0x3fff
                     }
                     var i_13_2 = MathUtils.SINE[rotation2]
                     var i_14_2 = MathUtils.COSINE[rotation2]
                     if (Camera.cameraCalculationType != 4) {
-                        i_13_2 = i_13_2 * 256 / (client.minimapZoom + 256)
-                        i_14_2 = i_14_2 * 256 / (client.minimapZoom + 256)
+                        i_13_2 = i_13_2 * 256 / (Client.minimapZoom + 256)
+                        i_14_2 = i_14_2 * 256 / (Client.minimapZoom + 256)
                     }
                     ints_10[i_11 * 2] = clipLeft + component.width / 2 + ((offsets[i_11 * 2 + 1] * 4 + i_6) * i_13_2 + i_14_2 * (i_5 + offsets[i_11 * 2] * 4) shr 14)
                     ints_10[i_11 * 2 + 1] = component.height / 2 + clipTop - ((offsets[i_11 * 2 + 1] * 4 + i_6) * i_14_2 - i_13_2 * (i_5 + offsets[i_11 * 2] * 4) shr 14)
@@ -724,7 +724,7 @@ object ComponentMinimap {
                             if (settingsBits.isVisible(fromPlane, sceneZ, sceneX, sceneY)) {
                                 var gameObject: GameObject? = scene.getGroundDecoration(sceneZ, sceneX, sceneY) as? GameObject
                                 if (gameObject == null) {
-                                    gameObject = scene.getInteractiveObject(sceneZ, sceneX, sceneY, client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+                                    gameObject = scene.getInteractiveObject(sceneZ, sceneX, sceneY, Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
                                 }
                                 if (gameObject == null) {
                                     gameObject = scene.getWall(sceneZ, sceneX, sceneY) as? GameObject
@@ -734,7 +734,7 @@ object ComponentMinimap {
                                 }
                                 if (gameObject != null) {
                                     val locType: ObjectType = locTypeList.list(gameObject.id)
-                                    if (!locType.members || client.memberWorld) {
+                                    if (!locType.members || Client.memberWorld) {
                                         var mapCategoryId = locType.mapCategoryid
                                         if (locType.alternativeIds != null) {
                                             val alternativeIds = locType.alternativeIds!!
@@ -828,7 +828,7 @@ object ComponentMinimap {
     @JvmStatic
     fun drawGame() {
         drawGame(Renderers.activeToolkit!!)
-        if (client.ROOF_OVERRIDE != PlayerUpdate.MY_PLAYER_PLANE) {
+        if (Client.ROOF_OVERRIDE != PlayerUpdate.MY_PLAYER_PLANE) {
             Scene.setRoofOverride()
         }
     }

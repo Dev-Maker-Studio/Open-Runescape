@@ -1,11 +1,9 @@
 package com.jagex.game.runetek5.config.sequence
 
 import com.jagex.game.runetek5.cache.node.impl.ObjectNode
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.config.bas.BasType
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
-import com.jagex.game.runetek5.config.sequence.spot.SpotAnimType
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
@@ -14,15 +12,10 @@ import com.jagex.game.runetek5.entity.RenderedEntity
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL
-import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
 import com.jagex.game.runetek5.graphics.model.particle.Silhouette
-import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystem
-import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.math.Matrix43
-import com.jagex.game.runetek5.math.Quaternion
 import com.jagex.game.runetek5.math.QuaternionPool
-import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.math.Vector3Pool
 import com.jagex.game.runetek5.movement.CoordinateSpace
 import com.jagex.game.runetek5.scene.RenderedEntityCache
@@ -118,7 +111,7 @@ class Projectile(
     fun cycle() {
         if (!animating && entitySource != 0) {
             var lockedOnEntity: Any? = null
-            if (client.MAP_LOADING_STAGE == 4) {
+            if (Client.MAP_LOADING_STAGE == 4) {
                 lockedOnEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![entitySource - 1].getEntity()
             } else {
                 val entityLockon: Int
@@ -131,7 +124,7 @@ class Projectile(
                     }
                 } else {
                     entityLockon = entitySource - 1
-                    val npcObjectNode = client.NPC_MAP.get(entityLockon.toLong()) as ObjectNode?
+                    val npcObjectNode = Client.NPC_MAP.get(entityLockon.toLong()) as ObjectNode?
                     if (npcObjectNode != null) {
                         lockedOnEntity = npcObjectNode.value
                     }
@@ -260,10 +253,10 @@ class Projectile(
         val emitters = gfxModel.getEmissiveTriangles()
         val vertices = gfxModel.getEffectiveVertices()
         if ((particleSystem == null || particleSystem!!.isDisabled) && (emitters != null || vertices != null)) {
-            particleSystem = ParticleSystem.get(client.cycles, true)
+            particleSystem = ParticleSystem.get(Client.cycles, true)
         }
         if (particleSystem != null) {
-            particleSystem!!.performCycle(toolkit, client.cycles.toLong(), emitters, vertices)
+            particleSystem!!.performCycle(toolkit, Client.cycles.toLong(), emitters, vertices)
             particleSystem!!.setLogicHeight(plane.toInt())
         }
     }

@@ -3173,7 +3173,7 @@ public class CS2Interpreter {
     }
 
     public static void method5755(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.aBool7323 ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aBool7323 ? 1 : 0;
     }
 
     public static void method5756(CS2Executor executor) {
@@ -3226,7 +3226,7 @@ public class CS2Interpreter {
 
     public static void loadClanSettingVarLong(CS2Executor executor) {
         int i_2 = executor.intOpValues[executor.instrPtr];
-        Long long_3 = executor.currentClanSettings.getLongVar(client.CURRENT_GAME.id << 16 | i_2);
+        Long long_3 = executor.currentClanSettings.getLongVar(Client.CURRENT_GAME.id << 16 | i_2);
         long long_4;
         if (long_3 == null) {
             long_4 = -1L;
@@ -3238,7 +3238,7 @@ public class CS2Interpreter {
 
     public static void loadClanSettingVarString(CS2Executor executor) {
         int i_2 = executor.intOpValues[executor.instrPtr];
-        String string_3 = executor.currentClanSettings.getStringVar(client.CURRENT_GAME.id << 16 | i_2);
+        String string_3 = executor.currentClanSettings.getStringVar(Client.CURRENT_GAME.id << 16 | i_2);
         String string_4;
         if (string_3 == null) {
             string_4 = "";
@@ -3252,7 +3252,7 @@ public class CS2Interpreter {
         int i_2 = executor.intStack[--executor.intStackPtr];
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.particles, i_2);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void gotoInstr(CS2Executor executor) {
@@ -3352,25 +3352,25 @@ public class CS2Interpreter {
         if (i_2 >= 2) {
             throw new RuntimeException();
         } else {
-            client.anInt7277 = i_2;
+            Client.anInt7277 = i_2;
             int i_3 = executor.intStack[executor.intStackPtr + 1];
-            if (i_3 + 1 >= client.anIntArrayArrayArray7302[client.anInt7277].length >> 1) {
+            if (i_3 + 1 >= Client.anIntArrayArrayArray7302[Client.anInt7277].length >> 1) {
                 throw new RuntimeException();
             } else {
-                client.anInt7279 = i_3;
-                client.anInt7256 = 0;
-                client.anInt7327 = executor.intStack[executor.intStackPtr + 2];
-                client.anInt7182 = executor.intStack[executor.intStackPtr + 3];
+                Client.anInt7279 = i_3;
+                Client.anInt7256 = 0;
+                Client.anInt7327 = executor.intStack[executor.intStackPtr + 2];
+                Client.anInt7182 = executor.intStack[executor.intStackPtr + 3];
                 int i_4 = executor.intStack[executor.intStackPtr + 4];
                 if (i_4 >= 2) {
                     throw new RuntimeException();
                 } else {
-                    client.anInt7448 = i_4;
+                    Client.anInt7448 = i_4;
                     int i_5 = executor.intStack[executor.intStackPtr + 5];
-                    if (i_5 + 1 >= client.anIntArrayArrayArray7302[client.anInt7448].length >> 1) {
+                    if (i_5 + 1 >= Client.anIntArrayArrayArray7302[Client.anInt7448].length >> 1) {
                         throw new RuntimeException();
                     } else {
-                        client.anInt7280 = i_5;
+                        Client.anInt7280 = i_5;
                         Camera.cameraCalculationType = 3;
                         StaticMethods.anInt833 = -1;
                         PingRequester.anInt5864 = -1;
@@ -3385,7 +3385,7 @@ public class CS2Interpreter {
         if (i_2 < 0) {
             i_2 = 0;
         }
-        client.anInt7271 = i_2 + client.anInt7270;
+        Client.anInt7271 = i_2 + Client.anInt7270;
     }
 
     public static void method1370(CS2Executor executor) {
@@ -3411,7 +3411,7 @@ public class CS2Interpreter {
     }
 
     public static void setPingWorlds(CS2Executor executor) {
-        if (client.gameState == GameState.UNK_0)
+        if (Client.gameState == GameState.UNK_0)
             WorldConnection.PING_WORLDS = executor.intStack[--executor.intStackPtr] == 1;
     }
 
@@ -3430,7 +3430,7 @@ public class CS2Interpreter {
 
     public static void method8716(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        int i_3 = client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
+        int i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
         executor.intStack[++executor.intStackPtr - 1] = i_3 == 2 ? 1 : 0;
     }
 
@@ -3545,7 +3545,7 @@ public class CS2Interpreter {
     }
 
     public static void method468(CS2Executor executor) {
-        BufferedConnectionContext class1842 = client.getConnectionContext();
+        BufferedConnectionContext class1842 = Client.getConnectionContext();
         TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842.isaac);
         tcpmessage3.buffer.writeByte(0);
         int i_4 = tcpmessage3.buffer.currentPosition;
@@ -3595,7 +3595,7 @@ public class CS2Interpreter {
         if (i_2 != PreferenceManager.preferences.gametipStartStagePreference.getValue()) {
             PreferenceManager.preferences.setValue(PreferenceManager.preferences.gametipStartStagePreference, i_2);
             PreferenceManager.savePreferences();
-            client.preferencesSavedOnServer = false;
+            Client.preferencesSavedOnServer = false;
         }
     }
 
@@ -3605,7 +3605,7 @@ public class CS2Interpreter {
         executor.intStack[++executor.intStackPtr - 1] = hraphicsPreference;
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     //Deprecated jsobject applet BS
@@ -3633,7 +3633,7 @@ public class CS2Interpreter {
 
     //Deprecated jsobject applet BS
     public static void method6280() {
-        client.aBool7189 = true;
+        Client.aBool7189 = true;
     }
 
     public static void method6281(CS2Executor executor) {
@@ -3677,7 +3677,7 @@ public class CS2Interpreter {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
         boolean bool3 = executor.intStack[--executor.intStackPtr] == 1;
         String string_4 = ServerEnvironment.getUrl() + string_2;
-        Browser.openOpenjs(string_4, bool3, client.aBool7158);
+        Browser.openOpenjs(string_4, bool3, Client.aBool7158);
     }
 
     public static void getNPCParam(CS2Executor executor) {
@@ -3723,16 +3723,16 @@ public class CS2Interpreter {
     }
 
     public static void method4882(CS2Executor executor) {
-        AbstractToolkit.calculateGameArea(0, 0, client.GAME_SCREEN_INTERFACE.width, client.GAME_SCREEN_INTERFACE.height, false);
-        executor.intStack[++executor.intStackPtr - 1] = client.gameAreaWidth;
-        executor.intStack[++executor.intStackPtr - 1] = client.gameAreaHeight;
+        AbstractToolkit.calculateGameArea(0, 0, Client.GAME_SCREEN_INTERFACE.width, Client.GAME_SCREEN_INTERFACE.height, false);
+        executor.intStack[++executor.intStackPtr - 1] = Client.gameAreaWidth;
+        executor.intStack[++executor.intStackPtr - 1] = Client.gameAreaHeight;
     }
 
     public static void storeVarc(CS2Executor executor) {
         int i_2 = executor.intOpValues[executor.instrPtr];
         VarcTypeList.VARC_INT[i_2] = executor.intStack[--executor.intStackPtr];
         PulseEventQueue.delayedClientvarcUpdate(i_2);
-        client.clientIsActive |= VarcTypeList.VARC_BOOL[i_2];
+        Client.clientIsActive |= VarcTypeList.VARC_BOOL[i_2];
     }
 
     public static void method5099(CS2Executor executor) {
@@ -3847,7 +3847,7 @@ public class CS2Interpreter {
 
     public static void method13494(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        if (client.aString3643 != null && client.aString3643.equalsIgnoreCase(string_2)) {
+        if (Client.aString3643 != null && Client.aString3643.equalsIgnoreCase(string_2)) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
@@ -3857,7 +3857,7 @@ public class CS2Interpreter {
     public static void method14857(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.characterShadows, executor.intStack[--executor.intStackPtr] == 1 ? 1 : 0);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void emailValidationAddNewAddress(CS2Executor executor) {
@@ -3867,7 +3867,7 @@ public class CS2Interpreter {
         boolean bool3 = executor.intStack[executor.intStackPtr] == 1;
         boolean bool4 = executor.intStack[executor.intStackPtr + 1] == 1;
         boolean bool5 = executor.intStack[executor.intStackPtr + 2] == 1;
-        TcpPacket tcpmessage6 = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_ADD_NEW_ADDRESS, client.LOBBY_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage6 = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_ADD_NEW_ADDRESS, Client.LOBBY_CONNECTION_CONTEXT.isaac);
         tcpmessage6.buffer.writeShort(TextUtils.getLength(string_2) + 1);
         tcpmessage6.buffer.writeString(string_2);
         int i_7 = 0;
@@ -3881,7 +3881,7 @@ public class CS2Interpreter {
             i_7 |= 0x4;
         }
         tcpmessage6.buffer.writeByte(i_7);
-        client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage6);
+        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage6);
     }
 
     public static void method5829(CS2Executor executor) {
@@ -3895,7 +3895,7 @@ public class CS2Interpreter {
     }
 
     public static void method5832(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.USERDETAIL_QUICKCHAT && !client.VERIFIED_EMAIL_ADDRESS ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.USERDETAIL_QUICKCHAT && !Client.VERIFIED_EMAIL_ADDRESS ? 1 : 0;
     }
 
     public static void method5833(CS2Executor executor) {
@@ -3977,7 +3977,7 @@ public class CS2Interpreter {
     }
 
     public static void method745(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.safemodeForcedDuringStartup ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.safemodeForcedDuringStartup ? 1 : 0;
     }
 
     public static void substring(CS2Executor executor) {
@@ -4033,7 +4033,7 @@ public class CS2Interpreter {
     }
 
     public static void method6799(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.AFFILIATE;
+        executor.intStack[++executor.intStackPtr - 1] = Client.AFFILIATE;
     }
 
     public static void method6800(CS2Executor executor) {
@@ -4054,7 +4054,7 @@ public class CS2Interpreter {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.textures, executor.intStack[--executor.intStackPtr] == 1 ? 1 : 0);
         PreferenceManager.savePreferences();
         GraphicsCache.resetGraphicCaches();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void ccSetItem(CS2Executor executor) {
@@ -4076,7 +4076,7 @@ public class CS2Interpreter {
 
     public static void method6797(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        int i_3 = client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
+        int i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
         executor.intStack[++executor.intStackPtr - 1] = i_3 == 0 ? 1 : 0;
     }
 
@@ -4279,7 +4279,7 @@ public class CS2Interpreter {
     public static void method4035(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.maxScreenSize, executor.intStack[--executor.intStackPtr]);
         PreferenceManager.savePreferences();
-        client.needsResize = true;
+        Client.needsResize = true;
     }
 
     public static void min(CS2Executor executor) {
@@ -4356,7 +4356,7 @@ public class CS2Interpreter {
     }
 
     public static void method775() {
-        client.logout(false);
+        Client.logout(false);
     }
 
     public static void method777(CS2Executor executor) {
@@ -4430,7 +4430,7 @@ public class CS2Interpreter {
     public static void method5010(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         String string_3 = (String) executor.stringStack[--executor.stringStackPtr];
-        if (client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
+        if (Client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
             executor.intStack[++executor.intStackPtr - 1] = LoginManager.setGameHost(i_2, string_3) ? 1 : 0;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
@@ -4572,7 +4572,7 @@ public class CS2Interpreter {
 
     public static void method6206(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.GRAND_EXCHANGE_SLOTS[i_2].totalPrice;
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2].totalPrice;
     }
 
     public static void random(CS2Executor executor) {
@@ -4686,7 +4686,7 @@ public class CS2Interpreter {
         PreferenceManager.loadLowDetailPreferences();
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method3667(CS2Executor executor) {
@@ -4845,7 +4845,7 @@ public class CS2Interpreter {
     public static void method6691(CS2Executor executor) {
         boolean bool2 = executor.intStack[--executor.intStackPtr] != 0;
         int i_3 = executor.intStack[--executor.intStackPtr];
-        executor.stringStack[++executor.stringStackPtr - 1] = SystemInfo.getCacheCompletionPercent(i_3, 0, bool2, client.CURRENT_LANGUAGE);
+        executor.stringStack[++executor.stringStackPtr - 1] = SystemInfo.getCacheCompletionPercent(i_3, 0, bool2, Client.CURRENT_LANGUAGE);
     }
 
     public static void method6695() {
@@ -4861,9 +4861,9 @@ public class CS2Interpreter {
 
     public static void pushGameobjectHintLocation(CS2Executor executor) {
         HintRenderer.calculateSceneobjectHintProjection((SceneGraphEntity) executor.currentLocation, executor.intStack[--executor.intStackPtr]);
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[0];
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[1];
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[2];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[0];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[1];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[2];
     }
 
     public static void method5695(CS2Executor executor) {
@@ -4945,9 +4945,9 @@ public class CS2Interpreter {
         if (Utils.isWrongJava(string_2)) {
             i_3 = Utils.parseInt(string_2);
         }
-        TcpPacket tcpmessage4 = PacketEncoder.createPacket(ClientProt.RESUME_COUNTDIALOG, client.GAME_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage4 = PacketEncoder.createPacket(ClientProt.RESUME_COUNTDIALOG, Client.GAME_CONNECTION_CONTEXT.isaac);
         tcpmessage4.buffer.writeInt(i_3);
-        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage4);
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage4);
     }
 
     public static void pushLong(CS2Executor executor) {
@@ -4997,10 +4997,10 @@ public class CS2Interpreter {
 
     public static void resumeClanForumQFCDialog(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_CLANFORUMQFCDIALOG, client.GAME_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_CLANFORUMQFCDIALOG, Client.GAME_CONNECTION_CONTEXT.isaac);
         tcpmessage3.buffer.writeByte(string_2.length() + 1);
         tcpmessage3.buffer.writeString(string_2);
-        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
 
     public static void method2871(CS2Executor executor) {
@@ -5080,7 +5080,7 @@ public class CS2Interpreter {
     }
 
     public static void method3921(CS2Executor executor) {
-        BufferedConnectionContext class1842 = client.getConnectionContext();
+        BufferedConnectionContext class1842 = Client.getConnectionContext();
         TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842.isaac);
         tcpmessage3.buffer.writeByte(0);
         int i_4 = tcpmessage3.buffer.currentPosition;
@@ -5142,7 +5142,7 @@ public class CS2Interpreter {
     }
 
     public static void method5733(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.memberWorld ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.memberWorld ? 1 : 0;
     }
 
     public static void method5734(CS2Executor executor) {
@@ -5188,7 +5188,7 @@ public class CS2Interpreter {
     }
 
     public static void method1071() {
-        client.method4195();
+        Client.method4195();
     }
 
     public static void storeVarp(CS2Executor executor) {
@@ -5239,7 +5239,7 @@ public class CS2Interpreter {
     public static void method1562(CS2Executor executor) {
         CS2Interface underlaydefinition2 = executor.aBool7022 ? executor.hookedInterface2 : executor.hookedInterface1;
         Component icomponentdefinitions3 = underlaydefinition2.comp;
-        executor.intStack[++executor.intStackPtr - 1] = client.getComponentSettings(icomponentdefinitions3).getUseOptionFlags();
+        executor.intStack[++executor.intStackPtr - 1] = Client.getComponentSettings(icomponentdefinitions3).getUseOptionFlags();
     }
 
     public static void method2101(CS2Executor executor) {
@@ -5298,20 +5298,20 @@ public class CS2Interpreter {
 
     public static void sendAClass3794624(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        if (client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
+        if (Client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
             if (string_2.length() > 20) {
-                client.aByte7458 = -4;
+                Client.aByte7458 = -4;
             } else {
-                client.aByte7458 = -1;
-                TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.DEPRECATED_97_SERVERPACKET_52, client.LOBBY_CONNECTION_CONTEXT.isaac);
+                Client.aByte7458 = -1;
+                TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.DEPRECATED_97_SERVERPACKET_52, Client.LOBBY_CONNECTION_CONTEXT.isaac);
                 tcpmessage3.buffer.writeByte(0);
                 int i_4 = tcpmessage3.buffer.currentPosition;
                 tcpmessage3.buffer.writeString(string_2);
                 tcpmessage3.buffer.writeIndex(tcpmessage3.buffer.currentPosition - i_4);
-                client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
+                Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
             }
         } else {
-            client.aByte7458 = -5;
+            Client.aByte7458 = -5;
         }
     }
 
@@ -5325,7 +5325,7 @@ public class CS2Interpreter {
     public static void method2568(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.flickeringEffects, executor.intStack[--executor.intStackPtr] == 1 ? 1 : 0);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method1349(CS2Executor executor) {
@@ -5379,7 +5379,7 @@ public class CS2Interpreter {
 
     public static void method5297(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        int i_3 = client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
+        int i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
         int[] ints_4 = executor.intStack;
         int i_5 = ++executor.intStackPtr - 1;
         byte b_6;
@@ -5407,7 +5407,7 @@ public class CS2Interpreter {
 
     public static void getGEOfferPrice(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.GRAND_EXCHANGE_SLOTS[i_2].price;
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2].price;
     }
 
     public static void getCompText(CS2Executor executor) {
@@ -5462,7 +5462,7 @@ public class CS2Interpreter {
     }
 
     public static void method6315(CS2Executor executor) {
-        BufferedConnectionContext class1842 = client.getConnectionContext();
+        BufferedConnectionContext class1842 = Client.getConnectionContext();
         TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842.isaac);
         tcpmessage3.buffer.writeByte(0);
         int i_4 = tcpmessage3.buffer.currentPosition;
@@ -5475,11 +5475,11 @@ public class CS2Interpreter {
 
     public static void getGEOfferItem(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.GRAND_EXCHANGE_SLOTS[i_2].itemId;
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2].itemId;
     }
 
     public static void method6317(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = GameState.isRenderingScene(client.gameState) ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = GameState.isRenderingScene(Client.gameState) ? 1 : 0;
     }
 
     public static void ccSetItemWearCol(CS2Executor executor) {
@@ -5498,7 +5498,7 @@ public class CS2Interpreter {
     }
 
     public static void getPlayerIsMember(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.IS_MEMBER ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.IS_MEMBER ? 1 : 0;
     }
 
     public static void method1138(CS2Executor executor) {
@@ -5509,7 +5509,7 @@ public class CS2Interpreter {
         Component icomponentdefinitions5 = Component.listIcomponent(i_2 << 16 | i_3, i_4);
         InterfaceComponentRenderer.cancelInterfaceSelection();
         assert icomponentdefinitions5 != null;
-        IFEvents class282Sub106 = client.getComponentSettings(icomponentdefinitions5);
+        IFEvents class282Sub106 = Client.getComponentSettings(icomponentdefinitions5);
         InterfaceRenderer.setUseOptionFlags(icomponentdefinitions5, class282Sub106.getUseOptionFlags(), class282Sub106.interfaceId);
     }
 
@@ -5577,7 +5577,7 @@ public class CS2Interpreter {
     }
 
     public static void method4176(CS2Executor executor) {
-        int i_2 = client.anIntArrayArrayArray7302[executor.intStack[--executor.intStackPtr]].length >> 1;
+        int i_2 = Client.anIntArrayArrayArray7302[executor.intStack[--executor.intStackPtr]].length >> 1;
         executor.intStack[++executor.intStackPtr - 1] = i_2;
     }
 
@@ -5781,7 +5781,7 @@ public class CS2Interpreter {
     }
 
     public static void method7699(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.aBool7151 ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aBool7151 ? 1 : 0;
     }
 
     public static void loadClanSettingVarbit(CS2Executor executor) {
@@ -5790,7 +5790,7 @@ public class CS2Interpreter {
         if (class5373 == null) {
             throw new RuntimeException();
         } else {
-            Integer integer4 = executor.currentClanSettings.method1225(client.CURRENT_GAME.id << 16 | class5373.baseVar, class5373.startBit, class5373.endBit);
+            Integer integer4 = executor.currentClanSettings.method1225(Client.CURRENT_GAME.id << 16 | class5373.baseVar, class5373.startBit, class5373.endBit);
             int i_5;
             if (integer4 == null) {
                 i_5 = 0;
@@ -5823,7 +5823,7 @@ public class CS2Interpreter {
     }
 
     public static void method934(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = SystemInfo.SYSTEM_INFO.ram >= 512 && !client.isForcedSafemode && !client.renderWithCpu ? 0 : 1;
+        executor.intStack[++executor.intStackPtr - 1] = SystemInfo.SYSTEM_INFO.ram >= 512 && !Client.isForcedSafemode && !Client.renderWithCpu ? 0 : 1;
     }
 
     public static void bitOr(CS2Executor executor) {
@@ -5841,7 +5841,7 @@ public class CS2Interpreter {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.water, executor.intStack[--executor.intStackPtr] == 1 ? 2 : 0);
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void clearCompChildren(CS2Executor executor) {
@@ -5913,7 +5913,7 @@ public class CS2Interpreter {
     public static void method4776() {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.graphics, 0);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void containerTotalParamStack(CS2Executor executor) {
@@ -5949,7 +5949,7 @@ public class CS2Interpreter {
     	PreferenceManager.loadMidDetailPreferences();
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method7774(CS2Executor executor) {
@@ -5977,7 +5977,7 @@ public class CS2Interpreter {
 
     public static void method3802(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.GRAND_EXCHANGE_SLOTS[i_2].amount;
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2].amount;
     }
 
     public static void method3803(CS2Executor executor) {
@@ -6008,7 +6008,7 @@ public class CS2Interpreter {
     }
 
     public static void method4556(CS2Executor executor) {
-        executor.intStack[executor.intStackPtr - 1] = TypeLists.QUEST.list(executor.intStack[executor.intStackPtr - 1]).hasAllRequirements(VarProviders.PLAYER_VAR_PROVIDER, client.SKILL_LEVEL_ACTUAL) ? 1 : 0;
+        executor.intStack[executor.intStackPtr - 1] = TypeLists.QUEST.list(executor.intStack[executor.intStackPtr - 1]).hasAllRequirements(VarProviders.PLAYER_VAR_PROVIDER, Client.SKILL_LEVEL_ACTUAL) ? 1 : 0;
     }
 
     public static void method4557(CS2Executor executor) {
@@ -6025,7 +6025,7 @@ public class CS2Interpreter {
 
     public static void stringEqual(CS2Executor executor) {
         executor.stringStackPtr -= 2;
-        executor.intStack[++executor.intStackPtr - 1] = TextUtils.method7557((String) executor.stringStack[executor.stringStackPtr], (String) executor.stringStack[executor.stringStackPtr + 1], client.CURRENT_LANGUAGE);
+        executor.intStack[++executor.intStackPtr - 1] = TextUtils.method7557((String) executor.stringStack[executor.stringStackPtr], (String) executor.stringStack[executor.stringStackPtr + 1], Client.CURRENT_LANGUAGE);
     }
 
     public static void toString(CS2Executor executor) {
@@ -6097,7 +6097,7 @@ public class CS2Interpreter {
     public static void method4839(CS2Executor executor) {
         --executor.intStackPtr;
         int i_2 = executor.intStack[executor.intStackPtr];
-        SubInterface class282Sub443 = client.OPEN_INTERFACES.get(i_2);
+        SubInterface class282Sub443 = Client.OPEN_INTERFACES.get(i_2);
         if (class282Sub443 != null && class282Sub443.overlay == 3) {
             Interface.closeChildInterface(class282Sub443, true, true);
         }
@@ -6150,9 +6150,9 @@ public class CS2Interpreter {
     }
 
     public static void activeClanchannelFindAffined(CS2Executor executor) {
-        if (client.CLAN_CHANNEL != null) {
+        if (Client.CLAN_CHANNEL != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
-            executor.clanChannel = client.CLAN_CHANNEL;
+            executor.clanChannel = Client.CLAN_CHANNEL;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
         }
@@ -6162,7 +6162,7 @@ public class CS2Interpreter {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.sceneryShadows, executor.intStack[--executor.intStackPtr]);
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method3613() {
@@ -6186,7 +6186,7 @@ public class CS2Interpreter {
     public static void method5766(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.mapSize, executor.intStack[--executor.intStackPtr]);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method5767(CS2Executor executor) {
@@ -6243,8 +6243,8 @@ public class CS2Interpreter {
         } else if (i_4 >= Resource.mapRegion.sceneSizeY) {
             i_4 = Resource.mapRegion.sceneSizeY;
         }
-        client.anInt7262 = (i_3 << 9) + 256;
-        client.anInt7376 = (i_4 << 9) + 256;
+        Client.anInt7262 = (i_3 << 9) + 256;
+        Client.anInt7376 = (i_4 << 9) + 256;
         Camera.cameraCalculationType = 4;
         StaticMethods.anInt833 = -1;
         PingRequester.anInt5864 = -1;
@@ -6274,12 +6274,12 @@ public class CS2Interpreter {
     }
 
     public static void fromDate(CS2Executor executor) {
-        executor.stringStack[++executor.stringStackPtr - 1] = CalenderUtil.method13045(CalenderUtil.method5363(executor.intStack[--executor.intStackPtr]), client.CURRENT_LANGUAGE.getValue());
+        executor.stringStack[++executor.stringStackPtr - 1] = CalenderUtil.method13045(CalenderUtil.method5363(executor.intStack[--executor.intStackPtr]), Client.CURRENT_LANGUAGE.getValue());
     }
 
     public static void method4968(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        PacketEncoder.kickPlayer(executor.clanChannel == client.CLAN_CHANNEL, i_2);
+        PacketEncoder.kickPlayer(executor.clanChannel == Client.CLAN_CHANNEL, i_2);
     }
 
     public static void method4970(CS2Executor executor) {
@@ -6366,9 +6366,9 @@ public class CS2Interpreter {
     }
 
     public static void method6275(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.interfaceSelectionActive ? 1 : 0;
-        executor.stringStack[++executor.stringStackPtr - 1] = client.useOnTarget == null ? "" : client.useOnTarget;
-        executor.stringStack[++executor.stringStackPtr - 1] = client.useOnType == null ? "" : client.useOnType;
+        executor.intStack[++executor.intStackPtr - 1] = Client.interfaceSelectionActive ? 1 : 0;
+        executor.stringStack[++executor.stringStackPtr - 1] = Client.useOnTarget == null ? "" : Client.useOnTarget;
+        executor.stringStack[++executor.stringStackPtr - 1] = Client.useOnType == null ? "" : Client.useOnType;
     }
 
     public static void method16079(CS2Executor executor) {
@@ -6457,8 +6457,8 @@ public class CS2Interpreter {
     }
 
     public static void method927(CS2Executor executor) {
-        int i_2 = client.OPEN_INTERFACES.size();
-        if (client.BASE_WINDOW_ID != -1) {
+        int i_2 = Client.OPEN_INTERFACES.size();
+        if (Client.BASE_WINDOW_ID != -1) {
             ++i_2;
         }
         executor.intStack[++executor.intStackPtr - 1] = i_2;
@@ -6478,8 +6478,8 @@ public class CS2Interpreter {
     }
 
     public static void method2587(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.aShort7436;
-        executor.intStack[++executor.intStackPtr - 1] = client.aShort7437;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7436;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7437;
     }
 
     public static void method2588(CS2Executor executor) {
@@ -6570,7 +6570,7 @@ public class CS2Interpreter {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.removeRoofsOptionOverride, bool2 ? 2 : 1);
         Scene.setRoofOverride();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method287(CS2Executor executor) {
@@ -6602,7 +6602,7 @@ public class CS2Interpreter {
     }
 
     public static void method14606(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.GAME_SCREEN_INTERFACE == null ? -1 : client.GAME_SCREEN_INTERFACE.idHash;
+        executor.intStack[++executor.intStackPtr - 1] = Client.GAME_SCREEN_INTERFACE == null ? -1 : Client.GAME_SCREEN_INTERFACE.idHash;
     }
 
     public static void method7322(CS2Executor executor) {
@@ -6756,9 +6756,9 @@ public class CS2Interpreter {
 
     public static void pushGroundItemHintPosition(CS2Executor executor) {
         HintRenderer.calculateSceneobjectHintProjection(executor.currentGroundItem, executor.intStack[--executor.intStackPtr]);
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[0];
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[1];
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[2];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[0];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[1];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[2];
     }
 
     public static void switchInstr(CS2Executor executor) {
@@ -6833,14 +6833,14 @@ public class CS2Interpreter {
     }
 
     public static void method2552(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.CURRENT_CURSOR;
+        executor.intStack[++executor.intStackPtr - 1] = Client.CURRENT_CURSOR;
     }
 
     public static void method2554(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
         int i_3 = PreferenceManager.preferences.musicVolume.getValue();
         if (i_2 != i_3) {
-            if (GameState.isRenderingScene(client.gameState)) {
+            if (GameState.isRenderingScene(Client.gameState)) {
                 if (i_3 == 0 && AreaSoundPlayer.currentMusicArchive != -1) {
                     AreaSoundPlayer.method13400(Resource.MUSIC, AreaSoundPlayer.currentMusicArchive, i_2);
                     SongPlayer.method12658();
@@ -6854,7 +6854,7 @@ public class CS2Interpreter {
             }
             PreferenceManager.preferences.setValue(PreferenceManager.preferences.musicVolume, i_2);
             PreferenceManager.savePreferences();
-            client.preferencesSavedOnServer = false;
+            Client.preferencesSavedOnServer = false;
         }
     }
 
@@ -6936,7 +6936,7 @@ public class CS2Interpreter {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.monoStereo, executor.intStack[--executor.intStackPtr] == 1 ? 1 : 0);
         SoundEffectPlayer.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method2823(CS2Executor executor) {
@@ -6955,7 +6955,7 @@ public class CS2Interpreter {
     }
 
     public static void method2825(CS2Executor executor) {
-        if (client.base64Url != null) {
+        if (Client.base64Url != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
@@ -7065,7 +7065,7 @@ public class CS2Interpreter {
     }
 
     public static void method1467(CS2Executor executor) {
-        if (client.PLAYER_MOD_LEVEL >= 5 && client.PLAYER_MOD_LEVEL <= 9) {
+        if (Client.PLAYER_MOD_LEVEL >= 5 && Client.PLAYER_MOD_LEVEL <= 9) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
@@ -7125,7 +7125,7 @@ public class CS2Interpreter {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.brightness, i_2);
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method4413(CS2Executor executor) {
@@ -7142,9 +7142,9 @@ public class CS2Interpreter {
     }
 
     public static void method12881(CS2Executor executor) {
-        if (client.CLAN_SETTINGS != null) {
+        if (Client.CLAN_SETTINGS != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
-            executor.currentClanSettings = client.CLAN_SETTINGS;
+            executor.currentClanSettings = Client.CLAN_SETTINGS;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
         }
@@ -7218,15 +7218,15 @@ public class CS2Interpreter {
 
     public static void method11594(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_SUBMIT_CODE, client.LOBBY_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_SUBMIT_CODE, Client.LOBBY_CONNECTION_CONTEXT.isaac);
         tcpmessage3.buffer.writeByte(TextUtils.getLength(string_2));
         tcpmessage3.buffer.writeString(string_2);
-        client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
+        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
 
     public static void method7715(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.GRAND_EXCHANGE_SLOTS[i_2].currentAmount;
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2].currentAmount;
     }
 
     public static void method5332(CS2Executor executor) {
@@ -7275,7 +7275,7 @@ public class CS2Interpreter {
 
     public static void method1951(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        int i_3 = client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
+        int i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2].method5908();
         executor.intStack[++executor.intStackPtr - 1] = i_3 == 5 ? 1 : 0;
     }
 
@@ -7300,7 +7300,7 @@ public class CS2Interpreter {
         int i_2 = executor.intStack[--executor.intStackPtr];
         int i_3 = PreferenceManager.preferences.soundLevel.getValue();
         if (i_3 != i_2 && AreaSoundPlayer.titlescreenMusicArchive == AreaSoundPlayer.currentMusicArchive) {
-            if (!GameState.isRenderingScene(client.gameState)) {
+            if (!GameState.isRenderingScene(Client.gameState)) {
                 if (i_3 == 0) {
                     AreaSoundPlayer.method13400(Resource.MUSIC, AreaSoundPlayer.currentMusicArchive, i_2);
                     SongPlayer.method12658();
@@ -7314,7 +7314,7 @@ public class CS2Interpreter {
             }
             PreferenceManager.preferences.setValue(PreferenceManager.preferences.soundLevel, i_2);
             PreferenceManager.savePreferences();
-            client.preferencesSavedOnServer = false;
+            Client.preferencesSavedOnServer = false;
         }
     }
 
@@ -7334,16 +7334,16 @@ public class CS2Interpreter {
     }
 
     public static void method15437(CS2Executor executor) {
-        if (client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
+        if (Client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
             if (WorldConnection.requestingWorldList) {
                 executor.intStack[++executor.intStackPtr - 1] = 0;
             } else if (WorldConnection.worldListReceivedTime > Utils.time() - 1000L) {
                 executor.intStack[++executor.intStackPtr - 1] = 1;
             } else {
                 WorldConnection.requestingWorldList = true;
-                TcpPacket tcpmessage2 = PacketEncoder.createPacket(ClientProt.REQUEST_WORLD_LIST, client.LOBBY_CONNECTION_CONTEXT.isaac);
+                TcpPacket tcpmessage2 = PacketEncoder.createPacket(ClientProt.REQUEST_WORLD_LIST, Client.LOBBY_CONNECTION_CONTEXT.isaac);
                 tcpmessage2.buffer.writeInt(StaticMethods.WORLD_LIST_VERSION);
-                client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage2);
+                Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage2);
                 executor.intStack[++executor.intStackPtr - 1] = 0;
             }
         } else {
@@ -7375,7 +7375,7 @@ public class CS2Interpreter {
         PreferenceManager.loadHighDetailPreferences();
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method11492(CS2Executor executor) {
@@ -7407,7 +7407,7 @@ public class CS2Interpreter {
     public static void method3200(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.voiceOverVolume, executor.intStack[--executor.intStackPtr]);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method3201(CS2Executor executor) {
@@ -7464,9 +7464,9 @@ public class CS2Interpreter {
     }
 
     public static void activeClanchannelFindListened(CS2Executor executor) {
-        if (client.LISTENED_CLAN_CHANNEL != null) {
+        if (Client.LISTENED_CLAN_CHANNEL != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
-            executor.clanChannel = client.LISTENED_CLAN_CHANNEL;
+            executor.clanChannel = Client.LISTENED_CLAN_CHANNEL;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
         }
@@ -7529,9 +7529,9 @@ public class CS2Interpreter {
     }
 
     public static void method546(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.aByte7458;
-        if (client.aByte7458 != -1) {
-            client.aByte7458 = -6;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aByte7458;
+        if (Client.aByte7458 != -1) {
+            Client.aByte7458 = -6;
         }
     }
 
@@ -7605,18 +7605,18 @@ public class CS2Interpreter {
 
     public static void method1815(CS2Executor executor) {
         executor.intStackPtr -= 2;
-        client.aShort7394 = (short) executor.intStack[executor.intStackPtr];
-        if (client.aShort7394 <= 0) {
-            client.aShort7394 = 256;
+        Client.aShort7394 = (short) executor.intStack[executor.intStackPtr];
+        if (Client.aShort7394 <= 0) {
+            Client.aShort7394 = 256;
         }
-        client.aShort7324 = (short) executor.intStack[executor.intStackPtr + 1];
-        if (client.aShort7324 <= 0) {
-            client.aShort7324 = 320;
+        Client.aShort7324 = (short) executor.intStack[executor.intStackPtr + 1];
+        if (Client.aShort7324 <= 0) {
+            Client.aShort7324 = 320;
         }
     }
 
     public static void getJcoins(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.JCOINS;
+        executor.intStack[++executor.intStackPtr - 1] = Client.JCOINS;
     }
 
     public static void getColTag(CS2Executor executor) {
@@ -7715,9 +7715,9 @@ public class CS2Interpreter {
 
     public static void pushEntityHintPosition(CS2Executor executor) {
         HintRenderer.calculateSceneobjectHintProjection(executor.currentEntity, executor.intStack[--executor.intStackPtr]);
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[0];
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[1];
-        executor.intStack[++executor.intStackPtr - 1] = (int) client.HINT_POSITION[2];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[0];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[1];
+        executor.intStack[++executor.intStackPtr - 1] = (int) Client.HINT_POSITION[2];
     }
 
     public static void method5814(CS2Executor executor) {
@@ -7806,7 +7806,7 @@ public class CS2Interpreter {
     }
 
     public static void getWorldLanguage(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.CURRENT_LANGUAGE.getValue();
+        executor.intStack[++executor.intStackPtr - 1] = Client.CURRENT_LANGUAGE.getValue();
     }
 
     public static void method4194(CS2Executor executor) {
@@ -7831,14 +7831,14 @@ public class CS2Interpreter {
     }
 
     public static void method6238(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.isForcedSafemode ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.isForcedSafemode ? 1 : 0;
     }
 
     public static void method6239() {
         PreferenceManager.loadMinDetailPreferences();
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void appendTypedMessage(CS2Executor executor) {
@@ -7864,7 +7864,7 @@ public class CS2Interpreter {
 
     public static void method6231(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.GRAND_EXCHANGE_SLOTS[i_2].method5909();
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2].method5909();
     }
 
     public static void getCompHidden(CS2Executor executor) {
@@ -7895,7 +7895,7 @@ public class CS2Interpreter {
             PreferenceManager.preferences.setValue(PreferenceManager.preferences.graphics, 0);
         }
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method6730(CS2Executor executor) {
@@ -7914,8 +7914,8 @@ public class CS2Interpreter {
     }
 
     public static void method12597(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = (int) (client.aLong7153 >> 32);
-        executor.intStack[++executor.intStackPtr - 1] = (int) (client.aLong7153);
+        executor.intStack[++executor.intStackPtr - 1] = (int) (Client.aLong7153 >> 32);
+        executor.intStack[++executor.intStackPtr - 1] = (int) (Client.aLong7153);
     }
 
     public static void ccDelete(CS2Executor executor) {
@@ -7947,10 +7947,10 @@ public class CS2Interpreter {
 
     public static void resumeStringDialog(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, client.GAME_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, Client.GAME_CONNECTION_CONTEXT.isaac);
         tcpmessage3.buffer.writeByte(string_2.length() + 1);
         tcpmessage3.buffer.writeString(string_2);
-        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
 
     public static void method1456(CS2Executor executor) {
@@ -7978,7 +7978,7 @@ public class CS2Interpreter {
         if (class5373 == null) {
             throw new RuntimeException();
         } else {
-            Integer integer4 = executor.currentClanSettings.getIntVar(client.CURRENT_GAME.id << 16 | i_2);
+            Integer integer4 = executor.currentClanSettings.getIntVar(Client.CURRENT_GAME.id << 16 | i_2);
             int i_5;
             if (integer4 == null) {
                 if (class5373.aChar7096 != 105 && class5373.aChar7096 != 49) {
@@ -8024,7 +8024,7 @@ public class CS2Interpreter {
 
     public static void method7444(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.SKILL_XP[i_2];
+        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_XP[i_2];
     }
 
     public static void method7445(CS2Executor executor) {
@@ -8073,25 +8073,25 @@ public class CS2Interpreter {
 
     public static void method15404(CS2Executor executor) {
         executor.intStackPtr -= 4;
-        client.aShort7276 = (short) executor.intStack[executor.intStackPtr];
-        if (client.aShort7276 <= 0) {
-            client.aShort7276 = 1;
+        Client.aShort7276 = (short) executor.intStack[executor.intStackPtr];
+        if (Client.aShort7276 <= 0) {
+            Client.aShort7276 = 1;
         }
-        client.aShort7441 = (short) executor.intStack[executor.intStackPtr + 1];
-        if (client.aShort7441 <= 0) {
-            client.aShort7441 = 32767;
-        } else if (client.aShort7441 < client.aShort7276) {
-            client.aShort7441 = client.aShort7276;
+        Client.aShort7441 = (short) executor.intStack[executor.intStackPtr + 1];
+        if (Client.aShort7441 <= 0) {
+            Client.aShort7441 = 32767;
+        } else if (Client.aShort7441 < Client.aShort7276) {
+            Client.aShort7441 = Client.aShort7276;
         }
-        client.aShort7214 = (short) executor.intStack[executor.intStackPtr + 2];
-        if (client.aShort7214 <= 0) {
-            client.aShort7214 = 1;
+        Client.aShort7214 = (short) executor.intStack[executor.intStackPtr + 2];
+        if (Client.aShort7214 <= 0) {
+            Client.aShort7214 = 1;
         }
-        client.aShort7474 = (short) executor.intStack[executor.intStackPtr + 3];
-        if (client.aShort7474 <= 0) {
-            client.aShort7474 = 32767;
-        } else if (client.aShort7474 < client.aShort7214) {
-            client.aShort7474 = client.aShort7214;
+        Client.aShort7474 = (short) executor.intStack[executor.intStackPtr + 3];
+        if (Client.aShort7474 <= 0) {
+            Client.aShort7474 = 32767;
+        } else if (Client.aShort7474 < Client.aShort7214) {
+            Client.aShort7474 = Client.aShort7214;
         }
     }
 
@@ -8116,7 +8116,7 @@ public class CS2Interpreter {
 
     public static void method6005(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        BufferedConnectionContext class1843 = client.getConnectionContext();
+        BufferedConnectionContext class1843 = Client.getConnectionContext();
         TcpPacket tcpmessage4 = PacketEncoder.createPacket(ClientProt.CHAT_TYPE, class1843.isaac);
         tcpmessage4.buffer.writeByte(i_2);
         class1843.queuePacket(tcpmessage4);
@@ -8164,7 +8164,7 @@ public class CS2Interpreter {
         if (string_3.length() > 80) {
             string_3 = string_3.substring(0, 80);
         }
-        BufferedConnectionContext class1846 = client.getConnectionContext();
+        BufferedConnectionContext class1846 = Client.getConnectionContext();
         TcpPacket tcpmessage7 = PacketEncoder.createPacket(ClientProt.REPORT_ABUSE, class1846.isaac);
         tcpmessage7.buffer.writeByte(TextUtils.getLength(string_2) + 2 + TextUtils.getLength(string_3));
         tcpmessage7.buffer.writeString(string_2);
@@ -8406,15 +8406,15 @@ public class CS2Interpreter {
         int i_6 = executor.intStack[executor.intStackPtr + 4];
         int i_7 = executor.intStack[executor.intStackPtr + 5];
         int i_8 = executor.intStack[executor.intStackPtr + 6];
-        if (i_2 >= 0 && i_2 < 2 && client.anIntArrayArrayArray7302[i_2] != null && i_3 >= 0 && i_3 < client.anIntArrayArrayArray7302[i_2].length) {
-            client.anIntArrayArrayArray7302[i_2][i_3] = new int[]{(i_4 >> 14 & 0x3fff) << 9, i_5 << 2, (i_4 & 0x3fff) << 9, i_8};
-            client.anIntArrayArrayArray7302[i_2][i_3 + 1] = new int[]{(i_6 >> 14 & 0x3fff) << 9, i_7 << 2, (i_6 & 0x3fff) << 9};
+        if (i_2 >= 0 && i_2 < 2 && Client.anIntArrayArrayArray7302[i_2] != null && i_3 >= 0 && i_3 < Client.anIntArrayArrayArray7302[i_2].length) {
+            Client.anIntArrayArrayArray7302[i_2][i_3] = new int[]{(i_4 >> 14 & 0x3fff) << 9, i_5 << 2, (i_4 & 0x3fff) << 9, i_8};
+            Client.anIntArrayArrayArray7302[i_2][i_3 + 1] = new int[]{(i_6 >> 14 & 0x3fff) << 9, i_7 << 2, (i_6 & 0x3fff) << 9};
         }
     }
 
     public static void method11486(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.SKILL_LEVEL_ACTUAL[i_2];
+        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_LEVEL_ACTUAL[i_2];
     }
 
     public static void mergeStrings(CS2Executor executor) {
@@ -8491,7 +8491,7 @@ public class CS2Interpreter {
     }
 
     public static void method3344(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.ENTITY_TARGET == executor.currentEntity.getCS2Index() ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.ENTITY_TARGET == executor.currentEntity.getCS2Index() ? 1 : 0;
     }
 
     public static void method3346(CS2Executor executor) {
@@ -8539,7 +8539,7 @@ public class CS2Interpreter {
     }
 
     public static void method3830(CS2Executor executor) {
-        executor.stringStack[++executor.stringStackPtr - 1] = CalenderUtil.getLanguageTimestring(executor.intStack[--executor.intStackPtr] * 60000L, client.CURRENT_LANGUAGE.getValue()) + " UTC";
+        executor.stringStack[++executor.stringStackPtr - 1] = CalenderUtil.getLanguageTimestring(executor.intStack[--executor.intStackPtr] * 60000L, Client.CURRENT_LANGUAGE.getValue()) + " UTC";
     }
 
     public static void method5065(CS2Executor executor) {
@@ -8583,8 +8583,8 @@ public class CS2Interpreter {
     }
 
     public static void method3033(CS2Executor executor) {
-        if (client.PLAYER_MOD_LEVEL >= 5 && client.PLAYER_MOD_LEVEL <= 9) {
-            executor.intStack[++executor.intStackPtr - 1] = client.PLAYER_MOD_LEVEL;
+        if (Client.PLAYER_MOD_LEVEL >= 5 && Client.PLAYER_MOD_LEVEL <= 9) {
+            executor.intStack[++executor.intStackPtr - 1] = Client.PLAYER_MOD_LEVEL;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
         }
@@ -8661,7 +8661,7 @@ public class CS2Interpreter {
         GraphicsCache.resetGraphicCaches();
         Resource.mapRegion.getEnvironmentManager().requestDirectEnvironmentTransition();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method452(CS2Executor executor) {
@@ -8669,12 +8669,12 @@ public class CS2Interpreter {
         if (i_2 != PreferenceManager.preferences.skyboxes.getValue()) {
             PreferenceManager.preferences.setValue(PreferenceManager.preferences.skyboxes, i_2);
             PreferenceManager.savePreferences();
-            client.preferencesSavedOnServer = false;
+            Client.preferencesSavedOnServer = false;
         }
     }
 
     public static void method453(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.aBool7189 ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aBool7189 ? 1 : 0;
     }
 
     public static void method454(CS2Executor executor) {
@@ -8731,7 +8731,7 @@ public class CS2Interpreter {
     }
 
     public static void method1603(CS2Executor executor) {
-        BufferedConnectionContext class1842 = client.getConnectionContext();
+        BufferedConnectionContext class1842 = Client.getConnectionContext();
         TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842.isaac);
         tcpmessage3.buffer.writeByte(0);
         int i_4 = tcpmessage3.buffer.currentPosition;
@@ -8764,10 +8764,10 @@ public class CS2Interpreter {
 
     public static void resumeNamedDialog(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_NAMEDIALOG, client.GAME_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_NAMEDIALOG, Client.GAME_CONNECTION_CONTEXT.isaac);
         tcpmessage3.buffer.writeByte(string_2.length() + 1);
         tcpmessage3.buffer.writeString(string_2);
-        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
 
     public static void method5788(CS2Executor executor) {
@@ -8862,7 +8862,7 @@ public class CS2Interpreter {
     }
 
     public static void getRunEnergy(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.RUN_ENERGY;
+        executor.intStack[++executor.intStackPtr - 1] = Client.RUN_ENERGY;
     }
 
     public static void method3596(CS2Executor executor) {
@@ -8884,7 +8884,7 @@ public class CS2Interpreter {
     public static void setEffectVolume(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.soundEffectVolume, executor.intStack[--executor.intStackPtr]);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method855(CS2Executor executor) {
@@ -8931,7 +8931,7 @@ public class CS2Interpreter {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.fog, executor.intStack[--executor.intStackPtr] == 1 ? 1 : 0);
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void pushInt(CS2Executor executor) {
@@ -8947,7 +8947,7 @@ public class CS2Interpreter {
 
     public static void method2914(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        SubInterface class282Sub443 = client.OPEN_INTERFACES.get(i_2);
+        SubInterface class282Sub443 = Client.OPEN_INTERFACES.get(i_2);
         if (class282Sub443 != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
         } else {
@@ -8984,7 +8984,7 @@ public class CS2Interpreter {
     }
 
     public static void method15403() {
-        client.setLoadingWorldMap();
+        Client.setLoadingWorldMap();
     }
 
     public static void method798(CS2Executor executor) {
@@ -9036,15 +9036,15 @@ public class CS2Interpreter {
 
     public static void method11613(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        if (client.BASE_WINDOW_ID != -1) {
+        if (Client.BASE_WINDOW_ID != -1) {
             if (i_2 == 0) {
-                executor.intStack[++executor.intStackPtr - 1] = client.BASE_WINDOW_ID;
+                executor.intStack[++executor.intStackPtr - 1] = Client.BASE_WINDOW_ID;
                 return;
             }
             --i_2;
         }
         SubInterface class282Sub443;
-        for (class282Sub443 = client.OPEN_INTERFACES.first(); i_2-- > 0; class282Sub443 = client.OPEN_INTERFACES.next()) {
+        for (class282Sub443 = Client.OPEN_INTERFACES.first(); i_2-- > 0; class282Sub443 = Client.OPEN_INTERFACES.next()) {
         }
         executor.intStack[++executor.intStackPtr - 1] = class282Sub443.subInterfaceId;
     }
@@ -9065,8 +9065,8 @@ public class CS2Interpreter {
     }
 
     public static void staffModLevel(CS2Executor executor) {
-        if (client.PLAYER_RIGHTS >= 2) {
-            executor.intStack[++executor.intStackPtr - 1] = client.PLAYER_RIGHTS;
+        if (Client.PLAYER_RIGHTS >= 2) {
+            executor.intStack[++executor.intStackPtr - 1] = Client.PLAYER_RIGHTS;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
         }
@@ -9088,8 +9088,8 @@ public class CS2Interpreter {
     }
 
     public static void method4973(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.aShort7394;
-        executor.intStack[++executor.intStackPtr - 1] = client.aShort7324;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7394;
+        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7324;
     }
 
     public static void method5454(CS2Executor executor) {
@@ -9139,7 +9139,7 @@ public class CS2Interpreter {
     }
 
     public static void method8205(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.anInt7271 - client.anInt7270;
+        executor.intStack[++executor.intStackPtr - 1] = Client.anInt7271 - Client.anInt7270;
     }
 
     public static void method8206(CS2Executor executor) {
@@ -9365,7 +9365,7 @@ public class CS2Interpreter {
 
     public static void setAntiAliasingPreview(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.antiAliasingPreview, executor.intStack[--executor.intStackPtr]);
-        client.loadAssets(PreferenceManager.preferences.activeToolkit.getValue(), false);
+        Client.loadAssets(PreferenceManager.preferences.activeToolkit.getValue(), false);
         PreferenceManager.savePreferences();
     }
 
@@ -9408,7 +9408,7 @@ public class CS2Interpreter {
     }
 
     public static void getWorldQuickchatOnly(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.IS_QUICKCHAT_ONLY ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.IS_QUICKCHAT_ONLY ? 1 : 0;
     }
 
     public static void intGreaterThan(CS2Executor executor) {
@@ -9444,7 +9444,7 @@ public class CS2Interpreter {
         int i_2 = executor.intStack[--executor.intStackPtr];
         Component icomponentdefinitions3 = Component.fromHash(i_2);
         assert icomponentdefinitions3 != null;
-        executor.intStack[++executor.intStackPtr - 1] = client.getComponentSettings(icomponentdefinitions3).getUseOptionFlags();
+        executor.intStack[++executor.intStackPtr - 1] = Client.getComponentSettings(icomponentdefinitions3).getUseOptionFlags();
     }
 
     public static void method6042(CS2Executor executor) {
@@ -9459,7 +9459,7 @@ public class CS2Interpreter {
     }
 
     public static void method6044(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.isApplet ? 1 : 0;
+        executor.intStack[++executor.intStackPtr - 1] = Client.isApplet ? 1 : 0;
     }
 
     public static void method6046(CS2Executor executor) {
@@ -9469,7 +9469,7 @@ public class CS2Interpreter {
     public static void method12718(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.ambientSoundVolume, executor.intStack[--executor.intStackPtr]);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void ccSetItemNoNum(CS2Executor executor) {
@@ -9501,7 +9501,7 @@ public class CS2Interpreter {
 
     public static void method8296(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        BufferedConnectionContext class1843 = client.getConnectionContext();
+        BufferedConnectionContext class1843 = Client.getConnectionContext();
         TcpPacket tcpmessage4 = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PRIVATE, class1843.isaac);
         tcpmessage4.buffer.writeByte(0);
         int i_5 = tcpmessage4.buffer.currentPosition;
@@ -9574,7 +9574,7 @@ public class CS2Interpreter {
     }
 
     public static void method14833(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.COUNTRY;
+        executor.intStack[++executor.intStackPtr - 1] = Client.COUNTRY;
     }
 
     public static void method14835(CS2Executor executor) {
@@ -9605,7 +9605,7 @@ public class CS2Interpreter {
     }
 
     public static void method14841(CS2Executor executor) {
-        executor.intStack[executor.intStackPtr - 2] = TypeLists.QUEST.list(executor.intStack[executor.intStackPtr - 2]).hasLevelRequirement(client.SKILL_LEVEL_ACTUAL, executor.intStack[executor.intStackPtr - 1]) ? 1 : 0;
+        executor.intStack[executor.intStackPtr - 2] = TypeLists.QUEST.list(executor.intStack[executor.intStackPtr - 2]).hasLevelRequirement(Client.SKILL_LEVEL_ACTUAL, executor.intStack[executor.intStackPtr - 1]) ? 1 : 0;
         --executor.intStackPtr;
     }
 
@@ -9619,7 +9619,7 @@ public class CS2Interpreter {
         if (i_2 < 0 || i_2 > 5) {
             i_2 = 2;
         }
-        client.loadAssets(i_2, false);
+        Client.loadAssets(i_2, false);
     }
 
     public static void method6680(CS2Executor executor) {
@@ -9646,20 +9646,20 @@ public class CS2Interpreter {
 
     public static void method12841(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.GRAND_EXCHANGE_ITEM_SELECT, client.GAME_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.GRAND_EXCHANGE_ITEM_SELECT, Client.GAME_CONNECTION_CONTEXT.isaac);
         tcpmessage3.buffer.writeShort(i_2);
-        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
 
     public static void method456(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.cycles;
+        executor.intStack[++executor.intStackPtr - 1] = Client.cycles;
     }
 
     public static void method457(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.groundDecoration, executor.intStack[--executor.intStackPtr] == 1 ? 1 : 0);
         Resource.mapRegion.reload();
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void ccSetScrollPos(CS2Executor executor) {
@@ -9721,8 +9721,8 @@ public class CS2Interpreter {
         executor.stringStackPtr -= 2;
         String string_2 = (String) executor.stringStack[executor.stringStackPtr];
         String string_3 = (String) executor.stringStack[executor.stringStackPtr + 1];
-        if (client.PLAYER_RIGHTS != 0 || (!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
-            BufferedConnectionContext class1844 = client.getConnectionContext();
+        if (Client.PLAYER_RIGHTS != 0 || (!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
+            BufferedConnectionContext class1844 = Client.getConnectionContext();
             TcpPacket tcpmessage5 = PacketEncoder.createPacket(ClientProt.SEND_PRIVATE_MESSAGE, class1844.isaac);
             tcpmessage5.buffer.writeShort(0);
             int i_6 = tcpmessage5.buffer.currentPosition;
@@ -9748,8 +9748,8 @@ public class CS2Interpreter {
     }
 
     public static void method3748(CS2Executor executor) {
-        if (client.aString7165 != null) {
-            executor.stringStack[++executor.stringStackPtr - 1] = client.aString7165;
+        if (Client.aString7165 != null) {
+            executor.stringStack[++executor.stringStackPtr - 1] = Client.aString7165;
         } else {
             executor.stringStack[++executor.stringStackPtr - 1] = "";
         }
@@ -9765,7 +9765,7 @@ public class CS2Interpreter {
     }
 
     public static void getSystemUpdateTimer(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.REBOOT_TIMER;
+        executor.intStack[++executor.intStackPtr - 1] = Client.REBOOT_TIMER;
     }
 
     public static void method911(CS2Executor executor) {
@@ -9842,17 +9842,17 @@ public class CS2Interpreter {
     public static void method7500(CS2Executor executor) {
         PreferenceManager.preferences.setValue(PreferenceManager.preferences.idleAnimations, executor.intStack[--executor.intStackPtr]);
         PreferenceManager.savePreferences();
-        client.preferencesSavedOnServer = false;
+        Client.preferencesSavedOnServer = false;
     }
 
     public static void method7501(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
         String string_3 = (String) executor.stringStack[--executor.stringStackPtr];
-        TcpPacket tcpmessage4 = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_CHANGE_ADDRESS, client.LOBBY_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage4 = PacketEncoder.createPacket(ClientProt.EMAIL_VALIDATION_CHANGE_ADDRESS, Client.LOBBY_CONNECTION_CONTEXT.isaac);
         tcpmessage4.buffer.writeShort(TextUtils.getLength(string_2) + TextUtils.getLength(string_3));
         tcpmessage4.buffer.writeString(string_2);
         tcpmessage4.buffer.writeString(string_3);
-        client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage4);
+        Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage4);
     }
 
     public static void method7502(CS2Executor executor) {
@@ -9950,7 +9950,7 @@ public class CS2Interpreter {
         executor.intStackPtr -= 2;
         int i_2 = executor.intStack[executor.intStackPtr];
         int i_3 = executor.intStack[executor.intStackPtr + 1];
-        SubInterface class282Sub444 = client.OPEN_INTERFACES.get(i_2);
+        SubInterface class282Sub444 = Client.OPEN_INTERFACES.get(i_2);
         if (class282Sub444 != null && i_3 == class282Sub444.subInterfaceId) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
         } else {
@@ -10071,7 +10071,7 @@ public class CS2Interpreter {
 
     public static void method1860(CS2Executor executor) {
         String string_2 = (String) executor.stringStack[--executor.stringStackPtr];
-        if (client.PLAYER_RIGHTS != 0 || (!client.USERDETAIL_QUICKCHAT || client.VERIFIED_EMAIL_ADDRESS) && !client.IS_QUICKCHAT_ONLY) {
+        if (Client.PLAYER_RIGHTS != 0 || (!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
             String string_3 = string_2.toLowerCase();
             byte b_4 = 0;
             if (string_3.startsWith(LocalizedText.YELLOW.translate(Language.ENGLISH))) {
@@ -10109,42 +10109,42 @@ public class CS2Interpreter {
             } else if (string_3.startsWith(LocalizedText.GLOW3.translate(Language.ENGLISH))) {
                 b_4 = 11;
                 string_2 = string_2.substring(LocalizedText.GLOW3.translate(Language.ENGLISH).length());
-            } else if (client.CURRENT_LANGUAGE != Language.ENGLISH) {
-                if (string_3.startsWith(LocalizedText.YELLOW.translate(client.CURRENT_LANGUAGE))) {
-                    string_2 = string_2.substring(LocalizedText.YELLOW.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.RED.translate(client.CURRENT_LANGUAGE))) {
+            } else if (Client.CURRENT_LANGUAGE != Language.ENGLISH) {
+                if (string_3.startsWith(LocalizedText.YELLOW.translate(Client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.YELLOW.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.RED.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 1;
-                    string_2 = string_2.substring(LocalizedText.RED.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.GREEN.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.RED.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.GREEN.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 2;
-                    string_2 = string_2.substring(LocalizedText.GREEN.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.CYAN.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.GREEN.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.CYAN.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 3;
-                    string_2 = string_2.substring(LocalizedText.CYAN.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.PURPLE.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.CYAN.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.PURPLE.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 4;
-                    string_2 = string_2.substring(LocalizedText.PURPLE.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.WHITE.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.PURPLE.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.WHITE.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 5;
-                    string_2 = string_2.substring(LocalizedText.WHITE.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.FLASH1.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.WHITE.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.FLASH1.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 6;
-                    string_2 = string_2.substring(LocalizedText.FLASH1.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.FLASH2.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.FLASH1.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.FLASH2.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 7;
-                    string_2 = string_2.substring(LocalizedText.FLASH2.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.FLASH3.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.FLASH2.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.FLASH3.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 8;
-                    string_2 = string_2.substring(LocalizedText.FLASH3.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.GLOW1.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.FLASH3.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.GLOW1.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 9;
-                    string_2 = string_2.substring(LocalizedText.GLOW1.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.GLOW2.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.GLOW1.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.GLOW2.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 10;
-                    string_2 = string_2.substring(LocalizedText.GLOW2.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.GLOW3.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.GLOW2.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.GLOW3.translate(Client.CURRENT_LANGUAGE))) {
                     b_4 = 11;
-                    string_2 = string_2.substring(LocalizedText.GLOW3.translate(client.CURRENT_LANGUAGE).length());
+                    string_2 = string_2.substring(LocalizedText.GLOW3.translate(Client.CURRENT_LANGUAGE).length());
                 }
             }
             string_3 = string_2.toLowerCase();
@@ -10164,25 +10164,25 @@ public class CS2Interpreter {
             } else if (string_3.startsWith(LocalizedText.SLIDE.translate(Language.ENGLISH))) {
                 b_5 = 5;
                 string_2 = string_2.substring(LocalizedText.SLIDE.translate(Language.ENGLISH).length());
-            } else if (client.CURRENT_LANGUAGE != Language.ENGLISH) {
-                if (string_3.startsWith(LocalizedText.WAVE.translate(client.CURRENT_LANGUAGE))) {
+            } else if (Client.CURRENT_LANGUAGE != Language.ENGLISH) {
+                if (string_3.startsWith(LocalizedText.WAVE.translate(Client.CURRENT_LANGUAGE))) {
                     b_5 = 1;
-                    string_2 = string_2.substring(LocalizedText.WAVE.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.WAVE2.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.WAVE.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.WAVE2.translate(Client.CURRENT_LANGUAGE))) {
                     b_5 = 2;
-                    string_2 = string_2.substring(LocalizedText.WAVE2.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.SHAKE.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.WAVE2.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.SHAKE.translate(Client.CURRENT_LANGUAGE))) {
                     b_5 = 3;
-                    string_2 = string_2.substring(LocalizedText.SHAKE.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.SCROLL.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.SHAKE.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.SCROLL.translate(Client.CURRENT_LANGUAGE))) {
                     b_5 = 4;
-                    string_2 = string_2.substring(LocalizedText.SCROLL.translate(client.CURRENT_LANGUAGE).length());
-                } else if (string_3.startsWith(LocalizedText.SLIDE.translate(client.CURRENT_LANGUAGE))) {
+                    string_2 = string_2.substring(LocalizedText.SCROLL.translate(Client.CURRENT_LANGUAGE).length());
+                } else if (string_3.startsWith(LocalizedText.SLIDE.translate(Client.CURRENT_LANGUAGE))) {
                     b_5 = 5;
-                    string_2 = string_2.substring(LocalizedText.SLIDE.translate(client.CURRENT_LANGUAGE).length());
+                    string_2 = string_2.substring(LocalizedText.SLIDE.translate(Client.CURRENT_LANGUAGE).length());
                 }
             }
-            BufferedConnectionContext class1846 = client.getConnectionContext();
+            BufferedConnectionContext class1846 = Client.getConnectionContext();
             TcpPacket tcpmessage7 = PacketEncoder.createPacket(ClientProt.CHAT, class1846.isaac);
             tcpmessage7.buffer.writeByte(0);
             int i_8 = tcpmessage7.buffer.currentPosition;
@@ -10196,7 +10196,7 @@ public class CS2Interpreter {
 
     public static void method1861(CS2Executor executor) {
         executor.intStackPtr -= 2;
-        client.recolorPalette[executor.intStack[executor.intStackPtr]] = (short) ColorUtil.rgbToHsl24(executor.intStack[executor.intStackPtr + 1]);
+        Client.recolorPalette[executor.intStack[executor.intStackPtr]] = (short) ColorUtil.rgbToHsl24(executor.intStack[executor.intStackPtr + 1]);
         TypeLists.OBJ.resetModelCache();
         TypeLists.OBJ.resetRecolorCache();
         TypeLists.NPC.resetBodyCaches();
@@ -10308,7 +10308,7 @@ public class CS2Interpreter {
         int i_2 = executor.intStack[executor.intStackPtr];
         int i_3 = executor.intStack[executor.intStackPtr + 1];
         if (i_2 >= 0 && i_2 < 2) {
-            client.anIntArrayArrayArray7302[i_2] = new int[i_3 << 1][4];
+            Client.anIntArrayArrayArray7302[i_2] = new int[i_3 << 1][4];
         }
     }
 
@@ -10345,7 +10345,7 @@ public class CS2Interpreter {
     }
 
     public static void method13467(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.anInt3644;
+        executor.intStack[++executor.intStackPtr - 1] = Client.anInt3644;
     }
 
     public static void getVarpbitOld(CS2Executor executor) {
@@ -10505,9 +10505,9 @@ public class CS2Interpreter {
 
     public static void resumeHSLDialog(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_HSLDIALOG, client.GAME_CONNECTION_CONTEXT.isaac);
+        TcpPacket tcpmessage3 = PacketEncoder.createPacket(ClientProt.RESUME_HSLDIALOG, Client.GAME_CONNECTION_CONTEXT.isaac);
         tcpmessage3.buffer.writeShort(i_2);
-        client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3);
     }
 
     public static void storeVarpbit(CS2Executor executor) {
@@ -10524,7 +10524,7 @@ public class CS2Interpreter {
 
     public static void method3913(CS2Executor executor) {
         int i_2 = executor.intStack[--executor.intStackPtr];
-        executor.intStack[++executor.intStackPtr - 1] = client.SKILL_LEVEL_VISIBLE[i_2];
+        executor.intStack[++executor.intStackPtr - 1] = Client.SKILL_LEVEL_VISIBLE[i_2];
     }
 
     public static void method1641(CS2Executor executor) {
@@ -10535,18 +10535,18 @@ public class CS2Interpreter {
 
     public static void method1643(CS2Executor executor) {
         executor.intStackPtr -= 2;
-        client.aShort7436 = (short) executor.intStack[executor.intStackPtr];
-        if (client.aShort7436 <= 0) {
-            client.aShort7436 = 256;
+        Client.aShort7436 = (short) executor.intStack[executor.intStackPtr];
+        if (Client.aShort7436 <= 0) {
+            Client.aShort7436 = 256;
         }
-        client.aShort7437 = (short) executor.intStack[executor.intStackPtr + 1];
-        if (client.aShort7437 <= 0) {
-            client.aShort7437 = 205;
+        Client.aShort7437 = (short) executor.intStack[executor.intStackPtr + 1];
+        if (Client.aShort7437 <= 0) {
+            Client.aShort7437 = 205;
         }
     }
 
     public static void getRunWeight(CS2Executor executor) {
-        executor.intStack[++executor.intStackPtr - 1] = client.RUN_WEIGHT;
+        executor.intStack[++executor.intStackPtr - 1] = Client.RUN_WEIGHT;
     }
 
     public static void method13404(CS2Executor executor) {
@@ -10583,9 +10583,9 @@ public class CS2Interpreter {
     }
 
     public static void method8698(CS2Executor executor) {
-        if (client.GUEST_CLAN_SETTINGS != null) {
+        if (Client.GUEST_CLAN_SETTINGS != null) {
             executor.intStack[++executor.intStackPtr - 1] = 1;
-            executor.currentClanSettings = client.GUEST_CLAN_SETTINGS;
+            executor.currentClanSettings = Client.GUEST_CLAN_SETTINGS;
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0;
         }
@@ -11641,7 +11641,7 @@ public class CS2Interpreter {
     }
 
     public static void method3965(Component icomponentdefinitions0, CS2Executor cs2executor1) {
-        FontMetrics fontmetrics3 = icomponentdefinitions0.getFontMetrics(StaticMethods.initializedFontcombos, client.FONT_PROVIDER);
+        FontMetrics fontmetrics3 = icomponentdefinitions0.getFontMetrics(StaticMethods.initializedFontcombos, Client.FONT_PROVIDER);
         int i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr];
         int i_5 = cs2executor1.intStack[--cs2executor1.intStackPtr];
         int i_6 = fontmetrics3.method6956(icomponentdefinitions0.text, icomponentdefinitions0.width, icomponentdefinitions0.anInt1358, i_5, i_4, StaticMedia.nameIconSprites);
@@ -11738,11 +11738,11 @@ public class CS2Interpreter {
     }
 
     public static void method6942(Component component) {
-        if (client.getComponentSettings(component).continueOptionEnabled() && client.aClass1187352 == null) {
+        if (Client.getComponentSettings(component).continueOptionEnabled() && Client.aClass1187352 == null) {
             PacketEncoder.continueInterfacePressed(component.idHash, component.slotId);
-            client.aClass1187352 = Component.listIcomponent(component.idHash, component.slotId);
-            assert client.aClass1187352 != null;
-            Component.redrawComponent(client.aClass1187352);
+            Client.aClass1187352 = Component.listIcomponent(component.idHash, component.slotId);
+            assert Client.aClass1187352 != null;
+            Component.redrawComponent(Client.aClass1187352);
         }
     }
 
@@ -11833,13 +11833,13 @@ public class CS2Interpreter {
                 hookrequest3.source = icomponentdefinitions0;
                 hookrequest3.params = icomponentdefinitions0.anObjectArray1271;
                 hookrequest3.requestId = cs2executor1.hookRequestCount + 1;
-                client.PENDING_HOOK_REQUESTS.addFirst(hookrequest3);
+                Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest3);
             }
         }
     }
 
     public static void method5001(Component icomponentdefinitions0, CS2Executor cs2executor1) {
-        FontMetrics fontmetrics3 = icomponentdefinitions0.getFontMetrics(StaticMethods.initializedFontcombos, client.FONT_PROVIDER);
+        FontMetrics fontmetrics3 = icomponentdefinitions0.getFontMetrics(StaticMethods.initializedFontcombos, Client.FONT_PROVIDER);
         int i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr];
         Point point5 = fontmetrics3.method6954(icomponentdefinitions0.text, icomponentdefinitions0.width, icomponentdefinitions0.anInt1358, i_4, StaticMedia.nameIconSprites);
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = point5.x;
@@ -11874,7 +11874,7 @@ public class CS2Interpreter {
         int i_5;
         if (icomponentdefinitions3 == null) {
             i_4 = GameShell.screenCanvasWidth;
-            i_5 = client.screenCanvasHeight * -969250379;
+            i_5 = Client.screenCanvasHeight * -969250379;
         } else {
             i_4 = icomponentdefinitions3.width;
             i_5 = icomponentdefinitions3.height;

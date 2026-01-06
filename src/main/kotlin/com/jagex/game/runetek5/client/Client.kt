@@ -147,7 +147,7 @@ import java.util.Vector
 import kotlin.concurrent.Volatile
 import kotlin.math.sin
 
-class client : GameShell() {
+class Client : GameShell() {
     public override fun init() {
         var buildEnvironmentMinor: String? = ""
         val parameters = Parameter.values()
@@ -595,7 +595,7 @@ class client : GameShell() {
                     val accessibleObject = Class.forName("java.lang.reflect.AccessibleObject")
                     val setAccessibleMethod = accessibleObject.getDeclaredMethod("setAccessible", java.lang.Boolean.TYPE)
                     setAccessibleMethod.invoke(nativeLibsField, java.lang.Boolean.TRUE)
-                    val objectVector = nativeLibsField.get(client::class.java.getClassLoader()) as Vector<*>
+                    val objectVector = nativeLibsField.get(Client::class.java.getClassLoader()) as Vector<*>
 
                     for (index in objectVector.indices) {
                         try {

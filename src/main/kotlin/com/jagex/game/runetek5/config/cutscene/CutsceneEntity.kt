@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.config.cutscene
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
@@ -31,7 +31,7 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
             if (id >= 0) {
                 npc = NpcEntity(Resource.mapRegion!!.getScene()!!)
                 npc!!.playerIndex = index
-                npc!!.lastUpdate = client.cycles
+                npc!!.lastUpdate = Client.cycles
                 npc!!.setDirection(TypeLists.NPC!!.list(id))
                 npc!!.sizeInSquares = npc!!.definitions!!.size
                 npc!!.turnDirection = npc!!.definitions!!.turnDirection shl 3
@@ -40,7 +40,7 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
                 player = PlayerEntity(Resource.mapRegion!!.getScene()!!)
                 player!!.decodeAppearance(CutsceneTypeList.CUTSCENE_BUFFER!!)
                 player!!.playerIndex = index
-                player!!.lastUpdate = client.cycles
+                player!!.lastUpdate = Client.cycles
                 player!!.worldPriority = ++drawPriority - 1
             }
         }

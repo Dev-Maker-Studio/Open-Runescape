@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.network.packet
 
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.mouse.MouseActionServer
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.utils.Utils
@@ -30,11 +30,11 @@ class MouseClickPacket : AbstractMousePacket() {
     override fun queuePacket() {
         val record = records.poll()
         if (record != null) {
-            val packet = PacketEncoder.createPacket(ClientProt.MOUSE_BUTTON_CLICK, client.GAME_CONNECTION_CONTEXT.isaac)
+            val packet = PacketEncoder.createPacket(ClientProt.MOUSE_BUTTON_CLICK, Client.GAME_CONNECTION_CONTEXT.isaac)
             packet.buffer.writeIntLittle(record.getX() or (record.getY() shl 16))
             packet.buffer.writeByteAdd((record.getClickMeta() shl 1) or (record.getConstant() and 0x1))
             packet.buffer.writeShortLittle(getServerSubmissionDelta(record, 0xFFFF))
-            client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+            Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
             record.pushToTop()
         }
     }
@@ -58,7 +58,7 @@ class MouseClickPacket : AbstractMousePacket() {
     }
 
     override fun createPacketBase(): TcpPacket {
-        return PacketEncoder.createPacket(ClientProt.MOVE_MOUSE, client.GAME_CONNECTION_CONTEXT.isaac)
+        return PacketEncoder.createPacket(ClientProt.MOVE_MOUSE, Client.GAME_CONNECTION_CONTEXT.isaac)
     }
 
     override fun writeConstantValue(packet: Packet, record: MouseRecord) {

@@ -2,11 +2,10 @@ package com.jagex.game.runetek5.graphics.loginscreen
 
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.LoadingStage
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.utils.Utils
 import java.awt.*
-import java.io.InputStream
 
 /**
  * Draws the vertically centered loading bar in the first seconds of the client starting
@@ -89,7 +88,7 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
     override fun draw() {
         if (!resourcesUnavailable && font == null) {
             try {
-                val resourceNames = Utils.split(client.loginScreenImageResourceNames!!, ',')
+                val resourceNames = Utils.split(Client.loginScreenImageResourceNames!!, ',')
                 if (resourceNames.size != 23) {
                     resourcesUnavailable = true
                 }
@@ -239,9 +238,9 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
         drawPlainLoadingBar(
             LoadingStage.plainLoginScreenRenderer!!.getLoadingPercentage(),
             LoadingStage.plainLoginScreenRenderer!!.getLoadingText() ?: "",
-            client.DEBUG_LOAD_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX],
-            client.DEBUG_BG_COLOR[client.DEBUG_DISPLAY_COLOR_INDEX],
-            client.aColorArray7200[client.DEBUG_DISPLAY_COLOR_INDEX]
+            Client.DEBUG_LOAD_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX],
+            Client.DEBUG_BG_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX],
+            Client.aColorArray7200[Client.DEBUG_DISPLAY_COLOR_INDEX]
         )
     }
 

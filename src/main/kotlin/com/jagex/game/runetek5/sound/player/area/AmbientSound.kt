@@ -3,10 +3,9 @@ package com.jagex.game.runetek5.sound.player.area
 import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.cache.node.Node
 import com.jagex.game.runetek5.cache.node.NodeCollection
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.config.midi.instrument.MusicSample
-import com.jagex.game.runetek5.config.npc.NPCType
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.sound.jagtheora.Node_Sub15_Sub4
@@ -105,7 +104,7 @@ class AmbientSound : Node<AmbientSound>() {
         val currentTransformState = instrumentSoundEffect
         if (emittingLoc != null) {
             val loctype = emittingLoc!!.getMultiLoc(
-                if (client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER
+                if (Client.MAP_LOADING_STAGE == 4) VarProviders.CUTSCENE_ACTION_VAR_PROVIDER else VarProviders.PLAYER_VAR_PROVIDER
             )
             if (loctype != null) {
                 soundEffectId = loctype.soundId

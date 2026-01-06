@@ -1,29 +1,23 @@
 package com.jagex.game.runetek5.graphics.ifcomponent
 
 import java.awt.Canvas
-import java.awt.Rectangle
 
-import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.camera.Camera
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.midi.VorbisNode
-import com.jagex.game.runetek5.config.item.ItemType
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.config.rsinterface.ComponentType
 import com.jagex.game.runetek5.config.rsinterface.HookRequest
-import com.jagex.game.runetek5.config.rsinterface.SubInterface
 import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer
 import com.jagex.game.runetek5.entity.pathingentity.EntityUpdating
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
-import com.jagex.game.runetek5.entity.pathingentity.player.PlayerAppearance
-import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontManager
@@ -37,7 +31,6 @@ import com.jagex.game.runetek5.graphics.model.MediaType
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
-import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.sound.SoundResourceManager
 import com.jagex.game.runetek5.sound.player.area.SoundEffectPlayer
@@ -73,17 +66,17 @@ object InterfaceComponentRenderer {
 
     @JvmStatic
     fun cancelInterfaceSelection() {
-        if (client.interfaceSelectionActive) {
-            val component = Component.listIcomponent(client.anInt56, client.anInt7345)
+        if (Client.interfaceSelectionActive) {
+            val component = Component.listIcomponent(Client.anInt56, Client.anInt7345)
             if (component != null && component.hookParams != null) {
                 val hookRequest = HookRequest()
                 hookRequest.source = component
                 hookRequest.params = component.hookParams
                 CS2Executor.executeHookInner(hookRequest)
             }
-            client.defaultMenuCursor = -1
-            client.anInt7346 = -1
-            client.interfaceSelectionActive = false
+            Client.defaultMenuCursor = -1
+            Client.anInt7346 = -1
+            Client.interfaceSelectionActive = false
             if (component != null) {
                 Component.redrawComponent(component)
             }
@@ -104,16 +97,16 @@ object InterfaceComponentRenderer {
         Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
         for (componentIndex in components.indices) {
             val component = components[componentIndex]
-            if (component != null && (component.parentId == i_1 || i_1 == -1412584499 && component === client.draggingComponent)) {
+            if (component != null && (component.parentId == i_1 || i_1 == -1412584499 && component === Client.draggingComponent)) {
                 val componentReference: Int
                 if (i_8 == -1) {
-                    client.INTERFACE_BG_COMPONENTS[client.anInt7407]!!.setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height)
-                    componentReference = ++client.anInt7407 - 1
+                    Client.INTERFACE_BG_COMPONENTS[Client.anInt7407]!!.setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height)
+                    componentReference = ++Client.anInt7407 - 1
                 } else {
                     componentReference = i_8
                 }
                 component.cacheReference = componentReference
-                component.lastRenderedCycle = client.cycles
+                component.lastRenderedCycle = Client.cycles
                 if (!InterfaceRenderer.isComponentHidden(component)) {
                     if (component.contentType != null) {
                         Component.prepareSequenceOnInterface(component)
@@ -121,36 +114,36 @@ object InterfaceComponentRenderer {
                     val drawX = component.x + offsetX
                     val drawY = component.y + offsetY
                     var drawTransparency = component.transparency
-                    if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER) && drawTransparency > 127) {
+                    if (Client.DISPLAY_HIDDEN_MENU_OPTIONS && (Client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER) && drawTransparency > 127) {
                         drawTransparency = 127
                     }
                     val startX: Int
                     val startY: Int
-                    if (component === client.draggingComponent) {
-                        if (i_1 != -1412584499 && (component.anUnkSetting11 == Component.UnkSetting1.UNK_2 || component.anUnkSetting11 == Component.UnkSetting1.UNK_0 || client.getComponentSettings(component)!!.ignoresDepthFlags())) {
+                    if (component === Client.draggingComponent) {
+                        if (i_1 != -1412584499 && (component.anUnkSetting11 == Component.UnkSetting1.UNK_2 || component.anUnkSetting11 == Component.UnkSetting1.UNK_0 || Client.getComponentSettings(component)!!.ignoresDepthFlags())) {
                             aClass118Array3772 = components
                             anInt4822 = offsetX
                             anInt5157 = offsetY
                             continue
                         }
-                        if (client.aBool7364 && client.isComponentSelected) {
+                        if (Client.aBool7364 && Client.isComponentSelected) {
                             var dragX = MouseRecord.recorder!!.getMouseX()
                             var dragY = MouseRecord.recorder!!.getMouseY()
-                            dragX -= client.mouseX
-                            dragY -= client.mouseY
-                            if (dragX < client.selectedComponentX) {
-                                dragX = client.selectedComponentX
+                            dragX -= Client.mouseX
+                            dragY -= Client.mouseY
+                            if (dragX < Client.selectedComponentX) {
+                                dragX = Client.selectedComponentX
                             }
-                            if (dragX + component.width > client.selectedComponentX + client.selectedComponentWidth) {
-                                dragX = client.selectedComponentX + client.selectedComponentWidth - component.width
+                            if (dragX + component.width > Client.selectedComponentX + Client.selectedComponentWidth) {
+                                dragX = Client.selectedComponentX + Client.selectedComponentWidth - component.width
                             }
-                            if (dragY < client.selectedComponentY) {
-                                dragY = client.selectedComponentY
+                            if (dragY < Client.selectedComponentY) {
+                                dragY = Client.selectedComponentY
                             }
-                            if (dragY + component.height > client.selectedComponentY + client.selectedComponentHeight) {
-                                dragY = client.selectedComponentHeight + client.selectedComponentY - component.height
+                            if (dragY + component.height > Client.selectedComponentY + Client.selectedComponentHeight) {
+                                dragY = Client.selectedComponentHeight + Client.selectedComponentY - component.height
                             }
-                            if (client.getComponentSettings(component)!!.ignoresDepthFlags()) {
+                            if (Client.getComponentSettings(component)!!.ignoresDepthFlags()) {
                                 inboundsComponentToTop(dragX, dragY, component.width, component.height)
                             }
                             startX = dragX
@@ -186,14 +179,14 @@ object InterfaceComponentRenderer {
                     if (clipStartX < endX && clipStartY < endY) {
                         if (component.contentType != null) {
                             if (component.contentType == GAME_WINDOW || component.contentType == CONTENT_TYPE_1403) {
-                                client.drawGameArea(startX, startY, component.width, component.height, component.contentType == CONTENT_TYPE_1403)
+                                Client.drawGameArea(startX, startY, component.width, component.height, component.contentType == CONTENT_TYPE_1403)
                                 EntityUpdating.method12366(componentReference, clipStartX, clipStartY, endX, endY, startX, startY)
                                 Renderers.activeToolkit!!.calculateViewportCenter()
                                 Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
-                                client.IS_COMPONENT_ON_TOP[componentReference] = true
+                                Client.IS_COMPONENT_ON_TOP[componentReference] = true
                                 continue
                             }
-                            if (component.contentType == MINIMAP && client.MAP_LOADING_STAGE == 1) {
+                            if (component.contentType == MINIMAP && Client.MAP_LOADING_STAGE == 1) {
                                 val toolkit = Renderers.activeToolkit
                                 if (component.addInteractiveSprite(toolkit!!) != null) {
                                     SoundEffectPlayer.updatePlayers()
@@ -220,20 +213,20 @@ object InterfaceComponentRenderer {
                             }
                             if (component.contentType == WORLDMAP) {
                                 WorldMap.drawWorldmap(Renderers.activeToolkit!!, TypeLists.MATERIALS!!, startX, startY, component.width, component.height)
-                                client.IS_COMPONENT_ON_TOP[componentReference] = true
+                                Client.IS_COMPONENT_ON_TOP[componentReference] = true
                                 Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                 continue
                             }
                             if (component.contentType == WORLD_MAP_OVERVIEW) {
                                 WorldMapOverview.drawWorldmapOverview(Renderers.activeToolkit!!, startX, startY, component.width, component.height)
-                                client.IS_COMPONENT_ON_TOP[componentReference] = true
+                                Client.IS_COMPONENT_ON_TOP[componentReference] = true
                                 Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                 continue
                             }
                             if (component.contentType == DEBUG_INFORMATION) {
-                                if (client.DRAW_DEBUG || client.DEBUG_MODE) {
+                                if (Client.DRAW_DEBUG || Client.DEBUG_MODE) {
                                     SystemInfo.drawDebugInformation(startX, startY, component)
-                                    client.IS_COMPONENT_ON_TOP[componentReference] = true
+                                    Client.IS_COMPONENT_ON_TOP[componentReference] = true
                                 }
                                 continue
                             }
@@ -248,7 +241,7 @@ object InterfaceComponentRenderer {
                             if (itemSlots != null) {
                                 drawComponents(itemSlots, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
                             }
-                            val subInterface = client.OPEN_INTERFACES!!.get(component.idHash.toLong())
+                            val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong())
                             if (subInterface != null) {
                                 Component.method3629(subInterface.subInterfaceId, clipStartX, clipStartY, endX, endY, startX, startY, componentReference)
                             }
@@ -256,13 +249,13 @@ object InterfaceComponentRenderer {
                                 if (Renderers.activeToolkit!!.bloomEnabled()) {
                                     Renderers.activeToolkit!!.method8474()
                                 }
-                                if (client.MAP_LOADING_STAGE == 4) {
+                                if (Client.MAP_LOADING_STAGE == 4) {
                                     var fadeAlpha = cutsceneFadeAlpha
                                     var fadeRed = cutsceneFadeRed
                                     var fadeGreen = cutsceneFadeGreen
                                     var fadeBlue = cutsceneFadeBlue
-                                    if (client.cycles < cutsceneFadeEndCycle) {
-                                        val completion = (client.cycles - cycleCutsceneFadeStarted) * 1.0f / (cutsceneFadeEndCycle - cycleCutsceneFadeStarted)
+                                    if (Client.cycles < cutsceneFadeEndCycle) {
+                                        val completion = (Client.cycles - cycleCutsceneFadeStarted) * 1.0f / (cutsceneFadeEndCycle - cycleCutsceneFadeStarted)
                                         fadeAlpha = (cutsceneFadeAlpha * completion + (1.0f - completion) * prevCutsceneFadeAlpha).toInt()
                                         fadeRed = (cutsceneFadeRed * completion + prevCutsceneFadeRed * (1.0f - completion)).toInt()
                                         fadeGreen = (completion * cutsceneFadeGreen + prevCutsceneFadeGreen * (1.0f - completion)).toInt()
@@ -275,7 +268,7 @@ object InterfaceComponentRenderer {
                             }
                             Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                         }
-                        if (client.PREV_COMPONENT_ON_TOP[componentReference] || client.anInt7412 > 1) {
+                        if (Client.PREV_COMPONENT_ON_TOP[componentReference] || Client.anInt7412 > 1) {
                             if (component.type == ComponentType.FIGURE) {
                                 if (drawTransparency == 0) {
                                     if (component.filled) {
@@ -289,7 +282,7 @@ object InterfaceComponentRenderer {
                                     Renderers.activeToolkit!!.drawRectangleOutline(startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or (component.color and 0xffffff), 1)
                                 }
                             } else if (component.type == ComponentType.TEXT) {
-                                val fontRenderer = component.getFontRenderer(StaticMethods.initializedFontcombos!!, client.FONT_PROVIDER)
+                                val fontRenderer = component.getFontRenderer(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
                                 if (fontRenderer == null) {
                                     if (Component.missingMedia) {
                                         Component.redrawComponent(component)
@@ -310,19 +303,19 @@ object InterfaceComponentRenderer {
                                     if (component.anInt1435 != -1) {
                                         itemDisplayText = SoundResourceManager.method2550(component.anInt1435)!!
                                     }
-                                    if (component === client.aClass1187352) {
-                                        itemDisplayText = LocalizedText.PLEASE_WAIT.translate(client.CURRENT_LANGUAGE!!)
+                                    if (component === Client.aClass1187352) {
+                                        itemDisplayText = LocalizedText.PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!)
                                         color = component.color
                                     }
-                                    if (client.CLIP_INTERFACES) {
+                                    if (Client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.expandClipping(startX, startY, startX + component.width, startY + component.height)
                                     }
                                     if (component.textAntiMacro) {
-                                        fontRenderer.renderTextAntiMacro(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, client.RANDOMIZER, client.randomSeed, client.anIntArray7438, StaticMedia.nameIconSprites, null)
+                                        fontRenderer.renderTextAntiMacro(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.anIntArray7438, StaticMedia.nameIconSprites, null)
                                     } else {
                                         fontRenderer.renderText(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, component.anInt1358, component.maxTextLines, StaticMedia.nameIconSprites, null, null, 0, 0)
                                     }
-                                    if (client.CLIP_INTERFACES) {
+                                    if (Client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                     }
                                 }
@@ -460,8 +453,8 @@ object InterfaceComponentRenderer {
                                         modelX += width * component.originX shr 9
                                         modelY += height * component.originY shr 9
                                     }
-                                    client.SUN_MATRIX.reset()
-                                    Renderers.activeToolkit!!.setSunPosition(client.SUN_MATRIX)
+                                    Client.SUN_MATRIX.reset()
+                                    Renderers.activeToolkit!!.setSunPosition(Client.SUN_MATRIX)
                                     val matrix44 = Renderers.activeToolkit!!.method8449()
                                     val viewRangeStart = Resource.mapRegion!!.viewRangeStart
                                     var viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
@@ -481,28 +474,28 @@ object InterfaceComponentRenderer {
                                         Renderers.activeToolkit!!.setDepthBuffering(false)
                                     }
                                     if (component.hasOrigin) {
-                                        client.INTERFACE_MODEL_MATRIX.rotateMatrix(1.0f, 0.0f, 0.0f, MathUtils.getTheta(component.spritePitch))
-                                        client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 1.0f, 0.0f, MathUtils.getTheta(component.spriteRoll))
-                                        client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 0.0f, 1.0f, MathUtils.getTheta(component.spriteYaw))
-                                        client.INTERFACE_MODEL_MATRIX.translate(component.originX.toFloat(), component.originY.toFloat(), component.originZ.toFloat())
+                                        Client.INTERFACE_MODEL_MATRIX.rotateMatrix(1.0f, 0.0f, 0.0f, MathUtils.getTheta(component.spritePitch))
+                                        Client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 1.0f, 0.0f, MathUtils.getTheta(component.spriteRoll))
+                                        Client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 0.0f, 1.0f, MathUtils.getTheta(component.spriteYaw))
+                                        Client.INTERFACE_MODEL_MATRIX.translate(component.originX.toFloat(), component.originY.toFloat(), component.originZ.toFloat())
                                     } else {
                                         val i_31 = MathUtils.SINE[component.spritePitch shl 3] * (component.spriteScale shl 2) shr 14
                                         val i_32 = MathUtils.COSINE[component.spritePitch shl 3] * (component.spriteScale shl 2) shr 14
-                                        client.INTERFACE_MODEL_MATRIX.rotateMatrix(0.0f, 0.0f, 1.0f, MathUtils.getTheta(-component.spriteYaw shl 3))
-                                        client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 1.0f, 0.0f, MathUtils.getTheta(component.spriteRoll shl 3))
-                                        client.INTERFACE_MODEL_MATRIX.translate((component.offsetX shl 2).toFloat(), (i_31 + centerY + (component.offsetY shl 2)).toFloat(), (i_32 + (component.offsetY shl 2)).toFloat())
-                                        client.INTERFACE_MODEL_MATRIX.rotate(1.0f, 0.0f, 0.0f, MathUtils.getTheta(component.spritePitch shl 3))
+                                        Client.INTERFACE_MODEL_MATRIX.rotateMatrix(0.0f, 0.0f, 1.0f, MathUtils.getTheta(-component.spriteYaw shl 3))
+                                        Client.INTERFACE_MODEL_MATRIX.rotate(0.0f, 1.0f, 0.0f, MathUtils.getTheta(component.spriteRoll shl 3))
+                                        Client.INTERFACE_MODEL_MATRIX.translate((component.offsetX shl 2).toFloat(), (i_31 + centerY + (component.offsetY shl 2)).toFloat(), (i_32 + (component.offsetY shl 2)).toFloat())
+                                        Client.INTERFACE_MODEL_MATRIX.rotate(1.0f, 0.0f, 0.0f, MathUtils.getTheta(component.spritePitch shl 3))
                                     }
                                     val toolkit = Renderers.activeToolkit
-                                    component.cycleParticles(toolkit!!, renderedMediaModel, client.INTERFACE_MODEL_MATRIX, client.cycles)
-                                    if (client.CLIP_INTERFACES) {
+                                    component.cycleParticles(toolkit!!, renderedMediaModel, Client.INTERFACE_MODEL_MATRIX, Client.cycles)
+                                    if (Client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.expandClipping(startX, startY, startX + component.width, startY + component.height)
                                     }
-                                    renderedMediaModel.drawMatrixThreaded(client.INTERFACE_MODEL_MATRIX, null, ModelFunctionMaskGL.SMOOTH_EDGES)
+                                    renderedMediaModel.drawMatrixThreaded(Client.INTERFACE_MODEL_MATRIX, null, ModelFunctionMaskGL.SMOOTH_EDGES)
                                     if (!component.usesOrthogonal && component.particleSystem != null) {
                                         Renderers.activeToolkit!!.renderParticles(component.particleSystem!!.rebuildRenderedParticles())
                                     }
-                                    if (client.CLIP_INTERFACES) {
+                                    if (Client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                     }
                                     if (component.priorityRender) {
@@ -547,11 +540,11 @@ object InterfaceComponentRenderer {
         if (itemSlots != null) {
             InterfaceRenderer.updateInterfaceDimensions(itemSlots, component.idHash, componentWidth, componentHeight, bool2)
         }
-        val subInterface = client.OPEN_INTERFACES!!.get(component.idHash.toLong())
+        val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong())
         if (subInterface != null) {
             InterfaceRenderer.updateInterfaceDimensions(subInterface.subInterfaceId, componentWidth, componentHeight, bool2)
         }
-        if (component === client.GAME_SCREEN_INTERFACE) {
+        if (component === Client.GAME_SCREEN_INTERFACE) {
             val playerIndiceCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
             val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
             for (index in 0 until playerIndiceCount) {
@@ -560,9 +553,9 @@ object InterfaceComponentRenderer {
                     playerEntity.updateInterfaceDisplay(componentWidth, componentHeight, bool2)
                 }
             }
-            for (npcUpdateIndex in 0 until client.NPC_UPDATE_INDEX) {
-                val updateKey = client.NPC_UPDATE_INDICES[npcUpdateIndex]
-                val npcObjectNode = client.NPC_MAP.get(updateKey.toLong())
+            for (npcUpdateIndex in 0 until Client.NPC_UPDATE_INDEX) {
+                val updateKey = Client.NPC_UPDATE_INDICES[npcUpdateIndex]
+                val npcObjectNode = Client.NPC_MAP.get(updateKey.toLong())
                 if (npcObjectNode != null) {
                     (npcObjectNode.value as PathingEntity).updateInterfaceDisplay(componentWidth, componentHeight, bool2)
                 }
@@ -598,7 +591,7 @@ object InterfaceComponentRenderer {
         } else {
             component.y = y - component.height - (y * component.basePositionY shr 14)
         }
-        if (client.DISPLAY_HIDDEN_MENU_OPTIONS && (client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
+        if (Client.DISPLAY_HIDDEN_MENU_OPTIONS && (Client.getComponentSettings(component)!!.settingsHash != 0 || component.type == ComponentType.CONTAINER)) {
             if (component.x < 0) {
                 component.x = 0
             } else if (component.x + component.width > x) {
@@ -618,7 +611,7 @@ object InterfaceComponentRenderer {
         if (Camera.cameraCalculationType == 4) {
             angle = Camera.camAngleY.toInt() and 0x3fff
         } else {
-            angle = Camera.camAngleY.toInt() + client.minimapRotation and 0x3fff
+            angle = Camera.camAngleY.toInt() + Client.minimapRotation and 0x3fff
         }
         val i_13 = Math.max(component.width / 2, component.height / 2) + 10
         val i_14 = i_5 * i_5 + i_4 * i_4
@@ -626,8 +619,8 @@ object InterfaceComponentRenderer {
             var sin = MathUtils.SINE[angle]
             var cos = MathUtils.COSINE[angle]
             if (Camera.cameraCalculationType != 4) {
-                sin = sin * 256 / (client.minimapZoom + 256)
-                cos = cos * 256 / (client.minimapZoom + 256)
+                sin = sin * 256 / (Client.minimapZoom + 256)
+                cos = cos * 256 / (Client.minimapZoom + 256)
             }
             val i_17 = cos * i_4 + i_5 * sin shr 14
             val i_18 = i_5 * cos - sin * i_4 shr 14
@@ -642,10 +635,10 @@ object InterfaceComponentRenderer {
 
     @JvmStatic
     fun inboundsComponentToTop(x: Int, y: Int, offsetX: Int, offsetY: Int) {
-        for (index in 0 until client.anInt7407) {
-            val rectangle = client.INTERFACE_BG_COMPONENTS[index] ?: continue
+        for (index in 0 until Client.anInt7407) {
+            val rectangle = Client.INTERFACE_BG_COMPONENTS[index] ?: continue
             if (rectangle.x + rectangle.width > x && rectangle.x < x + offsetX && rectangle.height + rectangle.y > y && rectangle.y < offsetY + y) {
-                client.IS_COMPONENT_ON_TOP[index] = true
+                Client.IS_COMPONENT_ON_TOP[index] = true
             }
         }
     }

@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.scene
 
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.entity.*
 import com.jagex.game.runetek5.entity.gameobject.AbstractGroundDecoration
@@ -1467,11 +1467,11 @@ class Scene(
                 }
             } else {
                 // Selectively
-                resetSettingsBits((client.timesSceneRendered - 4 and 0xff).toByte())
+                resetSettingsBits((Client.timesSceneRendered - 4 and 0xff).toByte())
                 initializeRoofSettings(2)
             }
 
-            client.ROOF_OVERRIDE = PlayerUpdate.MY_PLAYER_PLANE
+            Client.ROOF_OVERRIDE = PlayerUpdate.MY_PLAYER_PLANE
         }
 
         @JvmStatic
@@ -1492,11 +1492,11 @@ class Scene(
 
         @JvmStatic
         fun initializeRoofSettings(i_0: Int) {
-            client.visibleBelowDrawheight = IntArray(i_0)
-            client.visibleAboveX = IntArray(i_0)
-            client.visibleBelowX = IntArray(i_0)
-            client.visibleBelowY = IntArray(i_0)
-            client.visibleAboveY = IntArray(i_0)
+            Client.visibleBelowDrawheight = IntArray(i_0)
+            Client.visibleAboveX = IntArray(i_0)
+            Client.visibleBelowX = IntArray(i_0)
+            Client.visibleBelowY = IntArray(i_0)
+            Client.visibleAboveY = IntArray(i_0)
         }
 
         @JvmStatic

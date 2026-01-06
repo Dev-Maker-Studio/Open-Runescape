@@ -22,7 +22,6 @@ import com.jagex.game.runetek5.config.enumtype.EnumTypeList
 import com.jagex.game.runetek5.config.flo.FloTypeList
 import com.jagex.game.runetek5.config.flu.FluTypeList
 import com.jagex.game.runetek5.config.gametip.GameTipTypeList
-import com.jagex.game.runetek5.config.gametip.GameTipUpdateDetails
 import com.jagex.game.runetek5.config.hitbar.HitbarTypeList
 import com.jagex.game.runetek5.config.hitsplat.HitSplatTypeList
 import com.jagex.game.runetek5.config.identitykit.IdkTypeList
@@ -64,7 +63,6 @@ import com.jagex.game.runetek5.graphics.font.FontCombo
 import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.loginscreen.DrawableGameTip
 import com.jagex.game.runetek5.graphics.loginscreen.GameTipsLoader
-import com.jagex.game.runetek5.graphics.loginscreen.LoginScreenComponent
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.model.billboard.BillboardTypeList
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystemManager
@@ -108,26 +106,26 @@ object ClientStartup {
     var loadingStatusDependencies: Int = 0
 
     @JvmField
-    var activeClient: client? = null
+    var activeClient: Client? = null
 
     @JvmStatic
     fun initialize(): Int {
         if (PreferenceManager.preferences!!.safeMode!!.getValue() == 0) {
-            for (i in 0 until client.keyCachePointerPoss) {
-                if (client.KEYS_PRESSED[i]!!.getCharacter().code == 115 || client.KEYS_PRESSED[i]!!.getCharacter().code == 83) {
+            for (i in 0 until Client.keyCachePointerPoss) {
+                if (Client.KEYS_PRESSED[i]!!.getCharacter().code == 115 || Client.KEYS_PRESSED[i]!!.getCharacter().code == 83) {
                     PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.safeMode!!, 1)
-                    client.safemodeForcedDuringStartup = true
+                    Client.safemodeForcedDuringStartup = true
                     break
                 }
             }
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.INITIALIZE_JS5) {
-            if (client.requestManager == null) {
-                client.requestManager = RequestManager(Resource.remoteFileRequesterJs5!!, Resource.localRequesterJs5!!)
+            if (Client.requestManager == null) {
+                Client.requestManager = RequestManager(Resource.remoteFileRequesterJs5!!, Resource.localRequesterJs5!!)
             }
 
-            if (!client.requestManager!!.initialize()) {
+            if (!Client.requestManager!!.initialize()) {
                 return 0
             }
 
@@ -189,9 +187,9 @@ object ClientStartup {
                 }
             }
 
-            StaticMethods.initializedFontcombos!!.initializeFontMap(client.FONT_PROVIDER)
+            StaticMethods.initializedFontcombos!!.initializeFontMap(Client.FONT_PROVIDER)
             FontManager.initialize()
-            client.setGameState(GameState.UNK_15)
+            Client.setGameState(GameState.UNK_15)
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.CREATE_JS5) {
@@ -255,7 +253,7 @@ object ClientStartup {
 
             decodeTitlescreenMusic(data)
             SoundEffectPlayer.initializeAudio()
-            client.setGameState(GameState.UNK_1)
+            Client.setGameState(GameState.UNK_1)
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.PREPARE_NATIVE_LIBRARY_LOADER) {
@@ -270,12 +268,12 @@ object ClientStartup {
             }
 
             EnvironmentManager.decodeCubeTextures(Resource.DEFAULTS!!.getFile(DefaultsFile.SCENE_CUBE_TEXTURES.fileId)!!)
-            client.ENTITY_DEFAULTS = EntityDefaults(Resource.DEFAULTS!!)
-            PlayerAppearance.recolorPaletteSrc = client.ENTITY_DEFAULTS!!.recolorPaletteSrc
-            PlayerAppearance.recolorPaletteDst = client.ENTITY_DEFAULTS!!.recolorPaletteDst
-            if (client.ENTITY_DEFAULTS!!.gameWidthDefault != -1 && client.ENTITY_DEFAULTS!!.gameHeightDefault != -1) {
-                client.GAME_WIDTH = client.ENTITY_DEFAULTS!!.gameWidthDefault
-                client.GAME_HEIGHT = client.ENTITY_DEFAULTS!!.gameHeightDefault
+            Client.ENTITY_DEFAULTS = EntityDefaults(Resource.DEFAULTS!!)
+            PlayerAppearance.recolorPaletteSrc = Client.ENTITY_DEFAULTS!!.recolorPaletteSrc
+            PlayerAppearance.recolorPaletteDst = Client.ENTITY_DEFAULTS!!.recolorPaletteDst
+            if (Client.ENTITY_DEFAULTS!!.gameWidthDefault != -1 && Client.ENTITY_DEFAULTS!!.gameHeightDefault != -1) {
+                Client.GAME_WIDTH = Client.ENTITY_DEFAULTS!!.gameWidthDefault
+                Client.GAME_HEIGHT = Client.ENTITY_DEFAULTS!!.gameHeightDefault
             }
 
             TypeLists.EQUIPMENT_DEFAULTS = EquipmentDefaultsType(Resource.DEFAULTS!!)
@@ -284,7 +282,7 @@ object ClientStartup {
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.LOAD_TYPELISTS) {
-            if (client.ENTITY_DEFAULTS!!.profilingMesh != -1 && !Resource.MODEL!!.isCached(client.ENTITY_DEFAULTS!!.profilingMesh, 0)) {
+            if (Client.ENTITY_DEFAULTS!!.profilingMesh != -1 && !Resource.MODEL!!.isCached(Client.ENTITY_DEFAULTS!!.profilingMesh, 0)) {
                 return 99
             }
 
@@ -300,13 +298,13 @@ object ClientStartup {
             TypeLists.IDK = IdkTypeList(Resource.CONFIG!!, Resource.MODEL!!)
             TypeLists.CONTAINER = ItemContainerTypeList(Resource.CONFIG!!)
             TypeLists.LIGHT = LightTypeList(Resource.CONFIG!!)
-            TypeLists.LOC = ObjectTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, Resource.LOC!!, Resource.MODEL!!)
+            TypeLists.LOC = ObjectTypeList(Client.CURRENT_GAME!!, Client.CURRENT_LANGUAGE!!, Resource.LOC!!, Resource.MODEL!!)
             Resource.mapRegion!!.setLoctypelist(TypeLists.LOC!!)
-            Resource.mapRegionLoaderTask!!.initializeRegion(ObjectTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, Resource.LOC!!, Resource.MODEL!!))
+            Resource.mapRegionLoaderTask!!.initializeRegion(ObjectTypeList(Client.CURRENT_GAME!!, Client.CURRENT_LANGUAGE!!, Resource.LOC!!, Resource.MODEL!!))
             TypeLists.MEC = MECTypeList(Resource.CONFIG!!, Resource.SPRITES!!)
             TypeLists.MAP_SPRITE = MapSpriteTypeList(Resource.CONFIG!!, Resource.SPRITES!!)
-            TypeLists.NPC = NpcTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, Resource.NPC!!, Resource.MODEL!!)
-            TypeLists.OBJ = ItemTypeList(client.CURRENT_GAME!!, client.CURRENT_LANGUAGE!!, TypeLists.PARAMS!!, Resource.OBJ!!, Resource.MODEL!!)
+            TypeLists.NPC = NpcTypeList(Client.CURRENT_GAME!!, Client.CURRENT_LANGUAGE!!, Resource.NPC!!, Resource.MODEL!!)
+            TypeLists.OBJ = ItemTypeList(Client.CURRENT_GAME!!, Client.CURRENT_LANGUAGE!!, TypeLists.PARAMS!!, Resource.OBJ!!, Resource.MODEL!!)
             TypeLists.QUEST = QuestTypeList(Resource.CONFIG!!)
             TypeLists.SEQ = SeqTypeList(Resource.SEQ!!, Resource.FRAME_SET!!, Resource.FRAME_BASE!!)
             TypeLists.SKYBOX = SkyboxTypeList(Resource.CONFIG!!)
@@ -356,7 +354,7 @@ object ClientStartup {
             for (varcId in 0 until TypeLists.VARC!!.size) {
                 if (TypeLists.VARC!!.list(varcId).anInt4983 == 0) {
                     VarcTypeList.VARC_BOOL!![varcId] = true
-                    client.VARCS_BOOLS_LOADED++
+                    Client.VARCS_BOOLS_LOADED++
                 }
 
                 VarcTypeList.VARC_INT!![varcId] = -1
@@ -368,16 +366,16 @@ object ClientStartup {
             Resource.SPRITES!!.discardUnpacked(true)
             Resource.FONT_METRICS!!.discardUnpacked(true)
             Resource.HUFFMAN!!.discardUnpacked(true)
-            client.typelistCycleUpdate = true
+            Client.typelistCycleUpdate = true
         }
 
         if (LoadingStage.LOADING_STAGE == LoadingStage.DISPLAY_LOGIN_WINDOW) {
-            if (!Interface.interfaceLoaded(client.ENTITY_DEFAULTS!!.loginInterfaceId, null)) {
+            if (!Interface.interfaceLoaded(Client.ENTITY_DEFAULTS!!.loginInterfaceId, null)) {
                 return 0
             }
             var interfaceCached = true
-            for (index in Interface.INTERFACES!![client.ENTITY_DEFAULTS!!.loginInterfaceId]!!.components!!.indices) {
-                val component = Interface.INTERFACES!![client.ENTITY_DEFAULTS!!.loginInterfaceId]!!.components!![index]
+            for (index in Interface.INTERFACES!![Client.ENTITY_DEFAULTS!!.loginInterfaceId]!!.components!!.indices) {
+                val component = Interface.INTERFACES!![Client.ENTITY_DEFAULTS!!.loginInterfaceId]!!.components!![index]
                 if (component!!.type == ComponentType.SPRITE && component.spriteId != -1 && !Resource.SPRITES!!.isCached(component.spriteId, 0)) {
                     interfaceCached = false
                 }
@@ -406,21 +404,21 @@ object ClientStartup {
             TypeLists.GAME_TIPS = null
             LoadingStage.gametipsToDisplay = null
             NativeSprite.resetCache()
-            client.isForcedSafemode = PreferenceManager.preferences!!.safeMode!!.getValue() == 1
+            Client.isForcedSafemode = PreferenceManager.preferences!!.safeMode!!.getValue() == 1
             PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.safeMode!!, 1)
-            if (client.isForcedSafemode) {
+            if (Client.isForcedSafemode) {
                 PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, 0)
             } else if (PreferenceManager.preferences!!.toolkit!!.isDefault && SystemInfo.SYSTEM_INFO!!.ram < 512 && SystemInfo.SYSTEM_INFO!!.ram != 0) {
                 PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, 0)
             }
             PreferenceManager.savePreferences()
-            if (client.isForcedSafemode) {
-                client.loadAssets(0, false)
+            if (Client.isForcedSafemode) {
+                Client.loadAssets(0, false)
             } else {
-                client.loadAssets(PreferenceManager.preferences!!.toolkit!!.getValue(), false)
+                Client.loadAssets(PreferenceManager.preferences!!.toolkit!!.getValue(), false)
             }
             WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
-            StaticMethods.initializedFontcombos!!.initializeFontMap(client.FONT_PROVIDER)
+            StaticMethods.initializedFontcombos!!.initializeFontMap(Client.FONT_PROVIDER)
             FontManager.initialize()
             StaticMedia.loadSprites(Renderers.activeToolkit!!, Resource.SPRITES!!)
             StaticMedia.initializeChatIcons(StaticMedia.nameIconSprites!!)
@@ -513,7 +511,7 @@ object ClientStartup {
         }
         if (fullyCached) {
             if (!(CacheableDependencies.JAGTHEORA.getDependency()!! as CacheableDLL).isReady()) {
-                client.jagtheoraLoaded = activeClient!!.loadJagtheora()
+                Client.jagtheoraLoaded = activeClient!!.loadJagtheora()
             }
             fullyCachedDependencies = null
         }
@@ -555,32 +553,32 @@ object ClientStartup {
     @JvmStatic
     fun preparePlayer(prepareWindow: Boolean) {
         if (prepareWindow) {
-            if (client.BASE_WINDOW_ID != -1) {
-                Interface.unloadInterface(client.BASE_WINDOW_ID)
+            if (Client.BASE_WINDOW_ID != -1) {
+                Interface.unloadInterface(Client.BASE_WINDOW_ID)
             }
-            var subInterface: SubInterface? = client.OPEN_INTERFACES!!.first()
+            var subInterface: SubInterface? = Client.OPEN_INTERFACES!!.first()
             while (subInterface != null) {
                 if (!subInterface.linked()) {
-                    subInterface = client.OPEN_INTERFACES!!.first()
+                    subInterface = Client.OPEN_INTERFACES!!.first()
                     if (subInterface == null) {
                         break
                     }
                 }
                 Interface.closeChildInterface(subInterface, true, false)
-                subInterface = client.OPEN_INTERFACES!!.next()
+                subInterface = Client.OPEN_INTERFACES!!.next()
             }
-            client.BASE_WINDOW_ID = -1
-            client.OPEN_INTERFACES = IterableNodeMap(8)
+            Client.BASE_WINDOW_ID = -1
+            Client.OPEN_INTERFACES = IterableNodeMap(8)
             Interface.initializeTables()
-            client.BASE_WINDOW_ID = client.ENTITY_DEFAULTS!!.loginInterfaceId
+            Client.BASE_WINDOW_ID = Client.ENTITY_DEFAULTS!!.loginInterfaceId
             WindowMode.interfaceResize(false)
             GameShell.setComponentsOnTop()
-            Component.runScriptsIfLoaded(client.BASE_WINDOW_ID, null)
+            Component.runScriptsIfLoaded(Client.BASE_WINDOW_ID, null)
         }
         method12708()
         LoginManager.currentlyInLobby = false
         MiniMenu.addCancelOption()
-        client.defaultMenuCursor = -1
+        Client.defaultMenuCursor = -1
         CursorTypeList.setCustomCursor(CursorManager.defaultCursorId)
         PlayerUpdate.MY_PLAYER = PlayerEntity(null)
         PlayerUpdate.MY_PLAYER!!.setBasePosition((Resource.mapRegion!!.sceneSizeX * 512 / 2).toFloat(), 0.0f, (Resource.mapRegion!!.sceneSizeY * 512 / 2).toFloat())

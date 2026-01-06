@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.network.packet
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.NodeCollection
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.mouse.MouseRecord
 
 abstract class AbstractMousePacket {
@@ -140,7 +140,7 @@ abstract class AbstractMousePacket {
                 packet.buffer.writeByte(i_4 / count)
                 packet.buffer.writeByte(i_4 % count)
                 packet.buffer.currentPosition = positionBeforeWriting
-                client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
+                Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
             }
         }
         queuePacket()

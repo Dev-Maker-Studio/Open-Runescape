@@ -2,14 +2,12 @@ package com.jagex.game.runetek5.entity.pathingentity.player
 
 import com.darkan.bot.Bot
 import com.jagex.game.runetek5.buffer.Packet
-import com.jagex.game.runetek5.cache.node.impl.ObjectNode
 import com.jagex.game.runetek5.client.ChatMessageType
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Identifiable
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.config.cutscene.CutsceneEntity
 import com.jagex.game.runetek5.config.cutscene.CutsceneTypeList
 import com.jagex.game.runetek5.config.sequence.MovementType
 import com.jagex.game.runetek5.config.sequence.PathingEntitySequence
@@ -21,8 +19,6 @@ import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.graphics.hint.HintArrow
 import com.jagex.game.runetek5.interaction.chat.ChatBox
-import com.jagex.game.runetek5.math.Vector3
-import com.jagex.game.runetek5.movement.CoordGrid
 import com.jagex.game.runetek5.movement.pathfinding.RouteFinder
 import com.jagex.game.runetek5.movement.pathfinding.RouteStrategies
 import com.jagex.game.runetek5.scene.MapRegion
@@ -188,8 +184,8 @@ object PlayerUpdate {
             player.saturation = stream.readByteInverse()
             player.lightness = stream.readByteSubtract()
             player.opacity = stream.readUByteSubtract().toByte()
-            player.tintStartCycle = client.cycles + stream.readUShortAdd()
-            player.tintEndCycle = client.cycles + stream.readUShort()
+            player.tintStartCycle = Client.cycles + stream.readUShortAdd()
+            player.tintEndCycle = Client.cycles + stream.readUShort()
         }
 
         if ((flags and 0x400000) != 0) {
@@ -338,7 +334,7 @@ object PlayerUpdate {
                     }
 
                     val delay = stream.readUSmart()
-                    player.applyHit(hitsplatId, hitText, hitCustomText, soakHitsplatId, soakText, soakCustomText, client.cycles, delay)
+                    player.applyHit(hitsplatId, hitText, hitCustomText, soakHitsplatId, soakText, soakCustomText, Client.cycles, delay)
                 }
             }
 
@@ -351,7 +347,7 @@ object PlayerUpdate {
                         val delay = stream.readUSmart()
                         val fromPercentage = stream.readUByteSubtract()
                         val toPercentage = if (lifetimeCycles > 0) stream.readUByteAdd() else fromPercentage
-                        player.displayHitbar(hitbarId, client.cycles, lifetimeCycles, delay, fromPercentage, toPercentage)
+                        player.displayHitbar(hitbarId, Client.cycles, lifetimeCycles, delay, fromPercentage, toPercentage)
                     } else {
                         player.hideHitbar(hitbarId)
                     }
@@ -434,8 +430,8 @@ object PlayerUpdate {
             player.forceMovementT1YOff = stream.readByteSubtract().toInt()
             player.forceMovementT2XOff = stream.readByteAdd().toInt()
             player.forceMovementT2YOff = stream.readByteInverse().toInt()
-            player.forceMovementT1Delay = stream.readUShortAddLittle() + client.cycles
-            player.forceMovementT2Delay = stream.readUShortLittle() + client.cycles
+            player.forceMovementT1Delay = stream.readUShortAddLittle() + Client.cycles
+            player.forceMovementT2Delay = stream.readUShortLittle() + Client.cycles
             player.forceMoveDirection = stream.readUShortAdd()
             if (player.aBool10568) {
                 player.forceMovementT1XOff = player.forceMovementT1XOff + player.basePositionX
@@ -976,15 +972,15 @@ object PlayerUpdate {
             i_2++
         }
         i_2 = 0
-        while (i_2 < client.NPC_UPDATE_INDEX) {
-            val long_6 = client.NPC_UPDATE_INDICES[i_2].toLong()
-            val class282Sub475 = client.NPC_MAP[long_6]
+        while (i_2 < Client.NPC_UPDATE_INDEX) {
+            val long_6 = Client.NPC_UPDATE_INDICES[i_2].toLong()
+            val class282Sub475 = Client.NPC_MAP[long_6]
             if (class282Sub475 != null) {
                 (class282Sub475.value as PathingEntity).updateHintdetailsOntick()
             }
             i_2++
         }
-        if (client.MAP_LOADING_STAGE == 4) {
+        if (Client.MAP_LOADING_STAGE == 4) {
             i_2 = 0
             while (i_2 < CutsceneTypeList.CUTSCENE_ENTITIES!!.size) {
                 val class758 = CutsceneTypeList.CUTSCENE_ENTITIES!![i_2]
@@ -1003,11 +999,11 @@ object PlayerUpdate {
         if (i_2 != 0) {
             val i_3 = VarProviders.PLAYER_VAR_PROVIDER.activeVars[i_0]
             if (i_2 == 5) {
-                client.anInt7339 = i_3
+                Client.anInt7339 = i_3
             }
 
             if (i_2 == 6) {
-                client.anInt7351 = i_3
+                Client.anInt7351 = i_3
             }
         }
 
@@ -1018,10 +1014,10 @@ object PlayerUpdate {
         val rbx = player.movementBaseX[0]
         val rby = player.movementBaseY[0]
         if (rbx >= 0 && rbx < Resource.mapRegion!!.sceneSizeX && rby >= 0 && rby < Resource.mapRegion!!.sceneSizeY && destX >= 0 && destX < Resource.mapRegion!!.sceneSizeX && destY >= 0 && destY < Resource.mapRegion!!.sceneSizeY) {
-            val i_7 = RouteFinder.findRoute(rbx, rby, player.getSize(), RouteStrategies.forFixedTile(destX, destY), Resource.mapRegion!!.getCollisionMap(player.plane.toInt()), true, client.WALKING_STEPS_X, client.WALKING_STEPS_Y)
+            val i_7 = RouteFinder.findRoute(rbx, rby, player.getSize(), RouteStrategies.forFixedTile(destX, destY), Resource.mapRegion!!.getCollisionMap(player.plane.toInt()), true, Client.WALKING_STEPS_X, Client.WALKING_STEPS_Y)
             if (i_7 in 1..3) {
                 for (index in 0 until i_7 - 1) {
-                    player.addMovementStep(client.WALKING_STEPS_X[index], client.WALKING_STEPS_Y[index], moveType)
+                    player.addMovementStep(Client.WALKING_STEPS_X[index], Client.WALKING_STEPS_Y[index], moveType)
                 }
             }
         }
@@ -1063,7 +1059,7 @@ object PlayerUpdate {
                         if (player5.pMapdot || player5.reduceAttackPriority) {
                             priority += 512
                         } else {
-                            priority += if (client.prioritizePlayerDraw) 128 else 32
+                            priority += if (Client.prioritizePlayerDraw) 128 else 32
                             priority += 256
                         }
 
@@ -1075,8 +1071,8 @@ object PlayerUpdate {
             }
         }
 
-        for (npcIndex in 0 until client.NPC_UPDATE_INDEX) {
-            val npc = (client.NPC_MAP[client.NPC_UPDATE_INDICES[npcIndex].toLong()]!!.value as NpcEntity)
+        for (npcIndex in 0 until Client.NPC_UPDATE_INDEX) {
+            val npc = (Client.NPC_MAP[Client.NPC_UPDATE_INDICES[npcIndex].toLong()]!!.value as NpcEntity)
             if (npc.hasDefinition() && npc.definitions!!.hasTransformations(VarProviders.PLAYER_VAR_PROVIDER)) {
                 npc.calculatePosition()
                 if (npc.startX >= 0 && npc.startZ >= 0 && npc.endX < Resource.mapRegion!!.sceneSizeX && npc.endZ < Resource.mapRegion!!.sceneSizeY) {
@@ -1091,7 +1087,7 @@ object PlayerUpdate {
 
                     drawPriority += 5 - npc.getSize() shl 2
 
-                    var baseValue = if (client.prioritizePlayerDraw) 64 else 128
+                    var baseValue = if (Client.prioritizePlayerDraw) 64 else 128
                     if (npc.definitions!!.lowPriority)
                         baseValue /= 2
                     drawPriority += baseValue
@@ -1115,7 +1111,7 @@ object PlayerUpdate {
             val arrow = HINT_ARROWS[arrowIndex]
             if (arrow != null) {
                 if (arrow.targetType == 1) {
-                    val npcObject = client.NPC_MAP[arrow.targetIndex.toLong()]
+                    val npcObject = Client.NPC_MAP[arrow.targetIndex.toLong()]
                     if (npcObject != null) {
                         val npc = npcObject.value as NpcEntity
                         if (npc.worldPriority >= 0) {
@@ -1140,15 +1136,15 @@ object PlayerUpdate {
         val drawPriority = Resource.mapRegion!!.drawPriority
         val drawPrioritySharedby = Resource.mapRegion!!.drawPrioritySharedby
         val totalIndices: Int
-        totalIndices = if (client.MAP_LOADING_STAGE == 4) {
+        totalIndices = if (Client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
         } else {
-            numPlayerIndices + client.NPC_UPDATE_INDEX
+            numPlayerIndices + Client.NPC_UPDATE_INDEX
         }
 
         for (index in 0 until totalIndices) {
             val entity: PathingEntity
-            if (client.MAP_LOADING_STAGE == 4) {
+            if (Client.MAP_LOADING_STAGE == 4) {
                 val cutsceneEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![index]
                 if (!cutsceneEntity.initialized) {
                     continue
@@ -1159,7 +1155,7 @@ object PlayerUpdate {
                 entity = if (index < numPlayerIndices) {
                     players[playerIndices[index]]!!
                 } else {
-                    (client.NPC_MAP[client.NPC_UPDATE_INDICES[index - numPlayerIndices].toLong()]!!.value as PathingEntity)
+                    (Client.NPC_MAP[Client.NPC_UPDATE_INDICES[index - numPlayerIndices].toLong()]!!.value as PathingEntity)
                 }
 
                 if (plane != entity.plane.toInt() || entity.worldPriority < 0) {
@@ -1214,15 +1210,15 @@ object PlayerUpdate {
         val drawPriority = Resource.mapRegion!!.drawPriority
         val drawPrioritySharedby = Resource.mapRegion!!.drawPrioritySharedby
         val totalIndices: Int
-        totalIndices = if (client.MAP_LOADING_STAGE == 4) {
+        totalIndices = if (Client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
         } else {
-            if (client.aBool7241) numPlayerIndices else numPlayerIndices + client.NPC_UPDATE_INDEX
+            if (Client.aBool7241) numPlayerIndices else numPlayerIndices + Client.NPC_UPDATE_INDEX
         }
 
         for (index in 0 until totalIndices) {
             val entity: PathingEntity
-            if (client.MAP_LOADING_STAGE == 4) {
+            if (Client.MAP_LOADING_STAGE == 4) {
                 val cutsceneEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![index]
                 if (!cutsceneEntity.initialized) {
                     continue
@@ -1233,7 +1229,7 @@ object PlayerUpdate {
                 entity = if (index < numPlayerIndices) {
                     players[playerIndices[index]]!!
                 } else {
-                    (client.NPC_MAP[client.NPC_UPDATE_INDICES[index - numPlayerIndices].toLong()]!!.value as PathingEntity)
+                    (Client.NPC_MAP[Client.NPC_UPDATE_INDICES[index - numPlayerIndices].toLong()]!!.value as PathingEntity)
                 }
 
                 if (plane != entity.plane.toInt()) {
@@ -1259,7 +1255,7 @@ object PlayerUpdate {
                 continue
             }
 
-            if (client.MAP_LOADING_STAGE != 4) {
+            if (Client.MAP_LOADING_STAGE != 4) {
                 if (size == 1) {
                     val x = abs.x.toInt() shr 9
                     val z = abs.z.toInt() shr 9
@@ -1318,15 +1314,15 @@ object PlayerUpdate {
         val numIndices = NUM_OUT_PLAYER_INDICES
         val indices = OUT_PLAYER_INDICES
         val entities: Int
-        entities = if (client.MAP_LOADING_STAGE == 4) {
+        entities = if (Client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
         } else {
-            if (client.aBool7241) numIndices else numIndices + client.NPC_UPDATE_INDEX
+            if (Client.aBool7241) numIndices else numIndices + Client.NPC_UPDATE_INDEX
         }
 
         for (entityIndex in 0 until entities) {
             val entity: Any
-            if (client.MAP_LOADING_STAGE == 4) {
+            if (Client.MAP_LOADING_STAGE == 4) {
                 val cutsceneEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![entityIndex]
                 if (!cutsceneEntity.initialized) {
                     continue
@@ -1337,7 +1333,7 @@ object PlayerUpdate {
                 entity = if (entityIndex < numIndices) {
                     players[indices[entityIndex]]!!
                 } else {
-                    (client.NPC_MAP[client.NPC_UPDATE_INDICES[entityIndex - numIndices].toLong()]!!.value)!!
+                    (Client.NPC_MAP[Client.NPC_UPDATE_INDICES[entityIndex - numIndices].toLong()]!!.value)!!
                 }
 
                 if ((entity as PathingEntity).worldPriority < 0) {

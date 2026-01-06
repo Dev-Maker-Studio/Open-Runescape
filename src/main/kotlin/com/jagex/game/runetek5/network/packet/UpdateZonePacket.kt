@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.network.packet
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.impl.ProjectileSpawnRequest
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.`object`.ObjectShapes
 import com.jagex.game.runetek5.config.`object`.ObjectTypeCustomisation
@@ -37,7 +37,7 @@ enum class UpdateZonePacket(val size: Int) {
     SPOT_ANIM(8);
 
     fun decode() {
-        val buffer = client.GAME_CONNECTION_CONTEXT.receivedBuffer
+        val buffer = Client.GAME_CONNECTION_CONTEXT.receivedBuffer
 
         when (this) {
             GROUND_ITEM_COUNT -> decodeGroundItemCount(buffer)
@@ -69,7 +69,7 @@ enum class UpdateZonePacket(val size: Int) {
         val oldAmount = buffer.readUShort()
         val newAmount = buffer.readUShort()
 
-        client.GROUND_ITEMS?.get(createGroundItemKey(UPDATE_ZONE_PLANE, y, x))?.let { itemContainer ->
+        Client.GROUND_ITEMS?.get(createGroundItemKey(UPDATE_ZONE_PLANE, y, x))?.let { itemContainer ->
             var item = itemContainer.groundItems.getFirst() as GroundItemNode?
             while (item != null) {
                 if ((itemId and 0x7fff) == item.id && oldAmount == item.amount) {
@@ -104,7 +104,7 @@ enum class UpdateZonePacket(val size: Int) {
 
         if (shouldProcessUpdate(x, y)) {
             if (spotAnimId == -1) {
-                client.ACTIVE_GFX.get(x.toLong() shl 16 or y.toLong())?.apply {
+                Client.ACTIVE_GFX.get(x.toLong() shl 16 or y.toLong())?.apply {
                     objectGfx.resetCycle()
                     unlink()
                 }
@@ -125,7 +125,7 @@ enum class UpdateZonePacket(val size: Int) {
                         MapRegion.tileheightForAbsolutePosition(tileX, tileY, UPDATE_ZONE_PLANE) - height,
                         tileY, x, x, y, y, rotation, false
                     )
-                    client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
+                    Client.ACTIVE_GFX.put(PositionedGfx(spotAnimation), x.toLong() shl 16 or y.toLong())
                 }
             }
         }
@@ -209,11 +209,11 @@ enum class UpdateZonePacket(val size: Int) {
 
                 val p = Projectile(
                     scene, spotAnimId, UPDATE_ZONE_PLANE, UPDATE_ZONE_PLANE,
-                    localX, localY, startHeight, startTime + client.cycles, endTime + client.cycles,
+                    localX, localY, startHeight, startTime + Client.cycles, endTime + Client.cycles,
                     angle, slope, 0, lockOn, endHeight, useFloorHeight, -1
                 )
-                p.start(xOff, yOff, MapRegion.tileheightForAbsolutePosition(xOff, yOff, UPDATE_ZONE_PLANE) - endHeight, startTime + client.cycles)
-                client.PROJECTILES.addFirst(ProjectileSpawnRequest(p))
+                p.start(xOff, yOff, MapRegion.tileheightForAbsolutePosition(xOff, yOff, UPDATE_ZONE_PLANE) - endHeight, startTime + Client.cycles)
+                Client.PROJECTILES.addFirst(ProjectileSpawnRequest(p))
             }
         }
     }
@@ -245,7 +245,7 @@ enum class UpdateZonePacket(val size: Int) {
         val display = buffer.readUByteAdd()
         val shape = display shr 2
         val rotation = display and 0x3
-        val type = client.OBJECT_TYPE_SLOTS[shape]
+        val type = Client.OBJECT_TYPE_SLOTS[shape]
         val coords = buffer.readUByte()
         val x = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val y = (coords and 0x7) + UPDATE_ZONE_Y
@@ -264,7 +264,7 @@ enum class UpdateZonePacket(val size: Int) {
         val x = localX + baseCoords.x
         val itemId = buffer.readUShortAddLittle()
 
-        client.GROUND_ITEMS.get(createGroundItemKey(UPDATE_ZONE_PLANE, y, x))?.let { itemContainer ->
+        Client.GROUND_ITEMS.get(createGroundItemKey(UPDATE_ZONE_PLANE, y, x))?.let { itemContainer ->
             var item = itemContainer.groundItems.getFirst() as GroundItemNode?
             while (item != null) {
                 if ((itemId and 0x7fff) == item.id) {
@@ -289,7 +289,7 @@ enum class UpdateZonePacket(val size: Int) {
         val locType = Resource.mapRegion!!.getLoctypeList().list(locId)
         val displayInfo = buffer.readUByteAdd()
         var locShape = displayInfo shr 2
-        val type = client.OBJECT_TYPE_SLOTS[locShape]
+        val type = Client.OBJECT_TYPE_SLOTS[locShape]
         val transformFlags = buffer.readUByte()
         val coords = buffer.readUByteAdd()
         val x = (coords shr 4 and 0x7) + UPDATE_ZONE_X
@@ -377,7 +377,7 @@ enum class UpdateZonePacket(val size: Int) {
         val objInfo = buffer.readUByteSubtract()
         val type = objInfo shr 2
         val rotation = objInfo and 0x3
-        val slot = client.OBJECT_TYPE_SLOTS[type]
+        val slot = Client.OBJECT_TYPE_SLOTS[type]
         val coords = buffer.readUByteSubtract()
         val x = (coords shr 4 and 0x7) + UPDATE_ZONE_X
         val y = (coords and 0x7) + UPDATE_ZONE_Y
@@ -437,7 +437,7 @@ enum class UpdateZonePacket(val size: Int) {
         val displayInfo = buffer.readUByteSubtract()
         val shape = displayInfo shr 2
         val rotation = displayInfo and 0x3
-        val type = client.OBJECT_TYPE_SLOTS[shape]
+        val type = Client.OBJECT_TYPE_SLOTS[shape]
 
         if (Resource.mapRegion!!.loadingType.ignoreUpdateZoneSizeLimitations() || isWithinScene(x, y)) {
             LocAction.destroyObject(UPDATE_ZONE_PLANE, x, y, type, objectId, shape, rotation)

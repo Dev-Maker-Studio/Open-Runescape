@@ -9,10 +9,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import com.jagex.game.runetek5.client.GameState
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
-import com.jagex.game.runetek5.network.packet.TcpPacket
 import com.jagex.game.runetek5.sound.player.area.SoundEffectPlayer
 
 class PingRequester : Runnable {
@@ -133,8 +132,8 @@ class PingRequester : Runnable {
         @JvmStatic
         fun keepalive(force: Boolean) {
             SoundEffectPlayer.updatePlayers()
-            if (GameState.isRenderingScene(client.gameState)) {
-                val connectionContexts = client.connectionContexts
+            if (GameState.isRenderingScene(Client.gameState)) {
+                val connectionContexts = Client.connectionContexts
                 for (index in connectionContexts.indices) {
                     val connectionContext = connectionContexts[index]
                     if (++connectionContext.lastFlush < 50 && !force) {

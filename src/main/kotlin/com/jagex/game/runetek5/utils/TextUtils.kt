@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.utils
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.inputsubscriber.NameType
 import com.jagex.game.runetek5.tools.Language
 import com.jagex.game.runetek5.tools.LocalizedText
@@ -418,8 +418,8 @@ object TextUtils {
             charIndex -= 3
         }
         return when {
-            unformatted.length > 9 -> " ${setTextColor(65408)}${unformatted.substring(0, unformatted.length - 8)}${LocalizedText.M.translate(client.CURRENT_LANGUAGE!!)} ($unformatted)</col>"
-            unformatted.length > 6 -> " ${setTextColor(16777215)}${unformatted.substring(0, unformatted.length - 4)}${LocalizedText.K.translate(client.CURRENT_LANGUAGE!!)} ($unformatted)</col>"
+            unformatted.length > 9 -> " ${setTextColor(65408)}${unformatted.substring(0, unformatted.length - 8)}${LocalizedText.M.translate(Client.CURRENT_LANGUAGE!!)} ($unformatted)</col>"
+            unformatted.length > 6 -> " ${setTextColor(16777215)}${unformatted.substring(0, unformatted.length - 4)}${LocalizedText.K.translate(Client.CURRENT_LANGUAGE!!)} ($unformatted)</col>"
             else -> " ${setTextColor(16776960)}$unformatted</col>"
         }
     }

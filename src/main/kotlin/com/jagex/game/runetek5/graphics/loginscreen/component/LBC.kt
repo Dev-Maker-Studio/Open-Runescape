@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.graphics.loginscreen.component
 
 import com.jagex.game.runetek5.client.LoadingStage
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.gametip.component.AnchoredElement
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontMetrics
@@ -61,8 +61,8 @@ abstract class LBC(
     }
 
     override fun draw(draw: Boolean) {
-        val x = anchoredElement.horizontalAnchor.calculateDrawX(anchoredElement.width, client.GAME_WIDTH) + anchoredElement.offsetX
-        val y = anchoredElement.verticalAnchor.calculateDrawY(anchoredElement.height, client.GAME_HEIGHT) + anchoredElement.offsetY
+        val x = anchoredElement.horizontalAnchor.calculateDrawX(anchoredElement.width, Client.GAME_WIDTH) + anchoredElement.offsetX
+        val y = anchoredElement.verticalAnchor.calculateDrawY(anchoredElement.height, Client.GAME_HEIGHT) + anchoredElement.offsetY
         drawOutline(draw, x, y)
         drawBackground(x, y)
         var loadingText = LoadingStage.plainLoginScreenRenderer!!.getLoadingText()

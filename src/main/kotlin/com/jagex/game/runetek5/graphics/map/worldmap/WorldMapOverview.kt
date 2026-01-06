@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.graphics.map.worldmap
 import com.jagex.game.runetek5.client.Game
 import com.jagex.game.runetek5.client.JSObjectManager
 import com.jagex.game.runetek5.client.ServerEnvironment
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.config.mec.MECType
 import com.jagex.game.runetek5.graphics.map.minimap.ComponentMinimap
 import com.jagex.game.runetek5.staticmethods.StaticMethods
@@ -72,7 +72,7 @@ object WorldMapOverview {
             val backgroundY = scaledHeight + adjustedY - scaledHeight * WorldMapSub1.anInt5765 / WorldMap.mapSizeY - backgroundHeight
             var backgroundColor = -1996554240
 
-            if (Game.STELLAR_DAWN == client.CURRENT_GAME) {
+            if (Game.STELLAR_DAWN == Client.CURRENT_GAME) {
                 backgroundColor = -1996488705
             }
 

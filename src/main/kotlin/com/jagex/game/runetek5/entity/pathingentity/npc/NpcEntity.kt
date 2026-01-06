@@ -3,31 +3,23 @@ package com.jagex.game.runetek5.entity.pathingentity.npc
 import java.util.Arrays
 import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.client.PreferenceManager
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.menu.MiniMenu
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
-import com.jagex.game.runetek5.config.bas.BasType
 import com.jagex.game.runetek5.config.npc.NPCType
 import com.jagex.game.runetek5.config.sequence.MovementType
-import com.jagex.game.runetek5.config.sequence.MovingSequence
 import com.jagex.game.runetek5.config.sequence.Sequence
-import com.jagex.game.runetek5.config.sequence.spot.SpotAnimType
 import com.jagex.game.runetek5.entity.RenderedEntity
 import com.jagex.game.runetek5.entity.SceneGraphEntity
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
 import com.jagex.game.runetek5.entity.gameobject.AbstractGroundDecoration
 import com.jagex.game.runetek5.graphics.hint.HintDetails
-import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL
 import com.jagex.game.runetek5.graphics.model.particle.Silhouette
-import com.jagex.game.runetek5.math.Matrix43
-import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.math.Vector3Pool
-import com.jagex.game.runetek5.movement.CoordinateSpace
 import com.jagex.game.runetek5.scene.RenderedEntityCache
 import com.jagex.game.runetek5.scene.Scene
-import com.jagex.game.runetek5.scene.tile.Tile
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.vardomain.VarProviders
 import com.jagex.game.runetek5.vardomain.VarnCache
@@ -92,7 +84,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             functionMask = functionMask or (ModelFunctionMask.DISPLACE_X or ModelFunctionMask.DISPLACE_Y or ModelFunctionMask.DISPLACE_Z)
         }
 
-        val hasTint = super.opacity.toInt() != 0 && client.cycles >= super.tintStartCycle && client.cycles < super.tintEndCycle
+        val hasTint = super.opacity.toInt() != 0 && Client.cycles >= super.tintStartCycle && Client.cycles < super.tintEndCycle
         if (hasTint) {
             functionMask = functionMask or ModelFunctionMask.TINT
         }
@@ -329,7 +321,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
     }
 
     fun method16164(string_1: String) {
-        val i_5 = GameShell.gameCyclesPerSecond() * client.ENTITY_DEFAULTS!!.npcMessageDuration
+        val i_5 = GameShell.gameCyclesPerSecond() * Client.ENTITY_DEFAULTS!!.npcMessageDuration
         setHintDetails(string_1, 0, 0, i_5)
     }
 
@@ -404,14 +396,14 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
                 super.models[modelIndex] = null
             }
 
-            super.drawCycle = client.timesSceneRendered
+            super.drawCycle = Client.timesSceneRendered
             return renderedEntity
         }
         return null
     }
 
     override fun privateMessagesEnabled(): Boolean {
-        return client.ENTITY_DEFAULTS!!.npcMessagesEnabled
+        return Client.ENTITY_DEFAULTS!!.npcMessagesEnabled
     }
 
     override fun getHintDetails(): HintDetails? {

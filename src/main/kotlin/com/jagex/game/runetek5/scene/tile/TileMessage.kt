@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.scene.tile
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.entity.EntityNode
 
 class TileMessage : EntityNode() {
@@ -19,11 +19,11 @@ class TileMessage : EntityNode() {
             tileMessage.plane = plane
             tileMessage.absoluteX = absoluteX
             tileMessage.absoluteY = absoluteY
-            tileMessage.lastCycle = cycleDuration + client.cycles
+            tileMessage.lastCycle = cycleDuration + Client.cycles
             tileMessage.tileHeight = tileHeight
             tileMessage.minimenuText = minimenuText
             tileMessage.minimenuColor = minimenuColor
-            client.TILE_MESSAGES.offer(tileMessage)
+            Client.TILE_MESSAGES.offer(tileMessage)
         }
     }
 }

@@ -21,7 +21,6 @@ import com.jagex.game.runetek5.config.item.ItemType
 import com.jagex.game.runetek5.config.npc.NPCType
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.Interface
-import com.jagex.game.runetek5.config.rsinterface.SubInterface
 import com.jagex.game.runetek5.config.rsinterface.itemcontainer.ItemContainer
 import com.jagex.game.runetek5.config.varc.VarcTypeList
 import com.jagex.game.runetek5.entity.pathingentity.PathingEntity
@@ -164,18 +163,18 @@ object LoginManager {
                         tcpPacket.buffer.writeInt(Loader.MAJOR_BUILD)
                         tcpPacket.buffer.writeInt(Loader.MINOR_BUILD)
                         if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
-                            tcpPacket.buffer.writeByte(if (client.gameState == GameState.UNK_10) 1 else 0)
+                            tcpPacket.buffer.writeByte(if (Client.gameState == GameState.UNK_10) 1 else 0)
                         }
                         val seedBlock = encodeClientSeed()
                         seedBlock.writeByte(StaticMethods.anInt76)
                         seedBlock.writeShort((Math.random() * 9.9999999E7).toInt())
-                        seedBlock.writeByte(client.CURRENT_LANGUAGE!!.getValue())
-                        seedBlock.writeInt(client.AFFILIATE)
+                        seedBlock.writeByte(Client.CURRENT_LANGUAGE!!.getValue())
+                        seedBlock.writeInt(Client.AFFILIATE)
                         for (i in 0 until 6) {
                             seedBlock.writeInt((Math.random() * 9.9999999E7).toInt())
                         }
-                        seedBlock.writeLong(client.aLong7409)
-                        seedBlock.writeByte(client.CURRENT_GAME!!.id)
+                        seedBlock.writeLong(Client.aLong7409)
+                        seedBlock.writeByte(Client.CURRENT_GAME!!.id)
                         seedBlock.writeByte((Math.random() * 9.9999999E7).toInt())
                         seedBlock.applyRSA()
                         tcpPacket.buffer.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition)
@@ -225,8 +224,8 @@ object LoginManager {
                     val url = CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.readJagString()
                     CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.currentPosition = 0
                     val callName = JSObjectManager.LOGIN_PROMPT_BECOME_MEMBER.getCallName()
-                    if (!client.isApplet || !Browser.openBrowser(url, 1, callName)) {
-                        Browser.openBrowser(url, true, callName, client.aBool7158)
+                    if (!Client.isApplet || !Browser.openBrowser(url, 1, callName)) {
+                        Browser.openBrowser(url, true, callName, Client.aBool7158)
                     }
                     loginStage = LoginStage.UNK_65
                 }
@@ -272,7 +271,7 @@ object LoginManager {
                         if (!socialNetworkLogin) {
                             loginBlock.writeInt(Loader.MAJOR_BUILD)
                             loginBlock.writeInt(Loader.MINOR_BUILD)
-                            loginBlock.writeByte(if (client.gameState == GameState.UNK_10) 1 else 0)
+                            loginBlock.writeByte(if (Client.gameState == GameState.UNK_10) 1 else 0)
                             startPositionLoginBlock = loginBlock.currentPosition
                             val seedBlock = getSeedBlock(false)
                             loginBlock.writeBytes(seedBlock.buffer, 0, seedBlock.currentPosition)
@@ -289,29 +288,29 @@ object LoginManager {
                         loginBlock.writeShort(GameShell.screenCanvasHeight * -969250379)
                         loginBlock.writeByte(PreferenceManager.preferences!!.antiAliasingPreview!!.value)
                         pushRandomDat(loginBlock)
-                        loginBlock.writeString(client.affiliateP!!)
-                        loginBlock.writeInt(client.AFFILIATE)
+                        loginBlock.writeString(Client.affiliateP!!)
+                        loginBlock.writeInt(Client.AFFILIATE)
                         val preferenceBlock = PreferenceManager.preferences!!.encode()
                         loginBlock.writeByte(preferenceBlock.currentPosition)
                         loginBlock.writeBytes(preferenceBlock.buffer, 0, preferenceBlock.currentPosition)
-                        client.preferencesSavedOnServer = true
+                        Client.preferencesSavedOnServer = true
                         val systemInfoBlock = Packet(SystemInfo.SYSTEM_INFO!!.encode())
                         SystemInfo.SYSTEM_INFO!!.writeMachineInformation(systemInfoBlock)
                         loginBlock.writeBytes(systemInfoBlock.buffer, 0, systemInfoBlock.buffer.size)
-                        loginBlock.writeInt(client.varVerifyId)
-                        loginBlock.writeLong(client.aLong7153)
-                        loginBlock.writeString(client.aString5555!!)
-                        val str7156 = client.aString7156
+                        loginBlock.writeInt(Client.varVerifyId)
+                        loginBlock.writeLong(Client.aLong7153)
+                        loginBlock.writeString(Client.aString5555!!)
+                        val str7156 = Client.aString7156
                         loginBlock.writeByte(if (str7156 == null) 0 else 1)
                         if (str7156 != null) {
                             loginBlock.writeString(str7156)
                         }
                         loginBlock.writeByte(if (Resource.NATIVE_LIBRARY_LOADER!!.isJagtheoraLoaded()) 1 else 0)
-                        loginBlock.writeByte(if (client.isApplet) 1 else 0)
-                        loginBlock.writeByte(if (client.aBool7160) 1 else 0)
-                        loginBlock.writeByte(client.anInt2831)
-                        loginBlock.writeInt(client.anInt7163)
-                        loginBlock.writeString(client.aString7164!!)
+                        loginBlock.writeByte(if (Client.isApplet) 1 else 0)
+                        loginBlock.writeByte(if (Client.aBool7160) 1 else 0)
+                        loginBlock.writeByte(Client.anInt2831)
+                        loginBlock.writeInt(Client.anInt7163)
+                        loginBlock.writeString(Client.aString7164!!)
                         loginBlock.writeByte(if (WorldConnection.CONNECTION_INFO != null && GAME_CONNECTION_INFO!!.worldId == WorldConnection.CONNECTION_INFO!!.worldId) 0 else 1)
                         val worldId = GAME_CONNECTION_INFO!!.worldId
                         loginBlock.writeInt(worldId)
@@ -339,17 +338,17 @@ object LoginManager {
                                 loginBlock.writeLong(aLong77)
                             }
                         }
-                        loginBlock.writeByte(client.CURRENT_GAME!!.id)
-                        loginBlock.writeByte(client.CURRENT_LANGUAGE!!.getValue())
+                        loginBlock.writeByte(Client.CURRENT_GAME!!.id)
+                        loginBlock.writeByte(Client.CURRENT_LANGUAGE!!.getValue())
                         pushRandomDat(loginBlock)
-                        loginBlock.writeString(client.affiliateP!!)
+                        loginBlock.writeString(Client.affiliateP!!)
                         val preferenceBlock = PreferenceManager.preferences!!.encode()
                         loginBlock.writeByte(preferenceBlock.currentPosition)
                         loginBlock.writeBytes(preferenceBlock.buffer, 0, preferenceBlock.currentPosition)
-                        loginBlock.writeString(client.aString5555!!)
-                        loginBlock.writeInt(client.AFFILIATE)
-                        loginBlock.writeInt(client.anInt7163)
-                        loginBlock.writeString(client.aString7164!!)
+                        loginBlock.writeString(Client.aString5555!!)
+                        loginBlock.writeInt(Client.AFFILIATE)
+                        loginBlock.writeInt(Client.anInt7163)
+                        loginBlock.writeString(Client.aString7164!!)
                         writeResourceCrc(loginBlock)
                     }
                     loginBlock.encryptXtea(clientSeed!!, startPositionLoginBlock, loginBlock.currentPosition)
@@ -483,40 +482,40 @@ object LoginManager {
                             }
                             CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(buffer.buffer, 0, anInt1965)
                             buffer.currentPosition = 0
-                            client.PLAYER_RIGHTS = buffer.readUByte()
-                            client.PLAYER_MOD_LEVEL = buffer.readUByte()
-                            client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1
-                            client.VERIFIED_EMAIL_ADDRESS = buffer.readUByte() == 1
-                            client.aBool7322 = buffer.readUByte() == 1
-                            client.IS_QUICKCHAT_ONLY = buffer.readUByte() == 1
+                            Client.PLAYER_RIGHTS = buffer.readUByte()
+                            Client.PLAYER_MOD_LEVEL = buffer.readUByte()
+                            Client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1
+                            Client.VERIFIED_EMAIL_ADDRESS = buffer.readUByte() == 1
+                            Client.aBool7322 = buffer.readUByte() == 1
+                            Client.IS_QUICKCHAT_ONLY = buffer.readUByte() == 1
                             PlayerUpdate.myPlayerIndex = buffer.readUShort()
-                            client.IS_MEMBER = buffer.readUByte() == 1
+                            Client.IS_MEMBER = buffer.readUByte() == 1
                             PLAYER_DOB = buffer.readMedium()
-                            client.memberWorld = buffer.readUByte() == 1
-                            client.aString3643 = buffer.readString()
-                            Resource.mapRegion!!.loctypeList!!.setMember(client.memberWorld)
-                            Resource.mapRegionLoaderTask!!.region.loctypeList!!.setMember(client.memberWorld)
-                            TypeLists.OBJ!!.setMembersOnly(client.memberWorld)
-                            TypeLists.NPC!!.setMember(client.memberWorld)
+                            Client.memberWorld = buffer.readUByte() == 1
+                            Client.aString3643 = buffer.readString()
+                            Resource.mapRegion!!.loctypeList!!.setMember(Client.memberWorld)
+                            Resource.mapRegionLoaderTask!!.region.loctypeList!!.setMember(Client.memberWorld)
+                            TypeLists.OBJ!!.setMembersOnly(Client.memberWorld)
+                            TypeLists.NPC!!.setMember(Client.memberWorld)
                         } else {
                             if (!CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.available(anInt1965)) {
                                 return
                             }
                             CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(buffer.buffer, 0, anInt1965)
                             buffer.currentPosition = 0
-                            client.PLAYER_RIGHTS = buffer.readUByte()
-                            client.PLAYER_MOD_LEVEL = buffer.readUByte()
-                            client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1
+                            Client.PLAYER_RIGHTS = buffer.readUByte()
+                            Client.PLAYER_MOD_LEVEL = buffer.readUByte()
+                            Client.USERDETAIL_QUICKCHAT = buffer.readUByte() == 1
                             PLAYER_DOB = buffer.readMedium()
                             PlayerUpdate.MY_PLAYER!!.male = buffer.readUByte().toByte()
-                            client.VERIFIED_EMAIL_ADDRESS = buffer.readUByte() == 1
-                            client.aBool7322 = buffer.readUByte() == 1
+                            Client.VERIFIED_EMAIL_ADDRESS = buffer.readUByte() == 1
+                            Client.aBool7322 = buffer.readUByte() == 1
                             MEMBERSHIP_END = buffer.readLong()
                             aLong420 = MEMBERSHIP_END - Utils.time() - buffer.read40BitLong()
                             tcpPacketPositionBefore = buffer.readUByte()
-                            client.IS_MEMBER = (tcpPacketPositionBefore and 0x1) != 0
+                            Client.IS_MEMBER = (tcpPacketPositionBefore and 0x1) != 0
                             IS_MEMBER_SUBSCRIPTION = (tcpPacketPositionBefore and 0x2) != 0
-                            client.JCOINS = buffer.readInt()
+                            Client.JCOINS = buffer.readInt()
                             QueueIterator.LOYALTY_ENABLED = buffer.readUByte() == 1
                             LOYALTY_BALANCE = buffer.readInt()
                             RECOVERYQUESTIONSSETDATE = buffer.readUShort()
@@ -531,9 +530,9 @@ object LoginManager {
                             FileOnDisk.anInt5357 = buffer.readUShort()
                             aBool5556 = buffer.readUByte() == 1
                             PlayerUpdate.MY_PLAYER!!.username = buffer.readJagString().also { PlayerUpdate.MY_PLAYER!!.displayName = it; PlayerUpdate.MY_PLAYER_USERNAME = it }
-                            client.anInt3644 = buffer.readUByte()
+                            Client.anInt3644 = buffer.readUByte()
                             anInt1526 = buffer.readInt()
-                            client.aBool7323 = buffer.readUByte() == 1
+                            Client.aBool7323 = buffer.readUByte() == 1
                             WorldConnection.CONNECTION_INFO = ConnectionInfo()
                             WorldConnection.CONNECTION_INFO!!.worldId = buffer.readUShort()
                             if (WorldConnection.CONNECTION_INFO!!.worldId == 65535) {
@@ -544,7 +543,7 @@ object LoginManager {
                                 WorldConnection.CONNECTION_INFO!!.devWorld1 = WorldConnection.CONNECTION_INFO!!.worldId
                                 WorldConnection.CONNECTION_INFO!!.devWorld2 = WorldConnection.CONNECTION_INFO!!.worldId
                             }
-                            if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LOCAL && (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.WTQA || client.PLAYER_RIGHTS < 2) && GAME_CONNECTION_INFO == WorldConnection.GAME_CONNECTION) {
+                            if (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.LOCAL && (ServerEnvironment.SERVER_ENVIRONMENT != ServerEnvironment.WTQA || Client.PLAYER_RIGHTS < 2) && GAME_CONNECTION_INFO == WorldConnection.GAME_CONNECTION) {
                                 prepareHost()
                             }
                         }
@@ -552,7 +551,7 @@ object LoginManager {
                             loginStage = LoginStage.NONE_2
                             method13784(2)
                             prepareIngame()
-                            client.setGameState(GameState.UNK_0)
+                            Client.setGameState(GameState.UNK_0)
                             CURRENT_CONNECTION_CONTEXT!!.currentPacket = null
                             return
                         }
@@ -656,22 +655,22 @@ object LoginManager {
     @JvmStatic
     fun lobbyLogin(string_0: String, string_1: String) {
         lobbyStage = LobbyStage.LOGGING_IN_LOBBY
-        CURRENT_CONNECTION_CONTEXT = client.LOBBY_CONNECTION_CONTEXT
+        CURRENT_CONNECTION_CONTEXT = Client.LOBBY_CONNECTION_CONTEXT
         method7558(false, false, string_0, string_1, -1L)
     }
 
     @JvmStatic
     fun method4964() {
         lobbyStage = LobbyStage.LOGGING_IN_LOBBY
-        CURRENT_CONNECTION_CONTEXT = client.LOBBY_CONNECTION_CONTEXT
+        CURRENT_CONNECTION_CONTEXT = Client.LOBBY_CONNECTION_CONTEXT
         method7558(aLong77 == -1L, true, "", "", aLong77)
     }
 
     @JvmStatic
     fun method6160() {
         lobbyStage = LobbyStage.LOGGING_IN_LOBBY
-        CURRENT_CONNECTION_CONTEXT = client.LOBBY_CONNECTION_CONTEXT
-        client.base64Url?.let { url ->
+        CURRENT_CONNECTION_CONTEXT = Client.LOBBY_CONNECTION_CONTEXT
+        Client.base64Url?.let { url ->
             val buffer = Packet(url)
             aLong77 = buffer.readLong()
             aLong86 = buffer.readLong()
@@ -686,7 +685,7 @@ object LoginManager {
     @JvmStatic
     fun method5921() {
         when {
-            client.base64Url != null -> method6160()
+            Client.base64Url != null -> method6160()
             StaticMethods.anInt76 != -1 -> method4964()
             else -> lobbyLogin(StaticMethods.aString99, StaticMethods.aString102)
         }
@@ -695,27 +694,27 @@ object LoginManager {
     @JvmStatic
     fun openLobby(ingame: Boolean) {
         if (ingame) {
-            if (client.BASE_WINDOW_ID != -1) {
-                Interface.unloadInterface(client.BASE_WINDOW_ID)
+            if (Client.BASE_WINDOW_ID != -1) {
+                Interface.unloadInterface(Client.BASE_WINDOW_ID)
             }
-            var subInterface = client.OPEN_INTERFACES!!.first()
+            var subInterface = Client.OPEN_INTERFACES!!.first()
             while (subInterface != null) {
                 if (!subInterface.linked()) {
-                    subInterface = client.OPEN_INTERFACES!!.first()
+                    subInterface = Client.OPEN_INTERFACES!!.first()
                     if (subInterface == null) {
                         break
                     }
                 }
                 Interface.closeChildInterface(subInterface, true, false)
-                subInterface = client.OPEN_INTERFACES!!.next()
+                subInterface = Client.OPEN_INTERFACES!!.next()
             }
-            client.BASE_WINDOW_ID = -1
-            client.OPEN_INTERFACES = IterableNodeMap(8)
+            Client.BASE_WINDOW_ID = -1
+            Client.OPEN_INTERFACES = IterableNodeMap(8)
             Interface.initializeTables()
-            client.BASE_WINDOW_ID = client.ENTITY_DEFAULTS!!.lobbyWindow
+            Client.BASE_WINDOW_ID = Client.ENTITY_DEFAULTS!!.lobbyWindow
             WindowMode.interfaceResize(false)
             GameShell.setComponentsOnTop()
-            Component.runScriptsIfLoaded(client.BASE_WINDOW_ID, null)
+            Component.runScriptsIfLoaded(Client.BASE_WINDOW_ID, null)
         }
         currentlyInLobby = true
     }
@@ -726,29 +725,29 @@ object LoginManager {
         clientSeed.writeLong(0L)
         clientSeed.writeString(if (password) StaticMethods.aString102!! else lobbyAuthToken!!)
         clientSeed.writeLong(aLong86)
-        clientSeed.writeLong(client.aLong7409)
+        clientSeed.writeLong(Client.aLong7409)
         clientSeed.applyRSA()
         return clientSeed
     }
 
     @JvmStatic
     fun method7777() {
-        if (client.gameState == GameState.UNK_0 && !method3360() && !AccountCreationStage.method1466()) {
-            client.setGameState(GameState.UNK_7)
+        if (Client.gameState == GameState.UNK_0 && !method3360() && !AccountCreationStage.method1466()) {
+            Client.setGameState(GameState.UNK_7)
         }
     }
 
     @JvmStatic
     fun worldLogin(string_0: String, string_1: String) {
         lobbyStage = LobbyStage.LOBBY_TO_WORLD
-        CURRENT_CONNECTION_CONTEXT = client.GAME_CONNECTION_CONTEXT
+        CURRENT_CONNECTION_CONTEXT = Client.GAME_CONNECTION_CONTEXT
         method7558(false, false, string_0, string_1, -1L)
     }
 
     @JvmStatic
     fun method1384() {
         when {
-            client.base64Url != null -> method7022()
+            Client.base64Url != null -> method7022()
             StaticMethods.anInt76 != -1 -> method537()
             else -> worldLogin(StaticMethods.aString99, StaticMethods.aString102)
         }
@@ -782,11 +781,11 @@ object LoginManager {
     @JvmStatic
     fun method2635(string_0: String, string_1: String) {
         if (string_0.length <= 320 && GameState.method6693()) {
-            client.LOBBY_CONNECTION_CONTEXT.closeConnection()
+            Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
             method5118()
             StaticMethods.aString99 = string_0
             StaticMethods.aString102 = string_1
-            client.setGameState(GameState.UNK_14)
+            Client.setGameState(GameState.UNK_14)
         }
     }
 
@@ -803,7 +802,7 @@ object LoginManager {
             method5118()
             StaticMethods.aString99 = string_0
             StaticMethods.aString102 = string_1
-            client.setGameState(GameState.UNK_19)
+            Client.setGameState(GameState.UNK_19)
         }
     }
 
@@ -814,7 +813,7 @@ object LoginManager {
                 aLong77 = -1L
             }
             StaticMethods.anInt76 = i_0
-            client.setGameState(GameState.UNK_19)
+            Client.setGameState(GameState.UNK_19)
         }
     }
 
@@ -929,7 +928,7 @@ object LoginManager {
         CURRENT_CONNECTION_CONTEXT!!.thirdLastPacket = null
         CURRENT_CONNECTION_CONTEXT!!.currentPacketSize = 0
         CURRENT_CONNECTION_CONTEXT!!.idleReadPulses = 0
-        client.REBOOT_TIMER = 0
+        Client.REBOOT_TIMER = 0
         MiniMenu.reset()
         ComponentMinimap.resetMinimapFlag()
 
@@ -939,8 +938,8 @@ object LoginManager {
 
         PlayerUpdate.MY_PLAYER = null
 
-        for (index in 0 until client.npcCount) {
-            val pathingEntity = client.NPC_ARRAY[index]!!.value as PathingEntity?
+        for (index in 0 until Client.npcCount) {
+            val pathingEntity = Client.NPC_ARRAY[index]!!.value as PathingEntity?
             if (pathingEntity != null) {
                 pathingEntity.faceEntity = -1
             }
@@ -950,16 +949,16 @@ object LoginManager {
         Camera.cameraCalculationType = 2
         StaticMethods.anInt833 = -1
         PingRequester.anInt5864 = -1
-        client.setGameState(GameState.LOGGED_INGAME)
+        Client.setGameState(GameState.LOGGED_INGAME)
 
         for (index in 0 until 107) {
-            client.IS_COMPONENT_ON_TOP[index] = true
+            Client.IS_COMPONENT_ON_TOP[index] = true
         }
 
         PacketEncoder.sendWindowmodePreferenceToServer()
         PingRequester.CURRENT_REQUEST = null
         PingRequester.NEXT_PING_UPDATE_TO_SERVER = 0L
-        client.resetCutscenes()
+        Client.resetCutscenes()
     }
 
     @JvmField
@@ -999,18 +998,18 @@ object LoginManager {
     @JvmStatic
     fun method537() {
         lobbyStage = LobbyStage.LOBBY_TO_WORLD
-        CURRENT_CONNECTION_CONTEXT = client.GAME_CONNECTION_CONTEXT
+        CURRENT_CONNECTION_CONTEXT = Client.GAME_CONNECTION_CONTEXT
         method7558(aLong77 == -1L, true, "", "", aLong77)
     }
 
     @JvmStatic
     fun onEnterIngame() {
-        if (client.gameState == GameState.UNK_17) {
-            client.method14562()
+        if (Client.gameState == GameState.UNK_17) {
+            Client.method14562()
         }
 
         prepareForIngame()
-        client.LOBBY_CONNECTION_CONTEXT.closeConnection()
+        Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
         GameShell.appletHasFocus = true
         ReflectionCheckManager.setupPendingChecks()
 
@@ -1018,13 +1017,13 @@ object LoginManager {
             PlayerUpdate.HINT_ARROWS[index] = null
         }
 
-        client.interfaceSelectionActive = false
+        Client.interfaceSelectionActive = false
         AreaSoundPlayer.initialize()
         Camera.cameraRandomisationH = (Math.random() * 100.0).toInt() - 50
         Camera.cameraRandomisationV = (Math.random() * 110.0).toInt() - 55
         Camera.cameraRandomisationA = (Math.random() * 80.0).toInt() - 40
-        client.minimapRotation = (Math.random() * 120.0).toInt() - 60
-        client.minimapZoom = (Math.random() * 30.0).toInt() - 20
+        Client.minimapRotation = (Math.random() * 120.0).toInt() - 60
+        Client.minimapZoom = (Math.random() * 30.0).toInt() - 20
         Camera.camAngleY = ((Math.random() * 160.0).toInt() - 80 and 0x3fff).toFloat()
         ComponentMinimap.resetMinimapFlagAndPlane()
 
@@ -1033,13 +1032,13 @@ object LoginManager {
         }
 
         PlayerUpdate.MY_PLAYER = null
-        client.NPC_UPDATE_INDEX = 0
-        client.npcCount = 0
-        client.NPC_MAP.clear()
-        client.PROJECTILES.remove_all()
-        client.ACTIVE_GFX.clear()
-        client.TILE_MESSAGES.unlink()
-        client.GROUND_ITEMS.clear()
+        Client.NPC_UPDATE_INDEX = 0
+        Client.npcCount = 0
+        Client.NPC_MAP.clear()
+        Client.PROJECTILES.remove_all()
+        Client.ACTIVE_GFX.clear()
+        Client.TILE_MESSAGES.unlink()
+        Client.GROUND_ITEMS.clear()
         LocAction.pendingRemovals = NodeCollection()
         LocAction.pendingCustomizations = NodeCollection()
         VarProviders.PLAYER_VAR_PROVIDER.reset()
@@ -1061,54 +1060,54 @@ object LoginManager {
             }
         }
 
-        if (client.BASE_WINDOW_ID != -1) {
-            Interface.unloadInterface(client.BASE_WINDOW_ID)
+        if (Client.BASE_WINDOW_ID != -1) {
+            Interface.unloadInterface(Client.BASE_WINDOW_ID)
         }
 
-        var subInterface = client.OPEN_INTERFACES!!.first()
+        var subInterface = Client.OPEN_INTERFACES!!.first()
         while (subInterface != null) {
             if (!subInterface.linked()) {
-                subInterface = client.OPEN_INTERFACES!!.first()
+                subInterface = Client.OPEN_INTERFACES!!.first()
                 if (subInterface == null) {
                     break
                 }
             }
             Interface.closeChildInterface(subInterface, true, false)
-            subInterface = client.OPEN_INTERFACES!!.next()
+            subInterface = Client.OPEN_INTERFACES!!.next()
         }
 
-        client.BASE_WINDOW_ID = -1
-        client.OPEN_INTERFACES = IterableNodeMap(8)
+        Client.BASE_WINDOW_ID = -1
+        Client.OPEN_INTERFACES = IterableNodeMap(8)
         Interface.initializeTables()
-        client.aClass1187352 = null
+        Client.aClass1187352 = null
 
         for (index in 0 until 8) {
-            client.PLAYER_OPTIONS[index] = null
-            client.PLAYER_OPTION_REDUCED_PRIORITY[index] = false
-            client.PLAYER_OPTION_CURSORS[index] = -1
+            Client.PLAYER_OPTIONS[index] = null
+            Client.PLAYER_OPTION_REDUCED_PRIORITY[index] = false
+            Client.PLAYER_OPTION_CURSORS[index] = -1
         }
 
         ItemContainer.resetContainerMap()
-        client.awaitingPriorityRequests = true
+        Client.awaitingPriorityRequests = true
 
         for (index in 0 until 107) {
-            client.IS_COMPONENT_ON_TOP[index] = true
+            Client.IS_COMPONENT_ON_TOP[index] = true
         }
 
         for (index in 0 until 6) {
-            client.GRAND_EXCHANGE_SLOTS[index] = GrandExchangeSlot()
+            Client.GRAND_EXCHANGE_SLOTS[index] = GrandExchangeSlot()
         }
 
         Resource.mapRegion!!.environmentManager!!.requestDirectEnvironmentTransition()
-        client.sendCameraAngleToServer = true
-        client.recolorPalette = ShortArray(256).also {
+        Client.sendCameraAngleToServer = true
+        Client.recolorPalette = ShortArray(256).also {
             ObjectType.locRecolorPalette = it
             NPCType.npcRecolorPalette = it
             ItemType.recolorPalette = it
         }
-        InterfaceRenderer.translatedUptext = LocalizedText.WALK_HERE.translate(client.CURRENT_LANGUAGE!!)
+        InterfaceRenderer.translatedUptext = LocalizedText.WALK_HERE.translate(Client.CURRENT_LANGUAGE!!)
         PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.removeRoofsOptionOverride!!, PreferenceManager.preferences!!.removeRoofs!!.value)
-        client.varVerifyId = 0
+        Client.varVerifyId = 0
         MiniMenu.reset()
         PacketEncoder.sendWindowmodePreferenceToServer()
         PingRequester.CURRENT_REQUEST = null
@@ -1160,8 +1159,8 @@ object LoginManager {
     @JvmStatic
     fun method7022() {
         lobbyStage = LobbyStage.LOBBY_TO_WORLD
-        CURRENT_CONNECTION_CONTEXT = client.GAME_CONNECTION_CONTEXT
-        client.base64Url?.let { url ->
+        CURRENT_CONNECTION_CONTEXT = Client.GAME_CONNECTION_CONTEXT
+        Client.base64Url?.let { url ->
             val rsbytebuffer1 = Packet(url)
             aLong77 = rsbytebuffer1.readLong()
             aLong86 = rsbytebuffer1.readLong()
@@ -1181,21 +1180,21 @@ object LoginManager {
         CURRENT_CONNECTION_CONTEXT!!.secondLastPacket = null
         CURRENT_CONNECTION_CONTEXT!!.thirdLastPacket = null
         CURRENT_CONNECTION_CONTEXT!!.idleReadPulses = 0
-        client.REBOOT_TIMER = 0
+        Client.REBOOT_TIMER = 0
         ChatBox.reset()
         FriendList.LOADED = 0
         FriendList.FRIEND_COUNT = 0
         FriendsChat.FC_NAME = null
         FriendsChat.FC_PLAYER_COUNT = 0
         FriendsChat.FC_PLAYERS = null
-        client.GUEST_CLAN_SETTINGS = null
-        client.CLAN_SETTINGS = null
+        Client.GUEST_CLAN_SETTINGS = null
+        Client.CLAN_SETTINGS = null
         MouseActionServer.reset()
 
         for (skillIndex in 0 until 25) {
-            client.SKILL_LEVEL_VISIBLE[skillIndex] = 0
-            client.SKILL_LEVEL_ACTUAL[skillIndex] = 0
-            client.SKILL_XP[skillIndex] = 0
+            Client.SKILL_LEVEL_VISIBLE[skillIndex] = 0
+            Client.SKILL_LEVEL_ACTUAL[skillIndex] = 0
+            Client.SKILL_XP[skillIndex] = 0
         }
     }
 

@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.interaction.chat.friendschat
 
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.network.BufferedConnectionContext
 import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
@@ -18,7 +18,7 @@ object FriendsChat {
     @JvmStatic
     fun kickPlayer(username: String) {
         if (FC_PLAYERS != null) {
-            val connection: BufferedConnectionContext = client.connectionContext
+            val connection: BufferedConnectionContext = Client.connectionContext
             val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.FC_KICK, connection.isaac)
             packet.buffer.writeByte(TextUtils.getLength(username))
             packet.buffer.writeString(username)
@@ -28,7 +28,7 @@ object FriendsChat {
 
     @JvmStatic
     fun setRank(username: String, rank: Int) {
-        val connection: BufferedConnectionContext = client.connectionContext
+        val connection: BufferedConnectionContext = Client.connectionContext
         val packet: TcpPacket = PacketEncoder.createPacket(ClientProt.FC_SET_RANK, connection.isaac)
         packet.buffer.writeByte(1 + TextUtils.getLength(username))
         packet.buffer.writeByteSubtract(rank)

@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.tools
 
 import com.jagex.game.runetek5.ExplicitRuntimeException
 import com.jagex.game.runetek5.client.GameShell
-import com.jagex.game.runetek5.client.client
+import com.jagex.game.runetek5.client.Client
 import com.jagex.game.runetek5.client.input.console.Console
 import com.jagex.game.runetek5.client.login.LoginManager
 import com.jagex.game.runetek5.config.Resource
@@ -10,10 +10,8 @@ import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
-import com.jagex.game.runetek5.math.Vector3
 import com.jagex.game.runetek5.rendering.Renderers
 import com.jagex.game.runetek5.scene.MapRegion
-import com.jagex.game.runetek5.scene.culling.Culling
 import com.jagex.game.runetek5.utils.Utils
 import java.io.*
 
@@ -37,9 +35,9 @@ object DebugDisplay {
                     val culling = Resource.mapRegion!!.getScene()!!.culling
                     culling.cullingEnabled = !culling.cullingEnabled
                 }
-                7 -> client.DRAW_DEBUG = true
-                4 -> client.DRAW_DEBUG = false
-                14 -> client.TILE_MESSAGES.unlink()
+                7 -> Client.DRAW_DEBUG = true
+                4 -> Client.DRAW_DEBUG = false
+                14 -> Client.TILE_MESSAGES.unlink()
                 21 -> {
                     TypeLists.clear()
                     for (gc in 0..9) {
@@ -92,24 +90,24 @@ object DebugDisplay {
                 }
                 16 -> TypeLists.resetCachedData(false)
                 15 -> {
-                    client.DEBUG_MODE = !client.DEBUG_MODE
+                    Client.DEBUG_MODE = !Client.DEBUG_MODE
                     Renderers.activeToolkit!!.debugModeChanged()
                 }
                 10 -> {
-                    client.sceneDummyOp = 0
+                    Client.sceneDummyOp = 0
                     Resource.mapRegion!!.reload()
                 }
                 5 -> {
-                    client.sceneDummyOp = 1
+                    Client.sceneDummyOp = 1
                     Resource.mapRegion!!.reload()
                 }
                 29 -> {
-                    client.sceneDummyOp = 2
+                    Client.sceneDummyOp = 2
                     Resource.mapRegion!!.reload()
                 }
             }
         } catch (exception: Exception) {
-            Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(client.CURRENT_LANGUAGE!!)!!)
+            Console.writeLine(LocalizedText.ERROR_EXECUTING_COMMAND.translate(Client.CURRENT_LANGUAGE!!)!!)
         }
     }
 
