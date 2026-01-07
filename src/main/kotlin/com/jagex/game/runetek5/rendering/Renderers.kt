@@ -72,9 +72,9 @@ object Renderers {
                         }
                         val nativeHeap: NativeMemoryNode
                         if (highMem) {
-                            nativeHeap = activeToolkit!!.getNativeMemory(146800640)
+                            nativeHeap = activeToolkit!!.getNativeMemory(146800640)!!
                         } else {
-                            nativeHeap = activeToolkit!!.getNativeMemory(104857600)
+                            nativeHeap = activeToolkit!!.getNativeMemory(104857600)!!
                         }
                         activeToolkit!!.setNativeHeap(nativeHeap)
                     }

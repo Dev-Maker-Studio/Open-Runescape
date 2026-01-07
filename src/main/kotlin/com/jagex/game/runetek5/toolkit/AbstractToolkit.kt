@@ -225,7 +225,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun isOnScreen(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var6: Int): Int
 
-    abstract fun getNativeMemory(var1: Int): NativeMemoryNode
+    abstract fun getNativeMemory(var1: Int): NativeMemoryNode?
 
     abstract fun setNativeHeap(nativeMemoryNode: NativeMemoryNode)
 
@@ -289,7 +289,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun supportsFullscreen(): Boolean
 
-    abstract fun createCubeTexture(materialAtPositiveX: Int, materialAtNegativeX: Int, materialAtPositiveY: Int, materialAtNegativeY: Int, materialAtPositiveZ: Int, materialAtNegativeZ: Int): AbstractCubeTextureGenerator
+    abstract fun createCubeTexture(materialAtPositiveX: Int, materialAtNegativeX: Int, materialAtPositiveY: Int, materialAtNegativeY: Int, materialAtPositiveZ: Int, materialAtNegativeZ: Int): AbstractCubeTextureGenerator?
 
     abstract fun drawQuad(var1: AbstractCubeTextureGenerator?, var2: AbstractCubeTextureGenerator?, var3: Float, var4: AbstractCubeTextureGenerator?): AbstractCubeTextureGenerator?
 
@@ -367,7 +367,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun setBloomFilter(whitepoint: Float, bloom: Float, brightpass: Float)
 
-    open fun createPointLight(x: Int, y: Int, z: Int, size2d: Int, color: Int): PointLight {
+    open fun createPointLight(x: Int, y: Int, z: Int, size2d: Int, color: Int): PointLight? {
         return PointLight(x, y, z, size2d, color)
     }
 

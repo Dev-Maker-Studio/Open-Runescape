@@ -1144,7 +1144,7 @@ class GroundSM(
         if (toolkit.colourBuffer == null || toolkit.depthBuffer == null) {
             throw IllegalStateException("")
         }
-        val floorMatrix = toolkit.floorMatrix
+        val floorMatrix = toolkit.floorMatrix!!
         vertexXA = floorMatrix.faceList[0]
         vertexYA = floorMatrix.faceList[1]
         vertexZNearA = floorMatrix.faceList[2]
@@ -1461,7 +1461,7 @@ class GroundSM(
         tilesEndY: Int,
         tilesOnScreen: Array<BooleanArray>
     ) {
-        val thread = toolkit.getThreadResource(Thread.currentThread())
+        val thread = toolkit.getThreadResource(Thread.currentThread())!!
         val rasterizer = thread.rasterizer!!
         rasterizer.blendingAlpha = 0
         rasterizer.clipEdges = true
@@ -1715,7 +1715,7 @@ class GroundSM(
     }
 
     fun render(x: Int, y: Int) {
-        val thread = toolkit.getThreadResource(Thread.currentThread())
+        val thread = toolkit.getThreadResource(Thread.currentThread())!!
         val rasterizer = thread.rasterizer!!
         rasterizer.blendingAlpha = 0
         when {
