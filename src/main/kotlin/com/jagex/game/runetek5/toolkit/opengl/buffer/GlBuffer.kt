@@ -20,7 +20,7 @@ open class GlBuffer {
 
     constructor(toolkit: OpenGlToolkit, data: ByteArray?, initialCapacity: Int) {
         this.toolkit = toolkit
-        this.buffer = this.toolkit.nativeHeap.createBuffer(initialCapacity, false)
+        this.buffer = this.toolkit.nativeHeap!!.createBuffer(initialCapacity, false)
         if (data != null) {
             this.buffer!!.put(data, 0, 0, initialCapacity)
         }
@@ -28,7 +28,7 @@ open class GlBuffer {
 
     fun put(data: ByteArray, requiredSize: Int) {
         if (this.buffer == null || this.buffer!!.getSize() < requiredSize) {
-            this.buffer = this.toolkit.nativeHeap.createBuffer(requiredSize, false)
+            this.buffer = this.toolkit.nativeHeap!!.createBuffer(requiredSize, false)
         }
 
         this.buffer!!.put(data, 0, 0, requiredSize)

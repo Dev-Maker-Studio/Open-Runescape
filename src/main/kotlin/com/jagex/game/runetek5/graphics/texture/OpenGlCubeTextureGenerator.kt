@@ -25,7 +25,7 @@ class OpenGlCubeTextureGenerator(
 
     fun drawQuad(class137Sub21: OpenGlArbCubeMapTexture, class137Sub22: OpenGlArbCubeMapTexture, alpha: Float): Boolean {
         var framebuffersReady = true
-        val display = openglToolkit.integratedGraphicsImageProducer
+        val display = openglToolkit.integratedGraphicsImageProducer!!
         openglToolkit.getClipping(CLIPPINGS)
         openglToolkit.resetClipping()
         openglToolkit.method13586()

@@ -325,7 +325,7 @@ open class GroundGL(
             if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0) {
                 bufferEntrySize += 12
             }
-            val nativeHeapBuffer = activeToolkit.nativeHeap.createBuffer(bufferEntrySize * currentColorCount, false)
+            val nativeHeapBuffer = activeToolkit.nativeHeap!!.createBuffer(bufferEntrySize * currentColorCount, false)
             val nativeStream = Stream(nativeHeapBuffer)
             val materialsByVertice = Array<GroundMaterialGL?>(currentColorCount) { null }
             var furthestBitValue = MathUtils.furtestBitValue(currentColorCount / 4)

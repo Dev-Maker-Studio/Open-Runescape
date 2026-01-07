@@ -315,11 +315,11 @@ END
                 0,
                 f_4,
                 f_3,
-                256.0F / glToolkit.waterTile.scale,
-                glToolkit.waterTile.intensity / 255.0F
+                256.0F / glToolkit.waterTile!!.scale,
+                glToolkit.waterTile!!.intensity / 255.0F
             )
             glToolkit.activateTexture(1)
-            glToolkit.setTextureEnvColor(glToolkit.waterTile.color)
+            glToolkit.setTextureEnvColor(glToolkit.waterTile!!.color)
             glToolkit.activateTexture(0)
         }
     }

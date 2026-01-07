@@ -197,7 +197,7 @@ class GroundMaterialGL(
 
     fun createDataArrayBuffer(totalTiles: Int) {
         nativeStream!!.method2925()
-        val pointer = toolkit.createDataArrayBuffer(4, nativeHeapBuffer, totalTiles * 4)
+        val pointer = toolkit.createDataArrayBuffer(4, nativeHeapBuffer!!, totalTiles * 4)
         if (pointer is GlVboArrayBuffer) {
             nativeHeapBuffer!!.deallocateBuffer()
         }
@@ -207,7 +207,7 @@ class GroundMaterialGL(
     }
 
     fun generateNativeBuffer(colorCount: Int) {
-        nativeHeapBuffer = toolkit.nativeHeap.createBuffer(colorCount * 4, true)
+        nativeHeapBuffer = toolkit.nativeHeap!!.createBuffer(colorCount * 4, true)
         nativeStream = Stream(nativeHeapBuffer!!)
     }
 

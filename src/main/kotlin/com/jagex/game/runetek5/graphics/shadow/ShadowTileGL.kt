@@ -167,7 +167,7 @@ class ShadowTileGL(
         if (i_2 != 0) {
             regenerateTexture()
             toolkit.setActiveTexture(cachedTexture)
-            toolkit.drawElements(interface151, 0, i_2)
+            toolkit.drawElements(interface151!!, 0, i_2)
         }
     }
 }

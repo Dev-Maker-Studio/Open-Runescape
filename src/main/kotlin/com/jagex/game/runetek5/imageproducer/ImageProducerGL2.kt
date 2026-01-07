@@ -18,7 +18,7 @@ class ImageProducerGL2 : DelegatingDisplay {
         aBool10122 = false
         aGraphicalRendererSub110118 = openGlToolkit
         aCanvas10120 = canvas
-        anOpenGL10119 = openGlToolkit.activeOpenglInstance
+        anOpenGL10119 = openGlToolkit.activeOpenglInstance!!
         aLong10117 = surfaceHandle
         method15526()
     }
@@ -26,7 +26,7 @@ class ImageProducerGL2 : DelegatingDisplay {
     constructor(openGlToolkit: OpenGlToolkit, canvas: Canvas) : this(
         openGlToolkit,
         canvas,
-        openGlToolkit.activeOpenglInstance.prepareSurface(canvas)
+        openGlToolkit.activeOpenglInstance!!.prepareSurface(canvas)
     )
 
     override fun getWidth(): Int {

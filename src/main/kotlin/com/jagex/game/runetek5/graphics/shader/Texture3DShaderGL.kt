@@ -42,7 +42,7 @@ class Texture3DShaderGL(
         if (!createShader()) {
             return false
         }
-        val openglDisplay = openglToolkit.integratedGraphicsImageProducer
+        val openglDisplay = openglToolkit.integratedGraphicsImageProducer!!
         val openglRenderBuffer = OpenGlRenderBuffer(openglToolkit, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT, hdrTexture3d.width, hdrTexture3d.height)
         var ready = false
         openglToolkit.setDisplay(openglDisplay)
@@ -85,7 +85,7 @@ class Texture3DShaderGL(
             ready = true
         }
 
-        openglDisplay.setFramebuffer(0, null)
+        openglDisplay!!.setFramebuffer(0, null)
         openglToolkit.resizeDisplay(openglDisplay)
         return ready
     }

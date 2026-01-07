@@ -45,7 +45,7 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
             buffer = DataBuffer.unpackDataBuffer(anObject1627, false)!!
             aClass137Sub41636 = OpenGl3DTexture(openglToolkit, GLFormat.aClass1501952, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.aClass1501952)
             val shader = openglToolkit.aClass1648363
-            if (shader.createShader()) {
+            if (shader?.createShader() == true) {
                 buffer = DataBuffer.unpackDataBuffer(databufferHdrTexture, false)!!
                 hdrTexture3d = OpenGl3DTexture(openglToolkit, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT)
                 val texture3dTemp = OpenGl3DTexture(openglToolkit, GLFormat.aClass1501948, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.aClass1501948)
@@ -80,7 +80,7 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
             }
 
             val shader = openglToolkit.aClass1648363
-            if (shader.createShader() && databufferHdrTexture == null) {
+            if (shader?.createShader() == true && databufferHdrTexture == null) {
                 val buffer = PerlinWaterTextureGenerator.generatePerlinWaterTexture(PerlinNoiseGenerator())
                 databufferHdrTexture = DataBuffer.createDataBuffer(buffer)
             }
