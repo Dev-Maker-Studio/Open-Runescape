@@ -54,7 +54,7 @@ open class ObjectType {
 	 * to interact with this object
 	 */
 	@JvmField
-	var actions: Array<String>? = null
+	var actions: Array<String?>? = null
 
 	@JvmField
 	var shapes: ByteArray? = null
@@ -220,6 +220,7 @@ open class ObjectType {
 	 * used for fetching if player is member
 	 * and usage of caches stored there
 	 */
+	@JvmField
 	var locTypeList: ObjectTypeList? = null
 
 	/**
@@ -581,6 +582,8 @@ open class ObjectType {
 
 	@Synchronized
 	fun getPair(toolkit: AbstractToolkit, initialFunctionMask: Int, shape: Int, rotation: Int, currentLevel: Ground?, nextLevel: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int, hasShadow: Boolean, locCustomisation: ObjectTypeCustomisation?): TypeResult? {
+		val typeList = this.locTypeList
+			?: throw IllegalStateException("ObjectType.locTypeList is null for id=$id. This ObjectType was not properly initialized via ObjectTypeList.list()")
 		var shapeVar = shape
 		if (ObjectShapes.isWallDecoration(shapeVar)) {
 			shapeVar = ObjectShapes.STRAIGHT_INSIDE_WALL_DEC.shape
@@ -608,8 +611,8 @@ open class ObjectType {
 			adjustedFunctionMask = adjustedFunctionMask or SHADOWED
 		}
 		var pair: TypeResult?
-		synchronized(this.locTypeList!!.typeresultCache) {
-			pair = this.locTypeList!!.typeresultCache.get(uid) as TypeResult?
+		synchronized(typeList.typeresultCache) {
+			pair = typeList.typeresultCache.get(uid) as TypeResult?
 		}
 		var model: Model? = pair?.mainObject as? Model?
 		var shadow: Any? = null
@@ -641,8 +644,8 @@ open class ObjectType {
 			}
 			model.applyShading(adjustedFunctionMask)
 			pair = TypeResult(model, shadow)
-			synchronized(this.locTypeList!!.typeresultCache) {
-				this.locTypeList!!.typeresultCache.put(pair, uid)
+			synchronized(typeList.typeresultCache) {
+				typeList.typeresultCache.put(pair, uid)
 			}
 		}
 		val hasGroundContour = this.groundContourType.toInt() != 0 && (currentLevel != null || nextLevel != null)
@@ -650,7 +653,7 @@ open class ObjectType {
 		if (hasGroundContour || hasTranslation) {
 			model = model.copy(0.toByte(), adjustedFunctionMask, true)
 			if (hasGroundContour && this.goundContourModifier < 16384) {
-				model!!.contourToGround(this.groundContourType.toInt(), this.goundContourModifier, currentLevel!!, nextLevel!!, sceneX, averageHeight, sceneY)
+				model?.contourToGround(this.groundContourType.toInt(), this.goundContourModifier, currentLevel, nextLevel, sceneX, averageHeight, sceneY)
 			}
 			if (hasTranslation) {
 				model!!.translate(this.shadowOffsetX, this.shadowOffsetY, this.shadowOffsetZ)
@@ -659,9 +662,9 @@ open class ObjectType {
 		} else {
 			model = model.copy(0.toByte(), initialFunctionMask, true)
 		}
-		this.locTypeList!!.locresult.mainObject = model
-		this.locTypeList!!.locresult.companionObject = shadow
-		return this.locTypeList!!.locresult
+		typeList.locresult.mainObject = model
+		typeList.locresult.companionObject = shadow
+		return typeList.locresult
 	}
 
 	fun getStationaryModel(toolkit: AbstractToolkit, functionMask: Int, type: Int, rotation: Int, locCustomisation: ObjectTypeCustomisation?): Model? {

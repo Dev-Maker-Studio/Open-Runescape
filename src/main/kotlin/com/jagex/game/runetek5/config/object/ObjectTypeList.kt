@@ -61,47 +61,49 @@ class ObjectTypeList(
     }
 
     fun list(id: Int): ObjectType {
-        val loctype: ObjectType = synchronized(cache) {
-            cache[id.toLong()] as? ObjectType
-        } ?: run {
-            val data: ByteArray? = synchronized(configResource!!) {
-                configResource.getFile(
-                    SharedConfigsType.OBJECTS.archiveId(id),
-                    SharedConfigsType.OBJECTS.archiveFileId(id)
-                )
+        synchronized(cache) {
+            val cached = cache[id.toLong()] as? ObjectType
+            if (cached != null) {
+                cached.locTypeList = this
+                return cached
             }
-
-            val newLoctype = ObjectType().apply {
-                this.id = id
-                this.locTypeList = this@ObjectTypeList
-                @Suppress("UNCHECKED_CAST")
-                this.actions = defaultActions.clone() as Array<String>?
-
-                if (data != null) {
-                    decodeType(Packet(data))
-                }
-
-                postDecode()
-
-                if (ignoreClipOnAltRoute) {
-                    blocksMovement = 0
-                    blocksProjectiles = false
-                }
-
-                if (!playerIsMember && members) {
-                    actions = null
-                    quests = null
-                }
-            }
-
-            synchronized(cache) {
-                cache.put(newLoctype, id.toLong())
-            }
-
-            newLoctype
         }
 
-        return loctype
+        val data: ByteArray? = synchronized(configResource!!) {
+            configResource.getFile(
+                SharedConfigsType.OBJECTS.archiveId(id),
+                SharedConfigsType.OBJECTS.archiveFileId(id)
+            )
+        }
+
+        val newLoctype = ObjectType().apply {
+            this.id = id
+            this.locTypeList = this@ObjectTypeList
+            @Suppress("UNCHECKED_CAST")
+            this.actions = defaultActions.clone() as Array<String?>?
+
+            if (data != null) {
+                decodeType(Packet(data))
+            }
+
+            postDecode()
+
+            if (ignoreClipOnAltRoute) {
+                blocksMovement = 0
+                blocksProjectiles = false
+            }
+
+            if (!playerIsMember && members) {
+                actions = null
+                quests = null
+            }
+        }
+
+        synchronized(cache) {
+            cache.put(newLoctype, id.toLong())
+        }
+
+        return newLoctype
     }
 
     fun resetCaches(prefFlags: Int) {

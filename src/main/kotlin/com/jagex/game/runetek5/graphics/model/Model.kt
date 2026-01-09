@@ -80,7 +80,7 @@ abstract class Model {
 
     abstract fun setAmbient(ambient: Int)
 
-    abstract fun applyEnvironmentAlpha(alpha: Byte, transparency: ByteArray)
+    abstract fun applyEnvironmentAlpha(alpha: Byte, transparency: ByteArray?)
 
     abstract fun createShadowSprite(shadow: Shadow?): Shadow?
 
@@ -458,7 +458,7 @@ abstract class Model {
      * *****************************************************************
      */
 
-    abstract fun contourToGround(contourType: Int, contourModifier: Int, currentLvl: Ground, nextLvl: Ground, sceneX: Int, averageHeight: Int, sceneY: Int)
+    abstract fun contourToGround(contourType: Int, contourModifier: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int)
 
     /**
      * [J]

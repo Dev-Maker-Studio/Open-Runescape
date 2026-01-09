@@ -206,24 +206,24 @@ class Scene(
                 while (wrapper != null) {
                     val interactive = wrapper.interactiveObject
                     if (interactive!!.startX.toInt() == x && y == interactive!!.startZ.toInt()) {
-                        interactive.plane = (plane - 1).toByte()
+                        interactive.plane = (interactive.plane - 1).toByte()
                     }
                     wrapper = wrapper.child
                 }
                 if (tileNextLvl.groundDecoration != null) {
-                    tileNextLvl.groundDecoration!!.plane = (plane - 1).toByte()
+                    tileNextLvl.groundDecoration!!.plane = (tileNextLvl.groundDecoration!!.plane - 1).toByte()
                 }
                 if (tileNextLvl.primaryWall != null) {
-                    tileNextLvl.primaryWall!!.plane = (plane - 1).toByte()
+                    tileNextLvl.primaryWall!!.plane = (tileNextLvl.primaryWall!!.plane - 1).toByte()
                 }
                 if (tileNextLvl.secondaryWall != null) {
-                    tileNextLvl.secondaryWall!!.plane = (plane - 1).toByte()
+                    tileNextLvl.secondaryWall!!.plane = (tileNextLvl.secondaryWall!!.plane - 1).toByte()
                 }
                 if (tileNextLvl.primaryWallDecoration != null) {
-                    tileNextLvl.primaryWallDecoration!!.plane = (plane - 1).toByte()
+                    tileNextLvl.primaryWallDecoration!!.plane = (tileNextLvl.primaryWallDecoration!!.plane - 1).toByte()
                 }
                 if (tileNextLvl.secondaryWallDecoration != null) {
-                    tileNextLvl.secondaryWallDecoration!!.plane = (plane - 1).toByte()
+                    tileNextLvl.secondaryWallDecoration!!.plane = (tileNextLvl.secondaryWallDecoration!!.plane - 1).toByte()
                 }
             }
         }

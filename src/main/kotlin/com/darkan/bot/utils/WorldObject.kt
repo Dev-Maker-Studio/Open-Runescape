@@ -10,9 +10,9 @@ open class WorldObject : Tile {
     var rotation: Int = 0
     var type: Int = 0
         private set
-    private var actions: Array<String>? = null
+    private var actions: Array<String?>? = null
 
-    constructor(id: Int, rotation: Int, type: Int, x: Int, y: Int, actions: Array<String>?) : super(x, y, 0) {
+    constructor(id: Int, rotation: Int, type: Int, x: Int, y: Int, actions: Array<String?>?) : super(x, y, 0) {
         this.id = id
         this.rotation = rotation
         this.actions = actions
@@ -40,7 +40,7 @@ open class WorldObject : Tile {
         if (actions == null)
             return -1
         for (i in actions!!.indices) {
-            if (actions!![i].equals(option, ignoreCase = true))
+            if (actions!![i]?.equals(option, ignoreCase = true) == true)
                 return i + 1
         }
         return -1
