@@ -1795,9 +1795,6 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
         }
 
-        // 0x4 = renderOnLowerZ (render object from next plane on plane-1), 0x2 = hide roofs
-        private fun getCullingType(bitpacked: Int): Int = bitpacked and 0x3
-
         // Something with roofs? - TODO: fix the horrible naming in this
         fun calculateVisibilityAdjustments(regionTiles: Array<Array<Array<Tile>?>?>?, anInt1234: Int, baseX: Int, baseY: Int, hideRoofs: Boolean): Boolean {
             val settingBits = Resource.mapRegion!!.bits
@@ -1828,18 +1825,18 @@ class MapRegion(var asyncMaploading: Boolean) {
                         if (regionTiles[planeAbove] != null && (regionMap.tileFunctionMasks[planeAbove][tileBaseX][tileBaseY].toInt() and 0x8) == 0) {
                             if (renderOnLowerZ && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY] != null) {
                                 if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall != null) {
-                                    val cullingType = getCullingType(bitpackedTypeRotA)
+                                    val cullingType = TileUtils.getCullingType(bitpackedTypeRotA)
                                     if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall!!.cullingType.toInt() == cullingType || regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall != null && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall!!.cullingType.toInt() == cullingType) {
                                         continue
                                     }
                                     if (sceneXHashB != 0) {
-                                        val i_20 = getCullingType(sceneXHashB)
+                                        val i_20 = TileUtils.getCullingType(sceneXHashB)
                                         if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall!!.cullingType.toInt() == i_20 || regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall != null && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall!!.cullingType.toInt() == i_20) {
                                             continue
                                         }
                                     }
                                     if (bitpackedTypeRotB != 0) {
-                                        val i_20 = getCullingType(bitpackedTypeRotB)
+                                        val i_20 = TileUtils.getCullingType(bitpackedTypeRotB)
                                         if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall!!.cullingType.toInt() == i_20 || regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall != null && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall!!.cullingType.toInt() == i_20) {
                                             continue
                                         }
