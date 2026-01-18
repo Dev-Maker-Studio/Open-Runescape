@@ -1984,32 +1984,36 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     fun toggleDrawingClientstates(vertices: OpenGlArrayDrawBuffer?, normals: OpenGlArrayDrawBuffer?, colors: OpenGlArrayDrawBuffer?, textureCoordinates: OpenGlArrayDrawBuffer?) {
-        if (vertices != null) {
-            setArrayBuffer(vertices.buffer!!)
+        val verticesBuffer = vertices?.buffer
+        if (verticesBuffer != null) {
+            setArrayBuffer(verticesBuffer)
             OpenGL.glVertexPointer(vertices.size.toInt(), vertices.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + vertices.offset)
             OpenGL.glEnableClientState(GL_VERTEX_ARRAY)
         } else {
             OpenGL.glDisableClientState(GL_VERTEX_ARRAY)
         }
 
-        if (normals != null) {
-            setArrayBuffer(normals.buffer!!)
+        val normalsBuffer = normals?.buffer
+        if (normalsBuffer != null) {
+            setArrayBuffer(normalsBuffer)
             OpenGL.glNormalPointer(normals.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + normals.offset)
             OpenGL.glEnableClientState(GL_NORMAL_ARRAY)
         } else {
             OpenGL.glDisableClientState(GL_NORMAL_ARRAY)
         }
 
-        if (colors != null) {
-            setArrayBuffer(colors.buffer!!)
+        val colorsBuffer = colors?.buffer
+        if (colorsBuffer != null) {
+            setArrayBuffer(colorsBuffer)
             OpenGL.glColorPointer(colors.size.toInt(), colors.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + colors.offset)
             OpenGL.glEnableClientState(GL_COLOR_ARRAY)
         } else {
             OpenGL.glDisableClientState(GL_COLOR_ARRAY)
         }
 
-        if (textureCoordinates != null) {
-            setArrayBuffer(textureCoordinates.buffer!!)
+        val textureCoordinatesBuffer = textureCoordinates?.buffer
+        if (textureCoordinatesBuffer != null) {
+            setArrayBuffer(textureCoordinatesBuffer)
             OpenGL.glTexCoordPointer(textureCoordinates.size.toInt(), textureCoordinates.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + textureCoordinates.offset)
             OpenGL.glEnableClientState(GL_TEXTURE_COORD_ARRAY)
         } else {
