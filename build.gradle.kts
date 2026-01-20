@@ -18,26 +18,14 @@ application {
 }
 
 java {
-	toolchain.languageVersion = JavaLanguageVersion.of(17)
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 kotlin {
 	compilerOptions {
-		//jvmTarget.set(JvmTarget.JVM_1_8)
-        jvmTarget.set(JvmTarget.JVM_17)
-	}
-}
-
-sourceSets {
-	main {
-		java {
-			setSrcDirs(listOf("src/main/java", "src/main/kotlin"))
-		}
-		kotlin {
-			setSrcDirs(listOf("src/main/java", "src/main/kotlin"))
-		}
+		jvmTarget.set(JvmTarget.JVM_17)
 	}
 }
 
