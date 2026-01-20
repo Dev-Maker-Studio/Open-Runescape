@@ -5540,7 +5540,7 @@ object CS2Interpreter {
         if (i_3 == -1) {
             throw RuntimeException("")
         } else {
-            executor.stringStack[++executor.stringStackPtr - 1] = string_2 + i_3
+            executor.stringStack[++executor.stringStackPtr - 1] = string_2 + i_3.toChar()
         }
     }
 
@@ -6991,7 +6991,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6373(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Character.toUpperCase(i_2)
+        executor.intStack[++executor.intStackPtr - 1] = Character.toUpperCase(i_2.toChar()).code
     }
 
     @JvmStatic
@@ -7791,7 +7791,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1801(executor: CS2Executor) {
-        method11160(method8697()!!, executor)
+        method11160(method8697(), executor)
     }
 
     @JvmStatic
@@ -8774,7 +8774,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method3951(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Character.toLowerCase(i_2)
+        executor.intStack[++executor.intStackPtr - 1] = Character.toLowerCase(i_2.toChar()).code
     }
 
     @JvmStatic
@@ -10342,7 +10342,7 @@ object CS2Interpreter {
     }
 
     @JvmStatic
-    fun method11160(class282Sub50Sub70: MiniMenuEntry, cs2executor1: CS2Executor) {
+    fun method11160(class282Sub50Sub70: MiniMenuEntry?, cs2executor1: CS2Executor) {
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = MiniMenu.getClickType(class282Sub50Sub70)
         cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.method13768(class282Sub50Sub70)
         cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.method7303(class282Sub50Sub70)
