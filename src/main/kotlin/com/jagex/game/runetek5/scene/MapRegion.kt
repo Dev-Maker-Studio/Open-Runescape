@@ -942,13 +942,13 @@ class MapRegion(var asyncMaploading: Boolean) {
 
     fun getArchiveName(floorData: Boolean, underwater: Boolean, regionX: Int, regionY: Int): String {
         var mapName = ""
-        if (floorData) {
-            mapName = mapName + "m" + regionX + '_' + regionY
+        mapName = if (floorData) {
+            mapName + "m" + regionX + '_' + regionY
         } else {
-            mapName = mapName + "l" + regionX + '_' + regionY
+            mapName + "l" + regionX + '_' + regionY
         }
         if (underwater) {
-            mapName = 'u'.toString() + mapName
+            mapName = "u$mapName"
         }
         return mapName
     }

@@ -90,6 +90,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
      */
     @JvmField var alphaTestEnabled: Boolean = false
 
+    /** Controls whether textures are applied during rendering. When false, models render untextured. */
+    @JvmField var texturesEnabled: Boolean = true
+
     @JvmField var colormaskActive: Boolean = false
     @JvmField var fogColor: Int = -1
     @JvmField var sunColorRgb: Int = -1
@@ -1669,17 +1672,19 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     fun renderTexture(materialId: Int, hasLight: Boolean, has0x8: Boolean) {
-        if (this.lastMaterialId != materialId || this.renderStillWater != this.stillWaterToggled) {
+        // When textures are disabled, treat all materials as untextured
+        val effectiveMaterialId = if (texturesEnabled) materialId else -1
+        if (this.lastMaterialId != effectiveMaterialId || this.renderStillWater != this.stillWaterToggled) {
             var texture: OpenGl2DTexture? = null
             var combineMode = 0
             var param1 = 0
             var param2 = 0
             var effectId = if (this.stillWaterToggled) 3 else 0
-            if (materialId < 0) {
+            if (effectiveMaterialId < 0) {
                 renderStationaryTexture()
             } else {
-                texture = this.textureCache!!.get(materialId)
-                val material = materialProvider!!.getMaterial(materialId)
+                texture = this.textureCache!!.get(effectiveMaterialId)
+                val material = materialProvider!!.getMaterial(effectiveMaterialId)
                 if (material.textureSpeedU.toInt() == 0 && material.textureSpeedV.toInt() == 0) {
                     renderStationaryTexture()
                 } else {
@@ -1698,7 +1703,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
                 loadTextureCombineMode(combineMode)
             }
             this.renderStillWater = this.stillWaterToggled
-            this.lastMaterialId = materialId
+            this.lastMaterialId = effectiveMaterialId
         }
         this.functionMask = this.functionMask and -8
     }

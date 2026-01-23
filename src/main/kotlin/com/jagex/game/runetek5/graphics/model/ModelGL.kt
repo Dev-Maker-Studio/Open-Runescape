@@ -1810,6 +1810,7 @@ class ModelGL : Model {
                         val f_24 = (i_23 ushr 24) * this.toolkit.sunColorRed
                         val f_25 = ((i_23 shr 16) and 0xff) * this.toolkit.sunColorGreen
                         val f_26 = ((i_23 shr 8) and 0xff) * this.toolkit.sunColorBlue
+
                         var s_27 = facesALocal[i_22]
                         var s_28 = bytes_37[s_27.toInt()].toInt()
                         var f_29: Float
@@ -2334,7 +2335,7 @@ class ModelGL : Model {
             matrix445.multiplyBy(this.toolkit.aClass3848348)
             method13535(matrix445)
             if ((rasterizerFunctionMask and 0x2) != 0) {
-                OpenGL.glPolygonMode(1028, 6914)
+                OpenGL.glPolygonMode(1032, 6914)  // Reset GL_FRONT_AND_BACK to GL_FILL
             }
         }
     }
