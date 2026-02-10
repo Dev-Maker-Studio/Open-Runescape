@@ -41,10 +41,10 @@ open class LoadingBar(
             aNativeSprite9160!!.draw(x, y + (anchoredElement.height - leftHeight) / 2)
             aNativeSprite9163!!.draw(anchoredElement.width + x - rightWidth, y + (anchoredElement.height - rightHeight) / 2)
             Renderers.activeToolkit!!.setClipping(x, y, anchoredElement.width + x, y + aNativeSprite9164!!.getSpriteHeight())
-            aNativeSprite9164!!.method2756(width + x, y, anchoredElement.width - width - rightWidth, anchoredElement.height)
+            aNativeSprite9164!!.drawTiled(width + x, y, anchoredElement.width - width - rightWidth, anchoredElement.height)
             val height = aNativeSprite9165!!.getSpriteHeight()
             Renderers.activeToolkit!!.setClipping(x, y + anchoredElement.height - height, anchoredElement.width + x, y + anchoredElement.height)
-            aNativeSprite9165!!.method2756(width + x, y + anchoredElement.height - height, anchoredElement.width - width - rightWidth, anchoredElement.height)
+            aNativeSprite9165!!.drawTiled(width + x, y + anchoredElement.height - height, anchoredElement.width - width - rightWidth, anchoredElement.height)
             Renderers.activeToolkit!!.setClipping(clipping[0], clipping[1], clipping[2], clipping[3])
         }
     }
@@ -62,12 +62,12 @@ open class LoadingBar(
         Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, clipLeft + loadedPartWidth, clipBottom)
         method14498(clipLeft, clipTop, width, height)
         Renderers.activeToolkit!!.setClipping(clipLeft + loadedPartWidth, clipTop, clipRight, clipBottom)
-        aNativeSprite9161!!.method2756(clipLeft, clipTop, width, height)
+        aNativeSprite9161!!.drawTiled(clipLeft, clipTop, width, height)
         Renderers.activeToolkit!!.setClipping(clipping[0], clipping[1], clipping[2], clipping[3])
     }
 
     open fun method14498(x: Int, y: Int, width: Int, height: Int) {
-        aNativeSprite9162!!.method2756(x, y, width, height)
+        aNativeSprite9162!!.drawTiled(x, y, width, height)
     }
 
     override fun isCached(): Boolean {

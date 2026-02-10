@@ -147,33 +147,83 @@
 | method14072 | createEmptyTextureSampler | Creates empty sampler (delegates to rectangle) |
 | method13905 | getTexelOffset | Pixel alignment offset (0.0 in GL, 0.5 in D3D) |
 
-### Parent Class Methods (AbstractToolkit)
+### Parent Class Methods (AbstractToolkit) -- ALL RENAMED
 | Old | New | Behavior |
 |-----|-----|----------|
-| method8449 | getScratchMatrix | Returns temp Matrix44 for building projections |
-| method8404 | supportsHardwareRendering | True for GL toolkits, false for SafeMode |
-| method8525 | beginBloomCapture | Start bloom capture (width, height) |
-| method8474 | endBloomCapture | End bloom capture |
-| method8669 | drawTexturedSurfaceLine | Draw textured line on ComponentSurface |
+| method8449 | getScratchMatrix | Returns reusable Matrix44 for callers to build projections |
+| method8404 | hasHardwareRendering | True for GL toolkits, false for SafeMode |
+| method8525 | beginBloomCapture | Prepare bloom FBO at given screen size |
+| method8474 | compositeBloomEffects | Finalize/draw bloom effect |
+| method8669 | drawSurfaceLine | Draw colored line clipped to ComponentSurface |
 
-## External Constant Renames
+### SafeModeToolkit-specific Methods -- ALL RENAMED
+| Old | New |
+|-----|-----|
+| method14366 | drawDashedHorizontalLine |
+| method14399 | drawDashedVerticalLine |
+| method14373 | drawParticleShape |
+| method14374 | updateFrustumPlanes |
+| method14493 | createImageProducer |
 
-| Old | New | File |
-|-----|-----|------|
-| MatrixMode.aClass33380 | MatrixMode.DEFAULT | MatrixMode.kt |
-| VertexDeclarationAction.aClass69695 | POSITION | VertexDeclarationAction.kt |
-| VertexDeclarationAction.aClass69690 | COLOR | VertexDeclarationAction.kt |
-| VertexDeclarationAction.aClass69692 | TEXCOORD | VertexDeclarationAction.kt |
+### Remaining AbstractNativeToolkit Fields -- ALL RENAMED
+| Old | New |
+|-----|-----|
+| anInt8709 | multiSampleCount (dead field - stored but never read) |
+| aBool8760 | forceLightsDisabled (const false, negated in toggleLights) |
+| aClass3848715 | unusedMatrix (dead field - declared, never used) |
+| aClass3848712 (companion) | IDENTITY_MATRIX (default Matrix44 returned as fallback) |
+| shadowProjectionMatrix | scratchMatrix (corrected: was wrong name, only used via getScratchMatrix()) |
+| aFloatArrayArray8989 (SafeMode) | frustumPlanes (6x4 float arrays for frustum plane equations) |
 
-## Remaining Obfuscated in VertexDeclarationAction.kt
+## External Constant Renames -- ALL COMPLETE
 
-| Field | Slot | Size | Format | Hypothesis |
-|-------|------|------|--------|-----------|
-| aClass69691 | 3 | 1 float | F32 | Point size? Used only in NativeBloomRenderer |
-| aClass69693 | 5 | 3 float | F32 | Tangent/secondary color? |
-| aClass69694 | 6 | 4 float | F32 | Bone weights? |
-| aClass69696 | 7 | 4 float | F32 | Bone indices? |
-| aClass69700 | 8 | 4 float | F32 | Unknown |
-| aClass69699 | 9 | 4 float | F32 | Unknown |
-| aClass69688 | 10 | 3 float | F32 | Unknown |
-| aClass69697 | 11 | 3 float | F32 | Unknown |
+### MatrixMode.kt
+| Old | New |
+|-----|-----|
+| aClass33380 | ORTHO (default 2D/UI mode) |
+
+### VertexDeclarationAction.kt -- ALL RENAMED
+| Old | Slot | Components | GL Function | New |
+|-----|------|-----------|------------|-----|
+| aClass69695 | 0 | 3 F32 | glVertexPointer | POSITION |
+| NORMAL_POINTER_ACTION | 1 | 3 F32 | glNormalPointer | (already named) |
+| aClass69690 | 2 | 4 UB | glColorPointer | COLOR |
+| aClass69691 | 3 | 1 F32 | glTexCoordPointer(1) | TEXCOORD_1F |
+| aClass69692 | 4 | 2 F32 | glTexCoordPointer(2) | TEXCOORD |
+| aClass69693 | 5 | 3 F32 | glTexCoordPointer(3) | TEXCOORD_3F |
+| aClass69694 | 6 | 4 F32 | glTexCoordPointer(4) | TEXCOORD_4F |
+| aClass69696 | 7 | 4 F32 | (shader only) | BONE_INDICES |
+| aClass69700 | 8 | 4 F32 | (not handled) | GENERIC_4F |
+| aClass69699 | 9 | 4 F32 | (shader only) | BONE_WEIGHTS |
+| aClass69688 | 10 | 3 F32 | (shader only) | TANGENT |
+| aClass69697 | 11 | 3 F32 | (shader only) | BINORMAL |
+| anInt705 | - | - | - | componentCount |
+| anInt702 | - | - | - | BITS_PER_SLOT |
+
+### GLFormat.kt -- ALL RENAMED
+| Old | formatType | GL Enum | New |
+|-----|-----------|---------|-----|
+| aClass1501950 | 5 | GL_RGB | RGB |
+| aClass1501948 | 0 | GL_LUMINANCE | LUMINANCE |
+| aClass1501952 | 4 | GL_LUMINANCE_ALPHA | LUMINANCE_ALPHA |
+| aClass1501953 | 8 | GL_DEPTH_COMPONENT | DEPTH |
+| aClass1501956 | 7 | GL_COMPRESSED_DXT1 | COMPRESSED_DXT1 |
+| aClass1501957 | 9 | GL_COMPRESSED_DXT5 | COMPRESSED_DXT5 |
+| NOTE: existing "RGBA" (fmtType=1) is actually ALPHA; "HDR" (fmtType=6) is actually RGBA | | | (previous misrename, not fixed) |
+
+### GLActionFormat.kt -- ALL RENAMED
+| Old | dataTypeId | GL Type | New |
+|-----|-----------|---------|-----|
+| aClass76753 | 6 | GL_BYTE | BYTE |
+| aClass76756 | 0 | GL_SHORT | SHORT |
+| aClass76750 | 7 | GL_INT | INT |
+| aClass76754 | 2 | GL_UNSIGNED_INT | UNSIGNED_INT |
+| anInt757 | - | - | dataTypeId |
+
+### TextureStageState.kt -- ALL RENAMED
+| Old | state | GL Enum | New |
+|-----|-------|---------|-----|
+| aClass67680 | 2 | GL_TEXTURE | TEXTURE |
+| aClass67678 | 1 | GL_PRIMARY_COLOR | PRIMARY_COLOR |
+| aClass67679 | 3 | GL_PREVIOUS | PREVIOUS |
+| aClass67677 | 0 | GL_CONSTANT | CONSTANT |

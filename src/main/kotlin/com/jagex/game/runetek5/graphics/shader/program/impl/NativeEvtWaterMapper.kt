@@ -12,11 +12,11 @@ import com.jagex.game.runetek5.toolkit.companion.PrimitiveDrawMode
 
 class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: NativeWaterTexture) : NativeWaterShader(class505Sub21) {
 
-    @JvmField var anInt10094 = 0
+    @JvmField var startIndex = 0
     @JvmField var effectParam1 = 0
-    @JvmField var anInt10110 = 0
-    @JvmField var anInt10111 = 0
-    @JvmField var anInt10112 = 0
+    @JvmField var startVertex = 0
+    @JvmField var vertexCount = 0
+    @JvmField var primitiveCount = 0
     @JvmField val waterViewingPlaneMatrix = Matrix44()
     @JvmField val textureCoordinateMatrix = Matrix44()
     @JvmField val eye = Vector3()
@@ -36,7 +36,7 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
     @JvmField var heightFogColorAttribute: ShaderAttribute? = null
     @JvmField var distanceFogPlaneAttribute: ShaderAttribute? = null
     @JvmField var distanceFogColorAttribute: ShaderAttribute? = null
-    @JvmField var aFloat10114 = 0f
+    @JvmField var textureScale = 0f
     @JvmField val sunDirectionAndExponentVector = Vector4()
     @JvmField val sunColorAndWaveExponentVector = Vector4()
     @JvmField val waveIntensityAndBreakWaterDepthAndOffsetVector = Vector4()
@@ -75,7 +75,7 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
 
     override fun loadTextureMatrix(matrix441: Matrix44) {
         val matrix442 = Matrix44()
-        matrix442.method6525(aFloat10114, aFloat10114, 1.0f, 1.0f)
+        matrix442.method6525(textureScale, textureScale, 1.0f, 1.0f)
         matrix442.calculatePerspective(matrix441, matrix442)
         super.loadTextureMatrix(matrix442)
     }
@@ -88,21 +88,21 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
         toolkit.sunColorIntensity = baseIntensity
     }
 
-    fun method15517() {
-        aFloat10114 = 2.4414062E-4f
+    fun updateWaterParameters() {
+        textureScale = 2.4414062E-4f
         val z = 256
         val w = 0.3f
         val y = 0.4f
         val x = 0.1f
         val waveExponent = 5
-        textureCoordinateMatrix.method6525(aFloat10114, aFloat10114, aFloat10114, aFloat10114)
+        textureCoordinateMatrix.method6525(textureScale, textureScale, textureScale, textureScale)
         sunDirectionAndExponentVector.set(-toolkit.sunPosition[0], -toolkit.sunPosition[1], -toolkit.sunPosition[2], 32.0f)
         sunColorAndWaveExponentVector.set(toolkit.baseLightColorRed, toolkit.baseLightColorGreen, toolkit.baseLightColorBlue, waveExponent.toFloat())
         waveIntensityAndBreakWaterDepthAndOffsetVector.set(x, y, z.toFloat(), w)
     }
 
-    fun method15520() {
-        method15517()
+    fun renderWater() {
+        updateWaterParameters()
         activeShader!!.loadProgram(activeShader!!.createSingleMapping()!!)
         activeShader!!.setActiveMapping()
         activeShader!!.loadTextureSampler(normalSamplerAttribute!!, 0, nativeWaterTexture.normalSampler!!)
@@ -118,6 +118,6 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
         activeShader!!.uniform3f(heightFogColorAttribute!!, heightFogColorVector)
         activeShader!!.insertAttribute(distanceFogPlaneAttribute!!, distanceFogPlaneVector)
         activeShader!!.uniform3f(distanceFogColorAttribute!!, distanceFogColorVector)
-        toolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, anInt10110, anInt10111, anInt10094, anInt10112)
+        toolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, startVertex, vertexCount, startIndex, primitiveCount)
     }
 }

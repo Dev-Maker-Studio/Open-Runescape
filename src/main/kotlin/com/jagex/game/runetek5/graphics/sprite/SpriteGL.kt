@@ -14,13 +14,13 @@ class SpriteGL : NativeSprite {
 
     @JvmField var translateX: Int = 0
     @JvmField var translateY: Int = 0
-    @JvmField var anInt9036: Int = 0
-    @JvmField var anInt9035: Int = 0
+    @JvmField var trimRight: Int = 0
+    @JvmField var trimBottom: Int = 0
     @JvmField var stretched: Boolean = false
-    @JvmField var anInt9031: Int = 0
+    @JvmField var channelMaskIndex: Int = 0
     @JvmField val toolkit: OpenGlToolkit
     @JvmField val texture2d: OpenGl2DTexture_Sub1
-    @JvmField var aClass137Sub1Sub19029: OpenGl2DTexture_Sub1? = null
+    @JvmField var channelMaskTexture: OpenGl2DTexture_Sub1? = null
 
     constructor(class505Sub11: OpenGlToolkit, i_2: Int, i_3: Int, ints_4: IntArray, i_5: Int, i_6: Int) {
         toolkit = class505Sub11
@@ -36,7 +36,7 @@ class SpriteGL : NativeSprite {
         toolkit = class505Sub11
         texture2d = OpenGl2DTexture_Sub1.method15547(
             class505Sub11,
-            if (bool4) GLFormat.HDR else GLFormat.aClass1501950,
+            if (bool4) GLFormat.HDR else GLFormat.RGB,
             GLActionFormat.PIXEL_FORMAT,
             i_2,
             i_3
@@ -46,9 +46,9 @@ class SpriteGL : NativeSprite {
     override fun setSize(translateX: Int, translateY: Int, i_3: Int, i_4: Int) {
         this.translateX = translateX
         this.translateY = translateY
-        anInt9036 = i_3
-        anInt9035 = i_4
-        stretched = this.translateX != 0 || this.translateY != 0 || anInt9036 != 0 || anInt9035 != 0
+        trimRight = i_3
+        trimBottom = i_4
+        stretched = this.translateX != 0 || this.translateY != 0 || trimRight != 0 || trimBottom != 0
     }
 
     override fun getWidth(): Int {
@@ -60,17 +60,17 @@ class SpriteGL : NativeSprite {
     }
 
     override fun getSpriteHeight(): Int {
-        return texture2d.singleLength + translateY + anInt9035
+        return texture2d.singleLength + translateY + trimBottom
     }
 
-    override fun method2750(offsetX: Int, offsetY: Int, width: Int, height: Int, x: Int, y: Int) {
+    override fun captureScreenRegion(offsetX: Int, offsetY: Int, width: Int, height: Int, x: Int, y: Int) {
         if (toolkit.appleOperatingSystem) {
             val pixels = toolkit.copyPixelRectangle(x, y, width, height)
             if (pixels != null) {
                 for (i in pixels.indices) {
                     pixels[i] = pixels[i] or 0xffffff.inv()
                 }
-                method14414(offsetX, offsetY, width, height, pixels, width)
+                updateTextureRegion(offsetX, offsetY, width, height, pixels, width)
             }
         } else {
             texture2d.copyTextureSubImage(offsetX, offsetY, width, height, x, y)
@@ -84,8 +84,8 @@ class SpriteGL : NativeSprite {
         OpenGL.glPixelTransferf(GL_GREEN_BIAS, 0.499f)
         OpenGL.glPixelTransferf(GL_BLUE_SCALE, 0.5f)
         OpenGL.glPixelTransferf(GL_BLUE_BIAS, 0.499f)
-        aClass137Sub1Sub19029 = OpenGl2DTexture_Sub1.method15538(toolkit, 0, 0, texture2d.singleWidth, texture2d.singleLength)
-        anInt9031 = 3
+        channelMaskTexture = OpenGl2DTexture_Sub1.method15538(toolkit, 0, 0, texture2d.singleWidth, texture2d.singleLength)
+        channelMaskIndex = 3
         OpenGL.glPixelTransferf(GL_RED_SCALE, 1.0f)
         OpenGL.glPixelTransferf(GL_RED_BIAS, 0.0f)
         OpenGL.glPixelTransferf(GL_GREEN_SCALE, 1.0f)
@@ -94,11 +94,11 @@ class SpriteGL : NativeSprite {
         OpenGL.glPixelTransferf(GL_BLUE_BIAS, 0.0f)
     }
 
-    fun method14414(i_1: Int, i_2: Int, i_3: Int, i_4: Int, ints_5: IntArray, i_7: Int) {
+    fun updateTextureRegion(i_1: Int, i_2: Int, i_3: Int, i_4: Int, ints_5: IntArray, i_7: Int) {
         texture2d.updateTextureRegion(i_1, i_2, i_3, i_4, ints_5, i_7)
     }
 
-    override fun method2772(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+    override fun drawScaledColored(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
         val endX = x + width
         val endY = y + height
         texture2d.setLinearTextureFilter(false)
@@ -199,7 +199,7 @@ class SpriteGL : NativeSprite {
         }
     }
 
-    fun method14415() {
+    fun resetChannelMaskState() {
         toolkit.activateTexture(1)
         toolkit.setActiveTexture(null)
         toolkit.loadTextureCombineMode(GL_MODULATE, GL_MODULATE)
@@ -216,7 +216,7 @@ class SpriteGL : NativeSprite {
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         var drawX = x + translateX
         var drawY = y + translateY
-        if (aClass137Sub1Sub19029 == null) {
+        if (channelMaskTexture == null) {
             toolkit.setActiveTexture(texture2d)
             toolkit.loadTextureCombineMode(combineMode)
             OpenGL.glBegin(GL_QUADS)
@@ -230,8 +230,8 @@ class SpriteGL : NativeSprite {
             OpenGL.glVertex2i(texture2d.singleWidth + drawX, drawY)
             OpenGL.glEnd()
         } else {
-            method14419(combineMode)
-            aClass137Sub1Sub19029!!.setLinearTextureFilter(false)
+            setupChannelMaskRendering(combineMode)
+            channelMaskTexture!!.setLinearTextureFilter(false)
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
             OpenGL.glTexCoord2f(0.0f, texture2d.t)
@@ -246,11 +246,11 @@ class SpriteGL : NativeSprite {
             OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
             OpenGL.glVertex2i(texture2d.singleWidth + drawX, drawY)
             OpenGL.glEnd()
-            method14415()
+            resetChannelMaskState()
         }
     }
 
-    override fun method2773(i_1: Int, i_2: Int, class4553: ComponentSurface, i_4: Int, i_5: Int) {
+    override fun drawWithSurface(i_1: Int, i_2: Int, class4553: ComponentSurface, i_4: Int, i_5: Int) {
         val class455Sub26 = class4553 as SpriteSurfaceGL
         val class137Sub1Sub17 = class455Sub26.surface
         texture2d.setLinearTextureFilter(false)
@@ -305,7 +305,7 @@ class SpriteGL : NativeSprite {
             val f_12 = i_2 + translateY * f_10
             val f_13 = f_11 + texture2d.singleWidth * f_9
             val f_14 = f_12 + texture2d.singleLength * f_10
-            if (aClass137Sub1Sub19029 == null) {
+            if (channelMaskTexture == null) {
                 toolkit.setActiveTexture(texture2d)
                 toolkit.loadTextureCombineMode(combineMode)
                 OpenGL.glBegin(GL_QUADS)
@@ -319,8 +319,8 @@ class SpriteGL : NativeSprite {
                 OpenGL.glVertex2f(f_13, f_12)
                 OpenGL.glEnd()
             } else {
-                method14419(combineMode)
-                aClass137Sub1Sub19029!!.setLinearTextureFilter(true)
+                setupChannelMaskRendering(combineMode)
+                channelMaskTexture!!.setLinearTextureFilter(true)
                 OpenGL.glBegin(GL_QUADS)
                 OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
                 OpenGL.glTexCoord2f(0.0f, texture2d.t)
@@ -335,9 +335,9 @@ class SpriteGL : NativeSprite {
                 OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
                 OpenGL.glVertex2f(f_13, f_12)
                 OpenGL.glEnd()
-                method14415()
+                resetChannelMaskState()
             }
-        } else if (aClass137Sub1Sub19029 == null) {
+        } else if (channelMaskTexture == null) {
             toolkit.setActiveTexture(texture2d)
             toolkit.loadTextureCombineMode(combineMode)
             OpenGL.glBegin(GL_QUADS)
@@ -351,8 +351,8 @@ class SpriteGL : NativeSprite {
             OpenGL.glVertex2i(i_3 + i_1, i_2)
             OpenGL.glEnd()
         } else {
-            method14419(combineMode)
-            aClass137Sub1Sub19029!!.setLinearTextureFilter(true)
+            setupChannelMaskRendering(combineMode)
+            channelMaskTexture!!.setLinearTextureFilter(true)
             OpenGL.glBegin(GL_QUADS)
             OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, texture2d.t)
             OpenGL.glTexCoord2f(0.0f, texture2d.t)
@@ -367,11 +367,11 @@ class SpriteGL : NativeSprite {
             OpenGL.glTexCoord2f(texture2d.s, texture2d.t)
             OpenGL.glVertex2i(i_3 + i_1, i_2)
             OpenGL.glEnd()
-            method14415()
+            resetChannelMaskState()
         }
     }
 
-    override fun method2764(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, i_8: Int, i_9: Int) {
+    override fun drawAffine(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, i_8: Int, i_9: Int) {
         var x1 = f_1
         var y1 = f_2
         var x2 = f_3
@@ -391,10 +391,10 @@ class SpriteGL : NativeSprite {
             val f_18 = f_16 * translateY
             val f_19 = f_13 * translateX
             val f_20 = f_14 * translateX
-            val f_21 = -f_13 * anInt9036
-            val f_22 = -f_14 * anInt9036
-            val f_23 = -f_15 * anInt9035
-            val f_24 = -f_16 * anInt9035
+            val f_21 = -f_13 * trimRight
+            val f_22 = -f_14 * trimRight
+            val f_23 = -f_15 * trimBottom
+            val f_24 = -f_16 * trimBottom
             x1 = x1 + f_19 + f_17
             y1 = y1 + f_20 + f_18
             x2 = x2 + f_21 + f_17
@@ -424,10 +424,10 @@ class SpriteGL : NativeSprite {
     }
 
     override fun getSpriteWidth(): Int {
-        return texture2d.singleWidth + translateX + anInt9036
+        return texture2d.singleWidth + translateX + trimRight
     }
 
-    override fun method2766(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, class4558: ComponentSurface, i_9: Int, i_10: Int) {
+    override fun drawAffineMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, class4558: ComponentSurface, i_9: Int, i_10: Int) {
         val class137Sub1Sub111 = (class4558 as SpriteSurfaceGL).surface
         var x1 = f_1
         var y1 = f_2
@@ -450,10 +450,10 @@ class SpriteGL : NativeSprite {
             val f_19 = f_17 * translateY
             val f_20 = f_14 * translateX
             val f_21 = f_15 * translateX
-            val f_22 = -f_14 * anInt9036
-            val f_23 = -f_15 * anInt9036
-            val f_24 = -f_16 * anInt9035
-            val f_25 = -f_17 * anInt9035
+            val f_22 = -f_14 * trimRight
+            val f_23 = -f_15 * trimRight
+            val f_24 = -f_16 * trimBottom
+            val f_25 = -f_17 * trimBottom
             x1 = x1 + f_20 + f_18
             y1 = y1 + f_21 + f_19
             x2 = x2 + f_22 + f_18
@@ -499,25 +499,25 @@ class SpriteGL : NativeSprite {
     override fun cacheSizeInto(ints_1: IntArray) {
         ints_1[0] = translateX
         ints_1[1] = translateY
-        ints_1[2] = anInt9036
-        ints_1[3] = anInt9035
+        ints_1[2] = trimRight
+        ints_1[3] = trimBottom
     }
 
     override fun getFramebuffer(): FrameBuffer {
         return texture2d.createFrameBuffer()
     }
 
-    fun method14419(i_1: Int) {
+    fun setupChannelMaskRendering(i_1: Int) {
         toolkit.activateTexture(1)
         toolkit.setActiveTexture(texture2d)
         toolkit.loadTextureCombineMode(toolkit.getCombineModeEffectType(i_1), GL_REPLACE)
         toolkit.setTexture(1, GL_PRIMARY_COLOR, GL_SRC_COLOR)
         toolkit.setTextureTransparency(0, GL_PREVIOUS)
         toolkit.activateTexture(0)
-        toolkit.setActiveTexture(aClass137Sub1Sub19029)
+        toolkit.setActiveTexture(channelMaskTexture)
         toolkit.loadTextureCombineMode(GL_DOT3_RGBA, GL_REPLACE)
         toolkit.setTexture(1, GL_CONSTANT, GL_SRC_COLOR)
-        when (anInt9031) {
+        when (channelMaskIndex) {
             0 -> toolkit.updatePointSizeRange(1.0f, 0.5f, 0.5f, 0.0f)
             1 -> toolkit.updatePointSizeRange(0.5f, 1.0f, 0.5f, 0.0f)
             2 -> toolkit.updatePointSizeRange(0.5f, 0.5f, 1.0f, 0.0f)

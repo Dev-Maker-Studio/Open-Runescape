@@ -13,6 +13,6 @@ class LoadingBarSub1(
     override fun method14498(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         val i_6 = super.aNativeSprite9162!!.getSpriteWidth()
         val i_7 = (anchoredElement as AnimatedLoadingBarElement).anInt10160 * LegacyAssetLoadingScreen.method8740() / 10 % i_6
-        super.aNativeSprite9162!!.method2756(i_7 + (i_1 - i_6), i_2, i_3 + i_6 - i_7, i_4)
+        super.aNativeSprite9162!!.drawTiled(i_7 + (i_1 - i_6), i_2, i_3 + i_6 - i_7, i_4)
     }
 }

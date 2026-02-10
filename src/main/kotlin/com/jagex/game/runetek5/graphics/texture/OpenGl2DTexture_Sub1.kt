@@ -187,7 +187,7 @@ class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
     companion object {
         @JvmStatic
         fun method15537(toolkit: OpenGlToolkit, i_1: Int, i_2: Int, ints_4: IntArray, i_5: Int, i_6: Int): OpenGl2DTexture_Sub1 {
-            if (!toolkit.aBool8498 && (!OpenGlTexture.isPowerOfTwo(i_1) || !OpenGlTexture.isPowerOfTwo(i_2))) {
+            if (!toolkit.framebufferObjectSupported && (!OpenGlTexture.isPowerOfTwo(i_1) || !OpenGlTexture.isPowerOfTwo(i_2))) {
                 if (toolkit.arbRectangleTexturesSupported)
                     return OpenGl2DTexture_Sub1(toolkit, GL_TEXTURE_RECTANGLE, i_1, i_2, ints_4, i_5, i_6)
                 return OpenGl2DTexture_Sub1(
@@ -200,7 +200,7 @@ class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
 
         @JvmStatic
         fun method15538(toolkit: OpenGlToolkit, x: Int, y: Int, width: Int, length: Int): OpenGl2DTexture_Sub1 {
-            if (!toolkit.aBool8498 && (!OpenGlTexture.isPowerOfTwo(width) || !OpenGlTexture.isPowerOfTwo(length))) {
+            if (!toolkit.framebufferObjectSupported && (!OpenGlTexture.isPowerOfTwo(width) || !OpenGlTexture.isPowerOfTwo(length))) {
                 if (toolkit.arbRectangleTexturesSupported) {
                     return OpenGl2DTexture_Sub1(toolkit, GL_TEXTURE_RECTANGLE, x, y, width, length)
                 }
@@ -219,7 +219,7 @@ class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
             bytes_6: ByteArray,
             class1507: GLFormat
         ): OpenGl2DTexture_Sub1 {
-            if (!toolkit.aBool8498 && (!OpenGlTexture.isPowerOfTwo(i_3) || !OpenGlTexture.isPowerOfTwo(i_4))) {
+            if (!toolkit.framebufferObjectSupported && (!OpenGlTexture.isPowerOfTwo(i_3) || !OpenGlTexture.isPowerOfTwo(i_4))) {
                 if (toolkit.arbRectangleTexturesSupported)
                     return OpenGl2DTexture_Sub1(
                         toolkit, GL_TEXTURE_RECTANGLE, class1501, class762, i_3, i_4,
@@ -244,7 +244,7 @@ class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
             i_3: Int,
             i_4: Int
         ): OpenGl2DTexture_Sub1 {
-            if (!toolkit.aBool8498 && (!OpenGlTexture.isPowerOfTwo(i_3) || !OpenGlTexture.isPowerOfTwo(i_4))) {
+            if (!toolkit.framebufferObjectSupported && (!OpenGlTexture.isPowerOfTwo(i_3) || !OpenGlTexture.isPowerOfTwo(i_4))) {
                 if (toolkit.arbRectangleTexturesSupported)
                     return OpenGl2DTexture_Sub1(toolkit, GL_TEXTURE_RECTANGLE, class1501, class762, i_3, i_4)
                 return OpenGl2DTexture_Sub1(

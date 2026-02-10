@@ -434,7 +434,7 @@ class TransparentSpriteSM : SpriteSM {
         }
     }
 
-    override fun method2773(i_1: Int, i_2: Int, class4553: ComponentSurface, i_4: Int, i_5: Int) {
+    override fun drawWithSurface(i_1: Int, i_2: Int, class4553: ComponentSurface, i_4: Int, i_5: Int) {
         var i_29 = i_2
         var i_15 = i_1
         if (toolkit.hasBeenShutdown()) {
@@ -1163,7 +1163,7 @@ class TransparentSpriteSM : SpriteSM {
         }
     }
 
-    override fun method2750(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+    override fun captureScreenRegion(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
         val ints_7 = toolkit.colourBuffer
             ?: throw IllegalStateException("")
         for (i_8 in 0 until i_4) {

@@ -28,7 +28,7 @@ class OpenGlCubeTextureGenerator(
         val display = openglToolkit.integratedGraphicsImageProducer!!
         openglToolkit.getClipping(CLIPPINGS)
         openglToolkit.resetClipping()
-        openglToolkit.method13586()
+        openglToolkit.setOrthoMatrixMode()
         OpenGL.glMatrixMode(GL_PROJECTION)
         OpenGL.glLoadIdentity()
         OpenGL.glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0)

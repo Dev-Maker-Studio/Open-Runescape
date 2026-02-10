@@ -37,14 +37,14 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         aEntityNodeSub1Sub1ArrayArray498 = Array(1600) { arrayOfNulls(64) }
         pointEntities = Array(64) { arrayOfNulls(768) }
         anInt509 = 0
-        aClass70499 = class505Sub21.method13995(arrayOf(
-            VertexDeclarationComponent(arrayOf(VertexDeclarationAction.aClass69695, VertexDeclarationAction.aClass69690, VertexDeclarationAction.aClass69692)),
+        aClass70499 = class505Sub21.createVertexDeclaration(arrayOf(
+            VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.COLOR, VertexDeclarationAction.TEXCOORD)),
             VertexDeclarationComponent(VertexDeclarationAction.NORMAL_POINTER_ACTION)
         ))
         anInterface4500 = class505Sub21.createStream(true)
         anInterface4510 = class505Sub21.createStream(false)
         anInterface4510.create(393168, 12)
-        anInterface32511 = class505Sub21.method13993(false)
+        anInterface32511 = class505Sub21.createIndexBuffer(false)
         anInterface32511.create(49146)
         val bytebuffer2 = class505Sub21.directBuffer
         bytebuffer2.clear()
@@ -132,9 +132,9 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
         var child = particleTree.child
         i_7 = 0
-        nativeToolkit.method13997(anInterface32511)
+        nativeToolkit.bindIndexBuffer(anInterface32511)
         val class10314 = nativeToolkit.abstractParticleShader!!
-        class10314.method1788(AbstractNativeToolkit.WORLD_VIEW_PROJECTION_MATRIX)
+        class10314.setViewProjectionMatrix(AbstractNativeToolkit.WORLD_VIEW_PROJECTION_MATRIX)
         class10314.textureCoordinateMatrix.identity()
         class10314.diffuseColor = -1
         var materialId = -2
@@ -413,7 +413,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         nativeToolkit.setStreamSource(1, anInterface4510)
         nativeToolkit.setVertexDeclaration(aClass70499)
         val particleShader = nativeToolkit.abstractParticleShader!!
-        particleShader.method1787(i_3)
+        particleShader.drawParticles(i_3)
     }
 
     companion object {

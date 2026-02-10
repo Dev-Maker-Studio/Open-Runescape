@@ -19,11 +19,11 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
 
     init {
         hasDepth = activeToolkit.SUPPORTS_TEXTURE3D
-        if (hasDepth && !activeToolkit.method13955(GLFormat.aClass1501952, GLActionFormat.PIXEL_FORMAT)) {
+        if (hasDepth && !activeToolkit.supports3DTextureFormat(GLFormat.LUMINANCE_ALPHA, GLActionFormat.PIXEL_FORMAT)) {
             hasDepth = false
         }
 
-        if (hasDepth || activeToolkit.method13954(GLFormat.aClass1501952, GLActionFormat.PIXEL_FORMAT)) {
+        if (hasDepth || activeToolkit.supportsTextureFormat(GLFormat.LUMINANCE_ALPHA, GLActionFormat.PIXEL_FORMAT)) {
             initializeWaterData()
             if (!hasDepth) {
                 waterTextureSamplers = arrayOfNulls(16)
@@ -31,7 +31,7 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 for (index in 0 until 16) {
                     val data = DataBuffer.readDataBuffer(anObject482, index * 32768)
                     waterTextureSamplers!![index] = activeToolkit.createTextureSampler(
-                        GLFormat.aClass1501952,
+                        GLFormat.LUMINANCE_ALPHA,
                         128,
                         128,
                         true,
@@ -44,7 +44,7 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 for (index in 0 until 16) {
                     val data = DataBuffer.readDataBuffer(anObject477, index * 32768)
                     textureSamplers!![index] = activeToolkit.createTextureSampler(
-                        GLFormat.aClass1501952,
+                        GLFormat.LUMINANCE_ALPHA,
                         128,
                         128,
                         true,
@@ -53,9 +53,9 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 }
             } else {
                 var bytes = DataBuffer.unpackDataBuffer(anObject482, false)
-                waterSampler3d = activeToolkit.method13962(GLFormat.aClass1501952, bytes!!)
+                waterSampler3d = activeToolkit.create3DTexture(GLFormat.LUMINANCE_ALPHA, bytes!!)
                 bytes = DataBuffer.unpackDataBuffer(anObject477, false)
-                billowSampler = activeToolkit.method13962(GLFormat.aClass1501952, bytes!!)
+                billowSampler = activeToolkit.create3DTexture(GLFormat.LUMINANCE_ALPHA, bytes!!)
             }
         }
     }
@@ -101,7 +101,7 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 }
             }
 
-            normalSampler = activeToolkit.method13962(GLFormat.HDR, bytes2)
+            normalSampler = activeToolkit.create3DTexture(GLFormat.HDR, bytes2)
         }
 
         return normalSampler != null

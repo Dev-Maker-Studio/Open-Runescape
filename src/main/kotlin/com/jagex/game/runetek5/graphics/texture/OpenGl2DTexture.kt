@@ -107,7 +107,7 @@ open class OpenGl2DTexture : OpenGlTexture {
         y: Int,
         width: Int,
         length: Int
-    ) : super(toolkit, tt, GLFormat.aClass1501950, GLActionFormat.PIXEL_FORMAT, width * length, false) {
+    ) : super(toolkit, tt, GLFormat.RGB, GLActionFormat.PIXEL_FORMAT, width * length, false) {
         this.width = width
         this.length = length
         activeToolkit.setActiveTexture(this)

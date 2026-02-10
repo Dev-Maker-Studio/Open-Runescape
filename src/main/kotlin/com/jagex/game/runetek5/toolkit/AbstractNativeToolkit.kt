@@ -68,13 +68,13 @@ abstract class AbstractNativeToolkit(
     @JvmField var maxConcurrentTextures: Int = 0
     @JvmField val particleMatrix: Matrix44 = Matrix44()
     @JvmField val projectionMatrix: Matrix44 = Matrix44()
-    @JvmField val aClass3848729: Matrix44 = Matrix44()
+    @JvmField val frustumClipMatrix: Matrix44 = Matrix44()
     @JvmField val sunPosition: FloatArray = floatArrayOf(0.0f, 0.0f, 1.0f, 0.0f)
     @JvmField var baseLightColorRed: Float = 1.0f
     @JvmField var baseLightColorGreen: Float = 1.0f
     @JvmField var baseLightColorBlue: Float = 1.0f
     @JvmField var sunColorIntensity: Float = -1.0f
-    @JvmField var anInt8709: Int = 0
+    @JvmField var multiSampleCount: Int = 0
     @JvmField var theUnsafe: Unsafe? = null
     @JvmField var directBuffer: ByteBuffer
     @JvmField var directBufferAddress: Long = 0
@@ -86,7 +86,7 @@ abstract class AbstractNativeToolkit(
     @JvmField var fogEnd: Float = 0.0f
     @JvmField var SUPPORTS_TEXTURE3D: Boolean = false
     @JvmField var GLARBMultisample: Boolean = false
-    @JvmField val aClass3848683: Matrix44 = Matrix44()
+    @JvmField val perspectiveMatrix: Matrix44 = Matrix44()
     @JvmField var depthRangeNear: Float = 0.0f
     @JvmField var depthRangeFar: Float = 1.0f
     @JvmField var camNear: Float = 50.0f
@@ -95,18 +95,18 @@ abstract class AbstractNativeToolkit(
     @JvmField var cBottom: Int = 0
     @JvmField var cLeft: Int = 0
     @JvmField var cRight: Int = 0
-    @JvmField var anInt8749: Int = 0
-    @JvmField var anInt8776: Int = 0
-    @JvmField var anInt8751: Int = 0
-    @JvmField var anInt8752: Int = 0
-    @JvmField var anInt8823: Int = 0
-    @JvmField var anInt8754: Int = 0
+    @JvmField var glViewportX: Int = 0
+    @JvmField var glViewportY: Int = 0
+    @JvmField var glViewportWidth: Int = 0
+    @JvmField var glViewportHeight: Int = 0
+    @JvmField var viewportOffsetX: Int = 0
+    @JvmField var viewportOffsetY: Int = 0
     @JvmField var depthBufferingEnabled: Boolean = true
-    @JvmField var aBool8756: Boolean = false
+    @JvmField var depthMaskEnabled: Boolean = false
     @JvmField var enableDepthTest: Boolean = false
-    @JvmField var aBool8684: Boolean = false
+    @JvmField var lightingEnabled: Boolean = false
     @JvmField val sunEnabled: Boolean = true
-    @JvmField val aBool8760: Boolean = false
+    @JvmField val forceLightsDisabled: Boolean = false
     @JvmField val lightPosition: FloatArray = floatArrayOf(0.0f, 0.0f, -1.0f, 0.0f)
     @JvmField var lightIntensity: Float = 1.0f
     @JvmField var antiSunColorIntensity: Float = -1.0f
@@ -114,11 +114,11 @@ abstract class AbstractNativeToolkit(
     @JvmField val fogSupported: Boolean = true
     @JvmField var fogColorRgb: Int = -1
     @JvmField var fogDistance: Int = -1
-    @JvmField var anInt8680: Int = 0
+    @JvmField var fogOffset: Int = 0
     @JvmField var blendFuncMode: BlendFuncMode = BlendFuncMode.ALPHA_BLENDING
     @JvmField var enableBlending: Boolean = true
     @JvmField var enableAlphaTest: Boolean = true
-    @JvmField var anInt8844: Int = -1
+    @JvmField var alphaBlendMode: Int = -1
     @JvmField var enableLights: Boolean = false
     @JvmField var boundsCalculated: Boolean = false
     @JvmField var currentSceneLightCount: Int = 0
@@ -132,30 +132,30 @@ abstract class AbstractNativeToolkit(
     @JvmField var lightSources: Array<PointLight?>? = null
     @JvmField val weakReferences: WeakReferenceMappingCache = WeakReferenceMappingCache()
     @JvmField val activeNativeMemory: LinkedList = LinkedList()
-    @JvmField val aClass2948704: Matrix43 = Matrix43()
+    @JvmField val localModelMatrix43: Matrix43 = Matrix43()
     @JvmField val modelMatrix: Matrix44 = Matrix44()
-    @JvmField var aClass2948706: Matrix43 = Matrix43()
-    @JvmField val aClass2948804: Matrix43 = Matrix43()
-    @JvmField val aClass3848814: Matrix44 = Matrix44()
-    @JvmField val aClass2948710: Matrix43 = Matrix43()
+    @JvmField var viewMatrix43: Matrix43 = Matrix43()
+    @JvmField val inverseSunMatrix43: Matrix43 = Matrix43()
+    @JvmField val inverseSunMatrix44: Matrix44 = Matrix44()
+    @JvmField val combinedModelViewMatrix43: Matrix43 = Matrix43()
     @JvmField val modelViewMatrix: Matrix44 = Matrix44()
     @JvmField val unsure: Matrix43 = Matrix43()
-    @JvmField val aClass3848715: Matrix44 = Matrix44()
+    @JvmField val unusedMatrix: Matrix44 = Matrix44()
     @JvmField val pointLightVector: Vector3 = Vector3()
-    @JvmField val aFloatArray8717: FloatArray = FloatArray(4)
+    @JvmField val lightParameterBuffer: FloatArray = FloatArray(4)
     @JvmField var viewPositionCalibrated: Boolean = false
-    @JvmField var matrixMode: MatrixMode = MatrixMode.aClass33380
-    @JvmField var aBool8720: Boolean = false
-    @JvmField val aClass3848774: Matrix44 = Matrix44()
+    @JvmField var matrixMode: MatrixMode = MatrixMode.ORTHO
+    @JvmField var isOrthoProjectionValid: Boolean = false
+    @JvmField val screenOrthoMatrix: Matrix44 = Matrix44()
     @JvmField val worldViewProjectionMatrix: Matrix44 = Matrix44()
-    @JvmField var aBool8723: Boolean = false
-    @JvmField val aClass3848724: Matrix44 = Matrix44()
-    @JvmField val aClass3848725: Matrix44 = Matrix44()
-    @JvmField var aClass3848708: Matrix44
+    @JvmField var isModelViewValid: Boolean = false
+    @JvmField val currentModelMatrix: Matrix44 = Matrix44()
+    @JvmField val orthoProjectionMatrix: Matrix44 = Matrix44()
+    @JvmField var activeProjectionSource: Matrix44
     @JvmField val transformMatrix: Matrix44 = Matrix44()
-    @JvmField val aFloatArrayArray8730: Array<FloatArray> = Array(6) { FloatArray(4) }
-    @JvmField var aFloat8737: Float = 0.0f
-    @JvmField var aFloat8738: Float = 1.0f
+    @JvmField val frustumPlanes: Array<FloatArray> = Array(6) { FloatArray(4) }
+    @JvmField var depthRangeNearOverride: Float = 0.0f
+    @JvmField var depthRangeFarOverride: Float = 1.0f
     @JvmField var viewportX: Int = 0
     @JvmField var viewportY: Int = 0
     @JvmField var viewportWidth: Int = 0
@@ -168,59 +168,59 @@ abstract class AbstractNativeToolkit(
     @JvmField val materialSize: Int = 128
     @JvmField val waterShadersByEffect: Array<AbstractWaterShader?> = arrayOfNulls(16)
     @JvmField val bloomManager: Array<AbstractBloomShader?> = arrayOfNulls(2)
-    @JvmField val aBool8805: Boolean = false
+    @JvmField val hasWaterShaderEffect: Boolean = false
     @JvmField var blendFuncType: Int = 1
-    @JvmField var aBool8681: Boolean = false
+    @JvmField var isShutdown: Boolean = false
     @JvmField val copyByTypeSrc: Array<Model?> = arrayOfNulls(7)
     @JvmField val copyByTypeDst: Array<Model?> = arrayOfNulls(7)
-    @JvmField val aClass3848841: Matrix44 = Matrix44()
-    @JvmField val aClass2948842: Matrix43 = Matrix43()
+    @JvmField val scratchMatrix: Matrix44 = Matrix44()
+    @JvmField val renderingMatrix: Matrix43 = Matrix43()
     @JvmField var shaderResource: Js5ResourceProvider? = null
     @JvmField var endiannessType: Int = 0
     @JvmField var materialCache: NativeMaterialCache? = null
     @JvmField var hslToRgb: IntArray? = null
-    @JvmField var aClass498694: NativeWaterTexture? = null
+    @JvmField var waterTexture: NativeWaterTexture? = null
     @JvmField var environmentShader: AbstractEnvironmentShader? = null
     @JvmField var spriteShader: AbstractSpriteShader? = null
     @JvmField var abstractParticleShader: AbstractParticleShader? = null
     @JvmField var nativeEvtWaterMapper: NativeEvtWaterMapper? = null
     @JvmField var nativeWaterfall: NativeWaterfall? = null
-    @JvmField var aClass328714: NativeBloomRenderer? = null
-    @JvmField var aClass418753: AbstractWaterShader? = null
+    @JvmField var bloomRenderer: NativeBloomRenderer? = null
+    @JvmField var activeWaterShader: AbstractWaterShader? = null
     @JvmField var particleRenderer: NativeParticleRenderer? = null
     @JvmField var nativeFunctionMask: Int = 0
     @JvmField var shadowOffsetX: Int = 0
     @JvmField var shadowOffsetZ: Int = 0
     @JvmField var nativeHeap: NativeHeap? = null
-    @JvmField var aClass152Sub28731: AbstractNativeCubeTextureGenerator? = null
+    @JvmField var sunCubeTextureGenerator: AbstractNativeCubeTextureGenerator? = null
     @JvmField var viewportCenterX: Float = 0.0f
     @JvmField var viewportCenterY: Float = 0.0f
-    @JvmField var aFloat8797: Float = 0.0f
-    @JvmField var aFloat8741: Float = 0.0f
-    @JvmField var anInterface48746: NativeStream? = null
-    @JvmField var aClass708786: VertexDeclaration? = null
+    @JvmField var viewportOriginX: Float = 0.0f
+    @JvmField var viewportOriginY: Float = 0.0f
+    @JvmField var quadVertexStream: NativeStream? = null
+    @JvmField var quadVertexDeclaration: VertexDeclaration? = null
     @JvmField var renderedWaterColor: Int = 0
     @JvmField var renderedWaterTile: WaterTile? = null
     @JvmField var missingWaterColor: Boolean = false
     @JvmField var vertexStream: NativeStream? = null
     @JvmField var vertexDeclaration: VertexDeclaration? = null
     @JvmField var textureSamplers: Array<TextureSampler?>? = null
-    @JvmField var anInterface68795: NativeTextureSampler? = null
-    @JvmField var aClass708832: VertexDeclaration? = null
-    @JvmField var aClass708836: VertexDeclaration? = null
-    @JvmField var aClass708721: VertexDeclaration? = null
-    @JvmField var anInterface328834: NativeToolkitBuffer? = null
-    @JvmField var aNativeSpriteSub38790: NativeSprite? = null
-    @JvmField var aNativeSpriteSub38791: NativeSprite? = null
-    @JvmField var anInterface48693: NativeStream? = null
+    @JvmField var blackTextureSampler: NativeTextureSampler? = null
+    @JvmField var positionTexCoordDeclaration: VertexDeclaration? = null
+    @JvmField var positionColorTexCoordNormalDeclaration: VertexDeclaration? = null
+    @JvmField var positionColorTexCoordDeclaration: VertexDeclaration? = null
+    @JvmField var indexBuffer: NativeToolkitBuffer? = null
+    @JvmField var whitePixelSprite: NativeSprite? = null
+    @JvmField var blackPixelSprite: NativeSprite? = null
+    @JvmField var circleVertexStream: NativeStream? = null
 
     init {
-        aClass3848708 = aClass3848725
+        activeProjectionSource = orthoProjectionMatrix
         Stream()
 
         try {
             shaderResource = shaders
-            anInt8709 = i_3
+            multiSampleCount = i_3
             endiannessType = i_4
             ColorUtil.initializeTables(false, true)
             materialCache = if (materialProvider != null) {
@@ -300,16 +300,16 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun blendDrawBuffer()
 
-    fun method13895() {
-        aClass498694 = NativeWaterTexture(this)
+    fun initializeShaders() {
+        waterTexture = NativeWaterTexture(this)
         enableLights = false
 
         try {
             environmentShader = NativeEnvironmentShaderHd(this)
             spriteShader = NativeSpriteShaderHd(this)
             abstractParticleShader = NativeParticleShaderHd(this)
-            nativeEvtWaterMapper = NativeEvtWaterMapper(this, aClass498694!!)
-            nativeWaterfall = NativeWaterfall(this, aClass498694!!)
+            nativeEvtWaterMapper = NativeEvtWaterMapper(this, waterTexture!!)
+            nativeWaterfall = NativeWaterfall(this, waterTexture!!)
         } catch (exception: Exception) {
             exception.printStackTrace()
             environmentShader = NativeEnvironmentShaderLd(this)
@@ -330,18 +330,18 @@ abstract class AbstractNativeToolkit(
             displayWidth = 0
         }
 
-        aClass328714 = NativeBloomRenderer(this, displayWidth, displayHeight)
+        bloomRenderer = NativeBloomRenderer(this, displayWidth, displayHeight)
         if (!enableLights) {
             bloomManager[1] = NativeFilterBloomShader(this)
-            aClass328714!!.initialize(bloomManager[1]!!)
+            bloomRenderer!!.initialize(bloomManager[1]!!)
         }
 
-        if (aClass418753 != null) {
-            aClass418753!!.method885()
-            aClass418753 = null
+        if (activeWaterShader != null) {
+            activeWaterShader!!.deactivate()
+            activeWaterShader = null
         }
 
-        method13899()
+        initializeRenderers()
     }
 
     fun getShaderByEffect(effect: Int): AbstractWaterShader? {
@@ -350,41 +350,41 @@ abstract class AbstractNativeToolkit(
 
     fun setupGraphics() {
         colorMask(7)
-        method13976()
+        resetAllRenderState()
     }
 
     fun getRenderedWaterTile(): WaterTile? {
         return renderedWaterTile
     }
 
-    fun method13899() {
-        aClass328714!!.getFormat()
+    fun initializeRenderers() {
+        bloomRenderer!!.getFormat()
 
         for (i_1 in bloomManager.indices) {
-            if (bloomManager[i_1] != null && bloomManager[i_1]!!.method1107()) {
-                bloomManager[i_1]!!.method1099()
+            if (bloomManager[i_1] != null && bloomManager[i_1]!!.isLinked()) {
+                bloomManager[i_1]!!.reloadShader()
             }
         }
 
         particleRenderer = NativeParticleRenderer(this)
-        method13944()
-        method14009()
-        method14177()
+        initializeQuadStream()
+        initializeLineStream()
+        initializeCircleStream()
         particleRenderer!!.method1089()
     }
 
     fun deallocate() {
-        aClass328714!!.destroy()
-        anInterface48746!!.deallocate()
+        bloomRenderer!!.destroy()
+        quadVertexStream!!.deallocate()
         vertexStream!!.deallocate()
-        anInterface48693!!.deallocate()
+        circleVertexStream!!.deallocate()
 
         for (i_1 in 0 until 7) {
             // Model deallocation removed (deallocate not in base Model class)
         }
 
         particleRenderer!!.deallocate()
-        anInterface328834!!.deallocate()
+        indexBuffer!!.deallocate()
     }
 
     override fun createNativeSprite(i_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean): NativeSprite {
@@ -396,7 +396,7 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun shutdown() {
-        if (!aBool8681) {
+        if (!isShutdown) {
             deallocate()
             materialCache!!.reset()
 
@@ -410,21 +410,21 @@ abstract class AbstractNativeToolkit(
 
             for (index in waterShadersByEffect.indices) {
                 if (waterShadersByEffect[index] != null) {
-                    waterShadersByEffect[index]!!.method878()
+                    waterShadersByEffect[index]!!.destroy()
                     waterShadersByEffect[index] = null
                 }
             }
 
             for (index in bloomManager.indices) {
                 if (bloomManager[index] != null) {
-                    bloomManager[index]!!.method1105()
+                    bloomManager[index]!!.onShutdown()
                     bloomManager[index] = null
                 }
             }
 
             resetWeakReferences()
             animateTextures(0)
-            aBool8681 = true
+            isShutdown = true
         }
     }
 
@@ -440,7 +440,7 @@ abstract class AbstractNativeToolkit(
         return bloomManager[1] != null
     }
 
-    fun method13903() {
+    fun updateSceneLights() {
         if (areLightsEnabled()) {
             configureLights()
         }
@@ -509,7 +509,7 @@ abstract class AbstractNativeToolkit(
         return GLARBMultisample
     }
 
-    abstract fun method13905(): Float
+    abstract fun getPixelOffset(): Float
 
     override fun animateTextures(cycle: Int) {
         materialCache?.processCycle()
@@ -521,16 +521,16 @@ abstract class AbstractNativeToolkit(
     }
 
     fun autoResize() {
-        method13936()
-        method13938()
-        method13934()
+        invalidateOrthoProjection()
+        invalidateModelView()
+        setOrthoMatrixMode()
         calculateViewportCenter()
         resetClipping()
     }
 
     override fun bloomSupported(): Boolean {
-        if (bloomManager[1] != null && !bloomManager[1]!!.method1107()) {
-            val reset = aClass328714!!.initialize(bloomManager[1]!!)
+        if (bloomManager[1] != null && !bloomManager[1]!!.isLinked()) {
+            val reset = bloomRenderer!!.initialize(bloomManager[1]!!)
             if (reset) {
                 materialCache!!.reset()
             }
@@ -540,14 +540,14 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun resetBloom() {
-        if (bloomManager[1] != null && bloomManager[1]!!.method1107()) {
-            aClass328714!!.method822(bloomManager[1]!!)
+        if (bloomManager[1] != null && bloomManager[1]!!.isLinked()) {
+            bloomRenderer!!.method822(bloomManager[1]!!)
             materialCache!!.reset()
         }
     }
 
     override fun bloomEnabled(): Boolean {
-        return bloomManager[1] != null && bloomManager[1]!!.method1107()
+        return bloomManager[1] != null && bloomManager[1]!!.isLinked()
     }
 
     override fun setBloomFilter(r: Float, g: Float, b: Float) {
@@ -557,7 +557,7 @@ abstract class AbstractNativeToolkit(
         NativeFilterBloomShader.baseBlur = 1.0f
     }
 
-    fun method13908(f_1: Float, f_2: Float, f_4: Float, f_5: Float): Boolean {
+    fun uploadLineVertices(f_1: Float, f_2: Float, f_4: Float, f_5: Float): Boolean {
         directBuffer.clear()
         directBuffer.putFloat(f_1)
         directBuffer.putFloat(f_2)
@@ -586,11 +586,11 @@ abstract class AbstractNativeToolkit(
         return nativeHeap!!.createBuffer(initialCapacity, allocateDirect)
     }
 
-    fun method13911(i_1: Int): NativeToolkitBuffer {
-        if (anInterface328834!!.getCapacity() < i_1 * 2) {
-            anInterface328834!!.create(i_1)
+    fun getOrResizeIndexBuffer(i_1: Int): NativeToolkitBuffer {
+        if (indexBuffer!!.getCapacity() < i_1 * 2) {
+            indexBuffer!!.create(i_1)
         }
-        return anInterface328834!!
+        return indexBuffer!!
     }
 
     override fun getOffheap(): Int {
@@ -653,11 +653,11 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun getRenderingMatrix(): Matrix43 {
-        return aClass2948842
+        return renderingMatrix
     }
 
     override fun setSunCubeTexture(class1521: AbstractCubeTextureGenerator?) {
-        aClass152Sub28731 = class1521 as? AbstractNativeCubeTextureGenerator
+        sunCubeTextureGenerator = class1521 as? AbstractNativeCubeTextureGenerator
     }
 
     override fun calculateViewportCenter() {
@@ -681,21 +681,21 @@ abstract class AbstractNativeToolkit(
 
     fun calculateViewport() {
         if (matrixMode == MatrixMode.MODEL_VIEW) {
-            anInt8749 = viewportX
-            anInt8776 = viewportY
-            anInt8751 = viewportWidth
-            anInt8752 = viewportHeight
-            depthRangeNear = aFloat8737
-            depthRangeFar = aFloat8738
+            glViewportX = viewportX
+            glViewportY = viewportY
+            glViewportWidth = viewportWidth
+            glViewportHeight = viewportHeight
+            depthRangeNear = depthRangeNearOverride
+            depthRangeFar = depthRangeFarOverride
         } else {
-            anInt8749 = 0
-            anInt8776 = 0
+            glViewportX = 0
+            glViewportY = 0
             if (display != null) {
-                anInt8751 = display!!.getWidth()
-                anInt8752 = display!!.getHeight()
+                glViewportWidth = display!!.getWidth()
+                glViewportHeight = display!!.getHeight()
             } else {
-                anInt8751 = 0
-                anInt8752 = 0
+                glViewportWidth = 0
+                glViewportHeight = 0
             }
             depthRangeNear = 0.0f
             depthRangeFar = 1.0f
@@ -704,8 +704,8 @@ abstract class AbstractNativeToolkit(
         setViewport()
         viewportCenterX = viewportWidth / 2.0f
         viewportCenterY = viewportHeight / 2.0f
-        aFloat8797 = viewportX + viewportCenterX
-        aFloat8741 = viewportY + viewportCenterY
+        viewportOriginX = viewportX + viewportCenterX
+        viewportOriginY = viewportY + viewportCenterY
     }
 
     override fun getClipping(clipping: IntArray) {
@@ -764,9 +764,9 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun method13919() {
-        anInt8823 = 0
-        anInt8754 = 0
+    fun resetViewportOffsets() {
+        viewportOffsetX = 0
+        viewportOffsetY = 0
         setViewport()
         setScissorRect()
     }
@@ -779,21 +779,21 @@ abstract class AbstractNativeToolkit(
 
     abstract fun drawPrimitive(var1: PrimitiveDrawMode, var2: Int, var3: Int)
 
-    fun method13926() {
+    fun updateFrustumMatrix() {
         transformMatrix.copyFrom(particleMatrix)
-        transformMatrix.multiplyBy(aClass3848724)
-        transformMatrix.method6539(aFloatArrayArray8730[0])
-        transformMatrix.method6540(aFloatArrayArray8730[1])
-        transformMatrix.method6535(aFloatArrayArray8730[2])
-        transformMatrix.method6536(aFloatArrayArray8730[3])
-        transformMatrix.method6613(aFloatArrayArray8730[4])
-        transformMatrix.method6538(aFloatArrayArray8730[5])
-        aClass3848729.copyFrom(transformMatrix)
-        loadWorldViewProjectionMatrix(aClass3848729)
+        transformMatrix.multiplyBy(currentModelMatrix)
+        transformMatrix.method6539(frustumPlanes[0])
+        transformMatrix.method6540(frustumPlanes[1])
+        transformMatrix.method6535(frustumPlanes[2])
+        transformMatrix.method6536(frustumPlanes[3])
+        transformMatrix.method6613(frustumPlanes[4])
+        transformMatrix.method6538(frustumPlanes[5])
+        frustumClipMatrix.copyFrom(transformMatrix)
+        loadWorldViewProjectionMatrix(frustumClipMatrix)
     }
 
     override fun copyModelMatrix(): Matrix44 {
-        return aClass3848724
+        return currentModelMatrix
     }
 
     fun requestViewPositionUpdate() {
@@ -811,12 +811,12 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun method13931(): Matrix44 {
-        return aClass3848729
+    fun getFrustumClipMatrix(): Matrix44 {
+        return frustumClipMatrix
     }
 
     fun loadWorldViewProjectionMatrix() {
-        if (!aBool8720) {
+        if (!isOrthoProjectionValid) {
             val height: Int
             val width: Int
             if (display != null) {
@@ -827,7 +827,7 @@ abstract class AbstractNativeToolkit(
                 width = 0
             }
 
-            val matrix443 = aClass3848774
+            val matrix443 = screenOrthoMatrix
             if (width != 0 && height != 0) {
                 matrix443.method6530(0.0f, width.toFloat(), 0.0f, height.toFloat(), -1.0f, 1.0f)
             } else {
@@ -836,28 +836,28 @@ abstract class AbstractNativeToolkit(
 
             worldViewProjectionMatrix.copyFrom(matrix443)
             loadWorldViewProjectionMatrix(worldViewProjectionMatrix)
-            aBool8720 = true
+            isOrthoProjectionValid = true
         }
     }
 
     abstract fun loadWorldViewProjectionMatrix(cacheInto: Matrix44)
 
-    fun method13934() {
-        if (matrixMode != MatrixMode.aClass33380) {
+    fun setOrthoMatrixMode() {
+        if (matrixMode != MatrixMode.ORTHO) {
             val lastMode = matrixMode
-            matrixMode = MatrixMode.aClass33380
+            matrixMode = MatrixMode.ORTHO
             if (lastMode == MatrixMode.MODEL_VIEW) {
                 requestViewPositionUpdate()
             }
 
-            aClass3848708 = aClass3848725
+            activeProjectionSource = orthoProjectionMatrix
             calculateViewRange()
             calculateViewport()
             nativeFunctionMask = nativeFunctionMask and -16
         }
     }
 
-    fun method13935() {
+    fun setProjectionMatrixMode() {
         if (matrixMode != MatrixMode.PROJECTION) {
             val lastMode = matrixMode
             matrixMode = MatrixMode.PROJECTION
@@ -866,44 +866,44 @@ abstract class AbstractNativeToolkit(
             }
 
             loadWorldViewProjectionMatrix()
-            aClass3848708 = aClass3848774
+            activeProjectionSource = screenOrthoMatrix
             calculateViewRange()
             calculateViewport()
             nativeFunctionMask = nativeFunctionMask and -9
         }
     }
 
-    fun method13936() {
-        aBool8720 = false
+    fun invalidateOrthoProjection() {
+        isOrthoProjectionValid = false
         if (matrixMode == MatrixMode.PROJECTION) {
             loadWorldViewProjectionMatrix()
             calculateViewRange()
         }
     }
 
-    fun method13937() {
+    fun setModelViewMatrixMode() {
         if (matrixMode != MatrixMode.MODEL_VIEW) {
             matrixMode = MatrixMode.MODEL_VIEW
             requestViewPositionUpdate()
-            method13940()
-            aClass3848708 = aClass3848724
+            markModelViewValid()
+            activeProjectionSource = currentModelMatrix
             calculateViewRange()
             calculateViewport()
             nativeFunctionMask = nativeFunctionMask and -8
         }
     }
 
-    fun method13938() {
-        aBool8723 = false
-        method13940()
+    fun invalidateModelView() {
+        isModelViewValid = false
+        markModelViewValid()
         if (matrixMode == MatrixMode.MODEL_VIEW) {
             calculateViewRange()
         }
     }
 
-    fun method13940() {
-        if (!aBool8723) {
-            aBool8723 = true
+    fun markModelViewValid() {
+        if (!isModelViewValid) {
+            isModelViewValid = true
         }
     }
 
@@ -920,18 +920,18 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun method13942(bool1: Boolean) {
-        if (aBool8756 != bool1) {
-            aBool8756 = bool1
+    fun setDepthMaskEnabled(bool1: Boolean) {
+        if (depthMaskEnabled != bool1) {
+            depthMaskEnabled = bool1
             setDepthRenderState()
             nativeFunctionMask = nativeFunctionMask and -16
         }
     }
 
-    fun method13944() {
-        anInterface48746 = createStream(false)
+    fun initializeQuadStream() {
+        quadVertexStream = createStream(false)
         val s_1: Short = 160
-        anInterface48746!!.create(s_1.toInt(), 32)
+        quadVertexStream!!.create(s_1.toInt(), 32)
         directBuffer.clear()
         directBuffer.putFloat(0.0f)
         directBuffer.putFloat(0.0f)
@@ -973,8 +973,8 @@ abstract class AbstractNativeToolkit(
         directBuffer.putFloat(0.0f)
         directBuffer.putFloat(0.0f)
         directBuffer.putFloat(0.0f)
-        anInterface48746!!.upload(0, directBuffer.position(), directBufferAddress)
-        aClass708786 = method13995(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.aClass69695, VertexDeclarationAction.aClass69690, VertexDeclarationAction.aClass69692, VertexDeclarationAction.aClass69692))))
+        quadVertexStream!!.upload(0, directBuffer.position(), directBufferAddress)
+        quadVertexDeclaration = createVertexDeclaration(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.COLOR, VertexDeclarationAction.TEXCOORD, VertexDeclarationAction.TEXCOORD))))
     }
 
     override fun calculateProjection(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
@@ -982,8 +982,8 @@ abstract class AbstractNativeToolkit(
         val f_6 = transformMatrix.faceList[12] + transformMatrix.faceList[0] * f_1 + transformMatrix.faceList[4] * f_2 + transformMatrix.faceList[8] * f_3
         val f_7 = transformMatrix.faceList[13] + transformMatrix.faceList[1] * f_1 + transformMatrix.faceList[5] * f_2 + transformMatrix.faceList[9] * f_3
         val f_8 = particleMatrix.faceList[14] + particleMatrix.faceList[2] * f_1 + particleMatrix.faceList[6] * f_2 + particleMatrix.faceList[10] * f_3
-        floats_4[0] = aFloat8797 + viewportCenterX * f_6 / f_5
-        floats_4[1] = aFloat8741 + viewportCenterY * f_7 / f_5
+        floats_4[0] = viewportOriginX + viewportCenterX * f_6 / f_5
+        floats_4[1] = viewportOriginY + viewportCenterY * f_7 / f_5
         floats_4[2] = f_8
     }
 
@@ -996,8 +996,8 @@ abstract class AbstractNativeToolkit(
                 val f_8 = transformMatrix.faceList[13] + transformMatrix.faceList[1] * x + transformMatrix.faceList[5] * y + transformMatrix.faceList[9] * z
                 if (f_8 >= -wY && f_8 <= wY) {
                     val screenZ = particleMatrix.faceList[14] + particleMatrix.faceList[2] * x + particleMatrix.faceList[6] * y + particleMatrix.faceList[10] * z
-                    screenCoords[0] = aFloat8797 + viewportCenterX * wZ / wY
-                    screenCoords[1] = aFloat8741 + viewportCenterY * f_8 / wY
+                    screenCoords[0] = viewportOriginX + viewportCenterX * wZ / wY
+                    screenCoords[1] = viewportOriginY + viewportCenterY * f_8 / wY
                     screenCoords[2] = screenZ
                 } else {
                     screenCoords[2] = Float.NaN
@@ -1017,8 +1017,8 @@ abstract class AbstractNativeToolkit(
     }
 
     fun toggleLights(bool1: Boolean) {
-        if (aBool8684 != bool1) {
-            aBool8684 = bool1
+        if (lightingEnabled != bool1) {
+            lightingEnabled = bool1
             toggleLights()
             nativeFunctionMask = nativeFunctionMask and -8
         }
@@ -1030,7 +1030,7 @@ abstract class AbstractNativeToolkit(
 
         lastSceneLightCount = copyLength
         if (matrixMode == MatrixMode.MODEL_VIEW) {
-            method13903()
+            updateSceneLights()
         }
     }
 
@@ -1083,11 +1083,11 @@ abstract class AbstractNativeToolkit(
 
     fun setColourType(i_1: Int) {
         when (i_1) {
-            0 -> method13966(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
-            1 -> method13966(TextureCombineMode.REPLACE, TextureCombineMode.REPLACE)
-            2 -> method13966(TextureCombineMode.INTERPOLATE, TextureCombineMode.REPLACE)
-            3 -> method13966(TextureCombineMode.ADD, TextureCombineMode.MODULATE)
-            4 -> method13966(TextureCombineMode.SUBTRACT, TextureCombineMode.SUBTRACT)
+            0 -> setTextureCombineModes(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
+            1 -> setTextureCombineModes(TextureCombineMode.REPLACE, TextureCombineMode.REPLACE)
+            2 -> setTextureCombineModes(TextureCombineMode.INTERPOLATE, TextureCombineMode.REPLACE)
+            3 -> setTextureCombineModes(TextureCombineMode.ADD, TextureCombineMode.MODULATE)
+            4 -> setTextureCombineModes(TextureCombineMode.SUBTRACT, TextureCombineMode.SUBTRACT)
         }
     }
 
@@ -1107,9 +1107,9 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun configureLights()
 
-    abstract fun method13954(var1: GLFormat, var2: GLActionFormat): Boolean
+    abstract fun supportsTextureFormat(var1: GLFormat, var2: GLActionFormat): Boolean
 
-    abstract fun method13955(var1: GLFormat, var2: GLActionFormat): Boolean
+    abstract fun supports3DTextureFormat(var1: GLFormat, var2: GLActionFormat): Boolean
 
     internal abstract fun toggleDepthTest()
 
@@ -1121,21 +1121,21 @@ abstract class AbstractNativeToolkit(
         return createNativeTexture(format, width, length, pixels)
     }
 
-    fun method13960() {
+    fun resetCurrentTextureMatrix() {
         if (textureStates!![currentTextureSlot] != TextureState.INITIALIZE) {
             textureStates!![currentTextureSlot] = TextureState.INITIALIZE
             textureMatrices!![currentTextureSlot].identity()
-            method14133()
+            applyTextureMatrix()
         }
     }
 
     internal abstract fun createNativeTexture(format: GLFormat, width: Int, length: Int, pixels: FloatArray): NativeTextureSampler
 
     override fun copySunPosition(): Matrix43 {
-        return aClass2948706
+        return viewMatrix43
     }
 
-    abstract fun method13962(var1: GLFormat, var6: ByteArray): Texture3DSampler
+    abstract fun create3DTexture(var1: GLFormat, var6: ByteArray): Texture3DSampler
 
     override fun resetTextureState() {
     }
@@ -1151,10 +1151,10 @@ abstract class AbstractNativeToolkit(
     abstract fun setTextureOnCurrentSlot()
 
     fun getEnvironmentMapSampler(): CubeTextureSampler? {
-        return aClass152Sub28731?.getNativeCubeTexture()
+        return sunCubeTextureGenerator?.getNativeCubeTexture()
     }
 
-    fun method13966(class681: TextureCombineMode, class682: TextureCombineMode) {
+    fun setTextureCombineModes(class681: TextureCombineMode, class682: TextureCombineMode) {
         var bool3 = false
         if (class681 != textureRgbCombineModes!![currentTextureSlot]) {
             textureRgbCombineModes!![currentTextureSlot] = class681
@@ -1173,17 +1173,17 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun method13967(i_1: Int, class672: TextureStageState) {
+    fun setTextureRgbStageState(i_1: Int, class672: TextureStageState) {
         setTextureStageState(i_1, class672)
     }
 
     internal abstract fun setTextureStageState(var1: Int, var2: TextureStageState)
 
-    fun method13969(i_1: Int, class672: TextureStageState) {
-        method13970(i_1, class672)
+    fun setTextureAlphaStageState(i_1: Int, class672: TextureStageState) {
+        setTextureAlphaStage(i_1, class672)
     }
 
-    internal abstract fun method13970(var1: Int, var2: TextureStageState)
+    internal abstract fun setTextureAlphaStage(var1: Int, var2: TextureStageState)
 
     fun setColourValue(i_1: Int) {
         if (envColor != i_1) {
@@ -1192,20 +1192,20 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun method13973(): Matrix44 {
+    fun getCurrentTextureMatrix(): Matrix44 {
         return textureMatrices!![currentTextureSlot]
     }
 
     fun setTextureState(textureState: TextureState) {
         textureStates!![currentTextureSlot] = textureState
-        method14133()
+        applyTextureMatrix()
     }
 
-    fun method13976() {
+    fun resetAllRenderState() {
         setFogColorAndIntensity()
         setSunParameters()
         toggleLights()
-        method13903()
+        updateSceneLights()
         setLightPosition()
         enableLights()
         toggleSun()
@@ -1221,7 +1221,7 @@ abstract class AbstractNativeToolkit(
             setTextureSlot(slot)
             setTextureColorStage()
             setTextureAlphaStage()
-            method13960()
+            resetCurrentTextureMatrix()
         }
 
         setTextureEnvironmentColor()
@@ -1240,9 +1240,9 @@ abstract class AbstractNativeToolkit(
         missingWaterColor = true
     }
 
-    fun method13985() {
-        if (anInt8844 != 0) {
-            anInt8844 = 0
+    fun resetAlphaBlendMode() {
+        if (alphaBlendMode != 0) {
+            alphaBlendMode = 0
             blendDrawBuffer()
         }
     }
@@ -1279,22 +1279,22 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun calculateFog(color: Int, distance: Int, i_3: Int) {
-        if (fogColorRgb != color || distance != fogDistance || i_3 != anInt8680) {
+        if (fogColorRgb != color || distance != fogDistance || i_3 != fogOffset) {
             fogColorRgb = color
             fogDistance = distance
-            anInt8680 = i_3
-            method14062()
+            fogOffset = i_3
+            updateFogAndWater()
             toggleFog()
         }
     }
 
     override fun setSunPosition(matrix44var1: Matrix43) {
-        aClass2948706 = matrix44var1
-        particleMatrix.fromMatrix(aClass2948706)
-        aClass2948804.copyFrom(matrix44var1)
-        aClass2948804.updateIdentitiyMatrix()
-        aClass3848814.fromMatrix(aClass2948804)
-        method13926()
+        viewMatrix43 = matrix44var1
+        particleMatrix.fromMatrix(viewMatrix43)
+        inverseSunMatrix43.copyFrom(matrix44var1)
+        inverseSunMatrix43.updateIdentitiyMatrix()
+        inverseSunMatrix44.fromMatrix(inverseSunMatrix43)
+        updateFrustumMatrix()
         if (matrixMode == MatrixMode.MODEL_VIEW) {
             requestViewPositionUpdate()
         }
@@ -1304,24 +1304,24 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun toggleMultisampling(var1: Boolean)
 
-    abstract fun method13993(var1: Boolean): NativeToolkitBuffer
+    abstract fun createIndexBuffer(var1: Boolean): NativeToolkitBuffer
 
     abstract fun createStream(var1: Boolean): NativeStream
 
-    abstract fun method13995(var1: Array<VertexDeclarationComponent>): VertexDeclaration
+    abstract fun createVertexDeclaration(var1: Array<VertexDeclarationComponent>): VertexDeclaration
 
     abstract fun setVertexDeclaration(var1: VertexDeclaration)
 
     override fun clearRectangle(class4552: ComponentSurface, i_3: Int, i_4: Int) {
         setDepthBuffering(false)
-        aNativeSpriteSub38791!!.method2766(0.0f, 0.0f, display!!.getWidth().toFloat(), 0.0f, 0.0f, display!!.getHeight().toFloat(), 0, class4552, i_3, i_4)
+        blackPixelSprite!!.drawAffineMasked(0.0f, 0.0f, display!!.getWidth().toFloat(), 0.0f, 0.0f, display!!.getHeight().toFloat(), 0, class4552, i_3, i_4)
         setDepthBuffering(true)
     }
 
-    abstract fun method13997(var1: NativeToolkitBuffer)
+    abstract fun bindIndexBuffer(var1: NativeToolkitBuffer)
 
     fun getEyePositionOsMatrix(): Matrix44 {
-        return if (matrixMode == MatrixMode.MODEL_VIEW) aClass3848814 else aClass3848712
+        return if (matrixMode == MatrixMode.MODEL_VIEW) inverseSunMatrix44 else IDENTITY_MATRIX
     }
 
     override fun drawRectangleOutline(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
@@ -1355,12 +1355,12 @@ abstract class AbstractNativeToolkit(
             f_11 *= f_23
         }
 
-        method13935()
+        setProjectionMatrixMode()
         val class4112 = waterShadersByEffect[13]!!
-        class4112.method873()
-        class4112.method875()
+        class4112.activate()
+        class4112.prepareForRendering()
         toggleBlending(1)
-        class4112.method879()
+        class4112.loadDefaultModelMatrix()
         toggleMultisampling(false)
         var i_9 = i_9 % (i_8 + i_7)
         val f_13 = f_10 * i_7
@@ -1415,7 +1415,7 @@ abstract class AbstractNativeToolkit(
                 }
             }
 
-            if (!method13908(f_19, f_20, f_19 + f_17, f_20 + f_18)) {
+            if (!uploadLineVertices(f_19, f_20, f_19 + f_17, f_20 + f_18)) {
                 return
             }
 
@@ -1427,7 +1427,7 @@ abstract class AbstractNativeToolkit(
         }
 
         toggleMultisampling(true)
-        class4112.method885()
+        class4112.deactivate()
     }
 
     override fun drawTexturedLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int) {
@@ -1448,7 +1448,7 @@ abstract class AbstractNativeToolkit(
         var f_11 = -f_9
         f_11 *= 0.5f * i_6
         val f_12 = f_8 * 0.5f * i_6
-        aNativeSpriteSub38790!!.method2763(i_1 - f_11, i_2 - f_12, i_3 - f_11, i_4 - f_12, i_1 + f_11, i_2 + f_12, 0, i_5, i_7)
+        whitePixelSprite!!.drawAffineTransformed(i_1 - f_11, i_2 - f_12, i_3 - f_11, i_4 - f_12, i_1 + f_11, i_2 + f_12, 0, i_5, i_7)
     }
 
     override fun renderParticles(particleWrapper: ParticleWrapper) {
@@ -1461,53 +1461,53 @@ abstract class AbstractNativeToolkit(
         drawPrimitive(PrimitiveDrawMode.LINES, 0, 1)
     }
 
-    fun method14001(class3521: PrimitiveDrawMode) {
-        setStreamSource(0, anInterface48746!!)
-        setVertexDeclaration(aClass708786!!)
+    fun drawQuadPrimitive(class3521: PrimitiveDrawMode) {
+        setStreamSource(0, quadVertexStream!!)
+        setVertexDeclaration(quadVertexDeclaration!!)
         drawPrimitive(class3521, 0, 2)
     }
 
     abstract fun drawIndexedPrimitive(var1: PrimitiveDrawMode, var2: Int, var3: Int, var4: Int, var5: Int)
 
-    fun method14003() {
+    fun setupUiRenderState() {
         if (nativeFunctionMask != 2) {
-            method13935()
+            setProjectionMatrixMode()
             toggleFog(false)
             toggleLights(false)
             toggleDepthTest(false)
-            method13942(false)
+            setDepthMaskEnabled(false)
             nativeFunctionMask = 2
         }
     }
 
-    fun method14004() {
+    fun setupSceneRenderState() {
         if (nativeFunctionMask != 8) {
-            method13937()
+            setModelViewMatrixMode()
             toggleFog(true)
             toggleDepthTest(true)
-            method13942(true)
+            setDepthMaskEnabled(true)
             toggleBlending(1)
             nativeFunctionMask = 8
         }
     }
 
     override fun setModelMatrix(matrix441: Matrix44) {
-        aClass3848724.copyFrom(matrix441)
-        method13926()
+        currentModelMatrix.copyFrom(matrix441)
+        updateFrustumMatrix()
         if (matrixMode == MatrixMode.MODEL_VIEW) {
             calculateViewRange()
         }
     }
 
-    fun method14009() {
+    fun initializeLineStream() {
         vertexStream = createStream(true)
         vertexStream!!.create(24, 12)
-        vertexDeclaration = method13995(arrayOf(VertexDeclarationComponent(VertexDeclarationAction.aClass69695)))
+        vertexDeclaration = createVertexDeclaration(arrayOf(VertexDeclarationComponent(VertexDeclarationAction.POSITION)))
     }
 
     internal abstract fun configureFog()
 
-    override fun method8404(): Boolean {
+    override fun hasHardwareRendering(): Boolean {
         return true
     }
 
@@ -1520,8 +1520,8 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun resetDepthClippingMask() {
-        aFloat8737 = 0.0f
-        aFloat8738 = 1.0f
+        depthRangeNearOverride = 0.0f
+        depthRangeFarOverride = 1.0f
         calculateViewport()
     }
 
@@ -1535,16 +1535,16 @@ abstract class AbstractNativeToolkit(
         activeFlags = 1 shl shadowSizeShift
     }
 
-    override fun method8449(): Matrix44 {
-        return aClass3848841
+    override fun getScratchMatrix(): Matrix44 {
+        return scratchMatrix
     }
 
     fun calculateViewRange() {
-        projectionMatrix.copyFrom(aClass3848708)
+        projectionMatrix.copyFrom(activeProjectionSource)
         loadWorldViewProjectionMatrix(projectionMatrix)
         camFar = (projectionMatrix.faceList[14] - projectionMatrix.faceList[15]) / (projectionMatrix.faceList[11] - projectionMatrix.faceList[10])
         camNear = -projectionMatrix.faceList[14] / projectionMatrix.faceList[10]
-        method14062()
+        updateFogAndWater()
     }
 
     override fun createFontRenderer(fontMetrics: FontMetrics?, spriteTypes: Array<SpriteType>?, isPlain: Boolean): AbstractFontRenderer {
@@ -1601,18 +1601,18 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun setDepthRenderState()
 
-    override fun method8525(i_3: Int, i_4: Int) {
-        aClass328714!!.method830(i_3, i_4)
+    override fun beginBloomCapture(i_3: Int, i_4: Int) {
+        bloomRenderer!!.method830(i_3, i_4)
     }
 
-    fun method14062() {
-        aClass418753?.method877()
+    fun updateFogAndWater() {
+        activeWaterShader?.updateWaterState()
         configureFog()
     }
 
-    abstract fun method14064(var1: GLFormat, var2: GLActionFormat, var3: Int, var4: Int): RectangleTextureSampler
+    abstract fun createRectangleTexture(var1: GLFormat, var2: GLActionFormat, var3: Int, var4: Int): RectangleTextureSampler
 
-    abstract fun method14072(var1: GLFormat, var2: GLActionFormat, var3: Int, var4: Int): NativeTextureSampler
+    abstract fun createNativeTexture2D(var1: GLFormat, var2: GLActionFormat, var3: Int, var4: Int): NativeTextureSampler
 
     fun fetchShader(archiveName: String, fileName: String): ByteArray? {
         return shaderResource!!.getNamedFile(archiveName, fileName)
@@ -1624,9 +1624,9 @@ abstract class AbstractNativeToolkit(
         }
         renderedWaterColor = color
         renderedWaterTile = waterTile
-        if (aBool8805) {
-            waterShadersByEffect[3]!!.method876()
-            waterShadersByEffect[3]!!.method877()
+        if (hasWaterShaderEffect) {
+            waterShadersByEffect[3]!!.beginWaterTile()
+            waterShadersByEffect[3]!!.updateWaterState()
         }
     }
 
@@ -1634,7 +1634,7 @@ abstract class AbstractNativeToolkit(
 
     abstract fun setPolygonMode(var1: Int)
 
-    override fun method8669(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
+    override fun drawSurfaceLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
     }
 
     override fun onTilesDrawn() {
@@ -1677,7 +1677,7 @@ abstract class AbstractNativeToolkit(
     }
 
     fun getViewMatrix(): Matrix44 {
-        return if (matrixMode == MatrixMode.MODEL_VIEW) particleMatrix else aClass3848712
+        return if (matrixMode == MatrixMode.MODEL_VIEW) particleMatrix else IDENTITY_MATRIX
     }
 
     override fun hasTextures(): Boolean {
@@ -1691,18 +1691,18 @@ abstract class AbstractNativeToolkit(
         return if (matrixMode == MatrixMode.MODEL_VIEW) {
             if (!viewPositionCalibrated) {
                 // Combines model matrix and view matrix into modelview matrix?
-                aClass2948710.copyFrom(aClass2948704)
-                aClass2948710.multiply(aClass2948706)
-                modelViewMatrix.fromMatrix(aClass2948710)
+                combinedModelViewMatrix43.copyFrom(localModelMatrix43)
+                combinedModelViewMatrix43.multiply(viewMatrix43)
+                modelViewMatrix.fromMatrix(combinedModelViewMatrix43)
                 viewPositionCalibrated = true
             }
-            aClass2948710
+            combinedModelViewMatrix43
         } else {
-            aClass2948704
+            localModelMatrix43
         }
     }
 
-    fun method14133() {
+    fun applyTextureMatrix() {
         setTextureMatrix()
     }
 
@@ -1734,20 +1734,20 @@ abstract class AbstractNativeToolkit(
         val ints_3 = intArrayOf(-1)
         activeTextureSampler = createTextureSampler(1, 1, false, ints_3, 0, 0)
         ints_3[0] = 0xffffff.inv()
-        anInterface68795 = createTextureSampler(1, 1, false, ints_3, 0, 0)
+        blackTextureSampler = createTextureSampler(1, 1, false, ints_3, 0, 0)
         setNativeHeap(getNativeMemory(262144))
-        aClass708832 = method13995(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.aClass69695, VertexDeclarationAction.aClass69692))))
-        method13995(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.aClass69695, VertexDeclarationAction.aClass69690))))
-        aClass708836 = method13995(arrayOf(
-            VertexDeclarationComponent(VertexDeclarationAction.aClass69695),
-            VertexDeclarationComponent(VertexDeclarationAction.aClass69690),
-            VertexDeclarationComponent(VertexDeclarationAction.aClass69692),
+        positionTexCoordDeclaration = createVertexDeclaration(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.TEXCOORD))))
+        createVertexDeclaration(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.COLOR))))
+        positionColorTexCoordNormalDeclaration = createVertexDeclaration(arrayOf(
+            VertexDeclarationComponent(VertexDeclarationAction.POSITION),
+            VertexDeclarationComponent(VertexDeclarationAction.COLOR),
+            VertexDeclarationComponent(VertexDeclarationAction.TEXCOORD),
             VertexDeclarationComponent(VertexDeclarationAction.NORMAL_POINTER_ACTION)
         ))
-        aClass708721 = method13995(arrayOf(
-            VertexDeclarationComponent(VertexDeclarationAction.aClass69695),
-            VertexDeclarationComponent(VertexDeclarationAction.aClass69690),
-            VertexDeclarationComponent(VertexDeclarationAction.aClass69692)
+        positionColorTexCoordDeclaration = createVertexDeclaration(arrayOf(
+            VertexDeclarationComponent(VertexDeclarationAction.POSITION),
+            VertexDeclarationComponent(VertexDeclarationAction.COLOR),
+            VertexDeclarationComponent(VertexDeclarationAction.TEXCOORD)
         ))
 
         // Initialize copy buffers for model operations
@@ -1761,19 +1761,19 @@ abstract class AbstractNativeToolkit(
             // copyByTypeSrc/copyByTypeDst remain null - models will be created on-demand
         }
 
-        method13895()
-        anInterface328834 = method13993(true)
+        initializeShaders()
+        indexBuffer = createIndexBuffer(true)
         setupGraphics()
         getImageProducer()
         resetClipping()
         renderLastFrame()
-        aNativeSpriteSub38790 = createNativeSprite(activeTextureSampler!!)
-        aNativeSpriteSub38791 = createNativeSprite(anInterface68795!!)
+        whitePixelSprite = createNativeSprite(activeTextureSampler!!)
+        blackPixelSprite = createNativeSprite(blackTextureSampler!!)
         applyClearFlags(3, 0)
     }
 
-    fun method14150() {
-        method14001(PrimitiveDrawMode.TRIANGLE_FAN)
+    fun drawQuadTriangleFan() {
+        drawQuadPrimitive(PrimitiveDrawMode.TRIANGLE_FAN)
     }
 
     abstract fun setStreamSource(var1: Int, var2: NativeStream)
@@ -1785,9 +1785,9 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun method14177() {
-        anInterface48693 = createStream(false)
-        anInterface48693!!.create(3096, 12)
+    fun initializeCircleStream() {
+        circleVertexStream = createStream(false)
+        circleVertexStream!!.create(3096, 12)
         directBuffer.clear()
         directBuffer.putFloat(0.0f)
         directBuffer.putFloat(0.0f)
@@ -1802,16 +1802,16 @@ abstract class AbstractNativeToolkit(
             directBuffer.putFloat(0.0f)
         }
 
-        anInterface48693!!.upload(0, directBuffer.position(), directBufferAddress)
+        circleVertexStream!!.upload(0, directBuffer.position(), directBufferAddress)
     }
 
     override fun drawFilledRectangle(x: Int, y: Int, width: Int, height: Int, color: Int, alpha: Int) {
         if (depthBufferingEnabled) {
             setDepthBuffering(false)
-            aNativeSpriteSub38790!!.drawCircle(x, y, width, height, 0, color, alpha)
+            whitePixelSprite!!.drawCircle(x, y, width, height, 0, color, alpha)
             setDepthBuffering(true)
         } else {
-            aNativeSpriteSub38790!!.drawCircle(x, y, width, height, 0, color, alpha)
+            whitePixelSprite!!.drawCircle(x, y, width, height, 0, color, alpha)
         }
     }
 
@@ -1819,8 +1819,8 @@ abstract class AbstractNativeToolkit(
         drawTransparentLine(i_1, i_2, i_1, i_3 + i_2, i_4, i_5)
     }
 
-    override fun method8474() {
-        aClass328714!!.method833()
+    override fun compositeBloomEffects() {
+        bloomRenderer!!.method833()
     }
 
     internal abstract fun toggleLights()
@@ -1831,7 +1831,7 @@ abstract class AbstractNativeToolkit(
 
     companion object {
         @JvmField
-        val aClass3848712: Matrix44 = Matrix44()
+        val IDENTITY_MATRIX: Matrix44 = Matrix44()
 
         @JvmField
         val WORLD_VIEW_PROJECTION_MATRIX: Matrix44 = Matrix44()

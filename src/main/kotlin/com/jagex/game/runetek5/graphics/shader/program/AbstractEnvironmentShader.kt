@@ -15,12 +15,12 @@ abstract class AbstractEnvironmentShader(
     @JvmField protected val activeToolkit: AbstractNativeToolkit
 ) {
 
-    @JvmField var anInterface31451: CubeTextureSampler? = null
+    @JvmField var environmentSampler: CubeTextureSampler? = null
     @JvmField var textureSampler: NativeTextureSampler? = null
-    @JvmField var anInt467: Int = 0
-    @JvmField var anInt468: Int = 0
-    @JvmField var anInt469: Int = 0
-    @JvmField var anInt470: Int = 0
+    @JvmField var startVertex: Int = 0
+    @JvmField var vertexCount: Int = 0
+    @JvmField var startIndex: Int = 0
+    @JvmField var primitiveCount: Int = 0
     @JvmField val pointLightsDiffuseColor = FloatArray(16)
     @JvmField val pointLightsPosAndRadiusSq = FloatArray(16)
     @JvmField val textureCoordinateMatrix = Matrix44()
@@ -33,9 +33,9 @@ abstract class AbstractEnvironmentShader(
     @JvmField val sunColor = Vector3()
     @JvmField val antiSunColor = Vector3()
     @JvmField val lightColor = Vector3()
-    @JvmField val aClass384465 = Matrix44()
-    @JvmField protected var aFloat456: Float = 0f
-    @JvmField protected var aFloat453: Float = 0f
+    @JvmField val worldMatrix = Matrix44()
+    @JvmField protected var specularExponent: Float = 0f
+    @JvmField protected var specularIntensity: Float = 0f
 
     /**
      * Identifies and configures material effect parameters.
@@ -45,16 +45,16 @@ abstract class AbstractEnvironmentShader(
     fun indentifyMaterialEffect(material: MaterialType) {
         when (material.effectParam1.toInt()) {
             1 -> {
-                aFloat456 = 32.0f
-                aFloat453 = 0.5f
+                specularExponent = 32.0f
+                specularIntensity = 0.5f
             }
             2 -> {
-                aFloat456 = 4.0f
-                aFloat453 = 0.65f
+                specularExponent = 4.0f
+                specularIntensity = 0.65f
             }
             3 -> {
-                aFloat456 = 2.0f
-                aFloat453 = 0.8f
+                specularExponent = 2.0f
+                specularIntensity = 0.8f
             }
         }
     }

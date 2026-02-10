@@ -54,7 +54,7 @@ class OpenGLArbTextureCubeMapGenerator(
 
             arbCubeMapTexture = OpenGlArbCubeMapTexture(
                 openglToolkit,
-                GLFormat.aClass1501950,
+                GLFormat.RGB,
                 GLActionFormat.PIXEL_FORMAT,
                 largestMaterialSize,
                 mipmap,

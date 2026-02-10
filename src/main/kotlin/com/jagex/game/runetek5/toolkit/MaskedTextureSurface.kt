@@ -63,7 +63,7 @@ class MaskedTextureSurface : ComponentSurface {
             rowOffsets: IntArray,
             rowWidths: IntArray
         ): MaskedTextureSurface {
-            return if (nativeToolkit.method13954(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
+            return if (nativeToolkit.supportsTextureFormat(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
                 val bytes = ByteArray(height * width)
                 for (row in 0 until height) {
                     var pixelPtr = rowOffsets[row] + row * width

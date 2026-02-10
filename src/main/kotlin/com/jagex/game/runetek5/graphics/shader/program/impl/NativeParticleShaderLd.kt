@@ -10,32 +10,32 @@ import com.jagex.game.runetek5.toolkit.companion.TextureCombineMode
 
 class NativeParticleShaderLd(nativeToolkit: AbstractNativeToolkit) : AbstractParticleShader(nativeToolkit) {
 
-    override fun method1788(matrix441: Matrix44) {
+    override fun setViewProjectionMatrix(matrix441: Matrix44) {
         super.activeToolkit.setMatrixTransform(matrix441, super.activeToolkit.particleMatrix, super.activeToolkit.projectionMatrix)
     }
 
-    override fun method1790() {
+    override fun drawPointSprite() {
         super.activeToolkit.setColourValue(super.diffuseColor)
-        super.activeToolkit.method13967(1, TextureStageState.aClass67677)
-        super.activeToolkit.method13969(1, TextureStageState.aClass67677)
-        method14513()
-        super.activeToolkit.method14150()
+        super.activeToolkit.setTextureRgbStageState(1, TextureStageState.CONSTANT)
+        super.activeToolkit.setTextureAlphaStageState(1, TextureStageState.CONSTANT)
+        loadTextureState()
+        super.activeToolkit.drawQuadTriangleFan()
     }
 
-    override fun method1787(i_1: Int) {
-        super.activeToolkit.method13967(1, TextureStageState.aClass67678)
-        super.activeToolkit.method13969(1, TextureStageState.aClass67678)
-        method14513()
+    override fun drawParticles(i_1: Int) {
+        super.activeToolkit.setTextureRgbStageState(1, TextureStageState.PRIMARY_COLOR)
+        super.activeToolkit.setTextureAlphaStageState(1, TextureStageState.PRIMARY_COLOR)
+        loadTextureState()
         super.activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, 0, i_1 * 4, 0, i_1 * 2)
     }
 
-    fun method14513() {
+    fun loadTextureState() {
         super.activeToolkit.setTextureSlot(0)
         super.activeToolkit.setTextureSampler(super.diffuseSampler)
-        super.activeToolkit.method13967(0, TextureStageState.aClass67680)
-        super.activeToolkit.method13969(0, TextureStageState.aClass67680)
-        super.activeToolkit.method13966(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
-        super.activeToolkit.method13973().copyFrom(super.textureCoordinateMatrix)
+        super.activeToolkit.setTextureRgbStageState(0, TextureStageState.TEXTURE)
+        super.activeToolkit.setTextureAlphaStageState(0, TextureStageState.TEXTURE)
+        super.activeToolkit.setTextureCombineModes(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
+        super.activeToolkit.getCurrentTextureMatrix().copyFrom(super.textureCoordinateMatrix)
         super.activeToolkit.setTextureState(TextureState.PARTIAL_COPY_LAST)
     }
 }

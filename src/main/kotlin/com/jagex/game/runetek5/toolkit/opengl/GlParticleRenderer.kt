@@ -46,10 +46,10 @@ class GlParticleRenderer {
 
     fun drawParticles(toolkit: OpenGlToolkit, particleWrapper: ParticleWrapper) {
         disableLights(toolkit)
-        val vertexZNearA = toolkit.aClass3848348.faceList[2]
-        val vertexZNearB = toolkit.aClass3848348.faceList[6]
-        val vertexZNearC = toolkit.aClass3848348.faceList[10]
-        val vertexZNearD = toolkit.aClass3848348.faceList[14]
+        val vertexZNearA = toolkit.viewMatrix44.faceList[2]
+        val vertexZNearB = toolkit.viewMatrix44.faceList[6]
+        val vertexZNearC = toolkit.viewMatrix44.faceList[10]
+        val vertexZNearD = toolkit.viewMatrix44.faceList[14]
 
         try {
             var totalParticles = 0

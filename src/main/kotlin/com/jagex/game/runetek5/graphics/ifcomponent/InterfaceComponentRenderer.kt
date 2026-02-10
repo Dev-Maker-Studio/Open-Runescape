@@ -234,7 +234,7 @@ object InterfaceComponentRenderer {
 
                         if (component.type == ComponentType.CONTAINER) {
                             if (component.contentType == CUTSCENE_FADE && Renderers.activeToolkit!!.bloomEnabled()) {
-                                Renderers.activeToolkit!!.method8525(GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
+                                Renderers.activeToolkit!!.beginBloomCapture(GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379)
                             }
                             drawComponents(components, component.idHash, clipStartX, clipStartY, endX, endY, startX - component.scrollX, startY - component.scrollY, componentReference, bool9)
                             val itemSlots = component.itemSlots
@@ -247,7 +247,7 @@ object InterfaceComponentRenderer {
                             }
                             if (component.contentType == CUTSCENE_FADE) {
                                 if (Renderers.activeToolkit!!.bloomEnabled()) {
-                                    Renderers.activeToolkit!!.method8474()
+                                    Renderers.activeToolkit!!.compositeBloomEffects()
                                 }
                                 if (Client.MAP_LOADING_STAGE == 4) {
                                     var fadeAlpha = cutsceneFadeAlpha
@@ -344,28 +344,28 @@ object InterfaceComponentRenderer {
                                                 for (i_27 in 0 until height) {
                                                     for (i_28 in 0 until i_39) {
                                                         if (component.color != 0) {
-                                                            sprite.method2790((startX + i_27 * spriteWidth) + spriteWidth / 2.0f, spriteHeight / 2.0f + (startY + spriteHeight * i_28), 4096, component.angle2d, drawColor)
+                                                            sprite.drawRotatedCenterColored((startX + i_27 * spriteWidth) + spriteWidth / 2.0f, spriteHeight / 2.0f + (startY + spriteHeight * i_28), 4096, component.angle2d, drawColor)
                                                         } else {
-                                                            sprite.method2758((startX + spriteWidth * i_27) + spriteWidth / 2.0f, (startY + spriteHeight * i_28) + spriteHeight / 2.0f, 4096, component.angle2d)
+                                                            sprite.drawRotatedCenter((startX + spriteWidth * i_27) + spriteWidth / 2.0f, (startY + spriteHeight * i_28) + spriteHeight / 2.0f, 4096, component.angle2d)
                                                         }
                                                     }
                                                 }
                                             } else if (component.color == 0 && drawTransparency == 0) {
-                                                sprite.method2756(startX, startY, component.width, component.height)
+                                                sprite.drawTiled(startX, startY, component.width, component.height)
                                             } else {
-                                                sprite.method2772(startX, startY, component.width, component.height, 0, drawColor, 1)
+                                                sprite.drawScaledColored(startX, startY, component.width, component.height, 0, drawColor, 1)
                                             }
                                             Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                         } else if (component.color == 0 && drawTransparency == 0) {
                                             if (component.angle2d != 0) {
-                                                sprite.method2758(component.width / 2.0f + startX, startY + component.height / 2.0f, component.width * 4096 / spriteWidth, component.angle2d)
+                                                sprite.drawRotatedCenter(component.width / 2.0f + startX, startY + component.height / 2.0f, component.width * 4096 / spriteWidth, component.angle2d)
                                             } else if (spriteWidth == component.width && spriteHeight == component.height) {
                                                 sprite.draw(startX, startY)
                                             } else {
                                                 sprite.drawCircle(startX, startY, component.width, component.height)
                                             }
                                         } else if (component.angle2d != 0) {
-                                            sprite.method2790(component.width / 2.0f + startX, component.height / 2.0f + startY, component.width * 4096 / spriteWidth, component.angle2d, drawColor)
+                                            sprite.drawRotatedCenterColored(component.width / 2.0f + startX, component.height / 2.0f + startY, component.width * 4096 / spriteWidth, component.angle2d, drawColor)
                                         } else if (spriteWidth == component.width && spriteHeight == component.height) {
                                             sprite.draw(startX, startY, 0, drawColor, 1)
                                         } else {
@@ -455,7 +455,7 @@ object InterfaceComponentRenderer {
                                     }
                                     Client.SUN_MATRIX.reset()
                                     Renderers.activeToolkit!!.setSunPosition(Client.SUN_MATRIX)
-                                    val matrix44 = Renderers.activeToolkit!!.method8449()
+                                    val matrix44 = Renderers.activeToolkit!!.getScratchMatrix()
                                     val viewRangeStart = Resource.mapRegion!!.viewRangeStart
                                     var viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
                                     viewRangeEnd += component.spriteScale

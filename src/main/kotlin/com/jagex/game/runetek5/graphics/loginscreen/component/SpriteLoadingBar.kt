@@ -23,7 +23,7 @@ class SpriteLoadingBar(
         val clipping = IntArray(4)
         Renderers.activeToolkit!!.getClipping(clipping)
         Renderers.activeToolkit!!.setClipping(x, y + 2, width + x, y + super.anchoredElement.height)
-        this.aNativeSprite9150!!.method2756(x, y + 2, super.anchoredElement.width, super.anchoredElement.height)
+        this.aNativeSprite9150!!.drawTiled(x, y + 2, super.anchoredElement.width, super.anchoredElement.height)
         Renderers.activeToolkit!!.setClipping(clipping[0], clipping[1], clipping[2], clipping[3])
     }
 

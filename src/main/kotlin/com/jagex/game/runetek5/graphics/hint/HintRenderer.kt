@@ -197,14 +197,14 @@ object HintRenderer {
             if (sprite.withinBounds(x1, y1) && sprite.withinBounds(x2, y1) &&
                 sprite.withinBounds(x1, y2) && sprite.withinBounds(x2, y2)
             ) {
-                hintSprite.method2773(x1 + clipLeft, clipTop + y1, sprite.surface, clipLeft, clipTop)
+                hintSprite.drawWithSurface(x1 + clipLeft, clipTop + y1, sprite.surface, clipLeft, clipTop)
             } else {
                 val angleRadians = atan2(dx.toDouble(), dy.toDouble())
                 var maxArrowDistance = min(component.width / 2, component.height / 2)
                 maxArrowDistance -= 6
                 val i25 = (sin(angleRadians) * maxArrowDistance).toInt()
                 val i26 = (cos(angleRadians) * maxArrowDistance).toInt()
-                StaticMedia.hintMapedgeSprites!![arrowSprite].method2758(
+                StaticMedia.hintMapedgeSprites!![arrowSprite].drawRotatedCenter(
                     clipLeft + component.width / 2.0f + i25,
                     clipTop + component.height / 2.0f - i26,
                     4096,

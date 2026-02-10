@@ -139,7 +139,7 @@ class Sun(
             val highestDimension = max(sizeX, sizeY)
             val size = sunUseDimension * 1024 / highestDimension
             val matrix4412 = toolkit.copyModelMatrix()
-            val matrix4413 = toolkit.method8449()
+            val matrix4413 = toolkit.getScratchMatrix()
             matrix4413.method6532(
                 (sunUseDimension / 2).toFloat(),
                 (sunUseDimension / 2).toFloat(),
@@ -224,7 +224,7 @@ class Sun(
             size = size * 13 / 16
         }
         val matrix4414 = toolkit.copyModelMatrix()
-        val matrix449 = toolkit.method8449()
+        val matrix449 = toolkit.getScratchMatrix()
         matrix449.method6532(
             (sunUseDimension / 2).toFloat(),
             (sunUseDimension / 2).toFloat(),

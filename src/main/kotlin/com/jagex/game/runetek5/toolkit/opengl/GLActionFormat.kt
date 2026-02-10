@@ -1,7 +1,7 @@
 package com.jagex.game.runetek5.toolkit.opengl
 
 data class GLActionFormat(
-    @JvmField val anInt757: Int,
+    @JvmField val dataTypeId: Int,
     @JvmField val bytesPerEntry: Int
 ) {
     companion object {
@@ -10,9 +10,9 @@ data class GLActionFormat(
         @JvmField val DEPTH_COMPONENT_24 = GLActionFormat(1, 3)
         @JvmField val FLOAT_16_ARB = GLActionFormat(8, 2)
         @JvmField val FLOAT_32_ARB = GLActionFormat(3, 4)
-        @JvmField var aClass76753 = GLActionFormat(6, 1)
-        @JvmField var aClass76756 = GLActionFormat(0, 2)
-        @JvmField var aClass76750 = GLActionFormat(7, 4)
-        @JvmField var aClass76754 = GLActionFormat(2, 4)
+        @JvmField var BYTE = GLActionFormat(6, 1)
+        @JvmField var SHORT = GLActionFormat(0, 2)
+        @JvmField var INT = GLActionFormat(7, 4)
+        @JvmField var UNSIGNED_INT = GLActionFormat(2, 4)
     }
 }

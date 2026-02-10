@@ -51,11 +51,11 @@ class MipmapTextureSampler2D : MipmapTextureSampler, RectangleTextureSampler {
         } else {
             OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
             val class1509 = pixelFormat
-            if (class1509 === GLFormat.aClass1501956) {
+            if (class1509 === GLFormat.COMPRESSED_DXT1) {
                 OpenGL.glCompressedTexImage2Dub(textureTarget, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, width, height, 0, width * height / 2, pixels, 0)
             } else {
                 val class15010 = pixelFormat
-                if (class15010 === GLFormat.aClass1501957) {
+                if (class15010 === GLFormat.COMPRESSED_DXT5) {
                     OpenGL.glCompressedTexImage2Dub(textureTarget, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, width, height, 0, width * height, pixels, 0)
                 } else {
                     OpenGL.glTexImage2Dub(textureTarget, 0, OpenGLNativeToolkit.texture2dInternalFormat(pixelFormat, pixelActionFormat), width, height, 0, OpenGLNativeToolkit.texture2dFormat(pixelFormat), GL_UNSIGNED_BYTE, pixels, 0)

@@ -44,7 +44,7 @@ abstract class SpriteSM(
 
     override abstract fun draw(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int)
 
-    override abstract fun method2773(var1: Int, var2: Int, var3: ComponentSurface, var4: Int, var5: Int)
+    override abstract fun drawWithSurface(var1: Int, var2: Int, var3: ComponentSurface, var4: Int, var5: Int)
 
     abstract fun method14247(
         colorWrite: Boolean,
@@ -61,7 +61,7 @@ abstract class SpriteSM(
         var13: Boolean
     )
 
-    override fun method2772(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+    override fun drawScaledColored(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
         if (toolkit.hasBeenShutdown()) {
             throw IllegalStateException()
         }
@@ -221,7 +221,7 @@ abstract class SpriteSM(
         }
     }
 
-    override fun method2764(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, i_8: Int, i_9: Int) {
+    override fun drawAffine(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, i_8: Int, i_9: Int) {
         if (toolkit.hasBeenShutdown()) {
             throw IllegalStateException()
         } else {
@@ -295,7 +295,7 @@ abstract class SpriteSM(
 
     override abstract fun drawColoredCircle(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, colorArgb: Int, blendMode: Int)
 
-    override fun method2766(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, class4558: ComponentSurface, i_9: Int, i_10: Int) {
+    override fun drawAffineMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, class4558: ComponentSurface, i_9: Int, i_10: Int) {
         if (toolkit.hasBeenShutdown()) {
             throw IllegalStateException()
         }

@@ -36,7 +36,7 @@ class NativeFilterBloomShader(
         return loaded
     }
 
-    override fun method1102() {
+    override fun onRendererInitialized() {
     }
 
     override fun destroy() {
@@ -52,7 +52,7 @@ class NativeFilterBloomShader(
         compositeSampler: NativeTextureSampler,
         interface65: NativeTextureSampler
     ) {
-        val f_6 = nativeToolkit.method13905()
+        val f_6 = nativeToolkit.getPixelOffset()
         val displayWidth = display.getWidth().toFloat()
         val displayHeight = display.getHeight().toFloat()
         var sampler = compositeSampler
@@ -125,7 +125,7 @@ class NativeFilterBloomShader(
         return nativeToolkit.GLEXTFramebufferObject && nativeToolkit.supportsArbFragmentShader()
     }
 
-    override fun method1097(): Boolean {
+    override fun loadShader(): Boolean {
         if (isShaderSupported()) {
             filterBloomShader = nativeToolkit.loadShader("FilterBloom")
             if (filterBloomShader == null) {

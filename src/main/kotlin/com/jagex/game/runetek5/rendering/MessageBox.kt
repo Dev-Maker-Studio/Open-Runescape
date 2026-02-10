@@ -124,7 +124,7 @@ object MessageBox {
                 }
                 val drawX = anchorX!!.calculateDrawX(textW, Client.GAME_WIDTH) + paddingLeft
                 val drawY = anchorY!!.calculateDrawY(textH, Client.GAME_HEIGHT) + paddingTop
-                toolkit.generateSprite(boxFilledBackground, false).method2772(drawX + outlineCornerSprite!!.width, drawY + outlineCornerSprite!!.height, textW - outlineCornerSprite!!.width * 2, textH - outlineCornerSprite!!.height * 2, 1, 0, 0)
+                toolkit.generateSprite(boxFilledBackground, false).drawScaledColored(drawX + outlineCornerSprite!!.width, drawY + outlineCornerSprite!!.height, textW - outlineCornerSprite!!.width * 2, textH - outlineCornerSprite!!.height * 2, 1, 0, 0)
                 toolkit.generateSprite(outlineCornerSprite, true).draw(drawX, drawY)
                 outlineCornerSprite!!.flipHorizontal()
                 toolkit.generateSprite(outlineCornerSprite, true).draw(textW + drawX - i_15, drawY)
@@ -133,13 +133,13 @@ object MessageBox {
                 outlineCornerSprite!!.flipHorizontal()
                 toolkit.generateSprite(outlineCornerSprite, true).draw(drawX, textH + drawY - i_15)
                 outlineCornerSprite!!.flipVertical()
-                toolkit.generateSprite(outlineStraightSideSprite, true).method2756(drawX, drawY + outlineCornerSprite!!.height, i_15, textH - outlineCornerSprite!!.height * 2)
+                toolkit.generateSprite(outlineStraightSideSprite, true).drawTiled(drawX, drawY + outlineCornerSprite!!.height, i_15, textH - outlineCornerSprite!!.height * 2)
                 outlineStraightSideSprite!!.rotate90DegLeft()
-                toolkit.generateSprite(outlineStraightSideSprite, true).method2756(drawX + outlineCornerSprite!!.width, drawY, textW - outlineCornerSprite!!.width * 2, i_15)
+                toolkit.generateSprite(outlineStraightSideSprite, true).drawTiled(drawX + outlineCornerSprite!!.width, drawY, textW - outlineCornerSprite!!.width * 2, i_15)
                 outlineStraightSideSprite!!.rotate90DegLeft()
-                toolkit.generateSprite(outlineStraightSideSprite, true).method2756(drawX + textW - i_15, drawY + outlineCornerSprite!!.height, i_15, textH - outlineCornerSprite!!.height * 2)
+                toolkit.generateSprite(outlineStraightSideSprite, true).drawTiled(drawX + textW - i_15, drawY + outlineCornerSprite!!.height, i_15, textH - outlineCornerSprite!!.height * 2)
                 outlineStraightSideSprite!!.rotate90DegLeft()
-                toolkit.generateSprite(outlineStraightSideSprite, true).method2756(drawX + outlineCornerSprite!!.width, textH + drawY - i_15, textW - outlineCornerSprite!!.width * 2, i_15)
+                toolkit.generateSprite(outlineStraightSideSprite, true).drawTiled(drawX + outlineCornerSprite!!.width, textH + drawY - i_15, textW - outlineCornerSprite!!.width * 2, i_15)
                 outlineStraightSideSprite!!.rotate90DegLeft()
                 boxRenderer.drawText(text, drawX + i_10, drawY + i_10, textW - i_10 * 2, textH - i_10 * 2, textColor or 0xffffff.inv(), -1, 1, 1, 0, null, null, null, 0, 0)
                 InterfaceComponentRenderer.inboundsComponentToTop(drawX, drawY, textW, textH)

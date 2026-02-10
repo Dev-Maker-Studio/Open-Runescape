@@ -21,11 +21,11 @@ class NativeEnvironmentShaderLd(
 
     override fun loadUnlitProgram(enabled: Boolean) {
         activeToolkit.setTextureSlot(0)
-        activeToolkit.method13967(0, TextureStageState.aClass67680)
-        activeToolkit.method13969(0, TextureStageState.aClass67680)
-        activeToolkit.method13967(1, TextureStageState.aClass67678)
-        activeToolkit.method13969(1, TextureStageState.aClass67678)
-        activeToolkit.method13966(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
+        activeToolkit.setTextureRgbStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureAlphaStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureRgbStageState(1, TextureStageState.PRIMARY_COLOR)
+        activeToolkit.setTextureAlphaStageState(1, TextureStageState.PRIMARY_COLOR)
+        activeToolkit.setTextureCombineModes(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
         renderPrimitive()
     }
 
@@ -34,9 +34,9 @@ class NativeEnvironmentShaderLd(
      */
     fun renderPrimitive() {
         activeToolkit.setTextureSampler(textureSampler)
-        activeToolkit.method13973().copyFrom(textureCoordinateMatrix)
+        activeToolkit.getCurrentTextureMatrix().copyFrom(textureCoordinateMatrix)
         activeToolkit.setTextureState(TextureState.PARTIAL_COPY_LAST)
-        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, anInt467, anInt468, anInt469, anInt470)
+        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, startVertex, vertexCount, startIndex, primitiveCount)
     }
 
     override fun loadUnderwaterGround() {
@@ -45,31 +45,31 @@ class NativeEnvironmentShaderLd(
 
     override fun loadPointlightEnvironmentMapping(lightCount: Int) {
         activeToolkit.setTextureSlot(0)
-        activeToolkit.method13966(TextureCombineMode.MODULATE, TextureCombineMode.REPLACE)
-        activeToolkit.method13967(0, TextureStageState.aClass67680)
-        activeToolkit.method13969(0, TextureStageState.aClass67678)
-        activeToolkit.method13967(1, TextureStageState.aClass67678)
-        activeToolkit.method13969(1, TextureStageState.aClass67678)
+        activeToolkit.setTextureCombineModes(TextureCombineMode.MODULATE, TextureCombineMode.REPLACE)
+        activeToolkit.setTextureRgbStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureAlphaStageState(0, TextureStageState.PRIMARY_COLOR)
+        activeToolkit.setTextureRgbStageState(1, TextureStageState.PRIMARY_COLOR)
+        activeToolkit.setTextureAlphaStageState(1, TextureStageState.PRIMARY_COLOR)
         renderPrimitive()
     }
 
     override fun loadSpecularPointlight(lightCount: Int) {
         activeToolkit.setTextureSlot(0)
-        activeToolkit.method13966(TextureCombineMode.MODULATE, TextureCombineMode.REPLACE)
-        activeToolkit.method13967(0, TextureStageState.aClass67680)
-        activeToolkit.method13969(0, TextureStageState.aClass67678)
-        activeToolkit.method13967(1, TextureStageState.aClass67678)
-        activeToolkit.method13969(1, TextureStageState.aClass67678)
+        activeToolkit.setTextureCombineModes(TextureCombineMode.MODULATE, TextureCombineMode.REPLACE)
+        activeToolkit.setTextureRgbStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureAlphaStageState(0, TextureStageState.PRIMARY_COLOR)
+        activeToolkit.setTextureRgbStageState(1, TextureStageState.PRIMARY_COLOR)
+        activeToolkit.setTextureAlphaStageState(1, TextureStageState.PRIMARY_COLOR)
         renderPrimitive()
     }
 
     override fun loadStandartPointlight(lightCount: Int) {
         activeToolkit.setTextureSlot(0)
-        activeToolkit.method13966(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
-        activeToolkit.method13967(0, TextureStageState.aClass67680)
-        activeToolkit.method13969(0, TextureStageState.aClass67680)
-        activeToolkit.method13967(1, TextureStageState.aClass67678)
-        activeToolkit.method13969(1, TextureStageState.aClass67678)
+        activeToolkit.setTextureCombineModes(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
+        activeToolkit.setTextureRgbStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureAlphaStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureRgbStageState(1, TextureStageState.PRIMARY_COLOR)
+        activeToolkit.setTextureAlphaStageState(1, TextureStageState.PRIMARY_COLOR)
         renderPrimitive()
     }
 }

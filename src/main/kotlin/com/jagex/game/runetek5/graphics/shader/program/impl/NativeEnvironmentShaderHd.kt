@@ -39,7 +39,7 @@ class NativeEnvironmentShaderHd(
         modelShader!!.load3f(activeUniformLocation!![8], heightFogColor.x, heightFogColor.y, heightFogColor.z)
         modelShader!!.load4f(activeUniformLocation!![9], distanceFogPlane.x, distanceFogPlane.y, distanceFogPlane.z, distanceFogPlane.w)
         modelShader!!.load3f(activeUniformLocation!![10], distanceFogColor.x, distanceFogColor.y, distanceFogColor.z)
-        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, anInt467, anInt468, anInt469, anInt470)
+        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, startVertex, vertexCount, startIndex, primitiveCount)
     }
 
     override fun loadUnderwaterGround() {
@@ -87,7 +87,7 @@ class NativeEnvironmentShaderHd(
             modelShader!!.method1673(activeUniformLocation!![0], pointLightsDiffuseColor, unit * 4)
         }
 
-        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, anInt467, anInt468, anInt469, anInt470)
+        activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, startVertex, vertexCount, startIndex, primitiveCount)
     }
 
     override fun loadStandartPointlight(unit: Int) {
@@ -102,7 +102,7 @@ class NativeEnvironmentShaderHd(
         activeUniformLocation = uniformLocations[modelShader!!.getOccupyingSlot()]
         modelShader!!.setActiveMapping()
         modelShader!!.load3f(activeUniformLocation!![6], eyePos.x, eyePos.y, eyePos.z)
-        modelShader!!.load4f(activeUniformLocation!![16], aFloat456, aFloat453, 0.0f, 0.0f)
+        modelShader!!.load4f(activeUniformLocation!![16], specularExponent, specularIntensity, 0.0f, 0.0f)
         loadUnit(unit)
     }
 
@@ -110,9 +110,9 @@ class NativeEnvironmentShaderHd(
         modelShader!!.loadProgram(mappings[unit + 12]!!)
         activeUniformLocation = uniformLocations[modelShader!!.getOccupyingSlot()]
         modelShader!!.setActiveMapping()
-        modelShader!!.method1674(activeUniformLocation!![15], aClass384465)
+        modelShader!!.method1674(activeUniformLocation!![15], worldMatrix)
         modelShader!!.load3f(activeUniformLocation!![6], eyePos.x, eyePos.y, eyePos.z)
-        modelShader!!.setDiffuseSampler(activeUniformLocation!![3], 1, anInterface31451!!)
+        modelShader!!.setDiffuseSampler(activeUniformLocation!![3], 1, environmentSampler!!)
         loadUnit(unit)
     }
 
@@ -169,6 +169,6 @@ class NativeEnvironmentShaderHd(
 
     override fun loadWorldViewProjection(wvpMatrix: Matrix44) {
         worldViewProjectionMatrix.copyFrom(wvpMatrix)
-        worldViewProjectionMatrix.multiplyBy(activeToolkit.aClass3848729)
+        worldViewProjectionMatrix.multiplyBy(activeToolkit.frustumClipMatrix)
     }
 }

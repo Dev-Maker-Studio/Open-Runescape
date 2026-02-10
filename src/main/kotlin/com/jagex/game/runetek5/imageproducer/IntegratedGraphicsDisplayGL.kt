@@ -42,7 +42,7 @@ class IntegratedGraphicsDisplayGL(
             createDepthBuffer()
         }
         occupiedSlots = 0
-        toolkit.method13578()
+        toolkit.resetDisplay()
         return true
     }
 
@@ -65,7 +65,7 @@ class IntegratedGraphicsDisplayGL(
                 height = renderBuffer!!.getUseHeight()
                 width = renderBuffer.getUseWidth()
                 if (this === toolkit.getDisplay()) {
-                    toolkit.method13639()
+                    toolkit.resetOrthoAndDisplay()
                 }
             }
 
@@ -151,7 +151,7 @@ class IntegratedGraphicsDisplayGL(
                 height = nativeRenderBuffer!!.getUseHeight()
                 width = nativeRenderBuffer.getUseWidth()
                 if (this === toolkit.getDisplay()) {
-                    toolkit.method13639()
+                    toolkit.resetOrthoAndDisplay()
                 }
             }
 

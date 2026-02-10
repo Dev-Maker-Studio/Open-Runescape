@@ -511,7 +511,7 @@ open class ItemType {
             else -> this.modelZoom shl 2
         }
         val modelMatrix = mainToolkit.copyModelMatrix()
-        val matrix4418 = mainToolkit.method8449()
+        val matrix4418 = mainToolkit.getScratchMatrix()
         matrix4418.method6531(16.0f, 16.0f, 512.0f, 512.0f, 50.0f, 2.14748365e9f, mainToolkit.getDisplay()!!.getWidth().toFloat(), mainToolkit.getDisplay()!!.getHeight().toFloat())
         mainToolkit.setModelMatrix(matrix4418)
         mainToolkit.setDrawableArea(0, 0, mainToolkit.getDisplay()!!.getWidth(), mainToolkit.getDisplay()!!.getHeight())

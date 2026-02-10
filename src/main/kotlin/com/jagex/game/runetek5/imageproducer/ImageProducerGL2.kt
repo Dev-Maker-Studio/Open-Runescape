@@ -57,7 +57,7 @@ class ImageProducerGL2 : DelegatingDisplay {
             throw IllegalStateException()
         } else {
             anOpenGL10119.setSurface(aLong10117)
-            aGraphicalRendererSub110118.method13578()
+            aGraphicalRendererSub110118.resetDisplay()
             return true
         }
     }
@@ -82,7 +82,7 @@ class ImageProducerGL2 : DelegatingDisplay {
             anOpenGL10119.surfaceResized(aLong10117)
             method15526()
             if (this == aGraphicalRendererSub110118.getDisplay()) {
-                aGraphicalRendererSub110118.method13639()
+                aGraphicalRendererSub110118.resetOrthoAndDisplay()
             }
         }
     }

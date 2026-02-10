@@ -289,7 +289,7 @@ object ComponentMinimap {
 
                 val w = zan * sizeX + sizeZ * xan shr 14
                 val h = sizeZ * zan - xan * sizeX shr 14
-                sprite.method2773(w + component.width / 2 + clipLeft - sprite.getSpriteWidth() / 2, clipTop + component.height / 2 - h - sprite.getSpriteHeight() / 2, dimension, clipLeft, clipTop)
+                sprite.drawWithSurface(w + component.width / 2 + clipLeft - sprite.getSpriteWidth() / 2, clipTop + component.height / 2 - h - sprite.getSpriteHeight() / 2, dimension, clipLeft, clipTop)
             }
         }
     }
@@ -509,10 +509,10 @@ object ComponentMinimap {
                     val colorPointers = mecType.colorPointers!!
                     var rotation4 = 0
                     while (rotation4 < ints_10.size / 2 - 1) {
-                        toolkit.method8669(ints_10[rotation4 * 2], ints_10[rotation4 * 2 + 1], ints_10[(rotation4 + 1) * 2], ints_10[(rotation4 + 1) * 2 + 1], colors[colorPointers[rotation4].toInt() and 0xff], class4551, clipLeft, clipTop)
+                        toolkit.drawSurfaceLine(ints_10[rotation4 * 2], ints_10[rotation4 * 2 + 1], ints_10[(rotation4 + 1) * 2], ints_10[(rotation4 + 1) * 2 + 1], colors[colorPointers[rotation4].toInt() and 0xff], class4551, clipLeft, clipTop)
                         rotation4++
                     }
-                    toolkit.method8669(ints_10[ints_10.size - 2], ints_10[ints_10.size - 1], ints_10[0], ints_10[1], colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], class4551, clipLeft, clipTop)
+                    toolkit.drawSurfaceLine(ints_10[ints_10.size - 2], ints_10[ints_10.size - 1], ints_10[0], ints_10[1], colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], class4551, clipLeft, clipTop)
                 }
             }
             var iconSprite: NativeSprite? = null
@@ -683,7 +683,7 @@ object ComponentMinimap {
                     }
                     abstractToolkit.drawFilledRectangle(drawPositionX, drawPositionY, halfRegionDimension * 4, halfRegionDimension * 4, pixelClearColor, 2)
                     if (!MapRegion.requiresDisplayResize) {
-                        minimapBackground!!.method2750(width * 4 + 48, regionDimensionY * 4 + 48 - length * 4 - halfRegionDimension * 4, halfRegionDimension * 4, halfRegionDimension * 4, drawPositionX, drawPositionY)
+                        minimapBackground!!.captureScreenRegion(width * 4 + 48, regionDimensionY * 4 + 48 - length * 4 - halfRegionDimension * 4, halfRegionDimension * 4, halfRegionDimension * 4, drawPositionX, drawPositionY)
                         if (MapRegion.requiresClippingReset) {
                             minimapBackground!!.draw(256, 0)
                             try {

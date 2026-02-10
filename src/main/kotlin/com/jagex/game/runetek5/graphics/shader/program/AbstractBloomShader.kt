@@ -10,32 +10,32 @@ abstract class AbstractBloomShader protected constructor(
 
     @JvmField var hasLinkedVector: Boolean = false
 
-    abstract fun method1097(): Boolean
+    abstract fun loadShader(): Boolean
 
     abstract fun isLoaded(): Boolean
 
-    open fun method1099(): Boolean {
-        return method1097()
+    open fun reloadShader(): Boolean {
+        return loadShader()
     }
 
     open fun getIterations(): Int {
         return 1
     }
 
-    abstract fun method1102()
+    abstract fun onRendererInitialized()
 
     abstract fun initialize(type: Int, display: DirectDisplay, compositeSampler: NativeTextureSampler, var5: NativeTextureSampler)
 
     abstract fun reset()
 
-    open fun method1105() {
+    open fun onShutdown() {
     }
 
     open fun getFormatType(): Int {
         return 0
     }
 
-    fun method1107(): Boolean {
+    fun isLinked(): Boolean {
         return this.hasLinkedVector
     }
 

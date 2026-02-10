@@ -5,15 +5,15 @@ class TextureStageState(
 ) {
     companion object {
         @JvmField
-        val aClass67679: TextureStageState = TextureStageState(3)
+        val PREVIOUS: TextureStageState = TextureStageState(3)
 
         @JvmField
-        val aClass67680: TextureStageState = TextureStageState(2)
+        val TEXTURE: TextureStageState = TextureStageState(2)
 
         @JvmField
-        val aClass67678: TextureStageState = TextureStageState(1)
+        val PRIMARY_COLOR: TextureStageState = TextureStageState(1)
 
         @JvmField
-        val aClass67677: TextureStageState = TextureStageState(0)
+        val CONSTANT: TextureStageState = TextureStageState(0)
     }
 }

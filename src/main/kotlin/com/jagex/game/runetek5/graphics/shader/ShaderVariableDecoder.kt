@@ -78,11 +78,11 @@ A: bloomTex1
  */
 class ShaderVariableDecoder {
 
-    @JvmField var anIntArray1531: IntArray? = null
-    @JvmField var anIntArray1534: IntArray? = null
-    @JvmField var aClass1111529: ShaderVariableType? = null
-    @JvmField var aClass1111533: ShaderVariableType? = null
-    @JvmField var anInt1528 = -1
+    @JvmField var mappingProgramIndices: IntArray? = null
+    @JvmField var mappingSlotIndices: IntArray? = null
+    @JvmField var variableType: ShaderVariableType? = null
+    @JvmField var elementType: ShaderVariableType? = null
+    @JvmField var arraySize = -1
 
     /**
      * Always used
@@ -96,20 +96,20 @@ class ShaderVariableDecoder {
 
     fun decode(shaderBuffer: ShaderBuffer) {
         val mainEntryCount = shaderBuffer.getEntryCount()
-        aClass1111529 = ShaderVariableType.getAll()[mainEntryCount]
-        if (aClass1111529 == ShaderVariableType.aClass1111109) {
+        variableType = ShaderVariableType.getAll()[mainEntryCount]
+        if (variableType == ShaderVariableType.aClass1111109) {
             val i_4 = shaderBuffer.getEntryCount()
-            aClass1111533 = ShaderVariableType.getAll()[i_4]
-            anInt1528 = shaderBuffer.getEntryCount()
+            elementType = ShaderVariableType.getAll()[i_4]
+            arraySize = shaderBuffer.getEntryCount()
         }
         primaryShaderAttributeName = shaderBuffer.readString()
         secondaryShaderAttributeName = shaderBuffer.readString()
         val count = shaderBuffer.getEntryCount()
-        anIntArray1531 = IntArray(count)
-        anIntArray1534 = IntArray(count)
+        mappingProgramIndices = IntArray(count)
+        mappingSlotIndices = IntArray(count)
         for (index in 0 until count) {
-            anIntArray1531!![index] = shaderBuffer.getEntryCount()
-            anIntArray1534!![index] = shaderBuffer.getEntryCount()
+            mappingProgramIndices!![index] = shaderBuffer.getEntryCount()
+            mappingSlotIndices!![index] = shaderBuffer.getEntryCount()
         }
     }
 }

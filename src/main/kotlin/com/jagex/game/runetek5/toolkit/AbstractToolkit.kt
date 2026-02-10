@@ -102,7 +102,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun hasBloomSupport(): Boolean
 
-    abstract fun method8404(): Boolean
+    abstract fun hasHardwareRendering(): Boolean
 
     abstract fun hasAntiAliasing(): Boolean
 
@@ -239,7 +239,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun createFontRenderer(var1: FontMetrics?, var2: Array<SpriteType>?, var3: Boolean): AbstractFontRenderer
 
-    abstract fun method8449(): Matrix44
+    abstract fun getScratchMatrix(): Matrix44
 
     abstract fun getRenderingMatrix(): Matrix43
 
@@ -305,7 +305,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         setBloomFilter(whitepoint, bloom, brightpass)
     }
 
-    abstract fun method8474()
+    abstract fun compositeBloomEffects()
 
     abstract fun addWater(waterTile: WaterTile)
 
@@ -342,7 +342,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         }
     }
 
-    abstract fun method8525(screenCanvasWidth: Int, screenCanvasHeight: Int)
+    abstract fun beginBloomCapture(screenCanvasWidth: Int, screenCanvasHeight: Int)
 
     abstract fun clearRectangle(dimension: ComponentSurface, clipLeft: Int, clipTop: Int)
 
@@ -411,7 +411,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun createNativeSprite(var1: Int, var2: Int, var3: Int, var4: Int, var5: Boolean): NativeSprite
 
-    abstract fun method8669(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var7: ComponentSurface, clipLeft: Int, clipTop: Int)
+    abstract fun drawSurfaceLine(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var7: ComponentSurface, clipLeft: Int, clipTop: Int)
 
     companion object {
         @JvmField

@@ -933,8 +933,8 @@ class ModelGL : Model {
         val projectedVerticesY = this.toolkit.projectedVerticesY
 
         for (v in 0 until this.maxDepth) {
-            val x = ((this.verticesX!![v] - (this.toolkit.anInt8438 * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startX
-            val y = ((this.verticesZ!![v] - (this.toolkit.anInt8439 * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startY
+            val x = ((this.verticesX!![v] - (this.toolkit.shadowOffsetX * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startX
+            val y = ((this.verticesZ!![v] - (this.toolkit.shadowOffsetZ * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startY
             val i_7 = this.triangles!![v]
             val i_8 = this.triangles!![v + 1]
 
@@ -1571,11 +1571,11 @@ class ModelGL : Model {
 
         if (billboardEffectsLocal != null && billboardSurfacesLocal != null &&
             verticesXLocal != null && verticesYLocal != null && verticesZLocal != null && faceList != null) {
-            val matrix442 = this.toolkit.aClass3848361
+            val matrix442 = this.toolkit.billboardMatrix
             this.toolkit.pushMatrix()
             this.toolkit.setDepthBuffering(!this.hasAlphaTransition)
             this.toolkit.setLightingEnabled(false)
-            this.toolkit.toggleDrawingClientstates(this.toolkit.aClass1438494, null, null, this.toolkit.aClass1438495)
+            this.toolkit.toggleDrawingClientstates(this.toolkit.quadVertexBuffer, null, null, this.toolkit.quadTexCoordBuffer)
 
             for (b in 0 until this.billboardCount) {
                 val effect = billboardEffectsLocal[b] ?: continue
@@ -1802,8 +1802,8 @@ class ModelGL : Model {
                     f_39 = sunDirection[1]
                     val f_40 = sunDirection[2]
                     val f_41 = this.toolkit.sunBrightness
-                    f_20 = this.toolkit.aFloat8433 * 768.0f / this.contrast
-                    val f_21 = this.toolkit.aFloat8434 * 768.0f / this.contrast
+                    f_20 = this.toolkit.sunColorIntensity * 768.0f / this.contrast
+                    val f_21 = this.toolkit.antiSunColorIntensity * 768.0f / this.contrast
 
                     for (i_22 in 0 until this.numFaces) {
                         val i_23 = hslToRgb(facesColorLocal[i_22], facesMaterialLocal[i_22], this.ambient, facesAlphaLocal[i_22])
@@ -2080,9 +2080,9 @@ class ModelGL : Model {
     }
 
     override fun calculateProjection(camX: Int, camY: Int, modelMatrix: Matrix43, notRendered: Boolean, sizeShift: Int): Boolean {
-        val matrix446 = this.toolkit.aClass3848380
+        val matrix446 = this.toolkit.tempModelMatrix
         matrix446.fromMatrix(modelMatrix)
-        matrix446.multiplyBy(this.toolkit.aClass3848394)
+        matrix446.multiplyBy(this.toolkit.viewProjectionMatrix)
         var bool7 = false
         var i_8 = Int.MAX_VALUE
         var i_9 = Int.MIN_VALUE
@@ -2138,8 +2138,8 @@ class ModelGL : Model {
             if (f_28 >= -f_29) {
                 val f_30 = matrix446.faceList!![0] * i_39 + matrix446.faceList!![4] * i_26 + matrix446.faceList!![8] * i_27 + matrix446.faceList!![12]
                 val f_31 = matrix446.faceList!![1] * i_39 + matrix446.faceList!![5] * i_26 + matrix446.faceList!![9] * i_27 + matrix446.faceList!![13]
-                val i_32 = (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_30 / f_29).toInt()
-                val i_33 = (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_31 / f_29).toInt()
+                val i_32 = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_30 / f_29).toInt()
+                val i_33 = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_31 / f_29).toInt()
                 if (i_32 < i_8) {
                     i_8 = i_32
                 }
@@ -2191,8 +2191,8 @@ class ModelGL : Model {
                             break
                         }
 
-                        projectedVerticesX[i_37] = (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_42 / f_31).toInt()
-                        projectedVerticesY[i_37] = (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_43 / f_31).toInt()
+                        projectedVerticesX[i_37] = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_42 / f_31).toInt()
+                        projectedVerticesY[i_37] = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_43 / f_31).toInt()
                     }
                 } else {
                     val i_32 = this.triangles!![i_26]
@@ -2229,17 +2229,17 @@ class ModelGL : Model {
         }
 
         if (this.numNormals != 0) {
-            val matrix444 = this.toolkit.aClass3848442
-            val matrix445 = this.toolkit.aClass3848380
-            val matrix446 = this.toolkit.aClass3848407
+            val matrix444 = this.toolkit.currentModelMatrix
+            val matrix445 = this.toolkit.tempModelMatrix
+            val matrix446 = this.toolkit.tempProjectionMatrix
             matrix445.fromMatrix(projectionMatrix)
             matrix446.copyFrom(matrix445)
-            matrix446.multiplyBy(this.toolkit.aClass3848394)
+            matrix446.multiplyBy(this.toolkit.viewProjectionMatrix)
             if (!this.boundsCalculated) {
                 calculateBounds()
             }
 
-            val floats_7 = this.toolkit.aFloatArray8396
+            val floats_7 = this.toolkit.lightParameterBuffer
             matrix445.scale(0.0f, this.minY.toFloat(), 0.0f, floats_7)
             val f_8 = floats_7[0]
             val f_9 = floats_7[1]
@@ -2250,7 +2250,7 @@ class ModelGL : Model {
             val f_13 = floats_7[2]
 
             for (i_14 in 0 until 6) {
-                val floats_33 = this.toolkit.aFloatArrayArray8395!![i_14]
+                val floats_33 = this.toolkit.frustumPlanes!![i_14]
                 val f_16 = floats_33[0] * f_8 + floats_33[1] * f_9 + floats_33[2] * f_10 + floats_33[3] + this.size2d
                 val f_17 = floats_33[0] * f_11 + floats_33[1] * f_12 + floats_33[2] * f_13 + floats_33[3] + this.size2d
                 if (f_16 < 0.0f && f_17 < 0.0f) {
@@ -2269,8 +2269,8 @@ class ModelGL : Model {
                 var f_23 = matrix446.faceList!![2] * i_35 + matrix446.faceList!![6] * s_19 + matrix446.faceList!![10] * i_36 + matrix446.faceList!![14]
                 var f_24 = matrix446.faceList!![3] * i_35 + matrix446.faceList!![7] * s_19 + matrix446.faceList!![11] * i_36 + matrix446.faceList!![15]
                 if (f_23 >= -f_24) {
-                    boundingBox.left = (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_21 / f_24).toInt()
-                    boundingBox.bottom = (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_22 / f_24).toInt()
+                    boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_21 / f_24).toInt()
+                    boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_22 / f_24).toInt()
                 } else {
                     bool34 = true
                 }
@@ -2281,8 +2281,8 @@ class ModelGL : Model {
                 val f_27 = matrix446.faceList!![2] * i_35 + matrix446.faceList!![6] * s_19 + matrix446.faceList!![10] * i_36 + matrix446.faceList!![14]
                 val f_28 = matrix446.faceList!![3] * i_35 + matrix446.faceList!![7] * s_19 + matrix446.faceList!![11] * i_36 + matrix446.faceList!![15]
                 if (f_27 >= -f_28) {
-                    boundingBox.right = (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_25 / f_28).toInt()
-                    boundingBox.top = (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_26 / f_28).toInt()
+                    boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_25 / f_28).toInt()
+                    boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_26 / f_28).toInt()
                 } else {
                     bool34 = true
                 }
@@ -2300,15 +2300,15 @@ class ModelGL : Model {
                             f_30 = f_21 + f_29 * (f_25 - f_21)
                             f_31 = f_22 + f_29 * (f_26 - f_22)
                             f_32 = f_24 + f_29 * (f_28 - f_24)
-                            boundingBox.left = (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_30 / f_32).toInt()
-                            boundingBox.bottom = (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_31 / f_32).toInt()
+                            boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_30 / f_32).toInt()
+                            boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_31 / f_32).toInt()
                         } else if (f_27 < -f_28) {
                             f_29 = (f_27 + f_28) / (f_23 + f_24) - 1.0f
                             f_30 = f_25 + f_29 * (f_21 - f_25)
                             f_31 = f_26 + f_29 * (f_22 - f_26)
                             f_32 = f_28 + f_29 * (f_24 - f_28)
-                            boundingBox.right = (this.toolkit.aFloat8315 + this.toolkit.imageProducerCenterX * f_30 / f_32).toInt()
-                            boundingBox.top = (this.toolkit.aFloat8399 + this.toolkit.imageProducerCenterY * f_31 / f_32).toInt()
+                            boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_30 / f_32).toInt()
+                            boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_31 / f_32).toInt()
                         }
                     }
                 }
@@ -2317,11 +2317,11 @@ class ModelGL : Model {
                     if (f_23 / f_24 > f_27 / f_28) {
                         f_29 = f_21 + matrix444.faceList!![0] * this.size2d + matrix444.faceList!![12]
                         f_30 = f_24 + matrix444.faceList!![3] * this.size2d + matrix444.faceList!![15]
-                        boundingBox.size = (this.toolkit.aFloat8315 - boundingBox.left + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
+                        boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
                     } else {
                         f_29 = f_25 + matrix444.faceList!![0] * this.size2d + matrix444.faceList!![12]
                         f_30 = f_28 + matrix444.faceList!![3] * this.size2d + matrix444.faceList!![15]
-                        boundingBox.size = (this.toolkit.aFloat8315 - boundingBox.right + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
+                        boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
                     }
 
                     boundingBox.positionCalculated = true
@@ -2332,7 +2332,7 @@ class ModelGL : Model {
             this.toolkit.multiMatrix(matrix445)
             method13534()
             this.toolkit.popMatrix()
-            matrix445.multiplyBy(this.toolkit.aClass3848348)
+            matrix445.multiplyBy(this.toolkit.viewMatrix44)
             method13535(matrix445)
             if ((rasterizerFunctionMask and 0x2) != 0) {
                 OpenGL.glPolygonMode(1032, 6914)  // Reset GL_FRONT_AND_BACK to GL_FILL
@@ -2734,7 +2734,7 @@ class ModelGL : Model {
         if (this.verticesSubmeshes != null) {
             var matrix44var4 = var1
             if (var3) {
-                matrix44var4 = this.toolkit.aClass2948405
+                matrix44var4 = this.toolkit.inverseSunMatrix43
                 matrix44var4.updateMatrix(var1)
             }
 
@@ -2752,7 +2752,7 @@ class ModelGL : Model {
     }
 
     override fun updateParticlePosition(projectionMatrix: Matrix43) {
-        val matrix442 = this.toolkit.aClass3848380
+        val matrix442 = this.toolkit.tempModelMatrix
         matrix442.fromMatrix(projectionMatrix)
         if (this.emissiveTriangles != null) {
             for (i_3 in this.emissiveTriangles!!.indices) {

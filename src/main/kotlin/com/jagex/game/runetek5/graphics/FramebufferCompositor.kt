@@ -16,11 +16,11 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
     var renderBuffer: OpenGlRenderBuffer? = null
     var activeTexture: OpenGl2DTexture? = null
     var hdrRenderBuffer: OpenGlRenderBuffer? = null
-    var aBool2103 = true
-    var aBool2109 = true
-    var aBool2105 = true
+    var isDepthBufferDirty = true
+    var isFboAttachmentDirty = true
+    var isFramebufferDirty = true
     var pixelFormatSet = true
-    var aBool2100 = false
+    var isCompositionPending = false
     var s = 1
     var t = 1
     var vertexCoordinateX = 0
@@ -28,25 +28,25 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
     var format: GLActionFormat = GLActionFormat.PIXEL_FORMAT
     var loadTexture = false
     var texturedFaceCount = 0
-    val aClass4732108 = LinkedList()
+    val effectsList = LinkedList()
     var textures2d: Array<OpenGl2DTexture?>? = arrayOfNulls<OpenGl2DTexture>(2)
-    var aClass158Sub1Sub42099: IntegratedGraphicsDisplayGL? = null
-    var aClass158Sub1Sub42095: IntegratedGraphicsDisplayGL? = null
-    var aClass158Sub1Sub42101: IntegratedGraphicsDisplayGL? = null
+    var resolveDisplay: IntegratedGraphicsDisplayGL? = null
+    var activeDisplay: IntegratedGraphicsDisplayGL? = null
+    var multisampleDisplay: IntegratedGraphicsDisplayGL? = null
 
     init {
         if (activeToolkit.intelGpu && activeToolkit.arbRectangleTexturesSupported) {
-            aClass158Sub1Sub42099 = IntegratedGraphicsDisplayGL(activeToolkit)
-            aClass158Sub1Sub42095 = aClass158Sub1Sub42099
+            resolveDisplay = IntegratedGraphicsDisplayGL(activeToolkit)
+            activeDisplay = resolveDisplay
             if (activeToolkit.multiSamplesPreference > 1 && activeToolkit.framebufferBlit && activeToolkit.framebufferMultisample) {
-                aClass158Sub1Sub42101 = IntegratedGraphicsDisplayGL(activeToolkit)
-                aClass158Sub1Sub42095 = aClass158Sub1Sub42101
+                multisampleDisplay = IntegratedGraphicsDisplayGL(activeToolkit)
+                activeDisplay = multisampleDisplay
             }
         }
     }
 
-    fun method2881(): Boolean {
-        if (aBool2103) {
+    fun rebuildFramebuffers(): Boolean {
+        if (isDepthBufferDirty) {
             if (renderBuffer != null) {
                 renderBuffer!!.deallocate()
                 renderBuffer = null
@@ -70,24 +70,24 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                 textures2d?.set(1, null)
             }
         }
-        if (aBool2103) {
-            if (aClass158Sub1Sub42101 != null) {
-                renderBuffer = OpenGlRenderBuffer(activeToolkit, GLFormat.aClass1501953, GLActionFormat.DEPTH_COMPONENT_24, s, t, activeToolkit.multiSamplesPreference)
+        if (isDepthBufferDirty) {
+            if (multisampleDisplay != null) {
+                renderBuffer = OpenGlRenderBuffer(activeToolkit, GLFormat.DEPTH, GLActionFormat.DEPTH_COMPONENT_24, s, t, activeToolkit.multiSamplesPreference)
             }
 
             if (loadTexture) {
-                activeTexture = OpenGl2DTexture(activeToolkit, 34037, GLFormat.aClass1501953, GLActionFormat.DEPTH_COMPONENT_24, s, t)
+                activeTexture = OpenGl2DTexture(activeToolkit, 34037, GLFormat.DEPTH, GLActionFormat.DEPTH_COMPONENT_24, s, t)
             } else if (renderBuffer == null) {
-                renderBuffer = OpenGlRenderBuffer(activeToolkit, GLFormat.aClass1501953, GLActionFormat.DEPTH_COMPONENT_24, s, t)
+                renderBuffer = OpenGlRenderBuffer(activeToolkit, GLFormat.DEPTH, GLActionFormat.DEPTH_COMPONENT_24, s, t)
             }
 
-            aBool2103 = false
-            aBool2109 = true
-            aBool2105 = true
+            isDepthBufferDirty = false
+            isFboAttachmentDirty = true
+            isFramebufferDirty = true
         }
 
         if (pixelFormatSet) {
-            if (aClass158Sub1Sub42101 != null) {
+            if (multisampleDisplay != null) {
                 hdrRenderBuffer = OpenGlRenderBuffer(activeToolkit, GLFormat.HDR, format, s, t, activeToolkit.multiSamplesPreference)
             }
 
@@ -95,65 +95,65 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
             textures2d?.set(0, OpenGl2DTexture(activeToolkit, 34037, GLFormat.HDR, format, s, t))
             textures2d?.set(1, if (texturedFaceCount > 1) OpenGl2DTexture(activeToolkit, 34037, GLFormat.HDR, format, s, t) else null)
             pixelFormatSet = false
-            aBool2109 = true
-            aBool2105 = true
+            isFboAttachmentDirty = true
+            isFramebufferDirty = true
         }
 
-        if (aBool2109) {
-            if (aClass158Sub1Sub42101 != null) {
-                activeToolkit.setDisplay(aClass158Sub1Sub42099!!)
-                aClass158Sub1Sub42099!!.setRenderBuffer(null)
-                aClass158Sub1Sub42099!!.setFramebuffer(0, null)
-                aClass158Sub1Sub42099!!.setFramebuffer(1, null)
-                aClass158Sub1Sub42099!!.setFramebuffer(0, textures2d?.get(0)?.createFrameBuffer())
-                aClass158Sub1Sub42099!!.setFramebuffer(1, if (texturedFaceCount > 1) textures2d?.get(1)?.createFrameBuffer() else null)
+        if (isFboAttachmentDirty) {
+            if (multisampleDisplay != null) {
+                activeToolkit.setDisplay(resolveDisplay!!)
+                resolveDisplay!!.setRenderBuffer(null)
+                resolveDisplay!!.setFramebuffer(0, null)
+                resolveDisplay!!.setFramebuffer(1, null)
+                resolveDisplay!!.setFramebuffer(0, textures2d?.get(0)?.createFrameBuffer())
+                resolveDisplay!!.setFramebuffer(1, if (texturedFaceCount > 1) textures2d?.get(1)?.createFrameBuffer() else null)
                 if (loadTexture) {
-                    aClass158Sub1Sub42099!!.setRenderBuffer(activeTexture!!.createRenderBuffer())
+                    resolveDisplay!!.setRenderBuffer(activeTexture!!.createRenderBuffer())
                 }
 
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42099!!)
-                activeToolkit.setDisplay(aClass158Sub1Sub42101!!)
-                aClass158Sub1Sub42101!!.setRenderBuffer(null)
-                aClass158Sub1Sub42101!!.setFramebuffer(0, null)
-                aClass158Sub1Sub42101!!.setFramebuffer(0, hdrRenderBuffer)
-                aClass158Sub1Sub42101!!.setRenderBuffer(renderBuffer)
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42101!!)
+                activeToolkit.resizeDisplay(resolveDisplay!!)
+                activeToolkit.setDisplay(multisampleDisplay!!)
+                multisampleDisplay!!.setRenderBuffer(null)
+                multisampleDisplay!!.setFramebuffer(0, null)
+                multisampleDisplay!!.setFramebuffer(0, hdrRenderBuffer)
+                multisampleDisplay!!.setRenderBuffer(renderBuffer)
+                activeToolkit.resizeDisplay(multisampleDisplay!!)
             } else {
-                activeToolkit.setDisplay(aClass158Sub1Sub42099!!)
-                aClass158Sub1Sub42099!!.setRenderBuffer(null)
-                aClass158Sub1Sub42099!!.setFramebuffer(0, null)
-                aClass158Sub1Sub42099!!.setFramebuffer(1, null)
-                aClass158Sub1Sub42099!!.setFramebuffer(0, textures2d?.get(0)?.createFrameBuffer())
-                aClass158Sub1Sub42099!!.setFramebuffer(1, if (texturedFaceCount > 1) textures2d?.get(1)?.createFrameBuffer() else null)
+                activeToolkit.setDisplay(resolveDisplay!!)
+                resolveDisplay!!.setRenderBuffer(null)
+                resolveDisplay!!.setFramebuffer(0, null)
+                resolveDisplay!!.setFramebuffer(1, null)
+                resolveDisplay!!.setFramebuffer(0, textures2d?.get(0)?.createFrameBuffer())
+                resolveDisplay!!.setFramebuffer(1, if (texturedFaceCount > 1) textures2d?.get(1)?.createFrameBuffer() else null)
                 if (loadTexture) {
-                    aClass158Sub1Sub42099!!.setRenderBuffer(activeTexture!!.createRenderBuffer())
+                    resolveDisplay!!.setRenderBuffer(activeTexture!!.createRenderBuffer())
                 } else {
-                    aClass158Sub1Sub42099!!.setRenderBuffer(renderBuffer)
+                    resolveDisplay!!.setRenderBuffer(renderBuffer)
                 }
 
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42099!!)
+                activeToolkit.resizeDisplay(resolveDisplay!!)
             }
 
-            aBool2109 = false
-            aBool2105 = true
+            isFboAttachmentDirty = false
+            isFramebufferDirty = true
         }
 
-        if (aBool2105) {
-            activeToolkit.setDisplay(aClass158Sub1Sub42095!!)
-            aBool2105 = !aClass158Sub1Sub42095!!.isFramebufferComplete()
-            activeToolkit.resizeDisplay(aClass158Sub1Sub42095!!)
+        if (isFramebufferDirty) {
+            activeToolkit.setDisplay(activeDisplay!!)
+            isFramebufferDirty = !activeDisplay!!.isFramebufferComplete()
+            activeToolkit.resizeDisplay(activeDisplay!!)
         }
 
-        return !aBool2105
+        return !isFramebufferDirty
     }
 
-    fun method2883() {
-        if (aBool2100) {
-            if (aClass158Sub1Sub42101 != null) {
-                activeToolkit.resizeDisplay(aClass158Sub1Sub42101!!)
-                activeToolkit.setDisplay(aClass158Sub1Sub42099!!)
-                aClass158Sub1Sub42099!!.drawBuffer(0)
-                aClass158Sub1Sub42101!!.bindFrameBuffer(s, t, loadTexture)
+    fun compositeEffects() {
+        if (isCompositionPending) {
+            if (multisampleDisplay != null) {
+                activeToolkit.resizeDisplay(multisampleDisplay!!)
+                activeToolkit.setDisplay(resolveDisplay!!)
+                resolveDisplay!!.drawBuffer(0)
+                multisampleDisplay!!.bindFrameBuffer(s, t, loadTexture)
             }
 
             activeToolkit.setupSpriteRendering()
@@ -164,16 +164,16 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
             var colorAttachmentSlot = 1
 
             var prev: PostProcessEffect?
-            var tail = aClass4732108.getTail() as PostProcessEffect?
+            var tail = effectsList.getTail() as PostProcessEffect?
             while (tail != null) {
-                prev = aClass4732108.getPrevious() as PostProcessEffect?
+                prev = effectsList.getPrevious() as PostProcessEffect?
                 val numTexturedFaces = tail.getTexturedFaces()
 
                 for (face in 0 until numTexturedFaces) {
                     textures2d?.get(textureIndex)?.let { tail.draw(it) }
                     if (prev == null && face == numTexturedFaces - 1) {
-                        activeToolkit.resizeDisplay(aClass158Sub1Sub42099!!)
-                        activeToolkit.method13640(0, 0)
+                        activeToolkit.resizeDisplay(resolveDisplay!!)
+                        activeToolkit.setViewportOffset(0, 0)
                         OpenGL.glBegin(7)
                         OpenGL.glTexCoord2f(0.0f, t.toFloat())
                         OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 1.0f)
@@ -188,7 +188,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                         OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 1.0f, 1.0f)
                         OpenGL.glVertex2i(vertexCoordinateX + s, vertexCoordinateY)
                     } else {
-                        aClass158Sub1Sub42099!!.drawBuffer(colorAttachmentSlot)
+                        resolveDisplay!!.drawBuffer(colorAttachmentSlot)
                         OpenGL.glBegin(7)
                         OpenGL.glTexCoord2f(0.0f, t.toFloat())
                         OpenGL.glMultiTexCoord2f(GL_TEXTURE1, 0.0f, 1.0f)
@@ -213,32 +213,32 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                 tail = prev
             }
 
-            aBool2100 = false
+            isCompositionPending = false
         }
     }
 
-    fun method2884(s: Int, t: Int): Boolean {
-        if (aClass158Sub1Sub42095 != null && !aClass4732108.isEmpty()) {
+    fun prepareForRendering(s: Int, t: Int): Boolean {
+        if (activeDisplay != null && !effectsList.isEmpty()) {
             if (s != this.s || t != this.t) {
                 this.s = s
                 this.t = t
-                var node5: Any? = aClass4732108.getTail()
-                while (node5 !== aClass4732108.head) {
+                var node5: Any? = effectsList.getTail()
+                while (node5 !== effectsList.head) {
                     (node5 as PostProcessEffect).calculateMipmaps(this.s, this.t)
                     node5 = (node5 as? Node<*>)?.next
                 }
                 pixelFormatSet = true
-                aBool2103 = true
-                aBool2109 = true
+                isDepthBufferDirty = true
+                isFboAttachmentDirty = true
             }
-            if (method2881()) {
+            if (rebuildFramebuffers()) {
                 vertexCoordinateX = 0
                 vertexCoordinateY = 0
-                aBool2100 = true
-                activeToolkit.method13640(-vertexCoordinateX, t + vertexCoordinateY - activeToolkit.getDisplay()!!.getHeight())
-                activeToolkit.setDisplay(aClass158Sub1Sub42095!!)
+                isCompositionPending = true
+                activeToolkit.setViewportOffset(-vertexCoordinateX, t + vertexCoordinateY - activeToolkit.getDisplay()!!.getHeight())
+                activeToolkit.setDisplay(activeDisplay!!)
                 activeToolkit.applyClearFlags(3, 0)
-                aClass158Sub1Sub42095!!.drawBuffer(0)
+                activeDisplay!!.drawBuffer(0)
                 return true
             }
             return false
@@ -246,19 +246,19 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
         return false
     }
 
-    fun method2885(class282Sub51: PostProcessEffect) {
+    fun removeEffect(class282Sub51: PostProcessEffect) {
         class282Sub51.aBool7506 = false
         class282Sub51.destroy()
         class282Sub51.unlink()
-        method2886()
+        recalculateFormat()
     }
 
-    fun method2886() {
+    fun recalculateFormat() {
         var texturedFaces = 0
         var loadTexture = false
         var pixelFormat = GLActionFormat.PIXEL_FORMAT
 
-        var node = aClass4732108.getTail() as PostProcessEffect?
+        var node = effectsList.getTail() as PostProcessEffect?
         while (node != null) {
             val class767 = node.getFormat()
             if (class767.bytesPerEntry > pixelFormat.bytesPerEntry) {
@@ -266,7 +266,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
             }
             loadTexture = loadTexture or node.loadTexture()
             texturedFaces += node.getTexturedFaces()
-            node = aClass4732108.getPrevious() as PostProcessEffect?
+            node = effectsList.getPrevious() as PostProcessEffect?
         }
 
         if (pixelFormat != format) {
@@ -277,30 +277,30 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
         val newFaces = Math.min(2, texturedFaces)
         if (currFaces != newFaces) {
             pixelFormatSet = true
-            aBool2109 = true
+            isFboAttachmentDirty = true
         }
         if (loadTexture != this.loadTexture) {
             this.loadTexture = loadTexture
-            aBool2103 = true
+            isDepthBufferDirty = true
         }
         texturedFaceCount = texturedFaces
     }
 
-    fun method2896(): Boolean {
-        return aClass158Sub1Sub42095 != null
+    fun isDisplayAvailable(): Boolean {
+        return activeDisplay != null
     }
 
     fun shutdown() {
-        aClass158Sub1Sub42099 = null
-        aClass158Sub1Sub42101 = null
-        aClass158Sub1Sub42095 = null
+        resolveDisplay = null
+        multisampleDisplay = null
+        activeDisplay = null
         renderBuffer = null
         activeTexture = null
         textures2d = null
         hdrRenderBuffer = null
-        if (!aClass4732108.isEmpty()) {
-            var node1: Any? = aClass4732108.getTail()
-            while (node1 !== aClass4732108.head) {
+        if (!effectsList.isEmpty()) {
+            var node1: Any? = effectsList.getTail()
+            while (node1 !== effectsList.head) {
                 (node1 as PostProcessEffect).destroy()
                 node1 = (node1 as? Node<*>)?.next
             }
@@ -310,12 +310,12 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
         s = 1
     }
 
-    fun method2900(node: PostProcessEffect): Boolean {
-        if (aClass158Sub1Sub42095 != null) {
+    fun addEffect(node: PostProcessEffect): Boolean {
+        if (activeDisplay != null) {
             if (node.displayPresent() || node.createShaders()) {
-                aClass4732108.insertTail(node)
-                method2886()
-                if (method2881()) {
+                effectsList.insertTail(node)
+                recalculateFormat()
+                if (rebuildFramebuffers()) {
                     if (s != -1 && t != -1) {
                         node.calculateMipmaps(s, t)
                     }
@@ -323,7 +323,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                     return true
                 }
             }
-            method2885(node)
+            removeEffect(node)
         }
         return false
     }

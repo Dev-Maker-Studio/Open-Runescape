@@ -2392,7 +2392,7 @@ open class ModelSM : Model {
             val resource = this.toolkit.getThreadResource(Thread.currentThread())!!
             val particleMatrix = resource.particleMatrix
             particleMatrix.fromMatrix(matrix44var1)
-            val matrix446 = this.toolkit.aClass3848994!!
+            val matrix446 = this.toolkit.viewMatrix44!!
             val matrix447 = this.toolkit.modelMatrix!!
             if (!this.boundsUpdated) {
                 calculateBounds()
@@ -2410,7 +2410,7 @@ open class ModelSM : Model {
             var f_18: Float
             var f_19: Float
             for (i_16 in 0..5) {
-                val floats_17 = this.toolkit.aFloatArrayArray8989!![i_16]
+                val floats_17 = this.toolkit.frustumPlanes!![i_16]
                 f_18 = floats_17[0] * offsetXA + floats_17[1] * offsetYA + floats_17[2] * offsetZA + floats_17[3] + this.size2d
                 f_19 = floats_17[0] * offsetXB + floats_17[1] * offsetYB + floats_17[2] * offsetZB + floats_17[3] + this.size2d
                 if (f_18 < 0.0f && f_19 < 0.0f) {
@@ -2496,18 +2496,18 @@ open class ModelSM : Model {
                     if (mZ > -mZB2) {
                         mX += matrix447.faceList[0] * surface.offsetX + matrix447.faceList[4] * surface.offsetY
                         mY += matrix447.faceList[1] * surface.offsetX + matrix447.faceList[5] * surface.offsetY
-                        val xx = this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * mX / mZB2
-                        val yy = this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * mY / mZB2
+                        val xx = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * mX / mZB2
+                        val yy = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * mY / mZB2
                         val adjustedSizeX = surface.scaleX * effect.size2d
                         val adjustedSizeY = surface.scaleY * effect.size3d
                         val adjustX = mX + matrix447.faceList[0] * adjustedSizeX + matrix447.faceList[4] * adjustedSizeY
                         val adjustY = mY + matrix447.faceList[1] * adjustedSizeX + matrix447.faceList[5] * adjustedSizeY
                         val adjustZB2 = mZB2 + matrix447.faceList[3] * adjustedSizeX + matrix447.faceList[7] * adjustedSizeY
-                        val otherX = this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * adjustX / adjustZB2
-                        val otherY = this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * adjustY / adjustZB2
+                        val otherX = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * adjustX / adjustZB2
+                        val otherY = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * adjustY / adjustZB2
                         surface.x = xx.toInt()
                         surface.y = yy.toInt()
-                        surface.z = this.toolkit.aFloat8985 + this.toolkit.aFloat8978 * (mZ - matrix447.faceList[10] * effect.distance) / mZB2
+                        surface.z = this.toolkit.depthRangeNear + this.toolkit.depthRangeFar * (mZ - matrix447.faceList[10] * effect.distance) / mZB2
                         surface.size2d = (if (otherX < xx) xx - otherX else otherX - xx).toInt()
                         surface.size3d = (if (otherY < yy) yy - otherY else otherY - yy).toInt()
                     } else {
@@ -2527,8 +2527,8 @@ open class ModelSM : Model {
                 var f_33 = renderMatrix.faceList[2] * sizeDeltaX + renderMatrix.faceList[6] * mY + renderMatrix.faceList[10] * sizeDeltaZ + renderMatrix.faceList[14]
                 var f_34 = renderMatrix.faceList[3] * sizeDeltaX + renderMatrix.faceList[7] * mY + renderMatrix.faceList[11] * sizeDeltaZ + renderMatrix.faceList[15]
                 if (f_33 >= -f_34) {
-                    renderedEntity.left = (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * zz / f_34).toInt()
-                    renderedEntity.bottom = (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_64 / f_34).toInt()
+                    renderedEntity.left = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * zz / f_34).toInt()
+                    renderedEntity.bottom = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_64 / f_34).toInt()
                 } else {
                     bool57 = true
                 }
@@ -2538,8 +2538,8 @@ open class ModelSM : Model {
                 val f_37 = renderMatrix.faceList[2] * sizeDeltaX + renderMatrix.faceList[6] * mY + renderMatrix.faceList[10] * sizeDeltaZ + renderMatrix.faceList[14]
                 val f_38 = renderMatrix.faceList[3] * sizeDeltaX + renderMatrix.faceList[7] * mY + renderMatrix.faceList[11] * sizeDeltaZ + renderMatrix.faceList[15]
                 if (f_37 >= -f_38) {
-                    renderedEntity.right = (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * f_35 / f_38).toInt()
-                    renderedEntity.top = (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_36 / f_38).toInt()
+                    renderedEntity.right = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_35 / f_38).toInt()
+                    renderedEntity.top = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_36 / f_38).toInt()
                 } else {
                     bool57 = true
                 }
@@ -2551,26 +2551,26 @@ open class ModelSM : Model {
                         val f_40 = zz + f_39 * (f_35 - zz)
                         val f_41 = f_64 + f_39 * (f_36 - f_64)
                         val f_42 = f_34 + f_39 * (f_38 - f_34)
-                        renderedEntity.left = (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * f_40 / f_42).toInt()
-                        renderedEntity.bottom = (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_41 / f_42).toInt()
+                        renderedEntity.left = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_40 / f_42).toInt()
+                        renderedEntity.bottom = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_41 / f_42).toInt()
                     } else if (f_37 < -f_38) {
                         val f_39 = (f_37 + f_38) / (f_33 + f_34) - 1.0f
                         val f_40 = f_35 + f_39 * (zz - f_35)
                         val f_41 = f_36 + f_39 * (f_64 - f_36)
                         val f_42 = f_38 + f_39 * (f_34 - f_38)
-                        renderedEntity.right = (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * f_40 / f_42).toInt()
-                        renderedEntity.top = (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_41 / f_42).toInt()
+                        renderedEntity.right = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_40 / f_42).toInt()
+                        renderedEntity.top = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_41 / f_42).toInt()
                     }
                 }
                 if (bool58) {
                     if (f_33 / f_34 > f_37 / f_38) {
                         val f_39 = zz + matrix447.faceList[0] * this.size2d + matrix447.faceList[12]
                         val f_40 = f_34 + matrix447.faceList[3] * this.size2d + matrix447.faceList[15]
-                        renderedEntity.size = (this.toolkit.aFloat9003 - renderedEntity.left + this.toolkit.aFloat8976 * f_39 / f_40).toInt()
+                        renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.left + this.toolkit.viewportHalfWidth * f_39 / f_40).toInt()
                     } else {
                         val f_39 = f_35 + matrix447.faceList[0] * this.size2d + matrix447.faceList[12]
                         val f_40 = f_38 + matrix447.faceList[3] * this.size2d + matrix447.faceList[15]
-                        renderedEntity.size = (this.toolkit.aFloat9003 - renderedEntity.right + this.toolkit.aFloat8976 * f_39 / f_40).toInt()
+                        renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.right + this.toolkit.viewportHalfWidth * f_39 / f_40).toInt()
                     }
                     renderedEntity.positionCalculated = true
                 }
@@ -2904,8 +2904,8 @@ open class ModelSM : Model {
             if (depthA >= -depthB) {
                 val f_31 = renderMatrix.faceList[0] * x + renderMatrix.faceList[4] * y + renderMatrix.faceList[8] * z + renderMatrix.faceList[12]
                 val f_32 = renderMatrix.faceList[1] * x + renderMatrix.faceList[5] * y + renderMatrix.faceList[9] * z + renderMatrix.faceList[13]
-                val screenPosX = (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * f_31 / depthB).toInt()
-                val screenPosY = (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * f_32 / depthB).toInt()
+                val screenPosX = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_31 / depthB).toInt()
+                val screenPosY = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_32 / depthB).toInt()
                 if (screenPosX < left) {
                     left = screenPosX
                 }
@@ -2934,8 +2934,8 @@ open class ModelSM : Model {
                 if (depthA >= -depthB) {
                     val multiplierX = renderMatrix.faceList[0] * x + renderMatrix.faceList[4] * y + renderMatrix.faceList[8] * z + renderMatrix.faceList[12]
                     val multiplierY = renderMatrix.faceList[1] * x + renderMatrix.faceList[5] * y + renderMatrix.faceList[9] * z + renderMatrix.faceList[13]
-                    this.projectedVerticesX!![verticeIndex] = (this.toolkit.aFloat9003 + this.toolkit.aFloat8976 * multiplierX / depthB)
-                    this.projectedVerticesY!![verticeIndex] = (this.toolkit.aFloat8982 + this.toolkit.aFloat9004 * multiplierY / depthB)
+                    this.projectedVerticesX!![verticeIndex] = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * multiplierX / depthB)
+                    this.projectedVerticesY!![verticeIndex] = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * multiplierY / depthB)
                 } else {
                     this.projectedVerticesX!![verticeIndex] = -999999.0f
                 }

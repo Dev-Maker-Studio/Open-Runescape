@@ -89,7 +89,7 @@ open class OpenGLNativeToolkit(
     val textureIdsToDelete = IntArray(1000)
 
     @JvmField
-    val aClass326Sub1Array10186 = arrayOfNulls<OpenGlArbArrayBuffer>(16)
+    val activeArrayBuffers = arrayOfNulls<OpenGlArbArrayBuffer>(16)
 
     /**
      * Used to store either the fog position / color
@@ -134,7 +134,7 @@ open class OpenGLNativeToolkit(
     var pixelType: Int = 0
 
     @JvmField
-    var aClass326Sub210187: OpenGlArbElementArrayBuffer? = null
+    var currentElementsBuffer: OpenGlArbElementArrayBuffer? = null
 
     @JvmField
     var lastGcTime: Long = 0
@@ -326,7 +326,7 @@ open class OpenGLNativeToolkit(
         }
     }
 
-    override fun method13905(): Float {
+    override fun getPixelOffset(): Float {
         return 0.0f
     }
 
@@ -361,7 +361,7 @@ open class OpenGLNativeToolkit(
         }
 
         if ((flags and 0x2) != 0) {
-            method13942(true)
+            setDepthMaskEnabled(true)
             mask = mask or 0x100 // GL_DEPTH_BUFFER_BIT
         }
 
@@ -374,7 +374,7 @@ open class OpenGLNativeToolkit(
 
     override fun setViewport() {
         if (display != null) {
-            OpenGL.glViewport(anInt8823 + anInt8749, anInt8754 + display!!.getHeight() - anInt8776 - anInt8752, anInt8751, anInt8752)
+            OpenGL.glViewport(viewportOffsetX + glViewportX, viewportOffsetY + display!!.getHeight() - glViewportY - glViewportHeight, glViewportWidth, glViewportHeight)
         }
 
         OpenGL.glDepthRange(depthRangeNear, depthRangeFar)
@@ -389,11 +389,11 @@ open class OpenGLNativeToolkit(
     }
 
     override fun setDepthRenderState() {
-        OpenGL.glDepthMask(depthBufferingEnabled && aBool8756)
+        OpenGL.glDepthMask(depthBufferingEnabled && depthMaskEnabled)
     }
 
     override fun toggleLights() {
-        if (aBool8684 && !aBool8760) {
+        if (lightingEnabled && !forceLightsDisabled) {
             OpenGL.glEnable(GL_LIGHTING)
         } else {
             OpenGL.glDisable(GL_LIGHTING)
@@ -464,12 +464,12 @@ open class OpenGLNativeToolkit(
         }
     }
 
-    override fun method13955(class1501: GLFormat, class762: GLActionFormat): Boolean {
+    override fun supports3DTextureFormat(class1501: GLFormat, class762: GLActionFormat): Boolean {
         return SUPPORTS_TEXTURE3D
     }
 
-    override fun method14072(class1501: GLFormat, class762: GLActionFormat, i_3: Int, i_4: Int): NativeTextureSampler {
-        return method14064(class1501, class762, i_3, i_4)
+    override fun createNativeTexture2D(class1501: GLFormat, class762: GLActionFormat, i_3: Int, i_4: Int): NativeTextureSampler {
+        return createRectangleTexture(class1501, class762, i_3, i_4)
     }
 
     override fun createNativeTexture(class1501: GLFormat, i_2: Int, i_3: Int, floats_5: FloatArray): NativeTextureSampler {
@@ -484,7 +484,7 @@ open class OpenGLNativeToolkit(
         return MipmapTextureSampler2D(this, class1501, i_2, i_3, floats_5)
     }
 
-    override fun method14064(class1501: GLFormat, class762: GLActionFormat, i_3: Int, i_4: Int): RectangleTextureSampler {
+    override fun createRectangleTexture(class1501: GLFormat, class762: GLActionFormat, i_3: Int, i_4: Int): RectangleTextureSampler {
         return if (!GLARBTextureNonPowerOfTwo && (!OpenGlTexture.isPowerOfTwo(i_3) || !OpenGlTexture.isPowerOfTwo(i_4))) {
             if (GLARBTextureRectangle) {
                 MipmapRectangleTextureSampler(this, class1501, class762, i_3, i_4)
@@ -500,7 +500,7 @@ open class OpenGLNativeToolkit(
         return OpenGLCubeTextureSampler(this, sizeXy, mipmapsGenerated, ints_3)
     }
 
-    override fun method13962(class1501: GLFormat, bytes_6: ByteArray): Texture3DSampler {
+    override fun create3DTexture(class1501: GLFormat, bytes_6: ByteArray): Texture3DSampler {
         return MipmapTextureSampler3D(this, class1501, bytes_6)
     }
 
@@ -516,8 +516,8 @@ open class OpenGLNativeToolkit(
         OpenGL.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, getTextureCombineMode(textureAlphaCombineModes!![currentTextureSlot]))
     }
 
-    override fun method13970(i_1: Int, class672: TextureStageState) {
-        OpenGL.glTexEnvi(GL_TEXTURE_ENV, i_1 + 34184, method15567(class672))
+    override fun setTextureAlphaStage(i_1: Int, class672: TextureStageState) {
+        OpenGL.glTexEnvi(GL_TEXTURE_ENV, i_1 + 34184, toGlTextureSource(class672))
         OpenGL.glTexEnvi(GL_TEXTURE_ENV, i_1 + 34200, 770)
     }
 
@@ -537,7 +537,7 @@ open class OpenGLNativeToolkit(
         var alphaSrcFactor: Byte = 0
         var alphaDstFactor: Byte = 0
 
-        when (anInt8844) {
+        when (alphaBlendMode) {
             0 -> alphaDstFactor = 0
             1 -> {
                 alphaSrcFactor = 1
@@ -580,7 +580,7 @@ open class OpenGLNativeToolkit(
     }
 
     override fun configureFog() {
-        fogEnd = camFar - anInt8680
+        fogEnd = camFar - fogOffset
         fogStart = fogEnd - fogDistance
         if (fogStart < camNear) {
             fogStart = camNear
@@ -609,7 +609,7 @@ open class OpenGLNativeToolkit(
     }
 
     override fun setStreamSource(i_1: Int, interface42: NativeStream) {
-        aClass326Sub1Array10186[i_1] = interface42 as OpenGlArbArrayBuffer
+        activeArrayBuffers[i_1] = interface42 as OpenGlArbArrayBuffer
     }
 
     override fun drawPrimitive(drawMode: PrimitiveDrawMode, first: Int, amt: Int) {
@@ -675,8 +675,8 @@ open class OpenGLNativeToolkit(
                 count = amt
             }
         }
-        val actionFormat = aClass326Sub210187!!.actionFormat
-        OpenGL.glDrawElements(mode.toInt(), count, actionFormatDataType(actionFormat), aClass326Sub210187!!.getBufferAddress() + (i_4.toLong() * actionFormat.bytesPerEntry))
+        val actionFormat = currentElementsBuffer!!.actionFormat
+        OpenGL.glDrawElements(mode.toInt(), count, actionFormatDataType(actionFormat), currentElementsBuffer!!.getBufferAddress() + (i_4.toLong() * actionFormat.bytesPerEntry))
     }
 
     @Synchronized
@@ -822,12 +822,12 @@ open class OpenGLNativeToolkit(
         OpenGL.glPolygonMode(GL_FRONT, if ((mode and 0x2) != 0) GL_LINE else GL_FILL)
     }
 
-    override fun method13997(interface321: NativeToolkitBuffer) {
-        aClass326Sub210187 = interface321 as OpenGlArbElementArrayBuffer
-        aClass326Sub210187!!.bind()
+    override fun bindIndexBuffer(interface321: NativeToolkitBuffer) {
+        currentElementsBuffer = interface321 as OpenGlArbElementArrayBuffer
+        currentElementsBuffer!!.bind()
     }
 
-    override fun method13995(arr_1: Array<VertexDeclarationComponent>): VertexDeclaration {
+    override fun createVertexDeclaration(arr_1: Array<VertexDeclarationComponent>): VertexDeclaration {
         return VertexDeclarationGL(arr_1)
     }
 
@@ -921,7 +921,7 @@ open class OpenGLNativeToolkit(
 
         for (i in components.indices) {
             val component = components[i]
-            val arrayBuffer = aClass326Sub1Array10186[i]
+            val arrayBuffer = activeArrayBuffers[i]
             var pointerOffset = 0
             val stride = arrayBuffer!!.stride
             val pointer = arrayBuffer.getBufferAddress()
@@ -1012,7 +1012,7 @@ open class OpenGLNativeToolkit(
         }
     }
 
-    override fun method13993(bool1: Boolean): NativeToolkitBuffer {
+    override fun createIndexBuffer(bool1: Boolean): NativeToolkitBuffer {
         return OpenGlArbElementArrayBuffer(this, GLActionFormat.TEXTURE_FORMAT, bool1)
     }
 
@@ -1066,14 +1066,14 @@ open class OpenGLNativeToolkit(
         return MipmapTextureSampler2D(this, class1501, width, height, bool4, pixels!!)
     }
 
-    override fun method13954(class1501: GLFormat, class762: GLActionFormat): Boolean {
+    override fun supportsTextureFormat(class1501: GLFormat, class762: GLActionFormat): Boolean {
         return true
     }
 
     override fun setMatrixTransform(matrix441: Matrix44, matrix442: Matrix44, matrix443: Matrix44) {
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        aClass3848683.calculatePerspective(matrix441, matrix442)
-        OpenGL.glLoadMatrixf(aClass3848683.faceList, 0)
+        perspectiveMatrix.calculatePerspective(matrix441, matrix442)
+        OpenGL.glLoadMatrixf(perspectiveMatrix.faceList, 0)
         OpenGL.glMatrixMode(5889)
         OpenGL.glLoadMatrixf(matrix443.faceList, 0)
     }
@@ -1087,8 +1087,8 @@ open class OpenGLNativeToolkit(
 
     override fun setScissorRect() {
         if (display != null) {
-            var x = anInt8823 + cLeft
-            var y = anInt8754 + display!!.getHeight() - cBottom
+            var x = viewportOffsetX + cLeft
+            var y = viewportOffsetY + display!!.getHeight() - cBottom
             var width = cRight - cLeft
             var height = cBottom - cTop
             if (width < 0) {
@@ -1112,11 +1112,11 @@ open class OpenGLNativeToolkit(
     }
 
     override fun getRenderBuffer(width: Int, height: Int): RenderBuffer {
-        return OpenGlNativeRenderBuffer(this, GLFormat.aClass1501953, GLActionFormat.DEPTH_COMPONENT_24, width, height)
+        return OpenGlNativeRenderBuffer(this, GLFormat.DEPTH, GLActionFormat.DEPTH_COMPONENT_24, width, height)
     }
 
     override fun setTextureStageState(src: Int, state: TextureStageState) {
-        OpenGL.glTexEnvi(GL_TEXTURE_ENV, src + GL_SOURCE0_RGB, method15567(state))
+        OpenGL.glTexEnvi(GL_TEXTURE_ENV, src + GL_SOURCE0_RGB, toGlTextureSource(state))
         OpenGL.glTexEnvi(GL_TEXTURE_ENV, src + GL_OPERAND0_RGB, 768)
     }
 
@@ -1139,10 +1139,10 @@ open class OpenGLNativeToolkit(
             val displayWidth = display!!.getWidth()
             val displayHeight = display!!.getHeight()
             if (displayWidth > 0 || displayHeight > 0) {
-                val i_3 = anInt8749
-                val i_4 = anInt8776
-                val i_5 = anInt8751
-                val i_6 = anInt8752
+                val i_3 = glViewportX
+                val i_4 = glViewportY
+                val i_5 = glViewportWidth
+                val i_6 = glViewportHeight
                 calculateViewportCenter()
                 val i_7 = cLeft
                 val i_8 = cRight
@@ -1151,11 +1151,11 @@ open class OpenGLNativeToolkit(
                 resetClipping()
                 OpenGL.glReadBuffer(GL_FRONT)
                 OpenGL.glDrawBuffer(GL_BACK)
-                method13934()
+                setOrthoMatrixMode()
                 toggleFog(false)
                 toggleLights(false)
                 toggleDepthTest(false)
-                method13942(false)
+                setDepthMaskEnabled(false)
                 setTextureSampler(null)
                 setColourType(1)
                 toggleBlending(0)
@@ -1186,7 +1186,7 @@ open class OpenGLNativeToolkit(
     companion object {
         @JvmStatic
         fun actionFormatDataType(actionFormat: GLActionFormat): Int {
-            return when (actionFormat.anInt757) {
+            return when (actionFormat.dataTypeId) {
                 0 -> GL_SHORT
                 1, 4 -> GL_UNSIGNED_BYTE
                 2 -> GL_UNSIGNED_INT
@@ -1200,12 +1200,12 @@ open class OpenGLNativeToolkit(
         }
 
         @JvmStatic
-        fun method15567(class670: TextureStageState): Int {
+        fun toGlTextureSource(class670: TextureStageState): Int {
             return when {
-                TextureStageState.aClass67680 == class670 -> GL_TEXTURE
-                TextureStageState.aClass67678 == class670 -> GL_PRIMARY_COLOR
-                TextureStageState.aClass67679 == class670 -> GL_PREVIOUS
-                TextureStageState.aClass67677 == class670 -> GL_CONSTANT
+                TextureStageState.TEXTURE == class670 -> GL_TEXTURE
+                TextureStageState.PRIMARY_COLOR == class670 -> GL_PRIMARY_COLOR
+                TextureStageState.PREVIOUS == class670 -> GL_PREVIOUS
+                TextureStageState.CONSTANT == class670 -> GL_CONSTANT
                 else -> throw IllegalArgumentException()
             }
         }

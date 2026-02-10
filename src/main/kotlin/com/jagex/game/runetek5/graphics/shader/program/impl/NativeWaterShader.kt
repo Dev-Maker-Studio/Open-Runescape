@@ -37,7 +37,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         matrices = Array(toolkit.maxConcurrentTextures) { Matrix44() }
     }
 
-    override fun method877() {
+    override fun updateWaterState() {
     }
 
     @Throws(ShaderBuilderException::class)
@@ -93,14 +93,14 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
     @Throws(ShaderBuilderException::class)
     abstract fun buildProgram(): Boolean
 
-    fun method14526() {
-        loadLights(toolkit.aBool8684)
+    fun loadShaderUniforms() {
+        loadLights(toolkit.lightingEnabled)
         loadTextureMatrix(toolkit.getTextureMatrix())
         loadMatrices()
-        method877()
+        updateWaterState()
     }
 
-    override fun method885() {
+    override fun deactivate() {
         activeShader?.reset()
     }
 
@@ -173,7 +173,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         }
     }
 
-    fun method14529(matrix44var2: Matrix43) {
+    fun loadEyePositionOS(matrix44var2: Matrix43) {
         if (eyePositionOS != null) {
             val eyePosOsMatrix = toolkit.getEyePositionOsMatrix()
             val eyePos = floatArrayOf(eyePosOsMatrix.faceList[12], eyePosOsMatrix.faceList[13], eyePosOsMatrix.faceList[14])
@@ -186,8 +186,8 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         }
     }
 
-    override fun method886() {
-        method14532(Matrix43.aClass2943518)
+    override fun resetModelMatrix() {
+        loadModelMatrix(Matrix43.aClass2943518)
     }
 
     open fun loadLights(dummy: Boolean) {
@@ -230,12 +230,12 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         }
     }
 
-    override fun method879() {
-        method14532(Matrix43.aClass2943518)
+    override fun loadDefaultModelMatrix() {
+        loadModelMatrix(Matrix43.aClass2943518)
     }
 
-    fun method14532(matrix44var1: Matrix43) {
-        val matrix442 = toolkit.aClass3848683
+    fun loadModelMatrix(matrix44var1: Matrix43) {
+        val matrix442 = toolkit.perspectiveMatrix
         matrix442.fromMatrix(matrix44var1)
         val slot = activeShader!!.getOccupyingSlot()
         val flags = mappedWaterFlags
@@ -253,24 +253,24 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         }
 
         if (modelViewProjectionMatrixAttribute != null) {
-            VIEW_PROJECTION_MATRIX.calculatePerspective(matrix442, toolkit.method13931())
+            VIEW_PROJECTION_MATRIX.calculatePerspective(matrix442, toolkit.getFrustumClipMatrix())
             activeShader!!.loadMatrix(modelViewProjectionMatrixAttribute!!, VIEW_PROJECTION_MATRIX)
             flags[slot] = flags[slot] and -33
         }
 
-        method14529(matrix44var1)
-        method14549(matrix44var1)
+        loadEyePositionOS(matrix44var1)
+        loadSunDirectionOS(matrix44var1)
     }
 
-    override fun method888() {
+    override fun activateForPass() {
         activeShader!!.setActiveMapping()
         mappedWaterFlags!![activeShader!!.getOccupyingSlot()] = -1
-        method14550()
-        method14526()
+        resetTextureState()
+        loadShaderUniforms()
     }
 
-    override fun method889() {
-        method14532(Matrix43.aClass2943518)
+    override fun resetModelMatrixForPass() {
+        loadModelMatrix(Matrix43.aClass2943518)
     }
 
     fun setTextured() {
@@ -282,14 +282,14 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         }
     }
 
-    override fun method873() {
+    override fun activate() {
         activeShader!!.setActiveMapping()
         mappedWaterFlags!![activeShader!!.getOccupyingSlot()] = -1
-        method14550()
-        method14526()
+        resetTextureState()
+        loadShaderUniforms()
     }
 
-    fun method14549(matrix44var2: Matrix43) {
+    fun loadSunDirectionOS(matrix44var2: Matrix43) {
         if (sunDirectionOS != null) {
             val sunPosition = floatArrayOf(toolkit.sunPosition[0], toolkit.sunPosition[1], toolkit.sunPosition[2])
             matrix44var2.method5230(sunPosition)
@@ -297,7 +297,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         }
     }
 
-    fun method14550() {
+    fun resetTextureState() {
         matrices[0].identity()
         setTextured()
     }

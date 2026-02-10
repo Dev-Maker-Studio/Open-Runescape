@@ -84,7 +84,7 @@ class NativeFont(
                 }
             }
 
-            if (!class505Sub21.method13954(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
+            if (!class505Sub21.supportsTextureFormat(GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT)) {
                 val ints_22 = IntArray(bytes_28.size)
 
                 for (i_9 in bytes_28.indices) {
@@ -187,21 +187,21 @@ class NativeFont(
     }
 
     override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean) {
-        aGraphicalRendererSub29321.method13935()
+        aGraphicalRendererSub29321.setProjectionMatrixMode()
         aGraphicalRendererSub29321.toggleBlending(1)
         val class476 = aGraphicalRendererSub29321.spriteShader!!
-        class476.anInterface6443 = anInterface69322
+        class476.spriteSampler = anInterface69322
         class476.setColours(3, i_4)
         val f_7 = aGraphicalRendererSub29321.getDisplay()!!.getWidth().toFloat()
         val f_8 = aGraphicalRendererSub29321.getDisplay()!!.getHeight().toFloat()
         class476.worldViewProjectionMatrix.method6525(2.0f / f_7, 2.0f / f_8, 1.0f, 1.0f)
-        class476.worldViewProjectionMatrix.faceList[12] = (i_2 + aGraphicalRendererSub29321.method13905()) * 2.0f / f_7 - 1.0f
-        class476.worldViewProjectionMatrix.faceList[13] = (i_3 + aGraphicalRendererSub29321.method13905()) * 2.0f / f_8 - 1.0f
+        class476.worldViewProjectionMatrix.faceList[12] = (i_2 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_7 - 1.0f
+        class476.worldViewProjectionMatrix.faceList[13] = (i_3 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_8 - 1.0f
         class476.worldViewProjectionMatrix.faceList[14] = -1.0f
-        class476.aClass384440.identity()
-        class476.anInterface4445 = anInterface49320
-        class476.anInt446 = var_1 * 4
-        class476.aClass70447 = aGraphicalRendererSub29321.aClass708832
+        class476.spriteTexCoordMatrix.identity()
+        class476.vertexStream = anInterface49320
+        class476.startVertex = var_1 * 4
+        class476.vertexDeclaration = aGraphicalRendererSub29321.positionTexCoordDeclaration
         class476.loadNormal()
     }
 

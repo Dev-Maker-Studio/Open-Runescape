@@ -7949,11 +7949,11 @@ object CS2Interpreter {
         MiniMenu.close()
         StaticMedia.resetChatMedia()
         TextureOpIrregularBricks.anInt9792 = executor.intStack[executor.intStackPtr]
-        NativeSprite.anInt3556 = executor.intStack[executor.intStackPtr + 1]
+        NativeSprite.backgroundTransparency = executor.intStack[executor.intStackPtr + 1]
         MiniMenu.anInt188 = executor.intStack[executor.intStackPtr + 2]
         StaticMethods.anInt2262 = executor.intStack[executor.intStackPtr + 3]
         StaticMethods.anInt5438 = executor.intStack[executor.intStackPtr + 4]
-        NativeSprite.anInt4350 = executor.intStack[executor.intStackPtr + 5]
+        NativeSprite.loadingBarTileSpriteId = executor.intStack[executor.intStackPtr + 5]
         StaticMethods.anInt3145 = executor.intStack[executor.intStackPtr + 6]
         StaticMethods.anInt5396 = executor.intStack[executor.intStackPtr + 7]
         StaticMethods.anInt148 = executor.intStack[executor.intStackPtr + 8]
@@ -7961,7 +7961,7 @@ object CS2Interpreter {
         StaticMethods.anInt1005 = executor.intStack[executor.intStackPtr + 10]
         StaticMethods.anInt2982 = executor.intStack[executor.intStackPtr + 11]
         Resource.SPRITES!!.isFileCached(StaticMethods.anInt5438)
-        Resource.SPRITES!!.isFileCached(NativeSprite.anInt4350)
+        Resource.SPRITES!!.isFileCached(NativeSprite.loadingBarTileSpriteId)
         Resource.SPRITES!!.isFileCached(StaticMethods.anInt3145)
         Resource.SPRITES!!.isFileCached(StaticMethods.anInt5396)
         Resource.SPRITES!!.isFileCached(StaticMethods.anInt148)

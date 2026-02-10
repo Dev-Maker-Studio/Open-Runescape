@@ -21,7 +21,7 @@ class NativeSpriteShaderLd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
      * Loads and configures the sprite shader for rendering
      */
     fun load() {
-        activeToolkit.method14003()
+        activeToolkit.setupUiRenderState()
         activeToolkit.loadWorldViewProjectionMatrix(worldViewProjectionMatrix)
         activeToolkit.setMatrixTransform(
             AbstractNativeToolkit.WORLD_VIEW_PROJECTION_MATRIX,
@@ -29,16 +29,16 @@ class NativeSpriteShaderLd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
             worldViewProjectionMatrix
         )
         activeToolkit.setTextureSlot(0)
-        activeToolkit.setTextureSampler(anInterface6443)
-        activeToolkit.method13967(0, TextureStageState.aClass67680)
-        activeToolkit.method13969(0, TextureStageState.aClass67680)
-        activeToolkit.method13967(1, TextureStageState.aClass67677)
-        activeToolkit.method13969(1, TextureStageState.aClass67677)
-        activeToolkit.method13973().copyFrom(aClass384440)
+        activeToolkit.setTextureSampler(spriteSampler)
+        activeToolkit.setTextureRgbStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureAlphaStageState(0, TextureStageState.TEXTURE)
+        activeToolkit.setTextureRgbStageState(1, TextureStageState.CONSTANT)
+        activeToolkit.setTextureAlphaStageState(1, TextureStageState.CONSTANT)
+        activeToolkit.getCurrentTextureMatrix().copyFrom(spriteTexCoordMatrix)
         activeToolkit.setTextureState(TextureState.PARTIAL_COPY_LAST)
-        activeToolkit.setStreamSource(0, anInterface4445!!)
-        activeToolkit.setVertexDeclaration(aClass70447!!)
-        activeToolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLE_FAN, anInt446, 2)
+        activeToolkit.setStreamSource(0, vertexStream!!)
+        activeToolkit.setVertexDeclaration(vertexDeclaration!!)
+        activeToolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLE_FAN, startVertex, 2)
     }
 
     override fun setColours(type: Int, value: Int) {
@@ -48,11 +48,11 @@ class NativeSpriteShaderLd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
 
     override fun loadMasked() {
         activeToolkit.setTextureSlot(1)
-        activeToolkit.setTextureSampler(anInterface6441)
-        activeToolkit.method13973().copyFrom(aClass384444)
+        activeToolkit.setTextureSampler(maskSampler)
+        activeToolkit.getCurrentTextureMatrix().copyFrom(maskTexCoordMatrix)
         activeToolkit.setTextureState(TextureState.PARTIAL_COPY_LAST)
-        activeToolkit.method13966(TextureCombineMode.REPLACE, TextureCombineMode.MODULATE)
-        activeToolkit.method13967(0, TextureStageState.aClass67679)
+        activeToolkit.setTextureCombineModes(TextureCombineMode.REPLACE, TextureCombineMode.MODULATE)
+        activeToolkit.setTextureRgbStageState(0, TextureStageState.PREVIOUS)
         load()
         activeToolkit.setTextureSlot(1)
         activeToolkit.setTextureOnCurrentSlot()

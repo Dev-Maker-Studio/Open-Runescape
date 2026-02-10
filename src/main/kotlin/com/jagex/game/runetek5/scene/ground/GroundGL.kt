@@ -211,8 +211,8 @@ open class GroundGL(
         if (goundMaterialNodes != null) {
             var i_7 = i_3 + i_3 + 1
             i_7 *= i_7
-            if (activeToolkit.anIntArray8502.size < i_7) {
-                activeToolkit.anIntArray8502 = IntArray(i_7)
+            if (activeToolkit.projectedVerticesZ.size < i_7) {
+                activeToolkit.projectedVerticesZ = IntArray(i_7)
             }
 
             if (activeToolkit.textureBuffer.buffer.size < amountOfTexturedFaces * 2) {
@@ -242,7 +242,7 @@ open class GroundGL(
             }
 
             var i_14 = 0
-            val ints_15 = activeToolkit.anIntArray8502
+            val ints_15 = activeToolkit.projectedVerticesZ
 
             for (i_16 in i_8..i_12) {
                 val bools_20 = bools_4[i_16 - i_9]
@@ -264,7 +264,7 @@ open class GroundGL(
             if (!activeLights.isEmpty()) {
                 val fogColor = activeToolkit.fogColor
                 val fogDensity = activeToolkit.fogDensity
-                activeToolkit.calculateFog(0, fogDensity, activeToolkit.anInt8378)
+                activeToolkit.calculateFog(0, fogDensity, activeToolkit.fogOffset)
                 activeToolkit.setLightingEnabled(false)
                 activeToolkit.setDepthMask(false)
                 activeToolkit.setBlendMode(128)
@@ -278,7 +278,7 @@ open class GroundGL(
                 var light: Node<*>? = activeLights.getTail() as Node<*>?
                 while (light != null) {
                     val glLight = light as LightGL
-                    glLight.method12311(i_1, i_2, i_3, bools_4)
+                    glLight.drawLightMesh(i_1, i_2, i_3, bools_4)
                     @Suppress("UNCHECKED_CAST")
                     light = activeLights.getPrevious() as Node<*>?
                 }
@@ -286,7 +286,7 @@ open class GroundGL(
                 activeToolkit.setTexture(0, GL_TEXTURE, 768)
                 activeToolkit.setTextureTransparency(0, GL_TEXTURE)
                 activeToolkit.setActiveTexture(null)
-                activeToolkit.calculateFog(fogColor, fogDensity, activeToolkit.anInt8378)
+                activeToolkit.calculateFog(fogColor, fogDensity, activeToolkit.fogOffset)
             }
 
             if (shadowMapper != null) {
@@ -448,7 +448,7 @@ open class GroundGL(
                                 directColor = ColorUtil.hslToRgb!![mainColor and 0xff80 or lightness]
                                 if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) == 0) {
                                     f_50 = activeToolkit.sunDirection[0] * lightX + activeToolkit.sunDirection[1] * lightY + activeToolkit.sunDirection[2] * lightZ
-                                    f_50 = activeToolkit.sunBrightness + f_50 * (if (f_50 > 0.0f) activeToolkit.aFloat8433 else activeToolkit.aFloat8434)
+                                    f_50 = activeToolkit.sunBrightness + f_50 * (if (f_50 > 0.0f) activeToolkit.sunColorIntensity else activeToolkit.antiSunColorIntensity)
                                 }
                             }
 
@@ -471,7 +471,7 @@ open class GroundGL(
                                     colorRgb = ColorUtil.hslToRgb!![blendColor and 0xff80 or lightness]
                                     if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) == 0) {
                                         val f_10000 = activeToolkit.sunDirection[0] * lightX + activeToolkit.sunDirection[1] * lightY + activeToolkit.sunDirection[2] * lightZ
-                                        val lightStrengthMultiplier = activeToolkit.sunBrightness + f_50 * (if (f_50 > 0.0f) activeToolkit.aFloat8433 else activeToolkit.aFloat8434)
+                                        val lightStrengthMultiplier = activeToolkit.sunBrightness + f_50 * (if (f_50 > 0.0f) activeToolkit.sunColorIntensity else activeToolkit.antiSunColorIntensity)
                                         var red = colorRgb shr 16 and 0xff
                                         var green = colorRgb shr 8 and 0xff
                                         var blue = colorRgb and 0xff
@@ -677,7 +677,7 @@ open class GroundGL(
     ) {
         val activeDisplay = activeToolkit.getDisplay()
         if (currentColorCount > 0 && activeDisplay != null) {
-            activeToolkit.method13586()
+            activeToolkit.setOrthoMatrixMode()
             activeToolkit.toggleFog(false)
             activeToolkit.setLightingEnabled(false)
             activeToolkit.toggleZbuffer(false)
@@ -779,16 +779,16 @@ open class GroundGL(
 
     override fun addShadow(class282Sub50Sub171: Shadow?, i_2: Int, i_3: Int, i_4: Int) {
         if (shadowMapper != null && class282Sub50Sub171 != null) {
-            val i_7 = i_2 - (i_3 * activeToolkit.anInt8438 shr 8) shr activeToolkit.shadowScale
-            val i_8 = i_4 - (i_3 * activeToolkit.anInt8439 shr 8) shr activeToolkit.shadowScale
+            val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
+            val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
             shadowMapper!!.method2314(class282Sub50Sub171, i_7, i_8)
         }
     }
 
     override fun hasRenderingShadows(shadow: Shadow?, i_2: Int, i_3: Int, i_4: Int): Boolean {
         if (shadowMapper != null && shadow != null) {
-            val i_7 = i_2 - (i_3 * activeToolkit.anInt8438 shr 8) shr activeToolkit.shadowScale
-            val i_8 = i_4 - (i_3 * activeToolkit.anInt8439 shr 8) shr activeToolkit.shadowScale
+            val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
+            val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
             return shadowMapper!!.method2293(shadow, i_7, i_8)
         }
         return false
@@ -796,8 +796,8 @@ open class GroundGL(
 
     override fun removeShadow(shadow: Shadow?, i_2: Int, i_3: Int, i_4: Int) {
         if (shadowMapper != null && shadow != null) {
-            val i_7 = i_2 - (i_3 * activeToolkit.anInt8438 shr 8) shr activeToolkit.shadowScale
-            val i_8 = i_4 - (i_3 * activeToolkit.anInt8439 shr 8) shr activeToolkit.shadowScale
+            val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
+            val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
             shadowMapper!!.addShadow(shadow, i_7, i_8)
         }
     }

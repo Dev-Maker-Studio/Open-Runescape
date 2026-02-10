@@ -17,9 +17,9 @@ abstract class AbstractParticleShader protected constructor(
     @JvmField
     val textureCoordinateMatrix: Matrix44 = Matrix44()
 
-    abstract fun method1787(var1: Int)
+    abstract fun drawParticles(var1: Int)
 
-    abstract fun method1788(var1: Matrix44)
+    abstract fun setViewProjectionMatrix(var1: Matrix44)
 
-    abstract fun method1790()
+    abstract fun drawPointSprite()
 }

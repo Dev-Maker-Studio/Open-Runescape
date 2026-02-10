@@ -277,7 +277,7 @@ END
     }
 
     fun enable() {
-        val matrix = glToolkit.aClass3848348
+        val matrix = glToolkit.viewMatrix44
         if (this.calculateLights) {
             OpenGL.glBindProgramARB(
                 GL_VERTEX_PROGRAM_ARB,
@@ -306,7 +306,7 @@ END
 
     fun activate() {
         if (this.bound) {
-            val f_1 = glToolkit.aFloat8404
+            val f_1 = glToolkit.fogFarDistance
             val f_2 = glToolkit.fogMinimumStartPosition
             val f_3 = f_1 - (f_1 - f_2) * 0.125F
             val f_4 = f_1 - (f_1 - f_2) * 0.25F

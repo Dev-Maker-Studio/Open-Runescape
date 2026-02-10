@@ -6,7 +6,7 @@ package com.jagex.game.runetek5.toolkit.companion
  *
  */
 enum class MatrixMode {
-    aClass33380,
+    ORTHO,
     PROJECTION,
     MODEL_VIEW
 }

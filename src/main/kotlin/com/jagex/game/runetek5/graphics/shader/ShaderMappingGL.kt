@@ -14,14 +14,14 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     var programHandle: Int = 0
     var vertexShaderHandle: Int = 0
     var fragmentShaderHandle: Int = 0
-    var aBool9425: Boolean = false
-    val anIntArray9426: IntArray = IntArray(13)
+    var isShadersCompiled: Boolean = false
+    val attributeLocations: IntArray = IntArray(13)
     var vertexShaderProgramString: String? = null
     var fragmentShaderProgramString: String? = null
-    var aFloatArray9429: FloatArray? = null
-    var aFloatArray9422: FloatArray? = null
-    var aFloatArray9431: FloatArray? = null
-    var aFloatArray9432: FloatArray? = null
+    var uniformCacheX: FloatArray? = null
+    var uniformCacheY: FloatArray? = null
+    var uniformCacheZ: FloatArray? = null
+    var uniformCacheW: FloatArray? = null
     var textureSlots: IntArray? = null
     var openglShader: ShaderGL? = null
     var toolkit: OpenGLNativeToolkit? = null
@@ -54,7 +54,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
             programString.append(String(toolkit.getGLShaderData(fragmentShaderName!!)!!))
             fragmentShaderProgramString = programString.toString()
         }
-        ArrayUtils.setVariables(anIntArray9426, 0, anIntArray9426.size, -1)
+        ArrayUtils.setVariables(attributeLocations, 0, attributeLocations.size, -1)
     }
 
     constructor(toolkit: OpenGLNativeToolkit, openglShader: ShaderGL, hardwareShaderMapping: NativeShaderMapping) : this(toolkit, hardwareShaderMapping) {
@@ -62,7 +62,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
         this.toolkit = toolkit
     }
 
-    fun method14671(i_1: Int, string_2: String?): Int {
+    fun compileShader(i_1: Int, string_2: String?): Int {
         if (string_2 == null) {
             return 0
         } else {
@@ -81,9 +81,9 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
 
     override fun uniform1f(class282Sub21Sub11: ShaderAttribute, f_2: Float) {
         val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_3 != -1 && aFloatArray9429!![i_3] != f_2) {
-            aFloatArray9429!![i_3] = f_2
-            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111219 && class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111182) {
+        if (i_3 != -1 && uniformCacheX!![i_3] != f_2) {
+            uniformCacheX!![i_3] = f_2
+            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111219 && class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111182) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -93,10 +93,10 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
 
     override fun unform2f(class282Sub21Sub11: ShaderAttribute, f_2: Float, f_3: Float) {
         val i_4 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_4 != -1 && (aFloatArray9429!![i_4] != f_2 || aFloatArray9422!![i_4] != f_3)) {
-            aFloatArray9429!![i_4] = f_2
-            aFloatArray9422!![i_4] = f_3
-            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111132) {
+        if (i_4 != -1 && (uniformCacheX!![i_4] != f_2 || uniformCacheY!![i_4] != f_3)) {
+            uniformCacheX!![i_4] = f_2
+            uniformCacheY!![i_4] = f_3
+            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111132) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -106,11 +106,11 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
 
     override fun uniform3f(class282Sub21Sub11: ShaderAttribute, f_2: Float, f_3: Float, f_4: Float) {
         val i_5 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_5 != -1 && (aFloatArray9429!![i_5] != f_2 || aFloatArray9422!![i_5] != f_3 || aFloatArray9431!![i_5] != f_4)) {
-            aFloatArray9429!![i_5] = f_2
-            aFloatArray9422!![i_5] = f_3
-            aFloatArray9431!![i_5] = f_4
-            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111133) {
+        if (i_5 != -1 && (uniformCacheX!![i_5] != f_2 || uniformCacheY!![i_5] != f_3 || uniformCacheZ!![i_5] != f_4)) {
+            uniformCacheX!![i_5] = f_2
+            uniformCacheY!![i_5] = f_3
+            uniformCacheZ!![i_5] = f_4
+            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111133) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -126,24 +126,24 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     }
 
     override fun uniform2fv(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111168) {
+        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111168) {
             throw AssertionError()
         }
 
         val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
         if (i_3 != -1) {
-            OpenGL.glUniform2fv(i_3, 4, matrix442.getComponenetsXY(Companion.aFloatArray9427), 0)
+            OpenGL.glUniform2fv(i_3, 4, matrix442.getComponenetsXY(Companion.matrixBuffer), 0)
         }
     }
 
     override fun uniform4fv(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111150) {
+        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111150) {
             throw AssertionError()
         }
 
         val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
         if (i_3 != -1) {
-            OpenGL.glUniform4fv(i_3, 4, matrix442.copyInto(Companion.aFloatArray9427), 0)
+            OpenGL.glUniform4fv(i_3, 4, matrix442.copyInto(Companion.matrixBuffer), 0)
         }
     }
 
@@ -180,12 +180,12 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
 
     override fun addPreloadedPositionAttribute(class282Sub21Sub11: ShaderAttribute, f_2: Float, f_3: Float, f_4: Float, f_5: Float) {
         val i_6 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_6 != -1 && (aFloatArray9429!![i_6] != f_2 || aFloatArray9422!![i_6] != f_3 || aFloatArray9431!![i_6] != f_4 || aFloatArray9432!![i_6] != f_5)) {
-            aFloatArray9429!![i_6] = f_2
-            aFloatArray9422!![i_6] = f_3
-            aFloatArray9431!![i_6] = f_4
-            aFloatArray9432!![i_6] = f_5
-            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111134) {
+        if (i_6 != -1 && (uniformCacheX!![i_6] != f_2 || uniformCacheY!![i_6] != f_3 || uniformCacheZ!![i_6] != f_4 || uniformCacheW!![i_6] != f_5)) {
+            uniformCacheX!![i_6] = f_2
+            uniformCacheY!![i_6] = f_3
+            uniformCacheZ!![i_6] = f_4
+            uniformCacheW!![i_6] = f_5
+            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111134) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -194,15 +194,15 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     }
 
     override fun uniform3fSavedSize12(i_1: Int, matrix442: Matrix44) {
-        OpenGL.glUniform3fv(i_1, 3, matrix442.copy3x3NearMatrixInto(Companion.aFloatArray9427), 0)
+        OpenGL.glUniform3fv(i_1, 3, matrix442.copy3x3NearMatrixInto(Companion.matrixBuffer), 0)
     }
 
     override fun uniform3fSavedSize8(i_1: Int, matrix442: Matrix44) {
-        OpenGL.glUniform2fv(i_1, 4, matrix442.getComponenetsXY(Companion.aFloatArray9427), 0)
+        OpenGL.glUniform2fv(i_1, 4, matrix442.getComponenetsXY(Companion.matrixBuffer), 0)
     }
 
     override fun uniform3fSavedSize16(location: Int, matrix4x4: Matrix44) {
-        OpenGL.glUniform4fv(location, 4, matrix4x4.copyInto(Companion.aFloatArray9427), 0)
+        OpenGL.glUniform4fv(location, 4, matrix4x4.copyInto(Companion.matrixBuffer), 0)
     }
 
     override fun close() {
@@ -237,12 +237,12 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     }
 
     override fun createShaders(): Boolean {
-        if (aBool9425) {
+        if (isShadersCompiled) {
             return true
         }
         toolkit!!.activeShaderMapping = null
-        vertexShaderHandle = method14671(GL_VERTEX_SHADER, vertexShaderProgramString)
-        fragmentShaderHandle = method14671(GL_FRAGMENT_SHADER, fragmentShaderProgramString)
+        vertexShaderHandle = compileShader(GL_VERTEX_SHADER, vertexShaderProgramString)
+        fragmentShaderHandle = compileShader(GL_FRAGMENT_SHADER, fragmentShaderProgramString)
         if (vertexShaderHandle != 0 && fragmentShaderHandle != 0) {
             programHandle = OpenGL.glCreateProgram()
             if (vertexShaderHandle != 0) {
@@ -283,7 +283,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                         val shaderAttribute = openglShader!!.getShaderAttribute(variableIndex)
                         if (shaderAttribute != null) {
                             shaderAttribute.loadUniformLocation(activeInSlot)
-                            class1116 = shaderAttribute.method15457()
+                            class1116 = shaderAttribute.getVariableType()
                             val i_7 = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
                             if (class1116 != ShaderVariableType.aClass1111219 && class1116 != ShaderVariableType.aClass1111182 && class1116 != ShaderVariableType.aClass1111132 && class1116 != ShaderVariableType.aClass1111133 && class1116 != ShaderVariableType.aClass1111134) {
                                 i_3 = Math.max(i_7, i_3)
@@ -297,7 +297,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                         val shaderAttribute = openglShader!!.getSecondaryAttribute(variableIndex)
                         if (shaderAttribute != null) {
                             shaderAttribute.loadUniformLocation(activeInSlot)
-                            class1116 = shaderAttribute.method15457()
+                            class1116 = shaderAttribute.getVariableType()
                             val i_7 = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
                             if (class1116 != ShaderVariableType.aClass1111219 && class1116 != ShaderVariableType.aClass1111182 && class1116 != ShaderVariableType.aClass1111132 && class1116 != ShaderVariableType.aClass1111133 && class1116 != ShaderVariableType.aClass1111134) {
                                 i_3 = Math.max(i_7, i_3)
@@ -307,10 +307,10 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                         }
                     }
 
-                    aFloatArray9429 = FloatArray(slot + 1)
-                    aFloatArray9422 = FloatArray(slot + 1)
-                    aFloatArray9431 = FloatArray(slot + 1)
-                    aFloatArray9432 = FloatArray(slot + 1)
+                    uniformCacheX = FloatArray(slot + 1)
+                    uniformCacheY = FloatArray(slot + 1)
+                    uniformCacheZ = FloatArray(slot + 1)
+                    uniformCacheW = FloatArray(slot + 1)
                     textureSlots = IntArray(i_3 + 1)
 
                     for (index in textureSlots!!.indices) {
@@ -319,7 +319,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
 
                     vertexShaderProgramString = null
                     fragmentShaderProgramString = null
-                    aBool9425 = true
+                    isShadersCompiled = true
                     return true
                 }
             }
@@ -339,6 +339,6 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     companion object {
         val `$assertionsDisabled` = !ShaderMappingGL::class.java.desiredAssertionStatus()
         val STATUS_BUFFER = IntArray(2)
-        val aFloatArray9427 = FloatArray(16)
+        val matrixBuffer = FloatArray(16)
     }
 }

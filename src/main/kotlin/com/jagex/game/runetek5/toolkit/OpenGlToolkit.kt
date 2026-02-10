@@ -99,9 +99,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var colortableReset: Boolean = false
     @JvmField val currentTextureSize: Int = 128
     @JvmField val particleRenderer: GlParticleRenderer = GlParticleRenderer()
-    @JvmField val aClass3848360: Matrix44 = Matrix44()
-    @JvmField val aClass3848361: Matrix44 = Matrix44()
-    @JvmField val aClass2948476: Matrix43 = Matrix43()
+    @JvmField val scratchMatrix: Matrix44 = Matrix44()
+    @JvmField val billboardMatrix: Matrix44 = Matrix44()
+    @JvmField val renderingMatrix: Matrix43 = Matrix43()
     @JvmField var openglFlags: Int = 8
     @JvmField var shadowScale: Int = 3
     @JvmField val heapManager: LinkedList = LinkedList()
@@ -112,29 +112,29 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField val renderBuffersAwaitingRemoval: LinkedList = LinkedList()
     @JvmField val arbProgramsAwaitingDeallocation: LinkedList = LinkedList()
     @JvmField val shaderProgramsAwaitingDeallocation: LinkedList = LinkedList()
-    @JvmField val aClass2948389: Matrix43 = Matrix43()
-    @JvmField val aClass3848348: Matrix44 = Matrix44()
-    @JvmField val aClass3848391: Matrix44 = Matrix44()
-    @JvmField val aClass3848442: Matrix44 = Matrix44()
-    @JvmField val aClass3848385: Matrix44 = Matrix44()
-    @JvmField val aClass3848394: Matrix44 = Matrix44()
-    @JvmField val aFloatArrayArray8395: Array<FloatArray> = Array(6) { FloatArray(4) }
-    @JvmField val aFloatArray8396: FloatArray = FloatArray(4)
+    @JvmField val viewMatrix43: Matrix43 = Matrix43()
+    @JvmField val viewMatrix44: Matrix44 = Matrix44()
+    @JvmField val inverseSunMatrix44: Matrix44 = Matrix44()
+    @JvmField val currentModelMatrix: Matrix44 = Matrix44()
+    @JvmField val orthoProjectionMatrix: Matrix44 = Matrix44()
+    @JvmField val viewProjectionMatrix: Matrix44 = Matrix44()
+    @JvmField val frustumPlanes: Array<FloatArray> = Array(6) { FloatArray(4) }
+    @JvmField val lightParameterBuffer: FloatArray = FloatArray(4)
     @JvmField var depthClippingNear: Float = 0f
     @JvmField var depthClippingFar: Float = 1.0f
     @JvmField var fogMinimumStartPosition: Float = 0f
-    @JvmField var aFloat8404: Float = -1.0f
-    @JvmField val aClass2948405: Matrix43 = Matrix43()
-    @JvmField val aClass3848380: Matrix44 = Matrix44()
-    @JvmField val aClass3848407: Matrix44 = Matrix44()
+    @JvmField var fogFarDistance: Float = -1.0f
+    @JvmField val inverseSunMatrix43: Matrix43 = Matrix43()
+    @JvmField val tempModelMatrix: Matrix44 = Matrix44()
+    @JvmField val tempProjectionMatrix: Matrix44 = Matrix44()
     @JvmField val textureMatrix: FloatArray = FloatArray(16)
     @JvmField var depthBufferingEnabled: Boolean = true
     @JvmField var clipTop: Int = 0
     @JvmField var clipBottom: Int = 0
     @JvmField var clipLeft: Int = 0
     @JvmField var clipRight: Int = 0
-    @JvmField var anInt8453: Int = 0
-    @JvmField var anInt8416: Int = 0
+    @JvmField var viewportOffsetX: Int = 0
+    @JvmField var viewportOffsetY: Int = 0
     @JvmField val sunPreviousPosition: FloatArray = FloatArray(4)
     @JvmField val antiSunPreviousPosition: FloatArray = FloatArray(4)
 
@@ -147,11 +147,11 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var sunColorRed: Float = 1.0f
     @JvmField var sunColorGreen: Float = 1.0f
     @JvmField var sunColorBlue: Float = 1.0f
-    @JvmField var aFloat8433: Float = -1.0f
-    @JvmField var aFloat8434: Float = -1.0f
+    @JvmField var sunColorIntensity: Float = -1.0f
+    @JvmField var antiSunColorIntensity: Float = -1.0f
     @JvmField val lightNodes: Array<PointLight?> = arrayOfNulls(INITIAL_LIGHT_COUNT)
     @JvmField var fogDensity: Int = -1
-    @JvmField var anInt8378: Int = 0
+    @JvmField var fogOffset: Int = 0
     @JvmField var densityFactor: Float = 1.0f
     @JvmField var fogMin: Float = 0.0f
     @JvmField var renderStillWater: Boolean = false
@@ -164,7 +164,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var textureBuffer: GlBitBuffer = GlBitBuffer(8192)
     @JvmField var projectedVerticesX: IntArray = IntArray(1)
     @JvmField var projectedVerticesY: IntArray = IntArray(1)
-    @JvmField var anIntArray8502: IntArray = IntArray(1)
+    @JvmField var projectedVerticesZ: IntArray = IntArray(1)
     @JvmField val shadowTextureData: ByteArray = ByteArray(16384)
     @JvmField var multiSamplesPreference: Int = 0
     @JvmField var activeOpenglInstance: OpenGL? = null
@@ -173,8 +173,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var s3Graphics: Boolean = false
     @JvmField var arbTextureFloat: Boolean = false
     @JvmField var textureCache: OpenGLTextureCache? = null
-    @JvmField var aClass1648363: Texture3DShaderGL? = null
-    @JvmField var aClass1708357: FramebufferCompositor? = null
+    @JvmField var texture3dShader: Texture3DShaderGL? = null
+    @JvmField var framebufferCompositor: FramebufferCompositor? = null
     @JvmField var arbRectangleTexturesSupported: Boolean = false
     @JvmField var shouldUseArbVbo: Boolean = false
     @JvmField var radeonGpu: Boolean = false
@@ -183,20 +183,20 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var vertexbufferSupported: Boolean = false
     @JvmField var texture3dSupported: Boolean = false
     @JvmField var nativeHeap: NativeHeap? = null
-    @JvmField var anInterface148496: ArrayBufferGL? = null
-    @JvmField var aClass1438494: OpenGlArrayDrawBuffer? = null
-    @JvmField var aClass1438495: OpenGlArrayDrawBuffer? = null
+    @JvmField var screenQuadArrayBuffer: ArrayBufferGL? = null
+    @JvmField var quadVertexBuffer: OpenGlArrayDrawBuffer? = null
+    @JvmField var quadTexCoordBuffer: OpenGlArrayDrawBuffer? = null
     @JvmField var waterDepth: Int = 0
     @JvmField var waterTile: WaterTile? = null
     @JvmField var stillWaterToggled: Boolean = false
-    @JvmField var anInt8417: Int = 0
-    @JvmField var anInt8418: Int = 0
+    @JvmField var drawableX: Int = 0
+    @JvmField var drawableY: Int = 0
     @JvmField var imageProducerWidth: Int = 0
     @JvmField var imageProducerHeight: Int = 0
     @JvmField var imageProducerCenterX: Float = 0f
     @JvmField var imageProducerCenterY: Float = 0f
-    @JvmField var aFloat8315: Float = 0f
-    @JvmField var aFloat8399: Float = 0f
+    @JvmField var viewportOriginX: Float = 0f
+    @JvmField var viewportOriginY: Float = 0f
     @JvmField var sunBrightness: Float = 0f
     @JvmField var vboBuffersSize: Int = 0
     @JvmField var textureBuffersSize: Int = 0
@@ -205,8 +205,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var lastGcCycle: Long = 0L
     @JvmField var depthClippingMode: Int = 0
     @JvmField var functionMask: Int = 0
-    @JvmField var anInt8438: Int = 0
-    @JvmField var anInt8439: Int = 0
+    @JvmField var shadowOffsetX: Int = 0
+    @JvmField var shadowOffsetZ: Int = 0
     @JvmField var fogEndPosition: Float = 0f
     @JvmField var fogStartPosition: Float = 0f
     @JvmField var currentArrayBuffer: ArrayBufferGL? = null
@@ -218,7 +218,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var enableDepthMask: Boolean = false
     @JvmField var activeLightCount: Int = 0
     @JvmField var fogEnabled: Boolean = false
-    @JvmField var aClass137Sub1Sub18462: OpenGl2DTexture_Sub1? = null
+    @JvmField var worldMapTexture: OpenGl2DTexture_Sub1? = null
     @JvmField var gpuCompanyString: String? = null
     @JvmField var gpuNameString: String? = null
     @JvmField var openglVersion: Int = 0
@@ -231,14 +231,14 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var arbVertexShader: Boolean = false
     @JvmField var arbFragmentShader: Boolean = false
     @JvmField var arbTextureCubeMap: Boolean = false
-    @JvmField var aBool8498: Boolean = false
+    @JvmField var framebufferObjectSupported: Boolean = false
     @JvmField var framebufferBlit: Boolean = false
     @JvmField var framebufferMultisample: Boolean = false
     @JvmField var advancedFramebuffers: Boolean = false
     @JvmField var appleOperatingSystem: Boolean = false
     @JvmField var lastSceneLightCount: Int = 0
     @JvmField var depthBuffering: Boolean = false
-    @JvmField var aClass152Sub18317: AbstractOpenGlCubeTextureGenerator? = null
+    @JvmField var sunCubeTextureGenerator: AbstractOpenGlCubeTextureGenerator? = null
     @JvmField var currentElementsBuffer: ElementsBufferGL? = null
 
     init {
@@ -328,9 +328,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             }
             this.textureCache = OpenGLTextureCache(this, materialProvider)
             buildTables()
-            this.aClass1648363 = Texture3DShaderGL(this)
-            this.aClass1708357 = FramebufferCompositor(this)
-            if (this.aClass1708357!!.method2896()) {
+            this.texture3dShader = Texture3DShaderGL(this)
+            this.framebufferCompositor = FramebufferCompositor(this)
+            if (this.framebufferCompositor!!.isDisplayAvailable()) {
                 this.rectangularTexture = RectangularTextureGL(this)
                 if (!this.rectangularTexture!!.rectangularTextureSupport()) {
                     this.rectangularTexture!!.destroy()
@@ -355,7 +355,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun defineScissorBox() {
         if (display != null && this.clipLeft < this.clipRight && this.clipTop < this.clipBottom) {
-            OpenGL.glScissor(this.anInt8453 + this.clipLeft, this.anInt8416 + display!!.getHeight() - this.clipBottom, this.clipRight - this.clipLeft, this.clipBottom - this.clipTop)
+            OpenGL.glScissor(this.viewportOffsetX + this.clipLeft, this.viewportOffsetY + display!!.getHeight() - this.clipBottom, this.clipRight - this.clipLeft, this.clipBottom - this.clipTop)
         } else {
             OpenGL.glScissor(0, 0, 0, 0)
         }
@@ -410,7 +410,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         toggleZbuffer(true)
         setDepthMask(true)
         resetDepthClippingMask()
-        method13586()
+        setOrthoMatrixMode()
         this.activeOpenglInstance!!.setSwapInterval(0)
         OpenGL.glShadeModel(GL_SMOOTH)
         OpenGL.glClearDepth(1.0f)
@@ -459,7 +459,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             (node1 as NativeMemoryGL).deallocate()
             node1 = this.heapManager.getPrevious()
         }
-        this.aClass1708357?.shutdown()
+        this.framebufferCompositor?.shutdown()
         if (this.colortableReset) {
             ColorUtil.resetTables(false, true)
             this.colortableReset = false
@@ -474,7 +474,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         return this.rectangularTexture != null && (this.multiSamplesPreference <= 1 || this.advancedFramebuffers)
     }
 
-    override fun method8404(): Boolean = true
+    override fun hasHardwareRendering(): Boolean = true
 
     fun pushMatrix() {
         OpenGL.glPushMatrix()
@@ -482,8 +482,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     override fun extendBuildArea(): Boolean = true
 
-    fun method13578() {
-        method13639()
+    fun resetDisplay() {
+        resetOrthoAndDisplay()
     }
 
     override fun copyPixelRectangle(x: Int, y: Int, width: Int, height: Int): IntArray {
@@ -505,14 +505,14 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             val top = this.clipTop
             val bottom = this.clipBottom
             resetClipping()
-            val i_5 = this.anInt8417
-            val i_6 = this.anInt8418
+            val i_5 = this.drawableX
+            val i_6 = this.drawableY
             val i_7 = this.imageProducerWidth
             val i_8 = this.imageProducerHeight
             calculateViewportCenter()
             OpenGL.glReadBuffer(GL_FRONT)
             OpenGL.glDrawBuffer(GL_BACK)
-            method13586()
+            setOrthoMatrixMode()
             toggleFog(false)
             setLightingEnabled(false)
             toggleZbuffer(false)
@@ -705,7 +705,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    override fun method8669(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
+    override fun drawSurfaceLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
         val class455Sub210 = dimension as SpriteSurfaceGL
         val class137Sub1Sub111 = class455Sub210.surface
         setupSpriteRendering()
@@ -824,26 +824,26 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun calculateProjection(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * f_1 + this.aClass3848394.faceList[7] * f_2 + this.aClass3848394.faceList[11] * f_3
-        val f_6 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * f_1 + this.aClass3848394.faceList[4] * f_2 + this.aClass3848394.faceList[8] * f_3
-        val f_7 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * f_1 + this.aClass3848394.faceList[5] * f_2 + this.aClass3848394.faceList[9] * f_3
-        val f_8 = this.aClass3848348.faceList[14] + this.aClass3848348.faceList[2] * f_1 + this.aClass3848348.faceList[6] * f_2 + this.aClass3848348.faceList[10] * f_3
-        floats_4[0] = this.aFloat8315 + this.imageProducerCenterX * f_6 / f_5
-        floats_4[1] = this.aFloat8399 + this.imageProducerCenterY * f_7 / f_5
+        val f_5 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * f_1 + this.viewProjectionMatrix.faceList[7] * f_2 + this.viewProjectionMatrix.faceList[11] * f_3
+        val f_6 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * f_1 + this.viewProjectionMatrix.faceList[4] * f_2 + this.viewProjectionMatrix.faceList[8] * f_3
+        val f_7 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * f_1 + this.viewProjectionMatrix.faceList[5] * f_2 + this.viewProjectionMatrix.faceList[9] * f_3
+        val f_8 = this.viewMatrix44.faceList[14] + this.viewMatrix44.faceList[2] * f_1 + this.viewMatrix44.faceList[6] * f_2 + this.viewMatrix44.faceList[10] * f_3
+        floats_4[0] = this.viewportOriginX + this.imageProducerCenterX * f_6 / f_5
+        floats_4[1] = this.viewportOriginY + this.imageProducerCenterY * f_7 / f_5
         floats_4[2] = f_8
     }
 
     override fun computeWorldToScreen(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.aClass3848394.faceList[14] + this.aClass3848394.faceList[2] * f_1 + this.aClass3848394.faceList[6] * f_2 + this.aClass3848394.faceList[10] * f_3
-        val f_6 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * f_1 + this.aClass3848394.faceList[7] * f_2 + this.aClass3848394.faceList[11] * f_3
+        val f_5 = this.viewProjectionMatrix.faceList[14] + this.viewProjectionMatrix.faceList[2] * f_1 + this.viewProjectionMatrix.faceList[6] * f_2 + this.viewProjectionMatrix.faceList[10] * f_3
+        val f_6 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * f_1 + this.viewProjectionMatrix.faceList[7] * f_2 + this.viewProjectionMatrix.faceList[11] * f_3
         if (f_5 >= -f_6 && f_5 <= f_6) {
-            val f_7 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * f_1 + this.aClass3848394.faceList[4] * f_2 + this.aClass3848394.faceList[8] * f_3
+            val f_7 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * f_1 + this.viewProjectionMatrix.faceList[4] * f_2 + this.viewProjectionMatrix.faceList[8] * f_3
             if (f_7 >= -f_6 && f_7 <= f_6) {
-                val f_8 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * f_1 + this.aClass3848394.faceList[5] * f_2 + this.aClass3848394.faceList[9] * f_3
+                val f_8 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * f_1 + this.viewProjectionMatrix.faceList[5] * f_2 + this.viewProjectionMatrix.faceList[9] * f_3
                 if (f_8 >= -f_6 && f_8 <= f_6) {
-                    val f_9 = this.aClass3848348.faceList[14] + this.aClass3848348.faceList[2] * f_1 + this.aClass3848348.faceList[6] * f_2 + this.aClass3848348.faceList[10] * f_3
-                    floats_4[0] = this.aFloat8315 + this.imageProducerCenterX * f_7 / f_6
-                    floats_4[1] = this.aFloat8399 + this.imageProducerCenterY * f_8 / f_6
+                    val f_9 = this.viewMatrix44.faceList[14] + this.viewMatrix44.faceList[2] * f_1 + this.viewMatrix44.faceList[6] * f_2 + this.viewMatrix44.faceList[10] * f_3
+                    floats_4[0] = this.viewportOriginX + this.imageProducerCenterX * f_7 / f_6
+                    floats_4[1] = this.viewportOriginY + this.imageProducerCenterY * f_8 / f_6
                     floats_4[2] = f_9
                 } else {
                     floats_4[2] = Float.NaN
@@ -890,7 +890,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     override fun setNativeHeap(class282Sub11: NativeMemoryNode) {
         this.nativeHeap = (class282Sub11 as NativeMemoryGL).nativeHeap
-        if (this.anInterface148496 == null) {
+        if (this.screenQuadArrayBuffer == null) {
             val textureBuffer = GlBitBuffer(80)
             if (this.bigEndianess) {
                 textureBuffer.writeFloatBigEndian(-1.0f)
@@ -936,9 +936,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
                 textureBuffer.writeFloatLittleEndian(0.0f)
             }
 
-            this.anInterface148496 = createArrayBuffer(20, textureBuffer.buffer, textureBuffer.currentPosition, false)
-            this.aClass1438494 = OpenGlArrayDrawBuffer(this.anInterface148496!!, GL_FLOAT, 3, 0)
-            this.aClass1438495 = OpenGlArrayDrawBuffer(this.anInterface148496!!, GL_FLOAT, 2, 12)
+            this.screenQuadArrayBuffer = createArrayBuffer(20, textureBuffer.buffer, textureBuffer.currentPosition, false)
+            this.quadVertexBuffer = OpenGlArrayDrawBuffer(this.screenQuadArrayBuffer!!, GL_FLOAT, 3, 0)
+            this.quadTexCoordBuffer = OpenGlArrayDrawBuffer(this.screenQuadArrayBuffer!!, GL_FLOAT, 2, 12)
             this.particleRenderer.initialize(this)
         }
     }
@@ -1018,18 +1018,18 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun calculateFog(color: Int, density: Int, i_3: Int) {
-        if (this.fogColor != color || density != this.fogDensity || i_3 != this.anInt8378) {
+        if (this.fogColor != color || density != this.fogDensity || i_3 != this.fogOffset) {
             this.fogColor = color
             this.fogDensity = density
-            this.anInt8378 = i_3
+            this.fogOffset = i_3
             setFogRange()
             toggleFog()
         }
     }
 
-    override fun method8449(): Matrix44 = this.aClass3848360
+    override fun getScratchMatrix(): Matrix44 = this.scratchMatrix
 
-    override fun getRenderingMatrix(): Matrix43 = this.aClass2948476
+    override fun getRenderingMatrix(): Matrix43 = this.renderingMatrix
 
     override fun renderParticles(particleWrapper: ParticleWrapper) {
         this.particleRenderer.drawParticles(this, particleWrapper)
@@ -1054,26 +1054,26 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun getRenderBuffer(i_1: Int, i_2: Int): RenderBuffer {
-        return OpenGlRenderBuffer(this, GLFormat.aClass1501953, GLActionFormat.DEPTH_COMPONENT_24, i_1, i_2)
+        return OpenGlRenderBuffer(this, GLFormat.DEPTH, GLActionFormat.DEPTH_COMPONENT_24, i_1, i_2)
     }
 
     override fun calculateViewportCenter() {
         if (display == null) {
             return
         }
-        this.anInt8417 = 0
-        this.anInt8418 = 0
+        this.drawableX = 0
+        this.drawableY = 0
         this.imageProducerWidth = display!!.getWidth()
         this.imageProducerHeight = display!!.getHeight()
-        method13584()
+        updateViewportAndCenter()
     }
 
     override fun setDrawableArea(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        this.anInt8417 = i_1
-        this.anInt8418 = i_2
+        this.drawableX = i_1
+        this.drawableY = i_2
         this.imageProducerWidth = i_3
         this.imageProducerHeight = i_4
-        method13584()
+        updateViewportAndCenter()
     }
 
     override fun getClipping(clipping: IntArray) {
@@ -1141,15 +1141,15 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         this.stillWaterToggled = false
     }
 
-    fun method13584() {
+    fun updateViewportAndCenter() {
         if (display == null) return
         val i_1: Int
         val i_2: Int
         val i_3: Int
         val i_4: Int
         if (this.depthClippingMode == 2) {
-            i_1 = this.anInt8417
-            i_2 = this.anInt8418
+            i_1 = this.drawableX
+            i_2 = this.drawableY
             i_3 = this.imageProducerWidth
             i_4 = this.imageProducerHeight
         } else {
@@ -1168,11 +1168,11 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             height = 1
         }
 
-        OpenGL.glViewport(i_1 + this.anInt8453, this.anInt8416 + display!!.getHeight() - i_2 - height, width, height)
+        OpenGL.glViewport(i_1 + this.viewportOffsetX, this.viewportOffsetY + display!!.getHeight() - i_2 - height, width, height)
         this.imageProducerCenterX = this.imageProducerWidth / 2.0f
         this.imageProducerCenterY = this.imageProducerHeight / 2.0f
-        this.aFloat8315 = this.anInt8417 + this.imageProducerCenterX
-        this.aFloat8399 = this.anInt8418 + this.imageProducerCenterY
+        this.viewportOriginX = this.drawableX + this.imageProducerCenterX
+        this.viewportOriginY = this.drawableY + this.imageProducerCenterY
     }
 
     @Synchronized
@@ -1313,35 +1313,35 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun setSunPosition(matrix44var1: Matrix43) {
-        this.aClass2948389.copyFrom(matrix44var1)
-        this.aClass3848348.fromMatrix(this.aClass2948389)
-        this.aClass2948405.copyFrom(matrix44var1)
-        this.aClass2948405.updateIdentitiyMatrix()
-        this.aClass3848391.fromMatrix(this.aClass2948405)
-        method13597()
+        this.viewMatrix43.copyFrom(matrix44var1)
+        this.viewMatrix44.fromMatrix(this.viewMatrix43)
+        this.inverseSunMatrix43.copyFrom(matrix44var1)
+        this.inverseSunMatrix43.updateIdentitiyMatrix()
+        this.inverseSunMatrix44.fromMatrix(this.inverseSunMatrix43)
+        updateViewProjectionMatrix()
         if (this.depthClippingMode != 1) {
-            method13748()
+            updateModelViewAndLights()
         }
     }
 
-    override fun copySunPosition(): Matrix43 = Matrix43(this.aClass2948389)
+    override fun copySunPosition(): Matrix43 = Matrix43(this.viewMatrix43)
 
-    override fun copyModelMatrix(): Matrix44 = Matrix44(this.aClass3848442)
+    override fun copyModelMatrix(): Matrix44 = Matrix44(this.currentModelMatrix)
 
-    fun method13586() {
+    fun setOrthoMatrixMode() {
         if (this.depthClippingMode != 0) {
             this.depthClippingMode = 0
-            method13584()
+            updateViewportAndCenter()
             updateDepthRange()
             this.functionMask = this.functionMask and -16
         }
     }
 
-    fun method13587() {
+    fun setProjectionMatrixMode() {
         if (this.depthClippingMode != 1) {
             this.depthClippingMode = 1
-            method13588()
-            method13584()
+            recalculateFogAndProjection()
+            updateViewportAndCenter()
             updateDepthRange()
             OpenGL.glMatrixMode(GL_MODELVIEW)
             OpenGL.glLoadIdentity()
@@ -1349,21 +1349,21 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    fun method13588() {
-        this.aFloat8404 = this.aClass3848442.getDepthPerspectiveCD()
-        this.fogMinimumStartPosition = this.aClass3848442.method6533()
+    fun recalculateFogAndProjection() {
+        this.fogFarDistance = this.currentModelMatrix.getDepthPerspectiveCD()
+        this.fogMinimumStartPosition = this.currentModelMatrix.method6533()
         setFogRange()
         if (this.depthClippingMode == 2) {
-            invertMatrix(this.aClass3848442.faceList)
+            invertMatrix(this.currentModelMatrix.faceList)
         } else if (this.depthClippingMode == 1) {
-            invertMatrix(this.aClass3848385.faceList)
+            invertMatrix(this.orthoProjectionMatrix.faceList)
         }
     }
 
     override fun utilisesNativeHeap(): Boolean = true
 
-    override fun method8525(i_3: Int, i_4: Int) {
-        this.aClass1708357?.method2884(i_3, i_4)
+    override fun beginBloomCapture(i_3: Int, i_4: Int) {
+        this.framebufferCompositor?.prepareForRendering(i_3, i_4)
     }
 
     override fun updateSun(sunBrightness: Float) {
@@ -1375,17 +1375,17 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     override fun applyLighting(sunColor: Int, f_2: Float, f_3: Float, x: Float, y: Float, z: Float) {
         val calculateSunColor = this.sunColorRgb != sunColor
-        if (calculateSunColor || this.aFloat8433 != f_2 || this.aFloat8434 != f_3) {
+        if (calculateSunColor || this.sunColorIntensity != f_2 || this.antiSunColorIntensity != f_3) {
             this.sunColorRgb = sunColor
-            this.aFloat8433 = f_2
-            this.aFloat8434 = f_3
+            this.sunColorIntensity = f_2
+            this.antiSunColorIntensity = f_3
             if (calculateSunColor) {
                 this.sunColorRed = (this.sunColorRgb and 0xff0000) / 1.671168E7f
                 this.sunColorGreen = (this.sunColorRgb and 0xff00) / 65280.0f
                 this.sunColorBlue = (this.sunColorRgb and 0xff) / 255.0f
                 updateSunColor()
             }
-            method13592()
+            updateSunLightDiffuse()
         }
 
         if (this.sunPreviousPosition[0] != x || this.sunPreviousPosition[1] != y || this.sunPreviousPosition[2] != z) {
@@ -1403,25 +1403,25 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             this.lightingDirection[1] = -this.sunDirection[1]
             this.lightingDirection[2] = -this.sunDirection[2]
             setLightingSourceParams()
-            this.anInt8438 = (x * 256.0f / y).toInt()
-            this.anInt8439 = (z * 256.0f / y).toInt()
+            this.shadowOffsetX = (x * 256.0f / y).toInt()
+            this.shadowOffsetZ = (z * 256.0f / y).toInt()
         }
     }
 
     override fun isOnScreen(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
         var i_7 = 0
-        val f_8 = this.aClass3848394.faceList[14] + this.aClass3848394.faceList[2] * i_1 + this.aClass3848394.faceList[6] * i_2 + this.aClass3848394.faceList[10] * i_3
-        val f_9 = this.aClass3848394.faceList[14] + this.aClass3848394.faceList[2] * i_4 + this.aClass3848394.faceList[6] * i_5 + this.aClass3848394.faceList[10] * i_6
-        val f_10 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * i_1 + this.aClass3848394.faceList[7] * i_2 + this.aClass3848394.faceList[11] * i_3
-        val f_11 = this.aClass3848394.faceList[15] + this.aClass3848394.faceList[3] * i_4 + this.aClass3848394.faceList[7] * i_5 + this.aClass3848394.faceList[11] * i_6
+        val f_8 = this.viewProjectionMatrix.faceList[14] + this.viewProjectionMatrix.faceList[2] * i_1 + this.viewProjectionMatrix.faceList[6] * i_2 + this.viewProjectionMatrix.faceList[10] * i_3
+        val f_9 = this.viewProjectionMatrix.faceList[14] + this.viewProjectionMatrix.faceList[2] * i_4 + this.viewProjectionMatrix.faceList[6] * i_5 + this.viewProjectionMatrix.faceList[10] * i_6
+        val f_10 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * i_1 + this.viewProjectionMatrix.faceList[7] * i_2 + this.viewProjectionMatrix.faceList[11] * i_3
+        val f_11 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * i_4 + this.viewProjectionMatrix.faceList[7] * i_5 + this.viewProjectionMatrix.faceList[11] * i_6
         if (f_8 < -f_10 && f_9 < -f_11) {
             i_7 = i_7 or 0x10
         } else if (f_8 > f_10 && f_9 > f_11) {
             i_7 = i_7 or 0x20
         }
 
-        val f_12 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * i_1 + this.aClass3848394.faceList[4] * i_2 + this.aClass3848394.faceList[8] * i_3
-        val f_13 = this.aClass3848394.faceList[12] + this.aClass3848394.faceList[0] * i_4 + this.aClass3848394.faceList[4] * i_5 + this.aClass3848394.faceList[8] * i_6
+        val f_12 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * i_1 + this.viewProjectionMatrix.faceList[4] * i_2 + this.viewProjectionMatrix.faceList[8] * i_3
+        val f_13 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * i_4 + this.viewProjectionMatrix.faceList[4] * i_5 + this.viewProjectionMatrix.faceList[8] * i_6
         if (f_12 < -f_10 && f_13 < -f_11) {
             i_7 = i_7 or 0x1
         }
@@ -1430,8 +1430,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             i_7 = i_7 or 0x2
         }
 
-        val f_14 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * i_1 + this.aClass3848394.faceList[5] * i_2 + this.aClass3848394.faceList[9] * i_3
-        val f_15 = this.aClass3848394.faceList[13] + this.aClass3848394.faceList[1] * i_4 + this.aClass3848394.faceList[5] * i_5 + this.aClass3848394.faceList[9] * i_6
+        val f_14 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * i_1 + this.viewProjectionMatrix.faceList[5] * i_2 + this.viewProjectionMatrix.faceList[9] * i_3
+        val f_15 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * i_4 + this.viewProjectionMatrix.faceList[5] * i_5 + this.viewProjectionMatrix.faceList[9] * i_6
         if (f_14 < -f_10 && f_15 < -f_11) {
             i_7 = i_7 or 0x4
         }
@@ -1453,15 +1453,15 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         setFogRange()
     }
 
-    fun method13592() {
-        BUFFER_4F[0] = this.aFloat8433 * this.sunColorRed
-        BUFFER_4F[1] = this.aFloat8433 * this.sunColorGreen
-        BUFFER_4F[2] = this.aFloat8433 * this.sunColorBlue
+    fun updateSunLightDiffuse() {
+        BUFFER_4F[0] = this.sunColorIntensity * this.sunColorRed
+        BUFFER_4F[1] = this.sunColorIntensity * this.sunColorGreen
+        BUFFER_4F[2] = this.sunColorIntensity * this.sunColorBlue
         BUFFER_4F[3] = 1.0f
         OpenGL.glLightfv(GL_COLOR_BUFFER_BIT, GL_DIFFUSE, BUFFER_4F, 0)
-        BUFFER_4F[0] = -this.aFloat8434 * this.sunColorRed
-        BUFFER_4F[1] = -this.aFloat8434 * this.sunColorGreen
-        BUFFER_4F[2] = -this.aFloat8434 * this.sunColorBlue
+        BUFFER_4F[0] = -this.antiSunColorIntensity * this.sunColorRed
+        BUFFER_4F[1] = -this.antiSunColorIntensity * this.sunColorGreen
+        BUFFER_4F[2] = -this.antiSunColorIntensity * this.sunColorBlue
         BUFFER_4F[3] = 1.0f
         OpenGL.glLightfv(GL_LIGHT1, GL_DIFFUSE, BUFFER_4F, 0)
     }
@@ -1474,7 +1474,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     override fun hasShadows(): Boolean = true
 
     fun setFogRange() {
-        this.fogEndPosition = this.aFloat8404 - this.anInt8378 - this.fogMin
+        this.fogEndPosition = this.fogFarDistance - this.fogOffset - this.fogMin
         this.fogStartPosition = this.fogEndPosition - this.fogDensity * this.densityFactor
         if (this.fogStartPosition < this.fogMinimumStartPosition) {
             this.fogStartPosition = this.fogMinimumStartPosition
@@ -1526,13 +1526,13 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     fun getCubeMap(): OpenGlArbCubeMapTexture? {
-        return this.aClass152Sub18317?.getCubeTexture()
+        return this.sunCubeTextureGenerator?.getCubeTexture()
     }
 
     override fun bloomSupported(): Boolean {
         if (this.rectangularTexture != null) {
             if (!this.rectangularTexture!!.method12129()) {
-                if (!this.aClass1708357!!.method2900(this.rectangularTexture!!)) {
+                if (!this.framebufferCompositor!!.addEffect(this.rectangularTexture!!)) {
                     return false
                 }
                 this.textureCache?.resetBloomCache()
@@ -1544,7 +1544,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     override fun resetBloom() {
         if (this.rectangularTexture != null && this.rectangularTexture!!.method12129()) {
-            this.aClass1708357!!.method2885(this.rectangularTexture!!)
+            this.framebufferCompositor!!.removeEffect(this.rectangularTexture!!)
             this.textureCache?.resetBloomCache()
         }
     }
@@ -1559,23 +1559,23 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         RectangularTextureGL.brightpass = brightpass
     }
 
-    override fun method8474() {
-        this.aClass1708357?.method2883()
+    override fun compositeBloomEffects() {
+        this.framebufferCompositor?.compositeEffects()
     }
 
     override fun getImageProducer(): DirectDisplay {
         return IntegratedGraphicsDisplayGL(this)
     }
 
-    fun method13597() {
-        this.aClass3848394.copyFrom(this.aClass3848348)
-        this.aClass3848394.multiplyBy(this.aClass3848442)
-        this.aClass3848394.method6539(this.aFloatArrayArray8395[0])
-        this.aClass3848394.method6540(this.aFloatArrayArray8395[1])
-        this.aClass3848394.method6535(this.aFloatArrayArray8395[2])
-        this.aClass3848394.method6536(this.aFloatArrayArray8395[3])
-        this.aClass3848394.method6613(this.aFloatArrayArray8395[4])
-        this.aClass3848394.method6538(this.aFloatArrayArray8395[5])
+    fun updateViewProjectionMatrix() {
+        this.viewProjectionMatrix.copyFrom(this.viewMatrix44)
+        this.viewProjectionMatrix.multiplyBy(this.currentModelMatrix)
+        this.viewProjectionMatrix.method6539(this.frustumPlanes[0])
+        this.viewProjectionMatrix.method6540(this.frustumPlanes[1])
+        this.viewProjectionMatrix.method6535(this.frustumPlanes[2])
+        this.viewProjectionMatrix.method6536(this.frustumPlanes[3])
+        this.viewProjectionMatrix.method6613(this.frustumPlanes[4])
+        this.viewProjectionMatrix.method6538(this.frustumPlanes[5])
     }
 
     fun createElementsArrayBuffer(bytes_2: ByteArray, i_3: Int, bool4: Boolean): ElementsBufferGL {
@@ -1619,7 +1619,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun setupShapeRendering() {
         if (this.functionMask != 1) {
-            method13587()
+            setProjectionMatrixMode()
             toggleFog(false)
             setLightingEnabled(false)
             toggleZbuffer(false)
@@ -1633,7 +1633,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun setupSpriteRendering() {
         if (this.functionMask != 2) {
-            method13587()
+            setProjectionMatrixMode()
             toggleFog(false)
             setLightingEnabled(false)
             toggleZbuffer(false)
@@ -1645,7 +1645,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun setupTextRendering() {
         if (this.functionMask != 4) {
-            method13587()
+            setProjectionMatrixMode()
             toggleFog(false)
             setLightingEnabled(false)
             toggleZbuffer(false)
@@ -1658,7 +1658,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun setupMatrixRendering() {
         if (this.functionMask != 8) {
-            method13645()
+            setModelViewMatrixMode()
             toggleFog(true)
             toggleZbuffer(true)
             setDepthMask(true)
@@ -1933,22 +1933,22 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         this.activeLightCount = this.lastSceneLightCount
     }
 
-    fun method13639() {
+    fun resetOrthoAndDisplay() {
         if (display == null) {
             return
         }
         val displayWidth = display!!.getWidth()
         val displayHeight = display!!.getHeight()
-        this.aClass3848385.method6530(0.0f, displayWidth.toFloat(), 0.0f, displayHeight.toFloat(), -1.0f, 1.0f)
+        this.orthoProjectionMatrix.method6530(0.0f, displayWidth.toFloat(), 0.0f, displayHeight.toFloat(), -1.0f, 1.0f)
         calculateViewportCenter()
-        method13586()
+        setOrthoMatrixMode()
         resetClipping()
     }
 
-    fun method13640(i_1: Int, i_2: Int) {
-        this.anInt8453 = i_1
-        this.anInt8416 = i_2
-        method13584()
+    fun setViewportOffset(i_1: Int, i_2: Int) {
+        this.viewportOffsetX = i_1
+        this.viewportOffsetY = i_2
+        updateViewportAndCenter()
         defineScissorBox()
     }
 
@@ -1974,12 +1974,12 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         this.openglFlags = 1 shl this.shadowScale
     }
 
-    fun method13645() {
+    fun setModelViewMatrixMode() {
         if (this.depthClippingMode != 2) {
             this.depthClippingMode = 2
-            invertMatrix(this.aClass3848442.faceList)
-            method13748()
-            method13584()
+            invertMatrix(this.currentModelMatrix.faceList)
+            updateModelViewAndLights()
+            updateViewportAndCenter()
             updateDepthRange()
             this.functionMask = this.functionMask and -8
         }
@@ -2109,7 +2109,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         this.arbRectangleTexturesSupported = this.activeOpenglInstance!!.supportsExtension("GL_ARB_texture_rectangle")
         this.arbTextureCubeMap = this.activeOpenglInstance!!.supportsExtension("GL_ARB_texture_cube_map")
         this.arbTextureFloat = this.activeOpenglInstance!!.supportsExtension("GL_ARB_texture_float")
-        this.aBool8498 = false
+        this.framebufferObjectSupported = false
         this.intelGpu = this.activeOpenglInstance!!.supportsExtension("GL_EXT_framebuffer_object")
         this.framebufferBlit = this.activeOpenglInstance!!.supportsExtension("GL_EXT_framebuffer_blit")
         this.framebufferMultisample = this.activeOpenglInstance!!.supportsExtension("GL_EXT_framebuffer_multisample")
@@ -2202,18 +2202,18 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     override fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, bytes_7: ByteArray, i_8: Int, textureBlendColor: Int) {
         val f_10: Float
         val f_11: Float
-        if (this.aClass137Sub1Sub18462 != null && this.aClass137Sub1Sub18462!!.width >= width && this.aClass137Sub1Sub18462!!.length >= height) {
-            this.aClass137Sub1Sub18462!!.uploadTextureData(0, width, height, bytes_7, GLFormat.RGBA, false)
-            f_10 = this.aClass137Sub1Sub18462!!.t * height / this.aClass137Sub1Sub18462!!.length
-            f_11 = this.aClass137Sub1Sub18462!!.s * width / this.aClass137Sub1Sub18462!!.width
+        if (this.worldMapTexture != null && this.worldMapTexture!!.width >= width && this.worldMapTexture!!.length >= height) {
+            this.worldMapTexture!!.uploadTextureData(0, width, height, bytes_7, GLFormat.RGBA, false)
+            f_10 = this.worldMapTexture!!.t * height / this.worldMapTexture!!.length
+            f_11 = this.worldMapTexture!!.s * width / this.worldMapTexture!!.width
         } else {
-            this.aClass137Sub1Sub18462 = OpenGl2DTexture_Sub1.createSurface(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, height, bytes_7, GLFormat.RGBA)
-            this.aClass137Sub1Sub18462!!.setRepeat(false, false)
-            f_10 = this.aClass137Sub1Sub18462!!.t
-            f_11 = this.aClass137Sub1Sub18462!!.s
+            this.worldMapTexture = OpenGl2DTexture_Sub1.createSurface(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, height, bytes_7, GLFormat.RGBA)
+            this.worldMapTexture!!.setRepeat(false, false)
+            f_10 = this.worldMapTexture!!.t
+            f_11 = this.worldMapTexture!!.s
         }
         setupSpriteRendering()
-        setActiveTexture(this.aClass137Sub1Sub18462)
+        setActiveTexture(this.worldMapTexture)
         setBlendMode(textureBlendColor)
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         setTextureEnvColor(textureEnvColor)
@@ -2262,7 +2262,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun setSunCubeTexture(class1521: AbstractCubeTextureGenerator?) {
-        this.aClass152Sub18317 = class1521 as AbstractOpenGlCubeTextureGenerator?
+        this.sunCubeTextureGenerator = class1521 as AbstractOpenGlCubeTextureGenerator?
     }
 
     fun loadTextureCombineMode(combineRgb: Int, combineAlpha: Int) {
@@ -2304,9 +2304,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     override fun getMaxLights(): Int = 4
 
     override fun setModelMatrix(matrix441: Matrix44) {
-        this.aClass3848442.copyFrom(matrix441)
-        method13597()
-        method13588()
+        this.currentModelMatrix.copyFrom(matrix441)
+        updateViewProjectionMatrix()
+        recalculateFogAndProjection()
     }
 
     override fun hasAntiAliasing(): Boolean {
@@ -2321,9 +2321,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    fun method13748() {
+    fun updateModelViewAndLights() {
         OpenGL.glLoadIdentity()
-        OpenGL.glMultMatrixf(this.aClass3848348.faceList, 0)
+        OpenGL.glMultMatrixf(this.viewMatrix44.faceList, 0)
         if (this.renderStillWater) {
             this.effectManager!!.waterEffect.enable()
         }

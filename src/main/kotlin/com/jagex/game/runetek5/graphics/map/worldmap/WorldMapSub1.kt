@@ -610,7 +610,7 @@ object WorldMapSub1 {
         }
 
         i_14 = (atan2((spriteCenterX - category.anInt7990).toDouble(), (spriteCenterY - category.anInt7992).toDouble()) / Math.PI * 32767.0).toInt() and 0xffff
-        sprite.method2758(spriteCenterX + spriteDimension / 2.0f, spriteDimension / 2.0f + spriteCenterY, 4096, i_14)
+        sprite.drawRotatedCenter(spriteCenterX + spriteDimension / 2.0f, spriteDimension / 2.0f + spriteCenterY, 4096, i_14)
         var textLeft = -2
         var textBottom = -2
         var textRight = -2

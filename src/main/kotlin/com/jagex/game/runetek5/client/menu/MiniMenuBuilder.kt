@@ -191,7 +191,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     }
 
     val regionBase = Resource.mapRegion?.getBaseCoordinates() ?: return
-    val matrix445 = toolkit.method8449()
+    val matrix445 = toolkit.getScratchMatrix()
     toolkit.setModelMatrix(cameraMatrix)
     toolkit.setSunPosition(Camera.sunMatrix)
     toolkit.setClipping(MiniMenu.anInt180, MiniMenu.anInt181, MiniMenu.anInt180 + Camera.gameAreaWidth, Camera.gameAreaHeight + MiniMenu.anInt181)

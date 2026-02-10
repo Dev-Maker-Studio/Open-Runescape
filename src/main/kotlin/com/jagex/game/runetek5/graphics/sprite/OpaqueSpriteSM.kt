@@ -43,7 +43,7 @@ class OpaqueSpriteSM : SpriteSM {
         this.pixels = ints_2
     }
 
-    override fun method2750(i: Int, i151: Int, i152: Int, i153: Int, i154: Int, i155: Int) {
+    override fun captureScreenRegion(i: Int, i151: Int, i152: Int, i153: Int, i154: Int, i155: Int) {
         val ints = toolkit.colourBuffer ?: throw IllegalStateException("")
         for (i156 in 0 until i153) {
             val i157 = (i151 + i156) * anInt8851 + i
@@ -493,7 +493,7 @@ class OpaqueSpriteSM : SpriteSM {
         }
     }
 
-    override fun method2773(i_1: Int, i_2: Int, class4553: ComponentSurface, i_4: Int, i_5: Int) {
+    override fun drawWithSurface(i_1: Int, i_2: Int, class4553: ComponentSurface, i_4: Int, i_5: Int) {
         var i_26 = i_2
         var i_15Var = i_1
         if (toolkit.hasBeenShutdown()) {

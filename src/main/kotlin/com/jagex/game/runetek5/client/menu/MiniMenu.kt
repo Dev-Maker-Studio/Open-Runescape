@@ -760,8 +760,8 @@ object MiniMenu {
             fontrenderer7 = minimenuHeader
         }
         val fontmetrics8 = FontMetrics.getForMinimenu()
-        NativeSprite.method12680(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
-        var alpha = 255 - StaticMethods.anInt2262 - NativeSprite.anInt156
+        NativeSprite.drawLoadingBarBackground(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
+        var alpha = 255 - StaticMethods.anInt2262 - NativeSprite.alphaJitter
         if (alpha < 0) {
             alpha = 0
         }
@@ -796,7 +796,7 @@ object MiniMenu {
                 class282Sub50Sub1516Temp = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (aCacheableNodeSub15163 != null) {
-                NativeSprite.method12680(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.anInt10526, b_6, fontrenderer7, fontmetrics8, aCacheableNodeSub15163!!.tagStart)
+                NativeSprite.drawLoadingBarBackground(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.anInt10526, b_6, fontrenderer7, fontmetrics8, aCacheableNodeSub15163!!.tagStart)
                 i_12 = 0
                 class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (class282Sub50Sub713 != null) {

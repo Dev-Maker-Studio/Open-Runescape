@@ -27,28 +27,28 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
             textures2d = Array(16) { index ->
                 val bytes = DataBuffer.readDataBuffer(anObject1637, index * 32768)!!
                 OpenGl2DTexture(
-                    openglToolkit, 3553, GLFormat.aClass1501952,
-                    GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.aClass1501952, false
+                    openglToolkit, 3553, GLFormat.LUMINANCE_ALPHA,
+                    GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.LUMINANCE_ALPHA, false
                 )
             }
 
             aClass137Sub1Array1634 = Array(16) { index ->
                 val bytes = DataBuffer.readDataBuffer(anObject1627, index * 32768)!!
                 OpenGl2DTexture(
-                    openglToolkit, 3553, GLFormat.aClass1501952,
-                    GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.aClass1501952, false
+                    openglToolkit, 3553, GLFormat.LUMINANCE_ALPHA,
+                    GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.LUMINANCE_ALPHA, false
                 )
             }
         } else {
             var buffer = DataBuffer.unpackDataBuffer(anObject1637, false)!!
-            texture3d = OpenGl3DTexture(openglToolkit, GLFormat.aClass1501952, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.aClass1501952)
+            texture3d = OpenGl3DTexture(openglToolkit, GLFormat.LUMINANCE_ALPHA, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.LUMINANCE_ALPHA)
             buffer = DataBuffer.unpackDataBuffer(anObject1627, false)!!
-            aClass137Sub41636 = OpenGl3DTexture(openglToolkit, GLFormat.aClass1501952, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.aClass1501952)
-            val shader = openglToolkit.aClass1648363
+            aClass137Sub41636 = OpenGl3DTexture(openglToolkit, GLFormat.LUMINANCE_ALPHA, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.LUMINANCE_ALPHA)
+            val shader = openglToolkit.texture3dShader
             if (shader?.createShader() == true) {
                 buffer = DataBuffer.unpackDataBuffer(databufferHdrTexture, false)!!
                 hdrTexture3d = OpenGl3DTexture(openglToolkit, GLFormat.HDR, GLActionFormat.PIXEL_FORMAT)
-                val texture3dTemp = OpenGl3DTexture(openglToolkit, GLFormat.aClass1501948, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.aClass1501948)
+                val texture3dTemp = OpenGl3DTexture(openglToolkit, GLFormat.LUMINANCE, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.LUMINANCE)
                 if (!shader.activate(hdrTexture3d!!, texture3dTemp)) {
                     hdrTexture3d!!.dispose()
                     hdrTexture3d = null
@@ -79,7 +79,7 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
                 anObject1627 = DataBuffer.createDataBuffer(buffer)
             }
 
-            val shader = openglToolkit.aClass1648363
+            val shader = openglToolkit.texture3dShader
             if (shader?.createShader() == true && databufferHdrTexture == null) {
                 val buffer = PerlinWaterTextureGenerator.generatePerlinWaterTexture(PerlinNoiseGenerator())
                 databufferHdrTexture = DataBuffer.createDataBuffer(buffer)

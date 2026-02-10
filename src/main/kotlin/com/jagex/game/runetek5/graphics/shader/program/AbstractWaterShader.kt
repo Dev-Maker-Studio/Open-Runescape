@@ -6,27 +6,27 @@ abstract class AbstractWaterShader(
     @JvmField val toolkit: AbstractNativeToolkit
 ) {
 
-    abstract fun method873()
+    abstract fun activate()
 
-    open fun method875() {
+    open fun prepareForRendering() {
     }
 
-    open fun method876() {
+    open fun beginWaterTile() {
     }
 
-    open fun method877() {
+    open fun updateWaterState() {
     }
 
-    open fun method878() {
+    open fun destroy() {
     }
 
-    abstract fun method879()
+    abstract fun loadDefaultModelMatrix()
 
-    abstract fun method885()
+    abstract fun deactivate()
 
-    abstract fun method886()
+    abstract fun resetModelMatrix()
 
-    abstract fun method888()
+    abstract fun activateForPass()
 
-    abstract fun method889()
+    abstract fun resetModelMatrixForPass()
 }

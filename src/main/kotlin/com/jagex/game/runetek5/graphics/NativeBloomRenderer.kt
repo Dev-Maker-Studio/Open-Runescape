@@ -56,7 +56,7 @@ class NativeBloomRenderer(
             buffer.putFloat(1.0F)
             buffer.putFloat(2.0F)
             this.anInterface4376!!.upload(0, buffer.position(), this.toolkit.directBufferAddress)
-            this.aClass70377 = this.toolkit.method13995(arrayOf(VertexDeclarationComponent(VertexDeclarationAction.aClass69691)))
+            this.aClass70377 = this.toolkit.createVertexDeclaration(arrayOf(VertexDeclarationComponent(VertexDeclarationAction.TEXCOORD_1F)))
         }
 
     }
@@ -87,18 +87,18 @@ class NativeBloomRenderer(
         }
 
         this.directDisplay = this.toolkit.getImageProducer()
-        this.anInterface29363 = this.toolkit.method14064(GLFormat.HDR, this.format, this.width, this.height)
+        this.anInterface29363 = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
         this.anInterface9364 = this.anInterface29363!!.getFramebuffer()
-        this.anInterface29372 = this.toolkit.method14064(GLFormat.HDR, this.format, this.width, this.height)
+        this.anInterface29372 = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
         this.anInterface9368 = this.anInterface29372!!.getFramebuffer()
-        this.anInterface29366 = this.toolkit.method14064(GLFormat.HDR, this.format, this.width, this.height)
+        this.anInterface29366 = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
         this.anInterface9369 = this.anInterface29366!!.getFramebuffer()
         this.anInterface8362 = this.toolkit.getRenderBuffer(this.width, this.height)
         val i_1 = this.bloomVector.size
 
         for (i_2 in 0 until i_1) {
             val class553 = this.bloomVector.elementAt(i_2)
-            class553.method1102()
+            class553.onRendererInitialized()
         }
 
     }
@@ -110,12 +110,12 @@ class NativeBloomRenderer(
     }
 
     fun initialize(insertAtIndex: Int, bloom: AbstractBloomShader): Boolean {
-        if (!bloom.isLoaded() && !bloom.method1097()) {
+        if (!bloom.isLoaded() && !bloom.loadShader()) {
             method822(bloom)
             return true
         }
         this.bloomVector.insertElementAt(bloom, insertAtIndex)
-        bloom.method1102()
+        bloom.onRendererInitialized()
         val format = bloom.getFormatType()
         if (format > this.formatType) {
             this.formatType = format
@@ -131,12 +131,12 @@ class NativeBloomRenderer(
     }
 
     fun draw() {
-        this.toolkit.method14003()
+        this.toolkit.setupUiRenderState()
         this.toolkit.toggleBlending(0)
         this.toolkit.setColourType(1)
         this.toolkit.resetClipping()
         this.directDisplay!!.setRenderBuffer(null)
-        this.toolkit.method13919()
+        this.toolkit.resetViewportOffsets()
         val count = this.bloomVector.size
         this.anInterface29366!!.enableMipmapping()
 
@@ -192,7 +192,7 @@ class NativeBloomRenderer(
         this.toolkit.setDisplay(this.directDisplay!!)
         this.toolkit.applyClearFlags(3, 0xffffff.inv())
         this.toolkit.colorMask(15)
-        this.toolkit.method13985()
+        this.toolkit.resetAlphaBlendMode()
         if (!this.directDisplay!!.isFramebufferComplete()) {
             throw RuntimeException("")
         }

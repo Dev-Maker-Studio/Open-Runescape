@@ -82,22 +82,22 @@ class NativeSpriteShaderHd(nativeToolkit: AbstractNativeToolkit) : AbstractSprit
 
     fun load() {
         spriteShader!!.setActiveMapping()
-        spriteShader!!.setDiffuseSampler(activeUniformLocations!![1], 0, anInterface6443!!)
+        spriteShader!!.setDiffuseSampler(activeUniformLocations!![1], 0, spriteSampler!!)
         activeToolkit.loadWorldViewProjectionMatrix(worldViewProjectionMatrix)
         spriteShader!!.setWorldViewProjectionMatrix(activeUniformLocations!![0], worldViewProjectionMatrix)
-        spriteShader!!.setTextureCoordinateMatrix(activeUniformLocations!![3], aClass384440)
+        spriteShader!!.setTextureCoordinateMatrix(activeUniformLocations!![3], spriteTexCoordMatrix)
         spriteShader!!.load4f(activeUniformLocations!![5], mulColour.x, mulColour.y, mulColour.z, mulColour.w)
         spriteShader!!.load4f(activeUniformLocations!![6], addColour.x, addColour.y, addColour.z, addColour.w)
-        activeToolkit.setStreamSource(0, anInterface4445!!)
-        activeToolkit.setVertexDeclaration(aClass70447!!)
-        activeToolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLE_FAN, anInt446, 2)
+        activeToolkit.setStreamSource(0, vertexStream!!)
+        activeToolkit.setVertexDeclaration(vertexDeclaration!!)
+        activeToolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLE_FAN, startVertex, 2)
     }
 
     override fun loadMasked() {
         spriteShader!!.loadProgram(shaderMappings[1]!!)
         activeUniformLocations = uniformLocations[spriteShader!!.getOccupyingSlot()]
-        spriteShader!!.setDiffuseSampler(activeUniformLocations!![2], 1, anInterface6441!!)
-        spriteShader!!.setTextureCoordinateMatrix(activeUniformLocations!![4], aClass384444)
+        spriteShader!!.setDiffuseSampler(activeUniformLocations!![2], 1, maskSampler!!)
+        spriteShader!!.setTextureCoordinateMatrix(activeUniformLocations!![4], maskTexCoordMatrix)
         load()
     }
 }

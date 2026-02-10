@@ -25,10 +25,10 @@ class VertexDeclarationComponent {
     }
 
     fun method1299(i_1: Int): Int {
-        return ((this.bitpacked shr (VertexDeclarationAction.anInt702 * i_1)) and 0xf).toInt()
+        return ((this.bitpacked shr (VertexDeclarationAction.BITS_PER_SLOT * i_1)) and 0xf).toInt()
     }
 
     fun pack(action: VertexDeclarationAction) {
-        this.bitpacked = this.bitpacked or (action.slot.toLong() shl (VertexDeclarationAction.anInt702 * this.size++))
+        this.bitpacked = this.bitpacked or (action.slot.toLong() shl (VertexDeclarationAction.BITS_PER_SLOT * this.size++))
     }
 }

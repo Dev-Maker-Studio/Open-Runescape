@@ -270,7 +270,7 @@ class Skybox(
                 ready = ready or sunReady
             }
         }
-        if (skyboxPreference != 0 && toolkit.method8404()) {
+        if (skyboxPreference != 0 && toolkit.hasHardwareRendering()) {
             if (skyModel == null && skyboxArchiveId >= 0) {
                 setupModel(toolkit)
             }

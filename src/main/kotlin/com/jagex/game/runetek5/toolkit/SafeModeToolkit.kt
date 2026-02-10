@@ -53,16 +53,16 @@ open class SafeModeToolkit : AbstractToolkit {
     var currentCycle: Int = 0
 
     @JvmField
-    var anInt8998: Int = 0
+    var drawableX: Int = 0
 
     @JvmField
-    var anInt8999: Int = 0
+    var drawableY: Int = 0
 
     @JvmField
-    var anInt9000: Int = 0
+    var drawableWidth: Int = 0
 
     @JvmField
-    var anInt9001: Int = 0
+    var drawableHeight: Int = 0
 
     @JvmField
     var initialized: Boolean = false
@@ -71,16 +71,16 @@ open class SafeModeToolkit : AbstractToolkit {
     var shutdown: Boolean = false
 
     @JvmField
-    var aFloat8976: Float = 0f
+    var viewportHalfWidth: Float = 0f
 
     @JvmField
-    var aFloat9004: Float = 0f
+    var viewportHalfHeight: Float = 0f
 
     @JvmField
-    var aFloat9003: Float = 0f
+    var viewportOriginX: Float = 0f
 
     @JvmField
-    var aFloat8982: Float = 0f
+    var viewportOriginY: Float = 0f
 
     @JvmField
     var clipLeft: Int = 0
@@ -95,10 +95,10 @@ open class SafeModeToolkit : AbstractToolkit {
     var clipBottom: Int = 0
 
     @JvmField
-    var aFloat8978: Float = 0f
+    var depthRangeFar: Float = 0f
 
     @JvmField
-    var aFloat8985: Float = 0f
+    var depthRangeNear: Float = 0f
 
     @JvmField
     var lowestContrast: Int = 0
@@ -134,7 +134,7 @@ open class SafeModeToolkit : AbstractToolkit {
     var lightIntensity: Int = 0
 
     @JvmField
-    val aFloatArrayArray8989: Array<FloatArray>
+    val frustumPlanes: Array<FloatArray>
 
     @JvmField
     val materialSize: Int
@@ -149,7 +149,7 @@ open class SafeModeToolkit : AbstractToolkit {
     var animatedModelMaterials: LRUCache? = null
 
     @JvmField
-    var aClass3848994: Matrix44? = null
+    var viewMatrix44: Matrix44? = null
 
     @JvmField
     var modelMatrix: Matrix44? = null
@@ -179,9 +179,9 @@ open class SafeModeToolkit : AbstractToolkit {
         this.lowestContrast = 45823
         this.highestContrast = 78642
         this.lightIntensity = 75518
-        this.aFloatArrayArray8989 = Array(6) { FloatArray(4) }
-        this.aFloat8978 = 1.0f
-        this.aFloat8985 = 0.0f
+        this.frustumPlanes = Array(6) { FloatArray(4) }
+        this.depthRangeFar = 1.0f
+        this.depthRangeNear = 0.0f
         this.materialSize = 128
         this.forceSmallTexture = false
         this.animatedSpriteMaterials = LRUCache(16)
@@ -189,7 +189,7 @@ open class SafeModeToolkit : AbstractToolkit {
         try {
             this.animatedModelMaterials = LRUCache(256)
             this.currentSunPosition = Matrix43()
-            this.aClass3848994 = Matrix44()
+            this.viewMatrix44 = Matrix44()
             this.modelMatrix = Matrix44()
             this.floorMatrix = Matrix44()
             initializeThreads(1)
@@ -377,18 +377,18 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
     override fun calculateViewportCenter() {
-        this.anInt8998 = 0
-        this.anInt8999 = 0
-        this.anInt9000 = this.viewportWidth
-        this.anInt9001 = this.viewportHeight
+        this.drawableX = 0
+        this.drawableY = 0
+        this.drawableWidth = this.viewportWidth
+        this.drawableHeight = this.viewportHeight
         viewportUpdate()
     }
 
     override fun setDrawableArea(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        this.anInt8998 = i_1
-        this.anInt8999 = i_2
-        this.anInt9000 = i_3
-        this.anInt9001 = i_4
+        this.drawableX = i_1
+        this.drawableY = i_2
+        this.drawableWidth = i_3
+        this.drawableHeight = i_4
         viewportUpdate()
     }
 
@@ -403,19 +403,19 @@ open class SafeModeToolkit : AbstractToolkit {
     fun viewportUpdate() {
         val clipWidth = this.clipRight - this.clipLeft
         val clipHeight = this.clipBottom - this.clipTop
-        val f_3 = this.anInt9000 / 2.0f
-        this.aFloat8976 = f_3
-        val f_4 = this.anInt9001 / 2.0f
-        this.aFloat9004 = f_4
-        this.aFloat9003 = this.anInt8998 + f_3
-        this.aFloat8982 = this.anInt8999 + f_4
+        val f_3 = this.drawableWidth / 2.0f
+        this.viewportHalfWidth = f_3
+        val f_4 = this.drawableHeight / 2.0f
+        this.viewportHalfHeight = f_4
+        this.viewportOriginX = this.drawableX + f_3
+        this.viewportOriginY = this.drawableY + f_4
         for (threadIndex in 0 until this.executingThreadCount) {
             val renderingThread = this.renderingThreads!![threadIndex]
             val rasterizer = renderingThread.rasterizer
             rasterizer!!.offsetX = f_3
             rasterizer.offsetY = f_4
-            rasterizer.centerX = this.aFloat9003 - this.clipLeft
-            rasterizer.centerY = this.aFloat8982 - this.clipTop
+            rasterizer.centerX = this.viewportOriginX - this.clipLeft
+            rasterizer.centerY = this.viewportOriginY - this.clipTop
             rasterizer.clipWidth = clipWidth
             rasterizer.clipHeight = clipHeight
         }
@@ -472,7 +472,7 @@ open class SafeModeToolkit : AbstractToolkit {
             val f_12 = this.floorMatrix!!.faceList[14] + this.floorMatrix!!.faceList[10] * positionZ + positionX * this.floorMatrix!!.faceList[2] + positionY * this.floorMatrix!!.faceList[6]
             val f_13 = this.floorMatrix!!.faceList[15] + this.floorMatrix!!.faceList[7] * positionY + this.floorMatrix!!.faceList[3] * positionX + this.floorMatrix!!.faceList[11] * positionZ
             if (f_12 >= -f_13) {
-                val f_14 = this.aFloat8985 + f_12 * this.aFloat8978 / f_13
+                val f_14 = this.depthRangeNear + f_12 * this.depthRangeFar / f_13
                 if (f_12 <= threadResource!!.aFloat2305) {
                     val f_15 = this.floorMatrix!!.faceList[0] * positionX + this.floorMatrix!!.faceList[4] * positionY + positionZ * this.floorMatrix!!.faceList[8] + this.floorMatrix!!.faceList[12]
                     val f_16 = positionZ * this.floorMatrix!!.faceList[9] + this.floorMatrix!!.faceList[1] * positionX + this.floorMatrix!!.faceList[5] * positionY + this.floorMatrix!!.faceList[13]
@@ -480,9 +480,9 @@ open class SafeModeToolkit : AbstractToolkit {
                         val f_17 = pointEntry.size / 4096.0f
                         val f_18 = f_17 * this.modelMatrix!!.faceList[0] + f_15
                         val f_19 = f_13 + this.modelMatrix!!.faceList[3] * f_17
-                        val f_20 = this.aFloat9003 + f_15 * this.aFloat8976 / f_13
-                        val f_21 = this.aFloat9004 * f_16 / f_13 + this.aFloat8982
-                        val f_22 = this.aFloat9003 + f_18 * this.aFloat8976 / f_19
+                        val f_20 = this.viewportOriginX + f_15 * this.viewportHalfWidth / f_13
+                        val f_21 = this.viewportHalfHeight * f_16 / f_13 + this.viewportOriginY
+                        val f_22 = this.viewportOriginX + f_18 * this.viewportHalfWidth / f_19
                         renderMaterializedSprite(bool1, bool2, pointEntry, f_20.toInt(), f_21.toInt(), f_14, (if (f_22 < f_20) f_20 - f_22 else f_22 - f_20).toInt())
                     }
                 }
@@ -504,7 +504,7 @@ open class SafeModeToolkit : AbstractToolkit {
         return false
     }
 
-    override fun method8404(): Boolean { // unknown
+    override fun hasHardwareRendering(): Boolean { // unknown
         return false
     }
 
@@ -529,7 +529,7 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
     override fun createDelegatingDisplay(canvas1: Canvas, i_2: Int, i_3: Int): DelegatingDisplay {
-        return method14493(this, canvas1, i_2, i_3)
+        return createImageProducer(this, canvas1, i_2, i_3)
     }
 
     override fun setDepthBuffering(useDepthBuffer: Boolean) {
@@ -1071,7 +1071,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-    fun method14366(x: Int, y: Int, width: Int, color: Int, maxY: Int, i_7: Int, i_8: Int) {
+    fun drawDashedHorizontalLine(x: Int, y: Int, width: Int, color: Int, maxY: Int, i_7: Int, i_8: Int) {
         var color = color
         if (this.colourBuffer != null && y >= this.clipTop && y < this.clipBottom) {
             val offset = y * this.viewportWidth + x
@@ -1279,12 +1279,12 @@ open class SafeModeToolkit : AbstractToolkit {
         }
     }
 
-    override fun method8449(): Matrix44 {
+    override fun getScratchMatrix(): Matrix44 {
         val class1851 = getThreadResource(Thread.currentThread())
         return class1851!!.aClass3842346!!
     }
 
-    override fun method8669(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
+    override fun drawSurfaceLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
         var i_11 = i_1
         var i_31 = i_3
         var i_24 = i_2
@@ -1602,9 +1602,9 @@ open class SafeModeToolkit : AbstractToolkit {
         val z = length * this.floorMatrix!!.faceList[11] + this.floorMatrix!!.faceList[7] * height + width * this.floorMatrix!!.faceList[3] + this.floorMatrix!!.faceList[15]
         val x = height * this.floorMatrix!!.faceList[4] + width * this.floorMatrix!!.faceList[0] + this.floorMatrix!!.faceList[12] + this.floorMatrix!!.faceList[8] * length
         val y = height * this.floorMatrix!!.faceList[5] + width * this.floorMatrix!!.faceList[1] + this.floorMatrix!!.faceList[13] + length * this.floorMatrix!!.faceList[9]
-        val floorOffset = length * this.aClass3848994!!.faceList[10] + this.aClass3848994!!.faceList[6] * height + width * this.aClass3848994!!.faceList[2] + this.aClass3848994!!.faceList[14]
-        matrix[0] = this.aFloat9003 + x * this.aFloat8976 / z
-        matrix[1] = this.aFloat8982 + y * this.aFloat9004 / z
+        val floorOffset = length * this.viewMatrix44!!.faceList[10] + this.viewMatrix44!!.faceList[6] * height + width * this.viewMatrix44!!.faceList[2] + this.viewMatrix44!!.faceList[14]
+        matrix[0] = this.viewportOriginX + x * this.viewportHalfWidth / z
+        matrix[1] = this.viewportOriginY + y * this.viewportHalfHeight / z
         matrix[2] = floorOffset
     }
 
@@ -1639,14 +1639,14 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
     override fun resetDepthClippingMask() {
-        this.aFloat8978 = 1.0f
-        this.aFloat8985 = 0.0f
+        this.depthRangeFar = 1.0f
+        this.depthRangeNear = 0.0f
 
         for (i_3 in 0 until this.executingThreadCount) {
             val class1854 = this.renderingThreads!![i_3]
             val choppyitemfixclass5 = class1854.rasterizer
-            choppyitemfixclass5!!.aFloat1683 = this.aFloat8978
-            choppyitemfixclass5.aFloat1682 = this.aFloat8985
+            choppyitemfixclass5!!.aFloat1683 = this.depthRangeFar
+            choppyitemfixclass5.aFloat1682 = this.depthRangeNear
         }
 
     }
@@ -1701,7 +1701,7 @@ open class SafeModeToolkit : AbstractToolkit {
         val i_10 = i_8
         i_8 = i_8 shl 1
         if (materialId == -1) {
-            method14373(bool2, i_5, i_6, f_7, i_10, pointEntity.colorArgb, 1)
+            drawParticleShape(bool2, i_5, i_6, f_7, i_10, pointEntity.colorArgb, 1)
         } else {
             if (materialId != this.renderedMaterialId) {
                 var textureSprite = this.animatedSpriteMaterials.get(materialId.toLong()) as NativeSprite?
@@ -1746,12 +1746,12 @@ open class SafeModeToolkit : AbstractToolkit {
                     return
                 }
             }
-            method14373(depthWrite, x, y, z, size2d, color, shape)
+            drawParticleShape(depthWrite, x, y, z, size2d, color, shape)
         }
 
     }
 
-    fun method14373(writeDepth: Boolean, x: Int, y: Int, z: Float, deltaY: Int, color: Int, shape: Int) {
+    fun drawParticleShape(writeDepth: Boolean, x: Int, y: Int, z: Float, deltaY: Int, color: Int, shape: Int) {
         var y = y
         var deltaY = deltaY
         var color = color
@@ -2033,7 +2033,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
     override fun setSunPosition(sunPosition: Matrix43) {
         this.currentSunPosition = sunPosition
-        method14374()
+        updateFrustumPlanes()
     }
 
     override fun copySunPosition(): Matrix43 {
@@ -2082,16 +2082,16 @@ open class SafeModeToolkit : AbstractToolkit {
         this.animatedModelMaterials!!.reset()
     }
 
-    fun method14374() {
-        this.aClass3848994!!.fromMatrix(this.currentSunPosition!!)
-        this.floorMatrix!!.copyFrom(this.aClass3848994!!)
+    fun updateFrustumPlanes() {
+        this.viewMatrix44!!.fromMatrix(this.currentSunPosition!!)
+        this.floorMatrix!!.copyFrom(this.viewMatrix44!!)
         this.floorMatrix!!.multiplyBy(this.modelMatrix!!)
-        this.floorMatrix!!.method6539(this.aFloatArrayArray8989[0])
-        this.floorMatrix!!.method6540(this.aFloatArrayArray8989[1])
-        this.floorMatrix!!.method6535(this.aFloatArrayArray8989[2])
-        this.floorMatrix!!.method6536(this.aFloatArrayArray8989[3])
-        this.floorMatrix!!.method6613(this.aFloatArrayArray8989[4])
-        this.floorMatrix!!.method6538(this.aFloatArrayArray8989[5])
+        this.floorMatrix!!.method6539(this.frustumPlanes[0])
+        this.floorMatrix!!.method6540(this.frustumPlanes[1])
+        this.floorMatrix!!.method6535(this.frustumPlanes[2])
+        this.floorMatrix!!.method6536(this.frustumPlanes[3])
+        this.floorMatrix!!.method6613(this.frustumPlanes[4])
+        this.floorMatrix!!.method6538(this.frustumPlanes[5])
         val f_1 = this.modelMatrix!!.getDepthPerspectiveCD()
         val f_2 = this.modelMatrix!!.faceList[10] * (f_1 - 255.0f) + this.modelMatrix!!.faceList[14]
         val f_3 = this.modelMatrix!!.faceList[10] * f_1 + this.modelMatrix!!.faceList[14]
@@ -2112,7 +2112,7 @@ open class SafeModeToolkit : AbstractToolkit {
     override fun resetBloom() {
     }
 
-    override fun method8525(i_3: Int, i_4: Int) {
+    override fun beginBloomCapture(i_3: Int, i_4: Int) {
     }
 
 
@@ -2154,9 +2154,9 @@ open class SafeModeToolkit : AbstractToolkit {
             if (f_7 >= -f_6 && f_7 <= f_6) {
                 val f_8 = f_3 * this.floorMatrix!!.faceList[9] + this.floorMatrix!!.faceList[13] + this.floorMatrix!!.faceList[1] * f_1 + this.floorMatrix!!.faceList[5] * f_2
                 if (f_8 >= -f_6 && f_8 <= f_6) {
-                    val f_9 = this.aClass3848994!!.faceList[14] + this.aClass3848994!!.faceList[2] * f_1 + this.aClass3848994!!.faceList[6] * f_2 + this.aClass3848994!!.faceList[10] * f_3
-                    floats_4[0] = this.aFloat9003 + f_7 * this.aFloat8976 / f_6
-                    floats_4[1] = f_8 * this.aFloat9004 / f_6 + this.aFloat8982
+                    val f_9 = this.viewMatrix44!!.faceList[14] + this.viewMatrix44!!.faceList[2] * f_1 + this.viewMatrix44!!.faceList[6] * f_2 + this.viewMatrix44!!.faceList[10] * f_3
+                    floats_4[0] = this.viewportOriginX + f_7 * this.viewportHalfWidth / f_6
+                    floats_4[1] = f_8 * this.viewportHalfHeight / f_6 + this.viewportOriginY
                     floats_4[2] = f_9
                 } else {
                     floats_4[2] = Float.NaN
@@ -2260,7 +2260,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
     override fun setModelMatrix(modelMatrix: Matrix44) {
         this.modelMatrix!!.copyFrom(modelMatrix)
-        method14374()
+        updateFrustumPlanes()
     }
 
     override fun generateSprite(spriteType: SpriteType?, paletteSprite: Boolean): NativeSprite {
@@ -2378,7 +2378,7 @@ open class SafeModeToolkit : AbstractToolkit {
         return 0
     }
 
-    fun method14399(x: Int, y: Int, i_3: Int, color: Int, i_6: Int, i_7: Int, i_8: Int) {
+    fun drawDashedVerticalLine(x: Int, y: Int, i_3: Int, color: Int, i_6: Int, i_7: Int, i_8: Int) {
         var color = color
         if (this.colourBuffer != null && x >= this.clipLeft && x < this.clipRight) {
             val currentPos = y * this.viewportWidth + x
@@ -2489,7 +2489,7 @@ open class SafeModeToolkit : AbstractToolkit {
         drawTransparentVerticalLine(width + x - 1, y + 1, height - 2, color, alpha)
     }
 
-    override fun method8474() {
+    override fun compositeBloomEffects() {
     }
 
     override fun updateSun(multiplier: Float) {
@@ -2546,7 +2546,7 @@ open class SafeModeToolkit : AbstractToolkit {
             var i_10: Int
             if (length == 0) {
                 if (width >= 0) {
-                    method14366(x, y, width + 1, color, i_7, i_8, i_9)
+                    drawDashedHorizontalLine(x, y, width + 1, color, i_7, i_8, i_9)
                 } else {
                     i_10 = i_8 + i_7
                     i_9 %= i_10
@@ -2556,11 +2556,11 @@ open class SafeModeToolkit : AbstractToolkit {
                         i_9 += i_10
                     }
 
-                    method14366(width + x, y, -width + 1, color, i_7, i_8, i_9)
+                    drawDashedHorizontalLine(width + x, y, -width + 1, color, i_7, i_8, i_9)
                 }
             } else if (width == 0) {
                 if (length >= 0) {
-                    method14399(x, y, length + 1, color, i_7, i_8, i_9)
+                    drawDashedVerticalLine(x, y, length + 1, color, i_7, i_8, i_9)
                 } else {
                     i_10 = i_8 + i_7
                     i_9 %= i_10
@@ -2570,7 +2570,7 @@ open class SafeModeToolkit : AbstractToolkit {
                         i_9 += i_10
                     }
 
-                    method14399(x, y + length, -length + 1, color, i_7, i_8, i_9)
+                    drawDashedVerticalLine(x, y + length, -length + 1, color, i_7, i_8, i_9)
                 }
             } else {
                 i_9 = i_9 shl 8
@@ -2720,7 +2720,7 @@ open class SafeModeToolkit : AbstractToolkit {
         }
 
         @JvmStatic
-        fun method14493(hardwarerenderer0: SafeModeToolkit, canvas1: Canvas, i_2: Int, i_3: Int): AbstractImageProducerSM {
+        fun createImageProducer(hardwarerenderer0: SafeModeToolkit, canvas1: Canvas, i_2: Int, i_3: Int): AbstractImageProducerSM {
             val class158Sub2Sub3Sub15 = BufferedImageProducerSM(hardwarerenderer0, canvas1, i_2, i_3)
             return class158Sub2Sub3Sub15
         }

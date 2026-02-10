@@ -592,7 +592,7 @@ object StaticMethods {
             anInt3555 = i_8
             anInt2300 = i_7
             MiniMenu.anInt8975 = i_4
-            NativeSprite.anInt156 = (Math.random() * 24.0).toInt()
+            NativeSprite.alphaJitter = (Math.random() * 24.0).toInt()
             MiniMenu.isOpen = true
         }
     }
