@@ -77,7 +77,7 @@ object PacketEncoder {
             tcpmessage5.buffer.writeShortLength(tcpmessage5.buffer.currentPosition - i_6)
             Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage5)
             if (i_2 < 13) {
-                Client.aBool7189 = true
+                Client.hasJustCreatedAccount = true
             }
 
             AccountCreationStage.currentRequest = CreateAccountRequest.AWAITING_RESPONSE
@@ -140,7 +140,7 @@ object PacketEncoder {
                 if (icomponentdefinitions2 != null) {
                     val hookrequest3 = HookRequest()
                     hookrequest3.source = icomponentdefinitions0
-                    hookrequest3.aClass1188057 = icomponentdefinitions2
+                    hookrequest3.targetComponent = icomponentdefinitions2
                     hookrequest3.params = icomponentdefinitions0.onTargetLeave
                     CS2Executor.executeHookInner(hookrequest3)
                 }

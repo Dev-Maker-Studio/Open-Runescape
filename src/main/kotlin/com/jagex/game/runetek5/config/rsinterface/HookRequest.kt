@@ -5,7 +5,7 @@ import com.jagex.game.runetek5.cache.node.Node
 @Suppress("UNCHECKED_CAST")
 class HookRequest : Node<Any?>() {
     @JvmField
-    var anInt8051: Int = 0
+    var clickedOption: Int = 0
 
     @JvmField
     var hasMousePosition: Boolean = false
@@ -23,7 +23,7 @@ class HookRequest : Node<Any?>() {
     var typedKeyChar: Int = 0
 
     @JvmField
-    var aClass1188057: Component? = null
+    var targetComponent: Component? = null
 
     @JvmField
     var typedKeyCode: Int = 0

@@ -164,12 +164,12 @@ class Client : GameShell() {
                         }
                     }
 
-                    2 -> aBool7158 = "true".equals(paramString, ignoreCase = true)
-                    3 -> aString7165 = paramString
+                    2 -> useBrowserAppletMode = "true".equals(paramString, ignoreCase = true)
+                    3 -> customStringParam = paramString
                     4 -> {
-                        aString7156 = paramString
-                        if (aString7156!!.length > 100) {
-                            aString7156 = null
+                        supplementaryLoginData = paramString
+                        if (supplementaryLoginData!!.length > 100) {
+                            supplementaryLoginData = null
                         }
                     }
 
@@ -188,7 +188,7 @@ class Client : GameShell() {
                     10 -> showErrorOnFailedZap = "true".equals(paramString, ignoreCase = true)
                     11 -> addGamescreenPadding = "true".equals(paramString, ignoreCase = true)
                     12, 21 -> {}
-                    13 -> aString5555 = paramString
+                    13 -> loginToken = paramString
                     14 -> {
                         if (WorldConnection.LOBBY_CONNECTION_INFO == null) {
                             WorldConnection.LOBBY_CONNECTION_INFO = ConnectionInfo()
@@ -216,7 +216,7 @@ class Client : GameShell() {
 
                     19 -> PacketEncoder.sendErrorToServer("", RuntimeException())
                     20 -> loginScreenImageResourceNames = paramString
-                    22 -> aBool7160 = "true".equals(paramString, ignoreCase = true)
+                    22 -> hasSignedTermsAgreement = "true".equals(paramString, ignoreCase = true)
                     23 -> AFFILIATE = paramString.toInt()
                     24 -> {
                         ServerEnvironment.SERVER_ENVIRONMENT = Identifiable.identify(ServerEnvironment.values(), paramString.toInt()) as ServerEnvironment?
@@ -227,12 +227,12 @@ class Client : GameShell() {
                         }
                     }
 
-                    25 -> aBool7159 = "true".equals(paramString, ignoreCase = true)
+                    25 -> suppressTutorials = "true".equals(paramString, ignoreCase = true)
                     26 -> machineUid = paramString.toLong()
-                    27 -> anInt7163 = paramString.toInt()
-                    28 -> aBool7189 = "true" == paramString
-                    29 -> aBool7151 = "true" == paramString
-                    30 -> anInt2831 = paramString.toInt()
+                    27 -> sessionToken = paramString.toInt()
+                    28 -> hasJustCreatedAccount = "true" == paramString
+                    29 -> billingFlag = "true" == paramString
+                    30 -> loginType = paramString.toInt()
                     31 -> CURRENT_LANGUAGE = Language.getLanguage(paramString.toInt())
                     32 -> mapOwnerIdentifier = paramString
                     33 -> affiliateP = paramString
@@ -317,7 +317,7 @@ class Client : GameShell() {
             }
 
             StaticMethods.updateSoundSystems()
-            VorbisNode.method15536()
+            VorbisNode.processVorbisStreams()
             KeyRecorder.keyRecorder!!.prepareAwaitingKeys()
             MouseRecord.recorder!!.syncMouseState()
             if (Renderers.activeToolkit != null) {
@@ -400,8 +400,8 @@ class Client : GameShell() {
                 LoginManager.loginBlock()
                 if (StaticMethods.worldLoginResponse != -3 && StaticMethods.worldLoginResponse != 2 && StaticMethods.worldLoginResponse != 15) {
                     if (gameState == GameState.UNK_17) {
-                        StaticMethods.lastDisconnectArg2 = LoginManager.anInt112
-                        StaticMethods.lastDisconnectArg1 = LoginManager.anInt94
+                        StaticMethods.lastDisconnectArg2 = LoginManager.loginResponseDetail
+                        StaticMethods.lastDisconnectArg1 = LoginManager.loginResponseExtraInfo
                         StaticMethods.lastDisconnectResponse = StaticMethods.worldLoginResponse
                         if (WorldConnection.reconnectingWorld) {
                             LoginManager.setGameHost(WorldConnection.connectionInfo!!.worldId, WorldConnection.connectionInfo!!.host!!)
@@ -531,7 +531,7 @@ class Client : GameShell() {
                 }
             }
 
-            VorbisNode.method6511()
+            VorbisNode.cleanupStaleStreams()
             val cpuUsagePreference = PreferenceManager.preferences!!.cpu!!.getValue()
             if (cpuUsagePreference == 0) {
                 TimeTools.sleep(15L)
@@ -901,7 +901,7 @@ class Client : GameShell() {
     }
 
     fun processLobbyTick() {
-        if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
+        if (gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
             if (REBOOT_TIMER > 1) {
                 REBOOT_TIMER--
                 lastMiscUpdateTick = serverTick
@@ -982,7 +982,7 @@ class Client : GameShell() {
             }
         }
 
-        if ((gameState == GameState.UNK_5 || gameState == GameState.UNK_7 || gameState == GameState.UNK_0 || gameState == GameState.IN_ACCOUNT_CREATION) && (!LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42) && !AccountCreationStage.isCreatingAccount()) {
+        if ((gameState == GameState.UNK_5 || gameState == GameState.UNK_7 || gameState == GameState.UNK_0 || gameState == GameState.IN_ACCOUNT_CREATION) && (!LoginManager.isLoginInProgress() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42) && !AccountCreationStage.isCreatingAccount()) {
             if (Camera.cameraCalculationType == 5) {
                 Camera.calculateCameraPosition()
             } else {
@@ -1013,7 +1013,7 @@ class Client : GameShell() {
                                                 processDrag()
                                             }
 
-                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42) {
+                                            if (gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42) {
                                                 MenuInteraction.processMenuInput()
                                             }
 
@@ -1038,7 +1038,7 @@ class Client : GameShell() {
                                                 loginStateUpdate = PLAYER_LOGINSTATE_UPDATES.getNext() as LoginStateUpdate?
                                             }
 
-                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
+                                            if (gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
                                                 if (gameState != GameState.UNK_7 && LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
                                                     logout(false)
                                                 } else {
@@ -1203,7 +1203,7 @@ class Client : GameShell() {
         var AFFILIATE: Int = 0
         var DEBUG_DISPLAY_COLOR_INDEX: Int = 0
         @JvmField
-        var aBool7151: Boolean = false
+        var billingFlag: Boolean = false
         @JvmField
         var base64Url: ByteArray? = null
         @JvmField
@@ -1214,12 +1214,12 @@ class Client : GameShell() {
         var safemodeForcedDuringStartup: Boolean = false
         var loginScreenImageResourceNames: String? = null
         @JvmField
-        var aBool7158: Boolean = false
-        var aBool7159: Boolean = false
+        var useBrowserAppletMode: Boolean = false
+        var suppressTutorials: Boolean = false
         @JvmField
         var ENTITY_TARGET: Int = 0
         @JvmField
-        var aString7165: String? = null
+        var customStringParam: String? = null
         @JvmField
         var gameState: GameState = GameState.UNK_4
         @JvmField
@@ -1237,7 +1237,7 @@ class Client : GameShell() {
         var sceneDummyOp: Int = 0
         var jagtheoraLoaded: Boolean = false
         @JvmField
-        var aBool7189: Boolean = false
+        var hasJustCreatedAccount: Boolean = false
         var keyCachePointerPoss: Int = 0
         var maximumHeldKeys: Int = 0
         var npcCount: Int = 0
@@ -1287,7 +1287,7 @@ class Client : GameShell() {
         @JvmField
         var VERIFIED_EMAIL_ADDRESS: Boolean
         @JvmField
-        var aBool7323: Boolean
+        var hasDisplayNamePending: Boolean
         @JvmField
         var IS_QUICKCHAT_ONLY: Boolean
         @JvmField
@@ -1338,19 +1338,19 @@ class Client : GameShell() {
         @JvmField
         var gameAreaHeight: Int
         @JvmField
-        var aByte7458: Byte
+        var displayNameChangeState: Byte
         var showErrorOnFailedZap: Boolean = false
         var affiliateP: String? = null
-        var aString7156: String? = null
-        var aBool7160: Boolean = false
+        var supplementaryLoginData: String? = null
+        var hasSignedTermsAgreement: Boolean = false
         var addGamescreenPadding: Boolean = false
-        var anInt7163: Int = -1
+        var sessionToken: Int = -1
         var js5AuthToken: String? = null
         var lastRedrawTimeMillis: Long = 0
         var awaitingPriorityRequests: Boolean = true
         var DRAW_DEBUG: Boolean = false
         var DEBUG_MODE: Boolean = false
-        var aBool7241: Boolean = false
+        var hideNpcs: Boolean = false
         var playingAltGame: Boolean = true
         var drawsSinceLastPacket: Int = 0
         var mouseWheelDelta: Int = 0
@@ -1391,7 +1391,7 @@ class Client : GameShell() {
         var visibleBelowX: IntArray?
         var visibleBelowY: IntArray?
         var visibleAboveY: IntArray?
-        var aBool7322: Boolean
+        var hasAccountSecurity: Boolean
         var REDUCE_ATTACK_PRIORITY: Boolean
         var menuOpenMode: Int
         var defaultMenuCursor: Int
@@ -1539,8 +1539,8 @@ class Client : GameShell() {
             PLAYER_MOD_LEVEL = 0
             USERDETAIL_QUICKCHAT = false
             VERIFIED_EMAIL_ADDRESS = false
-            aBool7322 = false
-            aBool7323 = false
+            hasAccountSecurity = false
+            hasDisplayNamePending = false
             REDUCE_ATTACK_PRIORITY = true
             IS_QUICKCHAT_ONLY = false
             PLAYER_OP_BASE_TYPES = shortArrayOf(44.toShort(), 45.toShort(), 46.toShort(), 47.toShort(), 48.toShort(), 49.toShort(), 50.toShort(), 51.toShort())
@@ -1664,7 +1664,7 @@ class Client : GameShell() {
             viewportScaledFov = 0
             PLAYER_LOGINSTATE_UPDATES = EntityNodeList<LoginStateUpdate>()
             ACTIVE_TIMEZONE_CALENDER = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
-            aByte7458 = -6
+            displayNameChangeState = -6
             INTERACTIVE_OBJECT_COMPARABLE = ComparableInteractiveEntity()
             HITSPLAT_SIZE_CACHE = IntArray(4)
         }
@@ -1734,7 +1734,7 @@ class Client : GameShell() {
             if (state != gameState) {
                 drawsSinceLastPacket = 0
                 if (state == GameState.UNK_10 || state == GameState.UNK_17) {
-                    LoginManager.method1384()
+                    LoginManager.startWorldLogin()
                 }
 
                 if (state != GameState.UNK_10 && WorldConnection.gameConnection != null) {
@@ -1752,12 +1752,12 @@ class Client : GameShell() {
 
                 if (state != GameState.UNK_14 && state != GameState.UNK_12) {
                     if (state == GameState.UNK_19 || state == GameState.UNK_7 && gameState != GameState.UNK_6) {
-                        LoginManager.method1384()
+                        LoginManager.startWorldLogin()
                     } else if (state == GameState.UNK_8) {
                         AccountCreationStage.initAccountCreation()
                     }
                 } else {
-                    LoginManager.method5921()
+                    LoginManager.startLobbyLogin()
                 }
 
                 if (GameState.isLoadingRegion(state)) {
@@ -1772,7 +1772,7 @@ class Client : GameShell() {
                         AreaSoundPlayer.currentMusicArchive = AreaSoundPlayer.titlescreenMusicArchive
                         if (PreferenceManager.preferences!!.soundLevel!!.getValue() != 0) {
                             AreaSoundPlayer.musicSourceUpdate(Resource.MUSIC!!, AreaSoundPlayer.titlescreenMusicArchive, PreferenceManager.preferences!!.soundLevel!!.getValue())
-                            SongPlayer.method12658()
+                            SongPlayer.resetChannelVolumes()
                         } else {
                             disableTitlescreenMusic()
                         }
@@ -1804,7 +1804,7 @@ class Client : GameShell() {
                 }
                 connectionContext.closeConnection()
             }
-            LoginManager.method5558()
+            LoginManager.resetLoginState()
             TypeLists.resetCachedData(false)
             Resource.mapRegion!!.resetInteractiveEntities()
             Resource.mapRegion!!.resetBasePosition()
@@ -1812,7 +1812,7 @@ class Client : GameShell() {
             disableTitlescreenMusic()
             AreaSoundPlayer.currentMusicArchive = -1
             SoundEffectPlayer.soundJinglePlaying = false
-            SongPlayer.method12658()
+            SongPlayer.resetChannelVolumes()
             AmbientSound.unlinkSounds(true)
             AbstractNativeToolkit.drawLoadingPleaseWaitHardware()
             clearWorldMapCaches()
@@ -1883,7 +1883,7 @@ class Client : GameShell() {
             SoundResourceManager.pendingMidiStream = null
             AreaSoundPlayer.SOUND_LEVEL = 0
             StaticMethods.songLooping = false
-            CutsceneBasicMovement.anInt9440 = 2
+            CutsceneBasicMovement.musicFadeStep = 2
             SongPlayer.songTransition = null
         }
 
@@ -2194,7 +2194,7 @@ class Client : GameShell() {
         var mapOwnerIdentifier: String? = null
         @JvmField
         var lobbyMembershipStatus: Int = 0
-        var aString5555: String? = null
+        var loginToken: String? = null
         var frameComponent: Component? = null
         var ENTITY_DEFAULTS: EntityDefaults? = null
         @JvmField
@@ -2208,7 +2208,7 @@ class Client : GameShell() {
         var COUNTRY: Int = 0
         @JvmField
         var LISTENED_CLAN_CHANNEL: ClanChannel? = null
-        var anInt2831: Int = 0
+        var loginType: Int = 0
         var TEST_ENVIRONMENT_APPEARANCE_OVERRIDE_DATA: Array<ByteArray?>? = null
         @JvmField
         var JCOINS: Int = 0
@@ -2498,7 +2498,7 @@ class Client : GameShell() {
                             hookrequest5.source = draggingComponent
                             hookrequest5.mouseX = i_3
                             hookrequest5.mouseY = i_4
-                            hookrequest5.aClass1188057 = hoveredComponent
+                            hookrequest5.targetComponent = hoveredComponent
                             hookrequest5.params = draggingComponent!!.onDragComplete
                             CS2Executor.executeHookInner(hookrequest5)
                         }

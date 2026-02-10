@@ -30,7 +30,7 @@ class VorbisNode(
         @JvmField val SPRITE_GENERATOR = NativeSpriteGenerator()
 
         @JvmStatic
-        fun method6511() {
+        fun cleanupStaleStreams() {
             var node = StaticMethods.INDEX36_FILE_CACHE.first()
             while (node != null) {
                 if (!node.aBool7996) {
@@ -43,7 +43,7 @@ class VorbisNode(
         }
 
         @JvmStatic
-        fun method15536() {
+        fun processVorbisStreams() {
             var node = StaticMethods.INDEX36_FILE_CACHE.first()
             while (node != null) {
                 if (node.vfReference.isPlaybackComplete()) {

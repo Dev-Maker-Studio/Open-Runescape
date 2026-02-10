@@ -430,7 +430,7 @@ object SoundEffectPlayer {
 	    AmbientSound.gameSounds = PcmStreamScheduler()
 	    soundEffectPlayer!!.currentPcmStream = AmbientSound.gameSounds
 	    resampler = Resampler(22050, PcmPlayerManager.sampleRate)
-	    SongPlayer.method12658()
+	    SongPlayer.resetChannelVolumes()
 	}
 
 	@JvmStatic

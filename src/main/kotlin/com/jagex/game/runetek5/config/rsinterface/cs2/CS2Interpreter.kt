@@ -743,7 +743,7 @@ object CS2Interpreter {
             ClientScriptOpCode.ANIMATION_PARAM -> getAnimationParam(exec)
             ClientScriptOpCode.BAS_GETANIM_READY -> method15408(exec)
             ClientScriptOpCode.UNUSED_LOGIN_GLOBAL_BOOL -> method5755(exec)
-            ClientScriptOpCode.UNUSED_PACKET_SEND_STRING -> sendAClass3794624(exec)
+            ClientScriptOpCode.UNUSED_PACKET_SEND_STRING -> sendDisplayNameChangeRequest(exec)
             ClientScriptOpCode.UNUSED_PACKET_SET_GLOBAL_BYTE -> method546(exec)
             ClientScriptOpCode.CHAT_GETFILTER_PUBLIC -> setPublicFilter(exec)
             ClientScriptOpCode.CHAT_SETFILTER -> ChatBox.setFilter(exec)
@@ -1171,7 +1171,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5755(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (Client.aBool7323) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (Client.hasDisplayNamePending) 1  else 0
     }
 
     @JvmStatic
@@ -1689,7 +1689,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6280() {
-        Client.aBool7189 = true
+        Client.hasJustCreatedAccount = true
     }
 
     @JvmStatic
@@ -1738,7 +1738,7 @@ object CS2Interpreter {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
         var bool3 = executor.intStack[--executor.intStackPtr] == 1
         var string_4: String? = ServerEnvironment.getUrl() + string_2
-        Browser.openOpenjs(string_4!!, bool3, Client.aBool7158)
+        Browser.openOpenjs(string_4!!, bool3, Client.useBrowserAppletMode)
     }
 
     @JvmStatic
@@ -2597,7 +2597,7 @@ object CS2Interpreter {
     fun method5010(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var string_3: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        if (Client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
+        if (Client.gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress()) {
             executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.setGameHost(i_2, string_3!!)) 1 else 0
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -3070,7 +3070,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6695() {
-        LoginManager.method1774()
+        LoginManager.confirmLoginContinue()
     }
 
     @JvmStatic
@@ -3471,7 +3471,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1357(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = LoginManager.anInt8307
+        executor.intStack[++executor.intStackPtr - 1] = LoginManager.lobbyCreditCardExpiry
     }
 
     @JvmStatic
@@ -3582,13 +3582,13 @@ object CS2Interpreter {
     }
 
     @JvmStatic
-    fun sendAClass3794624(executor: CS2Executor) {
+    fun sendDisplayNameChangeRequest(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        if (Client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
+        if (Client.gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress()) {
             if (string_2!!.length > 20) {
-                Client.aByte7458 = -4
+                Client.displayNameChangeState = -4
             } else {
-                Client.aByte7458 = -1
+                Client.displayNameChangeState = -1
                 var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.DEPRECATED_97_SERVERPACKET_52, Client.LOBBY_CONNECTION_CONTEXT.isaac)
                 tcpmessage3!!.buffer.writeByte(0)
                 var i_4 = tcpmessage3!!.buffer.currentPosition
@@ -3597,7 +3597,7 @@ object CS2Interpreter {
                 Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage3)
             }
         } else {
-            Client.aByte7458 = -5
+            Client.displayNameChangeState = -5
         }
     }
 
@@ -4121,7 +4121,7 @@ object CS2Interpreter {
         executor.stringStackPtr -= 2
         var string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
         var string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
-        LoginManager.method2635(string_2!!, string_3!!)
+        LoginManager.switchWorldAndLogin(string_2!!, string_3!!)
     }
 
     @JvmStatic
@@ -4134,7 +4134,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7699(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (Client.aBool7151) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (Client.billingFlag) 1  else 0
     }
 
     @JvmStatic
@@ -5336,7 +5336,7 @@ object CS2Interpreter {
             if (GameState.isRenderingScene(Client.gameState)) {
                 if (i_3 == 0 && AreaSoundPlayer.currentMusicArchive != -1) {
                     AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
-                    SongPlayer.method12658()
+                    SongPlayer.resetChannelVolumes()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else if (i_2 == 0) {
                 	SoundResourceManager.discardSongData()
@@ -5668,7 +5668,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4417(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = LoginManager.anInt103
+        executor.intStack[++executor.intStackPtr - 1] = LoginManager.loginQueuePosition
     }
 
     @JvmStatic
@@ -5856,7 +5856,7 @@ object CS2Interpreter {
             if (!GameState.isRenderingScene(Client.gameState)) {
                 if (i_3 == 0) {
                     AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
-                    SongPlayer.method12658()
+                    SongPlayer.resetChannelVolumes()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else if (i_2 == 0) {
                 	SoundResourceManager.discardSongData()
@@ -5891,7 +5891,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15437(executor: CS2Executor) {
-        if (Client.gameState == GameState.UNK_0 && !LoginManager.method3360()) {
+        if (Client.gameState == GameState.UNK_0 && !LoginManager.isLoginInProgress()) {
             if (WorldConnection.requestingWorldList) {
                 executor.intStack[++executor.intStackPtr - 1] = 0
             } else if (WorldConnection.worldListReceivedTime > Utils.time() - 1000L) {
@@ -6026,7 +6026,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method1499(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = (LoginManager.MEMBERSHIP_END / 60000L).toInt()
-        executor.intStack[++executor.intStackPtr - 1] = ((LoginManager.MEMBERSHIP_END - Utils.time() - LoginManager.aLong420) / 60000L).toInt()
+        executor.intStack[++executor.intStackPtr - 1] = ((LoginManager.MEMBERSHIP_END - Utils.time() - LoginManager.membershipTimeCorrection) / 60000L).toInt()
         executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.IS_MEMBER_SUBSCRIPTION) 1 else 0
     }
 
@@ -6113,9 +6113,9 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method546(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = Client.aByte7458.toInt()
-        if (Client.aByte7458.toInt() != -1) {
-            Client.aByte7458 = -6
+        executor.intStack[++executor.intStackPtr - 1] = Client.displayNameChangeState.toInt()
+        if (Client.displayNameChangeState.toInt() != -1) {
+            Client.displayNameChangeState = -6
         }
     }
 
@@ -6958,8 +6958,8 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3368() {
-        if (!LoginManager.method3360()) {
-            LoginManager.method5558()
+        if (!LoginManager.isLoginInProgress()) {
+            LoginManager.resetLoginState()
         }
     }
 
@@ -7077,7 +7077,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method2107() {
-        LoginManager.method7777()
+        LoginManager.returnToLoginScreen()
     }
 
     @JvmStatic
@@ -7232,7 +7232,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5205(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = AccountCreationResponseOpcodes.method1489().getValue()
+        executor.intStack[++executor.intStackPtr - 1] = AccountCreationResponseOpcodes.getReceivedResponse().getValue()
     }
 
     @JvmStatic
@@ -7406,7 +7406,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method453(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (Client.aBool7189) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (Client.hasJustCreatedAccount) 1  else 0
     }
 
     @JvmStatic
@@ -7467,7 +7467,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3120() {
-        LoginManager.method1478()
+        LoginManager.cancelLogin()
     }
 
     @JvmStatic
@@ -8000,7 +8000,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8869(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = LoginManager.anInt1526
+        executor.intStack[++executor.intStackPtr - 1] = LoginManager.lobbyPlayAge
     }
 
     @JvmStatic
@@ -8042,7 +8042,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method12352(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.aBool5556) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.isDobRequested) 1  else 0
     }
 
     @JvmStatic
@@ -8579,7 +8579,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method14669(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.method3360()) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (LoginManager.isLoginInProgress()) 1  else 0
     }
 
     @JvmStatic
@@ -8625,8 +8625,8 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3748(executor: CS2Executor) {
-        if (Client.aString7165 != null) {
-            executor.stringStack[++executor.stringStackPtr - 1] = Client.aString7165
+        if (Client.customStringParam != null) {
+            executor.stringStack[++executor.stringStackPtr - 1] = Client.customStringParam
         } else {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
         }
@@ -8901,7 +8901,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7744(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = LoginManager.anInt94
+        executor.intStack[++executor.intStackPtr - 1] = LoginManager.loginResponseExtraInfo
     }
 
     @JvmStatic
@@ -8940,7 +8940,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4826(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = LoginManager.anInt112
+        executor.intStack[++executor.intStackPtr - 1] = LoginManager.loginResponseDetail
     }
 
     @JvmStatic

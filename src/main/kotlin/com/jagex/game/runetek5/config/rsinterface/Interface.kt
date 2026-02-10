@@ -370,7 +370,7 @@ class Interface(
                 if (component.params != null) {
                     val hookRequest = HookRequest()
                     hookRequest.source = component
-                    hookRequest.anInt8051 = option
+                    hookRequest.clickedOption = option
                     hookRequest.optionName = optionName
                     hookRequest.params = component.params
                     CS2Executor.executeHookInner(hookRequest)

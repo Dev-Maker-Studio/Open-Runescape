@@ -612,8 +612,8 @@ object PacketDecoder {
             if (bool66) {
                 var string_137 = rsbytebuffer127.readString()
                 if (string_137.isEmpty()) string_137 = url
-                if (!Client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) Browser.openOpenjs(string_137, true, Client.aBool7158)
-            } else Browser.openOpenjs(url, true, Client.aBool7158)
+                if (!Client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) Browser.openOpenjs(string_137, true, Client.useBrowserAppletMode)
+            } else Browser.openOpenjs(url, true, Client.useBrowserAppletMode)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CAM_SHAKE) {
@@ -719,9 +719,9 @@ object PacketDecoder {
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.DEPRECATED_52_CLIENTPACKET_97) {
-            Client.aByte7458 = buffer.readByte()
-            if (Client.aByte7458.toInt() == 0 || Client.aByte7458.toInt() == 1) {
-                Client.aBool7323 = true
+            Client.displayNameChangeState = buffer.readByte()
+            if (Client.displayNameChangeState.toInt() == 0 || Client.displayNameChangeState.toInt() == 1) {
+                Client.hasDisplayNamePending = true
             }
             context.currentPacket = null
             return true
@@ -2369,7 +2369,7 @@ object PacketDecoder {
             val string_88 = Utils.readString(bytes_64, 0, context.currentPacketSize)
             val str92 = "opensn"
             if (!Client.isApplet || !Browser.openBrowser(string_88, 1, str92)) {
-                Browser.openBrowser(string_88, true, str92, Client.aBool7158)
+                Browser.openBrowser(string_88, true, str92, Client.useBrowserAppletMode)
             }
             context.currentPacket = null
             return true

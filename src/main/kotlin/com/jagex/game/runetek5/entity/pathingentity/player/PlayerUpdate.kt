@@ -1213,7 +1213,7 @@ object PlayerUpdate {
         totalIndices = if (Client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
         } else {
-            if (Client.aBool7241) numPlayerIndices else numPlayerIndices + Client.NPC_UPDATE_INDEX
+            if (Client.hideNpcs) numPlayerIndices else numPlayerIndices + Client.NPC_UPDATE_INDEX
         }
 
         for (index in 0 until totalIndices) {
@@ -1317,7 +1317,7 @@ object PlayerUpdate {
         entities = if (Client.MAP_LOADING_STAGE == 4) {
             CutsceneTypeList.CUTSCENE_ENTITIES!!.size
         } else {
-            if (Client.aBool7241) numIndices else numIndices + Client.NPC_UPDATE_INDEX
+            if (Client.hideNpcs) numIndices else numIndices + Client.NPC_UPDATE_INDEX
         }
 
         for (entityIndex in 0 until entities) {

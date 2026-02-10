@@ -396,7 +396,7 @@ object StaticMethods {
     fun switchToWorldLogin(i_0: Int) {
         if (GameState.method6693()) {
             if (i_0 != selectedWorldId) {
-                LoginManager.aLong77 = -1L
+                LoginManager.socialNetworkToken = -1L
             }
 
             selectedWorldId = i_0
@@ -440,7 +440,7 @@ object StaticMethods {
             if (SoundResourceManager.songLoadState == 1) {
                 var volume = SoundResourceManager.midiPcmStream!!.getMusicVolume()
                 if (volume > 0 && SoundResourceManager.midiPcmStream!!.dataLoaded()) {
-                    volume -= CutsceneBasicMovement.anInt9440
+                    volume -= CutsceneBasicMovement.musicFadeStep
                     if (volume < 0) {
                         volume = 0
                     }

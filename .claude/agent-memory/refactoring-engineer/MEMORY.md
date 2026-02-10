@@ -34,7 +34,7 @@
 
 ## Completed Deobfuscation Summary (see topic files for details)
 
-- **Client/Camera/Mouse/Console**: client-kt.md, 68 fields + 13 methods in Client.kt, 11+6 in Camera.kt
+- **Client/Camera/Mouse/Console**: client-kt.md, 68+14 fields + 13 methods in Client.kt, 11+6 in Camera.kt
 - **CS2Interpreter**: cs2-interpreter.md, ~337 refs, 2 remaining uncertain fields
 - **Toolkit Hierarchy (COMPLETE)**: abstract-native-toolkit.md, ALL own fields + methods deobfuscated
   - AbstractToolkit: 5 abstract methods renamed (hasHardwareRendering, getScratchMatrix, compositeBloomEffects, beginBloomCapture, drawSurfaceLine)
@@ -146,6 +146,10 @@
   - SpriteSM: 6 instance fields + 25 companion statics + 4 methods (offsetX/Y, trimRight/Bottom, imageWidth/Height, viewportStride, pixelOffset, dudx/dvdx/dudy/dvdy, subpixelOffsetX/Y, uBase/vBase, uOffsetX/vOffsetX, drawMinX/Width/MinY/Height, blendColor, colorAlpha/InverseAlpha/Red/Green/Blue, overlayAlpha/InverseAlpha/Precomputed, drawAffineTransformed, drawParticle, computeAffineTransform, drawMasked)
   - Matrix44: faceList->elements (529 refs), 16 methods (determinant, setDiagonal, isIdentity, transformPoint, setOrtho, setPerspective, setPerspectiveFromViewport, getNearClipDistance, extractRotationInto, extractLeftPlane, extractRightPlane, extractTopPlane, extractNearPlane, extractFarPlane, extractBottomPlane, setRotatedTranslation, setProduct, transpose, getComponentsXY typo fix)
 - **Phase 5B Entity/Scene/Cutscene/Sound (COMPLETE)**: ~100 renames across 26 files (see previous memory entries)
+- **LoginManager + AccountCreationResponseOpcodes (COMPLETE)**: login-manager.md
+  - AccountCreationResponseOpcodes: 8 enum constants + 1 method (NONE, AWAITING_RESPONSE, NOT_STARTED, CONNECTION_ERROR, CONNECTION_FAILED, NAME_UNAVAILABLE, ACCOUNT_CREATION_DISABLED, ALREADY_LOGGED_IN, getReceivedResponse)
+  - LoginStage: 20 enum constants (IDLE, OPENING_CONNECTION, AWAITING_INIT_RESPONSE, etc.)
+  - LoginManager: 13 fields + 16 methods (connectionTickCount, connectionRetryCount, loginQueuePosition, loginResponseDetail, loginResponseExtraInfo, socialNetworkToken, socialNetworkNonce, lobbyCreditCardExpiry, membershipTimeCorrection, isDobRequested, lobbyPlayAge, loginResponseCode, loginPayloadSize; isLoginInProgress, initializeLogin, setLoginResponse, resetLoginState, resetCredentials, confirmLoginContinue, startLobbyLogin, startWorldLogin, cancelLogin, onReconnect, etc.)
 - **MiniMenu/MiniMenuEntry/MenuInteraction/MiniMenuBuilder (COMPLETE)**: ~55 renames across 17 files
   - MiniMenu.kt: 25 fields + 19 methods (entryList, coloredEntryMap, sortedColoredEntries, coloredEntryCache, menuWidth/Height, submenuX/Y/Width, entryRowHeight, isCollapsed, coloredEntryCount, maxVisibleEntries, topEntry, activeEntry, secondaryEntry, deferredEntry, activeSubmenu, deferredClickType, viewportX/Y, menuTextColor, menuHoverHighlightColor, lowPriorityEntries, interfaceEntries; render, renderOpenMenu/Simple/Styled, drawMenuEntry, renderTooltipText, openSubmenu, closeSubmenu, removeEntry, removeMatchingEntries, insertSortedEntry, hasHigherPriority, isInterfaceClickType, getActionText, getColoredNameText, getSecondaryEntry, isTopEntryInterfaceAction, setViewportOrigin, raycastTerrainIntersection)
   - MiniMenuEntry.kt: 6 fields (param0, param1, isSelectable, showOtherLevelIcon, isUncategorized, targetName)
@@ -178,10 +182,11 @@
 - **Incremental build cache can mask pre-existing errors**: First `./gradlew build` can succeed due to cache. Use `./gradlew clean build` if you see errors that seem unrelated to your changes.
 - **Matrix44.scale() shares name with Model.scale()**: Cannot rename with sed without distinguishing types. Leave alone or use file-specific targeting.
 
-## Remaining Uncertain Fields (deliberately left obfuscated)
-
-### Client.kt (14 uncertain)
-aBool7151(p29), aBool7158(p2), aBool7159(p25), aString7165(p3), aBool7189(p28), aBool7323(unused login), aByte7458(deprecated packet), aString7156(p4), aBool7160(p22), anInt7163(p27), aBool7241(hide NPCs?), aBool7322(post-email), aString5555(p13), anInt2831(p30)
-
-### CS2Interpreter.kt (2 uncertain)
-Client.aBool7158 (isApplet conflict), Client.aString7165 (unknown param)
+- **Parameter.kt (COMPLETE)**: 10 parameter constants renamed (USE_BROWSER_APPLET, CUSTOM_STRING_PARAM, SUPPLEMENTARY_LOGIN_DATA, LOGIN_TOKEN, SIGNED_TERMS_AGREEMENT, SUPPRESS_TUTORIALS, SESSION_TOKEN, ACCOUNT_CREATED_FLAG, BILLING_FLAG, LOGIN_TYPE)
+- **Client.kt Phase 2B (COMPLETE)**: 14 remaining fields renamed (useBrowserAppletMode, customStringParam, supplementaryLoginData, loginToken, hasSignedTermsAgreement, suppressTutorials, sessionToken, hasJustCreatedAccount, billingFlag, loginType, hasDisplayNamePending, hasAccountSecurity, displayNameChangeState, hideNpcs)
+- **HookRequest.kt**: 2 fields renamed (targetComponent from aClass1188057, clickedOption from anInt8051)
+- **VorbisNode.kt**: 2 methods renamed (processVorbisStreams, cleanupStaleStreams)
+- **LoginManager.kt Phase 2B**: 4 methods + 2 fields renamed (isLoginInProgress, startWorldLogin, startLobbyLogin, resetLoginState, loginResponseDetail, loginResponseExtraInfo)
+- **SongPlayer.kt**: resetChannelVolumes (from method12658)
+- **CutsceneBasicMovement.kt**: musicFadeStep (from anInt9440)
+- **CS2Interpreter.kt**: sendDisplayNameChangeRequest (from sendAClass3794624)

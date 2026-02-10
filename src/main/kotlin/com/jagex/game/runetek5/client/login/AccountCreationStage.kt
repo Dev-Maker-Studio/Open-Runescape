@@ -30,7 +30,7 @@ class AccountCreationStage {
         @JvmStatic
         fun initAccountCreation() {
             ACCOUNT_CREATION_STAGE = REQUEST
-            RECEIVED_RESPONSE = AccountCreationResponseOpcodes.aClass4835729
+            RECEIVED_RESPONSE = AccountCreationResponseOpcodes.NOT_STARTED
             currentRequest = CreateAccountRequest.NOT_STARTED
             checkemailRequeststatus = CheckEmailRequest.DEFAULT
         }
@@ -45,7 +45,7 @@ class AccountCreationStage {
                 ACCOUNT_CREATION_STAGE = REQUEST
             } else {
                 ACCOUNT_CREATION_STAGE = null
-                RECEIVED_RESPONSE = AccountCreationResponseOpcodes.aClass4835731
+                RECEIVED_RESPONSE = AccountCreationResponseOpcodes.CONNECTION_FAILED
                 Client.setGameState(GameState.UNK_5)
             }
         }
@@ -85,11 +85,11 @@ class AccountCreationStage {
                         packet.buffer.writeString(Client.js5AuthToken!!)
                         packet.buffer.writeShort(Client.AFFILIATE)
                         packet.buffer.writeLong(Client.machineUid)
-                        packet.buffer.writeString(Client.aString5555!!)
+                        packet.buffer.writeString(Client.loginToken!!)
                         packet.buffer.writeByte(Client.CURRENT_LANGUAGE!!.getValue())
                         packet.buffer.writeByte(Client.CURRENT_GAME!!.id)
                         LoginManager.pushRandomDat(packet.buffer)
-                        val string_5 = Client.aString7156
+                        val string_5 = Client.supplementaryLoginData
                         packet.buffer.writeByte(if (string_5 == null) 0 else 1)
                         if (string_5 != null) {
                             packet.buffer.writeString(string_5)

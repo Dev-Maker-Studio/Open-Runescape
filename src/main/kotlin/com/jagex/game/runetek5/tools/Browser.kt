@@ -69,7 +69,7 @@ object Browser {
     @JvmStatic
     fun openBrowserErrorscreenOpenjs() {
         val url = errorWebsiteBaseUrl ?: ServerEnvironment.getUrl()
-        openOpenjs(url, false, Client.aBool7158)
+        openOpenjs(url, false, Client.useBrowserAppletMode)
     }
 
     @JvmStatic

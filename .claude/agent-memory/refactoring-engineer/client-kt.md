@@ -135,9 +135,21 @@
 | `method4198` | `isInLobbyOrCreation` | Check lobby/account creation states |
 | `method5789` | `isInLobbyConnection` | Check lobby connection states |
 
-## Remaining Obfuscated (16 fields, uncertain)
+## Phase 2B Renames (ALL COMPLETE)
 
-- `aBool7151` (param 29), `aBool7158` (param 2: browser mode?), `aBool7159` (param 25)
-- `aString7165` (param 3), `aString7156` (param 4), `aString5555` (param 13), `aString3643` (param 32)
-- `aBool7189` (param 28/CS2), `aBool7160` (param 22), `aBool7241` (hide NPCs?), `aBool7322`, `aBool7323`
-- `anInt7163` (param 27), `anInt2831` (param 30), `anInt3644` (login response), `aByte7458` (deprecated packet)
+| Old Name | New Name | Evidence |
+|----------|----------|----------|
+| `aBool7158` | `useBrowserAppletMode` | Passed as `isApplet` to Browser.openOpenjs/openBrowser in all call sites |
+| `aString7165` | `customStringParam` | Param 3, pushed to CS2 string stack by method3748 |
+| `aString7156` | `supplementaryLoginData` | Param 4, optional string (max 100 chars) in login block + account creation |
+| `aString5555` | `loginToken` | Param 13, sent in both lobby and world login blocks |
+| `aBool7160` | `hasSignedTermsAgreement` | Param 22, sent as byte in login block |
+| `aBool7159` | `suppressTutorials` | Param 25, only set never read (dead parameter) |
+| `anInt7163` | `sessionToken` | Param 27, sent as int in both login blocks |
+| `aBool7189` | `hasJustCreatedAccount` | Param 28, set by account creation stage (step < 13), read by CS2 |
+| `aBool7151` | `billingFlag` | Param 29, only read by CS2 opcode |
+| `anInt2831` | `loginType` | Param 30, written as byte in login block |
+| `aBool7323` | `hasDisplayNamePending` | Set by DEPRECATED_52 packet (display name change) + lobby response |
+| `aBool7322` | `hasAccountSecurity` | Read after VERIFIED_EMAIL_ADDRESS in both login paths |
+| `aByte7458` | `displayNameChangeState` | Display name change response state (-6=consumed, -5=not in lobby, -4=too long, -1=pending, 0/1=server response) |
+| `aBool7241` | `hideNpcs` | When true, PlayerUpdate skips NPC indices in entity positioning |

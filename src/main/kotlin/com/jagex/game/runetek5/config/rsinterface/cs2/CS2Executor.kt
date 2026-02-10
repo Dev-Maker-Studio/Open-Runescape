@@ -240,7 +240,7 @@ class CS2Executor {
                             }
 
                             if (intLocal == -2147483644) {
-                                intLocal = hook.anInt8051
+                                intLocal = hook.clickedOption
                             }
 
                             if (intLocal == -2147483643) {
@@ -248,11 +248,11 @@ class CS2Executor {
                             }
 
                             if (intLocal == -2147483642) {
-                                intLocal = if (hook.aClass1188057 != null) hook.aClass1188057!!.idHash else -1
+                                intLocal = if (hook.targetComponent != null) hook.targetComponent!!.idHash else -1
                             }
 
                             if (intLocal == -2147483641) {
-                                intLocal = if (hook.aClass1188057 != null) hook.aClass1188057!!.slotId else -1
+                                intLocal = if (hook.targetComponent != null) hook.targetComponent!!.slotId else -1
                             }
 
                             if (intLocal == -2147483640) {

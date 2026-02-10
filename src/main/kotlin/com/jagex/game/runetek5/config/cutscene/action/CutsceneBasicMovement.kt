@@ -18,6 +18,6 @@ class CutsceneBasicMovement(buffer: Packet) : CutsceneAction(buffer) {
     }
 
     companion object {
-        @JvmField var anInt9440: Int = 0
+        @JvmField var musicFadeStep: Int = 0
     }
 }

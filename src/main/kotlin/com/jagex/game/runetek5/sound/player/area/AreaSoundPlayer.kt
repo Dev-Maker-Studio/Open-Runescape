@@ -181,7 +181,7 @@ object AreaSoundPlayer {
         SoundResourceManager.pendingMidiStream = null
         SOUND_LEVEL = soundLevel
         StaticMethods.songLooping = false
-        CutsceneBasicMovement.anInt9440 = 2
+        CutsceneBasicMovement.musicFadeStep = 2
         SongPlayer.songTransition = null
     }
 
@@ -288,7 +288,7 @@ object AreaSoundPlayer {
         SoundResourceManager.pendingMidiStream = null
         SOUND_LEVEL = soundLevel
         StaticMethods.songLooping = bool4
-        CutsceneBasicMovement.anInt9440 = 10000
+        CutsceneBasicMovement.musicFadeStep = 10000
         SoundResourceManager.songStartPosition = 0
         StaticMethods.songFadeInRate = 0
     }

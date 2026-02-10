@@ -48,7 +48,7 @@ enum class GameState {
         @JvmStatic
         @JvmName("method12426")
         fun method12426() {
-            if (Client.gameState == UNK_5 && !LoginManager.method3360() && !AccountCreationStage.isCreatingAccount()) {
+            if (Client.gameState == UNK_5 && !LoginManager.isLoginInProgress() && !AccountCreationStage.isCreatingAccount()) {
                 Client.setGameState(UNK_8)
             }
         }
@@ -85,7 +85,7 @@ enum class GameState {
         @JvmStatic
         @JvmName("method6693")
         fun method6693(): Boolean {
-            return Client.gameState == UNK_5 && !LoginManager.method3360() && !AccountCreationStage.isCreatingAccount()
+            return Client.gameState == UNK_5 && !LoginManager.isLoginInProgress() && !AccountCreationStage.isCreatingAccount()
         }
 
         /**

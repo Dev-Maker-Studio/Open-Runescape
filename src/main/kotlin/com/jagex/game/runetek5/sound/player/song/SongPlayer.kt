@@ -45,7 +45,7 @@ object SongPlayer {
                 && adjustedVolume != 0 && !SoundEffectPlayer.soundJinglePlaying
             ) {
                 transitionToNextSong(i_2, Resource.MUSIC!!, musicArchive, adjustedVolume, SongTransition())
-                method12658()
+                resetChannelVolumes()
             }
             if (musicArchive != AreaSoundPlayer.currentMusicArchive) {
                 SoundEffectPlayer.jingleStream = null
@@ -71,9 +71,9 @@ object SongPlayer {
             SoundResourceManager.pendingMidiStream = null
             AreaSoundPlayer.SOUND_LEVEL = soundLevel
             StaticMethods.songLooping = false
-            CutsceneBasicMovement.anInt9440 = SoundResourceManager.midiPcmStream!!.getMusicVolume() / i_0
-            if (CutsceneBasicMovement.anInt9440 < 1) {
-                CutsceneBasicMovement.anInt9440 = 1
+            CutsceneBasicMovement.musicFadeStep = SoundResourceManager.midiPcmStream!!.getMusicVolume() / i_0
+            if (CutsceneBasicMovement.musicFadeStep < 1) {
+                CutsceneBasicMovement.musicFadeStep = 1
             }
             songTransition = transition
         } else {
@@ -102,7 +102,7 @@ object SongPlayer {
     }
 
     @JvmStatic
-    fun method12658() {
+    fun resetChannelVolumes() {
         method2580(-1, 255)
     }
 
