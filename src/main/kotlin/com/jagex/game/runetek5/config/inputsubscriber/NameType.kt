@@ -7,14 +7,14 @@ enum class NameType(
     private val value: Int = -1,
     @JvmField val str: String = ""
 ) : Identifiable {
-    aClass4134971(1, 0),
-    aClass4134965(6, 1),
-    aClass4134968(7, 2),
-    aClass4134967(3, 3),
-    aClass4134970(4, 4),
-    aClass4134969(5, 5),
-    aClass4134964(0, 6),
-    aClass4134966();
+    PLAYER(1, 0),
+    EMAIL(6, 1),
+    IGNORE(7, 2),
+    CLAN_CHANNEL(3, 3),
+    CLAN(4, 4),
+    NOTES(5, 5),
+    NONE(0, 6),
+    UNKNOWN();
 
     override fun getValue(): Int = value
 

@@ -302,7 +302,7 @@ class FileOnDisk(
 
     companion object {
         @JvmField
-        var anInt5357: Int = 0
+        var lobbyGraceExpiry: Int = 0
 
         @JvmField
         var cacheFileIndices: Array<FileOnDisk?>? = null

@@ -1870,7 +1870,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1855(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = FileOnDisk.anInt5357
+        executor.intStack[++executor.intStackPtr - 1] = FileOnDisk.lobbyGraceExpiry
     }
 
     @JvmStatic

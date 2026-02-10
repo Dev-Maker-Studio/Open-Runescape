@@ -527,7 +527,7 @@ object LoginManager {
                             Thread(PacketDecoder.HOSTNAME_IDENTIFIER).start()
                             EMAIL_STATUS = buffer.readUByte()
                             lobbyCreditCardExpiry = buffer.readUShort()
-                            FileOnDisk.anInt5357 = buffer.readUShort()
+                            FileOnDisk.lobbyGraceExpiry = buffer.readUShort()
                             isDobRequested = buffer.readUByte() == 1
                             PlayerUpdate.MY_PLAYER!!.username = buffer.readJagString().also { PlayerUpdate.MY_PLAYER!!.displayName = it; PlayerUpdate.MY_PLAYER_USERNAME = it }
                             Client.lobbyMembershipStatus = buffer.readUByte()

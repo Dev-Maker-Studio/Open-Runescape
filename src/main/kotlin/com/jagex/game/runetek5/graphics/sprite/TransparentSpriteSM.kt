@@ -9,13 +9,13 @@ import com.jagex.game.runetek5.toolkit.ComponentDimensionSM
 class TransparentSpriteSM : SpriteSM {
 
     @JvmField
-    val anIntArray10235: IntArray
+    val pixels: IntArray
 
     constructor(hardwarerenderer1: SafeModeToolkit, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, bool7: Boolean) : super(hardwarerenderer1, i_5, i_6) {
         if (bool7) {
-            this.anIntArray10235 = IntArray(i_5 * i_6)
+            this.pixels = IntArray(i_5 * i_6)
         } else {
-            this.anIntArray10235 = ints_2
+            this.pixels = ints_2
         }
 
         var adjustedI4 = i_4 - imageWidth
@@ -24,22 +24,22 @@ class TransparentSpriteSM : SpriteSM {
 
         for (i_9 in 0 until i_6) {
             for (i_10 in 0 until i_5) {
-                this.anIntArray10235[i_8++] = ints_2[i_3Var++]
+                this.pixels[i_8++] = ints_2[i_3Var++]
             }
             i_3Var += adjustedI4
         }
     }
 
     constructor(hardwarerenderer1: SafeModeToolkit, ints_2: IntArray, i_3: Int, i_4: Int) : super(hardwarerenderer1, i_3, i_4) {
-        this.anIntArray10235 = ints_2
+        this.pixels = ints_2
     }
 
     constructor(hardwarerenderer1: SafeModeToolkit, i_2: Int, i_3: Int) : super(hardwarerenderer1, i_2, i_3) {
-        this.anIntArray10235 = IntArray(i_3 * i_2)
+        this.pixels = IntArray(i_3 * i_2)
     }
 
     override fun getFramebuffer(): FrameBuffer {
-        return SafeModeFrameBuffer(imageWidth, imageHeight, this.anIntArray10235)
+        return SafeModeFrameBuffer(imageWidth, imageHeight, this.pixels)
     }
 
     override fun draw(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
@@ -104,15 +104,15 @@ class TransparentSpriteSM : SpriteSM {
                     while (i_14 < 0) {
                         i_15 = i_8 + i_11 - 3
                         while (i_8 < i_15) {
-                            ints_6[i_8++] = this.anIntArray10235[i_9++]
-                            ints_6[i_8++] = this.anIntArray10235[i_9++]
-                            ints_6[i_8++] = this.anIntArray10235[i_9++]
-                            ints_6[i_8++] = this.anIntArray10235[i_9++]
+                            ints_6[i_8++] = this.pixels[i_9++]
+                            ints_6[i_8++] = this.pixels[i_9++]
+                            ints_6[i_8++] = this.pixels[i_9++]
+                            ints_6[i_8++] = this.pixels[i_9++]
                         }
 
                         i_15 += 3
                         while (i_8 < i_15) {
-                            ints_6[i_8++] = this.anIntArray10235[i_9++]
+                            ints_6[i_8++] = this.pixels[i_9++]
                         }
 
                         i_8 += i_12
@@ -128,7 +128,7 @@ class TransparentSpriteSM : SpriteSM {
                     while (i_17 < 0) {
                         i_18 = -i_11
                         while (i_18 < 0) {
-                            i_19 = this.anIntArray10235[i_9++]
+                            i_19 = this.pixels[i_9++]
                             i_20 = i_14 * (i_19 and 0xff0000) and 0xff000000.toInt()
                             i_21 = i_15 * (i_19 and 0xff00) and 0xff0000
                             i_22 = (i_19 and 0xff) * i_16 and 0xff00
@@ -145,7 +145,7 @@ class TransparentSpriteSM : SpriteSM {
                     while (i_14 < 0) {
                         i_15 = -i_11
                         while (i_15 < 0) {
-                            i_16 = this.anIntArray10235[i_9++]
+                            i_16 = this.pixels[i_9++]
                             i_17 = i_16 + i_41
                             i_18 = (i_16 and 0xff00ff) + (i_41 and 0xff00ff)
                             i_19 = (i_18 and 0x1000100) + (i_17 - i_18 and 0x10000)
@@ -172,7 +172,7 @@ class TransparentSpriteSM : SpriteSM {
                     while (i_18 < 0) {
                         i_19 = -i_11
                         while (i_19 < 0) {
-                            i_20 = this.anIntArray10235[i_9++]
+                            i_20 = this.pixels[i_9++]
                             i_16 = (i_20 and 0xff00ff) * i_14 and -16711936
                             i_17 = i_14 * (i_20 and 0xff00) and 0xff0000
                             ints_6[i_8++] = i_41 + ((i_16 or i_17) ushr 8)
@@ -194,7 +194,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_14 < 0) {
                             i_15 = -i_11
                             while (i_15 < 0) {
-                                i_16 = this.anIntArray10235[i_9++]
+                                i_16 = this.pixels[i_9++]
                                 i_17 = i_16 ushr 24
                                 i_18 = 256 - i_17
                                 i_19 = ints_6[i_8]
@@ -212,7 +212,7 @@ class TransparentSpriteSM : SpriteSM {
                             while (i_14 < 0) {
                                 i_15 = -i_11
                                 while (i_15 < 0) {
-                                    i_16 = this.anIntArray10235[i_9++]
+                                    i_16 = this.pixels[i_9++]
                                     i_17 = (i_16 ushr 24) * (i_41 ushr 24) shr 8
                                     i_18 = 256 - i_17
                                     i_19 = ints_6[i_8]
@@ -233,7 +233,7 @@ class TransparentSpriteSM : SpriteSM {
                             while (i_17 < 0) {
                                 i_18 = -i_11
                                 while (i_18 < 0) {
-                                    i_19 = this.anIntArray10235[i_9++]
+                                    i_19 = this.pixels[i_9++]
                                     i_20 = (i_19 ushr 24) * (i_41 ushr 24) shr 8
                                     i_21 = 256 - i_20
                                     if (i_20 != 255) {
@@ -262,7 +262,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_14 < 0) {
                             i_15 = -i_11
                             while (i_15 < 0) {
-                                i_16 = this.anIntArray10235[i_9++]
+                                i_16 = this.pixels[i_9++]
                                 i_17 = i_16 + i_41
                                 i_18 = (i_16 and 0xff00ff) + (i_41 and 0xff00ff)
                                 i_19 = (i_18 and 0x1000100) + (i_17 - i_18 and 0x10000)
@@ -298,7 +298,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_18 < 0) {
                             i_19 = -i_11
                             while (i_19 < 0) {
-                                i_20 = this.anIntArray10235[i_9++]
+                                i_20 = this.pixels[i_9++]
                                 i_21 = i_20 ushr 24
                                 i_22 = 256 - i_21
                                 i_16 = (i_20 and 0xff00ff) * i_14 and -16711936
@@ -324,7 +324,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_14 < 0) {
                             i_15 = -i_11
                             while (i_15 < 0) {
-                                i_16 = this.anIntArray10235[i_9++]
+                                i_16 = this.pixels[i_9++]
                                 if (i_16 != 0) {
                                     i_17 = ints_6[i_8]
                                     i_18 = i_16 + i_17
@@ -350,7 +350,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_17 < 0) {
                             i_18 = -i_11
                             while (i_18 < 0) {
-                                i_19 = this.anIntArray10235[i_9++]
+                                i_19 = this.pixels[i_9++]
                                 if (i_19 != 0) {
                                     i_20 = i_14 * (i_19 and 0xff0000) and 0xff000000.toInt()
                                     i_21 = i_15 * (i_19 and 0xff00) and 0xff0000
@@ -376,7 +376,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_14 < 0) {
                             i_15 = -i_11
                             while (i_15 < 0) {
-                                i_16 = this.anIntArray10235[i_9++]
+                                i_16 = this.pixels[i_9++]
                                 i_17 = i_16 + i_41
                                 i_18 = (i_16 and 0xff00ff) + (i_41 and 0xff00ff)
                                 i_19 = (i_18 and 0x1000100) + (i_17 - i_18 and 0x10000)
@@ -408,7 +408,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_18 < 0) {
                             i_19 = -i_11
                             while (i_19 < 0) {
-                                i_20 = this.anIntArray10235[i_9++]
+                                i_20 = this.pixels[i_9++]
                                 if (i_20 != 0) {
                                     i_16 = (i_20 and 0xff00ff) * i_14 and -16711936
                                     i_17 = i_14 * (i_20 and 0xff00) and 0xff0000
@@ -528,7 +528,7 @@ class TransparentSpriteSM : SpriteSM {
                 }
 
                 for (i_24 in -i_21 until 0) {
-                    val i_25 = this.anIntArray10235[i_7++]
+                    val i_25 = this.pixels[i_7++]
                     val i_26 = i_25 ushr 24
                     val i_27 = 256 - i_26
                     val i_28 = ints_6[i_13]
@@ -641,7 +641,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_27 < 0) {
                             if (!bool2 || f_6 < floats_39!![i_20]) {
                                 if (bool1) {
-                                    ints_23!![i_20] = this.anIntArray10235[i_26 + (i_14 shr 16)]
+                                    ints_23!![i_20] = this.pixels[i_26 + (i_14 shr 16)]
                                 }
 
                                 if (bool2 && bool13) {
@@ -673,7 +673,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_30 < 0) {
                             if (!bool2 || f_6 < floats_39!![i_20]) {
                                 if (bool1) {
-                                    i_31 = this.anIntArray10235[i_29 + (i_14 shr 16)]
+                                    i_31 = this.pixels[i_29 + (i_14 shr 16)]
                                     i_32 = i_24 * (i_31 and 0xff0000) and 0xff000000.toInt()
                                     i_33 = i_25 * (i_31 and 0xff00) and 0xff0000
                                     i_34 = (i_31 and 0xff) * i_26 and 0xff00
@@ -706,7 +706,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_27 < 0) {
                             if (!bool2 || f_6 < floats_39!![i_20]) {
                                 if (bool1) {
-                                    i_28 = this.anIntArray10235[i_26 + (i_14 shr 16)]
+                                    i_28 = this.pixels[i_26 + (i_14 shr 16)]
                                     i_29 = i_101 + i_28
                                     i_30 = (i_28 and 0xff00ff) + (i_101 and 0xff00ff)
                                     i_31 = (i_30 and 0x1000100) + (i_29 - i_30 and 0x10000)
@@ -748,7 +748,7 @@ class TransparentSpriteSM : SpriteSM {
                         while (i_31 < 0) {
                             if (!bool2 || f_6 < floats_39!![i_20]) {
                                 if (bool1) {
-                                    i_32 = this.anIntArray10235[i_30 + (i_14 shr 16)]
+                                    i_32 = this.pixels[i_30 + (i_14 shr 16)]
                                     i_26 = (i_32 and 0xff00ff) * i_24 and -16711936
                                     i_27 = i_24 * (i_32 and 0xff00) and 0xff0000
                                     ints_23!![i_20] = i_101 + ((i_26 or i_27) ushr 8)
@@ -786,7 +786,7 @@ class TransparentSpriteSM : SpriteSM {
                             while (i_27 < 0) {
                                 if (!bool2 || f_6 < floats_39!![i_20]) {
                                     if (bool1) {
-                                        i_28 = this.anIntArray10235[i_26 + (i_14 shr 16)]
+                                        i_28 = this.pixels[i_26 + (i_14 shr 16)]
                                         i_29 = i_28 ushr 24
                                         i_30 = 256 - i_29
                                         i_31 = ints_23!![i_20]
@@ -819,7 +819,7 @@ class TransparentSpriteSM : SpriteSM {
                                 while (i_27 < 0) {
                                     if (!bool2 || f_6 < floats_39!![i_20]) {
                                         if (bool1) {
-                                            i_28 = this.anIntArray10235[i_26 + (i_14 shr 16)]
+                                            i_28 = this.pixels[i_26 + (i_14 shr 16)]
                                             i_29 = (i_101 ushr 24) * (i_28 ushr 24) shr 8
                                             i_30 = 256 - i_29
                                             i_31 = ints_23!![i_20]
@@ -853,7 +853,7 @@ class TransparentSpriteSM : SpriteSM {
                                 i_30 = -i_71
                                 while (i_30 < 0) {
                                     if (!bool2 || f_6 < floats_39!![i_20]) {
-                                        i_31 = this.anIntArray10235[i_29 + (i_14 shr 16)]
+                                        i_31 = this.pixels[i_29 + (i_14 shr 16)]
                                         i_32 = (i_101 ushr 24) * (i_31 ushr 24) shr 8
                                         i_33 = 256 - i_32
                                         if (i_32 != 255) {
@@ -910,7 +910,7 @@ class TransparentSpriteSM : SpriteSM {
                             while (i_27 < 0) {
                                 if (!bool2 || f_6 < floats_39!![i_20]) {
                                     if (bool1) {
-                                        i_28 = this.anIntArray10235[i_26 + (i_14 shr 16)]
+                                        i_28 = this.pixels[i_26 + (i_14 shr 16)]
                                         i_29 = i_101 + i_28
                                         i_30 = (i_28 and 0xff00ff) + (i_101 and 0xff00ff)
                                         i_31 = (i_30 and 0x1000100) + (i_29 - i_30 and 0x10000)
@@ -961,7 +961,7 @@ class TransparentSpriteSM : SpriteSM {
                             while (i_31 < 0) {
                                 if (!bool2 || f_6 < floats_39!![i_20]) {
                                     if (bool1) {
-                                        i_32 = this.anIntArray10235[i_30 + (i_14 shr 16)]
+                                        i_32 = this.pixels[i_30 + (i_14 shr 16)]
                                         i_33 = i_32 ushr 24
                                         i_34 = 256 - i_33
                                         i_26 = (i_32 and 0xff00ff) * i_24 and -16711936
@@ -1002,7 +1002,7 @@ class TransparentSpriteSM : SpriteSM {
                             i_27 = -i_71
                             while (i_27 < 0) {
                                 if (!bool2 || f_6 < floats_39!![i_20]) {
-                                    i_28 = this.anIntArray10235[i_26 + (i_14 shr 16)]
+                                    i_28 = this.pixels[i_26 + (i_14 shr 16)]
                                     if (i_28 != 0) {
                                         if (bool1) {
                                             i_29 = ints_23!![i_20]
@@ -1041,7 +1041,7 @@ class TransparentSpriteSM : SpriteSM {
                             i_30 = -i_71
                             while (i_30 < 0) {
                                 if (!bool2 || f_6 < floats_39!![i_20]) {
-                                    i_31 = this.anIntArray10235[i_29 + (i_14 shr 16)]
+                                    i_31 = this.pixels[i_29 + (i_14 shr 16)]
                                     if (i_31 != 0) {
                                         if (bool1) {
                                             i_32 = i_25 * (i_31 and 0xff0000) and 0xff000000.toInt()
@@ -1082,7 +1082,7 @@ class TransparentSpriteSM : SpriteSM {
                             while (i_27 < 0) {
                                 if (!bool2 || f_6 < floats_39!![i_20]) {
                                     if (bool1) {
-                                        i_28 = this.anIntArray10235[i_26 + (i_14 shr 16)]
+                                        i_28 = this.pixels[i_26 + (i_14 shr 16)]
                                         i_29 = i_101 + i_28
                                         i_30 = (i_28 and 0xff00ff) + (i_101 and 0xff00ff)
                                         i_31 = (i_30 and 0x1000100) + (i_29 - i_30 and 0x10000)
@@ -1128,7 +1128,7 @@ class TransparentSpriteSM : SpriteSM {
                             i_31 = -i_71
                             while (i_31 < 0) {
                                 if (!bool2 || f_6 < floats_39!![i_20]) {
-                                    i_32 = this.anIntArray10235[i_30 + (i_14 shr 16)]
+                                    i_32 = this.pixels[i_30 + (i_14 shr 16)]
                                     if (i_32 != 0) {
                                         if (bool1) {
                                             i_26 = (i_32 and 0xff00ff) * i_24 and -16711936
@@ -1171,7 +1171,7 @@ class TransparentSpriteSM : SpriteSM {
             val i_10 = i_5 + i_3 * (i_8 + i_6)
 
             for (i_11 in 0 until i_3) {
-                this.anIntArray10235[i_9 + i_11] = ints_7[i_10 + i_11] and 0xffffff
+                this.pixels[i_9 + i_11] = ints_7[i_10 + i_11] and 0xffffff
             }
         }
     }
@@ -1184,7 +1184,7 @@ class TransparentSpriteSM : SpriteSM {
             val i_7 = toolkit.viewportWidth * i_5
 
             for (i_8 in 0 until imageWidth) {
-                this.anIntArray10235[i_6 + i_8] = this.anIntArray10235[i_6 + i_8] and 0xffffff or (if (ints_4[i_7 + i_8] != 0) 0xff000000.toInt() else 0)
+                this.pixels[i_6 + i_8] = this.pixels[i_6 + i_8] and 0xffffff or (if (ints_4[i_7 + i_8] != 0) 0xff000000.toInt() else 0)
             }
         }
     }
@@ -1220,15 +1220,15 @@ class TransparentSpriteSM : SpriteSM {
                             i_10 = i_5++
                             if (i_2 == 0) {
                                 if (i_1 == 1) {
-                                    ints_3[i_10] = this.anIntArray10235[i_9]
+                                    ints_3[i_10] = this.pixels[i_9]
                                 } else if (i_1 == 0) {
-                                    i_11 = this.anIntArray10235[i_9++]
+                                    i_11 = this.pixels[i_9++]
                                     i_12 = colorRed * (i_11 and 0xff0000) and 0xff000000.toInt()
                                     i_13 = (i_11 and 0xff00) * colorGreen and 0xff0000
                                     i_14 = (i_11 and 0xff) * colorBlue and 0xff00
                                     ints_3[i_10] = (i_12 or i_13 or i_14) ushr 8
                                 } else if (i_1 == 3) {
-                                    i_11 = this.anIntArray10235[i_9++]
+                                    i_11 = this.pixels[i_9++]
                                     i_12 = blendColor
                                     i_13 = i_11 + i_12
                                     i_14 = (i_11 and 0xff00ff) + (i_12 and 0xff00ff)
@@ -1238,20 +1238,20 @@ class TransparentSpriteSM : SpriteSM {
                                     if (i_1 != 2) {
                                         throw IllegalArgumentException()
                                     }
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = (i_11 and 0xff00ff) * colorAlpha and -16711936
                                     i_13 = (i_11 and 0xff00) * colorAlpha and 0xff0000
                                     ints_3[i_10] = ((i_12 or i_13) ushr 8) + overlayPrecomputed
                                 }
                             } else if (i_2 == 1) {
                                 if (i_1 == 1) {
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = i_11 ushr 24
                                     i_13 = 256 - i_12
                                     i_14 = ints_3[i_10]
                                     ints_3[i_10] = ((i_11 and 0xff00ff) * i_12 + (i_14 and 0xff00ff) * i_13 and -16711936) + (i_12 * (i_11 and 0xff00) + i_13 * (i_14 and 0xff00) and 0xff0000) shr 8
                                 } else if (i_1 == 0) {
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = (i_11 ushr 24) * colorAlpha shr 8
                                     i_13 = 256 - i_12
                                     if ((blendColor and 0xffffff) == 16777215) {
@@ -1271,7 +1271,7 @@ class TransparentSpriteSM : SpriteSM {
                                         ints_3[i_10] = (i_14 or i_15 or i_16) ushr 8
                                     }
                                 } else if (i_1 == 3) {
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = blendColor
                                     i_13 = i_11 + i_12
                                     i_14 = (i_11 and 0xff00ff) + (i_12 and 0xff00ff)
@@ -1289,7 +1289,7 @@ class TransparentSpriteSM : SpriteSM {
                                     if (i_1 != 2) {
                                         throw IllegalArgumentException()
                                     }
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = i_11 ushr 24
                                     i_13 = 256 - i_12
                                     i_14 = (i_11 and 0xff00ff) * colorAlpha and -16711936
@@ -1303,14 +1303,14 @@ class TransparentSpriteSM : SpriteSM {
                                     throw IllegalArgumentException()
                                 }
                                 if (i_1 == 1) {
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = ints_3[i_10]
                                     i_13 = i_11 + i_12
                                     i_14 = (i_11 and 0xff00ff) + (i_12 and 0xff00ff)
                                     i_12 = (i_14 and 0x1000100) + (i_13 - i_14 and 0x10000)
                                     ints_3[i_10] = i_13 - i_12 or (i_12 - (i_12 ushr 8))
                                 } else if (i_1 == 0) {
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = colorRed * (i_11 and 0xff0000) and 0xff000000.toInt()
                                     i_13 = (i_11 and 0xff00) * colorGreen and 0xff0000
                                     i_14 = (i_11 and 0xff) * colorBlue and 0xff00
@@ -1321,7 +1321,7 @@ class TransparentSpriteSM : SpriteSM {
                                     i_15 = (i_17 and 0x1000100) + (i_16 - i_17 and 0x10000)
                                     ints_3[i_10] = i_16 - i_15 or (i_15 - (i_15 ushr 8))
                                 } else if (i_1 == 3) {
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = blendColor
                                     i_13 = i_11 + i_12
                                     i_14 = (i_11 and 0xff00ff) + (i_12 and 0xff00ff)
@@ -1333,7 +1333,7 @@ class TransparentSpriteSM : SpriteSM {
                                     i_15 = (i_14 and 0x1000100) + (i_13 - i_14 and 0x10000)
                                     ints_3[i_10] = i_13 - i_15 or (i_15 - (i_15 ushr 8))
                                 } else if (i_1 == 2) {
-                                    i_11 = this.anIntArray10235[i_9]
+                                    i_11 = this.pixels[i_9]
                                     i_12 = (i_11 and 0xff00ff) * colorAlpha and -16711936
                                     i_13 = (i_11 and 0xff00) * colorAlpha and 0xff0000
                                     i_11 = ((i_12 or i_13) ushr 8) + overlayPrecomputed
@@ -1374,15 +1374,15 @@ class TransparentSpriteSM : SpriteSM {
                             i_11 = i_5++
                             if (i_2 == 0) {
                                 if (i_1 == 1) {
-                                    ints_3[i_11] = this.anIntArray10235[i_10]
+                                    ints_3[i_11] = this.pixels[i_10]
                                 } else if (i_1 == 0) {
-                                    i_12 = this.anIntArray10235[i_10++]
+                                    i_12 = this.pixels[i_10++]
                                     i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
                                     i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
                                     i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                                     ints_3[i_11] = (i_13 or i_14 or i_15) ushr 8
                                 } else if (i_1 == 3) {
-                                    i_12 = this.anIntArray10235[i_10++]
+                                    i_12 = this.pixels[i_10++]
                                     i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -1392,20 +1392,20 @@ class TransparentSpriteSM : SpriteSM {
                                     if (i_1 != 2) {
                                         throw IllegalArgumentException()
                                     }
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
                                     i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
                                     ints_3[i_11] = ((i_13 or i_14) ushr 8) + overlayPrecomputed
                                 }
                             } else if (i_2 == 1) {
                                 if (i_1 == 1) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = i_12 ushr 24
                                     i_14 = 256 - i_13
                                     i_15 = ints_3[i_11]
                                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
                                 } else if (i_1 == 0) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = (i_12 ushr 24) * colorAlpha shr 8
                                     i_14 = 256 - i_13
                                     if ((blendColor and 0xffffff) == 16777215) {
@@ -1425,7 +1425,7 @@ class TransparentSpriteSM : SpriteSM {
                                         ints_3[i_11] = (i_15 or i_16 or i_17) ushr 8
                                     }
                                 } else if (i_1 == 3) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -1443,7 +1443,7 @@ class TransparentSpriteSM : SpriteSM {
                                     if (i_1 != 2) {
                                         throw IllegalArgumentException()
                                     }
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = i_12 ushr 24
                                     i_14 = 256 - i_13
                                     i_15 = (i_12 and 0xff00ff) * colorAlpha and -16711936
@@ -1457,14 +1457,14 @@ class TransparentSpriteSM : SpriteSM {
                                     throw IllegalArgumentException()
                                 }
                                 if (i_1 == 1) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = ints_3[i_11]
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_13 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                                     ints_3[i_11] = i_14 - i_13 or (i_13 - (i_13 ushr 8))
                                 } else if (i_1 == 0) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
                                     i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
                                     i_15 = (i_12 and 0xff) * colorBlue and 0xff00
@@ -1475,7 +1475,7 @@ class TransparentSpriteSM : SpriteSM {
                                     i_16 = (i_18 and 0x1000100) + (i_17 - i_18 and 0x10000)
                                     ints_3[i_11] = i_17 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 3) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -1487,7 +1487,7 @@ class TransparentSpriteSM : SpriteSM {
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                                     ints_3[i_11] = i_14 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 2) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
                                     i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
                                     i_12 = ((i_13 or i_14) ushr 8) + overlayPrecomputed
@@ -1529,15 +1529,15 @@ class TransparentSpriteSM : SpriteSM {
                             i_11 = i_5++
                             if (i_2 == 0) {
                                 if (i_1 == 1) {
-                                    ints_3[i_11] = this.anIntArray10235[i_10]
+                                    ints_3[i_11] = this.pixels[i_10]
                                 } else if (i_1 == 0) {
-                                    i_12 = this.anIntArray10235[i_10++]
+                                    i_12 = this.pixels[i_10++]
                                     i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
                                     i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
                                     i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                                     ints_3[i_11] = (i_13 or i_14 or i_15) ushr 8
                                 } else if (i_1 == 3) {
-                                    i_12 = this.anIntArray10235[i_10++]
+                                    i_12 = this.pixels[i_10++]
                                     i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -1547,20 +1547,20 @@ class TransparentSpriteSM : SpriteSM {
                                     if (i_1 != 2) {
                                         throw IllegalArgumentException()
                                     }
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
                                     i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
                                     ints_3[i_11] = ((i_13 or i_14) ushr 8) + overlayPrecomputed
                                 }
                             } else if (i_2 == 1) {
                                 if (i_1 == 1) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = i_12 ushr 24
                                     i_14 = 256 - i_13
                                     i_15 = ints_3[i_11]
                                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
                                 } else if (i_1 == 0) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = (i_12 ushr 24) * colorAlpha shr 8
                                     i_14 = 256 - i_13
                                     if ((blendColor and 0xffffff) == 16777215) {
@@ -1580,7 +1580,7 @@ class TransparentSpriteSM : SpriteSM {
                                         ints_3[i_11] = (i_15 or i_16 or i_17) ushr 8
                                     }
                                 } else if (i_1 == 3) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -1598,7 +1598,7 @@ class TransparentSpriteSM : SpriteSM {
                                     if (i_1 != 2) {
                                         throw IllegalArgumentException()
                                     }
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = i_12 ushr 24
                                     i_14 = 256 - i_13
                                     i_15 = (i_12 and 0xff00ff) * colorAlpha and -16711936
@@ -1612,14 +1612,14 @@ class TransparentSpriteSM : SpriteSM {
                                     throw IllegalArgumentException()
                                 }
                                 if (i_1 == 1) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = ints_3[i_11]
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_13 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                                     ints_3[i_11] = i_14 - i_13 or (i_13 - (i_13 ushr 8))
                                 } else if (i_1 == 0) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
                                     i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
                                     i_15 = (i_12 and 0xff) * colorBlue and 0xff00
@@ -1630,7 +1630,7 @@ class TransparentSpriteSM : SpriteSM {
                                     i_16 = (i_18 and 0x1000100) + (i_17 - i_18 and 0x10000)
                                     ints_3[i_11] = i_17 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 3) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -1642,7 +1642,7 @@ class TransparentSpriteSM : SpriteSM {
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                                     ints_3[i_11] = i_14 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 2) {
-                                    i_12 = this.anIntArray10235[i_10]
+                                    i_12 = this.pixels[i_10]
                                     i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
                                     i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
                                     i_12 = ((i_13 or i_14) ushr 8) + overlayPrecomputed
@@ -1663,13 +1663,13 @@ class TransparentSpriteSM : SpriteSM {
                 }
             }
         } else if (dudx < 0) {
-            method14245NegX(i_1, i_2, ints_3)
+            drawScaledRowNegX(i_1, i_2, ints_3)
         } else {
-            method14245PosX(i_1, i_2, ints_3)
+            drawScaledRowPosX(i_1, i_2, ints_3)
         }
     }
 
-    private fun method14245NegX(i_1: Int, i_2: Int, ints_3: IntArray) {
+    private fun drawScaledRowNegX(i_1: Int, i_2: Int, ints_3: IntArray) {
         var i_4: Int
         var i_5: Int
         var i_6: Int
@@ -1806,7 +1806,7 @@ class TransparentSpriteSM : SpriteSM {
         }
     }
 
-    private fun method14245PosX(i_1: Int, i_2: Int, ints_3: IntArray) {
+    private fun drawScaledRowPosX(i_1: Int, i_2: Int, ints_3: IntArray) {
         var i_4: Int
         var i_5: Int
         var i_6: Int
@@ -1944,15 +1944,15 @@ class TransparentSpriteSM : SpriteSM {
         var i_18: Int
         if (i_2 == 0) {
             if (i_1 == 1) {
-                ints_3[i_11] = this.anIntArray10235[i_10]
+                ints_3[i_11] = this.pixels[i_10]
             } else if (i_1 == 0) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
                 i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
                 i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                 ints_3[i_11] = (i_13 or i_14 or i_15) ushr 8
             } else if (i_1 == 3) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = blendColor
                 i_14 = i_12 + i_13
                 i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -1962,20 +1962,20 @@ class TransparentSpriteSM : SpriteSM {
                 if (i_1 != 2) {
                     throw IllegalArgumentException()
                 }
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
                 i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
                 ints_3[i_11] = ((i_13 or i_14) ushr 8) + overlayPrecomputed
             }
         } else if (i_2 == 1) {
             if (i_1 == 1) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = i_12 ushr 24
                 i_14 = 256 - i_13
                 i_15 = ints_3[i_11]
                 ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
             } else if (i_1 == 0) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = (i_12 ushr 24) * colorAlpha shr 8
                 i_14 = 256 - i_13
                 if ((blendColor and 0xffffff) == 16777215) {
@@ -1995,7 +1995,7 @@ class TransparentSpriteSM : SpriteSM {
                     ints_3[i_11] = (i_15 or i_16 or i_17) ushr 8
                 }
             } else if (i_1 == 3) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = blendColor
                 i_14 = i_12 + i_13
                 i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -2013,7 +2013,7 @@ class TransparentSpriteSM : SpriteSM {
                 if (i_1 != 2) {
                     throw IllegalArgumentException()
                 }
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = i_12 ushr 24
                 i_14 = 256 - i_13
                 i_15 = (i_12 and 0xff00ff) * colorAlpha and -16711936
@@ -2027,14 +2027,14 @@ class TransparentSpriteSM : SpriteSM {
                 throw IllegalArgumentException()
             }
             if (i_1 == 1) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = ints_3[i_11]
                 i_14 = i_12 + i_13
                 i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                 i_13 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                 ints_3[i_11] = i_14 - i_13 or (i_13 - (i_13 ushr 8))
             } else if (i_1 == 0) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
                 i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
                 i_15 = (i_12 and 0xff) * colorBlue and 0xff00
@@ -2045,7 +2045,7 @@ class TransparentSpriteSM : SpriteSM {
                 i_16 = (i_18 and 0x1000100) + (i_17 - i_18 and 0x10000)
                 ints_3[i_11] = i_17 - i_16 or (i_16 - (i_16 ushr 8))
             } else if (i_1 == 3) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = blendColor
                 i_14 = i_12 + i_13
                 i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
@@ -2057,7 +2057,7 @@ class TransparentSpriteSM : SpriteSM {
                 i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                 ints_3[i_11] = i_14 - i_16 or (i_16 - (i_16 ushr 8))
             } else if (i_1 == 2) {
-                i_12 = this.anIntArray10235[i_10]
+                i_12 = this.pixels[i_10]
                 i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
                 i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
                 i_12 = ((i_13 or i_14) ushr 8) + overlayPrecomputed
@@ -2118,7 +2118,7 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_15 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                                i_15 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_16 = i_15 ushr 24
                                 i_17 = 256 - i_16
                                 i_18 = ints_5[i_8]
@@ -2175,7 +2175,7 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                                i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_17 = i_16 ushr 24
                                 i_18 = 256 - i_17
                                 i_19 = ints_5[i_8]
@@ -2233,7 +2233,7 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                                i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_17 = i_16 ushr 24
                                 i_18 = 256 - i_17
                                 i_19 = ints_5[i_8]
@@ -2294,7 +2294,7 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                                i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_17 = i_16 ushr 24
                                 i_18 = 256 - i_17
                                 i_19 = ints_5[i_8]
@@ -2367,7 +2367,7 @@ class TransparentSpriteSM : SpriteSM {
                         }
 
                         while (i_11 < 0) {
-                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                            i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                             i_17 = i_16 ushr 24
                             i_18 = 256 - i_17
                             i_19 = ints_5[i_8]
@@ -2440,7 +2440,7 @@ class TransparentSpriteSM : SpriteSM {
                         }
 
                         while (i_11 < 0) {
-                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                            i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                             i_17 = i_16 ushr 24
                             i_18 = 256 - i_17
                             i_19 = ints_5[i_8]
@@ -2500,7 +2500,7 @@ class TransparentSpriteSM : SpriteSM {
                         }
 
                         while (i_11 < 0) {
-                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                            i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                             i_17 = i_16 ushr 24
                             i_18 = 256 - i_17
                             i_19 = ints_5[i_8]
@@ -2573,7 +2573,7 @@ class TransparentSpriteSM : SpriteSM {
                     }
 
                     while (i_11 < 0) {
-                        i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                        i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                         i_17 = i_16 ushr 24
                         i_18 = 256 - i_17
                         i_19 = ints_5[i_8]
@@ -2645,7 +2645,7 @@ class TransparentSpriteSM : SpriteSM {
                     }
 
                     while (i_11 < 0) {
-                        i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
+                        i_16 = this.pixels[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                         i_17 = i_16 ushr 24
                         i_18 = 256 - i_17
                         i_19 = ints_5[i_8]
@@ -2751,7 +2751,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_22 = -i_33
                         while (i_22 < 0) {
-                            ints_9[i_17++] = this.anIntArray10235[i_21 + (i_10 shr 16)]
+                            ints_9[i_17++] = this.pixels[i_21 + (i_10 shr 16)]
                             i_10 += i_15
                             i_22++
                         }
@@ -2773,7 +2773,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_25 = -i_33
                         while (i_25 < 0) {
-                            i_26 = this.anIntArray10235[i_24 + (i_10 shr 16)]
+                            i_26 = this.pixels[i_24 + (i_10 shr 16)]
                             i_27 = i_19 * (i_26 and 0xff0000) and 0xff000000.toInt()
                             i_28 = i_20 * (i_26 and 0xff00) and 0xff0000
                             i_29 = (i_26 and 0xff) * i_21 and 0xff00
@@ -2796,7 +2796,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_22 = -i_33
                         while (i_22 < 0) {
-                            i_23 = this.anIntArray10235[i_21 + (i_10 shr 16)]
+                            i_23 = this.pixels[i_21 + (i_10 shr 16)]
                             i_24 = i_23 + i_61
                             i_25 = (i_23 and 0xff00ff) + (i_61 and 0xff00ff)
                             i_26 = (i_25 and 0x1000100) + (i_24 - i_25 and 0x10000)
@@ -2828,7 +2828,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_26 = -i_33
                         while (i_26 < 0) {
-                            i_27 = this.anIntArray10235[i_25 + (i_10 shr 16)]
+                            i_27 = this.pixels[i_25 + (i_10 shr 16)]
                             i_21 = (i_27 and 0xff00ff) * i_19 and -16711936
                             i_22 = i_19 * (i_27 and 0xff00) and 0xff0000
                             ints_9[i_17++] = ((i_21 or i_22) ushr 8) + i_61
@@ -2856,7 +2856,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_22 = -i_33
                             while (i_22 < 0) {
-                                i_23 = this.anIntArray10235[i_21 + (i_10 shr 16)]
+                                i_23 = this.pixels[i_21 + (i_10 shr 16)]
                                 i_24 = i_23 ushr 24
                                 i_25 = 256 - i_24
                                 i_26 = ints_9[i_17]
@@ -2879,7 +2879,7 @@ class TransparentSpriteSM : SpriteSM {
 
                                 i_22 = -i_33
                                 while (i_22 < 0) {
-                                    i_23 = this.anIntArray10235[i_21 + (i_10 shr 16)]
+                                    i_23 = this.pixels[i_21 + (i_10 shr 16)]
                                     i_24 = (i_61 ushr 24) * (i_23 ushr 24) shr 8
                                     i_25 = 256 - i_24
                                     i_26 = ints_9[i_17]
@@ -2904,7 +2904,7 @@ class TransparentSpriteSM : SpriteSM {
 
                                 i_25 = -i_33
                                 while (i_25 < 0) {
-                                    i_26 = this.anIntArray10235[i_24 + (i_10 shr 16)]
+                                    i_26 = this.pixels[i_24 + (i_10 shr 16)]
                                     i_27 = (i_61 ushr 24) * (i_26 ushr 24) shr 8
                                     i_28 = 256 - i_27
                                     if (i_27 != 255) {
@@ -2940,7 +2940,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_22 = -i_33
                             while (i_22 < 0) {
-                                i_23 = this.anIntArray10235[i_21 + (i_10 shr 16)]
+                                i_23 = this.pixels[i_21 + (i_10 shr 16)]
                                 i_24 = i_23 + i_61
                                 i_25 = (i_23 and 0xff00ff) + (i_61 and 0xff00ff)
                                 i_26 = (i_25 and 0x1000100) + (i_24 - i_25 and 0x10000)
@@ -2981,7 +2981,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_26 = -i_33
                             while (i_26 < 0) {
-                                i_27 = this.anIntArray10235[i_25 + (i_10 shr 16)]
+                                i_27 = this.pixels[i_25 + (i_10 shr 16)]
                                 i_28 = i_27 ushr 24
                                 i_29 = 256 - i_28
                                 i_21 = (i_27 and 0xff00ff) * i_19 and -16711936
@@ -3013,7 +3013,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_22 = -i_33
                             while (i_22 < 0) {
-                                i_23 = this.anIntArray10235[i_21 + (i_10 shr 16)]
+                                i_23 = this.pixels[i_21 + (i_10 shr 16)]
                                 if (i_23 != 0) {
                                     i_24 = ints_9[i_17]
                                     i_25 = i_23 + i_24
@@ -3045,7 +3045,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_25 = -i_33
                             while (i_25 < 0) {
-                                i_26 = this.anIntArray10235[i_24 + (i_10 shr 16)]
+                                i_26 = this.pixels[i_24 + (i_10 shr 16)]
                                 if (i_26 != 0) {
                                     i_27 = i_20 * (i_26 and 0xff0000) and 0xff000000.toInt()
                                     i_28 = i_21 * (i_26 and 0xff00) and 0xff0000
@@ -3078,7 +3078,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_22 = -i_33
                             while (i_22 < 0) {
-                                i_23 = this.anIntArray10235[i_21 + (i_10 shr 16)]
+                                i_23 = this.pixels[i_21 + (i_10 shr 16)]
                                 i_24 = i_23 + i_61
                                 i_25 = (i_23 and 0xff00ff) + (i_61 and 0xff00ff)
                                 i_26 = (i_25 and 0x1000100) + (i_24 - i_25 and 0x10000)
@@ -3115,7 +3115,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_26 = -i_33
                             while (i_26 < 0) {
-                                i_27 = this.anIntArray10235[i_25 + (i_10 shr 16)]
+                                i_27 = this.pixels[i_25 + (i_10 shr 16)]
                                 if (i_27 != 0) {
                                     i_21 = (i_27 and 0xff00ff) * i_19 and -16711936
                                     i_22 = i_19 * (i_27 and 0xff00) and 0xff0000

@@ -1806,13 +1806,13 @@ class OpaqueSpriteSM : SpriteSM {
                 }
             }
         } else if (dudx < 0) {
-            method14245NegX(ints_3, i_1, i_2)
+            drawScaledRowNegX(ints_3, i_1, i_2)
         } else {
-            method14245PosX(ints_3, i_1, i_2)
+            drawScaledRowPosX(ints_3, i_1, i_2)
         }
     }
 
-    private fun method14245NegX(ints_3: IntArray, i_1: Int, i_2: Int) {
+    private fun drawScaledRowNegX(ints_3: IntArray, i_1: Int, i_2: Int) {
         var i_4: Int
         var i_5: Int
         var i_6: Int
@@ -1942,7 +1942,7 @@ class OpaqueSpriteSM : SpriteSM {
         }
     }
 
-    private fun method14245PosX(ints_3: IntArray, i_1: Int, i_2: Int) {
+    private fun drawScaledRowPosX(ints_3: IntArray, i_1: Int, i_2: Int) {
         var i_4: Int
         var i_5: Int
         var i_6: Int
@@ -2373,13 +2373,13 @@ class OpaqueSpriteSM : SpriteSM {
                 }
             }
         } else if (dudx < 0) {
-            method14250NegX(ints_5, ints_1, ints_2, i_3, i_4)
+            drawMaskedScaledRowNegX(ints_5, ints_1, ints_2, i_3, i_4)
         } else {
-            method14250PosX(ints_5, ints_1, ints_2, i_3, i_4)
+            drawMaskedScaledRowPosX(ints_5, ints_1, ints_2, i_3, i_4)
         }
     }
 
-    private fun method14250NegX(ints_5: IntArray, ints_1: IntArray, ints_2: IntArray, i_3: Int, i_4: Int) {
+    private fun drawMaskedScaledRowNegX(ints_5: IntArray, ints_1: IntArray, ints_2: IntArray, i_3: Int, i_4: Int) {
         var i_6: Int
         var i_7: Int
         var i_8: Int
@@ -2581,7 +2581,7 @@ class OpaqueSpriteSM : SpriteSM {
         }
     }
 
-    private fun method14250PosX(ints_5: IntArray, ints_1: IntArray, ints_2: IntArray, i_3: Int, i_4: Int) {
+    private fun drawMaskedScaledRowPosX(ints_5: IntArray, ints_1: IntArray, ints_2: IntArray, i_3: Int, i_4: Int) {
         var i_6: Int
         var i_7: Int
         var i_8: Int
