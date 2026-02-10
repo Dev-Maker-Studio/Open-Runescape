@@ -39,24 +39,24 @@ class MidiFileReader {
 
     constructor()
 
-    fun getTrackLength(i_1: Int) {
-        val i_2 = buffer.readVarInt()
-        trackLengths!![i_1] += i_2
+    fun getTrackLength(track: Int) {
+        val delta = buffer.readVarInt()
+        trackLengths!![track] += delta
     }
 
     fun getPrioritizedTrack(): Int {
-        val i_1 = startPositionTrackBuffer!!.size
-        var i_2 = -1
-        var i_3 = Int.MAX_VALUE
+        val trackCount = startPositionTrackBuffer!!.size
+        var bestTrack = -1
+        var earliestLength = Int.MAX_VALUE
 
-        for (i_4 in 0 until i_1) {
-            if (startPositionTrackBuffer!![i_4] >= 0 && trackLengths!![i_4] < i_3) {
-                i_2 = i_4
-                i_3 = trackLengths!![i_4]
+        for (track in 0 until trackCount) {
+            if (startPositionTrackBuffer!![track] >= 0 && trackLengths!![track] < earliestLength) {
+                bestTrack = track
+                earliestLength = trackLengths!![track]
             }
         }
 
-        return i_2
+        return bestTrack
     }
 
     fun decode(data: ByteArray) {
@@ -69,12 +69,12 @@ class MidiFileReader {
 
         var index = 0
         while (index < count) {
-            val action = buffer.readInt()
-            val offset = buffer.readInt()
-            if (action == 1297379947) {
+            val chunkType = buffer.readInt()
+            val chunkLength = buffer.readInt()
+            if (chunkType == 1297379947) {
                 trackStarts!![index++] = buffer.currentPosition
             }
-            buffer.currentPosition += offset
+            buffer.currentPosition += chunkLength
         }
 
         tempoTimeOffset = 0L
@@ -108,19 +108,19 @@ class MidiFileReader {
         return decodeTrackFlags(track)
     }
 
-    fun getTickTimestamp(i_1: Int): Long {
-        return tempoTimeOffset + i_1.toLong() * microsecondsPerBeat
+    fun getTickTimestamp(tickLength: Int): Long {
+        return tempoTimeOffset + tickLength.toLong() * microsecondsPerBeat
     }
 
-    fun markTracePosition(i_1: Int) {
-        startPositionTrackBuffer!![i_1] = buffer.currentPosition
+    fun markTracePosition(track: Int) {
+        startPositionTrackBuffer!![track] = buffer.currentPosition
     }
 
     fun isDone(): Boolean {
-        val i_1 = startPositionTrackBuffer!!.size
+        val trackCount = startPositionTrackBuffer!!.size
 
-        for (i_2 in 0 until i_1) {
-            if (startPositionTrackBuffer!![i_2] >= 0) {
+        for (track in 0 until trackCount) {
+            if (startPositionTrackBuffer!![track] >= 0) {
                 return false
             }
         }
@@ -128,50 +128,50 @@ class MidiFileReader {
         return true
     }
 
-    fun resetTracksFromTimestamp(long_1: Long) {
-        tempoTimeOffset = long_1
-        val i_3 = startPositionTrackBuffer!!.size
+    fun resetTracksFromTimestamp(timestamp: Long) {
+        tempoTimeOffset = timestamp
+        val trackCount = startPositionTrackBuffer!!.size
 
-        for (i_4 in 0 until i_3) {
-            trackLengths!![i_4] = 0
-            runningStatus!![i_4] = 0
-            buffer.currentPosition = trackStarts!![i_4]
-            getTrackLength(i_4)
-            startPositionTrackBuffer!![i_4] = buffer.currentPosition
+        for (track in 0 until trackCount) {
+            trackLengths!![track] = 0
+            runningStatus!![track] = 0
+            buffer.currentPosition = trackStarts!![track]
+            getTrackLength(track)
+            startPositionTrackBuffer!![track] = buffer.currentPosition
         }
     }
 
     fun dataLoaded(): Boolean = buffer.buffer.isNotEmpty()
 
-    fun decodeTrackFlags(track: Int, initialFlags: Int): Int {
-        if (initialFlags == 255) {
-            val i_7 = buffer.readUByte()
-            var offset = buffer.readVarInt()
-            if (i_7 == 47) {
-                buffer.currentPosition += offset
+    fun decodeTrackFlags(track: Int, statusByte: Int): Int {
+        if (statusByte == 255) {
+            val metaType = buffer.readUByte()
+            var metaLength = buffer.readVarInt()
+            if (metaType == 47) {
+                buffer.currentPosition += metaLength
                 return 1
-            } else if (i_7 == 81) {
-                val i_5 = buffer.readUMedium()
-                offset -= 3
-                val length = trackLengths!![track]
-                tempoTimeOffset += length.toLong() * (microsecondsPerBeat - i_5)
-                microsecondsPerBeat = i_5
-                buffer.currentPosition += offset
+            } else if (metaType == 81) {
+                val newTempo = buffer.readUMedium()
+                metaLength -= 3
+                val currentLength = trackLengths!![track]
+                tempoTimeOffset += currentLength.toLong() * (microsecondsPerBeat - newTempo)
+                microsecondsPerBeat = newTempo
+                buffer.currentPosition += metaLength
                 return 2
             } else {
-                buffer.currentPosition += offset
+                buffer.currentPosition += metaLength
                 return 3
             }
         }
 
-        val b_3 = messageDataByteCount[initialFlags - 128]
-        var flags = initialFlags
+        val dataByteCount = messageDataByteCount[statusByte - 128]
+        var flags = statusByte
 
-        if (b_3 >= 1) {
-            flags = initialFlags or (buffer.readUByte() shl 8)
+        if (dataByteCount >= 1) {
+            flags = statusByte or (buffer.readUByte() shl 8)
         }
 
-        if (b_3 >= 2) {
+        if (dataByteCount >= 2) {
             flags = flags or (buffer.readUByte() shl 16)
         }
 
@@ -179,23 +179,23 @@ class MidiFileReader {
     }
 
     fun decodeTrackFlags(track: Int): Int {
-        val b_2 = buffer.buffer[buffer.currentPosition]
-        val i_5: Int
+        val peekByte = buffer.buffer[buffer.currentPosition]
+        val statusByte: Int
 
-        if (b_2 < 0) {
-            i_5 = b_2.toInt() and 0xff
-            runningStatus!![track] = i_5
+        if (peekByte < 0) {
+            statusByte = peekByte.toInt() and 0xff
+            runningStatus!![track] = statusByte
             buffer.currentPosition++
         } else {
-            i_5 = runningStatus!![track]
+            statusByte = runningStatus!![track]
         }
 
-        if (i_5 != 240 && i_5 != 247) {
-            return decodeTrackFlags(track, i_5)
+        if (statusByte != 240 && statusByte != 247) {
+            return decodeTrackFlags(track, statusByte)
         }
 
-        val offset = buffer.readVarInt()
-        if (i_5 == 247 && offset > 0) {
+        val sysexLength = buffer.readVarInt()
+        if (statusByte == 247 && sysexLength > 0) {
             val flags = buffer.buffer[buffer.currentPosition].toInt() and 0xff
             if (flags in 241..243 || flags == 246 || flags == 248 || flags in 250..252 || flags == 254) {
                 buffer.currentPosition++
@@ -204,7 +204,7 @@ class MidiFileReader {
             }
         }
 
-        buffer.currentPosition += offset
+        buffer.currentPosition += sysexLength
         return 0
     }
 

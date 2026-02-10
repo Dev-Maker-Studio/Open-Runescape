@@ -17,34 +17,34 @@ class Resampler(inputSampleRate: Int, outputSampleRate: Int) {
         var inputRate = inputSampleRate
         var outputRate = outputSampleRate
         if (outputRate != inputRate) {
-            val i_3 = step(inputRate, outputRate)
-            inputRate /= i_3
-            outputRate /= i_3
+            val gcd = step(inputRate, outputRate)
+            inputRate /= gcd
+            outputRate /= gcd
             this.inputSampleRate = inputRate
             this.outputSampleRate = outputRate
             resampleTable = Array(inputRate) { IntArray(14) }
-            for (i_4 in 0 until inputRate) {
-                val ints_5 = resampleTable!![i_4]
-                val d_6 = i_4.toDouble() / inputRate + 6.0
-                var i_8 = (Math.floor(d_6 - 7.0 + 1.0)).toInt()
-                if (i_8 < 0) {
-                    i_8 = 0
+            for (phaseIndex in 0 until inputRate) {
+                val coefficients = resampleTable!![phaseIndex]
+                val centerPosition = phaseIndex.toDouble() / inputRate + 6.0
+                var windowStart = (Math.floor(centerPosition - 7.0 + 1.0)).toInt()
+                if (windowStart < 0) {
+                    windowStart = 0
                 }
-                var i_9 = (Math.ceil(7.0 + d_6)).toInt()
-                if (i_9 > 14) {
-                    i_9 = 14
+                var windowEnd = (Math.ceil(7.0 + centerPosition)).toInt()
+                if (windowEnd > 14) {
+                    windowEnd = 14
                 }
-                val d_10 = outputRate.toDouble() / inputRate
-                var i_8_loop = i_8
-                while (i_8_loop < i_9) {
-                    val d_12 = (i_8_loop - d_6) * Math.PI
-                    var d_14 = d_10
-                    if (d_12 < -1.0E-4 || d_12 > 1.0E-4) {
-                        d_14 = d_10 * (Math.sin(d_12) / d_12)
+                val gainFactor = outputRate.toDouble() / inputRate
+                var tapIndex = windowStart
+                while (tapIndex < windowEnd) {
+                    val sincArg = (tapIndex - centerPosition) * Math.PI
+                    var tapValue = gainFactor
+                    if (sincArg < -1.0E-4 || sincArg > 1.0E-4) {
+                        tapValue = gainFactor * (Math.sin(sincArg) / sincArg)
                     }
-                    d_14 *= 0.54 + 0.46 * Math.cos(0.2243994752564138 * (i_8_loop - d_6))
-                    ints_5[i_8_loop] = (Math.floor(d_14 * 65536.0 + 0.5)).toInt()
-                    i_8_loop++
+                    tapValue *= 0.54 + 0.46 * Math.cos(0.2243994752564138 * (tapIndex - centerPosition))
+                    coefficients[tapIndex] = (Math.floor(tapValue * 65536.0 + 0.5)).toInt()
+                    tapIndex++
                 }
             }
         }
@@ -55,26 +55,26 @@ class Resampler(inputSampleRate: Int, outputSampleRate: Int) {
         if (resampleTable != null) {
             val outputLength = ((outputSignal.size.toLong() * outputSampleRate / inputSampleRate) + 14).toInt()
             val resampledData = IntArray(outputLength)
-            var i = 0
-            var j = 0
-            for (k in outputSignal.indices) {
-                val inputSample = outputSignal[k]
-                val resampleCoefficients = resampleTable!![j]
-                for (l in 0 until 14) {
-                    resampledData[i + l] += inputSample * resampleCoefficients[l]
+            var outputIndex = 0
+            var phaseAccumulator = 0
+            for (inputIndex in outputSignal.indices) {
+                val inputSample = outputSignal[inputIndex]
+                val resampleCoefficients = resampleTable!![phaseAccumulator]
+                for (tapIndex in 0 until 14) {
+                    resampledData[outputIndex + tapIndex] += inputSample * resampleCoefficients[tapIndex]
                 }
-                j += outputSampleRate
-                val numInputSamples = j / inputSampleRate
-                i += numInputSamples
-                j -= numInputSamples * inputSampleRate
+                phaseAccumulator += outputSampleRate
+                val phaseAdvance = phaseAccumulator / inputSampleRate
+                outputIndex += phaseAdvance
+                phaseAccumulator -= phaseAdvance * inputSampleRate
             }
             outputSignal = ByteArray(outputLength)
-            for (k in 0 until outputLength) {
-                val i_11 = resampledData[k] + 32768 shr 16
-                outputSignal[k] = when {
-                    i_11 < -128 -> -128
-                    i_11 > 127 -> 127
-                    else -> i_11.toByte()
+            for (sampleIndex in 0 until outputLength) {
+                val clampedSample = resampledData[sampleIndex] + 32768 shr 16
+                outputSignal[sampleIndex] = when {
+                    clampedSample < -128 -> -128
+                    clampedSample > 127 -> 127
+                    else -> clampedSample.toByte()
                 }
             }
         }
@@ -86,23 +86,23 @@ class Resampler(inputSampleRate: Int, outputSampleRate: Int) {
         if (resampleTable != null) {
             val outputLength = ((outputSignal.size.toLong() * outputSampleRate / inputSampleRate) + 14).toInt()
             val resampledData = IntArray(outputLength)
-            var i = 0
-            var j = 0
-            for (k in outputSignal.indices) {
-                val inputSample = outputSignal[k]
-                val resampleCoefficients = resampleTable!![j]
-                for (l in 0 until 14) {
-                    resampledData[l + i] += resampleCoefficients[l] * inputSample shr 2
+            var outputIndex = 0
+            var phaseAccumulator = 0
+            for (inputIndex in outputSignal.indices) {
+                val inputSample = outputSignal[inputIndex]
+                val resampleCoefficients = resampleTable!![phaseAccumulator]
+                for (tapIndex in 0 until 14) {
+                    resampledData[tapIndex + outputIndex] += resampleCoefficients[tapIndex] * inputSample shr 2
                 }
-                j += outputSampleRate
-                val numInputSamples = j / inputSampleRate
-                i += numInputSamples
-                j -= numInputSamples * inputSampleRate
+                phaseAccumulator += outputSampleRate
+                val phaseAdvance = phaseAccumulator / inputSampleRate
+                outputIndex += phaseAdvance
+                phaseAccumulator -= phaseAdvance * inputSampleRate
             }
             outputSignal = ShortArray(outputLength)
-            for (k in 0 until outputLength) {
-                val resampledSample = resampledData[k] + 8192 shr 14
-                outputSignal[k] = when {
+            for (sampleIndex in 0 until outputLength) {
+                val resampledSample = resampledData[sampleIndex] + 8192 shr 14
+                outputSignal[sampleIndex] = when {
                     resampledSample < -32768 -> -32768
                     resampledSample > 32767 -> 32767
                     else -> resampledSample.toShort()

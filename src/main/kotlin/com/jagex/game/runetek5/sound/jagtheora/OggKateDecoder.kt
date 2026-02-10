@@ -17,39 +17,39 @@ class OggKateDecoder(oggstreamstate1: OggStreamState) : OggStreamDecoder(oggstre
 
     override fun decode(oggpacket1: OggPacket) {
         if (packetCount <= 0 || "SUB" == category) {
-            val rsbytebuffer3 = Packet(oggpacket1.getData())
-            val i_4 = rsbytebuffer3.readUByte()
+            val packetBuffer = Packet(oggpacket1.getData())
+            val packetType = packetBuffer.readUByte()
             if (packetCount <= 8) {
-                if ((i_4 or 0x80) == 0) {
+                if ((packetType or 0x80) == 0) {
                     throw IllegalStateException()
                 }
 
                 if (packetCount == 0) {
-                    rsbytebuffer3.currentPosition += 23
-                    granuleRateNumerator = rsbytebuffer3.readUIntLittle()
-                    granuleRateDenominator = rsbytebuffer3.readUIntLittle()
+                    packetBuffer.currentPosition += 23
+                    granuleRateNumerator = packetBuffer.readUIntLittle()
+                    granuleRateDenominator = packetBuffer.readUIntLittle()
                     if (granuleRateNumerator == 0 || granuleRateDenominator == 0) {
                         throw IllegalStateException()
                     }
 
-                    val rsbytebuffer12 = Packet(16)
-                    rsbytebuffer3.readBytes(rsbytebuffer12.buffer, 0, 16)
-                    languageAbbreviation = rsbytebuffer12.readString()
-                    rsbytebuffer12.currentPosition = 0
-                    rsbytebuffer3.readBytes(rsbytebuffer12.buffer, 0, 16)
-                    category = rsbytebuffer12.readString()
+                    val stringBuffer = Packet(16)
+                    packetBuffer.readBytes(stringBuffer.buffer, 0, 16)
+                    languageAbbreviation = stringBuffer.readString()
+                    stringBuffer.currentPosition = 0
+                    packetBuffer.readBytes(stringBuffer.buffer, 0, 16)
+                    category = stringBuffer.readString()
                 }
             } else {
-                if (i_4 == 0) {
-                    val long_5 = rsbytebuffer3.readULongLittle()
-                    val long_7 = rsbytebuffer3.readULongLittle()
-                    val long_9 = rsbytebuffer3.readULongLittle()
-                    if (long_7 >= 0L && long_9 >= 0L && long_9 <= long_5) {
-                        startTime = (granuleRateDenominator * long_5).toFloat() / granuleRateNumerator
-                        endTime = (granuleRateDenominator * (long_7 + long_5)).toFloat() / granuleRateNumerator
-                        val i_11 = rsbytebuffer3.readUIntLittle()
-                        if (i_11 >= 0 && i_11 <= rsbytebuffer3.buffer.size - rsbytebuffer3.currentPosition) {
-                            subtitleText = StaticMethods.decodeUtf8(rsbytebuffer3.buffer, rsbytebuffer3.currentPosition, i_11)
+                if (packetType == 0) {
+                    val startGranulePos = packetBuffer.readULongLittle()
+                    val duration = packetBuffer.readULongLittle()
+                    val backlink = packetBuffer.readULongLittle()
+                    if (duration >= 0L && backlink >= 0L && backlink <= startGranulePos) {
+                        startTime = (granuleRateDenominator * startGranulePos).toFloat() / granuleRateNumerator
+                        endTime = (granuleRateDenominator * (duration + startGranulePos)).toFloat() / granuleRateNumerator
+                        val textLength = packetBuffer.readUIntLittle()
+                        if (textLength >= 0 && textLength <= packetBuffer.buffer.size - packetBuffer.currentPosition) {
+                            subtitleText = StaticMethods.decodeUtf8(packetBuffer.buffer, packetBuffer.currentPosition, textLength)
                         } else {
                             throw IllegalStateException()
                         }
@@ -58,7 +58,7 @@ class OggKateDecoder(oggstreamstate1: OggStreamState) : OggStreamDecoder(oggstre
                     }
                 }
 
-                if ((i_4 or 0x80) != 0) {
+                if ((packetType or 0x80) != 0) {
                     // NOOP
                 }
             }

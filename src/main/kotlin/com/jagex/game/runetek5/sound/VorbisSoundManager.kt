@@ -9,12 +9,12 @@ import com.jagex.game.runetek5.trigger.sound.SoundTrigger
 
 object VorbisSoundManager {
     @JvmStatic
-    fun preloadVorbisSound(fileId: Int, i_1: Int, bool2: Boolean) {
+    fun preloadVorbisSound(fileId: Int, priority: Int, looping: Boolean) {
         if (StaticMethods.INDEX36_FILE_CACHE[fileId.toLong()] == null) {
             if (!Client.jagtheoraLoaded) {
-                SoundTrigger.playVorbis(fileId, bool2)
+                SoundTrigger.playVorbis(fileId, looping)
             } else {
-                val vorbisnode = VorbisNode(fileId, VorbisFileReference(Resource.VORBIS!!, fileId), i_1, bool2)
+                val vorbisnode = VorbisNode(fileId, VorbisFileReference(Resource.VORBIS!!, fileId), priority, looping)
                 vorbisnode.vfReference.setLanguage(Client.CURRENT_LANGUAGE!!.lowercaseAbbreviation)
                 StaticMethods.INDEX36_FILE_CACHE.put(vorbisnode, fileId.toLong())
             }

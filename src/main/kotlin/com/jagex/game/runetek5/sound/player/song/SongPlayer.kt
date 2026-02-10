@@ -28,7 +28,7 @@ object SongPlayer {
     @JvmField var pcmPlayer: PcmPlayer? = null
 
     @JvmStatic
-    fun playSong(musicArchive: Int, volume: Int, i_2: Int) {
+    fun playSong(musicArchive: Int, volume: Int, fadeDuration: Int) {
         if (currentSong != null && currentSong!!.isLoaded() && musicArchive == currentSong!!.musicId) {
             play(currentSong, volume)
             AreaSoundPlayer.currentMusicArchive = musicArchive
@@ -44,7 +44,7 @@ object SongPlayer {
             } else if (musicArchive != -1 && (musicArchive != AreaSoundPlayer.currentMusicArchive || !SongReference.isSongLoading())
                 && adjustedVolume != 0 && !SoundEffectPlayer.soundJinglePlaying
             ) {
-                transitionToNextSong(i_2, Resource.MUSIC!!, musicArchive, adjustedVolume, SongTransition())
+                transitionToNextSong(fadeDuration, Resource.MUSIC!!, musicArchive, adjustedVolume, SongTransition())
                 resetChannelVolumes()
             }
             if (musicArchive != AreaSoundPlayer.currentMusicArchive) {
@@ -62,8 +62,8 @@ object SongPlayer {
     }
 
     @JvmStatic
-    fun transitionToNextSong(i_0: Int, musicResource: Js5ResourceProvider, musicArchive: Int, soundLevel: Int, transition: AbstractSongTransition) {
-        if (i_0 > 0) {
+    fun transitionToNextSong(fadeSteps: Int, musicResource: Js5ResourceProvider, musicArchive: Int, soundLevel: Int, transition: AbstractSongTransition) {
+        if (fadeSteps > 0) {
             SoundResourceManager.songLoadState = 1
             AreaSoundPlayer.MUSIC_RESOURCE = musicResource
             musicArchiveId = musicArchive
@@ -71,7 +71,7 @@ object SongPlayer {
             SoundResourceManager.pendingMidiStream = null
             AreaSoundPlayer.SOUND_LEVEL = soundLevel
             StaticMethods.songLooping = false
-            CutsceneBasicMovement.musicFadeStep = SoundResourceManager.midiPcmStream!!.getMusicVolume() / i_0
+            CutsceneBasicMovement.musicFadeStep = SoundResourceManager.midiPcmStream!!.getMusicVolume() / fadeSteps
             if (CutsceneBasicMovement.musicFadeStep < 1) {
                 CutsceneBasicMovement.musicFadeStep = 1
             }
@@ -123,16 +123,16 @@ object SongPlayer {
     }
 
     @JvmStatic
-    fun setChannelVolume(i_0: Int, i_1: Int) {
+    fun setChannelVolume(channel: Int, volume: Int) {
         if (SoundResourceManager.songLoadState != 0) {
-            if (i_0 < 0) {
-                for (i_3 in 0 until 16) {
-                    channelVolumes!![i_3] = i_1
+            if (channel < 0) {
+                for (channelIndex in 0 until 16) {
+                    channelVolumes!![channelIndex] = volume
                 }
             } else {
-                channelVolumes!![i_0] = i_1
+                channelVolumes!![channel] = volume
             }
         }
-        SoundResourceManager.midiPcmStream!!.setChannelVolume(i_0, i_1)
+        SoundResourceManager.midiPcmStream!!.setChannelVolume(channel, volume)
     }
 }

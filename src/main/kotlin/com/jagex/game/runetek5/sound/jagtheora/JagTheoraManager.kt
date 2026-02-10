@@ -66,8 +66,8 @@ abstract class JagTheoraManager {
         return if (this.vorbisDecoder != null) {
             !this.theoraDecoder!!.isHeaderDecoded() || getPlaybackTime() > this.theoraDecoder!!.granuleTime
         } else {
-            val d_2 = this.theoraDecoder!!.getFps()
-            d_2 == 0.0f || Utils.time() >= this.theoraDecoder!!.packetDecodeTime + 1000.0 / d_2
+            val fps = this.theoraDecoder!!.getFps()
+            fps == 0.0f || Utils.time() >= this.theoraDecoder!!.packetDecodeTime + 1000.0 / fps
         }
     }
 
@@ -78,59 +78,59 @@ abstract class JagTheoraManager {
         } else if (this.isEndOfStream) {
             return null
         } else {
-            var i_2: Int
+            var bytesRead: Int
             while (this.syncState.pageOut(this.page) <= 0) {
-                i_2 = decode(this.buffer)
-                if (i_2 == -1) {
+                bytesRead = decode(this.buffer)
+                if (bytesRead == -1) {
                     this.isEndOfStream = true
                     return null
                 }
-                if (i_2 == 0) {
+                if (bytesRead == 0) {
                     return null
                 }
-                if (!this.syncState.write(this.buffer, i_2)) {
+                if (!this.syncState.write(this.buffer, bytesRead)) {
                     throw RuntimeException("")
                 }
             }
-            i_2 = this.page.getSerialNumber()
+            bytesRead = this.page.getSerialNumber()
             if (!this.page.isBOS()) {
-                val class282Sub419 = this.cache.get(i_2.toLong()) as OggStreamDecoder
-                if (!class282Sub419.streamState.pageIn(this.page)) {
+                val decoder = this.cache.get(bytesRead.toLong()) as OggStreamDecoder
+                if (!decoder.streamState.pageIn(this.page)) {
                     throw IllegalStateException()
                 } else {
-                    return class282Sub419
+                    return decoder
                 }
             } else {
-                val state = OggStreamState(i_2)
-                if (!state.pageIn(this.page)) {
+                val streamState = OggStreamState(bytesRead)
+                if (!streamState.pageIn(this.page)) {
                     throw IllegalStateException()
-                } else if (state.packetPeek(this.packet) != 1) {
+                } else if (streamState.packetPeek(this.packet) != 1) {
                     throw IllegalStateException()
                 } else {
-                    val obj4: OggStreamDecoder
+                    val newDecoder: OggStreamDecoder
                     if (this.theoraDecoder == null && this.packet.isTheora()) {
-                        this.theoraDecoder = JagTheoraTheoraNode(state)
-                        obj4 = this.theoraDecoder!!
+                        this.theoraDecoder = JagTheoraTheoraNode(streamState)
+                        newDecoder = this.theoraDecoder!!
                     } else if (this.vorbisDecoder == null && this.packet.isVorbis()) {
-                        this.vorbisDecoder = JagTheoraVorbisNode(state)
-                        obj4 = this.vorbisDecoder!!
+                        this.vorbisDecoder = JagTheoraVorbisNode(streamState)
+                        newDecoder = this.vorbisDecoder!!
                     } else {
-                        val bytes_5 = this.packet.getData()
-                        val stringbuilder6 = StringBuilder()
-                        var i_7 = 1
-                        while (i_7 < bytes_5.size && Character.isLetterOrDigit(bytes_5[i_7].toInt().toChar())) {
-                            stringbuilder6.append(bytes_5[i_7].toInt().toChar())
-                            i_7++
+                        val packetData = this.packet.getData()
+                        val codecNameBuilder = StringBuilder()
+                        var byteIndex = 1
+                        while (byteIndex < packetData.size && Character.isLetterOrDigit(packetData[byteIndex].toInt().toChar())) {
+                            codecNameBuilder.append(packetData[byteIndex].toInt().toChar())
+                            byteIndex++
                         }
-                        val string_8 = stringbuilder6.toString()
-                        obj4 = if ("kate" == string_8) {
-                            OggKateDecoder(state)
+                        val codecName = codecNameBuilder.toString()
+                        newDecoder = if ("kate" == codecName) {
+                            OggKateDecoder(streamState)
                         } else {
-                            NullOggStreamDecoder(state)
+                            NullOggStreamDecoder(streamState)
                         }
                     }
-                    this.cache.put(obj4, i_2.toLong())
-                    return obj4
+                    this.cache.put(newDecoder, bytesRead.toLong())
+                    return newDecoder
                 }
             }
         }
@@ -139,14 +139,14 @@ abstract class JagTheoraManager {
     @Throws(IOException::class)
     fun decodeTheoraPacket() {
         while (this.theoraDecoder!!.streamState.packetOut(this.packet) != 1) {
-            val class282Sub412 = readNextPage()
-            if (class282Sub412 == null) {
+            val decoder = readNextPage()
+            if (decoder == null) {
                 if (this.isEndOfStream) {
                     drainAllStreams()
                 }
                 return
             }
-            if (class282Sub412 == this.kateDecoder) {
+            if (decoder == this.kateDecoder) {
                 processKateSubtitles()
             }
         }
@@ -166,40 +166,40 @@ abstract class JagTheoraManager {
                 this.kateDecoder = null
             }
             if (this.kateDecoder == null) {
-                var class282Sub413 = this.cache.first() as OggStreamDecoder?
-                while (class282Sub413 != null) {
-                    if (class282Sub413 is OggKateDecoder) {
-                        val class282Sub41Sub24 = class282Sub413
-                        if (this.languageAbbreviation == class282Sub41Sub24.getLanguageAbbreviation()) {
-                            this.kateDecoder = class282Sub41Sub24
+                var decoder = this.cache.first() as OggStreamDecoder?
+                while (decoder != null) {
+                    if (decoder is OggKateDecoder) {
+                        val kateDecoder = decoder
+                        if (this.languageAbbreviation == kateDecoder.getLanguageAbbreviation()) {
+                            this.kateDecoder = kateDecoder
                             break
                         }
                     }
-                    class282Sub413 = this.cache.next() as OggStreamDecoder?
+                    decoder = this.cache.next() as OggStreamDecoder?
                 }
             }
         }
     }
 
     fun drainAllStreams() {
-        var class282Sub412 = this.cache.first() as OggStreamDecoder?
-        while (class282Sub412 != null) {
-            if (class282Sub412 != this.theoraDecoder) {
-                while (class282Sub412.streamState.packetOut() == 1) {
-                    class282Sub412.processPacket(this.packet)
+        var decoder = this.cache.first() as OggStreamDecoder?
+        while (decoder != null) {
+            if (decoder != this.theoraDecoder) {
+                while (decoder.streamState.packetOut() == 1) {
+                    decoder.processPacket(this.packet)
                 }
             }
-            class282Sub412 = this.cache.next() as OggStreamDecoder?
+            decoder = this.cache.next() as OggStreamDecoder?
         }
         if (this.theoraDecoder != null) {
-            var i_3 = 0
-            while (i_3 < 10 && shouldDecodeVideoFrame()) {
+            var frameCount = 0
+            while (frameCount < 10 && shouldDecodeVideoFrame()) {
                 if (this.theoraDecoder!!.streamState.packetOut() != 1) {
                     shutdown()
                     break
                 }
                 this.theoraDecoder!!.processPacket(this.packet)
-                i_3++
+                frameCount++
             }
         }
     }
@@ -216,11 +216,11 @@ abstract class JagTheoraManager {
         return if (this.vorbisDecoder != null) this.vorbisDecoder!!.getCurrentPlaybackTime() else if (this.theoraDecoder != null) this.theoraDecoder!!.granuleTime else 0.0
     }
 
-    fun togglePause(bool1: Boolean) {
+    fun togglePause(paused: Boolean) {
         if (this.vorbisDecoder != null) {
-            val class282Sub15Sub13 = this.vorbisDecoder!!.getPcmStream()
-            if (class282Sub15Sub13 != null) {
-                class282Sub15Sub13.setMuted(bool1)
+            val pcmStream = this.vorbisDecoder!!.getPcmStream()
+            if (pcmStream != null) {
+                pcmStream.setMuted(paused)
             }
         }
         this.isPaused = !this.isPaused
@@ -230,10 +230,10 @@ abstract class JagTheoraManager {
     fun processStreams() {
         if (!this.isPaused) {
             while (!this.isShutdown) {
-                val class282Sub412: OggStreamDecoder?
+                val decoder: OggStreamDecoder?
                 if (!this.hasBufferedPage) {
-                    class282Sub412 = readNextPage()
-                    if (class282Sub412 == null) {
+                    decoder = readNextPage()
+                    if (decoder == null) {
                         if (this.isEndOfStream) {
                             drainAllStreams()
                         }
@@ -241,9 +241,9 @@ abstract class JagTheoraManager {
                     }
                     this.hasBufferedPage = true
                 } else {
-                    class282Sub412 = this.cache.get(this.page.getSerialNumber().toLong()) as OggStreamDecoder?
+                    decoder = this.cache.get(this.page.getSerialNumber().toLong()) as OggStreamDecoder?
                 }
-                if (class282Sub412 == this.vorbisDecoder) {
+                if (decoder == this.vorbisDecoder) {
                     if (this.vorbisDecoder!!.getBufferedSampleCount() >= 50) {
                         break
                     }
@@ -251,16 +251,16 @@ abstract class JagTheoraManager {
                         this.vorbisDecoder!!.processPacket(this.packet)
                         processKateSubtitles()
                         if (this.theoraDecoder != null) {
-                            val d_3 = this.theoraDecoder!!.granuleTime
-                            var i_5 = 0
-                            while (i_5 < 10 && shouldDecodeVideoFrame()) {
+                            val previousGranuleTime = this.theoraDecoder!!.granuleTime
+                            var frameCount = 0
+                            while (frameCount < 10 && shouldDecodeVideoFrame()) {
                                 decodeTheoraPacket()
                                 if (this.isShutdown) {
                                     return
                                 }
-                                i_5++
+                                frameCount++
                             }
-                            if (d_3 < this.theoraDecoder!!.granuleTime) {
+                            if (previousGranuleTime < this.theoraDecoder!!.granuleTime) {
                                 return
                             }
                         }
@@ -268,20 +268,20 @@ abstract class JagTheoraManager {
                             return
                         }
                     }
-                } else if (class282Sub412 is OggKateDecoder) {
+                } else if (decoder is OggKateDecoder) {
                     processKateSubtitles()
-                } else if (class282Sub412 != this.theoraDecoder) {
-                    while (class282Sub412!!.streamState.packetOut(this.packet) == 1) {
-                        class282Sub412.processPacket(this.packet)
+                } else if (decoder != this.theoraDecoder) {
+                    while (decoder!!.streamState.packetOut(this.packet) == 1) {
+                        decoder.processPacket(this.packet)
                     }
                 } else if (this.vorbisDecoder == null && !this.isPaused) {
-                    var i_6 = 0
-                    while (i_6 < 10 && shouldDecodeVideoFrame()) {
+                    var frameCount = 0
+                    while (frameCount < 10 && shouldDecodeVideoFrame()) {
                         decodeTheoraPacket()
                         if (this.isShutdown) {
                             return
                         }
-                        i_6++
+                        frameCount++
                     }
                     return
                 }
@@ -295,26 +295,26 @@ abstract class JagTheoraManager {
     }
 
     fun processKateSubtitles() {
-        var class282Sub412 = this.cache.first() as OggStreamDecoder?
-        while (class282Sub412 != null) {
-            if (class282Sub412 is OggKateDecoder) {
-                val class282Sub41Sub23 = class282Sub412
-                while ((class282Sub41Sub23.packetCount <= 8 || getPlaybackTime() > class282Sub41Sub23.getEndTime()) && class282Sub41Sub23.streamState.packetOut(this.packet) == 1) {
-                    class282Sub41Sub23.processPacket(this.packet)
+        var decoder = this.cache.first() as OggStreamDecoder?
+        while (decoder != null) {
+            if (decoder is OggKateDecoder) {
+                val kateDecoder = decoder
+                while ((kateDecoder.packetCount <= 8 || getPlaybackTime() > kateDecoder.getEndTime()) && kateDecoder.streamState.packetOut(this.packet) == 1) {
+                    kateDecoder.processPacket(this.packet)
                 }
             }
-            class282Sub412 = this.cache.next() as OggStreamDecoder?
+            decoder = this.cache.next() as OggStreamDecoder?
         }
         setLanguage(this.languageAbbreviation)
     }
 
     fun shutdown() {
         if (!this.isShutdown) {
-            var class282Sub412 = this.cache.first() as OggStreamDecoder?
-            while (class282Sub412 != null) {
-                class282Sub412.reset()
-                class282Sub412.streamState.resetPeer()
-                class282Sub412 = this.cache.next() as OggStreamDecoder?
+            var decoder = this.cache.first() as OggStreamDecoder?
+            while (decoder != null) {
+                decoder.reset()
+                decoder.streamState.resetPeer()
+                decoder = this.cache.next() as OggStreamDecoder?
             }
             this.packet.resetPeer()
             this.page.resetPeer()
@@ -323,5 +323,5 @@ abstract class JagTheoraManager {
         }
     }
 
-    abstract fun decode(var1: ByteArray): Int
+    abstract fun decode(buffer: ByteArray): Int
 }

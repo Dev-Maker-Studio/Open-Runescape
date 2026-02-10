@@ -21,8 +21,8 @@ class VorbisPcmStream(
     }
 
     @Synchronized
-    override fun fill(ints_1: IntArray, i_2: Int, i_3: Int) {
-        var i_2_var = i_2
+    override fun fill(mixBuffer: IntArray, offset: Int, length: Int) {
+        var outputIndex = offset
         if (!isMuted) {
             if (getFirst() == null) {
                 if (isStopping) {
@@ -30,28 +30,28 @@ class VorbisPcmStream(
                     TIMED_CACHE.clear()
                 }
             } else {
-                var i_4 = i_3 + i_2_var
+                var endIndex = length + outputIndex
                 if (PcmPlayerManager.stereo) {
-                    i_4 = i_4 shl 1
+                    endIndex = endIndex shl 1
                 }
-                val b_5: Byte = 0
-                val b_6: Byte = if (channelCount == 2) 1 else 0
+                val leftChannel: Byte = 0
+                val rightChannel: Byte = if (channelCount == 2) 1 else 0
 
-                while (i_2_var < i_4) {
-                    val class282Sub397 = getFirst() ?: break
-                    val shorts_8 = class282Sub397.samples
+                while (outputIndex < endIndex) {
+                    val sampleData = getFirst() ?: break
+                    val samples = sampleData.samples
 
-                    while (i_2_var < i_4 && sampleOffset < shorts_8[0].size) {
+                    while (outputIndex < endIndex && sampleOffset < samples[0].size) {
                         if (PcmPlayerManager.stereo) {
-                            ints_1[i_2_var++] = shorts_8[b_5.toInt()][sampleOffset] * leftVolume
-                            ints_1[i_2_var++] = shorts_8[b_6.toInt()][sampleOffset] * rightVolume
+                            mixBuffer[outputIndex++] = samples[leftChannel.toInt()][sampleOffset] * leftVolume
+                            mixBuffer[outputIndex++] = samples[rightChannel.toInt()][sampleOffset] * rightVolume
                         } else {
-                            ints_1[i_2_var++] += shorts_8[b_6.toInt()][sampleOffset] * rightVolume + shorts_8[b_5.toInt()][sampleOffset] * leftVolume
+                            mixBuffer[outputIndex++] += samples[rightChannel.toInt()][sampleOffset] * rightVolume + samples[leftChannel.toInt()][sampleOffset] * leftVolume
                         }
                         sampleOffset++
                     }
 
-                    if (sampleOffset >= shorts_8[0].size) {
+                    if (sampleOffset >= samples[0].size) {
                         advanceBuffer()
                     }
                 }
@@ -71,40 +71,40 @@ class VorbisPcmStream(
 
     @Synchronized
     fun advanceBuffer() {
-        val class282Sub392 = getFirst()
-        if (class282Sub392 != null) {
-            class282Sub392.unlink()
+        val sampleData = getFirst()
+        if (sampleData != null) {
+            sampleData.unlink()
             sampleOffset = 0
             capacityUsed--
-            TIMED_CACHE.put(class282Sub392.getCacheKey(), class282Sub392)
+            TIMED_CACHE.put(sampleData.getCacheKey(), sampleData)
         }
     }
 
-    fun allocateSampleData(i_1: Int, d_2: Double): MonoSterioData {
-        val long_4 = channelCount.toLong() or i_1.toLong()
-        var class282Sub396 = TIMED_CACHE.get(long_4)
-        if (class282Sub396 != null) {
-            class282Sub396.timestamp = d_2
-            TIMED_CACHE.pop(long_4)
+    fun allocateSampleData(sampleCount: Int, timestamp: Double): MonoSterioData {
+        val cacheKey = channelCount.toLong() or sampleCount.toLong()
+        var data = TIMED_CACHE.get(cacheKey)
+        if (data != null) {
+            data.timestamp = timestamp
+            TIMED_CACHE.pop(cacheKey)
         } else {
-            class282Sub396 = MonoSterioData(Array(channelCount) { ShortArray(i_1) }, d_2)
+            data = MonoSterioData(Array(channelCount) { ShortArray(sampleCount) }, timestamp)
         }
-        return class282Sub396
+        return data
     }
 
     @Synchronized
-    fun enqueueSampleData(class282Sub391: MonoSterioData) {
+    fun enqueueSampleData(sampleData: MonoSterioData) {
         while (capacityUsed >= 100) {
             nodeCollection.popHead()
             capacityUsed--
         }
-        nodeCollection.addFirst(class282Sub391)
+        nodeCollection.addFirst(sampleData)
         capacityUsed++
     }
 
     @Synchronized
-    fun setMuted(bool1: Boolean) {
-        isMuted = bool1
+    fun setMuted(muted: Boolean) {
+        isMuted = muted
     }
 
     override fun getActiveVoiceCount(): Int {
@@ -112,23 +112,23 @@ class VorbisPcmStream(
     }
 
     @Synchronized
-    override fun skip(i_1: Int) {
-        var i_1_var = i_1
+    override fun skip(sampleCount: Int) {
+        var remaining = sampleCount
         if (!isMuted) {
             while (true) {
-                val class282Sub392 = getFirst()
-                if (class282Sub392 == null) {
+                val sampleData = getFirst()
+                if (sampleData == null) {
                     if (isStopping) {
                         unlink()
                         TIMED_CACHE.clear()
                     }
                     break
                 }
-                if (class282Sub392.samples[0].size - sampleOffset > i_1_var) {
-                    sampleOffset += i_1_var
+                if (sampleData.samples[0].size - sampleOffset > remaining) {
+                    sampleOffset += remaining
                     break
                 }
-                i_1_var -= class282Sub392.samples[0].size - sampleOffset
+                remaining -= sampleData.samples[0].size - sampleOffset
                 advanceBuffer()
             }
         }
@@ -139,17 +139,17 @@ class VorbisPcmStream(
         if (capacityUsed < 1) {
             return -1.0
         }
-        val class282Sub392 = nodeCollection.getFirst() as MonoSterioData?
-        return if (class282Sub392 == null) {
+        val sampleData = nodeCollection.getFirst() as MonoSterioData?
+        return if (sampleData == null) {
             -1.0
         } else {
-            class282Sub392.timestamp - (class282Sub392.samples[0].size.toFloat() / PcmPlayerManager.sampleRate)
+            sampleData.timestamp - (sampleData.samples[0].size.toFloat() / PcmPlayerManager.sampleRate)
         }
     }
 
-    fun setVolume(i_1: Int) {
-        leftVolume = i_1
-        rightVolume = i_1
+    fun setVolume(volume: Int) {
+        leftVolume = volume
+        rightVolume = volume
     }
 
     override fun getNextStream(): PcmStream? {

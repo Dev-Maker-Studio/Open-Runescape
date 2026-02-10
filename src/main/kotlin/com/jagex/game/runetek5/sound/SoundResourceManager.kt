@@ -31,14 +31,14 @@ object SoundResourceManager {
     @JvmField var pendingMidiStream: MidiPcmStream? = null
 
     @JvmStatic
-    fun getVideoSubtitleText(i_0: Int): String? {
-        val vorbis = StaticMethods.INDEX36_FILE_CACHE.get(i_0.toLong())
+    fun getVideoSubtitleText(fileId: Int): String? {
+        val vorbis = StaticMethods.INDEX36_FILE_CACHE.get(fileId.toLong())
         if (vorbis != null) {
-            val class282Sub41Sub23 = vorbis.vfReference.getKateDecoder()
-            if (class282Sub41Sub23 != null) {
-                val d_4 = vorbis.vfReference.getPlaybackTime()
-                if (class282Sub41Sub23.getStartTime() <= d_4 && class282Sub41Sub23.getEndTime() >= d_4) {
-                    return class282Sub41Sub23.getSubtitleText()
+            val kateDecoder = vorbis.vfReference.getKateDecoder()
+            if (kateDecoder != null) {
+                val playbackTime = vorbis.vfReference.getPlaybackTime()
+                if (kateDecoder.getStartTime() <= playbackTime && kateDecoder.getEndTime() >= playbackTime) {
+                    return kateDecoder.getSubtitleText()
                 }
             }
         }
@@ -54,15 +54,15 @@ object SoundResourceManager {
     }
 
     @JvmStatic
-    fun initializePcmResources(index0: Js5ResourceProvider, index1: Js5ResourceProvider, index2: Js5ResourceProvider, class282Sub15Sub23: MidiPcmStream, class2534: PcmPlayer): Boolean {
-        SOUND_MIDI_PROVIDER = index0
-        MIDI_INSTRUMENT_PROVIDER = index1
-        SOUND_EFFECT_PROVIDER = index2
-        midiPcmStream = class282Sub15Sub23
-        SongPlayer.pcmPlayer = class2534
+    fun initializePcmResources(midiProvider: Js5ResourceProvider, instrumentProvider: Js5ResourceProvider, soundEffectProvider: Js5ResourceProvider, pcmStream: MidiPcmStream, pcmPlayer: PcmPlayer): Boolean {
+        SOUND_MIDI_PROVIDER = midiProvider
+        MIDI_INSTRUMENT_PROVIDER = instrumentProvider
+        SOUND_EFFECT_PROVIDER = soundEffectProvider
+        midiPcmStream = pcmStream
+        SongPlayer.pcmPlayer = pcmPlayer
         SongPlayer.channelVolumes = IntArray(16)
-        for (i_6 in 0..15) {
-            SongPlayer.channelVolumes!![i_6] = 255
+        for (channel in 0..15) {
+            SongPlayer.channelVolumes!![channel] = 255
         }
         return true
     }
@@ -80,27 +80,27 @@ object SoundResourceManager {
                 if (StaticMethods.pendingSoundBankCache == null) {
                     StaticMethods.pendingSoundBankCache = SoundBankCache(SOUND_EFFECT_PROVIDER!!, MIDI_INSTRUMENT_PROVIDER!!)
                 }
-                var class282Sub15Sub22 = midiPcmStream
+                var targetStream = midiPcmStream
                 if (pendingMidiStream != null) {
-                    class282Sub15Sub22 = pendingMidiStream
+                    targetStream = pendingMidiStream
                 }
                 val pendingMusicTrack = StaticMethods.pendingMusicTrack!!
-                if (class282Sub15Sub22!!.ready(pendingMusicTrack, SOUND_MIDI_PROVIDER!!, StaticMethods.pendingSoundBankCache!!)) {
-                    midiPcmStream = class282Sub15Sub22
+                if (targetStream!!.ready(pendingMusicTrack, SOUND_MIDI_PROVIDER!!, StaticMethods.pendingSoundBankCache!!)) {
+                    midiPcmStream = targetStream
                     midiPcmStream!!.resetMusicPatches()
                     if (StaticMethods.songFadeInRate > 0) {
                         songLoadState = 3
                         midiPcmStream!!.setMusicVolume(Math.min(StaticMethods.songFadeInRate, AreaSoundPlayer.SOUND_LEVEL))
-                        for (i_3 in SongPlayer.channelVolumes!!.indices) {
-                            midiPcmStream!!.setChannelVolume(i_3, SongPlayer.channelVolumes!![i_3])
-                            SongPlayer.channelVolumes!![i_3] = 255
+                        for (channel in SongPlayer.channelVolumes!!.indices) {
+                            midiPcmStream!!.setChannelVolume(channel, SongPlayer.channelVolumes!![channel])
+                            SongPlayer.channelVolumes!![channel] = 255
                         }
                     } else {
                         songLoadState = 0
                         midiPcmStream!!.setMusicVolume(AreaSoundPlayer.SOUND_LEVEL)
-                        for (i_3 in SongPlayer.channelVolumes!!.indices) {
-                            midiPcmStream!!.setChannelVolume(i_3, SongPlayer.channelVolumes!![i_3])
-                            SongPlayer.channelVolumes!![i_3] = 255
+                        for (channel in SongPlayer.channelVolumes!!.indices) {
+                            midiPcmStream!!.setChannelVolume(channel, SongPlayer.channelVolumes!![channel])
+                            SongPlayer.channelVolumes!![channel] = 255
                         }
                     }
                     if (pendingMidiStream == null) {
@@ -125,8 +125,8 @@ object SoundResourceManager {
                     return true
                 }
             }
-        } catch (exception4: Exception) {
-            exception4.printStackTrace()
+        } catch (exception: Exception) {
+            exception.printStackTrace()
             midiPcmStream!!.turnOffSound()
             SongReference.reset()
         }

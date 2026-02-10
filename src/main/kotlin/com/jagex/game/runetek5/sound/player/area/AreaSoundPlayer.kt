@@ -52,7 +52,7 @@ object AreaSoundPlayer {
         var soundIndex = 0
         while (soundIndex < AREA_SOUND_CACHE_SIZE) {
             val sound = AREA_SOUND_CACHE[soundIndex]!!
-            var bool3 = false
+            var shouldRemove = false
             if (sound.areaSoundStream == null) {
                 if (--sound.delay >= (if (sound.spoken()) -1500 else -10)) {
                     if (sound.type.toInt() == 1 && sound.soundEffect == null) {
@@ -79,19 +79,19 @@ object AreaSoundPlayer {
                         }
                     }
                     if (sound.delay < 0) {
-                        var i_4 = 8192
+                        var panValue = 8192
                         val volume: Int
                         if (sound.bitpackedPosition != 0) {
                             val plane = sound.bitpackedPosition shr 24 and 0x3
                             if (plane == PlayerUpdate.MY_PLAYER!!.plane.toInt()) {
                                 val maxHearDistance = (sound.bitpackedPosition and 0xff) shl 9
-                                val size = PlayerUpdate.MY_PLAYER!!.getSize() shl 8
-                                val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
-                                var startX = sound.bitpackedPosition shr 16 and 0xff
-                                var endX = (startX shl 9) + 256 - abs.x.toInt() + size
-                                var startY = sound.bitpackedPosition shr 8 and 0xff
-                                var endY = (startY shl 9) + 256 - abs.z.toInt() + size
-                                var currentDistance = abs(endX) + abs(endY) - 512
+                                val entitySize = PlayerUpdate.MY_PLAYER!!.getSize() shl 8
+                                val playerPos = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
+                                var tileX = sound.bitpackedPosition shr 16 and 0xff
+                                var deltaX = (tileX shl 9) + 256 - playerPos.x.toInt() + entitySize
+                                var tileY = sound.bitpackedPosition shr 8 and 0xff
+                                var deltaY = (tileY shl 9) + 256 - playerPos.z.toInt() + entitySize
+                                var currentDistance = abs(deltaX) + abs(deltaY) - 512
                                 if (currentDistance > maxHearDistance) {
                                     sound.delay = -99999
                                     soundIndex++
@@ -102,22 +102,22 @@ object AreaSoundPlayer {
                                 }
                                 volume = (maxHearDistance - currentDistance) * PreferenceManager.preferences!!.ambientSoundVolume!!.getValue() * sound.volume / maxHearDistance shr 2
                                 if (sound.startX != -1) {
-                                    startX = sound.startX
-                                    startY = sound.startZ
+                                    tileX = sound.startX
+                                    tileY = sound.startZ
                                 }
-                                if (endX != 0 || endY != 0) {
-                                    var angle = -Camera.cameraRoll - (atan2(endX.toDouble(), endY.toDouble()) * 2607.5945876176133).toInt() - 4096 and 0x3fff
+                                if (deltaX != 0 || deltaY != 0) {
+                                    var angle = -Camera.cameraRoll - (atan2(deltaX.toDouble(), deltaY.toDouble()) * 2607.5945876176133).toInt() - 4096 and 0x3fff
                                     if (angle > 8192) {
                                         angle = 16384 - angle
                                     }
-                                    val i_16: Int = if (currentDistance <= 0) {
+                                    val stereoWidth: Int = if (currentDistance <= 0) {
                                         8192
                                     } else if (currentDistance >= 4096) {
                                         16384
                                     } else {
                                         (8192 - currentDistance) / 4096 + 8192
                                     }
-                                    i_4 = (16384 - i_16 shr 1) + angle * i_16 / 8192
+                                    panValue = (16384 - stereoWidth shr 1) + angle * stereoWidth / 8192
                                 }
                             } else {
                                 volume = 0
@@ -131,21 +131,21 @@ object AreaSoundPlayer {
                         if (volume > 0) {
                             if (sound.type.toInt() == 1) {
                                 val mixedAudio = sound.soundEffect!!.getMixedAudio().resample(SoundEffectPlayer.resampler!!)
-                                sound.areaSoundStream = mixedAudio.getStream(sound.sampleRate, volume, i_4)
+                                sound.areaSoundStream = mixedAudio.getStream(sound.sampleRate, volume, panValue)
                             } else if (sound.spoken()) {
-                                sound.areaSoundStream = sound.buffer!!.getStream(sound.sampleRate, volume, i_4)
+                                sound.areaSoundStream = sound.buffer!!.getStream(sound.sampleRate, volume, panValue)
                             }
                             sound.areaSoundStream!!.setNumLoops(sound.loops - 1)
                             AmbientSound.gameSounds!!.addSubStream(sound.areaSoundStream!!)
                         }
                     }
                 } else {
-                    bool3 = true
+                    shouldRemove = true
                 }
             } else if (!sound.areaSoundStream!!.linked()) {
-                bool3 = true
+                shouldRemove = true
             }
-            if (bool3) {
+            if (shouldRemove) {
                 --AREA_SOUND_CACHE_SIZE
                 for (index in soundIndex until AREA_SOUND_CACHE_SIZE) {
                     AREA_SOUND_CACHE[index] = AREA_SOUND_CACHE[index + 1]
@@ -264,9 +264,9 @@ object AreaSoundPlayer {
     }
 
     @JvmStatic
-    fun playMusicWithTransition(musicResource: Js5ResourceProvider, archive: Int, volume: Int, class282Sub15Sub25: MidiPcmStream) {
+    fun playMusicWithTransition(musicResource: Js5ResourceProvider, archive: Int, volume: Int, transitionStream: MidiPcmStream) {
         playMusic(musicResource, archive, volume)
-        SoundResourceManager.pendingMidiStream = class282Sub15Sub25
+        SoundResourceManager.pendingMidiStream = transitionStream
     }
 
     @JvmStatic
@@ -280,14 +280,14 @@ object AreaSoundPlayer {
     }
 
     @JvmStatic
-    fun loadAndPlayMusic(musicResource: Js5ResourceProvider, musicArchive: Int, musicFile: Int, soundLevel: Int, bool4: Boolean) {
+    fun loadAndPlayMusic(musicResource: Js5ResourceProvider, musicArchive: Int, musicFile: Int, soundLevel: Int, looping: Boolean) {
         SoundResourceManager.songLoadState = 1
         MUSIC_RESOURCE = musicResource
         SongPlayer.musicArchiveId = musicArchive
         SoundResourceManager.musicFileId = musicFile
         SoundResourceManager.pendingMidiStream = null
         SOUND_LEVEL = soundLevel
-        StaticMethods.songLooping = bool4
+        StaticMethods.songLooping = looping
         CutsceneBasicMovement.musicFadeStep = 10000
         SoundResourceManager.songStartPosition = 0
         StaticMethods.songFadeInRate = 0
@@ -296,13 +296,13 @@ object AreaSoundPlayer {
     @JvmStatic
     fun updateSpatialMusicVolume() {
         if (SongPlayer.primarySound != null) {
-            val abs = Vector3Pool.vector3From(PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords)
+            val playerPos = Vector3Pool.vector3From(PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords)
             val base = Resource.mapRegion!!.getBaseCoordinates()
-            abs.x += (base.x shl 9).toFloat()
-            abs.z += (base.y shl 9).toFloat()
-            abs.subtract(SongPlayer.primarySound!!.x.toFloat(), abs.y, SongPlayer.primarySound!!.z.toFloat())
-            var magnitude = abs.magnitude()
-            abs.pushVectorStack()
+            playerPos.x += (base.x shl 9).toFloat()
+            playerPos.z += (base.y shl 9).toFloat()
+            playerPos.subtract(SongPlayer.primarySound!!.x.toFloat(), playerPos.y, SongPlayer.primarySound!!.z.toFloat())
+            var magnitude = playerPos.magnitude()
+            playerPos.pushVectorStack()
             val volumeMultiplier: Float = if (magnitude < SongPlayer.primarySound!!.near) {
                 1.0f
             } else if (magnitude > SongPlayer.primarySound!!.far) {

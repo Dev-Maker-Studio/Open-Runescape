@@ -64,12 +64,12 @@ open class PcmPlayer {
                         this.dataConsumed = this.dataLeftLastCycle - dataLeft
                     }
 
-                    var offset = this.sampleRate + this.currentOffset
-                    if (offset + 256 > 16384) {
-                        offset = 16128
+                    var targetOffset = this.sampleRate + this.currentOffset
+                    if (targetOffset + 256 > 16384) {
+                        targetOffset = 16128
                     }
 
-                    if (offset + 256 > this.capacity) {
+                    if (targetOffset + 256 > this.capacity) {
                         this.capacity += 1024
                         if (this.capacity > 16384) {
                             this.capacity = 16384
@@ -79,13 +79,13 @@ open class PcmPlayer {
                         play(this.capacity)
                         dataLeft = 0
                         this.enabled = true
-                        if (offset + 256 > this.capacity) {
-                            offset = this.capacity - 256
-                            this.currentOffset = offset - this.sampleRate
+                        if (targetOffset + 256 > this.capacity) {
+                            targetOffset = this.capacity - 256
+                            this.currentOffset = targetOffset - this.sampleRate
                         }
                     }
 
-                    while (dataLeft < offset) {
+                    while (dataLeft < targetOffset) {
                         fillSoundBuffer(this.bitpackedSoundData!!)
                         writeToBuffer()
                         dataLeft += 256
@@ -161,42 +161,42 @@ open class PcmPlayer {
         this.shutdown = true
     }
 
-    fun fillSoundBuffer(bitpackedSoundData: IntArray) {
+    fun fillSoundBuffer(soundData: IntArray) {
         var bufferLength = 256
         if (PcmPlayerManager.stereo) {
             bufferLength = 512
         }
 
-        Arrays.fill(bitpackedSoundData, 0, bufferLength, 0)
+        Arrays.fill(soundData, 0, bufferLength, 0)
         this.streamUpdateCountdown -= 256
         if (this.currentPcmStream != null && this.streamUpdateCountdown <= 0) {
             this.streamUpdateCountdown += PcmPlayerManager.sampleRate shr 4
             resetStreamFillState(this.currentPcmStream!!)
             enqueueStreamByPriority(this.currentPcmStream!!, this.currentPcmStream!!.getPriority())
-            var i_4 = 0
-            var i_5 = 255
+            var activeVoiceCount = 0
+            var priorityBitmask = 255
 
-            var i_6: Int
-            var inactive: PcmStream?
-            label107@ for (i_6 in 7 downTo 0) {
-                if (i_5 == 0) break
+            var priorityLevel: Int
+            var previousStream: PcmStream?
+            label107@ for (priorityLevel in 7 downTo 0) {
+                if (priorityBitmask == 0) break
 
-                val i_16: Int
-                val i_17: Int
-                if (i_6 < 0) {
-                    i_16 = i_6 and 0x3
-                    i_17 = -(i_6 shr 2)
+                val bucketIndex: Int
+                val voiceThreshold: Int
+                if (priorityLevel < 0) {
+                    bucketIndex = priorityLevel and 0x3
+                    voiceThreshold = -(priorityLevel shr 2)
                 } else {
-                    i_16 = i_6
-                    i_17 = 0
+                    bucketIndex = priorityLevel
+                    voiceThreshold = 0
                 }
 
-                var i_9 = i_5 ushr i_16 and 0x11111111
-                while (i_9 != 0) {
-                    if ((i_9 and 0x1) != 0) {
-                        i_5 = i_5 and (1 shl i_16).inv()
-                        inactive = null
-                        var activeStream = this.activeStreams[i_16]
+                var bitmask = priorityBitmask ushr bucketIndex and 0x11111111
+                while (bitmask != 0) {
+                    if ((bitmask and 0x1) != 0) {
+                        priorityBitmask = priorityBitmask and (1 shl bucketIndex).inv()
+                        previousStream = null
+                        var activeStream = this.activeStreams[bucketIndex]
 
                         label101@ while (true) {
                             while (true) {
@@ -204,65 +204,65 @@ open class PcmPlayer {
                                     break@label101
                                 }
 
-                                val class282Sub2612 = activeStream.buffer
-                                if (class282Sub2612 != null && class282Sub2612.activeVoiceCount > i_17) {
-                                    i_5 = i_5 or (1 shl i_16)
-                                    inactive = activeStream
+                                val audioNode = activeStream.buffer
+                                if (audioNode != null && audioNode.activeVoiceCount > voiceThreshold) {
+                                    priorityBitmask = priorityBitmask or (1 shl bucketIndex)
+                                    previousStream = activeStream
                                     activeStream = activeStream.nextStream
                                 } else {
                                     activeStream.fill = true
-                                    val i_13 = activeStream.getActiveVoiceCount()
-                                    i_4 += i_13
-                                    if (class282Sub2612 != null) {
-                                        class282Sub2612.activeVoiceCount += i_13
+                                    val voiceCount = activeStream.getActiveVoiceCount()
+                                    activeVoiceCount += voiceCount
+                                    if (audioNode != null) {
+                                        audioNode.activeVoiceCount += voiceCount
                                     }
 
-                                    if (i_4 >= this.maxActiveVoices) {
+                                    if (activeVoiceCount >= this.maxActiveVoices) {
                                         break@label107
                                     }
 
-                                    var class282Sub1514: PcmStream? = activeStream.getFirstStream()
-                                    if (class282Sub1514 != null) {
-                                        val i_15 = activeStream.streamPriority
-                                        while (class282Sub1514 != null) {
-                                            enqueueStreamByPriority(class282Sub1514, i_15 * class282Sub1514.getPriority() shr 8)
-                                            class282Sub1514 = activeStream.getNextStream()
+                                    var childStream: PcmStream? = activeStream.getFirstStream()
+                                    if (childStream != null) {
+                                        val parentPriority = activeStream.streamPriority
+                                        while (childStream != null) {
+                                            enqueueStreamByPriority(childStream, parentPriority * childStream.getPriority() shr 8)
+                                            childStream = activeStream.getNextStream()
                                         }
                                     }
 
-                                    val active = activeStream.nextStream
+                                    val nextActive = activeStream.nextStream
                                     activeStream.nextStream = null
-                                    if (inactive == null) {
-                                        this.activeStreams[i_16] = active
+                                    if (previousStream == null) {
+                                        this.activeStreams[bucketIndex] = nextActive
                                     } else {
-                                        inactive.nextStream = active
+                                        previousStream.nextStream = nextActive
                                     }
 
-                                    if (active == null) {
-                                        this.inactiveStreams[i_16] = inactive
+                                    if (nextActive == null) {
+                                        this.inactiveStreams[bucketIndex] = previousStream
                                     }
 
-                                    activeStream = active
+                                    activeStream = nextActive
                                 }
                             }
                         }
                     }
 
-                    i_9 = i_9 ushr 4
+                    bitmask = bitmask ushr 4
                 }
             }
 
             for (index in 0 until 8) {
-                val class282Sub157 = this.activeStreams[index]
-                val arr_8 = this.activeStreams
+                val headStream = this.activeStreams[index]
+                val streamArray = this.activeStreams
                 this.inactiveStreams[index] = null
 
-                var current = class282Sub157
-                arr_8[index] = null
+                var current = headStream
+                streamArray[index] = null
                 while (current != null) {
-                    inactive = current.nextStream
+                    previousStream = current.nextStream
                     current.nextStream = null
-                    current = inactive
+                    current = previousStream
                 }
             }
         }
@@ -272,23 +272,23 @@ open class PcmPlayer {
         }
 
         if (this.currentPcmStream != null) {
-            this.currentPcmStream!!.fill(bitpackedSoundData, 0, 256)
+            this.currentPcmStream!!.fill(soundData, 0, 256)
         }
 
         this.timeLastCycle = Utils.time()
     }
 
-    fun enqueueStreamByPriority(next: PcmStream, priority: Int) {
-        val i_3 = priority shr 5
-        val inactive = this.inactiveStreams[i_3]
-        if (inactive == null) {
-            this.activeStreams[i_3] = next
+    fun enqueueStreamByPriority(stream: PcmStream, priority: Int) {
+        val bucketIndex = priority shr 5
+        val tail = this.inactiveStreams[bucketIndex]
+        if (tail == null) {
+            this.activeStreams[bucketIndex] = stream
         } else {
-            inactive.nextStream = next
+            tail.nextStream = stream
         }
 
-        this.inactiveStreams[i_3] = next
-        next.streamPriority = priority
+        this.inactiveStreams[bucketIndex] = stream
+        stream.streamPriority = priority
     }
 
     open fun dataLeft(): Int {
@@ -309,7 +309,7 @@ open class PcmPlayer {
     }
 
     @Throws(Exception::class)
-    open fun play(i_1: Int) {
+    open fun play(bufferSize: Int) {
         // NOOP
     }
 
@@ -336,10 +336,10 @@ open class PcmPlayer {
                 stream.buffer!!.activeVoiceCount = 0
             }
 
-            var patchStream: PcmStream? = stream.getFirstStream()
-            while (patchStream != null) {
-                resetStreamFillState(patchStream)
-                patchStream = stream.getNextStream()
+            var childStream: PcmStream? = stream.getFirstStream()
+            while (childStream != null) {
+                resetStreamFillState(childStream)
+                childStream = stream.getNextStream()
             }
         }
     }

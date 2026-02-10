@@ -32,11 +32,11 @@ import com.jagex.game.runetek5.vardomain.VarProviders
 object SoundEffectPlayer {
 
 	@JvmStatic
-	fun setMusicVolume(i_0: Int) {
+	fun setMusicVolume(volume: Int) {
 	    if (SoundResourceManager.songLoadState != 0) {
-	        AreaSoundPlayer.SOUND_LEVEL = i_0
+	        AreaSoundPlayer.SOUND_LEVEL = volume
 	    } else {
-	        SoundResourceManager.midiPcmStream!!.setMusicVolume(i_0)
+	        SoundResourceManager.midiPcmStream!!.setMusicVolume(volume)
 	    }
 	}
 
@@ -175,7 +175,7 @@ object SoundEffectPlayer {
 	fun updateAmbientSound(ambientSound: AmbientSound, plane: Int, absX: Int, absY: Int, step: Int) {
 	    if (ambientSound.soundEffectId != -1 || ambientSound.ambientSoundGroupIds != null) {
 	        var hearDistance = 0
-	        val preferedVolume = ambientSound.ambientSoundVolume * PreferenceManager.preferences!!.ambientSoundVolume!!.getValue() shr 8
+	        val preferredVolume = ambientSound.ambientSoundVolume * PreferenceManager.preferences!!.ambientSoundVolume!!.getValue() shr 8
 	        if (absX > ambientSound.absEndX) {
 	            hearDistance += absX - ambientSound.absEndX
 	        } else if (absX < ambientSound.absStartX) {
@@ -192,35 +192,35 @@ object SoundEffectPlayer {
 	            if (adjustedHearDistance < 0) {
 	                adjustedHearDistance = 0
 	            }
-	            var minHearDistance = ambientSound.ambientSoundMinHearDistance - ambientSound.ambientSoundMaxHearDistance
-	            if (minHearDistance < 0) {
-	                minHearDistance = ambientSound.ambientSoundMinHearDistance
+	            var hearRange = ambientSound.ambientSoundMinHearDistance - ambientSound.ambientSoundMaxHearDistance
+	            if (hearRange < 0) {
+	                hearRange = ambientSound.ambientSoundMinHearDistance
 	            }
-	            var volume = preferedVolume
-	            val hearDistanceDelta = adjustedHearDistance - ambientSound.ambientSoundMaxHearDistance
-	            if (hearDistanceDelta > 0 && minHearDistance > 0) {
-	                volume = preferedVolume * (minHearDistance - hearDistanceDelta) / minHearDistance
+	            var volume = preferredVolume
+	            val distanceBeyondMax = adjustedHearDistance - ambientSound.ambientSoundMaxHearDistance
+	            if (distanceBeyondMax > 0 && hearRange > 0) {
+	                volume = preferredVolume * (hearRange - distanceBeyondMax) / hearRange
 	            }
 	            PlayerUpdate.MY_PLAYER!!.getSize()
-	            var i_11 = 8192
-	            val i_12 = (ambientSound.absStartX + ambientSound.absEndX) / 2 - absX
-	            val i_13 = (ambientSound.absStartY + ambientSound.absEndY) / 2 - absY
-	            if (i_12 != 0 || i_13 != 0) {
-	                var i_17 = (-Camera.cameraRoll - (Math.atan2(i_12.toDouble(), i_13.toDouble()) * 2607.5945876176133).toInt() - 4096) and 0x3fff
-	                if (i_17 > 8192) {
-	                    i_17 = 16384 - i_17
+	            var panValue = 8192
+	            val deltaX = (ambientSound.absStartX + ambientSound.absEndX) / 2 - absX
+	            val deltaY = (ambientSound.absStartY + ambientSound.absEndY) / 2 - absY
+	            if (deltaX != 0 || deltaY != 0) {
+	                var angle = (-Camera.cameraRoll - (Math.atan2(deltaX.toDouble(), deltaY.toDouble()) * 2607.5945876176133).toInt() - 4096) and 0x3fff
+	                if (angle > 8192) {
+	                    angle = 16384 - angle
 	                }
-	                val i_18: Int
+	                val stereoWidth: Int
 	                if (adjustedHearDistance <= 0) {
-	                    i_18 = 8192
+	                    stereoWidth = 8192
 	                } else if (adjustedHearDistance >= 4096) {
-	                    i_18 = 16384
+	                    stereoWidth = 16384
 	                } else {
-	                    i_18 = adjustedHearDistance * 8192 / 4096 + 8192
+	                    stereoWidth = adjustedHearDistance * 8192 / 4096 + 8192
 	                }
-	                i_11 = (16384 - i_18 shr 1) + i_17 * i_18 / 8192
+	                panValue = (16384 - stereoWidth shr 1) + angle * stereoWidth / 8192
 	            }
-	            var class282Sub15Sub5Sub114: AudioBufferStream?
+	            var audioStream: AudioBufferStream?
 	            var mixedAudioNode: MixedAudioBuffer
 	            var soundEffectStream: MixedAudioStream
 	            var soundEffect: SoundEffect?
@@ -237,17 +237,17 @@ object SoundEffectPlayer {
 	                                ambientSound.aNodeSub26Sub1Sub18082 = ambientSound.instrumentEffect!!.getAudioBuffer()
 	                            }
 	                            if (ambientSound.aNodeSub26Sub1Sub18082 != null) {
-	                                class282Sub15Sub5Sub114 = ambientSound.aNodeSub26Sub1Sub18082!!.getStream(sampleRate, volume shl 6, i_11) as AudioBufferStream
-	                                class282Sub15Sub5Sub114.setNumLoops(-1)
-	                                AmbientSound.gameSounds!!.addSubStream(class282Sub15Sub5Sub114)
-	                                ambientSound.soundEffect = class282Sub15Sub5Sub114
+	                                audioStream = ambientSound.aNodeSub26Sub1Sub18082!!.getStream(sampleRate, volume shl 6, panValue) as AudioBufferStream
+	                                audioStream.setNumLoops(-1)
+	                                AmbientSound.gameSounds!!.addSubStream(audioStream)
+	                                ambientSound.soundEffect = audioStream
 	                            }
 	                        }
 	                    } else {
 	                        soundEffect = getSoundEffect(Resource.SOUND_EFFECT!!, ambientSound.soundEffectId, 0)
 	                        if (soundEffect != null) {
 	                            mixedAudioNode = soundEffect.getMixedAudio().resample(resampler!!)
-	                            soundEffectStream = mixedAudioNode.getStream(sampleRate, volume shl 6, i_11) as MixedAudioStream
+	                            soundEffectStream = mixedAudioNode.getStream(sampleRate, volume shl 6, panValue) as MixedAudioStream
 	                            soundEffectStream.setNumLoops(-1)
 	                            AmbientSound.gameSounds!!.addSubStream(soundEffectStream)
 	                            ambientSound.soundEffect = soundEffectStream
@@ -256,35 +256,35 @@ object SoundEffectPlayer {
 	                }
 	            } else {
 	                ambientSound.soundEffect!!.setVolume(volume)
-	                ambientSound.soundEffect!!.setPanPosition(i_11)
+	                ambientSound.soundEffect!!.setPanPosition(panValue)
 	            }
 	            if (ambientSound.aNodeSub15Sub58096 == null) {
 	                if (ambientSound.ambientSoundGroupIds != null && run { ambientSound.step -= step; ambientSound.step <= 0 }) {
-	                    val sampleRate = if (ambientSound.minDelay == 256 && ambientSound.maxDelay == 256)
+	                    val groupSampleRate = if (ambientSound.minDelay == 256 && ambientSound.maxDelay == 256)
 	                    	256 else (Math.random() * (ambientSound.minDelay - ambientSound.maxDelay)).toInt() + ambientSound.maxDelay
 	                    if (ambientSound.instrumentAmbientSound) {
 	                        if (ambientSound.aNodeSub188087 == null) {
-	                            val random = (Math.random() * ambientSound.ambientSoundGroupIds!!.size).toInt()
-	                            ambientSound.aNodeSub188087 = MusicSample.list(Resource.MIDI_INSTRUMENT!!, ambientSound.ambientSoundGroupIds!![random])
+	                            val randomIndex = (Math.random() * ambientSound.ambientSoundGroupIds!!.size).toInt()
+	                            ambientSound.aNodeSub188087 = MusicSample.list(Resource.MIDI_INSTRUMENT!!, ambientSound.ambientSoundGroupIds!![randomIndex])
 	                        }
 	                        if (ambientSound.aNodeSub188087 != null) {
 	                            if (ambientSound.aNodeSub26Sub1Sub18106 == null) {
 	                                ambientSound.aNodeSub26Sub1Sub18106 = ambientSound.aNodeSub188087!!.getAudioBuffer()
 	                            }
 	                            if (ambientSound.aNodeSub26Sub1Sub18106 != null) {
-	                                class282Sub15Sub5Sub114 = ambientSound.aNodeSub26Sub1Sub18106!!.getStream(sampleRate, volume shl 6, i_11) as AudioBufferStream
-	                                class282Sub15Sub5Sub114.setNumLoops(0)
-	                                AmbientSound.gameSounds!!.addSubStream(class282Sub15Sub5Sub114)
-	                                ambientSound.aNodeSub15Sub58096 = class282Sub15Sub5Sub114
+	                                audioStream = ambientSound.aNodeSub26Sub1Sub18106!!.getStream(groupSampleRate, volume shl 6, panValue) as AudioBufferStream
+	                                audioStream.setNumLoops(0)
+	                                AmbientSound.gameSounds!!.addSubStream(audioStream)
+	                                ambientSound.aNodeSub15Sub58096 = audioStream
 	                                ambientSound.step = ambientSound.soundMinStep + (Math.random() * (ambientSound.soundMaxStep - ambientSound.soundMinStep)).toInt()
 	                            }
 	                        }
 	                    } else {
-	                        val random = (Math.random() * ambientSound.ambientSoundGroupIds!!.size).toInt()
-	                        soundEffect = getSoundEffect(Resource.SOUND_EFFECT!!, ambientSound.ambientSoundGroupIds!![random], 0)
+	                        val randomIndex = (Math.random() * ambientSound.ambientSoundGroupIds!!.size).toInt()
+	                        soundEffect = getSoundEffect(Resource.SOUND_EFFECT!!, ambientSound.ambientSoundGroupIds!![randomIndex], 0)
 	                        if (soundEffect != null) {
 	                            mixedAudioNode = soundEffect.getMixedAudio().resample(resampler!!)
-	                            soundEffectStream = mixedAudioNode.getStream(sampleRate, volume shl 6, i_11) as MixedAudioStream
+	                            soundEffectStream = mixedAudioNode.getStream(groupSampleRate, volume shl 6, panValue) as MixedAudioStream
 	                            soundEffectStream.setNumLoops(0)
 	                            AmbientSound.gameSounds!!.addSubStream(soundEffectStream)
 	                            ambientSound.aNodeSub15Sub58096 = soundEffectStream
@@ -294,7 +294,7 @@ object SoundEffectPlayer {
 	                }
 	            } else {
 	                ambientSound.aNodeSub15Sub58096!!.setVolume(volume)
-	                ambientSound.aNodeSub15Sub58096!!.setPanPosition(i_11)
+	                ambientSound.aNodeSub15Sub58096!!.setPanPosition(panValue)
 	                if (!ambientSound.aNodeSub15Sub58096!!.linked()) {
 	                    ambientSound.aNodeSub15Sub58096 = null
 	                    ambientSound.aNodeSub188087 = null
@@ -309,9 +309,9 @@ object SoundEffectPlayer {
 	                ambientSound.aNodeSub26Sub1Sub18082 = null
 	                ambientSound.instrumentEffect = null
 	            }
-	            val aNodeSub15Sub58096 = ambientSound.aNodeSub15Sub58096
-	            if (aNodeSub15Sub58096 != null) {
-	                AmbientSound.gameSounds!!.unlink(aNodeSub15Sub58096 as PcmStream)
+	            val groupSoundEffect = ambientSound.aNodeSub15Sub58096
+	            if (groupSoundEffect != null) {
+	                AmbientSound.gameSounds!!.unlink(groupSoundEffect as PcmStream)
 	                ambientSound.aNodeSub15Sub58096 = null
 	                ambientSound.aNodeSub188087 = null
 	                ambientSound.aNodeSub26Sub1Sub18106 = null

@@ -66,40 +66,40 @@ open class MidiPcmStream : PcmStream {
     }
 
     @Synchronized
-    fun setChannelVolume(i_1: Int, i_2: Int) {
-        if (i_1 < 0) {
-            for (i_4 in 0..15) {
-                this.channelVolume[i_4] = i_2
+    fun setChannelVolume(channel: Int, volume: Int) {
+        if (channel < 0) {
+            for (channelIndex in 0..15) {
+                this.channelVolume[channelIndex] = volume
             }
         } else {
-            this.channelVolume[i_1] = i_2
+            this.channelVolume[channel] = volume
         }
     }
 
     @Synchronized
-    override fun fill(ints_1: IntArray, i_2: Int, i_3: Int) {
-        var offset = i_2
-        var length = i_3
+    override fun fill(mixBuffer: IntArray, offset: Int, length: Int) {
+        var outputOffset = offset
+        var remaining = length
         if (this.fileReader.dataLoaded()) {
-            val i_4 = this.fileReader.division * this.ticks / PcmPlayerManager.sampleRate
+            val ticksPerSample = this.fileReader.division * this.ticks / PcmPlayerManager.sampleRate
 
             do {
-                val long_5 = (i_4.toLong()) * length + this.currentTickTime
-                if (this.nextEventTickTime - long_5 >= 0L) {
-                    this.currentTickTime = long_5
+                val projectedTickTime = (ticksPerSample.toLong()) * remaining + this.currentTickTime
+                if (this.nextEventTickTime - projectedTickTime >= 0L) {
+                    this.currentTickTime = projectedTickTime
                     break
                 }
 
-                val i_7 = ((this.nextEventTickTime - this.currentTickTime + i_4 - 1L) / i_4).toInt()
-                this.currentTickTime += (i_7.toLong()) * i_4
-                this.patchStream.fill(ints_1, offset, i_7)
-                offset += i_7
-                length -= i_7
+                val samplesToProcess = ((this.nextEventTickTime - this.currentTickTime + ticksPerSample - 1L) / ticksPerSample).toInt()
+                this.currentTickTime += (samplesToProcess.toLong()) * ticksPerSample
+                this.patchStream.fill(mixBuffer, outputOffset, samplesToProcess)
+                outputOffset += samplesToProcess
+                remaining -= samplesToProcess
                 processNextMidiEvents()
             } while (this.fileReader.dataLoaded())
         }
 
-        this.patchStream.fill(ints_1, offset, length)
+        this.patchStream.fill(mixBuffer, outputOffset, remaining)
     }
 
     @Synchronized
@@ -117,33 +117,33 @@ open class MidiPcmStream : PcmStream {
     }
 
     @Synchronized
-    fun setMusicTrack(class282Sub71: MusicTrack, bool2: Boolean) {
-        loadAndPlayTrack(class282Sub71, bool2, true)
+    fun setMusicTrack(musicTrack: MusicTrack, looping: Boolean) {
+        loadAndPlayTrack(musicTrack, looping, true)
     }
 
-    fun applyInitialSampleOffset(patchNode: MusicPatchNode, bool2: Boolean) {
+    fun applyInitialSampleOffset(patchNode: MusicPatchNode, reverseLoop: Boolean) {
         val audioFile = patchNode.audioFile ?: return
         val stream = patchNode.stream ?: return
         var samples = audioFile.getTotalSamples()
-        val i_5: Int
-        if (bool2 && audioFile.enableLoop) {
-            val i_6 = samples + samples - audioFile.start
-            i_5 = ((this.generalPurpose1[patchNode.currentTrack].toLong()) * i_6 shr 6).toInt()
+        val sampleOffset: Int
+        if (reverseLoop && audioFile.enableLoop) {
+            val bounceLength = samples + samples - audioFile.start
+            sampleOffset = ((this.generalPurpose1[patchNode.currentTrack].toLong()) * bounceLength shr 6).toInt()
             samples = samples shl 8
-            if (i_5 >= samples) {
+            if (sampleOffset >= samples) {
                 stream.reversePlaybackDirection()
             }
         } else {
-            i_5 = ((this.generalPurpose1[patchNode.currentTrack].toLong()) * samples shr 6).toInt()
+            sampleOffset = ((this.generalPurpose1[patchNode.currentTrack].toLong()) * samples shr 6).toInt()
         }
 
-        stream.setPlaybackPosition(i_5)
+        stream.setPlaybackPosition(sampleOffset)
     }
 
     @Synchronized
-    fun setMusicTrackAtPosition(class282Sub71: MusicTrack, bool2: Boolean, long_4: Long) {
-        loadAndPlayTrack(class282Sub71, bool2, true)
-        advanceToTick(this.fileReader.division * long_4)
+    fun setMusicTrackAtPosition(musicTrack: MusicTrack, looping: Boolean, tickPosition: Long) {
+        loadAndPlayTrack(musicTrack, looping, true)
+        advanceToTick(this.fileReader.division * tickPosition)
     }
 
     @Synchronized
@@ -152,10 +152,10 @@ open class MidiPcmStream : PcmStream {
     }
 
     @Synchronized
-    fun clearTrack(bool1: Boolean) {
+    fun clearTrack(allSoundOff: Boolean) {
         this.fileReader.clear()
         this.queuedTrack = null
-        sendSystemResetMessage(bool1)
+        sendSystemResetMessage(allSoundOff)
     }
 
     @Synchronized
@@ -163,9 +163,9 @@ open class MidiPcmStream : PcmStream {
         return this.fileReader.dataLoaded()
     }
 
-    fun setEffectSpeed(i_1: Int, i_2: Int) {
-        this.effectSpeedRaw[i_1] = i_2
-        this.effectSpeedScaled[i_1] = (2097152.0 * (2.0).pow((i_2.toDouble()) * (5.4931640625E-4)) + 0.5).toInt()
+    fun setEffectSpeed(channel: Int, rawSpeed: Int) {
+        this.effectSpeedRaw[channel] = rawSpeed
+        this.effectSpeedScaled[channel] = (2097152.0 * (2.0).pow((rawSpeed.toDouble()) * (5.4931640625E-4)) + 0.5).toInt()
     }
 
     fun initDrumChannel() {
@@ -182,9 +182,9 @@ open class MidiPcmStream : PcmStream {
                 if (patchNode.currentTrack == channel && patchNode.releaseState < 0) {
                     this.activeNotes[channel][patchNode.currentNotePitch] = null
                     this.activeNotes[channel][note] = patchNode
-                    val i_9 = (patchNode.portamentoFactor * patchNode.portamentoPitchOffset shr 12) + patchNode.notePitchAdjustment
+                    val portamentoPitch = (patchNode.portamentoFactor * patchNode.portamentoPitchOffset shr 12) + patchNode.notePitchAdjustment
                     patchNode.notePitchAdjustment += (note - patchNode.currentNotePitch) shl 8
-                    patchNode.portamentoPitchOffset = i_9 - patchNode.notePitchAdjustment
+                    patchNode.portamentoPitchOffset = portamentoPitch - patchNode.notePitchAdjustment
                     patchNode.portamentoFactor = 4096
                     patchNode.currentNotePitch = note
                     return
@@ -224,10 +224,10 @@ open class MidiPcmStream : PcmStream {
                 }
 
                 if (musicPatchNode.loopVariable >= 0) {
-                    val patchNode = this.loopGroupNotes[channel][musicPatchNode.loopVariable]
-                    if (patchNode != null && patchNode.releaseState < 0) {
-                        this.activeNotes[channel][patchNode.currentNotePitch] = null
-                        patchNode.releaseState = 0
+                    val existingNode = this.loopGroupNotes[channel][musicPatchNode.loopVariable]
+                    if (existingNode != null && existingNode.releaseState < 0) {
+                        this.activeNotes[channel][existingNode.currentNotePitch] = null
+                        existingNode.releaseState = 0
                     }
 
                     this.loopGroupNotes[channel][musicPatchNode.loopVariable] = musicPatchNode
@@ -239,126 +239,126 @@ open class MidiPcmStream : PcmStream {
         }
     }
 
-    fun calculateVolume(class282Sub131: MusicPatchNode): Int {
-        if (this.channelVolume[class282Sub131.currentTrack] == 0) {
+    fun calculateVolume(patchNode: MusicPatchNode): Int {
+        if (this.channelVolume[patchNode.currentTrack] == 0) {
             return 0
         } else {
-            val class1103 = class282Sub131.musicPatchInfo ?: return 0
-            var i_4 = this.expression[class282Sub131.currentTrack] * this.volume[class282Sub131.currentTrack] + 4096 shr 13
-            i_4 = i_4 * i_4 + 16384 shr 15
-            i_4 = i_4 * class282Sub131.maxVolumeLevel + 16384 shr 15
-            i_4 = i_4 * this.musicVolume + 128 shr 8
-            i_4 = i_4 * this.volumeMultiplier shr 8
-            i_4 = i_4 * this.channelVolume[class282Sub131.currentTrack] + 128 shr 8
-            if (class1103.volumeEnvelopeDecay > 0) {
-                i_4 = (i_4 * (0.5).pow((class282Sub131.volumeEnvelopeTime.toDouble()) * (1.953125E-5) * (class1103.volumeEnvelopeDecay.toDouble())) + 0.5).toInt()
+            val patchInfo = patchNode.musicPatchInfo ?: return 0
+            var vol = this.expression[patchNode.currentTrack] * this.volume[patchNode.currentTrack] + 4096 shr 13
+            vol = vol * vol + 16384 shr 15
+            vol = vol * patchNode.maxVolumeLevel + 16384 shr 15
+            vol = vol * this.musicVolume + 128 shr 8
+            vol = vol * this.volumeMultiplier shr 8
+            vol = vol * this.channelVolume[patchNode.currentTrack] + 128 shr 8
+            if (patchInfo.volumeEnvelopeDecay > 0) {
+                vol = (vol * (0.5).pow((patchNode.volumeEnvelopeTime.toDouble()) * (1.953125E-5) * (patchInfo.volumeEnvelopeDecay.toDouble())) + 0.5).toInt()
             }
 
-            var i_5: Int
-            var i_6: Int
-            var i_7: Int
-            var i_8: Int
-            class1103.volumeEnvelopeData?.let {
-                i_5 = class282Sub131.volumeEnvelopePosition
-                i_6 = (it[class282Sub131.volumeEnvelopeIndex + 1].toInt() and 0xff)
-                if (class282Sub131.volumeEnvelopeIndex < it.size - 2) {
-                    i_7 = (it[class282Sub131.volumeEnvelopeIndex].toInt() and 0xff) shl 8
-                    i_8 = (it[class282Sub131.volumeEnvelopeIndex + 2].toInt() and 0xff) shl 8
-                    i_6 += (i_5 - i_7) * (it[class282Sub131.volumeEnvelopeIndex + 3].toInt() - i_6) / (i_8 - i_7)
+            var envelopePosition: Int
+            var envelopeValue: Int
+            var envelopeKeyStart: Int
+            var envelopeKeyEnd: Int
+            patchInfo.volumeEnvelopeData?.let {
+                envelopePosition = patchNode.volumeEnvelopePosition
+                envelopeValue = (it[patchNode.volumeEnvelopeIndex + 1].toInt() and 0xff)
+                if (patchNode.volumeEnvelopeIndex < it.size - 2) {
+                    envelopeKeyStart = (it[patchNode.volumeEnvelopeIndex].toInt() and 0xff) shl 8
+                    envelopeKeyEnd = (it[patchNode.volumeEnvelopeIndex + 2].toInt() and 0xff) shl 8
+                    envelopeValue += (envelopePosition - envelopeKeyStart) * (it[patchNode.volumeEnvelopeIndex + 3].toInt() - envelopeValue) / (envelopeKeyEnd - envelopeKeyStart)
                 }
 
-                i_4 = i_4 * i_6 + 32 shr 6
+                vol = vol * envelopeValue + 32 shr 6
             }
 
-            class1103.releaseEnvelopeData?.let {
-                if (class282Sub131.releaseState > 0) {
-                    i_5 = class282Sub131.releaseState
-                    i_6 = (it[class282Sub131.releaseEnvelopeIndex + 1].toInt() and 0xff)
-                    if (class282Sub131.releaseEnvelopeIndex < it.size - 2) {
-                        i_7 = (it[class282Sub131.releaseEnvelopeIndex].toInt() and 0xff) shl 8
-                        i_8 = (it[class282Sub131.releaseEnvelopeIndex + 2].toInt() and 0xff) shl 8
-                        i_6 += (it[class282Sub131.releaseEnvelopeIndex + 3].toInt() - i_6) * (i_5 - i_7) / (i_8 - i_7)
+            patchInfo.releaseEnvelopeData?.let {
+                if (patchNode.releaseState > 0) {
+                    envelopePosition = patchNode.releaseState
+                    envelopeValue = (it[patchNode.releaseEnvelopeIndex + 1].toInt() and 0xff)
+                    if (patchNode.releaseEnvelopeIndex < it.size - 2) {
+                        envelopeKeyStart = (it[patchNode.releaseEnvelopeIndex].toInt() and 0xff) shl 8
+                        envelopeKeyEnd = (it[patchNode.releaseEnvelopeIndex + 2].toInt() and 0xff) shl 8
+                        envelopeValue += (it[patchNode.releaseEnvelopeIndex + 3].toInt() - envelopeValue) * (envelopePosition - envelopeKeyStart) / (envelopeKeyEnd - envelopeKeyStart)
                     }
 
-                    i_4 = i_6 * i_4 + 32 shr 6
+                    vol = envelopeValue * vol + 32 shr 6
                 }
             }
 
-            return i_4
+            return vol
         }
     }
 
-    fun setNoteOff(channel: Int, i_2: Int) {
-        val patch1 = this.activeNotes[channel][i_2]
-        if (patch1 != null) {
-            this.activeNotes[channel][i_2] = null
+    fun setNoteOff(channel: Int, note: Int) {
+        val activeNote = this.activeNotes[channel][note]
+        if (activeNote != null) {
+            this.activeNotes[channel][note] = null
             if ((this.sustain[channel] and 0x2) != 0) {
                 var streamedPatch: MusicPatchNode? = this.patchStream.queue.getFirst() as? MusicPatchNode
                 while (streamedPatch != null) {
-                    if (patch1.currentTrack == streamedPatch.currentTrack && streamedPatch.releaseState < 0 && streamedPatch != patch1) {
-                        patch1.releaseState = 0
+                    if (activeNote.currentTrack == streamedPatch.currentTrack && streamedPatch.releaseState < 0 && streamedPatch != activeNote) {
+                        activeNote.releaseState = 0
                         break
                     }
                     streamedPatch = this.patchStream.queue.next() as? MusicPatchNode
                 }
             } else {
-                patch1.releaseState = 0
+                activeNote.releaseState = 0
             }
         }
     }
 
-    fun turnAllSoundOff(i_1: Int) {
-        var class282Sub133: MusicPatchNode? = this.patchStream.queue.getFirst() as? MusicPatchNode
-        while (class282Sub133 != null) {
-            if (i_1 < 0 || class282Sub133.currentTrack == i_1) {
-                class282Sub133.stream?.let { stream ->
+    fun turnAllSoundOff(channel: Int) {
+        var patchNode: MusicPatchNode? = this.patchStream.queue.getFirst() as? MusicPatchNode
+        while (patchNode != null) {
+            if (channel < 0 || patchNode.currentTrack == channel) {
+                patchNode.stream?.let { stream ->
                     stream.fadeOutAndStop(PcmPlayerManager.sampleRate / 100)
                     if (stream.isFading()) {
                         this.patchStream.fadeOutScheduler.addSubStream(stream)
                     }
                 }
 
-                class282Sub133.clearMusicPatchNode()
+                patchNode.clearMusicPatchNode()
 
-                if (class282Sub133.releaseState < 0) {
-                    this.activeNotes[class282Sub133.currentTrack][class282Sub133.currentNotePitch] = null
+                if (patchNode.releaseState < 0) {
+                    this.activeNotes[patchNode.currentTrack][patchNode.currentNotePitch] = null
                 }
 
-                class282Sub133.unlink()
+                patchNode.unlink()
             }
-            class282Sub133 = this.patchStream.queue.next() as? MusicPatchNode
+            patchNode = this.patchStream.queue.next() as? MusicPatchNode
         }
     }
 
-    fun resetAllControllers(i_1: Int) {
-        var idx = i_1
-        if (idx < 0) {
-            for (i_1 in 0..15) {
-                resetAllControllers(i_1)
+    fun resetAllControllers(channel: Int) {
+        var ch = channel
+        if (ch < 0) {
+            for (channelIndex in 0..15) {
+                resetAllControllers(channelIndex)
             }
         } else {
-            this.volume[idx] = 12800
-            this.pan[idx] = 8192
-            this.expression[idx] = 16383
-            this.pitchBend[idx] = 8192
-            this.modulation[idx] = 0
-            this.portamento[idx] = 8192
-            resetSustainPedal(idx)
-            resetEffectSwitch(idx, 41.toByte())
-            this.sustain[idx] = 0
-            this.nonRegisteredParameter[idx] = 32767
-            this.dataEntry[idx] = 256
-            this.generalPurpose1[idx] = 0
-            setEffectSpeed(idx, 8192)
+            this.volume[ch] = 12800
+            this.pan[ch] = 8192
+            this.expression[ch] = 16383
+            this.pitchBend[ch] = 8192
+            this.modulation[ch] = 0
+            this.portamento[ch] = 8192
+            resetSustainPedal(ch)
+            resetEffectSwitch(ch, 41.toByte())
+            this.sustain[ch] = 0
+            this.nonRegisteredParameter[ch] = 32767
+            this.dataEntry[ch] = 256
+            this.generalPurpose1[ch] = 0
+            setEffectSpeed(ch, 8192)
         }
     }
 
-    fun isPatchNodeDead(class282Sub131: MusicPatchNode): Boolean {
-        if (class282Sub131.stream == null) {
-            if (class282Sub131.releaseState >= 0) {
-                class282Sub131.unlink()
-                if (class282Sub131.loopVariable > 0 && class282Sub131 == this.loopGroupNotes[class282Sub131.currentTrack][class282Sub131.loopVariable]) {
-                    this.loopGroupNotes[class282Sub131.currentTrack][class282Sub131.loopVariable] = null
+    fun isPatchNodeDead(patchNode: MusicPatchNode): Boolean {
+        if (patchNode.stream == null) {
+            if (patchNode.releaseState >= 0) {
+                patchNode.unlink()
+                if (patchNode.loopVariable > 0 && patchNode == this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable]) {
+                    this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable] = null
                 }
             }
 
@@ -396,8 +396,8 @@ open class MidiPcmStream : PcmStream {
         }
     }
 
-    fun resetEffectSwitch(index: Int, b_2: Byte) {
-        if ((this.sustain[index] and 0x4) != 0 && b_2 > 1) {
+    fun resetEffectSwitch(index: Int, threshold: Byte) {
+        if ((this.sustain[index] and 0x4) != 0 && threshold > 1) {
             var musicPatch: MusicPatchNode? = this.patchStream.queue.getFirst() as? MusicPatchNode
             while (musicPatch != null) {
                 if (musicPatch.currentTrack == index) {
@@ -529,17 +529,17 @@ open class MidiPcmStream : PcmStream {
                 turnAllNotesOff(channel)
             }
 
-            var i_7: Int
+            var paramNumber: Int
             if (data1 == 6) {
-                i_7 = this.nonRegisteredParameter[channel]
-                if (i_7 == 16384) {
+                paramNumber = this.nonRegisteredParameter[channel]
+                if (paramNumber == 16384) {
                     this.dataEntry[channel] = (data2 shl 7) + (this.dataEntry[channel] and -16257)
                 }
             }
 
             if (data1 == 38) {
-                i_7 = this.nonRegisteredParameter[channel]
-                if (i_7 == 16384) {
+                paramNumber = this.nonRegisteredParameter[channel]
+                if (paramNumber == 16384) {
                     this.dataEntry[channel] = data2 + (this.dataEntry[channel] and -128)
                 }
             }
@@ -588,38 +588,38 @@ open class MidiPcmStream : PcmStream {
         }
     }
 
-    fun calculatePitch(class282Sub131: MusicPatchNode): Int {
-        var i_3 = (class282Sub131.portamentoPitchOffset * class282Sub131.portamentoFactor shr 12) + class282Sub131.notePitchAdjustment
-        i_3 += (this.pitchBend[class282Sub131.currentTrack] - 8192) * this.dataEntry[class282Sub131.currentTrack] shr 12
-        val class1104 = class282Sub131.musicPatchInfo
-        var i_5: Int
-        if (class1104 != null && class1104.volumeEnvelopeRelease > 0 && (class1104.vibratoLfoPitch > 0 || this.modulation[class282Sub131.currentTrack] > 0)) {
-            i_5 = class1104.vibratoLfoPitch shl 2
-            val i_6 = class1104.vibratoDelay shl 1
-            if (class282Sub131.tickCounter < i_6) {
-                i_5 = i_5 * class282Sub131.tickCounter / i_6
+    fun calculatePitch(patchNode: MusicPatchNode): Int {
+        var pitch = (patchNode.portamentoPitchOffset * patchNode.portamentoFactor shr 12) + patchNode.notePitchAdjustment
+        pitch += (this.pitchBend[patchNode.currentTrack] - 8192) * this.dataEntry[patchNode.currentTrack] shr 12
+        val patchInfo = patchNode.musicPatchInfo
+        var scaledPitch: Int
+        if (patchInfo != null && patchInfo.volumeEnvelopeRelease > 0 && (patchInfo.vibratoLfoPitch > 0 || this.modulation[patchNode.currentTrack] > 0)) {
+            scaledPitch = patchInfo.vibratoLfoPitch shl 2
+            val vibratoDelay = patchInfo.vibratoDelay shl 1
+            if (patchNode.tickCounter < vibratoDelay) {
+                scaledPitch = scaledPitch * patchNode.tickCounter / vibratoDelay
             }
 
-            i_5 += this.modulation[class282Sub131.currentTrack] shr 7
-            val d_7 = sin(0.01227184630308513 * (class282Sub131.vibratoPhase and 0x1ff))
-            i_3 += (d_7 * i_5).toInt()
+            scaledPitch += this.modulation[patchNode.currentTrack] shr 7
+            val vibratoWave = sin(0.01227184630308513 * (patchNode.vibratoPhase and 0x1ff))
+            pitch += (vibratoWave * scaledPitch).toInt()
         }
 
-        val audioFile = class282Sub131.audioFile
-        i_5 = if (audioFile != null) {
-            ((audioFile.sampleRate * 256) * (2.0).pow((3.255208333333333E-4) * (i_3.toDouble())) / PcmPlayerManager.sampleRate + 0.5).toInt()
+        val audioFile = patchNode.audioFile
+        scaledPitch = if (audioFile != null) {
+            ((audioFile.sampleRate * 256) * (2.0).pow((3.255208333333333E-4) * (pitch.toDouble())) / PcmPlayerManager.sampleRate + 0.5).toInt()
         } else {
             0
         }
-        return max(1, i_5)
+        return max(1, scaledPitch)
     }
 
     fun setAfterTouch() {
     }
 
-    fun calculatePan(class282Sub131: MusicPatchNode): Int {
-        val i_3 = this.pan[class282Sub131.currentTrack]
-        return if (i_3 < 8192) i_3 * class282Sub131.currentPanValue + 32 shr 6 else 16384 - ((128 - class282Sub131.currentPanValue) * (16384 - i_3) + 32 shr 6)
+    fun calculatePan(patchNode: MusicPatchNode): Int {
+        val channelPan = this.pan[patchNode.currentTrack]
+        return if (channelPan < 8192) channelPan * patchNode.currentPanValue + 32 shr 6 else 16384 - ((128 - patchNode.currentPanValue) * (16384 - channelPan) + 32 shr 6)
     }
 
     @Synchronized
@@ -632,37 +632,37 @@ open class MidiPcmStream : PcmStream {
     }
 
     @Synchronized
-    override fun skip(i_1: Int) {
-        var offset = i_1
+    override fun skip(sampleCount: Int) {
+        var remaining = sampleCount
         if (this.fileReader.dataLoaded()) {
-            val i_2 = this.fileReader.division * this.ticks / PcmPlayerManager.sampleRate
+            val ticksPerSample = this.fileReader.division * this.ticks / PcmPlayerManager.sampleRate
 
             do {
-                val long_3 = (offset.toLong()) * i_2 + this.currentTickTime
-                if (this.nextEventTickTime - long_3 >= 0L) {
-                    this.currentTickTime = long_3
+                val projectedTickTime = (remaining.toLong()) * ticksPerSample + this.currentTickTime
+                if (this.nextEventTickTime - projectedTickTime >= 0L) {
+                    this.currentTickTime = projectedTickTime
                     break
                 }
 
-                val i_5 = ((this.nextEventTickTime - this.currentTickTime + i_2 - 1L) / i_2).toInt()
-                this.currentTickTime += (i_5.toLong()) * i_2
-                this.patchStream.skip(i_5)
-                offset -= i_5
+                val samplesToProcess = ((this.nextEventTickTime - this.currentTickTime + ticksPerSample - 1L) / ticksPerSample).toInt()
+                this.currentTickTime += (samplesToProcess.toLong()) * ticksPerSample
+                this.patchStream.skip(samplesToProcess)
+                remaining -= samplesToProcess
                 processNextMidiEvents()
             } while (this.fileReader.dataLoaded())
         }
 
-        this.patchStream.skip(offset)
+        this.patchStream.skip(remaining)
     }
 
-    fun advanceToTick(long_1: Long) {
-        while (this.nextEventTickTime <= long_1) {
+    fun advanceToTick(targetTick: Long) {
+        while (this.nextEventTickTime <= targetTick) {
             var track = this.prioritizedTrack
             var length = this.prioritizedTrackLength
 
-            var long_3: Long
+            var tickTime: Long
             while (true) {
-                long_3 = this.nextEventTickTime
+                tickTime = this.nextEventTickTime
                 if (length != this.prioritizedTrackLength) {
                     break
                 }
@@ -680,7 +680,7 @@ open class MidiPcmStream : PcmStream {
                                 return
                             }
 
-                            this.fileReader.resetTracksFromTimestamp(long_3)
+                            this.fileReader.resetTracksFromTimestamp(tickTime)
                         }
                         break
                     }
@@ -693,7 +693,7 @@ open class MidiPcmStream : PcmStream {
                     this.fileReader.markTracePosition(track)
                 }
 
-                this.currentTickTime = long_3
+                this.currentTickTime = tickTime
                 track = this.fileReader.getPrioritizedTrack()
                 val trackLengths2 = this.fileReader.trackLengths
                 length = if (trackLengths2 != null) trackLengths2[track] else 0
@@ -701,24 +701,24 @@ open class MidiPcmStream : PcmStream {
 
             this.prioritizedTrack = track
             this.prioritizedTrackLength = length
-            this.nextEventTickTime = long_3
+            this.nextEventTickTime = tickTime
         }
     }
 
     fun processNextMidiEvents() {
-        var i_2 = this.prioritizedTrack
-        var i_3 = this.prioritizedTrackLength
-        var long_4 = this.nextEventTickTime
-        if (this.queuedTrack != null && i_3 == this.queuedTrackTick) {
+        var track = this.prioritizedTrack
+        var length = this.prioritizedTrackLength
+        var tickTime = this.nextEventTickTime
+        if (this.queuedTrack != null && length == this.queuedTrackTick) {
             loadAndPlayTrack(this.queuedTrack!!, this.isLooping, this.queuedAllSoundOff)
             processNextMidiEvents()
         } else {
             while (true) {
-                if (i_3 != this.prioritizedTrackLength) {
-                    this.prioritizedTrack = i_2
-                    this.prioritizedTrackLength = i_3
-                    this.nextEventTickTime = long_4
-                    if (this.queuedTrack != null && this.queuedTrackTick < i_3) {
+                if (length != this.prioritizedTrackLength) {
+                    this.prioritizedTrack = track
+                    this.prioritizedTrackLength = length
+                    this.nextEventTickTime = tickTime
+                    if (this.queuedTrack != null && this.queuedTrackTick < length) {
                         this.prioritizedTrack = -1
                         this.prioritizedTrackLength = this.queuedTrackTick
                         this.nextEventTickTime = this.fileReader.getTickTimestamp(this.prioritizedTrackLength)
@@ -727,12 +727,12 @@ open class MidiPcmStream : PcmStream {
                 }
 
                 val trackLengths = this.fileReader.trackLengths
-                while (trackLengths != null && i_3 == trackLengths[i_2]) {
-                    this.fileReader.getGotoTrack(i_2)
-                    val i_6 = this.fileReader.readMessage(i_2)
-                    if (i_6 == 1) {
+                while (trackLengths != null && length == trackLengths[track]) {
+                    this.fileReader.getGotoTrack(track)
+                    val midiMessage = this.fileReader.readMessage(track)
+                    if (midiMessage == 1) {
                         this.fileReader.setTrackDone()
-                        this.fileReader.markTracePosition(i_2)
+                        this.fileReader.markTracePosition(track)
                         if (this.fileReader.isDone()) {
                             if (this.queuedTrack != null) {
                                 setMusicTrack(this.queuedTrack!!, this.isLooping)
@@ -740,29 +740,29 @@ open class MidiPcmStream : PcmStream {
                                 return
                             }
 
-                            if (!this.isLooping || i_3 == 0) {
+                            if (!this.isLooping || length == 0) {
                                 sendSystemResetMessage(true)
                                 this.fileReader.clear()
                                 return
                             }
 
-                            this.fileReader.resetTracksFromTimestamp(long_4)
+                            this.fileReader.resetTracksFromTimestamp(tickTime)
                         }
                         break
                     }
 
-                    if ((i_6 and 0x80) != 0) {
-                        parseMessage(i_6)
+                    if ((midiMessage and 0x80) != 0) {
+                        parseMessage(midiMessage)
                     }
 
-                    this.fileReader.getTrackLength(i_2)
-                    this.fileReader.markTracePosition(i_2)
+                    this.fileReader.getTrackLength(track)
+                    this.fileReader.markTracePosition(track)
                 }
 
-                i_2 = this.fileReader.getPrioritizedTrack()
+                track = this.fileReader.getPrioritizedTrack()
                 val trackLengths2 = this.fileReader.trackLengths
-                i_3 = if (trackLengths2 != null) trackLengths2[i_2] else 0
-                long_4 = this.fileReader.getTickTimestamp(i_3)
+                length = if (trackLengths2 != null) trackLengths2[track] else 0
+                tickTime = this.fileReader.getTickTimestamp(length)
             }
         }
     }
@@ -772,102 +772,102 @@ open class MidiPcmStream : PcmStream {
         return 0
     }
 
-    fun updatePatchNode(class282Sub131: MusicPatchNode, ints_2: IntArray?, i_3: Int, i_4: Int): Boolean {
-        val stream = class282Sub131.stream ?: return true
-        class282Sub131.tickSampleLength = PcmPlayerManager.sampleRate / 100
-        if (class282Sub131.releaseState < 0 || !stream.isFinished()) {
-            var i_6 = class282Sub131.portamentoFactor
-            if (i_6 > 0) {
-                i_6 -= (16.0 * (2.0).pow((this.portamento[class282Sub131.currentTrack].toDouble()) * (4.921259842519685E-4)) + 0.5).toInt()
-                if (i_6 < 0) {
-                    i_6 = 0
+    fun updatePatchNode(patchNode: MusicPatchNode, mixBuffer: IntArray?, outputOffset: Int, sampleLength: Int): Boolean {
+        val stream = patchNode.stream ?: return true
+        patchNode.tickSampleLength = PcmPlayerManager.sampleRate / 100
+        if (patchNode.releaseState < 0 || !stream.isFinished()) {
+            var portamentoFactor = patchNode.portamentoFactor
+            if (portamentoFactor > 0) {
+                portamentoFactor -= (16.0 * (2.0).pow((this.portamento[patchNode.currentTrack].toDouble()) * (4.921259842519685E-4)) + 0.5).toInt()
+                if (portamentoFactor < 0) {
+                    portamentoFactor = 0
                 }
 
-                class282Sub131.portamentoFactor = i_6
+                patchNode.portamentoFactor = portamentoFactor
             }
 
-            stream.setPlaybackRate(calculatePitch(class282Sub131))
-            val class1107 = class282Sub131.musicPatchInfo ?: return true
-            var bool8 = false
-            ++class282Sub131.tickCounter
-            class282Sub131.vibratoPhase += class1107.volumeEnvelopeRelease
-            val d_9 = 5.086263020833333E-6 * ((class282Sub131.currentNotePitch - 60 shl 8) + (class282Sub131.portamentoPitchOffset * class282Sub131.portamentoFactor shr 12))
-            if (class1107.volumeEnvelopeDecay > 0) {
-                if (class1107.vibratoLfoFrequency > 0) {
-                    class282Sub131.volumeEnvelopeTime += (128.0 * (2.0).pow((d_9) * (class1107.vibratoLfoFrequency.toDouble())) + 0.5).toInt()
+            stream.setPlaybackRate(calculatePitch(patchNode))
+            val patchInfo = patchNode.musicPatchInfo ?: return true
+            var isDead = false
+            ++patchNode.tickCounter
+            patchNode.vibratoPhase += patchInfo.volumeEnvelopeRelease
+            val pitchScalar = 5.086263020833333E-6 * ((patchNode.currentNotePitch - 60 shl 8) + (patchNode.portamentoPitchOffset * patchNode.portamentoFactor shr 12))
+            if (patchInfo.volumeEnvelopeDecay > 0) {
+                if (patchInfo.vibratoLfoFrequency > 0) {
+                    patchNode.volumeEnvelopeTime += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.vibratoLfoFrequency.toDouble())) + 0.5).toInt()
                 } else {
-                    class282Sub131.volumeEnvelopeTime += 128
+                    patchNode.volumeEnvelopeTime += 128
                 }
 
-                if (class1107.volumeEnvelopeDecay * class282Sub131.volumeEnvelopeTime >= 819200) {
-                    bool8 = true
+                if (patchInfo.volumeEnvelopeDecay * patchNode.volumeEnvelopeTime >= 819200) {
+                    isDead = true
                 }
             }
 
-            class1107.volumeEnvelopeData?.let { array ->
-                if (class1107.volumeEnvelopeSustain > 0) {
-                    class282Sub131.volumeEnvelopePosition += (128.0 * (2.0).pow((d_9) * (class1107.volumeEnvelopeSustain.toDouble())) + 0.5).toInt()
+            patchInfo.volumeEnvelopeData?.let { array ->
+                if (patchInfo.volumeEnvelopeSustain > 0) {
+                    patchNode.volumeEnvelopePosition += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.volumeEnvelopeSustain.toDouble())) + 0.5).toInt()
                 } else {
-                    class282Sub131.volumeEnvelopePosition += 128
+                    patchNode.volumeEnvelopePosition += 128
                 }
 
-                while (class282Sub131.volumeEnvelopeIndex < array.size - 2 && class282Sub131.volumeEnvelopePosition > (array[class282Sub131.volumeEnvelopeIndex + 2].toInt() and 0xff) shl 8) {
-                    class282Sub131.volumeEnvelopeIndex += 2
+                while (patchNode.volumeEnvelopeIndex < array.size - 2 && patchNode.volumeEnvelopePosition > (array[patchNode.volumeEnvelopeIndex + 2].toInt() and 0xff) shl 8) {
+                    patchNode.volumeEnvelopeIndex += 2
                 }
 
-                if (array.size - 2 == class282Sub131.volumeEnvelopeIndex && array[class282Sub131.volumeEnvelopeIndex + 1].toInt() == 0) {
-                    bool8 = true
+                if (array.size - 2 == patchNode.volumeEnvelopeIndex && array[patchNode.volumeEnvelopeIndex + 1].toInt() == 0) {
+                    isDead = true
                 }
             }
 
-            if (class282Sub131.releaseState >= 0 && (this.sustain[class282Sub131.currentTrack] and 0x1) == 0 && (class282Sub131.loopVariable < 0 || class282Sub131 != this.loopGroupNotes[class282Sub131.currentTrack][class282Sub131.loopVariable])) {
-                class1107.releaseEnvelopeData?.let { array ->
-                    if (class1107.vibratoLfoDelay > 0) {
-                        class282Sub131.releaseState += (128.0 * (2.0).pow((d_9) * (class1107.vibratoLfoDelay.toDouble())) + 0.5).toInt()
+            if (patchNode.releaseState >= 0 && (this.sustain[patchNode.currentTrack] and 0x1) == 0 && (patchNode.loopVariable < 0 || patchNode != this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable])) {
+                patchInfo.releaseEnvelopeData?.let { array ->
+                    if (patchInfo.vibratoLfoDelay > 0) {
+                        patchNode.releaseState += (128.0 * (2.0).pow((pitchScalar) * (patchInfo.vibratoLfoDelay.toDouble())) + 0.5).toInt()
                     } else {
-                        class282Sub131.releaseState += 128
+                        patchNode.releaseState += 128
                     }
 
-                    while (class282Sub131.releaseEnvelopeIndex < array.size - 2 && class282Sub131.releaseState > (array[class282Sub131.releaseEnvelopeIndex + 2].toInt() and 0xff) shl 8) {
-                        class282Sub131.releaseEnvelopeIndex += 2
+                    while (patchNode.releaseEnvelopeIndex < array.size - 2 && patchNode.releaseState > (array[patchNode.releaseEnvelopeIndex + 2].toInt() and 0xff) shl 8) {
+                        patchNode.releaseEnvelopeIndex += 2
                     }
 
-                    if (array.size - 2 == class282Sub131.releaseEnvelopeIndex) {
-                        bool8 = true
+                    if (array.size - 2 == patchNode.releaseEnvelopeIndex) {
+                        isDead = true
                     }
                 }
             }
 
-            if (bool8) {
-                stream.fadeOutAndStop(class282Sub131.tickSampleLength)
-                if (ints_2 != null) {
-                    stream.fill(ints_2, i_3, i_4)
+            if (isDead) {
+                stream.fadeOutAndStop(patchNode.tickSampleLength)
+                if (mixBuffer != null) {
+                    stream.fill(mixBuffer, outputOffset, sampleLength)
                 } else {
-                    stream.skip(i_4)
+                    stream.skip(sampleLength)
                 }
 
                 if (stream.isFading()) {
                     this.patchStream.fadeOutScheduler.addSubStream(stream)
                 }
 
-                class282Sub131.clearMusicPatchNode()
-                if (class282Sub131.releaseState >= 0) {
-                    class282Sub131.unlink()
-                    if (class282Sub131.loopVariable > 0 && class282Sub131 == this.loopGroupNotes[class282Sub131.currentTrack][class282Sub131.loopVariable]) {
-                        this.loopGroupNotes[class282Sub131.currentTrack][class282Sub131.loopVariable] = null
+                patchNode.clearMusicPatchNode()
+                if (patchNode.releaseState >= 0) {
+                    patchNode.unlink()
+                    if (patchNode.loopVariable > 0 && patchNode == this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable]) {
+                        this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable] = null
                     }
                 }
 
                 return true
             } else {
-                stream.fadeToVolumeAndPan(class282Sub131.tickSampleLength, calculateVolume(class282Sub131), calculatePan(class282Sub131))
+                stream.fadeToVolumeAndPan(patchNode.tickSampleLength, calculateVolume(patchNode), calculatePan(patchNode))
                 return false
             }
         } else {
-            class282Sub131.clearMusicPatchNode()
-            class282Sub131.unlink()
-            if (class282Sub131.loopVariable > 0 && class282Sub131 == this.loopGroupNotes[class282Sub131.currentTrack][class282Sub131.loopVariable]) {
-                this.loopGroupNotes[class282Sub131.currentTrack][class282Sub131.loopVariable] = null
+            patchNode.clearMusicPatchNode()
+            patchNode.unlink()
+            if (patchNode.loopVariable > 0 && patchNode == this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable]) {
+                this.loopGroupNotes[patchNode.currentTrack][patchNode.loopVariable] = null
             }
 
             return true
@@ -875,12 +875,12 @@ open class MidiPcmStream : PcmStream {
     }
 
     @Synchronized
-    fun loadAndPlayTrack(musicTrack: MusicTrack, bool2: Boolean, bool3: Boolean) {
-        clearTrack(bool3)
+    fun loadAndPlayTrack(musicTrack: MusicTrack, looping: Boolean, allSoundOff: Boolean) {
+        clearTrack(allSoundOff)
         val midi = musicTrack.midi
         if (midi != null) {
             this.fileReader.decode(midi)
-            this.isLooping = bool2
+            this.isLooping = looping
             this.currentTickTime = 0L
             val trackCount = this.fileReader.getTrackCount()
 
@@ -915,47 +915,47 @@ open class MidiPcmStream : PcmStream {
     @Synchronized
     fun ready(track: MusicTrack, resource: Js5ResourceProvider, cache: SoundBankCache): Boolean {
         track.buildPatchTable()
-        var ready = true
-        val ints_7 = intArrayOf(22050)
+        var isReady = true
+        val sampleRates = intArrayOf(22050)
 
         val table = track.table
         if (table != null) {
-            var class282Sub478: ObjectNode? = table.first() as? ObjectNode
-            while (class282Sub478 != null) {
-                val key = class282Sub478.pointer.toInt()
-                var class282Sub1410: MusicPatch? = this.musicPatches.get(key.toLong())
-                if (class282Sub1410 == null) {
-                    class282Sub1410 = getMusicPatch(resource, key)
-                    if (class282Sub1410 == null) {
-                        ready = false
-                        class282Sub478 = table.next() as? ObjectNode
+            var patchNode: ObjectNode? = table.first() as? ObjectNode
+            while (patchNode != null) {
+                val key = patchNode.pointer.toInt()
+                var patch: MusicPatch? = this.musicPatches.get(key.toLong())
+                if (patch == null) {
+                    patch = getMusicPatch(resource, key)
+                    if (patch == null) {
+                        isReady = false
+                        patchNode = table.next() as? ObjectNode
                         continue
                     }
 
-                    this.musicPatches.put(class282Sub1410, key.toLong())
+                    this.musicPatches.put(patch, key.toLong())
                 }
 
-                val value = class282Sub478.value
-                if (value is ByteArray && class282Sub1410 != null && !class282Sub1410.ready(cache, value, ints_7)) {
-                    ready = false
+                val value = patchNode.value
+                if (value is ByteArray && patch != null && !patch.ready(cache, value, sampleRates)) {
+                    isReady = false
                 }
-                class282Sub478 = table.next() as? ObjectNode
+                patchNode = table.next() as? ObjectNode
             }
         }
 
-        if (ready) {
+        if (isReady) {
             track.clear()
         }
 
-        return ready
+        return isReady
     }
 
     fun setKeyPressure() {
     }
 
-    fun setProgramChange(channel: Int, data1: Int) {
-        if (data1 != this.programChange[channel]) {
-            this.programChange[channel] = data1
+    fun setProgramChange(channel: Int, program: Int) {
+        if (program != this.programChange[channel]) {
+            this.programChange[channel] = program
 
             for (noteIndex in 0..127) {
                 this.loopGroupNotes[channel][noteIndex] = null
@@ -963,10 +963,10 @@ open class MidiPcmStream : PcmStream {
         }
     }
 
-    fun turnAllNotesOff(i_1: Int) {
+    fun turnAllNotesOff(channel: Int) {
         var patchNode: MusicPatchNode? = this.patchStream.queue.getFirst() as? MusicPatchNode
         while (patchNode != null) {
-            if ((i_1 < 0 || patchNode.currentTrack == i_1) && patchNode.releaseState < 0) {
+            if ((channel < 0 || patchNode.currentTrack == channel) && patchNode.releaseState < 0) {
                 this.activeNotes[patchNode.currentTrack][patchNode.currentNotePitch] = null
                 patchNode.releaseState = 0
             }
