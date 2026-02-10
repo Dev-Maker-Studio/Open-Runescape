@@ -267,21 +267,21 @@ class CollisionMap {
         }
     }
 
-    fun flagBlockedDecoration(i_1: Int, i_2: Int) {
-        val x = i_1 - offsetX
-        val y = i_2 - offsetY
+    fun flagBlockedDecoration(tileX: Int, tileY: Int) {
+        val x = tileX - offsetX
+        val y = tileY - offsetY
         collisionFlags[x][y] = collisionFlags[x][y] or CollisionFlag.BLOCKED_DECO.flag
     }
 
-    fun unflagFloorDecoration(i_1: Int, i_2: Int) {
-        val x = i_1 - offsetX
-        val y = i_2 - offsetY
+    fun unflagFloorDecoration(tileX: Int, tileY: Int) {
+        val x = tileX - offsetX
+        val y = tileY - offsetY
         collisionFlags[x][y] = collisionFlags[x][y] and CollisionFlag.BLOCKED_DECO.flag.inv()
     }
 
-    fun setUnwalkable(i_1: Int, i_2: Int) {
-        val x = i_1 - offsetX
-        val y = i_2 - offsetY
+    fun setUnwalkable(tileX: Int, tileY: Int) {
+        val x = tileX - offsetX
+        val y = tileY - offsetY
         collisionFlags[x][y] = collisionFlags[x][y] or CollisionFlag.BLOCKED.flag
     }
 
@@ -291,73 +291,73 @@ class CollisionMap {
         collisionFlags[x][y] = collisionFlags[x][y] and CollisionFlag.BLOCKED.flag.inv()
     }
 
-    fun removeFlag(i_1: Int, i_2: Int, i_3: Int) {
-        collisionFlags[i_1][i_2] = collisionFlags[i_1][i_2] and i_3.inv()
+    fun removeFlag(x: Int, y: Int, flag: Int) {
+        collisionFlags[x][y] = collisionFlags[x][y] and flag.inv()
     }
 
-    fun addFlag(i_1: Int, i_2: Int, i_3: Int) {
-        collisionFlags[i_1][i_2] = collisionFlags[i_1][i_2] or i_3
+    fun addFlag(x: Int, y: Int, flag: Int) {
+        collisionFlags[x][y] = collisionFlags[x][y] or flag
     }
 
-    fun removeFlag(i_1: Int, i_2: Int, vararg flags: CollisionFlag) {
+    fun removeFlag(x: Int, y: Int, vararg flags: CollisionFlag) {
         var flag = 0
         for (f in flags) {
             flag = flag or f.flag
         }
-        removeFlag(i_1, i_2, flag)
+        removeFlag(x, y, flag)
     }
 
-    fun addFlag(i_1: Int, i_2: Int, vararg flags: CollisionFlag) {
+    fun addFlag(x: Int, y: Int, vararg flags: CollisionFlag) {
         var flag = 0
         for (f in flags) {
             flag = flag or f.flag
         }
-        addFlag(i_1, i_2, flag)
+        addFlag(x, y, flag)
     }
 
-    fun walkable(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, flag: Int): Boolean {
-        val i_11 = i_3 + i_1
-        val i_12 = i_2 + i_4
-        val i_13 = i_5 + i_7
-        val i_14 = i_8 + i_6
-        val i_15: Int
-        val i_16: Int
-        if (i_13 == i_1 && notFlagged(flag, CollisionFlag.N_OBJ)) {
-            i_15 = Math.max(i_2, i_6)
-            i_16 = Math.min(i_12, i_14)
-            var i = i_15
-            while (i < i_16) {
-                if (notFlagged(collisionFlags[i_13 - 1 - offsetX][i - offsetY], CollisionFlag.E_OBJ)) {
+    fun walkable(srcX: Int, srcY: Int, srcSizeX: Int, srcSizeY: Int, dstX: Int, dstY: Int, dstSizeX: Int, dstSizeY: Int, flag: Int): Boolean {
+        val srcMaxX = srcSizeX + srcX
+        val srcMaxY = srcY + srcSizeY
+        val dstMaxX = dstX + dstSizeX
+        val dstMaxY = dstSizeY + dstY
+        val overlapMin: Int
+        val overlapMax: Int
+        if (dstMaxX == srcX && notFlagged(flag, CollisionFlag.N_OBJ)) {
+            overlapMin = Math.max(srcY, dstY)
+            overlapMax = Math.min(srcMaxY, dstMaxY)
+            var i = overlapMin
+            while (i < overlapMax) {
+                if (notFlagged(collisionFlags[dstMaxX - 1 - offsetX][i - offsetY], CollisionFlag.E_OBJ)) {
                     return true
                 }
                 i++
             }
-        } else if (i_5 == i_11 && notFlagged(flag, CollisionFlag.E_OBJ)) {
-            i_15 = Math.max(i_2, i_6)
-            i_16 = Math.min(i_12, i_14)
-            var i = i_15
-            while (i < i_16) {
-                if (notFlagged(collisionFlags[i_5 - offsetX][i - offsetY], CollisionFlag.W_OBJ)) {
+        } else if (dstX == srcMaxX && notFlagged(flag, CollisionFlag.E_OBJ)) {
+            overlapMin = Math.max(srcY, dstY)
+            overlapMax = Math.min(srcMaxY, dstMaxY)
+            var i = overlapMin
+            while (i < overlapMax) {
+                if (notFlagged(collisionFlags[dstX - offsetX][i - offsetY], CollisionFlag.W_OBJ)) {
                     return true
                 }
                 i++
             }
-        } else if (i_14 == i_2 && notFlagged(flag, CollisionFlag.NW_OBJ)) {
-            i_15 = Math.max(i_1, i_5)
-            i_16 = Math.min(i_11, i_13)
-            var i = i_15
-            while (i < i_16) {
-                if (notFlagged(collisionFlags[i - offsetX][i_14 - 1 - offsetY], CollisionFlag.N_OBJ)) {
+        } else if (dstMaxY == srcY && notFlagged(flag, CollisionFlag.NW_OBJ)) {
+            overlapMin = Math.max(srcX, dstX)
+            overlapMax = Math.min(srcMaxX, dstMaxX)
+            var i = overlapMin
+            while (i < overlapMax) {
+                if (notFlagged(collisionFlags[i - offsetX][dstMaxY - 1 - offsetY], CollisionFlag.N_OBJ)) {
                     return true
                 }
                 i++
             }
-        } else if (i_12 == i_6 && notFlagged(flag, CollisionFlag.NE_OBJ)) {
-            i_15 = Math.max(i_1, i_5)
-            i_16 = Math.min(i_11, i_13)
-            var i = i_15
-            while (i < i_16) {
-                if (notFlagged(collisionFlags[i - offsetX][i_6 - offsetY], CollisionFlag.S_OBJ)) {
+        } else if (srcMaxY == dstY && notFlagged(flag, CollisionFlag.NE_OBJ)) {
+            overlapMin = Math.max(srcX, dstX)
+            overlapMax = Math.min(srcMaxX, dstMaxX)
+            var i = overlapMin
+            while (i < overlapMax) {
+                if (notFlagged(collisionFlags[i - offsetX][dstY - offsetY], CollisionFlag.S_OBJ)) {
                     return true
                 }
                 i++
@@ -821,12 +821,12 @@ class CollisionMap {
         }
 
         @JvmStatic
-        fun createClipMap(i_0: Int, i_1: Int): CollisionMap {
+        fun createClipMap(sceneSizeX: Int, sceneSizeY: Int): CollisionMap {
             val clipping = CollisionMap()
             clipping.offsetX = -1
             clipping.offsetY = -1
-            clipping.sizeX = i_0 + 1 + 5
-            clipping.sizeY = i_1 + 1 + 5
+            clipping.sizeX = sceneSizeX + 1 + 5
+            clipping.sizeY = sceneSizeY + 1 + 5
             clipping.collisionFlags = Array(clipping.sizeX) { IntArray(clipping.sizeY) }
             clipping.reset()
             return clipping

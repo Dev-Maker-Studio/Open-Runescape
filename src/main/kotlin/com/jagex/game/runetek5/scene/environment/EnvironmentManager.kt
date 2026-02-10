@@ -276,29 +276,29 @@ class EnvironmentManager(
         }
 
         @JvmStatic
-        fun localOffsetX(i_0: Int, i_1: Int, rotation: Int, i_3: Int, i_4: Int, i_5: Int): Int {
-            var i_31 = i_3
-            var i_41 = i_4
-            if ((i_5 and 0x1) == 1) {
-                val i_7 = i_31
-                i_31 = i_41
-                i_41 = i_7
+        fun localOffsetX(localX: Int, localY: Int, rotation: Int, sizeX: Int, sizeY: Int, locRotation: Int): Int {
+            var mutableSizeX = sizeX
+            var mutableSizeY = sizeY
+            if ((locRotation and 0x1) == 1) {
+                val temp = mutableSizeX
+                mutableSizeX = mutableSizeY
+                mutableSizeY = temp
             }
             val rotationMasked = rotation and 0x3
-            return if (rotationMasked == 0) i_0 else if (rotationMasked == 1) i_1 else if (rotationMasked == 2) 7 - i_0 - (i_31 - 1) else 7 - i_1 - (i_41 - 1)
+            return if (rotationMasked == 0) localX else if (rotationMasked == 1) localY else if (rotationMasked == 2) 7 - localX - (mutableSizeX - 1) else 7 - localY - (mutableSizeY - 1)
         }
 
         @JvmStatic
-        fun localOffsetY(i_0: Int, i_1: Int, rotation: Int, i_3: Int, i_4: Int, angle: Int): Int {
-            var i_31 = i_3
-            var i_41 = i_4
-            if ((angle and 0x1) == 1) {
-                val i_7 = i_31
-                i_31 = i_41
-                i_41 = i_7
+        fun localOffsetY(localX: Int, localY: Int, rotation: Int, sizeX: Int, sizeY: Int, locRotation: Int): Int {
+            var mutableSizeX = sizeX
+            var mutableSizeY = sizeY
+            if ((locRotation and 0x1) == 1) {
+                val temp = mutableSizeX
+                mutableSizeX = mutableSizeY
+                mutableSizeY = temp
             }
             val rotationMasked = rotation and 0x3
-            return if (rotationMasked == 0) i_1 else if (rotationMasked == 1) 7 - i_0 - (i_31 - 1) else if (rotationMasked == 2) 7 - i_1 - (i_41 - 1) else i_0
+            return if (rotationMasked == 0) localY else if (rotationMasked == 1) 7 - localX - (mutableSizeX - 1) else if (rotationMasked == 2) 7 - localY - (mutableSizeY - 1) else localX
         }
 
         @JvmStatic
@@ -314,15 +314,15 @@ class EnvironmentManager(
         }
 
         @JvmStatic
-        fun rotateTerrainBlockY(i_0: Int, i_1: Int, rotation: Int): Int {
+        fun rotateTerrainBlockY(localX: Int, localY: Int, rotation: Int): Int {
             val rotationMasked = rotation and 0x3
-            return if (rotationMasked == 0) i_1 else if (rotationMasked == 1) 7 - i_0 else if (rotationMasked == 2) 7 - i_1 else i_0
+            return if (rotationMasked == 0) localY else if (rotationMasked == 1) 7 - localX else if (rotationMasked == 2) 7 - localY else localX
         }
 
         @JvmStatic
-        fun rotateTerrainBlockX(i_0: Int, i_1: Int, rotation: Int): Int {
+        fun rotateTerrainBlockX(localX: Int, localY: Int, rotation: Int): Int {
             val rotationMasked = rotation and 0x3
-            return if (rotationMasked == 0) i_0 else if (rotationMasked == 1) i_1 else if (rotationMasked == 2) 7 - i_0 else 7 - i_1
+            return if (rotationMasked == 0) localX else if (rotationMasked == 1) localY else if (rotationMasked == 2) 7 - localX else 7 - localY
         }
     }
 }

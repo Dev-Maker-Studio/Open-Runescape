@@ -259,103 +259,103 @@ open class MapLoader(
         }
     }
 
-    fun decodeTilesServer(rsbytebuffer1: Packet, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, arr_9: Array<CollisionMap>) {
-        val i_11 = (i_6 and 0x7) * 8
-        val i_12 = (i_7 and 0x7) * 8
-        var i_14: Int
-        var i_17: Int
+    fun decodeTilesServer(stream: Packet, sceneZ: Int, chunkStartX: Int, chunkStartY: Int, sourcePlane: Int, absoluteX: Int, absoluteY: Int, chunkRotation: Int, collisionMaps: Array<CollisionMap>) {
+        val chunkLocalStartY = (absoluteX and 0x7) * 8
+        val rotationOffset = (absoluteY and 0x7) * 8
+        var regionBaseX: Int
+        var regionBaseY: Int
         if (!overlayHidden) {
-            val clipmap13 = arr_9[i_2]
-            i_14 = 0
-            while (i_14 < 8) {
-                for (i_15 in 0..7) {
-                    val i_16 = i_3 + EnvironmentManager.rotateTerrainBlockX(i_14 and 0x7, i_15 and 0x7, i_8)
-                    i_17 = i_4 + EnvironmentManager.rotateTerrainBlockY(i_14 and 0x7, i_15 and 0x7, i_8)
-                    if (i_16 > 0 && i_16 < regionSizeX - 1 && i_17 > 0 && i_17 < regionSizeY - 1) {
-                        clipmap13.unblock(i_16, i_17)
+            val clipmap13 = collisionMaps[sceneZ]
+            regionBaseX = 0
+            while (regionBaseX < 8) {
+                for (deltaX in 0..7) {
+                    val deltaY = chunkStartX + EnvironmentManager.rotateTerrainBlockX(regionBaseX and 0x7, deltaX and 0x7, chunkRotation)
+                    regionBaseY = chunkStartY + EnvironmentManager.rotateTerrainBlockY(regionBaseX and 0x7, deltaX and 0x7, chunkRotation)
+                    if (deltaY > 0 && deltaY < regionSizeX - 1 && regionBaseY > 0 && regionBaseY < regionSizeY - 1) {
+                        clipmap13.unblock(deltaY, regionBaseY)
                     }
                 }
-                i_14++
+                regionBaseX++
             }
         }
-        val i_28 = (i_6 and -8) shl 3
-        i_14 = (i_7 and -8) shl 3
-        var b_29: Byte = 0
-        var b_30: Byte = 0
-        if (i_8 == 1) {
-            b_30 = 1
-        } else if (i_8 == 2) {
-            b_29 = 1
-            b_30 = 1
-        } else if (i_8 == 3) {
-            b_29 = 1
+        val absoluteChunkY = (absoluteX and -8) shl 3
+        regionBaseX = (absoluteY and -8) shl 3
+        var tileOverlayId: Byte = 0
+        var tileUnderlayId: Byte = 0
+        if (chunkRotation == 1) {
+            tileUnderlayId = 1
+        } else if (chunkRotation == 2) {
+            tileOverlayId = 1
+            tileUnderlayId = 1
+        } else if (chunkRotation == 3) {
+            tileOverlayId = 1
         }
-        i_17 = 0
-        while (i_17 < regionSizeZ) {
-            for (i_18 in 0..63) {
-                for (i_19 in 0..63) {
-                    if (i_5 == i_17 && i_18 >= i_11 && i_18 <= i_11 + 8 && i_19 >= i_12 && i_19 <= i_12 + 8) {
-                        val i_20: Int
-                        val i_21: Int
-                        if (i_18 != i_11 + 8 && i_12 + 8 != i_19) {
-                            i_20 = i_3 + EnvironmentManager.rotateTerrainBlockX(i_18 and 0x7, i_19 and 0x7, i_8)
-                            i_21 = i_4 + EnvironmentManager.rotateTerrainBlockY(i_18 and 0x7, i_19 and 0x7, i_8)
-                            decodeTile(rsbytebuffer1, i_2, i_20, i_21, b_29.toInt(), b_30.toInt(), i_28 + i_18, i_14 + i_19, i_8, false)
+        regionBaseY = 0
+        while (regionBaseY < regionSizeZ) {
+            for (tileX in 0..63) {
+                for (tileY in 0..63) {
+                    if (sourcePlane == regionBaseY && tileX >= chunkLocalStartY && tileX <= chunkLocalStartY + 8 && tileY >= rotationOffset && tileY <= rotationOffset + 8) {
+                        val destX: Int
+                        val destY: Int
+                        if (tileX != chunkLocalStartY + 8 && rotationOffset + 8 != tileY) {
+                            destX = chunkStartX + EnvironmentManager.rotateTerrainBlockX(tileX and 0x7, tileY and 0x7, chunkRotation)
+                            destY = chunkStartY + EnvironmentManager.rotateTerrainBlockY(tileX and 0x7, tileY and 0x7, chunkRotation)
+                            decodeTile(stream, sceneZ, destX, destY, tileOverlayId.toInt(), tileUnderlayId.toInt(), absoluteChunkY + tileX, regionBaseX + tileY, chunkRotation, false)
                         } else {
-                            if (i_8 == 0) {
-                                i_20 = i_3 + (i_18 - i_11)
-                                i_21 = i_19 - i_12 + i_4
-                            } else if (i_8 == 1) {
-                                i_20 = i_3 + (i_19 - i_12)
-                                i_21 = i_4 + 8 - (i_18 - i_11)
-                            } else if (i_8 == 2) {
-                                i_20 = i_3 + 8 - (i_18 - i_11)
-                                i_21 = i_4 + 8 - (i_19 - i_12)
+                            if (chunkRotation == 0) {
+                                destX = chunkStartX + (tileX - chunkLocalStartY)
+                                destY = tileY - rotationOffset + chunkStartY
+                            } else if (chunkRotation == 1) {
+                                destX = chunkStartX + (tileY - rotationOffset)
+                                destY = chunkStartY + 8 - (tileX - chunkLocalStartY)
+                            } else if (chunkRotation == 2) {
+                                destX = chunkStartX + 8 - (tileX - chunkLocalStartY)
+                                destY = chunkStartY + 8 - (tileY - rotationOffset)
                             } else {
-                                i_20 = i_3 + 8 - (i_19 - i_12)
-                                i_21 = i_18 - i_11 + i_4
+                                destX = chunkStartX + 8 - (tileY - rotationOffset)
+                                destY = tileX - chunkLocalStartY + chunkStartY
                             }
-                            decodeTile(rsbytebuffer1, i_2, i_20, i_21, 0, 0, i_28 + i_18, i_14 + i_19, 0, true)
+                            decodeTile(stream, sceneZ, destX, destY, 0, 0, absoluteChunkY + tileX, regionBaseX + tileY, 0, true)
                         }
-                        if (i_18 == 63 || i_19 == 63) {
-                            val b_22: Byte = if (i_18 == 63 && i_19 == 63) 3 else 1
-                            for (i_23 in 0 until b_22) {
-                                var i_24 = i_18
-                                var i_25 = i_19
-                                if (i_23 == 0) {
-                                    i_24 = if (i_18 == 63) 64 else i_18
-                                    i_25 = if (i_19 == 63) 64 else i_19
-                                } else if (i_23 == 1) {
-                                    i_24 = 64
+                        if (tileX == 63 || tileY == 63) {
+                            val edgeCount: Byte = if (tileX == 63 && tileY == 63) 3 else 1
+                            for (edgeIndex in 0 until edgeCount) {
+                                var edgeTileX = tileX
+                                var edgeTileY = tileY
+                                if (edgeIndex == 0) {
+                                    edgeTileX = if (tileX == 63) 64 else tileX
+                                    edgeTileY = if (tileY == 63) 64 else tileY
+                                } else if (edgeIndex == 1) {
+                                    edgeTileX = 64
                                 } else {
-                                    i_25 = 64
+                                    edgeTileY = 64
                                 }
-                                val i_26: Int
-                                val i_27: Int
-                                if (i_8 == 0) {
-                                    i_26 = i_3 + (i_24 - i_11)
-                                    i_27 = i_25 - i_12 + i_4
-                                } else if (i_8 == 1) {
-                                    i_26 = i_3 + (i_25 - i_12)
-                                    i_27 = i_4 + 8 - (i_24 - i_11)
-                                } else if (i_8 == 2) {
-                                    i_26 = i_3 + 8 - (i_24 - i_11)
-                                    i_27 = i_4 + 8 - (i_25 - i_12)
+                                val edgeDestX: Int
+                                val edgeDestY: Int
+                                if (chunkRotation == 0) {
+                                    edgeDestX = chunkStartX + (edgeTileX - chunkLocalStartY)
+                                    edgeDestY = edgeTileY - rotationOffset + chunkStartY
+                                } else if (chunkRotation == 1) {
+                                    edgeDestX = chunkStartX + (edgeTileY - rotationOffset)
+                                    edgeDestY = chunkStartY + 8 - (edgeTileX - chunkLocalStartY)
+                                } else if (chunkRotation == 2) {
+                                    edgeDestX = chunkStartX + 8 - (edgeTileX - chunkLocalStartY)
+                                    edgeDestY = chunkStartY + 8 - (edgeTileY - rotationOffset)
                                 } else {
-                                    i_26 = i_3 + 8 - (i_25 - i_12)
-                                    i_27 = i_24 - i_11 + i_4
+                                    edgeDestX = chunkStartX + 8 - (edgeTileY - rotationOffset)
+                                    edgeDestY = edgeTileX - chunkLocalStartY + chunkStartY
                                 }
-                                if (i_26 >= 0 && i_26 < regionSizeX && i_27 >= 0 && i_27 < regionSizeY) {
-                                    tileHeights[i_2][i_26][i_27] = tileHeights[i_2][i_20 + b_29][b_30 + i_21]
+                                if (edgeDestX >= 0 && edgeDestX < regionSizeX && edgeDestY >= 0 && edgeDestY < regionSizeY) {
+                                    tileHeights[sceneZ][edgeDestX][edgeDestY] = tileHeights[sceneZ][destX + tileOverlayId][tileUnderlayId + destY]
                                 }
                             }
                         }
                     } else {
-                        decodeTile(rsbytebuffer1, 0, -1, -1, 0, 0, 0, 0, 0, false)
+                        decodeTile(stream, 0, -1, -1, 0, 0, 0, 0, 0, false)
                     }
                 }
             }
-            i_17++
+            regionBaseY++
         }
     }
 
@@ -427,18 +427,18 @@ open class MapLoader(
                     tileRotation = 0
                     overlayTextureId = overlay?.texture ?: -1
                     val underlayTetureId = underlay?.texture ?: -1
-                    val ints_20 = IntArray(faceCount)
-                    val ints_21 = IntArray(faceCount)
-                    val ints_22 = IntArray(faceCount)
+                    val faceVertexA = IntArray(faceCount)
+                    val faceVertexB = IntArray(faceCount)
+                    val faceVertexC = IntArray(faceCount)
                     val floorColor = IntArray(faceCount)
                     val overlayTextures = IntArray(faceCount)
                     val textureScale = IntArray(faceCount)
                     val minimapColor = if (overlay != null && overlay.minimapColorHsl != -1) IntArray(faceCount) else null
                     if (overlay != null) {
                         for (index in 0 until overlayFaceCount) {
-                            ints_20[tileCount] = anIntArrayArray3824[overlayShape.toInt()][tileRotation]
-                            ints_21[tileCount] = anIntArrayArray3860[overlayShape.toInt()][tileRotation]
-                            ints_22[tileCount] = anIntArrayArray3815[overlayShape.toInt()][tileRotation]
+                            faceVertexA[tileCount] = SHAPE_VERTEX_A[overlayShape.toInt()][tileRotation]
+                            faceVertexB[tileCount] = SHAPE_VERTEX_B[overlayShape.toInt()][tileRotation]
+                            faceVertexC[tileCount] = SHAPE_VERTEX_C[overlayShape.toInt()][tileRotation]
                             overlayTextures[tileCount] = overlayTextureId
                             textureScale[tileCount] = overlay.textureScale
                             floorColor[tileCount] = overlay.tileColorHsl
@@ -456,9 +456,9 @@ open class MapLoader(
                     }
                     if (underlay != null) {
                         for (index in 0 until underlayFaceCount) {
-                            ints_20[tileCount] = anIntArrayArray3824[overlayShape.toInt()][tileRotation]
-                            ints_21[tileCount] = anIntArrayArray3860[overlayShape.toInt()][tileRotation]
-                            ints_22[tileCount] = anIntArrayArray3815[overlayShape.toInt()][tileRotation]
+                            faceVertexA[tileCount] = SHAPE_VERTEX_A[overlayShape.toInt()][tileRotation]
+                            faceVertexB[tileCount] = SHAPE_VERTEX_B[overlayShape.toInt()][tileRotation]
+                            faceVertexC[tileCount] = SHAPE_VERTEX_C[overlayShape.toInt()][tileRotation]
                             overlayTextures[tileCount] = underlayTetureId
                             textureScale[tileCount] = underlay.scale
                             floorColor[tileCount] = floorColors[x][y]
@@ -500,7 +500,7 @@ open class MapLoader(
                                 val sceneX = (x shl 9) + sizesX[rotation]
                                 val sceneY = (y shl 9) + sizesY[rotation]
                                 localLvlHeightDifference[rotation] = localHeights.getAverageHeight(sceneX, sceneY) - nextHeights.getAverageHeight(sceneX, sceneY)
-                            } else if (currentHeights != null && !aBoolArrayArray3823[overlayShape.toInt()][rotation]) {
+                            } else if (currentHeights != null && !UNDERLAY_SHAPE_SUPPORTS_HEIGHT[overlayShape.toInt()][rotation]) {
                                 val sceneX = (x shl 9) + sizesX[rotation]
                                 val sceneY = (y shl 9) + sizesY[rotation]
                                 localLvlHeightDifference[rotation] = currentHeights.getAverageHeight(sceneX, sceneY) - localHeights.getAverageHeight(sceneX, sceneY)
@@ -534,7 +534,7 @@ open class MapLoader(
                         tile.floUnusedOpcode21 = scene.unusedOpcode21(x, y)
                         tile.floUnusedOpcode22 = scene.unusedOpcode22(x, y)
                     }
-                    localHeights.calculateBlockTiles(x, y, sizesX, nextLvlHeightDifference!!, sizesY, localLvlHeightDifference!!, ints_20!!, ints_21!!, ints_22!!, floorColor, minimapColor!!, overlayTextures, textureScale, tile)
+                    localHeights.calculateBlockTiles(x, y, sizesX, nextLvlHeightDifference!!, sizesY, localLvlHeightDifference!!, faceVertexA!!, faceVertexB!!, faceVertexC!!, floorColor, minimapColor!!, overlayTextures, textureScale, tile)
                     scene.loadTiles(plane, x, y)
                 }
             }
@@ -729,13 +729,13 @@ open class MapLoader(
                     if (overlay.blendsWithUnderlay) {
                         var signedRotationA = 2
                         var signedRotationB = rotation * 2 + 4
-                        val i_20 = ColorUtil.getOverlayColorHsl(toolkit, overlay)
-                        for (i_21 in 0..2) {
+                        val overlayColorHsl = ColorUtil.getOverlayColorHsl(toolkit, overlay)
+                        for (cornerIndex in 0..2) {
                             signedRotationB = signedRotationB and 0x7
                             signedRotationA = signedRotationA and 0x7
                             if (OVERLAY_SHAPE_SUPPORTS_HEIGHT[shape.toInt()][signedRotationB] && waterSlots[signedRotationA] <= overlay.slot) {
                                 overlayTileColors[signedRotationA] = overlay.tileColorHsl
-                                overlayTileRenderedColors[signedRotationA] = i_20
+                                overlayTileRenderedColors[signedRotationA] = overlayColorHsl
                                 waterTextureIds[signedRotationA] = overlay.texture
                                 waterTextureScaling[signedRotationA] = overlay.textureScale
                                 if (overlay.slot == waterSlots[signedRotationA]) {
@@ -767,13 +767,13 @@ open class MapLoader(
                     if (overlay.blendsWithUnderlay) {
                         var signedRotationA = 4
                         var signedRotationB = rotation * 2 + 2
-                        val i_20 = ColorUtil.getOverlayColorHsl(toolkit, overlay)
-                        for (i_21 in 0..2) {
+                        val overlayColorHsl = ColorUtil.getOverlayColorHsl(toolkit, overlay)
+                        for (cornerIndex in 0..2) {
                             signedRotationB = signedRotationB and 0x7
                             signedRotationA = signedRotationA and 0x7
                             if (OVERLAY_SHAPE_SUPPORTS_HEIGHT[shape.toInt()][signedRotationB] && waterSlots[signedRotationA] <= overlay.slot) {
                                 overlayTileColors[signedRotationA] = overlay.tileColorHsl
-                                overlayTileRenderedColors[signedRotationA] = i_20
+                                overlayTileRenderedColors[signedRotationA] = overlayColorHsl
                                 waterTextureIds[signedRotationA] = overlay.texture
                                 waterTextureScaling[signedRotationA] = overlay.textureScale
                                 if (overlay.slot == waterSlots[signedRotationA]) {
@@ -805,13 +805,13 @@ open class MapLoader(
                     if (overlay.blendsWithUnderlay) {
                         var signedRotationA = 6
                         var signedRotationB = rotation * 2 + 4
-                        val i_20 = ColorUtil.getOverlayColorHsl(toolkit, overlay)
-                        for (i_21 in 0..2) {
+                        val overlayColorHsl = ColorUtil.getOverlayColorHsl(toolkit, overlay)
+                        for (cornerIndex in 0..2) {
                             signedRotationB = signedRotationB and 0x7
                             signedRotationA = signedRotationA and 0x7
                             if (OVERLAY_SHAPE_SUPPORTS_HEIGHT[shape.toInt()][signedRotationB] && waterSlots[signedRotationA] <= overlay.slot) {
                                 overlayTileColors[signedRotationA] = overlay.tileColorHsl
-                                overlayTileRenderedColors[signedRotationA] = i_20
+                                overlayTileRenderedColors[signedRotationA] = overlayColorHsl
                                 waterTextureIds[signedRotationA] = overlay.texture
                                 waterTextureScaling[signedRotationA] = overlay.textureScale
                                 if (overlay.slot == waterSlots[signedRotationA]) {
@@ -893,29 +893,29 @@ open class MapLoader(
 
     fun calculateFaceCounts(overlay: FloType?, underlay: FluType?) {
         if (unblendable) {
-            shapeVertexA = anIntArrayArray3824[pathShape]
-            shapeVertexB = anIntArrayArray3860[pathShape]
-            shapeVertexC = anIntArrayArray3815[pathShape]
+            shapeVertexA = SHAPE_VERTEX_A[pathShape]
+            shapeVertexB = SHAPE_VERTEX_B[pathShape]
+            shapeVertexC = SHAPE_VERTEX_C[pathShape]
             overlayFaceCount = if (overlay != null) OVERLAY_FACE_COUNT[pathShape] else 0
             underlayFaceCount = if (underlay != null) UNDERLAY_FACE_COUNT[pathShape] else 0
         } else if (overlaySupportsBlending) {
-            shapeVertexA = anIntArrayArray3775[pathShape]
-            shapeVertexB = anIntArrayArray3821[pathShape]
-            shapeVertexC = anIntArrayArray3836[pathShape]
+            shapeVertexA = BLENDING_SHAPE_VERTEX_A[pathShape]
+            shapeVertexB = BLENDING_SHAPE_VERTEX_B[pathShape]
+            shapeVertexC = BLENDING_SHAPE_VERTEX_C[pathShape]
             overlayFaceCount = if (overlay != null) OVERLAY_FACE_COUNT_BLENDED[pathShape] else 0
             underlayFaceCount = if (underlay != null) UNDERLAY_FACE_COUNT_BLENDED[pathShape] else 0
-            overlayFaceCounts = anIntArrayArray3833[pathShape]
+            overlayFaceCounts = BLENDING_FACE_MAPPING[pathShape]
         } else {
-            shapeVertexA = anIntArrayArray3774[pathShape]
-            shapeVertexB = anIntArrayArray3830[pathShape]
-            shapeVertexC = anIntArrayArray3831[pathShape]
+            shapeVertexA = BLENDED_SHAPE_VERTEX_A[pathShape]
+            shapeVertexB = BLENDED_SHAPE_VERTEX_B[pathShape]
+            shapeVertexC = BLENDED_SHAPE_VERTEX_C[pathShape]
             overlayFaceCount = if (overlay != null) OVERLAY_FACE_COUNTS[pathShape] else 0
             underlayFaceCount = if (underlay != null) UNDERLAY_FACE_COUNTS[pathShape] else 0
-            overlayFaceCounts = anIntArrayArray3828[pathShape]
+            overlayFaceCounts = BLENDED_FACE_MAPPING[pathShape]
         }
     }
 
-    fun addOverlayTiles(toolkit: AbstractToolkit, i_2: Int, x: Int, y: Int, overlay: FloType?, bools_6: BooleanArray, ints_7: IntArray?, sizesX: IntArray, sizesY: IntArray, ints_10: IntArray, waterTextures: IntArray, waterTexturesScale: IntArray, groundDrawHeights: IntArray?, ints_14: IntArray?, groundA: Ground, groundB: Ground?, groundC: Ground?) {
+    fun addOverlayTiles(toolkit: AbstractToolkit, neighborFaces: Int, x: Int, y: Int, overlay: FloType?, overlayVisibility: BooleanArray, neighborColors: IntArray?, sizesX: IntArray, sizesY: IntArray, mainTileColors: IntArray, waterTextures: IntArray, waterTexturesScale: IntArray, groundDrawHeights: IntArray?, groundHeightOffsets: IntArray?, groundA: Ground, groundB: Ground?, groundC: Ground?) {
         overlayHslColor = -1
         overlayTextureId = -1
         overlayTextureScale = 256
@@ -925,64 +925,64 @@ open class MapLoader(
             overlayTextureScale = overlay.textureScale
             val overlayBaseColor = ColorUtil.getOverlayColorHsl(toolkit, overlay)
             for (overlayFace in 0 until overlayFaceCount) {
-                val b_22: Byte
-                if (bools_6[-tileRotation and 0x3] && overlayTotalFaces == overlayFaceCounts!![0]) {
+                val totalOverlayFaces: Byte
+                if (overlayVisibility[-tileRotation and 0x3] && overlayTotalFaces == overlayFaceCounts!![0]) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 1
                     overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 1
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_22 = 6
-                } else if (bools_6[2 - tileRotation and 0x3] && overlayFaceCounts!![2] == overlayTotalFaces) {
+                    totalOverlayFaces = 6
+                } else if (overlayVisibility[2 - tileRotation and 0x3] && overlayFaceCounts!![2] == overlayTotalFaces) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 5
                     overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 5
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_22 = 6
-                } else if (bools_6[1 - tileRotation and 0x3] && overlayFaceCounts!![1] == overlayTotalFaces) {
+                    totalOverlayFaces = 6
+                } else if (overlayVisibility[1 - tileRotation and 0x3] && overlayFaceCounts!![1] == overlayTotalFaces) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 3
                     overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 3
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_22 = 6
-                } else if (bools_6[3 - tileRotation and 0x3] && overlayFaceCounts!![3] == overlayTotalFaces) {
+                    totalOverlayFaces = 6
+                } else if (overlayVisibility[3 - tileRotation and 0x3] && overlayFaceCounts!![3] == overlayTotalFaces) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 7
                     overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 7
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_22 = 6
+                    totalOverlayFaces = 6
                 } else {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
-                    b_22 = 3
+                    totalOverlayFaces = 3
                 }
-                for (i_23 in 0 until b_22) {
-                    val rotation = overlayTileRotations[i_23]
-                    val i_25 = rotation - tileRotation * 2 and 0x7
-                    val i_26 = tileSizeDeltasX[rotation]
-                    val i_27 = tileSizeDeltasY[rotation]
+                for (overlayIndex in 0 until totalOverlayFaces) {
+                    val rotation = overlayTileRotations[overlayIndex]
+                    val overlaySlotIndex = rotation - tileRotation * 2 and 0x7
+                    val tileSizeDeltaX = tileSizeDeltasX[rotation]
+                    val tileSizeDeltaY = tileSizeDeltasY[rotation]
                     val sizeX: Int
                     val sizeY: Int
                     if (tileRotation == 1) {
-                        sizeX = i_27
-                        sizeY = 512 - i_26
+                        sizeX = tileSizeDeltaY
+                        sizeY = 512 - tileSizeDeltaX
                     } else if (tileRotation == 2) {
-                        sizeX = 512 - i_26
-                        sizeY = 512 - i_27
+                        sizeX = 512 - tileSizeDeltaX
+                        sizeY = 512 - tileSizeDeltaY
                     } else if (tileRotation == 3) {
-                        sizeX = 512 - i_27
-                        sizeY = i_26
+                        sizeX = 512 - tileSizeDeltaY
+                        sizeY = tileSizeDeltaX
                     } else {
-                        sizeX = i_26
-                        sizeY = i_27
+                        sizeX = tileSizeDeltaX
+                        sizeY = tileSizeDeltaY
                     }
                     sizesX[index] = sizeX
                     sizesY[index] = sizeY
@@ -993,37 +993,37 @@ open class MapLoader(
                         sceneY = (y shl 9) + sizeY
                         groundDrawHeights[index] = groundB!!.getAverageHeight(sceneX, sceneY) - groundA.getAverageHeight(sceneX, sceneY)
                     }
-                    if (ints_14 != null) {
+                    if (groundHeightOffsets != null) {
                         if (groundB != null && !OVERLAY_SHAPE_SUPPORTS_HEIGHT[pathShape][rotation]) {
                             sceneX = (x shl 9) + sizeX
                             sceneY = (y shl 9) + sizeY
-                            ints_14[index] = groundA.getAverageHeight(sceneX, sceneY) - groundB.getAverageHeight(sceneX, sceneY)
-                        } else if (groundC != null && !aBoolArrayArray3823[pathShape][rotation]) {
+                            groundHeightOffsets[index] = groundA.getAverageHeight(sceneX, sceneY) - groundB.getAverageHeight(sceneX, sceneY)
+                        } else if (groundC != null && !UNDERLAY_SHAPE_SUPPORTS_HEIGHT[pathShape][rotation]) {
                             sceneX = (x shl 9) + sizeX
                             sceneY = (y shl 9) + sizeY
-                            ints_14[index] = groundC.getAverageHeight(sceneX, sceneY) - groundA.getAverageHeight(sceneX, sceneY)
+                            groundHeightOffsets[index] = groundC.getAverageHeight(sceneX, sceneY) - groundA.getAverageHeight(sceneX, sceneY)
                         }
                     }
-                    if (rotation < 8 && waterSlots[i_25] > overlay.slot) {
-                        if (ints_7 != null) {
-                            ints_7[index] = overlayTileRenderedColors[i_25]
+                    if (rotation < 8 && waterSlots[overlaySlotIndex] > overlay.slot) {
+                        if (neighborColors != null) {
+                            neighborColors[index] = overlayTileRenderedColors[overlaySlotIndex]
                         }
-                        waterTexturesScale[index] = waterTextureScaling[i_25]
-                        waterTextures[index] = waterTextureIds[i_25]
-                        ints_10[index] = overlayTileColors[i_25]
+                        waterTexturesScale[index] = waterTextureScaling[overlaySlotIndex]
+                        waterTextures[index] = waterTextureIds[overlaySlotIndex]
+                        mainTileColors[index] = overlayTileColors[overlaySlotIndex]
                     } else {
-                        if (ints_7 != null) {
-                            ints_7[index] = overlayBaseColor
+                        if (neighborColors != null) {
+                            neighborColors[index] = overlayBaseColor
                         }
                         waterTextures[index] = overlay.texture
                         waterTexturesScale[index] = overlay.textureScale
-                        ints_10[index] = overlayHslColor
+                        mainTileColors[index] = overlayHslColor
                     }
                     ++index
                 }
                 ++overlayTotalFaces
             }
-            if (!overlayHidden && i_2 == 0) {
+            if (!overlayHidden && neighborFaces == 0) {
                 scene.addWater(x, y, overlay.waterColor, overlay.waterFogDepth, overlay.waterIntensity, overlay.opcode20, overlay.unusedOpcode21, overlay.unusedOpcode22)
             }
             if (pathShape != 12 && overlay.tileColorHsl != -1 && overlay.shadowed) {
@@ -1057,7 +1057,7 @@ open class MapLoader(
             val underlayC = underlayTypeList.list(underlayIdC - 1)
             val underlayD = underlayTypeList.list(underlayIdD - 1)
             for (underlayFace in 0 until underlayFaceCount) {
-                val b_32: Byte
+                val vertexCount: Byte
                 if (blendable[-tileRotation and 0x3] && overlayTotalFaces == overlayFaceCounts!![0]) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 1
@@ -1065,7 +1065,7 @@ open class MapLoader(
                     overlayTileRotations[3] = 1
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_32 = 6
+                    vertexCount = 6
                 } else if (blendable[2 - tileRotation and 0x3] && overlayFaceCounts!![2] == overlayTotalFaces) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 5
@@ -1073,7 +1073,7 @@ open class MapLoader(
                     overlayTileRotations[3] = 5
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_32 = 6
+                    vertexCount = 6
                 } else if (blendable[1 - tileRotation and 0x3] && overlayFaceCounts!![1] == overlayTotalFaces) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 3
@@ -1081,7 +1081,7 @@ open class MapLoader(
                     overlayTileRotations[3] = 3
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_32 = 6
+                    vertexCount = 6
                 } else if (blendable[3 - tileRotation and 0x3] && overlayFaceCounts!![3] == overlayTotalFaces) {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 7
@@ -1089,15 +1089,15 @@ open class MapLoader(
                     overlayTileRotations[3] = 7
                     overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
-                    b_32 = 6
+                    vertexCount = 6
                 } else {
                     overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = shapeVertexB!![overlayTotalFaces]
                     overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
-                    b_32 = 3
+                    vertexCount = 3
                 }
-                for (i_33 in 0 until b_32) {
-                    val rotation = overlayTileRotations[i_33]
+                for (vertexIndex in 0 until vertexCount) {
+                    val rotation = overlayTileRotations[vertexIndex]
                     val slot = rotation - tileRotation * 2 and 0x7
                     val dX = tileSizeDeltasX[rotation]
                     val dY = tileSizeDeltasY[rotation]
@@ -1128,7 +1128,7 @@ open class MapLoader(
                             val sceneX = (x shl 9) + sizeX
                             val sceneY = (y shl 9) + sizeY
                             groundHeightsB[index] = groundA.getAverageHeight(sceneX, sceneY) - groundB.getAverageHeight(sceneX, sceneY)
-                        } else if (groundC != null && !aBoolArrayArray3823[pathShape][rotation]) {
+                        } else if (groundC != null && !UNDERLAY_SHAPE_SUPPORTS_HEIGHT[pathShape][rotation]) {
                             val sceneX = (x shl 9) + sizeX
                             val sceneY = (y shl 9) + sizeY
                             groundHeightsB[index] = groundC.getAverageHeight(sceneX, sceneY) - groundA.getAverageHeight(sceneX, sceneY)
@@ -1332,15 +1332,15 @@ open class MapLoader(
         return tileRotation
     }
 
-    fun decodeTile(stream: Packet, plane: Int, x: Int, y: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, underwater: Boolean) {
-        var deltaY = i_6
-        var deltaX = i_5
-        if (i_9 == 1) {
+    fun decodeTile(stream: Packet, plane: Int, x: Int, y: Int, height: Int, underlayId: Int, absoluteTileX: Int, absoluteTileY: Int, tileRotation: Int, underwater: Boolean) {
+        var deltaY = underlayId
+        var deltaX = height
+        if (tileRotation == 1) {
             deltaY = 1
-        } else if (i_9 == 2) {
+        } else if (tileRotation == 2) {
             deltaX = 1
             deltaY = 1
-        } else if (i_9 == 3) {
+        } else if (tileRotation == 3) {
             deltaX = 1
         }
         var opcode: Int
@@ -1354,25 +1354,25 @@ open class MapLoader(
                     if (overlayHidden) {
                         tileHeights[0][x + deltaX][y + deltaY] = 0
                     } else if (plane == 0) {
-                        tileHeights[0][x + deltaX][y + deltaY] = -TileUtils.calculateTileheight(i_7 + 932731, i_8 + 556238) * 8 shl 2
+                        tileHeights[0][x + deltaX][y + deltaY] = -TileUtils.calculateTileheight(absoluteTileX + 932731, absoluteTileY + 556238) * 8 shl 2
                     } else {
                         tileHeights[plane][x + deltaX][y + deltaY] = tileHeights[plane - 1][x + deltaX][y + deltaY] - 960
                     }
                     break
                 }
                 if (opcode == 1) {
-                    var i_13 = stream.readUByte()
+                    var heightDelta = stream.readUByte()
                     if (!overlayHidden) {
-                        if (i_13 == 1) {
-                            i_13 = 0
+                        if (heightDelta == 1) {
+                            heightDelta = 0
                         }
                         if (plane == 0) {
-                            tileHeights[0][x + deltaX][y + deltaY] = -i_13 * 8 shl 2
+                            tileHeights[0][x + deltaX][y + deltaY] = -heightDelta * 8 shl 2
                         } else {
-                            tileHeights[plane][x + deltaX][y + deltaY] = tileHeights[plane - 1][x + deltaX][y + deltaY] - (i_13 * 8 shl 2)
+                            tileHeights[plane][x + deltaX][y + deltaY] = tileHeights[plane - 1][x + deltaX][y + deltaY] - (heightDelta * 8 shl 2)
                         }
                     } else {
-                        tileHeights[0][x + deltaX][y + deltaY] = i_13 * 8 shl 2
+                        tileHeights[0][x + deltaX][y + deltaY] = heightDelta * 8 shl 2
                     }
                     break
                 }
@@ -1382,7 +1382,7 @@ open class MapLoader(
                     } else {
                         overlayIds[plane][x][y] = stream.readByte()
                         overlayPathShapes[plane][x][y] = ((opcode - 2) / 4).toByte()
-                        overlayRotations[plane][x][y] = (opcode - 2 + i_9 and 0x3).toByte()
+                        overlayRotations[plane][x][y] = (opcode - 2 + tileRotation and 0x3).toByte()
                     }
                 } else if (opcode <= 81) {
                     if (!overlayHidden && !underwater) {
@@ -1429,33 +1429,33 @@ open class MapLoader(
         @JvmField
         val OVERLAY_SHAPE_SUPPORTS_HEIGHT = arrayOf(booleanArrayOf(true, true, true, true, true, true, true, true, true, true, true, true, true), booleanArrayOf(true, true, true, false, false, false, true, true, false, false, false, false, true), booleanArrayOf(true, false, false, false, false, true, true, true, false, false, false, false, false), booleanArrayOf(false, false, true, true, true, true, false, false, false, false, false, false, false), booleanArrayOf(true, true, true, true, true, true, false, false, false, false, false, false, false), booleanArrayOf(true, true, true, false, false, true, true, true, false, false, false, false, false), booleanArrayOf(true, true, false, false, false, true, true, true, false, false, false, false, true), booleanArrayOf(true, true, false, false, false, false, false, true, false, false, false, false, false), booleanArrayOf(false, true, true, true, true, true, true, true, false, false, false, false, false), booleanArrayOf(true, false, false, false, true, true, true, true, true, true, false, false, false), booleanArrayOf(true, true, true, true, true, false, false, false, true, true, false, false, false), booleanArrayOf(true, true, true, false, false, false, false, false, false, false, true, true, false), BooleanArray(13), booleanArrayOf(true, true, true, true, true, true, true, true, true, true, true, true, true), BooleanArray(13))
         @JvmField
-        val aBoolArrayArray3823 = arrayOf(BooleanArray(13), booleanArrayOf(false, false, true, true, true, true, true, false, false, false, false, false, true), booleanArrayOf(true, true, true, true, true, true, false, false, false, false, false, false, false), booleanArrayOf(true, true, true, false, false, true, true, true, false, false, false, false, false), booleanArrayOf(true, false, false, false, false, true, true, true, false, false, false, false, false), booleanArrayOf(false, false, true, true, true, true, false, false, false, false, false, false, false), booleanArrayOf(false, true, true, true, true, true, false, false, false, false, false, false, true), booleanArrayOf(false, true, true, true, true, true, true, true, false, false, false, false, true), booleanArrayOf(true, true, false, false, false, false, false, true, false, false, false, false, false), booleanArrayOf(true, true, true, true, true, false, false, false, true, true, false, false, false), booleanArrayOf(true, false, false, false, true, true, true, true, true, true, false, false, false), booleanArrayOf(true, false, true, true, true, true, true, true, false, false, true, true, false), booleanArrayOf(true, true, true, true, true, true, true, true, true, true, true, true, true), BooleanArray(13), booleanArrayOf(true, true, true, true, true, true, true, true, true, true, true, true, true))
+        val UNDERLAY_SHAPE_SUPPORTS_HEIGHT = arrayOf(BooleanArray(13), booleanArrayOf(false, false, true, true, true, true, true, false, false, false, false, false, true), booleanArrayOf(true, true, true, true, true, true, false, false, false, false, false, false, false), booleanArrayOf(true, true, true, false, false, true, true, true, false, false, false, false, false), booleanArrayOf(true, false, false, false, false, true, true, true, false, false, false, false, false), booleanArrayOf(false, false, true, true, true, true, false, false, false, false, false, false, false), booleanArrayOf(false, true, true, true, true, true, false, false, false, false, false, false, true), booleanArrayOf(false, true, true, true, true, true, true, true, false, false, false, false, true), booleanArrayOf(true, true, false, false, false, false, false, true, false, false, false, false, false), booleanArrayOf(true, true, true, true, true, false, false, false, true, true, false, false, false), booleanArrayOf(true, false, false, false, true, true, true, true, true, true, false, false, false), booleanArrayOf(true, false, true, true, true, true, true, true, false, false, true, true, false), booleanArrayOf(true, true, true, true, true, true, true, true, true, true, true, true, true), BooleanArray(13), booleanArrayOf(true, true, true, true, true, true, true, true, true, true, true, true, true))
         @JvmField
-        val anIntArrayArray3824 = arrayOf(intArrayOf(0, 2), intArrayOf(0, 2), intArrayOf(0, 0, 2), intArrayOf(2, 0, 0), intArrayOf(0, 2, 0), intArrayOf(0, 0, 2), intArrayOf(0, 5, 1, 4), intArrayOf(0, 4, 4, 4), intArrayOf(4, 4, 4, 0), intArrayOf(6, 6, 6, 2, 2, 2), intArrayOf(2, 2, 2, 6, 6, 6), intArrayOf(0, 11, 6, 6, 6, 4), intArrayOf(0, 2), intArrayOf(0, 4, 4, 4), intArrayOf(0, 4, 4, 4))
+        val SHAPE_VERTEX_A = arrayOf(intArrayOf(0, 2), intArrayOf(0, 2), intArrayOf(0, 0, 2), intArrayOf(2, 0, 0), intArrayOf(0, 2, 0), intArrayOf(0, 0, 2), intArrayOf(0, 5, 1, 4), intArrayOf(0, 4, 4, 4), intArrayOf(4, 4, 4, 0), intArrayOf(6, 6, 6, 2, 2, 2), intArrayOf(2, 2, 2, 6, 6, 6), intArrayOf(0, 11, 6, 6, 6, 4), intArrayOf(0, 2), intArrayOf(0, 4, 4, 4), intArrayOf(0, 4, 4, 4))
         @JvmField
-        val anIntArrayArray3860 = arrayOf(intArrayOf(2, 4), intArrayOf(2, 4), intArrayOf(5, 2, 4), intArrayOf(4, 5, 2), intArrayOf(2, 4, 5), intArrayOf(5, 2, 4), intArrayOf(1, 6, 2, 5), intArrayOf(1, 6, 7, 1), intArrayOf(6, 7, 1, 1), intArrayOf(0, 8, 9, 8, 9, 4), intArrayOf(8, 9, 4, 0, 8, 9), intArrayOf(2, 10, 0, 10, 11, 11), intArrayOf(2, 4), intArrayOf(1, 6, 7, 1), intArrayOf(1, 6, 7, 1))
+        val SHAPE_VERTEX_B = arrayOf(intArrayOf(2, 4), intArrayOf(2, 4), intArrayOf(5, 2, 4), intArrayOf(4, 5, 2), intArrayOf(2, 4, 5), intArrayOf(5, 2, 4), intArrayOf(1, 6, 2, 5), intArrayOf(1, 6, 7, 1), intArrayOf(6, 7, 1, 1), intArrayOf(0, 8, 9, 8, 9, 4), intArrayOf(8, 9, 4, 0, 8, 9), intArrayOf(2, 10, 0, 10, 11, 11), intArrayOf(2, 4), intArrayOf(1, 6, 7, 1), intArrayOf(1, 6, 7, 1))
         @JvmField
-        val anIntArrayArray3815 = arrayOf(intArrayOf(6, 6), intArrayOf(6, 6), intArrayOf(6, 5, 5), intArrayOf(5, 6, 5), intArrayOf(5, 5, 6), intArrayOf(6, 5, 5), intArrayOf(5, 0, 4, 1), intArrayOf(7, 7, 1, 2), intArrayOf(7, 1, 2, 7), intArrayOf(8, 9, 4, 0, 8, 9), intArrayOf(0, 8, 9, 8, 9, 4), intArrayOf(11, 0, 10, 11, 4, 2), intArrayOf(6, 6), intArrayOf(7, 7, 1, 2), intArrayOf(7, 7, 1, 2))
+        val SHAPE_VERTEX_C = arrayOf(intArrayOf(6, 6), intArrayOf(6, 6), intArrayOf(6, 5, 5), intArrayOf(5, 6, 5), intArrayOf(5, 5, 6), intArrayOf(6, 5, 5), intArrayOf(5, 0, 4, 1), intArrayOf(7, 7, 1, 2), intArrayOf(7, 1, 2, 7), intArrayOf(8, 9, 4, 0, 8, 9), intArrayOf(0, 8, 9, 8, 9, 4), intArrayOf(11, 0, 10, 11, 4, 2), intArrayOf(6, 6), intArrayOf(7, 7, 1, 2), intArrayOf(7, 7, 1, 2))
         @JvmField
         val pathSquares = arrayOf(BooleanArray(4), BooleanArray(4), booleanArrayOf(false, false, true, false), booleanArrayOf(false, false, true, false), booleanArrayOf(false, false, true, false), booleanArrayOf(false, false, true, false), booleanArrayOf(true, false, true, false), booleanArrayOf(true, false, false, true), booleanArrayOf(true, false, false, true), BooleanArray(4), BooleanArray(4), BooleanArray(4), BooleanArray(4))
         @JvmField
-        val anIntArrayArray3828 = arrayOf(intArrayOf(0, 1, 2, 3), intArrayOf(1, 2, 3, 0), intArrayOf(1, 2, -1, 0), intArrayOf(2, 0, -1, 1), intArrayOf(0, 1, -1, 2), intArrayOf(1, 2, -1, 0), intArrayOf(-1, 4, -1, 1), intArrayOf(-1, 1, 3, -1), intArrayOf(-1, 0, 2, -1), intArrayOf(3, 5, 2, 0), intArrayOf(0, 2, 5, 3), intArrayOf(0, 2, 3, 5), intArrayOf(0, 1, 2, 3))
+        val BLENDED_FACE_MAPPING = arrayOf(intArrayOf(0, 1, 2, 3), intArrayOf(1, 2, 3, 0), intArrayOf(1, 2, -1, 0), intArrayOf(2, 0, -1, 1), intArrayOf(0, 1, -1, 2), intArrayOf(1, 2, -1, 0), intArrayOf(-1, 4, -1, 1), intArrayOf(-1, 1, 3, -1), intArrayOf(-1, 0, 2, -1), intArrayOf(3, 5, 2, 0), intArrayOf(0, 2, 5, 3), intArrayOf(0, 2, 3, 5), intArrayOf(0, 1, 2, 3))
         @JvmField
-        val anIntArrayArray3774 = arrayOf(intArrayOf(0, 2, 4, 6), intArrayOf(6, 0, 2, 4), intArrayOf(6, 0, 2), intArrayOf(2, 6, 0), intArrayOf(0, 2, 6), intArrayOf(6, 0, 2), intArrayOf(5, 6, 0, 1, 2, 4), intArrayOf(7, 2, 4, 4), intArrayOf(2, 4, 4, 7), intArrayOf(6, 6, 4, 0, 2, 2), intArrayOf(0, 2, 2, 6, 6, 4), intArrayOf(0, 2, 2, 4, 6, 6), intArrayOf(0, 2, 4, 6))
+        val BLENDED_SHAPE_VERTEX_A = arrayOf(intArrayOf(0, 2, 4, 6), intArrayOf(6, 0, 2, 4), intArrayOf(6, 0, 2), intArrayOf(2, 6, 0), intArrayOf(0, 2, 6), intArrayOf(6, 0, 2), intArrayOf(5, 6, 0, 1, 2, 4), intArrayOf(7, 2, 4, 4), intArrayOf(2, 4, 4, 7), intArrayOf(6, 6, 4, 0, 2, 2), intArrayOf(0, 2, 2, 6, 6, 4), intArrayOf(0, 2, 2, 4, 6, 6), intArrayOf(0, 2, 4, 6))
         @JvmField
-        val anIntArrayArray3830 = arrayOf(intArrayOf(2, 4, 6, 0), intArrayOf(0, 2, 4, 6), intArrayOf(0, 2, 4), intArrayOf(4, 0, 2), intArrayOf(2, 4, 0), intArrayOf(0, 2, 4), intArrayOf(6, 0, 1, 2, 4, 5), intArrayOf(0, 4, 7, 6), intArrayOf(4, 7, 6, 0), intArrayOf(0, 8, 6, 2, 9, 4), intArrayOf(2, 9, 4, 0, 8, 6), intArrayOf(2, 11, 4, 6, 10, 0), intArrayOf(2, 4, 6, 0))
+        val BLENDED_SHAPE_VERTEX_B = arrayOf(intArrayOf(2, 4, 6, 0), intArrayOf(0, 2, 4, 6), intArrayOf(0, 2, 4), intArrayOf(4, 0, 2), intArrayOf(2, 4, 0), intArrayOf(0, 2, 4), intArrayOf(6, 0, 1, 2, 4, 5), intArrayOf(0, 4, 7, 6), intArrayOf(4, 7, 6, 0), intArrayOf(0, 8, 6, 2, 9, 4), intArrayOf(2, 9, 4, 0, 8, 6), intArrayOf(2, 11, 4, 6, 10, 0), intArrayOf(2, 4, 6, 0))
         @JvmField
-        val anIntArrayArray3831 = arrayOf(intArrayOf(12, 12, 12, 12), intArrayOf(12, 12, 12, 12), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(12, 12, 12, 12, 12, 12), intArrayOf(1, 1, 1, 7), intArrayOf(1, 1, 7, 1), intArrayOf(8, 9, 9, 8, 8, 9), intArrayOf(8, 8, 9, 8, 9, 9), intArrayOf(10, 10, 11, 11, 11, 10), intArrayOf(12, 12, 12, 12))
+        val BLENDED_SHAPE_VERTEX_C = arrayOf(intArrayOf(12, 12, 12, 12), intArrayOf(12, 12, 12, 12), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(12, 12, 12, 12, 12, 12), intArrayOf(1, 1, 1, 7), intArrayOf(1, 1, 7, 1), intArrayOf(8, 9, 9, 8, 8, 9), intArrayOf(8, 8, 9, 8, 9, 9), intArrayOf(10, 10, 11, 11, 11, 10), intArrayOf(12, 12, 12, 12))
         @JvmField
         val pathBlendings = arrayOf(BooleanArray(4), booleanArrayOf(false, true, true, false), booleanArrayOf(true, false, true, false), booleanArrayOf(true, false, true, false), booleanArrayOf(false, false, true, false), booleanArrayOf(false, false, true, false), booleanArrayOf(true, false, true, false), booleanArrayOf(true, false, false, true), booleanArrayOf(true, false, false, true), booleanArrayOf(true, true, false, false), BooleanArray(4), booleanArrayOf(false, true, false, true), BooleanArray(4))
         @JvmField
-        val anIntArrayArray3833 = arrayOf(intArrayOf(0, 1, 2, 3), intArrayOf(1, -1, -1, 0), intArrayOf(-1, 2, -1, 0), intArrayOf(-1, 0, -1, 2), intArrayOf(0, 1, -1, 2), intArrayOf(1, 2, -1, 0), intArrayOf(-1, 4, -1, 1), intArrayOf(-1, 3, 4, -1), intArrayOf(-1, 0, 2, -1), intArrayOf(-1, -1, 2, 0), intArrayOf(0, 2, 5, 3), intArrayOf(0, -1, 6, -1), intArrayOf(0, 1, 2, 3))
+        val BLENDING_FACE_MAPPING = arrayOf(intArrayOf(0, 1, 2, 3), intArrayOf(1, -1, -1, 0), intArrayOf(-1, 2, -1, 0), intArrayOf(-1, 0, -1, 2), intArrayOf(0, 1, -1, 2), intArrayOf(1, 2, -1, 0), intArrayOf(-1, 4, -1, 1), intArrayOf(-1, 3, 4, -1), intArrayOf(-1, 0, 2, -1), intArrayOf(-1, -1, 2, 0), intArrayOf(0, 2, 5, 3), intArrayOf(0, -1, 6, -1), intArrayOf(0, 1, 2, 3))
         @JvmField
-        val anIntArrayArray3775 = arrayOf(intArrayOf(0, 2, 4, 6), intArrayOf(6, 0, 2, 3, 5, 3), intArrayOf(6, 0, 2, 4), intArrayOf(2, 5, 6, 1), intArrayOf(0, 2, 6), intArrayOf(6, 0, 2), intArrayOf(5, 6, 0, 1, 2, 4), intArrayOf(7, 7, 1, 2, 4, 6), intArrayOf(2, 4, 4, 7), intArrayOf(6, 6, 4, 0, 1, 1, 3, 3), intArrayOf(0, 2, 2, 6, 6, 4), intArrayOf(0, 2, 2, 3, 7, 0, 4, 3), intArrayOf(0, 2, 4, 6))
+        val BLENDING_SHAPE_VERTEX_A = arrayOf(intArrayOf(0, 2, 4, 6), intArrayOf(6, 0, 2, 3, 5, 3), intArrayOf(6, 0, 2, 4), intArrayOf(2, 5, 6, 1), intArrayOf(0, 2, 6), intArrayOf(6, 0, 2), intArrayOf(5, 6, 0, 1, 2, 4), intArrayOf(7, 7, 1, 2, 4, 6), intArrayOf(2, 4, 4, 7), intArrayOf(6, 6, 4, 0, 1, 1, 3, 3), intArrayOf(0, 2, 2, 6, 6, 4), intArrayOf(0, 2, 2, 3, 7, 0, 4, 3), intArrayOf(0, 2, 4, 6))
         @JvmField
-        val anIntArrayArray3821 = arrayOf(intArrayOf(2, 4, 6, 0), intArrayOf(0, 2, 3, 5, 6, 4), intArrayOf(0, 1, 4, 5), intArrayOf(4, 6, 0, 2), intArrayOf(2, 4, 0), intArrayOf(0, 2, 4), intArrayOf(6, 0, 1, 2, 4, 5), intArrayOf(0, 1, 2, 4, 6, 7), intArrayOf(4, 7, 6, 0), intArrayOf(0, 8, 6, 1, 9, 2, 9, 4), intArrayOf(2, 9, 4, 0, 8, 6), intArrayOf(2, 11, 3, 7, 10, 10, 6, 6), intArrayOf(2, 4, 6, 0))
+        val BLENDING_SHAPE_VERTEX_B = arrayOf(intArrayOf(2, 4, 6, 0), intArrayOf(0, 2, 3, 5, 6, 4), intArrayOf(0, 1, 4, 5), intArrayOf(4, 6, 0, 2), intArrayOf(2, 4, 0), intArrayOf(0, 2, 4), intArrayOf(6, 0, 1, 2, 4, 5), intArrayOf(0, 1, 2, 4, 6, 7), intArrayOf(4, 7, 6, 0), intArrayOf(0, 8, 6, 1, 9, 2, 9, 4), intArrayOf(2, 9, 4, 0, 8, 6), intArrayOf(2, 11, 3, 7, 10, 10, 6, 6), intArrayOf(2, 4, 6, 0))
         @JvmField
-        val anIntArrayArray3836 = arrayOf(intArrayOf(12, 12, 12, 12), intArrayOf(12, 12, 12, 12, 12, 5), intArrayOf(5, 5, 1, 1), intArrayOf(5, 1, 1, 5), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(12, 12, 12, 12, 12, 12), intArrayOf(1, 12, 12, 12, 12, 12), intArrayOf(1, 1, 7, 1), intArrayOf(8, 9, 9, 8, 8, 3, 1, 9), intArrayOf(8, 8, 9, 8, 9, 9), intArrayOf(10, 10, 11, 11, 11, 7, 3, 7), intArrayOf(12, 12, 12, 12))
+        val BLENDING_SHAPE_VERTEX_C = arrayOf(intArrayOf(12, 12, 12, 12), intArrayOf(12, 12, 12, 12, 12, 5), intArrayOf(5, 5, 1, 1), intArrayOf(5, 1, 1, 5), intArrayOf(5, 5, 5), intArrayOf(5, 5, 5), intArrayOf(12, 12, 12, 12, 12, 12), intArrayOf(1, 12, 12, 12, 12, 12), intArrayOf(1, 1, 7, 1), intArrayOf(8, 9, 9, 8, 8, 3, 1, 9), intArrayOf(8, 8, 9, 8, 9, 9), intArrayOf(10, 10, 11, 11, 11, 7, 3, 7), intArrayOf(12, 12, 12, 12))
 
         @JvmStatic
         fun calculateLocUid(gameObject: GameObject, x: Int, y: Int): Long {

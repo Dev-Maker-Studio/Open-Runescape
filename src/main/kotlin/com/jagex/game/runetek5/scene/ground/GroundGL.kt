@@ -142,114 +142,114 @@ open class GroundGL(
     }
 
     override fun calculateBlockTiles(
-        i_1: Int,
-        i_2: Int,
-        ints_3: IntArray,
-        ints_4: IntArray,
-        ints_5: IntArray,
-        ints_6: IntArray,
-        ints_7: IntArray,
-        ints_8: IntArray,
-        ints_9: IntArray,
-        ints_10: IntArray,
-        ints_11: IntArray,
-        ints_12: IntArray,
-        ints_13: IntArray,
-        class9014: WaterTile?
+        x: Int,
+        y: Int,
+        offsetsX: IntArray,
+        heightOffsets: IntArray,
+        offsetsZ: IntArray,
+        unused: IntArray,
+        trianglesA: IntArray,
+        trianglesB: IntArray,
+        trianglesC: IntArray,
+        floorColor: IntArray,
+        minimapColor: IntArray,
+        overlayTextureIds: IntArray,
+        textureScales: IntArray,
+        waterTile: WaterTile?
     ) {
-        val i_16 = ints_10.size
-        val ints_17 = IntArray(i_16 * 3)
-        val ints_18 = IntArray(i_16 * 3)
-        val ints_19 = IntArray(i_16 * 3)
-        val ints_20 = IntArray(i_16 * 3)
-        val ints_21 = IntArray(i_16 * 3)
-        val ints_22 = IntArray(i_16 * 3)
-        val ints_23 = IntArray(i_16 * 3)
-        val ints_24 = IntArray(i_16 * 3)
-        var i_25 = 0
+        val triangleCount = floorColor.size
+        val expandedOffsetsX = IntArray(triangleCount * 3)
+        val expandedOffsetsZ = IntArray(triangleCount * 3)
+        val expandedMainColors = IntArray(triangleCount * 3)
+        val expandedBlendColors = IntArray(triangleCount * 3)
+        val expandedOverlayTextures = IntArray(triangleCount * 3)
+        val expandedTextureScales = IntArray(triangleCount * 3)
+        val expandedHeightOffsets = IntArray(triangleCount * 3)
+        val expandedUnused = IntArray(triangleCount * 3)
+        var vertexIndex = 0
 
-        for (i_26 in 0 until i_16) {
-            val i_27 = ints_7[i_26]
-            val i_28 = ints_8[i_26]
-            val i_29 = ints_9[i_26]
-            ints_17[i_25] = ints_3[i_27]
-            ints_18[i_25] = ints_5[i_27]
-            ints_19[i_25] = ints_10[i_26]
-            ints_21[i_25] = ints_12[i_26]
-            ints_22[i_25] = ints_13[i_26]
-            ints_20[i_25] = ints_11[i_26]
-            ints_23[i_25] = ints_4[i_27]
-            ints_24[i_25] = ints_6[i_27]
+        for (triangleIndex in 0 until triangleCount) {
+            val vertexA = trianglesA[triangleIndex]
+            val vertexB = trianglesB[triangleIndex]
+            val vertexC = trianglesC[triangleIndex]
+            expandedOffsetsX[vertexIndex] = offsetsX[vertexA]
+            expandedOffsetsZ[vertexIndex] = offsetsZ[vertexA]
+            expandedMainColors[vertexIndex] = floorColor[triangleIndex]
+            expandedOverlayTextures[vertexIndex] = overlayTextureIds[triangleIndex]
+            expandedTextureScales[vertexIndex] = textureScales[triangleIndex]
+            expandedBlendColors[vertexIndex] = minimapColor[triangleIndex]
+            expandedHeightOffsets[vertexIndex] = heightOffsets[vertexA]
+            expandedUnused[vertexIndex] = unused[vertexA]
 
-            ++i_25
-            ints_17[i_25] = ints_3[i_28]
-            ints_18[i_25] = ints_5[i_28]
-            ints_19[i_25] = ints_10[i_26]
-            ints_21[i_25] = ints_12[i_26]
-            ints_22[i_25] = ints_13[i_26]
-            ints_20[i_25] = ints_11[i_26]
-            ints_23[i_25] = ints_4[i_28]
-            ints_24[i_25] = ints_6[i_28]
+            ++vertexIndex
+            expandedOffsetsX[vertexIndex] = offsetsX[vertexB]
+            expandedOffsetsZ[vertexIndex] = offsetsZ[vertexB]
+            expandedMainColors[vertexIndex] = floorColor[triangleIndex]
+            expandedOverlayTextures[vertexIndex] = overlayTextureIds[triangleIndex]
+            expandedTextureScales[vertexIndex] = textureScales[triangleIndex]
+            expandedBlendColors[vertexIndex] = minimapColor[triangleIndex]
+            expandedHeightOffsets[vertexIndex] = heightOffsets[vertexB]
+            expandedUnused[vertexIndex] = unused[vertexB]
 
-            ++i_25
-            ints_17[i_25] = ints_3[i_29]
-            ints_18[i_25] = ints_5[i_29]
-            ints_19[i_25] = ints_10[i_26]
-            ints_21[i_25] = ints_12[i_26]
-            ints_22[i_25] = ints_13[i_26]
-            ints_20[i_25] = ints_11[i_26]
-            ints_23[i_25] = ints_4[i_29]
-            ints_24[i_25] = ints_6[i_29]
+            ++vertexIndex
+            expandedOffsetsX[vertexIndex] = offsetsX[vertexC]
+            expandedOffsetsZ[vertexIndex] = offsetsZ[vertexC]
+            expandedMainColors[vertexIndex] = floorColor[triangleIndex]
+            expandedOverlayTextures[vertexIndex] = overlayTextureIds[triangleIndex]
+            expandedTextureScales[vertexIndex] = textureScales[triangleIndex]
+            expandedBlendColors[vertexIndex] = minimapColor[triangleIndex]
+            expandedHeightOffsets[vertexIndex] = heightOffsets[vertexC]
+            expandedUnused[vertexIndex] = unused[vertexC]
 
-            ++i_25
+            ++vertexIndex
         }
 
-        addBlendedTile(i_1, i_2, ints_17, ints_23, ints_18, ints_24, ints_19, ints_20, ints_21, ints_22, class9014, false)
+        addBlendedTile(x, y, expandedOffsetsX, expandedHeightOffsets, expandedOffsetsZ, expandedUnused, expandedMainColors, expandedBlendColors, expandedOverlayTextures, expandedTextureScales, waterTile, false)
     }
 
-    fun renderShadows(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
+    fun renderShadows(cameraGridX: Int, cameraGridY: Int, visibleTileRange: Int, tilesOnScreen: Array<BooleanArray>, belowLowestPlane: Boolean) {
         if (goundMaterialNodes != null) {
-            var i_7 = i_3 + i_3 + 1
-            i_7 *= i_7
-            if (activeToolkit.projectedVerticesZ.size < i_7) {
-                activeToolkit.projectedVerticesZ = IntArray(i_7)
+            var tileAreaSize = visibleTileRange + visibleTileRange + 1
+            tileAreaSize *= tileAreaSize
+            if (activeToolkit.projectedVerticesZ.size < tileAreaSize) {
+                activeToolkit.projectedVerticesZ = IntArray(tileAreaSize)
             }
 
             if (activeToolkit.textureBuffer.buffer.size < amountOfTexturedFaces * 2) {
                 activeToolkit.textureBuffer = GlBitBuffer(amountOfTexturedFaces * 2)
             }
 
-            var i_8 = i_1 - i_3
-            val i_9 = i_8
-            if (i_8 < 0) {
-                i_8 = 0
+            var startX = cameraGridX - visibleTileRange
+            val originalStartX = startX
+            if (startX < 0) {
+                startX = 0
             }
 
-            var i_10 = i_2 - i_3
-            val i_11 = i_10
-            if (i_10 < 0) {
-                i_10 = 0
+            var startY = cameraGridY - visibleTileRange
+            val originalStartY = startY
+            if (startY < 0) {
+                startY = 0
             }
 
-            var i_12 = i_3 + i_1
-            if (i_12 > width - 1) {
-                i_12 = width - 1
+            var endX = visibleTileRange + cameraGridX
+            if (endX > width - 1) {
+                endX = width - 1
             }
 
-            var i_13 = i_3 + i_2
-            if (i_13 > length - 1) {
-                i_13 = length - 1
+            var endY = visibleTileRange + cameraGridY
+            if (endY > length - 1) {
+                endY = length - 1
             }
 
-            var i_14 = 0
-            val ints_15 = activeToolkit.projectedVerticesZ
+            var visibleTileCount = 0
+            val visibleTileIndices = activeToolkit.projectedVerticesZ
 
-            for (i_16 in i_8..i_12) {
-                val bools_20 = bools_4[i_16 - i_9]
+            for (tileX in startX..endX) {
+                val visibilityRow = tilesOnScreen[tileX - originalStartX]
 
-                for (i_21 in i_10..i_13) {
-                    if (bools_20[i_21 - i_11]) {
-                        ints_15[i_14++] = i_16 + i_21 * width
+                for (tileY in startY..endY) {
+                    if (visibilityRow[tileY - originalStartY]) {
+                        visibleTileIndices[visibleTileCount++] = tileX + tileY * width
                     }
                 }
             }
@@ -257,8 +257,8 @@ open class GroundGL(
             activeToolkit.setupMatrixRendering()
             activeToolkit.setLightingEnabled((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0)
 
-            for (i_16 in goundMaterialNodes!!.indices) {
-                (goundMaterialNodes!![i_16] as GroundMaterialGL).drawMaterialTriangles(ints_15, i_14)
+            for (tileX in goundMaterialNodes!!.indices) {
+                (goundMaterialNodes!![tileX] as GroundMaterialGL).drawMaterialTriangles(visibleTileIndices, visibleTileCount)
             }
 
             if (!activeLights.isEmpty()) {
@@ -278,7 +278,7 @@ open class GroundGL(
                 var light: Node<*>? = activeLights.getTail() as Node<*>?
                 while (light != null) {
                     val glLight = light as LightGL
-                    glLight.drawLightMesh(i_1, i_2, i_3, bools_4)
+                    glLight.drawLightMesh(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen)
                     @Suppress("UNCHECKED_CAST")
                     light = activeLights.getPrevious() as Node<*>?
                 }
@@ -293,7 +293,7 @@ open class GroundGL(
                 OpenGL.glPushMatrix()
                 OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
-                shadowMapper!!.renderShadowOverlay(i_1, i_2, i_3, bools_4, bool5)
+                shadowMapper!!.renderShadowOverlay(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen, belowLowestPlane)
                 OpenGL.glPopMatrix()
             }
         }
@@ -338,7 +338,7 @@ open class GroundGL(
             for (x in 0 until width) {
                 for (y in 0 until length) {
                     if (tileColors!![x][y] != null) {
-                        val arr_65 = materials!![x][y]!!
+                        val vertexMaterials = materials!![x][y]!!
                         val offsetsX = tileOffsetsX!![x][y]!!
                         val offsetsZ = tileOffsetsZ!![x][y]!!
                         val mainColors = tileColors!![x][y]!!
@@ -347,7 +347,7 @@ open class GroundGL(
                             blendingColors = mainColors
                         }
                         val floorOffsets = if (lightOffsetsA != null) lightOffsetsA!![x][y] else null
-                        val ints_17 = if (lightOffsetsB != null) lightOffsetsB!![x][y] else null
+                        val lightOffsetsForTile = if (lightOffsetsB != null) lightOffsetsB!![x][y] else null
 
                         val lightingXSouthWest = lightingX!![x][y]
                         val lightingYSouthWest = lightingY!![x][y]
@@ -365,21 +365,21 @@ open class GroundGL(
                         val lightStrengthNorthWest = intensity[x][y + 1].toInt() and 0xff
                         val lightStrengthNorthEast = intensity[x + 1][y + 1].toInt() and 0xff
                         val lightStrengthSouthEast = intensity[x + 1][y].toInt() and 0xff
-                        var i_34 = 0
+                        var uniqueMaterialCount = 0
 
                         loop@ for (colorIndex in mainColors.indices) {
-                            val currentMaterialNode = arr_65[colorIndex]
-                            for (index in 0 until i_34) {
+                            val currentMaterialNode = vertexMaterials[colorIndex]
+                            for (index in 0 until uniqueMaterialCount) {
                                 if (currentMaterialNode === someMaterialArray[index]) {
                                     continue@loop
                                 }
                             }
-                            someMaterialArray[i_34++] = currentMaterialNode
+                            someMaterialArray[uniqueMaterialCount++] = currentMaterialNode
                         }
 
-                        val shorts_74 = ShortArray(mainColors.size)
+                        val vertexMaterialIndices = ShortArray(mainColors.size)
                         @Suppress("UNCHECKED_CAST")
-                        (materialIndices as Array<ShortArray?>)[x + y * width] = shorts_74
+                        (materialIndices as Array<ShortArray?>)[x + y * width] = vertexMaterialIndices
 
                         for (loop in mainColors.indices) {
                             val sceneX = (x shl tileScale) + offsetsX[loop]
@@ -394,7 +394,7 @@ open class GroundGL(
                             val offsetZ = offsetsZ[loop]
                             val baseStrength = 74
                             var directColor = 0
-                            var f_50 = 1.0f
+                            var sunDotProduct = 1.0f
                             var lightX: Float
                             var lightY: Float
                             var lightZ: Float
@@ -447,8 +447,8 @@ open class GroundGL(
 
                                 directColor = ColorUtil.hslToRgb!![mainColor and 0xff80 or lightness]
                                 if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) == 0) {
-                                    f_50 = activeToolkit.sunDirection[0] * lightX + activeToolkit.sunDirection[1] * lightY + activeToolkit.sunDirection[2] * lightZ
-                                    f_50 = activeToolkit.sunBrightness + f_50 * (if (f_50 > 0.0f) activeToolkit.sunColorIntensity else activeToolkit.antiSunColorIntensity)
+                                    sunDotProduct = activeToolkit.sunDirection[0] * lightX + activeToolkit.sunDirection[1] * lightY + activeToolkit.sunDirection[2] * lightZ
+                                    sunDotProduct = activeToolkit.sunBrightness + sunDotProduct * (if (sunDotProduct > 0.0f) activeToolkit.sunColorIntensity else activeToolkit.antiSunColorIntensity)
                                 }
                             }
 
@@ -457,7 +457,7 @@ open class GroundGL(
                                 blendedTile = hashTable.get(uid)
                             }
 
-                            var i_84: Int
+                            var materialVertexIndex: Int
                             var colorRgb: Int
                             if (blendedTile == null) {
                                 if (blendColor != mainColor) {
@@ -470,8 +470,8 @@ open class GroundGL(
 
                                     colorRgb = ColorUtil.hslToRgb!![blendColor and 0xff80 or lightness]
                                     if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) == 0) {
-                                        val f_10000 = activeToolkit.sunDirection[0] * lightX + activeToolkit.sunDirection[1] * lightY + activeToolkit.sunDirection[2] * lightZ
-                                        val lightStrengthMultiplier = activeToolkit.sunBrightness + f_50 * (if (f_50 > 0.0f) activeToolkit.sunColorIntensity else activeToolkit.antiSunColorIntensity)
+                                        val blendSunDotProduct = activeToolkit.sunDirection[0] * lightX + activeToolkit.sunDirection[1] * lightY + activeToolkit.sunDirection[2] * lightZ
+                                        val lightStrengthMultiplier = activeToolkit.sunBrightness + sunDotProduct * (if (sunDotProduct > 0.0f) activeToolkit.sunColorIntensity else activeToolkit.antiSunColorIntensity)
                                         var red = colorRgb shr 16 and 0xff
                                         var green = colorRgb shr 8 and 0xff
                                         var blue = colorRgb and 0xff
@@ -509,7 +509,7 @@ open class GroundGL(
                                     nativeStream.putFloatBigEndian(sceneX.toFloat())
                                     nativeStream.putFloatBigEndian(sceneY.toFloat())
                                     if (lightOffsetsB != null) {
-                                        nativeStream.putFloatBigEndian(if (ints_17 != null) (ints_17[loop] - 1).toFloat() else 0.0f)
+                                        nativeStream.putFloatBigEndian(if (lightOffsetsForTile != null) (lightOffsetsForTile[loop] - 1).toFloat() else 0.0f)
                                     }
                                     if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0) {
                                         nativeStream.putFloatBigEndian(lightX)
@@ -527,7 +527,7 @@ open class GroundGL(
                                     nativeStream.putFloatLittleEndian(sceneX.toFloat())
                                     nativeStream.putFloatLittleEndian(sceneY.toFloat())
                                     if (lightOffsetsB != null) {
-                                        nativeStream.putFloatLittleEndian(if (ints_17 != null) (ints_17[loop] - 1).toFloat() else 0.0f)
+                                        nativeStream.putFloatLittleEndian(if (lightOffsetsForTile != null) (lightOffsetsForTile[loop] - 1).toFloat() else 0.0f)
                                     }
                                     if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0) {
                                         nativeStream.putFloatLittleEndian(lightX)
@@ -535,22 +535,22 @@ open class GroundGL(
                                         nativeStream.putFloatLittleEndian(lightZ)
                                     }
                                 }
-                                i_84 = totalMaterializedTiles++
-                                shorts_74[loop] = i_84.toShort()
+                                materialVertexIndex = totalMaterializedTiles++
+                                vertexMaterialIndices[loop] = materialVertexIndex.toShort()
                                 if (mainColor != -1) {
-                                    materialsByVertice[i_84] = arr_65[loop]
+                                    materialsByVertice[materialVertexIndex] = vertexMaterials[loop]
                                 }
-                                hashTable.put(ShortNode(shorts_74[loop]), uid)
+                                hashTable.put(ShortNode(vertexMaterialIndices[loop]), uid)
                             } else {
-                                shorts_74[loop] = (blendedTile as ShortNode).value
-                                i_84 = shorts_74[loop].toInt() and 0xffff
-                                if (mainColor != -1 && arr_65[loop].pointer < materialsByVertice[i_84]!!.pointer) {
-                                    materialsByVertice[i_84] = arr_65[loop]
+                                vertexMaterialIndices[loop] = (blendedTile as ShortNode).value
+                                materialVertexIndex = vertexMaterialIndices[loop].toInt() and 0xffff
+                                if (mainColor != -1 && vertexMaterials[loop].pointer < materialsByVertice[materialVertexIndex]!!.pointer) {
+                                    materialsByVertice[materialVertexIndex] = vertexMaterials[loop]
                                 }
                             }
 
-                            for (materialIndex in 0 until i_34) {
-                                someMaterialArray[materialIndex]!!.writeVertexColor(i_84, directColor, lightStrength, f_50)
+                            for (materialIndex in 0 until uniqueMaterialCount) {
+                                someMaterialArray[materialIndex]!!.writeVertexColor(materialVertexIndex, directColor, lightStrength, sunDotProduct)
                             }
 
                             amountOfTexturedFaces++
@@ -559,10 +559,10 @@ open class GroundGL(
                 }
             }
 
-            for (i_9 in 0 until totalMaterializedTiles) {
-                val class282Sub310 = materialsByVertice[i_9]
-                if (class282Sub310 != null) {
-                    class282Sub310.appendToNativeStream(i_9)
+            for (vertexIndex in 0 until totalMaterializedTiles) {
+                val groundMaterial = materialsByVertice[vertexIndex]
+                if (groundMaterial != null) {
+                    groundMaterial.appendToNativeStream(vertexIndex)
                 }
             }
 
@@ -667,8 +667,8 @@ open class GroundGL(
     }
 
     override fun renderMinimapFloor(
-        i_1: Int,
-        i_2: Int,
+        centerOffsetX: Int,
+        centerOffsetY: Int,
         startX: Int,
         startY: Int,
         endX: Int,
@@ -697,8 +697,8 @@ open class GroundGL(
             GROUND_MATRIX[9] = 0.0f
             GROUND_MATRIX[10] = 0.0f
             GROUND_MATRIX[11] = 0.0f
-            GROUND_MATRIX[12] = -1.0f - ((1024 * startX) / 128.0f - (i_1 * 2)) / activeDisplay.getWidth()
-            GROUND_MATRIX[13] = 1.0f - ((i_2 * 2) + (1024 * endY) / 128.0f) / activeDisplay.getHeight()
+            GROUND_MATRIX[12] = -1.0f - ((1024 * startX) / 128.0f - (centerOffsetX * 2)) / activeDisplay.getWidth()
+            GROUND_MATRIX[13] = 1.0f - ((centerOffsetY * 2) + (1024 * endY) / 128.0f) / activeDisplay.getHeight()
             GROUND_MATRIX[14] = 0.0f
             GROUND_MATRIX[15] = 1.0f
             OpenGL.glMatrixMode(5889)
@@ -777,33 +777,33 @@ open class GroundGL(
         }
     }
 
-    override fun addShadow(class282Sub50Sub171: Shadow?, i_2: Int, i_3: Int, i_4: Int) {
-        if (shadowMapper != null && class282Sub50Sub171 != null) {
-            val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
-            val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
-            shadowMapper!!.removeShadow(class282Sub50Sub171, i_7, i_8)
+    override fun addShadow(shadow: Shadow?, scaledX: Int, averageHeight: Int, scaledY: Int) {
+        if (shadowMapper != null && shadow != null) {
+            val shadowX = scaledX - (averageHeight * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
+            val shadowY = scaledY - (averageHeight * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
+            shadowMapper!!.removeShadow(shadow, shadowX, shadowY)
         }
     }
 
-    override fun hasRenderingShadows(shadow: Shadow?, i_2: Int, i_3: Int, i_4: Int): Boolean {
+    override fun hasRenderingShadows(shadow: Shadow?, x: Int, planesHeightDelta: Int, y: Int): Boolean {
         if (shadowMapper != null && shadow != null) {
-            val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
-            val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
-            return shadowMapper!!.applyShadow(shadow, i_7, i_8)
+            val shadowX = x - (planesHeightDelta * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
+            val shadowY = y - (planesHeightDelta * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
+            return shadowMapper!!.applyShadow(shadow, shadowX, shadowY)
         }
         return false
     }
 
-    override fun removeShadow(shadow: Shadow?, i_2: Int, i_3: Int, i_4: Int) {
+    override fun removeShadow(shadow: Shadow?, x: Int, groundOffset: Int, y: Int) {
         if (shadowMapper != null && shadow != null) {
-            val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
-            val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
-            shadowMapper!!.addShadow(shadow, i_7, i_8)
+            val shadowX = x - (groundOffset * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
+            val shadowY = y - (groundOffset * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
+            shadowMapper!!.addShadow(shadow, shadowX, shadowY)
         }
     }
 
-    override fun addLight(lightNode: PointLight, ints_2: IntArray) {
-        activeLights.insertTail(LightGL(activeToolkit, this, lightNode, ints_2))
+    override fun addLight(lightNode: PointLight, lightDisplacement: IntArray) {
+        activeLights.insertTail(LightGL(activeToolkit, this, lightNode, lightDisplacement))
     }
 
     override fun addBlendedTile(
@@ -881,8 +881,8 @@ open class GroundGL(
         currentColorCount += mainColors.size
     }
 
-    override fun renderFloor(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
-        renderShadows(i_1, i_2, i_3, bools_4, bool5)
+    override fun renderFloor(cameraGridX: Int, cameraGridY: Int, visibleTileRange: Int, tilesOnScreen: Array<BooleanArray>, belowLowestPlane: Boolean) {
+        renderShadows(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen, belowLowestPlane)
     }
 
     override fun createShadowAt(tileX: Int, tileY: Int, shadow: Shadow?): Shadow? {

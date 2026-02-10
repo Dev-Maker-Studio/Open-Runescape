@@ -1453,8 +1453,8 @@ class GroundSM(
     override fun hasRenderingShadows(shadow: Shadow?, x: Int, planesHeightDelta: Int, y: Int): Boolean = false
 
     override fun renderMinimapFloor(
-        var1: Int,
-        var2: Int,
+        centerOffsetX: Int,
+        centerOffsetY: Int,
         tilesStartX: Int,
         tilesStartY: Int,
         tilesEndX: Int,
@@ -1469,10 +1469,10 @@ class GroundSM(
 
         if (plainBlendedTiles == null && blendedTexturedTiles == null) {
             if (scenePlainTiles != null) {
-                renderLowDetailMinimap(var1, var2, tilesStartX, tilesStartY, tilesEndX, tilesEndY, tilesOnScreen, thread, rasterizer, thread.perspectiveX, thread.perspectiveY)
+                renderLowDetailMinimap(centerOffsetX, centerOffsetY, tilesStartX, tilesStartY, tilesEndX, tilesEndY, tilesOnScreen, thread, rasterizer, thread.perspectiveX, thread.perspectiveY)
             }
         } else {
-            renderHighDetailMinimap(var1, var2, tilesStartX, tilesStartY, tilesEndX, tilesEndY, tilesOnScreen, thread, rasterizer, thread.perspectiveX, thread.perspectiveY)
+            renderHighDetailMinimap(centerOffsetX, centerOffsetY, tilesStartX, tilesStartY, tilesEndX, tilesEndY, tilesOnScreen, thread, rasterizer, thread.perspectiveX, thread.perspectiveY)
         }
     }
 
@@ -1725,7 +1725,7 @@ class GroundSM(
         }
     }
 
-    override fun addLight(light: PointLight, var2: IntArray) {
+    override fun addLight(light: PointLight, lightDisplacement: IntArray) {
         // NOOP
     }
 }

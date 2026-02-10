@@ -1308,15 +1308,15 @@ class MapRegion(var asyncMaploading: Boolean) {
                 var index = 0
                 while (stream.currentPosition < this.npcSpawnBuffer!![mapIndex]!!.size && index < 511 && Client.NPC_UPDATE_INDEX < 1023) {
                     val slot = cursorPosition or (index++ shl 6)
-                    val i_8 = stream.readUShort()
-                    val plane = i_8 shr 14
-                    val i_10 = i_8 shr 7 and 0x3f
-                    val i_11 = i_8 and 0x3f
-                    val i_12 = (this.regionIds[mapIndex] shr 8) * 64 - this.baseCoordinates!!.x + i_10
-                    val i_13 = (this.regionIds[mapIndex] and 0xff) * 64 - this.baseCoordinates!!.y + i_11
+                    val packedPosition = stream.readUShort()
+                    val plane = packedPosition shr 14
+                    val localX = packedPosition shr 7 and 0x3f
+                    val localY = packedPosition and 0x3f
+                    val sceneX = (this.regionIds[mapIndex] shr 8) * 64 - this.baseCoordinates!!.x + localX
+                    val sceneY = (this.regionIds[mapIndex] and 0xff) * 64 - this.baseCoordinates!!.y + localY
                     val npcType: NPCType = TypeLists.NPC!!.list(stream.readUShort())
                     val npcObjectNode: ObjectNode? = Client.NPC_MAP.get(slot.toLong())
-                    if (npcObjectNode == null && (npcType.walkingFlags.toInt() and 0x1) > 0 && i_12 >= 0 && i_12 + npcType.size < this.sceneSizeX && i_13 >= 0 && i_13 + npcType.size < this.sceneSizeY) {
+                    if (npcObjectNode == null && (npcType.walkingFlags.toInt() and 0x1) > 0 && sceneX >= 0 && sceneX + npcType.size < this.sceneSizeX && sceneY >= 0 && sceneY + npcType.size < this.sceneSizeY) {
                         val npcEntity: NpcEntity = NpcEntity(this.scene)
                         npcEntity.playerIndex = slot
                         val npcEntityObjectNode = ObjectNode(npcEntity)
@@ -1328,7 +1328,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                         npcEntity.setSize(npcEntity.definitions!!.size)
                         npcEntity.turnDirection = npcEntity.definitions!!.turnDirection shl 3
                         npcEntity.turn(npcEntity.definitions!!.respawnDirection!!.getRotation().getValue() shl 11 and 0x3fff, true)
-                        npcEntity.move(plane, i_12, i_13, true, npcEntity.getSize())
+                        npcEntity.move(plane, sceneX, sceneY, true, npcEntity.getSize())
                     }
                 }
             }
@@ -1468,11 +1468,11 @@ class MapRegion(var asyncMaploading: Boolean) {
         fun handleRoofDisplay() {
             if (PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue() == 2) {
                 val settingsBits = Resource.mapRegion!!.bits
-                val b_2 = (Client.timesSceneRendered - 4 and 0xff).toByte()
+                val defaultSettings = (Client.timesSceneRendered - 4 and 0xff).toByte()
                 val x: Int = Client.timesSceneRendered % Resource.mapRegion!!.sceneSizeX
                 for (plane in 0..3) {
                     for (y in 0..<Resource.mapRegion!!.sceneSizeY) {
-                        settingsBits!![plane]!![x]!![y] = b_2
+                        settingsBits!![plane]!![x]!![y] = defaultSettings
                     }
                 }
                 if (PlayerUpdate.MY_PLAYER_PLANE != 3) {
@@ -1523,11 +1523,11 @@ class MapRegion(var asyncMaploading: Boolean) {
                             }
 
                             if ((cameraBaseXOffset != 0 || cameraBaseZOffset != 0) && cameraBaseXOffset > -Resource.mapRegion!!.sceneSizeX && cameraBaseXOffset < Resource.mapRegion!!.sceneSizeX && cameraBaseZOffset > -Resource.mapRegion!!.sceneSizeY && cameraBaseZOffset < Resource.mapRegion!!.sceneSizeY) {
-                                var i_16: Int
-                                val i_18: Int
+                                var accumulator: Int
+                                val stepRatio: Int
                                 if (cameraBaseXOffset > cameraBaseZOffset) {
-                                    i_18 = cameraBaseZOffset * 65536 / cameraBaseXOffset
-                                    i_16 = 32768
+                                    stepRatio = cameraBaseZOffset * 65536 / cameraBaseXOffset
+                                    accumulator = 32768
 
                                     while (cameraBaseX != baseX) {
                                         if (cameraBaseX < baseX) {
@@ -1541,9 +1541,9 @@ class MapRegion(var asyncMaploading: Boolean) {
                                             break
                                         }
 
-                                        i_16 += i_18
-                                        if (i_16 >= 65536) {
-                                            i_16 -= 65536
+                                        accumulator += stepRatio
+                                        if (accumulator >= 65536) {
+                                            accumulator -= 65536
                                             if (cameraBaseZ < baseZ) {
                                                 ++cameraBaseZ
                                             } else if (cameraBaseZ > baseZ) {
@@ -1557,8 +1557,8 @@ class MapRegion(var asyncMaploading: Boolean) {
                                         }
                                     }
                                 } else {
-                                    i_18 = cameraBaseXOffset * 65536 / cameraBaseZOffset
-                                    i_16 = 32768
+                                    stepRatio = cameraBaseXOffset * 65536 / cameraBaseZOffset
+                                    accumulator = 32768
 
                                     while (baseZ != cameraBaseZ) {
                                         if (cameraBaseZ < baseZ) {
@@ -1572,9 +1572,9 @@ class MapRegion(var asyncMaploading: Boolean) {
                                             break
                                         }
 
-                                        i_16 += i_18
-                                        if (i_16 >= 65536) {
-                                            i_16 -= 65536
+                                        accumulator += stepRatio
+                                        if (accumulator >= 65536) {
+                                            accumulator -= 65536
                                             if (cameraBaseX < baseX) {
                                                 ++cameraBaseX
                                             } else if (cameraBaseX > baseX) {
@@ -1830,14 +1830,14 @@ class MapRegion(var asyncMaploading: Boolean) {
                                         continue
                                     }
                                     if (sceneXHashB != 0) {
-                                        val i_20 = TileUtils.getCullingType(sceneXHashB)
-                                        if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall!!.cullingType.toInt() == i_20 || regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall != null && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall!!.cullingType.toInt() == i_20) {
+                                        val cullingTypeB = TileUtils.getCullingType(sceneXHashB)
+                                        if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall!!.cullingType.toInt() == cullingTypeB || regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall != null && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall!!.cullingType.toInt() == cullingTypeB) {
                                             continue
                                         }
                                     }
                                     if (bitpackedTypeRotB != 0) {
-                                        val i_20 = TileUtils.getCullingType(bitpackedTypeRotB)
-                                        if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall!!.cullingType.toInt() == i_20 || regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall != null && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall!!.cullingType.toInt() == i_20) {
+                                        val cullingTypeC = TileUtils.getCullingType(bitpackedTypeRotB)
+                                        if (regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].primaryWall!!.cullingType.toInt() == cullingTypeC || regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall != null && regionTiles[planeAbove]!![tileBaseX]!![tileBaseY].secondaryWall!!.cullingType.toInt() == cullingTypeC) {
                                             continue
                                         }
                                     }

@@ -291,12 +291,12 @@ open class SceneGraph(
         }
     }
 
-    fun decodeEffectsServer(toolkit: AbstractToolkit, mapBuffer: Packet, lightZ: Int, sceneStartX: Int, sceneStartY: Int, z: Int, i_7: Int, i_8: Int, rotation: Int) {
+    fun decodeEffectsServer(toolkit: AbstractToolkit, mapBuffer: Packet, lightZ: Int, sceneStartX: Int, sceneStartY: Int, z: Int, sourceChunkX: Int, sourceChunkY: Int, rotation: Int) {
         if (!overlayHidden) {
             var hasActiveLights = false
             var environment: Environment? = null
-            val i_13 = (i_7 and 0x7) * 8
-            val i_14 = (i_8 and 0x7) * 8
+            val chunkStartTileX = (sourceChunkX and 0x7) * 8
+            val chunkStartTileY = (sourceChunkY and 0x7) * 8
             while (true) {
                 while (mapBuffer.currentPosition < mapBuffer.buffer.size) {
                     val opcode = mapBuffer.readUByte()
@@ -320,7 +320,7 @@ open class SceneGraph(
                                         val light = flickeringEffect.pointLight!!
                                         val sceneX = light.getX() shr 9
                                         val sceneY = light.getZ() shr 9
-                                        if (flickeringEffect.level == z && sceneX >= i_13 && sceneX < i_13 + 8 && sceneY >= i_14 && sceneY < i_14 + 8) {
+                                        if (flickeringEffect.level == z && sceneX >= chunkStartTileX && sceneX < chunkStartTileX + 8 && sceneY >= chunkStartTileY && sceneY < chunkStartTileY + 8) {
                                             val positionX = (sceneStartX shl 9) + EnvironmentManager.rotatedX(light.getX() and 0xfff, light.getZ() and 0xfff, rotation)
                                             val positionY = (sceneStartY shl 9) + EnvironmentManager.rotatedZ(light.getX() and 0xfff, light.getZ() and 0xfff, rotation)
                                             val sceneXFinal = positionX shr 9
@@ -400,7 +400,7 @@ open class SceneGraph(
                                             if (currentZ <= z) {
                                                 for (x in insideRegionX until insideRegionX + 4) {
                                                     for (y in insideRegionY until insideRegionY + 4) {
-                                                        if (x >= i_13 && x < i_13 + 8 && y >= i_14 && y < i_14 + 8) {
+                                                        if (x >= chunkStartTileX && x < chunkStartTileX + 8 && y >= chunkStartTileY && y < chunkStartTileY + 8) {
                                                             val lightSceneX = sceneStartX + EnvironmentManager.rotateTerrainBlockX(x and 0x7, y and 0x7, rotation)
                                                             val lightSceneY = sceneStartY + EnvironmentManager.rotateTerrainBlockY(x and 0x7, y and 0x7, rotation)
                                                             if (lightSceneX >= 0 && lightSceneX < regionSizeX && lightSceneY >= 0 && lightSceneY < regionSizeY) {
@@ -570,9 +570,9 @@ open class SceneGraph(
                             if ((startX - endX + 1) * (yB - yAVar + 1) >= 4) {
                                 val height = tileHeights[z][endX][yAVar]
                                 scene.culling.createTileCullingCluster(z, endX shl 9, (startX shl 9) + 512, yAVar shl 9, (yB shl 9) + 512, height, height)
-                                for (i_12 in endX..startX) {
-                                    for (i_13 in yAVar..yB) {
-                                        cullingsMap!![z][i_12][i_13] = (cullingsMap!![z][i_12][i_13].toInt() and -5).toByte()
+                                for (cullingX in endX..startX) {
+                                    for (cullingY in yAVar..yB) {
+                                        cullingsMap!![z][cullingX][cullingY] = (cullingsMap!![z][cullingX][cullingY].toInt() and -5).toByte()
                                     }
                                 }
                             }
@@ -585,7 +585,7 @@ open class SceneGraph(
         cullingsMap = null
     }
 
-    fun addWall(toolkit: AbstractToolkit, locShape: Int, locRotation: Int, stationary: Boolean, locType: ObjectType, i_6: Int, locHeight: Int, locPlane: Int, sceneX: Int, averageHeight: Int, sceneY: Int, baseX: Int, baseY: Int, delayShading: Boolean, currentSurfaceGround: Ground, localCollisionMap: CollisionMap?, locSizeX: Int, locSizeY: Int): Boolean {
+    fun addWall(toolkit: AbstractToolkit, locShape: Int, locRotation: Int, stationary: Boolean, locType: ObjectType, sequenceId: Int, locHeight: Int, locPlane: Int, sceneX: Int, averageHeight: Int, sceneY: Int, baseX: Int, baseY: Int, delayShading: Boolean, currentSurfaceGround: Ground, localCollisionMap: CollisionMap?, locSizeX: Int, locSizeY: Int): Boolean {
         if (locShape == ObjectShapes.WALL_STRAIGHT.shape) {
             var cullable = locType.occlusionMode
             if (cullingAdjustment && locType.occlusionMode == -1) {
@@ -598,7 +598,7 @@ open class SceneGraph(
                 }
                 stationaryWall
             } else {
-                AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation, i_6)
+                AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation, sequenceId)
             }
             scene.addWall(locHeight, baseX, baseY, primaryWall, null)
             when (locRotation) {
@@ -655,7 +655,7 @@ open class SceneGraph(
                     }
                     stationaryWall
                 } else {
-                    AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation, i_6)
+                    AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation, sequenceId)
                 }
                 scene.addWall(locHeight, baseX, baseY, wall, null)
                 if (locType.staticShadow && lowDetailShadows) {
@@ -686,8 +686,8 @@ open class SceneGraph(
                     primaryWall = firstWall
                     secondaryWall = secondWall
                 } else {
-                    primaryWall = AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation + 4, i_6)
-                    secondaryWall = AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, signedRotation, i_6)
+                    primaryWall = AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation + 4, sequenceId)
+                    secondaryWall = AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, signedRotation, sequenceId)
                 }
                 scene.addWall(locHeight, baseX, baseY, primaryWall, secondaryWall)
                 if ((locType.occlusionMode == 1 || cullingAdjustment && locType.occlusionMode == -1) && !overlayHidden) {
@@ -725,7 +725,7 @@ open class SceneGraph(
                     }
                     stationaryWall
                 } else {
-                    AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation, i_6)
+                    AnimatedWall(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, locShape, locRotation, sequenceId)
                 }
                 scene.addWall(locHeight, baseX, baseY, wall, null)
                 if (locType.staticShadow && lowDetailShadows) {
@@ -748,7 +748,7 @@ open class SceneGraph(
                     }
                     stationaryInteractive
                 } else {
-                    AnimatedInteractiveObject(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, baseX, locSizeX + baseX - 1, baseY, locSizeY + baseY - 1, locShape, locRotation, i_6)
+                    AnimatedInteractiveObject(scene, toolkit, locTypeList, locType, locHeight, locPlane, sceneX, averageHeight, sceneY, overlayHidden, baseX, locSizeX + baseX - 1, baseY, locSizeY + baseY - 1, locShape, locRotation, sequenceId)
                 }
                 scene.addInteractive(interactive, false)
                 if (locType.occlusionMode == 1 && !overlayHidden) {
@@ -882,7 +882,7 @@ open class SceneGraph(
         return gameObject
     }
 
-    fun decodeEffectsClient(toolkit: AbstractToolkit, buffer: Packet, i_3: Int, i_4: Int) {
+    fun decodeEffectsClient(toolkit: AbstractToolkit, buffer: Packet, regionStartX: Int, regionStartY: Int) {
         if (!overlayHidden) {
             var hasActiveLights = false
             var atmosphere: Environment? = null
@@ -899,7 +899,7 @@ open class SceneGraph(
                         if (opcode == 1) {
                             val count = buffer.readUByte()
                             if (count > 0) {
-                                for (i_19 in 0 until count) {
+                                for (effectIndex in 0 until count) {
                                     val flickeringEffect = FlickeringEffect(toolkit, scene.tileUnits, buffer)
                                     if (flickeringEffect.type == 31) {
                                         val lightType = TypeLists.LIGHT!!.list(buffer.readUShort())
@@ -907,12 +907,12 @@ open class SceneGraph(
                                     }
                                     if (toolkit.getMaxLights() > 0) {
                                         val lightSource = flickeringEffect.pointLight!!
-                                        val i_13 = lightSource.getX() + (i_3 shl 9)
-                                        val i_14 = lightSource.getZ() + (i_4 shl 9)
-                                        val i_15 = i_13 shr 9
-                                        val i_16 = i_14 shr 9
-                                        if (i_15 >= 0 && i_16 >= 0 && i_15 < regionSizeX && i_16 < regionSizeY) {
-                                            lightSource.setPosition(i_13, tileHeights[flickeringEffect.level][i_15][i_16] - lightSource.getY(), i_14)
+                                        val lightAbsX = lightSource.getX() + (regionStartX shl 9)
+                                        val lightAbsY = lightSource.getZ() + (regionStartY shl 9)
+                                        val lightTileX = lightAbsX shr 9
+                                        val lightTileY = lightAbsY shr 9
+                                        if (lightTileX >= 0 && lightTileY >= 0 && lightTileX < regionSizeX && lightTileY < regionSizeY) {
+                                            lightSource.setPosition(lightAbsX, tileHeights[flickeringEffect.level][lightTileX][lightTileY] - lightSource.getY(), lightAbsY)
                                             scene.calculateLightUid(flickeringEffect)
                                         }
                                     }
@@ -938,13 +938,13 @@ open class SceneGraph(
                             for (plane in 0 until 4) {
                                 val lightingDecodeType = buffer.readByte()
                                 if (lightingDecodeType.toInt() == 0 && lighting!![plane] != null) {
-                                    var minX = i_3
-                                    var maxX = i_3 + 64
-                                    var minY = i_4
-                                    var maxY = i_4 + 64
-                                    if (i_3 < 0) {
+                                    var minX = regionStartX
+                                    var maxX = regionStartX + 64
+                                    var minY = regionStartY
+                                    var maxY = regionStartY + 64
+                                    if (regionStartX < 0) {
                                         minX = 0
-                                    } else if (i_3 >= regionSizeX) {
+                                    } else if (regionStartX >= regionSizeX) {
                                         minX = regionSizeX
                                     }
                                     if (maxX < 0) {
@@ -952,9 +952,9 @@ open class SceneGraph(
                                     } else if (maxX >= regionSizeX) {
                                         maxX = regionSizeX
                                     }
-                                    if (i_4 < 0) {
+                                    if (regionStartY < 0) {
                                         minY = 0
-                                    } else if (i_4 >= regionSizeY) {
+                                    } else if (regionStartY >= regionSizeY) {
                                         minY = regionSizeY
                                     }
                                     if (maxY < 0) {
@@ -974,13 +974,13 @@ open class SceneGraph(
                                     if (lighting!![plane] == null) {
                                         lighting!![plane] = Array(regionSizeX + 1) { ByteArray(regionSizeY + 1) }
                                     }
-                                    for (i_11 in 0 until 64 step 4) {
-                                        for (i_12 in 0 until 64 step 4) {
-                                            val b_20 = buffer.readByte()
-                                            for (i_14 in i_3 + i_11 until i_3 + i_11 + 4) {
-                                                for (i_15 in i_12 + i_4 until i_12 + i_4 + 4) {
-                                                    if (i_14 >= 0 && i_14 < regionSizeX && i_15 >= 0 && i_15 < regionSizeY) {
-                                                        lighting!![plane]!![i_14][i_15] = b_20
+                                    for (innerX in 0 until 64 step 4) {
+                                        for (innerY in 0 until 64 step 4) {
+                                            val lightIntensity = buffer.readByte()
+                                            for (sceneX in regionStartX + innerX until regionStartX + innerX + 4) {
+                                                for (sceneY in innerY + regionStartY until innerY + regionStartY + 4) {
+                                                    if (sceneX >= 0 && sceneX < regionSizeX && sceneY >= 0 && sceneY < regionSizeY) {
+                                                        lighting!![plane]!![sceneX][sceneY] = lightIntensity
                                                     }
                                                 }
                                             }
@@ -991,13 +991,13 @@ open class SceneGraph(
                                         lighting!![plane] = Array(regionSizeX + 1) { ByteArray(regionSizeY + 1) }
                                     }
                                     if (plane > 0) {
-                                        var minX = i_3
-                                        var maxX = i_3 + 64
-                                        var minY = i_4
-                                        var maxY = i_4 + 64
-                                        if (i_3 < 0) {
+                                        var minX = regionStartX
+                                        var maxX = regionStartX + 64
+                                        var minY = regionStartY
+                                        var maxY = regionStartY + 64
+                                        if (regionStartX < 0) {
                                             minX = 0
-                                        } else if (i_3 >= regionSizeX) {
+                                        } else if (regionStartX >= regionSizeX) {
                                             minX = regionSizeX
                                         }
                                         if (maxX < 0) {
@@ -1005,9 +1005,9 @@ open class SceneGraph(
                                         } else if (maxX >= regionSizeX) {
                                             maxX = regionSizeX
                                         }
-                                        if (i_4 < 0) {
+                                        if (regionStartY < 0) {
                                             minY = 0
-                                        } else if (i_4 >= regionSizeY) {
+                                        } else if (regionStartY >= regionSizeY) {
                                             minY = regionSizeY
                                         }
                                         if (maxY < 0) {
@@ -1032,9 +1032,9 @@ open class SceneGraph(
                 }
                 if (atmosphere != null) {
                     for (opcode in 0 until 8) {
-                        for (i_9 in 0 until 8) {
-                            val sceneChunkX = opcode + (i_3 shr 3)
-                            val sceneChunkY = i_9 + (i_4 shr 3)
+                        for (lightAbsY in 0 until 8) {
+                            val sceneChunkX = opcode + (regionStartX shr 3)
+                            val sceneChunkY = lightAbsY + (regionStartY shr 3)
                             if (sceneChunkX >= 0 && sceneChunkX < regionSizeX shr 3 && sceneChunkY >= 0 && sceneChunkY < regionSizeY shr 3) {
                                 environmentManager.addChunkEnvironment(sceneChunkX, sceneChunkY, atmosphere)
                             }
@@ -1046,8 +1046,8 @@ open class SceneGraph(
                         if (lighting!![lightZ] != null) {
                             for (sceneChunkX in 0 until 16) {
                                 for (sceneChunkY in 0 until 16) {
-                                    val lightSceneX = sceneChunkX + (i_3 shr 2)
-                                    val lightSceneY = sceneChunkY + (i_4 shr 2)
+                                    val lightSceneX = sceneChunkX + (regionStartX shr 2)
+                                    val lightSceneY = sceneChunkY + (regionStartY shr 2)
                                     if (lightSceneX >= 0 && lightSceneX < 26 && lightSceneY >= 0 && lightSceneY < 26) {
                                         lighting!![lightZ]!![lightSceneX][lightSceneY] = 0
                                     }

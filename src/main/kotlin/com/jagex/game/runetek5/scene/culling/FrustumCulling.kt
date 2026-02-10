@@ -35,18 +35,18 @@ open class FrustumCulling(
         }
 
         if (this.state == 2) {
-            var i_10 = this.culling.oneThirdViewportWidth * yA + xA
-            if (i_10 >= 0 && i_10 < this.culling.depthBuffer!!.size && (zA shl 8) - 39168 < this.culling.depthBuffer!![i_10]) {
+            var depthBufferIndex = this.culling.oneThirdViewportWidth * yA + xA
+            if (depthBufferIndex >= 0 && depthBufferIndex < this.culling.depthBuffer!!.size && (zA shl 8) - 39168 < this.culling.depthBuffer!![depthBufferIndex]) {
                 return false
             }
 
-            i_10 = xB + this.culling.oneThirdViewportWidth * yB
-            if (i_10 >= 0 && i_10 < this.culling.depthBuffer!!.size && (zB shl 8) - 39168 < this.culling.depthBuffer!![i_10]) {
+            depthBufferIndex = xB + this.culling.oneThirdViewportWidth * yB
+            if (depthBufferIndex >= 0 && depthBufferIndex < this.culling.depthBuffer!!.size && (zB shl 8) - 39168 < this.culling.depthBuffer!![depthBufferIndex]) {
                 return false
             }
 
-            i_10 = yC * this.culling.oneThirdViewportWidth + xC
-            if (i_10 >= 0 && i_10 < this.culling.depthBuffer!!.size && (zC shl 8) - 39168 < this.culling.depthBuffer!![i_10]) {
+            depthBufferIndex = yC * this.culling.oneThirdViewportWidth + xC
+            if (depthBufferIndex >= 0 && depthBufferIndex < this.culling.depthBuffer!!.size && (zC shl 8) - 39168 < this.culling.depthBuffer!![depthBufferIndex]) {
                 return false
             }
         }
@@ -98,8 +98,8 @@ open class FrustumCulling(
         if (size2d == 0) {
             return false
         }
-        val i_20 = (slopeZBa * slopeYCa - slopeZCa * slopeYBa shl 8) / size2d
-        val i_21 = (slopeZCa * slopeXBa - slopeZBa * slopeXCa shl 8) / size2d
+        val depthGradientX = (slopeZBa * slopeYCa - slopeZCa * slopeYBa shl 8) / size2d
+        val depthGradientY = (slopeZCa * slopeXBa - slopeZBa * slopeXCa shl 8) / size2d
         if (yA <= yB && yA <= yC) {
             if (yA >= this.culling.oneThirdViewportHeight) {
                 return true
@@ -112,13 +112,13 @@ open class FrustumCulling(
                 yC = this.culling.oneThirdViewportHeight
             }
 
-            zA = i_20 + ((zA shl 8) - i_20 * xA)
+            zA = depthGradientX + ((zA shl 8) - depthGradientX * xA)
             if (yB < yC) {
                 xC = (xA shl 12).also { xA = it }
                 if (yA < 0) {
                     xC -= perspectiveAc * yA
                     xA -= perspectiveBa * yA
-                    zA -= i_21 * yA
+                    zA -= depthGradientY * yA
                     yA = 0
                 }
 
@@ -140,24 +140,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xB shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xB shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xC += perspectiveAc
                                 xB += perspectiveCb
-                                zA += i_21
+                                zA += depthGradientY
                                 yA += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xC += perspectiveAc
                         xA += perspectiveBa
-                        zA += i_21
+                        zA += depthGradientY
                         yA += this.culling.oneThirdViewportWidth
                     }
                 } else {
@@ -172,24 +172,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xB shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xB shr 12) - 1, (xC shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xC += perspectiveAc
                                 xB += perspectiveCb
-                                zA += i_21
+                                zA += depthGradientY
                                 yA += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xC += perspectiveAc
                         xA += perspectiveBa
-                        zA += i_21
+                        zA += depthGradientY
                         yA += this.culling.oneThirdViewportWidth
                     }
                 }
@@ -198,7 +198,7 @@ open class FrustumCulling(
                 if (yA < 0) {
                     xB -= perspectiveAc * yA
                     xA -= perspectiveBa * yA
-                    zA -= i_21 * yA
+                    zA -= depthGradientY * yA
                     yA = 0
                 }
 
@@ -220,24 +220,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xC += perspectiveCb
                                 xA += perspectiveBa
-                                zA += i_21
+                                zA += depthGradientY
                                 yA += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xB shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xB shr 12) - 1, (xA shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xB += perspectiveAc
                         xA += perspectiveBa
-                        zA += i_21
+                        zA += depthGradientY
                         yA += this.culling.oneThirdViewportWidth
                     }
                 } else {
@@ -252,24 +252,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xC += perspectiveCb
                                 xA += perspectiveBa
-                                zA += i_21
+                                zA += depthGradientY
                                 yA += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xB shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xB shr 12) + 1, zA, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xB += perspectiveAc
                         xA += perspectiveBa
-                        zA += i_21
+                        zA += depthGradientY
                         yA += this.culling.oneThirdViewportWidth
                     }
                 }
@@ -286,13 +286,13 @@ open class FrustumCulling(
                 yA = this.culling.oneThirdViewportHeight
             }
 
-            zB = i_20 + ((zB shl 8) - xB * i_20)
+            zB = depthGradientX + ((zB shl 8) - xB * depthGradientX)
             if (yC < yA) {
                 xA = (xB shl 12).also { xB = it }
                 if (yB < 0) {
                     xA -= perspectiveBa * yB
                     xB -= perspectiveCb * yB
-                    zB -= i_21 * yB
+                    zB -= depthGradientY * yB
                     yB = 0
                 }
 
@@ -314,24 +314,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xC shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xC shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xA += perspectiveBa
                                 xC += perspectiveAc
-                                zB += i_21
+                                zB += depthGradientY
                                 yB += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xA += perspectiveBa
                         xB += perspectiveCb
-                        zB += i_21
+                        zB += depthGradientY
                         yB += this.culling.oneThirdViewportWidth
                     }
                 } else {
@@ -346,24 +346,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xC shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xC shr 12) - 1, (xA shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xA += perspectiveBa
                                 xC += perspectiveAc
-                                zB += i_21
+                                zB += depthGradientY
                                 yB += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xA += perspectiveBa
                         xB += perspectiveCb
-                        zB += i_21
+                        zB += depthGradientY
                         yB += this.culling.oneThirdViewportWidth
                     }
                 }
@@ -372,7 +372,7 @@ open class FrustumCulling(
                 if (yB < 0) {
                     xC -= perspectiveBa * yB
                     xB -= perspectiveCb * yB
-                    zB -= i_21 * yB
+                    zB -= depthGradientY * yB
                     yB = 0
                 }
 
@@ -394,24 +394,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xA += perspectiveAc
                                 xB += perspectiveCb
-                                zB += i_21
+                                zB += depthGradientY
                                 yB += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xC shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xC shr 12) - 1, (xB shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xC += perspectiveBa
                         xB += perspectiveCb
-                        zB += i_21
+                        zB += depthGradientY
                         yB += this.culling.oneThirdViewportWidth
                     }
                 } else {
@@ -426,24 +426,24 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
                                 xA += perspectiveAc
                                 xB += perspectiveCb
-                                zB += i_21
+                                zB += depthGradientY
                                 yB += this.culling.oneThirdViewportWidth
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xC shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xC shr 12) + 1, zB, depthGradientX, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
                         xC += perspectiveBa
                         xB += perspectiveCb
-                        zB += i_21
+                        zB += depthGradientY
                         yB += this.culling.oneThirdViewportWidth
                     }
                 }
@@ -459,13 +459,13 @@ open class FrustumCulling(
             yB = this.culling.oneThirdViewportHeight
         }
 
-        zC = i_20 + ((zC shl 8) - i_20 * xC)
+        zC = depthGradientX + ((zC shl 8) - depthGradientX * xC)
         if (yA < yB) {
             xB = (xC shl 12).also { xC = it }
             if (yC < 0) {
                 xB -= yC * perspectiveCb
                 xC -= yC * perspectiveAc
-                zC -= yC * i_21
+                zC -= yC * depthGradientY
                 yC = 0
             }
 
@@ -487,24 +487,24 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xA shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xA shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
                             xB += perspectiveCb
                             xA += perspectiveBa
-                            zC += i_21
+                            zC += depthGradientY
                             yC += this.culling.oneThirdViewportWidth
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 
                     xB += perspectiveCb
                     xC += perspectiveAc
-                    zC += i_21
+                    zC += depthGradientY
                     yC += this.culling.oneThirdViewportWidth
                 }
             } else {
@@ -519,24 +519,24 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xA shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xA shr 12) - 1, (xB shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
                             xB += perspectiveCb
                             xA += perspectiveBa
-                            zC += i_21
+                            zC += depthGradientY
                             yC += this.culling.oneThirdViewportWidth
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 
                     xB += perspectiveCb
                     xC += perspectiveAc
-                    zC += i_21
+                    zC += depthGradientY
                     yC += this.culling.oneThirdViewportWidth
                 }
             }
@@ -545,7 +545,7 @@ open class FrustumCulling(
             if (yC < 0) {
                 xA -= yC * perspectiveCb
                 xC -= yC * perspectiveAc
-                zC -= yC * i_21
+                zC -= yC * depthGradientY
                 yC = 0
             }
 
@@ -567,24 +567,24 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
                             xB += perspectiveBa
                             xC += perspectiveAc
-                            zC += i_21
+                            zC += depthGradientY
                             yC += this.culling.oneThirdViewportWidth
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xA shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xA shr 12) - 1, (xC shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 
                     xA += perspectiveCb
                     xC += perspectiveAc
-                    zC += i_21
+                    zC += depthGradientY
                     yC += this.culling.oneThirdViewportWidth
                 }
             } else {
@@ -599,129 +599,129 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
                             xB += perspectiveBa
                             xC += perspectiveAc
-                            zC += i_21
+                            zC += depthGradientY
                             yC += this.culling.oneThirdViewportWidth
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xA shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xA shr 12) + 1, zC, depthGradientX, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 
                     xA += perspectiveCb
                     xC += perspectiveAc
-                    zC += i_21
+                    zC += depthGradientY
                     yC += this.culling.oneThirdViewportWidth
                 }
             }
         }
     }
 
-    fun processDepthScanline(ints_1: IntArray, i_2: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int): Boolean {
-        var i_2 = i_2
-        var i_4 = i_4
-        var i_5 = i_5
-        var i_6 = i_6
-        var i_31: Int
-        if (i_5 > i_8) {
-            i_5 = i_8
+    fun processDepthScanline(depthBuffer: IntArray, scanlineOffset: Int, startX: Int, endX: Int, depth: Int, depthStepX: Int, bufferWidth: Int): Boolean {
+        var bufferIndex = scanlineOffset
+        var clampedStartX = startX
+        var clampedEndX = endX
+        var currentDepth = depth
+        var pixelCount: Int
+        if (clampedEndX > bufferWidth) {
+            clampedEndX = bufferWidth
         }
-        if (i_4 < 0) {
-            i_4 = 0
+        if (clampedStartX < 0) {
+            clampedStartX = 0
         }
-        if (i_4 >= i_5) {
+        if (clampedStartX >= clampedEndX) {
             return true
         }
-        i_2 += i_4 - 1
-        i_31 = i_5 - i_4 shr 2
-        i_6 += i_4 * i_7
+        bufferIndex += clampedStartX - 1
+        pixelCount = clampedEndX - clampedStartX shr 2
+        currentDepth += clampedStartX * depthStepX
         if (this.state == 1) {
-            this.depthWriteCount += i_31
+            this.depthWriteCount += pixelCount
 
             while (true) {
-                if (--i_31 < 0) {
-                    i_31 = i_5 - i_4 and 0x3
+                if (--pixelCount < 0) {
+                    pixelCount = clampedEndX - clampedStartX and 0x3
 
                     while (true) {
-                        if (--i_31 < 0) {
+                        if (--pixelCount < 0) {
                             return true
                         }
 
-                        if (i_6 < ints_1[++i_2]) {
-                            ints_1[i_2] = i_6
+                        if (currentDepth < depthBuffer[++bufferIndex]) {
+                            depthBuffer[bufferIndex] = currentDepth
                         }
 
-                        i_6 += i_7
+                        currentDepth += depthStepX
                     }
                 }
 
-                if (i_6 < ints_1[++i_2]) {
-                    ints_1[i_2] = i_6
+                if (currentDepth < depthBuffer[++bufferIndex]) {
+                    depthBuffer[bufferIndex] = currentDepth
                 }
 
-                i_6 += i_7
-                if (i_6 < ints_1[++i_2]) {
-                    ints_1[i_2] = i_6
+                currentDepth += depthStepX
+                if (currentDepth < depthBuffer[++bufferIndex]) {
+                    depthBuffer[bufferIndex] = currentDepth
                 }
 
-                i_6 += i_7
-                if (i_6 < ints_1[++i_2]) {
-                    ints_1[i_2] = i_6
+                currentDepth += depthStepX
+                if (currentDepth < depthBuffer[++bufferIndex]) {
+                    depthBuffer[bufferIndex] = currentDepth
                 }
 
-                i_6 += i_7
-                if (i_6 < ints_1[++i_2]) {
-                    ints_1[i_2] = i_6
+                currentDepth += depthStepX
+                if (currentDepth < depthBuffer[++bufferIndex]) {
+                    depthBuffer[bufferIndex] = currentDepth
                 }
 
-                i_6 += i_7
+                currentDepth += depthStepX
             }
         } else {
-            i_6 -= 39168
+            currentDepth -= 39168
 
             while (true) {
-                if (--i_31 < 0) {
-                    i_31 = i_5 - i_4 and 0x3
+                if (--pixelCount < 0) {
+                    pixelCount = clampedEndX - clampedStartX and 0x3
 
                     while (true) {
-                        if (--i_31 < 0) {
+                        if (--pixelCount < 0) {
                             return true
                         }
 
-                        if (i_6 < ints_1[++i_2]) {
+                        if (currentDepth < depthBuffer[++bufferIndex]) {
                             return false
                         }
 
-                        i_6 += i_7
+                        currentDepth += depthStepX
                     }
                 }
 
-                if (i_6 < ints_1[++i_2]) {
+                if (currentDepth < depthBuffer[++bufferIndex]) {
                     return false
                 }
 
-                i_6 += i_7
-                if (i_6 < ints_1[++i_2]) {
+                currentDepth += depthStepX
+                if (currentDepth < depthBuffer[++bufferIndex]) {
                     return false
                 }
 
-                i_6 += i_7
-                if (i_6 < ints_1[++i_2]) {
+                currentDepth += depthStepX
+                if (currentDepth < depthBuffer[++bufferIndex]) {
                     return false
                 }
 
-                i_6 += i_7
-                if (i_6 < ints_1[++i_2]) {
+                currentDepth += depthStepX
+                if (currentDepth < depthBuffer[++bufferIndex]) {
                     return false
                 }
 
-                i_6 += i_7
+                currentDepth += depthStepX
             }
         }
     }

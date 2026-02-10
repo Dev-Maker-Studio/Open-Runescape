@@ -15,8 +15,8 @@ class CullingCluster(
     tileEndX2: Int,
     heightSouthWest: Int,
     heightNorthEast: Int,
-    i_10: Int,
-    i_11: Int,
+    heightNorthWest: Int,
+    heightSouthEast: Int,
     tileEndY: Int,
     tileStartY: Int,
     tileStartY2: Int,
@@ -46,8 +46,8 @@ class CullingCluster(
         this.tileCullingsX[3] = tileEndX2
         this.drawHeights[0] = heightSouthWest
         this.drawHeights[1] = heightNorthEast
-        this.drawHeights[2] = i_10
-        this.drawHeights[3] = i_11
+        this.drawHeights[2] = heightNorthWest
+        this.drawHeights[3] = heightSouthEast
         this.tileCullingsZ[0] = tileEndY
         this.tileCullingsZ[1] = tileStartY
         this.tileCullingsZ[2] = tileStartY2

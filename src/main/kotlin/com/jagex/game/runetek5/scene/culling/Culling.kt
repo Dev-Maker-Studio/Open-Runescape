@@ -247,8 +247,8 @@ open class Culling(
         }
     }
 
-    fun createTileCullingCluster(plane: Int, xEnd: Int, xStart: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
-        tileCullingCluster[tileCullingClusterCount++] = CullingCluster(scene, 4, plane, xEnd, xStart, xStart, xEnd, i_7, i_8, i_8, i_7, i_5, i_5, i_6, i_6)
+    fun createTileCullingCluster(plane: Int, xEnd: Int, xStart: Int, yStart: Int, yEnd: Int, heightStart: Int, heightEnd: Int) {
+        tileCullingCluster[tileCullingClusterCount++] = CullingCluster(scene, 4, plane, xEnd, xStart, xStart, xEnd, heightStart, heightEnd, heightEnd, heightStart, yStart, yStart, yEnd, yEnd)
     }
 
     fun calculateProjection(cluster: CullingCluster, cullingIndex: Int): Boolean {
@@ -599,8 +599,8 @@ open class Culling(
             }
         } else if (cullingCluster.type.toInt() != 16 && cullingCluster.type.toInt() != 8) {
             if (cullingCluster.type.toInt() == 4) {
-                val f_12 = (cullingCluster.drawHeights[0] - scene.cameraPositionY)
-                if (f_12 > fullTileDimensionY) {
+                val cameraHeightOffset = (cullingCluster.drawHeights[0] - scene.cameraPositionY)
+                if (cameraHeightOffset > fullTileDimensionY) {
                     var startY = scene.visibleTiles + (cullingCluster.startY - scene.cameraGridPositionY)
                     if (startY < 0) {
                         startY = 0
@@ -744,17 +744,17 @@ open class Culling(
                                 nextTile = scene.tiles[scenePlane][sceneX][yEnd + 1]
                             }
                             val highestSouthWest = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(sceneX, yStart)
-                            val i_14 = highestSouthWest + tile.cullY
+                            val culledHeightSW = highestSouthWest + tile.cullY
                             val heighestNorthWest = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(sceneX, yEnd + 1)
-                            val i_16 = heighestNorthWest + tile.cullY
+                            val culledHeightNW = heighestNorthWest + tile.cullY
                             val mainX = sceneX shl scene.tileUnits
                             val tileEndY2 = yStart shl scene.tileUnits
-                            val i_19 = (yEnd shl scene.tileUnits) + scene.fullTileDimension
+                            val worldYEnd = (yEnd shl scene.tileUnits) + scene.fullTileDimension
                             interactiveCulling[interactiveCullingCursorPos++] = CullingCluster(
                                 scene, 1, scenePlane,
                                 mainX + tile.cullX, mainX + tile.cullX, mainX + tile.cullX, mainX + tile.cullX,
-                                highestSouthWest, heighestNorthWest, i_16, i_14,
-                                tileEndY2, i_19, i_19, tileEndY2
+                                highestSouthWest, heighestNorthWest, culledHeightNW, culledHeightSW,
+                                tileEndY2, worldYEnd, worldYEnd, tileEndY2
                             )
                             for (tilePlane in scenePlane..zEnd) {
                                 for (tileY in yStart..yEnd) {
@@ -790,16 +790,16 @@ open class Culling(
                                 nextTile = scene.tiles[scenePlane][xEnd + 1][sceneY]
                             }
                             val heightSouthWest = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(xStart, sceneY)
-                            val i_14 = heightSouthWest + tile.interactiveSideViewHeightOffset
+                            val culledHeightSW = heightSouthWest + tile.interactiveSideViewHeightOffset
                             val heightSouthEast = scene.surfaceHeightmap!![ if (hasBridge) scenePlane + 1 else scenePlane]!!.getHeight(xEnd + 1, sceneY)
-                            val i_16 = heightSouthEast + tile.interactiveSideViewHeightOffset
+                            val culledHeightSE = heightSouthEast + tile.interactiveSideViewHeightOffset
                             val startX = xStart shl scene.tileUnits
                             val endX = (xEnd shl scene.tileUnits) + scene.fullTileDimension
                             val startY = sceneY shl scene.tileUnits
                             interactiveCulling[interactiveCullingCursorPos++] = CullingCluster(
                                 scene, 2, scenePlane,
                                 startX, endX, endX, startX,
-                                heightSouthWest, heightSouthEast, i_16, i_14,
+                                heightSouthWest, heightSouthEast, culledHeightSE, culledHeightSW,
                                 startY + tile.cullZ, startY + tile.cullZ, startY + tile.cullZ, startY + tile.cullZ
                             )
                             for (tilePlane in scenePlane..zEnd) {

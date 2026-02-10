@@ -842,10 +842,10 @@ class Scene(
                 lightEndZ = this.regionSizeZ - 1
             }
             for (z in lightStartZ..lightEndZ) {
-                var i_7 = 0
+                var rangeIndex = 0
                 var lightStartY = light!!.getZ() - light!!.getSize2d() + this.halfTileOffset shr this.tileUnits
                 if (lightStartY < 0) {
-                    i_7 -= lightStartY
+                    rangeIndex -= lightStartY
                     lightStartY = 0
                 }
                 var lightEndY = light!!.getZ() + light!!.getSize2d() - this.halfTileOffset shr this.tileUnits
@@ -853,7 +853,7 @@ class Scene(
                     lightEndY = this.sceneDimensionY - 1
                 }
                 for (y in lightStartY..lightEndY) {
-                    val range = positionedLight.ranges[i_7++]
+                    val range = positionedLight.ranges[rangeIndex++]
                     var lightStartX = (light!!.getX() - light!!.getSize2d() + this.halfTileOffset shr this.tileUnits) + (range.toInt() ushr 8)
                     var lightEndX = (range.toInt() and 0xff) + lightStartX - 1
                     if (lightStartX < 0) {
@@ -976,8 +976,8 @@ class Scene(
         }
     }
 
-    fun getWaterOpcode20(i_1: Int, i_2: Int): Int {
-        return if (this.opcode20 != null) this.opcode20!![i_1][i_2].toInt() and 0xff else 0
+    fun getWaterOpcode20(x: Int, y: Int): Int {
+        return if (this.opcode20 != null) this.opcode20!![x][y].toInt() and 0xff else 0
     }
 
     fun getGroundItem(z: Int, x: Int, y: Int): AbstractGroundItem? {
@@ -1219,7 +1219,7 @@ class Scene(
     }
 
     fun castShadow(rendered: SceneGraphEntity, lowestZ: Int, startX: Int, startY: Int, width: Int, length: Int) {
-        var bool7 = true
+        var isSamePlane = true
         val lowestX = startX
         val highestX = startX + width
         val lowestY = startY - 1
@@ -1229,7 +1229,7 @@ class Scene(
                 for (x in lowestX..highestX) {
                     if (x >= 0 && x < this.sceneDimensionX) {
                         for (y in lowestY..highestY) {
-                            if (y >= 0 && y < this.sceneDimensionY && (!bool7 || x >= highestX || y >= highestY || y < startY && startX != x)) {
+                            if (y >= 0 && y < this.sceneDimensionY && (!isSamePlane || x >= highestX || y >= highestY || y < startY && startX != x)) {
                                 val tile = this.tiles[z][x][y]
                                 if (tile != null) {
                                     val tileheightDifference =
@@ -1242,12 +1242,12 @@ class Scene(
                                     if (primaryWall != null && primaryWall.hasTileShadow()) {
                                         rendered.castShadow(primaryWall,
                                                 (x - startX) * this.fullTileDimension + (1 - width) * this.halfTileOffset, tileheightDifference,
-                                                (y - startY) * this.fullTileDimension + (1 - length) * this.halfTileOffset, bool7)
+                                                (y - startY) * this.fullTileDimension + (1 - length) * this.halfTileOffset, isSamePlane)
                                     }
                                     if (secondaryWall != null && secondaryWall.hasTileShadow()) {
                                         rendered.castShadow(secondaryWall,
                                                 (x - startX) * this.fullTileDimension + (1 - width) * this.halfTileOffset, tileheightDifference,
-                                                (y - startY) * this.fullTileDimension + (1 - length) * this.halfTileOffset, bool7)
+                                                (y - startY) * this.fullTileDimension + (1 - length) * this.halfTileOffset, isSamePlane)
                                     }
                                     var interactives = tile.interactives
                                     while (interactives != null) {
@@ -1257,7 +1257,7 @@ class Scene(
                                             val sizeZ = interactive.endZ - interactive.startZ + 1
                                             rendered.castShadow(interactive,
                                                     this.fullTileDimension * (interactive.startX - startX) + this.halfTileOffset * (sizeX - width), tileheightDifference,
-                                                    this.fullTileDimension * (interactive.startZ - startY) + this.halfTileOffset * (sizeZ - length), bool7)
+                                                    this.fullTileDimension * (interactive.startZ - startY) + this.halfTileOffset * (sizeZ - length), isSamePlane)
                                         }
                                         interactives = interactives.child
                                     }
@@ -1266,7 +1266,7 @@ class Scene(
                         }
                     }
                 }
-                bool7 = false
+                isSamePlane = false
             }
         }
     }
@@ -1476,14 +1476,14 @@ class Scene(
 
         @JvmStatic
         fun updateTileVisibility() {
-            var i_1 = 0
+            var adjustmentCount = 0
             val scene = Resource.mapRegion!!.getScene()!!
             for (sceneX in 0 until Resource.mapRegion!!.sceneSizeX) {
                 for (sceneY in 0 until Resource.mapRegion!!.sceneSizeY) {
-                    if (MapRegion.calculateVisibilityAdjustments(scene!!.tiles as Array<Array<Array<Tile>?>?>?, i_1, sceneX, sceneY, true)) {
-                        i_1++
+                    if (MapRegion.calculateVisibilityAdjustments(scene!!.tiles as Array<Array<Array<Tile>?>?>?, adjustmentCount, sceneX, sceneY, true)) {
+                        adjustmentCount++
                     }
-                    if (i_1 >= 512) {
+                    if (adjustmentCount >= 512) {
                         return
                     }
                 }
@@ -1491,12 +1491,12 @@ class Scene(
         }
 
         @JvmStatic
-        fun initializeRoofSettings(i_0: Int) {
-            Client.visibleBelowDrawheight = IntArray(i_0)
-            Client.visibleAboveX = IntArray(i_0)
-            Client.visibleBelowX = IntArray(i_0)
-            Client.visibleBelowY = IntArray(i_0)
-            Client.visibleAboveY = IntArray(i_0)
+        fun initializeRoofSettings(capacity: Int) {
+            Client.visibleBelowDrawheight = IntArray(capacity)
+            Client.visibleAboveX = IntArray(capacity)
+            Client.visibleBelowX = IntArray(capacity)
+            Client.visibleBelowY = IntArray(capacity)
+            Client.visibleAboveY = IntArray(capacity)
         }
 
         @JvmStatic

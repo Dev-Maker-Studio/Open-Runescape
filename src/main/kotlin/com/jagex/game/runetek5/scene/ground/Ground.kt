@@ -49,12 +49,12 @@ abstract class Ground(
         x: Int,
         y: Int,
         sizesX: IntArray,
-        var4: IntArray,
+        heightOffsets: IntArray,
         sizesY: IntArray,
-        var6: IntArray,
-        var7: IntArray,
-        var8: IntArray,
-        var9: IntArray,
+        unused: IntArray,
+        trianglesA: IntArray,
+        trianglesB: IntArray,
+        trianglesC: IntArray,
         floorColor: IntArray,
         minimapColor: IntArray,
         overlayTextureIds: IntArray,
@@ -90,19 +90,19 @@ abstract class Ground(
 
     abstract fun hasRenderingShadows(shadow: Shadow?, x: Int, planesHeightDelta: Int, y: Int): Boolean
 
-    abstract fun addLight(light: PointLight, var2: IntArray)
+    abstract fun addLight(light: PointLight, lightDisplacement: IntArray)
 
     abstract fun renderMinimapFloor(
-        var1: Int,
-        var2: Int,
-        var4: Int,
-        var5: Int,
-        var6: Int,
-        var7: Int,
+        centerOffsetX: Int,
+        centerOffsetY: Int,
+        tilesStartX: Int,
+        tilesStartY: Int,
+        tilesEndX: Int,
+        tilesEndY: Int,
         visibleTiles: Array<BooleanArray>
     )
 
-    abstract fun renderFloor(var1: Int, var2: Int, var3: Int, var4: Array<BooleanArray>, var5: Boolean)
+    abstract fun renderFloor(cameraGridX: Int, cameraGridY: Int, visibleTileRange: Int, tilesOnScreen: Array<BooleanArray>, belowLowestPlane: Boolean)
 
     /**
      * Gets the height at the specified tile coordinates.
