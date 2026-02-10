@@ -179,8 +179,8 @@ object MiniMenu {
                     fontRenderer = minimenuHeader
                 }
                 @Suppress("UNCHECKED_CAST")
-                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.anInt195, InterfaceComponentRenderer.anInt179, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.anIntArray7438, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
-                InterfaceComponentRenderer.inboundsComponentToTop(Client.anIntArray7438[0], Client.anIntArray7438[1], Client.anIntArray7438[2], Client.anIntArray7438[3])
+                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.anInt195, InterfaceComponentRenderer.anInt179, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+                InterfaceComponentRenderer.inboundsComponentToTop(Client.ANTI_MACRO_TEXT_BOUNDS[0], Client.ANTI_MACRO_TEXT_BOUNDS[1], Client.ANTI_MACRO_TEXT_BOUNDS[2], Client.ANTI_MACRO_TEXT_BOUNDS[3])
             }
         }
     }

@@ -32,15 +32,15 @@ class CutsceneDirectCameraTransition(buffer: Packet) : CutsceneAction(buffer) {
     override fun perform() {
         CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS!![this.anInt9299].loadIntoClientCameraPath(0)
         CutsceneTypeList.CUTSCENE_CAMERA_MOVEMENTS!![this.anInt9300].loadIntoClientCameraPath(1)
-        Client.anInt7277 = 0
-        Client.anInt7279 = this.anInt9301
-        Client.anInt7256 = 0
-        Client.anInt7327 = this.anInt9303
-        Client.anInt7182 = this.anInt9304
-        Client.anInt7448 = 1
-        Client.anInt7280 = this.anInt9302
+        Client.cameraPositionPathIndex = 0
+        Client.cameraPositionKeyframe = this.anInt9301
+        Client.cameraSplineProgress = 0
+        Client.cameraSplineSpeedStart = this.anInt9303
+        Client.cameraSplineSpeedEnd = this.anInt9304
+        Client.cameraLookAtPathIndex = 1
+        Client.cameraLookAtKeyframe = this.anInt9302
         Camera.cameraCalculationType = 3
         Camera.calculateCutsceneCameraPosition()
-        Client.aBool7321 = true
+        Client.cutsceneCameraActive = true
     }
 }

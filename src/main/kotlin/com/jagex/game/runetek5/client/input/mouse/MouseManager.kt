@@ -11,17 +11,17 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
 
     @JvmField var clickMask: Int = 0
 
-    @JvmField var aClass4827941: NodeCollection? = NodeCollection()
+    @JvmField var pendingMouseActions: NodeCollection? = NodeCollection()
 
     @JvmField var clientMouseActions: NodeCollection? = NodeCollection()
 
     @JvmField val canvasInitialized: Boolean
 
-    @JvmField var anInt7938: Int = 0
+    @JvmField var snapshotMouseX: Int = 0
 
-    @JvmField var anInt7939: Int = 0
+    @JvmField var snapshotMouseY: Int = 0
 
-    @JvmField var anInt7940: Int = 0
+    @JvmField var snapshotClickMask: Int = 0
 
     @JvmField var mouseX: Int = 0
 
@@ -63,12 +63,12 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
     }
 
     @Synchronized
-    override fun method3589() {
-        anInt7938 = mouseX
-        anInt7939 = mouseY
-        anInt7940 = clickMask
-        val nodecollection2 = aClass4827941
-        aClass4827941 = clientMouseActions
+    override fun syncMouseState() {
+        snapshotMouseX = mouseX
+        snapshotMouseY = mouseY
+        snapshotClickMask = clickMask
+        val nodecollection2 = pendingMouseActions
+        pendingMouseActions = clientMouseActions
         clientMouseActions = nodecollection2
         clientMouseActions!!.remove_all()
     }
@@ -82,11 +82,11 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
     }
 
     override fun rightButtonDown(): Boolean {
-        return (anInt7940 and 0x2) != 0
+        return (snapshotClickMask and 0x2) != 0
     }
 
     override fun leftButtonDown(): Boolean {
-        return (anInt7940 and 0x1) != 0
+        return (snapshotClickMask and 0x1) != 0
     }
 
     @Synchronized
@@ -95,7 +95,7 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
     }
 
     override fun middleButtonDown(): Boolean {
-        return (anInt7940 and 0x4) != 0
+        return (snapshotClickMask and 0x4) != 0
     }
 
     fun setCanvas(canvasComponent: Component) {
@@ -107,7 +107,7 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
     }
 
     override fun getMouseX(): Int {
-        return anInt7938
+        return snapshotMouseX
     }
 
     override fun reset() {
@@ -120,13 +120,13 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
             canvasComponent!!.removeMouseMotionListener(this)
             canvasComponent!!.removeMouseListener(this)
             canvasComponent = null
-            anInt7940 = 0
-            anInt7939 = 0
-            anInt7938 = 0
+            snapshotClickMask = 0
+            snapshotMouseY = 0
+            snapshotMouseX = 0
             clickMask = 0
             mouseY = 0
             mouseX = 0
-            aClass4827941 = null
+            pendingMouseActions = null
             clientMouseActions = null
         }
     }
@@ -137,7 +137,7 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
     }
 
     override fun nextSubmission(): MouseRecord? {
-        return aClass4827941!!.popHead() as MouseRecord?
+        return pendingMouseActions!!.popHead() as MouseRecord?
     }
 
     fun getClickmask(mouseEvent: MouseEvent): Int {
@@ -191,7 +191,7 @@ class MouseManager(component: Component) : AbstractMouseManager(), MouseListener
     }
 
     override fun getMouseY(): Int {
-        return anInt7939
+        return snapshotMouseY
     }
 
     @Synchronized

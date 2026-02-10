@@ -1373,25 +1373,25 @@ object CS2Interpreter {
         if (i_2 >= 2) {
             throw RuntimeException()
         } else {
-            Client.anInt7277 = i_2
+            Client.cameraPositionPathIndex = i_2
             var i_3 = executor.intStack[executor.intStackPtr + 1]
-            if (i_3 + 1 >= (Client.anIntArrayArrayArray7302[Client.anInt7277]!!.size shr 1)) {
+            if (i_3 + 1 >= (Client.cameraSplinePaths[Client.cameraPositionPathIndex]!!.size shr 1)) {
                 throw RuntimeException()
             } else {
-                Client.anInt7279 = i_3
-                Client.anInt7256 = 0
-                Client.anInt7327 = executor.intStack[executor.intStackPtr + 2]
-                Client.anInt7182 = executor.intStack[executor.intStackPtr + 3]
+                Client.cameraPositionKeyframe = i_3
+                Client.cameraSplineProgress = 0
+                Client.cameraSplineSpeedStart = executor.intStack[executor.intStackPtr + 2]
+                Client.cameraSplineSpeedEnd = executor.intStack[executor.intStackPtr + 3]
                 var i_4 = executor.intStack[executor.intStackPtr + 4]
                 if (i_4 >= 2) {
                     throw RuntimeException()
                 } else {
-                    Client.anInt7448 = i_4
+                    Client.cameraLookAtPathIndex = i_4
                     var i_5 = executor.intStack[executor.intStackPtr + 5]
-                    if (i_5 + 1 >= (Client.anIntArrayArrayArray7302[Client.anInt7448]!!.size shr 1)) {
+                    if (i_5 + 1 >= (Client.cameraSplinePaths[Client.cameraLookAtPathIndex]!!.size shr 1)) {
                         throw RuntimeException()
                     } else {
-                        Client.anInt7280 = i_5
+                        Client.cameraLookAtKeyframe = i_5
                         Camera.cameraCalculationType = 3
                         StaticMethods.anInt833 = -1
                         PingRequester.anInt5864 = -1
@@ -1407,7 +1407,7 @@ object CS2Interpreter {
         if (i_2 < 0) {
             i_2 = 0
         }
-        Client.anInt7271 = i_2 + Client.anInt7270
+        Client.cameraMaxZoom = i_2 + Client.cameraBaseZoom
     }
 
     @JvmStatic
@@ -1931,7 +1931,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method13494(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        if (Client.aString3643 != null && Client.aString3643.equals(string_2!!)) {
+        if (Client.mapOwnerIdentifier != null && Client.mapOwnerIdentifier.equals(string_2!!)) {
             executor.intStack[++executor.intStackPtr - 1] = 1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = 0
@@ -3455,7 +3455,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1071() {
-        Client.method4195()
+        Client.applyCameraYawRight()
     }
 
     @JvmStatic
@@ -3900,7 +3900,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4176(executor: CS2Executor) {
-        var i_2 = (Client.anIntArrayArrayArray7302!![executor.intStack[--executor.intStackPtr]]!!.size shr 1)
+        var i_2 = (Client.cameraSplinePaths!![executor.intStack[--executor.intStackPtr]]!!.size shr 1)
         executor.intStack[++executor.intStackPtr - 1] = i_2
     }
 
@@ -4657,8 +4657,8 @@ object CS2Interpreter {
         } else if (i_4 >= Resource.mapRegion!!.sceneSizeY) {
             i_4 = Resource.mapRegion!!.sceneSizeY
         }
-        Client.anInt7262 = ((i_3 shl 9)) + 256
-        Client.anInt7376 = ((i_4 shl 9)) + 256
+        Client.cameraTargetAbsX = ((i_3 shl 9)) + 256
+        Client.cameraTargetAbsY = ((i_4 shl 9)) + 256
         Camera.cameraCalculationType = 4
         StaticMethods.anInt833 = -1
         PingRequester.anInt5864 = -1
@@ -4925,8 +4925,8 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method2587(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7436.toInt()
-        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7437.toInt()
+        executor.intStack[++executor.intStackPtr - 1] = Client.viewportFovMin.toInt()
+        executor.intStack[++executor.intStackPtr - 1] = Client.viewportFovMax.toInt()
     }
 
     @JvmStatic
@@ -5222,7 +5222,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8742() {
-        Camera.method12606()
+        Camera.startSmoothTransition()
     }
 
     @JvmStatic
@@ -6198,13 +6198,13 @@ object CS2Interpreter {
     @JvmStatic
     fun method1815(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        Client.aShort7394 = executor.intStack[executor.intStackPtr].toShort()
-        if (Client.aShort7394 <= 0) {
-            Client.aShort7394 = 256
+        Client.cameraZoomMin = executor.intStack[executor.intStackPtr].toShort()
+        if (Client.cameraZoomMin <= 0) {
+            Client.cameraZoomMin = 256
         }
-        Client.aShort7324 = executor.intStack[executor.intStackPtr + 1].toShort()
-        if (Client.aShort7324 <= 0) {
-            Client.aShort7324 = 320
+        Client.cameraZoomMax = executor.intStack[executor.intStackPtr + 1].toShort()
+        if (Client.cameraZoomMax <= 0) {
+            Client.cameraZoomMax = 320
         }
     }
 
@@ -6550,8 +6550,8 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method12597(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = (Client.aLong7153 shr 32).toInt()
-        executor.intStack[++executor.intStackPtr - 1] = Client.aLong7153.toInt()
+        executor.intStack[++executor.intStackPtr - 1] = (Client.machineUid shr 32).toInt()
+        executor.intStack[++executor.intStackPtr - 1] = Client.machineUid.toInt()
     }
 
     @JvmStatic
@@ -6726,25 +6726,25 @@ object CS2Interpreter {
     @JvmStatic
     fun method15404(executor: CS2Executor) {
         executor.intStackPtr -= 4
-        Client.aShort7276 = executor.intStack[executor.intStackPtr].toShort()
-        if (Client.aShort7276 <= 0) {
-            Client.aShort7276 = 1
+        Client.fovScaleMin = executor.intStack[executor.intStackPtr].toShort()
+        if (Client.fovScaleMin <= 0) {
+            Client.fovScaleMin = 1
         }
-        Client.aShort7441 = executor.intStack[executor.intStackPtr + 1].toShort()
-        if (Client.aShort7441 <= 0) {
-            Client.aShort7441 = 32767
-        } else if (Client.aShort7441 < Client.aShort7276) {
-            Client.aShort7441 = Client.aShort7276
+        Client.fovScaleMax = executor.intStack[executor.intStackPtr + 1].toShort()
+        if (Client.fovScaleMax <= 0) {
+            Client.fovScaleMax = 32767
+        } else if (Client.fovScaleMax < Client.fovScaleMin) {
+            Client.fovScaleMax = Client.fovScaleMin
         }
-        Client.aShort7214 = executor.intStack[executor.intStackPtr + 2].toShort()
-        if (Client.aShort7214 <= 0) {
-            Client.aShort7214 = 1
+        Client.aspectFovMin = executor.intStack[executor.intStackPtr + 2].toShort()
+        if (Client.aspectFovMin <= 0) {
+            Client.aspectFovMin = 1
         }
-        Client.aShort7474 = executor.intStack[executor.intStackPtr + 3].toShort()
-        if (Client.aShort7474 <= 0) {
-            Client.aShort7474 = 32767
-        } else if (Client.aShort7474 < Client.aShort7214) {
-            Client.aShort7474 = Client.aShort7214
+        Client.aspectFovMax = executor.intStack[executor.intStackPtr + 3].toShort()
+        if (Client.aspectFovMax <= 0) {
+            Client.aspectFovMax = 32767
+        } else if (Client.aspectFovMax < Client.aspectFovMin) {
+            Client.aspectFovMax = Client.aspectFovMin
         }
     }
 
@@ -7096,9 +7096,9 @@ object CS2Interpreter {
         var i_6 = executor.intStack[executor.intStackPtr + 4]
         var i_7 = executor.intStack[executor.intStackPtr + 5]
         var i_8 = executor.intStack[executor.intStackPtr + 6]
-        if (i_2 >= 0 && i_2 < 2 && Client.anIntArrayArrayArray7302[i_2] != null && i_3 >= 0 && i_3 < Client.anIntArrayArrayArray7302[i_2]!!.size) {
-            Client.anIntArrayArrayArray7302[i_2]!![i_3] = intArrayOf(((i_4 shr 14) and 0x3fff) shl 9, i_5 shl 2, ((i_4 and 0x3fff) shl 9), i_8)
-            Client.anIntArrayArrayArray7302[i_2]!![i_3 + 1] = intArrayOf(((i_6 shr 14) and 0x3fff) shl 9, i_7 shl 2, (i_6 and 0x3fff) shl 9)
+        if (i_2 >= 0 && i_2 < 2 && Client.cameraSplinePaths[i_2] != null && i_3 >= 0 && i_3 < Client.cameraSplinePaths[i_2]!!.size) {
+            Client.cameraSplinePaths[i_2]!![i_3] = intArrayOf(((i_4 shr 14) and 0x3fff) shl 9, i_5 shl 2, ((i_4 and 0x3fff) shl 9), i_8)
+            Client.cameraSplinePaths[i_2]!![i_3 + 1] = intArrayOf(((i_6 shr 14) and 0x3fff) shl 9, i_7 shl 2, (i_6 and 0x3fff) shl 9)
         }
     }
 
@@ -7881,8 +7881,8 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4973(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7394.toInt()
-        executor.intStack[++executor.intStackPtr - 1] = Client.aShort7324.toInt()
+        executor.intStack[++executor.intStackPtr - 1] = Client.cameraZoomMin.toInt()
+        executor.intStack[++executor.intStackPtr - 1] = Client.cameraZoomMax.toInt()
     }
 
     @JvmStatic
@@ -7940,7 +7940,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8205(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = Client.anInt7271 - Client.anInt7270
+        executor.intStack[++executor.intStackPtr - 1] = Client.cameraMaxZoom - Client.cameraBaseZoom
     }
 
     @JvmStatic
@@ -9244,7 +9244,7 @@ object CS2Interpreter {
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         if (i_2 >= 0 && i_2 < 2) {
-            Client.anIntArrayArrayArray7302!![i_2] = Array(4) { IntArray(i_3 shl 1) }
+            Client.cameraSplinePaths!![i_2] = Array(4) { IntArray(i_3 shl 1) }
         }
     }
 
@@ -9287,7 +9287,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method13467(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = Client.anInt3644
+        executor.intStack[++executor.intStackPtr - 1] = Client.lobbyMembershipStatus
     }
 
     @JvmStatic
@@ -9504,13 +9504,13 @@ object CS2Interpreter {
     @JvmStatic
     fun method1643(executor: CS2Executor) {
         executor.intStackPtr -= 2
-        Client.aShort7436 = executor.intStack[executor.intStackPtr].toShort()
-        if (Client.aShort7436 <= 0) {
-            Client.aShort7436 = 256
+        Client.viewportFovMin = executor.intStack[executor.intStackPtr].toShort()
+        if (Client.viewportFovMin <= 0) {
+            Client.viewportFovMin = 256
         }
-        Client.aShort7437 = executor.intStack[executor.intStackPtr + 1].toShort()
-        if (Client.aShort7437 <= 0) {
-            Client.aShort7437 = 205
+        Client.viewportFovMax = executor.intStack[executor.intStackPtr + 1].toShort()
+        if (Client.viewportFovMax <= 0) {
+            Client.viewportFovMax = 205
         }
     }
 
@@ -10784,11 +10784,11 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6942(component: Component) {
-        if (Client.getComponentSettings(component)!!.continueOptionEnabled() && Client.aClass1187352 == null) {
+        if (Client.getComponentSettings(component)!!.continueOptionEnabled() && Client.activeDialogueContinue == null) {
             PacketEncoder.continueInterfacePressed(component!!.idHash, component!!.slotId)
-            Client.aClass1187352 = Component.listIcomponent(component!!.idHash, component!!.slotId)
-            assert(Client.aClass1187352 != null)
-            Component.redrawComponent(Client.aClass1187352!!)
+            Client.activeDialogueContinue = Component.listIcomponent(component!!.idHash, component!!.slotId)
+            assert(Client.activeDialogueContinue != null)
+            Component.redrawComponent(Client.activeDialogueContinue!!)
         }
     }
 
@@ -11098,7 +11098,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method2598(): CreateAccountRequest? {
-        return if (AccountCreationStage.aClass4942916 == null) CreateAccountRequest.aClass4945786 else AccountCreationStage.aClass4942916
+        return if (AccountCreationStage.currentRequest == null) CreateAccountRequest.NOT_STARTED else AccountCreationStage.currentRequest
     }
 
     @JvmStatic

@@ -185,3 +185,50 @@ Decoder functions (AnimatedLoadingBarElement.kt):
 - `decodeSub2` -> `decodeColorLoadingBar`
 - `decodeSub3` -> `decodeMultiSpriteLoadingBar`
 - `decodeSub3Sub1` -> `decodeAnimatedLoadingBar`
+
+## CreateAccountRequest + AccountCreationStage (BUILD VERIFIED, 0 errors)
+
+### CreateAccountRequest.kt (1 field + 1 method + 14 enum constants renamed)
+Field: `anInt5793`->responseCode. Method: `method8038`->getAll.
+Enum constants: NOT_STARTED(-2), AWAITING_RESPONSE(-3), SUCCESS(2), UNKNOWN_ERROR(3), USERNAME_UNAVAILABLE(9), INVALID_USERNAME(10), INVALID_PASSWORD(20), PASSWORD_TOO_SIMILAR(21), INVALID_DOB(30), EMAIL_ALREADY_IN_USE(31), INVALID_EMAIL(32), TERMS_NOT_ACCEPTED(33), TOO_MANY_ATTEMPTS(34), SERVER_UNAVAILABLE(38).
+
+### AccountCreationStage.kt (2 fields + 3 methods renamed)
+Fields: `anInt134`->connectionRetryCount, `anInt133`->connectionTickCount, `aClass4942916`->currentRequest.
+Methods: `method4251`->initAccountCreation, `method297`->retryOrFailConnection, `method1466`->isCreatingAccount, `method12948`->setCurrentRequest.
+
+Consumer files updated: PacketDecoder.kt, PacketEncoder.kt, CS2Interpreter.kt, Client.kt, GameState.kt, LoginManager.kt.
+
+## Client.kt Field + Method Deobfuscation (BUILD VERIFIED, 0 errors)
+
+### Methods (13 renamed, 0 remaining in Client.kt)
+processLobbyTick, processGameTick, drawInterfaceFrame, drawGameFrame, processDrag, resetGraphicsState, getDragTarget, clearWorldMapCaches, applyCameraYawRight, buildOverlappingEntityList, resetGameState, isInLobbyOrCreation, isInLobbyConnection
+
+### Fields (68 renamed, 14 uncertain left obfuscated)
+- Tick/Timestamp (8): serverTick, lastChatMessageTick, lastFriendIgnoreUpdateTick, lastFriendsChatUpdateTick, lastClanSettingsUpdateTick, lastClanChannelUpdateTick, lastGrandExchangeUpdateTick, lastMiscUpdateTick
+- Camera (8): cameraYawVelocity, cameraPitchVelocity, cameraYawVelocityApplied, cameraPitchVelocityApplied, cameraTargetAbsX, cameraTargetAbsY, cameraRandomizationCycle, lastCameraSmoothCycle
+- Cutscene Spline (13): cameraSplinePaths, cameraPositionPathIndex, cameraLookAtPathIndex, cameraPositionKeyframe, cameraLookAtKeyframe, cameraSplineProgress, cameraSplineSpeedStart, cameraSplineSpeedEnd, cameraBaseZoom, cameraMaxZoom, cutsceneCameraActive, cutsceneCameraCompleted, cutsceneCameraPreviouslyCompleted
+- Viewport/FOV (9): viewportFovMin, viewportFovMax, cameraZoomMin, cameraZoomMax, fovScaleMin, fovScaleMax, aspectFovMin, aspectFovMax, viewportScaledFov
+- Minimap (3): minimapRandomizationCycle, minimapRotationStep, minimapZoomStep
+- Input/UI (7): mouseWheelDelta, isDragThresholdMet, menuItemHoverCycle, menuOpenMode, selectedComponentHash, selectedSlotId, selectedItemId
+- Rendering (7): lastRedrawTimeMillis, componentBackgroundCount, lastRenderedCycle, drawsSinceLastPacket, interfaceDebugMode, overlappingEntityCount, overheadChatFilter
+- Chat/Skills (4): chatMessageHashIndex, skillUpdateCycle, recentSkillUpdates, recentKeyUpdates
+- Camera Shake (3): CAM_SHAKE_JITTER, CAM_SHAKE_FREQUENCY, CAM_SHAKE_PHASE
+- Constants/Other (6): DEBUG_TEXT_COLOR, OVERHEAD_TEXT_COLORS, ANTI_MACRO_TEXT_BOUNDS, PLAYER_OP_BASE_TYPES, clientRandomSeed, activeDialogueContinue, TICK_HOOK_REQUESTS, MOUSE_HOOK_REQUESTS
+- Identity (4): js5AuthToken, machineUid, lobbyMembershipStatus, mapOwnerIdentifier
+
+### 14 Remaining Uncertain Fields (deliberately left obfuscated)
+aBool7151 (param29), aBool7158 (param2), aBool7159 (param25), aString7165 (param3), aBool7189 (param28), aBool7323 (unused login bool), aByte7458 (deprecated packet), aString7156 (param4), aBool7160 (param22), anInt7163 (param27), aBool7241 (hide NPCs?), aBool7322 (post-email flag), aString5555 (param13), anInt2831 (param30)
+
+### Cross-file impact: 37 files modified across codebase
+
+## Camera/Mouse/Console Deobfuscation (BUILD VERIFIED, 0 new errors)
+
+### Camera.kt (11 fields + 6 methods renamed)
+Fields: `aClass3847167`->projectionMatrix, `anInt9461/2349/9575`->transitionStartZ/X/Y, `anInt3968`->transitionStartYaw, `anInt5029`->transitionStartRoll, `aClass384158`->viewProjectionMatrix, `aClass294155`->sunMatrix, `anInt176/184`->gameAreaWidth/Height, `anInt1527`->lookAtHeightOffset
+Methods: `method6286`->updateFollowPlayerCamera, `method4974`->updateOrbitTargetCamera, `method6934`->storePickingState, `method3920`->updateSmoothTransitionCamera, `method13296`->storeViewProjectionMatrix, `method12606`->startSmoothTransition
+
+### MouseManager.kt (4 fields + 1 method renamed)
+`aClass4827941`->pendingMouseActions, `anInt7938/7939`->snapshotMouseX/Y, `anInt7940`->snapshotClickMask, `method3589`->syncMouseState (also in AbstractMouseManager)
+
+### Console.kt (4 fields renamed)
+`anInt2230`->inputLineHeight, `anInt2222`->outputLineHeight, `anInt2223`->scrollOffset, `anInt2226`->historyIndex

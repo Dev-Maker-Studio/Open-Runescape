@@ -145,7 +145,7 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
                         attackClickType = 2000
                     }
 
-                    val clickType = (Client.aShortArray7239[index] + attackClickType).toShort()
+                    val clickType = (Client.PLAYER_OP_BASE_TYPES[index] + attackClickType).toShort()
                     val cursor = if (Client.PLAYER_OPTION_CURSORS[index] != -1) {
                         Client.PLAYER_OPTION_CURSORS[index]
                     } else {
@@ -185,7 +185,7 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
 
 @JvmName("tileHovered")
 fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
-    val cameraMatrix = Camera.aClass384158
+    val cameraMatrix = Camera.viewProjectionMatrix
     if (mouseX < 0 || mouseY < 0 || cameraMatrix == null) {
         return
     }
@@ -193,10 +193,10 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     val regionBase = Resource.mapRegion?.getBaseCoordinates() ?: return
     val matrix445 = toolkit.method8449()
     toolkit.setModelMatrix(cameraMatrix)
-    toolkit.setSunPosition(Camera.aClass294155)
-    toolkit.setClipping(MiniMenu.anInt180, MiniMenu.anInt181, MiniMenu.anInt180 + Camera.anInt176, Camera.anInt184 + MiniMenu.anInt181)
-    toolkit.setDrawableArea(MiniMenu.anInt180, MiniMenu.anInt181, Camera.anInt176, Camera.anInt184)
-    matrix445.fromMatrix(Camera.aClass294155)
+    toolkit.setSunPosition(Camera.sunMatrix)
+    toolkit.setClipping(MiniMenu.anInt180, MiniMenu.anInt181, MiniMenu.anInt180 + Camera.gameAreaWidth, Camera.gameAreaHeight + MiniMenu.anInt181)
+    toolkit.setDrawableArea(MiniMenu.anInt180, MiniMenu.anInt181, Camera.gameAreaWidth, Camera.gameAreaHeight)
+    matrix445.fromMatrix(Camera.sunMatrix)
     matrix445.multiplyBy(cameraMatrix)
     matrix445.invert()
 
@@ -207,8 +207,8 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
         var x = -1
         var y = -1
 
-        val f_10 = 2.0f * i_3 / Camera.anInt176 - 1.0f
-        val f_11 = 2.0f * i_4 / Camera.anInt184 - 1.0f
+        val f_10 = 2.0f * i_3 / Camera.gameAreaWidth - 1.0f
+        val f_11 = 2.0f * i_4 / Camera.gameAreaHeight - 1.0f
 
         matrix445.scale(f_10, f_11, -1.0f, StaticMethods.aFloatArray194)
         val f_12 = StaticMethods.aFloatArray194[0] / StaticMethods.aFloatArray194[3]
@@ -237,7 +237,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
 
         if (x != -1 && y != -1) {
             if (Client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x40) != 0) {
-                val component = Component.listIcomponent(Client.anInt56, Client.anInt7345)
+                val component = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
                 if (component != null) {
                     MiniMenu.addEntry(
                         Client.useOnType!!,

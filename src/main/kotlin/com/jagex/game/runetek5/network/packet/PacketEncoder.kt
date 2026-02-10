@@ -80,7 +80,7 @@ object PacketEncoder {
                 Client.aBool7189 = true
             }
 
-            AccountCreationStage.aClass4942916 = CreateAccountRequest.aClass4945790
+            AccountCreationStage.currentRequest = CreateAccountRequest.AWAITING_RESPONSE
         }
     }
 
@@ -136,7 +136,7 @@ object PacketEncoder {
     fun method2590(icomponentdefinitions0: Component?) {
         if (Client.interfaceSelectionActive) {
             if (icomponentdefinitions0!!.anObjectArray1393 != null) {
-                val icomponentdefinitions2 = Component.listIcomponent(Client.anInt56, Client.anInt7345)
+                val icomponentdefinitions2 = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
                 if (icomponentdefinitions2 != null) {
                     val hookrequest3 = HookRequest()
                     hookrequest3.source = icomponentdefinitions0
@@ -146,13 +146,13 @@ object PacketEncoder {
                 }
             }
             val tcpmessage4 = createPacket(ClientProt.IF_ON_IF, Client.GAME_CONNECTION_CONTEXT.isaac)
-            Console.writeLine("IF_ON_IF: [" + interfaceIdFromHash(Client.anInt56) + ", " + componentIdFromHash(Client.anInt56) + ", " + Client.anInt7345 + ", " + Client.anInt7346 + "] -> [" + interfaceIdFromHash(icomponentdefinitions0!!.idHash) + ", " + componentIdFromHash(icomponentdefinitions0.idHash) + ", " + icomponentdefinitions0.slotId + ", " + icomponentdefinitions0.containerItemId + "]")
+            Console.writeLine("IF_ON_IF: [" + interfaceIdFromHash(Client.selectedComponentHash) + ", " + componentIdFromHash(Client.selectedComponentHash) + ", " + Client.selectedSlotId + ", " + Client.selectedItemId + "] -> [" + interfaceIdFromHash(icomponentdefinitions0!!.idHash) + ", " + componentIdFromHash(icomponentdefinitions0.idHash) + ", " + icomponentdefinitions0.slotId + ", " + icomponentdefinitions0.containerItemId + "]")
             tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.slotId)
-            tcpmessage4.buffer.writeShortLittle(Client.anInt7345)
+            tcpmessage4.buffer.writeShortLittle(Client.selectedSlotId)
             tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId)
             tcpmessage4.buffer.writeIntLittle(icomponentdefinitions0.idHash)
-            tcpmessage4.buffer.writeIntInverseMiddle(Client.anInt56)
-            tcpmessage4.buffer.writeShortLittle(Client.anInt7346)
+            tcpmessage4.buffer.writeIntInverseMiddle(Client.selectedComponentHash)
+            tcpmessage4.buffer.writeShortLittle(Client.selectedItemId)
             Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage4)
         }
     }
@@ -338,10 +338,10 @@ object PacketEncoder {
             }
             subInterface = Client.OPEN_INTERFACES!!.next()
         }
-        val comp1187352 = Client.aClass1187352
+        val comp1187352 = Client.activeDialogueContinue
         if (comp1187352 != null) {
             Component.redrawComponent(comp1187352)
-            Client.aClass1187352 = null
+            Client.activeDialogueContinue = null
         }
     }
 
@@ -499,11 +499,11 @@ object PacketEncoder {
                 val player6: PlayerEntity? = PlayerUpdate.players[indices[i]]
                 if (player6 != null && player6.displayName != null && player6.displayName.equals(string_0, ignoreCase = true) && (player6 === PlayerUpdate.MY_PLAYER!! && (USE_OPTIONS_FLAGS and 0x10) != 0 || (USE_OPTIONS_FLAGS and 0x8) != 0)) {
                     val packet = createPacket(ClientProt.IF_ON_PLAYER, Client.GAME_CONNECTION_CONTEXT.isaac)
-                    packet.buffer.writeShort(Client.anInt7345)
+                    packet.buffer.writeShort(Client.selectedSlotId)
                     packet.buffer.writeShortLittle(indices[i])
                     packet.buffer.writeByteSubtract(0)
-                    packet.buffer.writeIntInverseMiddle(Client.anInt56)
-                    packet.buffer.writeShortLittle(Client.anInt7346)
+                    packet.buffer.writeIntInverseMiddle(Client.selectedComponentHash)
+                    packet.buffer.writeShortLittle(Client.selectedItemId)
                     Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
                     val size = player6.getSize()
                     RouteFinder.calculateRoute(player6.movementBaseX[0], player6.movementBaseY[0], true, RouteStrategies.forPlayer(player6.movementBaseX[0], player6.movementBaseY[0], size, size))
@@ -581,7 +581,7 @@ object PacketEncoder {
             Client.MAP_LOADING_STAGE = 2
             MapRegion.CUTSCENE_MAP_XTEAS = null
             CutsceneTypeList.CUTSCENE_BUFFER = null
-            Client.aBool7321 = false
+            Client.cutsceneCameraActive = false
             CutsceneTypeList.resetCutsceneConfigs()
             val cutsceneExitPacket = createPacket(ClientProt.CUTSCENE_FINISHED, Client.GAME_CONNECTION_CONTEXT.isaac)
             cutsceneExitPacket.buffer.writeByte(if (bool0) 1 else 0)

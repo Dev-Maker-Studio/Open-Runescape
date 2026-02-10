@@ -89,7 +89,7 @@ object IgnoreList {
                     if (TextUtils.matches(displayName, formattedDisplayName, unfilteredUsername, formattedIgnoredDisplayName, (-110).toByte())) {
                         if (--IGNORE_COUNT - index >= 0)
                             System.arraycopy(IGNORED, index + 1, IGNORED, index, IGNORE_COUNT - index)
-                        Client.anInt7386 = Client.anInt7347
+                        Client.lastFriendIgnoreUpdateTick = Client.serverTick
                         val context = Client.connectionContext
                         val packet = PacketEncoder.createPacket(ClientProt.REMOVE_IGNORE, context.isaac)
                         packet.buffer.writeByte(TextUtils.getLength(displayName))

@@ -85,11 +85,11 @@ object MenuInteraction {
                 Client.crossType = 2
                 Client.crossSpritePtr = 0
                 packet = PacketEncoder.createPacket(ClientProt.IF_ON_PLAYER, Client.GAME_CONNECTION_CONTEXT!!.isaac)
-                packet!!.buffer!!.writeShort(Client.anInt7345)
+                packet!!.buffer!!.writeShort(Client.selectedSlotId)
                 packet.buffer!!.writeShortLittle(PlayerUpdate.MY_PLAYER!!.playerIndex)
                 packet.buffer!!.writeByteSubtract(if (KeyDownCommand.runKeyDown()) 1 else 0)
-                packet.buffer!!.writeIntInverseMiddle(Client.anInt56)
-                packet.buffer!!.writeShortLittle(Client.anInt7346)
+                packet.buffer!!.writeIntInverseMiddle(Client.selectedComponentHash)
+                packet.buffer!!.writeShortLittle(Client.selectedItemId)
                 Client.GAME_CONNECTION_CONTEXT!!.queuePacket(packet)
             }
 
@@ -105,11 +105,11 @@ object MenuInteraction {
                     Client.crossType = 2
                     Client.crossSpritePtr = 0
                     val ifPlayerPacket = PacketEncoder.createPacket(ClientProt.IF_ON_PLAYER, Client.GAME_CONNECTION_CONTEXT!!.isaac)
-                    ifPlayerPacket!!.buffer!!.writeShort(Client.anInt7345)
+                    ifPlayerPacket!!.buffer!!.writeShort(Client.selectedSlotId)
                     ifPlayerPacket.buffer!!.writeShortLittle(uid)
                     ifPlayerPacket.buffer!!.writeByteSubtract(if (KeyDownCommand.runKeyDown()) 1 else 0)
-                    ifPlayerPacket.buffer!!.writeIntInverseMiddle(Client.anInt56)
-                    ifPlayerPacket.buffer!!.writeShortLittle(Client.anInt7346)
+                    ifPlayerPacket.buffer!!.writeIntInverseMiddle(Client.selectedComponentHash)
+                    ifPlayerPacket.buffer!!.writeShortLittle(Client.selectedItemId)
                     Client.GAME_CONNECTION_CONTEXT!!.queuePacket(ifPlayerPacket)
                     RouteFinder.calculateRoute(player.movementBaseX!![0], player.movementBaseY!![0], true, RouteStrategies.forPlayer(player.movementBaseX!![0], player.movementBaseY!![0], player.getSize(), player.getSize()))
                 }
@@ -121,13 +121,13 @@ object MenuInteraction {
                 Client.crossType = 2
                 Client.crossSpritePtr = 0
                 packet = PacketEncoder.createPacket(ClientProt.IF_ON_OBJECT, Client.GAME_CONNECTION_CONTEXT!!.isaac)
-                Console.writeLine("IF_ON_OBJECT [" + interfaceIdFromHash(Client.anInt56) + ", " + componentIdFromHash(Client.anInt56) + ", " + Client.anInt7345 + ", " + Client.anInt7346 + "] -> [" + ((bitpackedEntity ushr 32).toInt() and 0x7fffffff) + ", (" + (attr1 + baseCoordinates!!.x) + ", " + (attr2 + baseCoordinates.y) + ", " + Bot.getMyPlayerPosition().z + ")]")
+                Console.writeLine("IF_ON_OBJECT [" + interfaceIdFromHash(Client.selectedComponentHash) + ", " + componentIdFromHash(Client.selectedComponentHash) + ", " + Client.selectedSlotId + ", " + Client.selectedItemId + "] -> [" + ((bitpackedEntity ushr 32).toInt() and 0x7fffffff) + ", (" + (attr1 + baseCoordinates!!.x) + ", " + (attr2 + baseCoordinates.y) + ", " + Bot.getMyPlayerPosition().z + ")]")
                 packet!!.buffer!!.writeShortAddLittle(attr1 + baseCoordinates.x)
                 packet.buffer!!.writeByteSubtract(if (KeyDownCommand.runKeyDown()) 1 else 0)
                 packet.buffer!!.writeIntMiddle((bitpackedEntity ushr 32).toInt() and 0x7fffffff)
-                packet.buffer!!.writeInt(Client.anInt56)
-                packet.buffer!!.writeShortLittle(Client.anInt7346)
-                packet.buffer!!.writeShortAdd(Client.anInt7345)
+                packet.buffer!!.writeInt(Client.selectedComponentHash)
+                packet.buffer!!.writeShortLittle(Client.selectedItemId)
+                packet.buffer!!.writeShortAdd(Client.selectedSlotId)
                 packet.buffer!!.writeShortLittle(attr2 + baseCoordinates.y)
                 Client.GAME_CONNECTION_CONTEXT!!.queuePacket(packet)
                 RouteFinder.routeToSceneobject(attr1, attr2, bitpackedEntity)
@@ -210,11 +210,11 @@ object MenuInteraction {
                 Client.crossType = 2
                 Client.crossSpritePtr = 0
                 val ifGrounditemPacket = PacketEncoder.createPacket(ClientProt.IF_ON_GROUND_ITEM, Client.GAME_CONNECTION_CONTEXT!!.isaac)
-                ifGrounditemPacket!!.buffer!!.writeShortAdd(Client.anInt7346)
-                ifGrounditemPacket.buffer!!.writeIntInverseMiddle(Client.anInt56)
+                ifGrounditemPacket!!.buffer!!.writeShortAdd(Client.selectedItemId)
+                ifGrounditemPacket.buffer!!.writeIntInverseMiddle(Client.selectedComponentHash)
                 ifGrounditemPacket.buffer!!.writeShort(uid)
                 ifGrounditemPacket.buffer!!.writeByteSubtract(if (KeyDownCommand.runKeyDown()) 1 else 0)
-                ifGrounditemPacket.buffer!!.writeShortAddLittle(Client.anInt7345)
+                ifGrounditemPacket.buffer!!.writeShortAddLittle(Client.selectedSlotId)
                 ifGrounditemPacket.buffer!!.writeShortAddLittle(attr2 + baseCoordinates!!.y)
                 ifGrounditemPacket.buffer!!.writeShortLittle(attr1 + baseCoordinates.x)
                 Client.GAME_CONNECTION_CONTEXT!!.queuePacket(ifGrounditemPacket)
@@ -227,19 +227,19 @@ object MenuInteraction {
                 Client.crossType = 1
                 Client.crossSpritePtr = 0
                 val ifTilePacket = PacketEncoder.createPacket(ClientProt.IF_ON_TILE, Client.GAME_CONNECTION_CONTEXT!!.isaac)
-                ifTilePacket!!.buffer!!.writeShortLittle(Client.anInt7346)
+                ifTilePacket!!.buffer!!.writeShortLittle(Client.selectedItemId)
                 ifTilePacket.buffer!!.writeShortLittle(attr2 + baseCoordinates!!.y)
-                ifTilePacket.buffer!!.writeIntMiddle(Client.anInt56)
-                ifTilePacket.buffer!!.writeShortAdd(Client.anInt7345)
+                ifTilePacket.buffer!!.writeIntMiddle(Client.selectedComponentHash)
+                ifTilePacket.buffer!!.writeShortAdd(Client.selectedSlotId)
                 ifTilePacket.buffer!!.writeShortLittle(attr1 + baseCoordinates.x)
                 Client.GAME_CONNECTION_CONTEXT!!.queuePacket(ifTilePacket)
                 RouteFinder.calculateRoute(attr1, attr2, true, RouteStrategies.forFixedTile(attr1, attr2))
             }
 
-            if (clickType == 30 && Client.aClass1187352 == null) {
+            if (clickType == 30 && Client.activeDialogueContinue == null) {
                 PacketEncoder.continueInterfacePressed(attr2, attr1)
                 val comp = Component.listIcomponent(attr2, attr1)
-                Client.aClass1187352 = comp
+                Client.activeDialogueContinue = comp
                 if (comp != null) {
                     Component.redrawComponent(comp)
                 }
@@ -299,11 +299,11 @@ object MenuInteraction {
                         Client.crossType = 2
                         Client.crossSpritePtr = 0
                         val ifNpcPacket = PacketEncoder.createPacket(ClientProt.IF_ON_NPC, Client.GAME_CONNECTION_CONTEXT!!.isaac)
-                        ifNpcPacket!!.buffer!!.writeIntInverseMiddle(Client.anInt56)
+                        ifNpcPacket!!.buffer!!.writeIntInverseMiddle(Client.selectedComponentHash)
                         ifNpcPacket.buffer!!.writeShortAddLittle(uid)
                         ifNpcPacket.buffer!!.writeByteSubtract(if (KeyDownCommand.runKeyDown()) 1 else 0)
-                        ifNpcPacket.buffer!!.writeShortAddLittle(Client.anInt7346)
-                        ifNpcPacket.buffer!!.writeShortAdd(Client.anInt7345)
+                        ifNpcPacket.buffer!!.writeShortAddLittle(Client.selectedItemId)
+                        ifNpcPacket.buffer!!.writeShortAdd(Client.selectedSlotId)
                         Client.GAME_CONNECTION_CONTEXT!!.queuePacket(ifNpcPacket)
                         RouteFinder.calculateRoute(npc.movementBaseX!![0], npc.movementBaseY!![0], true, RouteStrategies.forPlayer(npc.movementBaseX!![0], npc.movementBaseY!![0], npc.getSize(), npc.getSize()))
                     }
@@ -343,7 +343,7 @@ object MenuInteraction {
                 }
 
                 val component = aClass1184825
-                if (component != null && Client.anInt7297 == 0) {
+                if (component != null && Client.menuItemHoverCycle == 0) {
                     Component.redrawComponent(component)
                 }
             }
@@ -565,7 +565,7 @@ object MenuInteraction {
                 val bool16 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.anInterface175878, mouseRecord)
                 val bool18 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.anInterface175874, mouseRecord)
                 var bool20 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.anInterface175875, mouseRecord)
-                if ((bool16 || bool18) && (Client.anInt7339 == 1 && MiniMenu.entryCount > 2 || MiniMenu.method12562())) {
+                if ((bool16 || bool18) && (Client.menuOpenMode == 1 && MiniMenu.entryCount > 2 || MiniMenu.method12562())) {
                     bool20 = true
                 }
                 if (bool20 && MiniMenu.entryCount > 0) {

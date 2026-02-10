@@ -21,6 +21,6 @@ class CutsceneUncenteredCameraMovement(buffer: Packet) : CutsceneAction(buffer) 
     override fun perform() {
         Camera.moveCamera(this.localX, this.localY, this.moveZ, 100, 100, false)
         Camera.setAngle(this.angleX, this.angleY, 0)
-        Client.aBool7321 = true
+        Client.cutsceneCameraActive = true
     }
 }

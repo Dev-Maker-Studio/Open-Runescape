@@ -67,7 +67,7 @@ object InterfaceComponentRenderer {
     @JvmStatic
     fun cancelInterfaceSelection() {
         if (Client.interfaceSelectionActive) {
-            val component = Component.listIcomponent(Client.anInt56, Client.anInt7345)
+            val component = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
             if (component != null && component.hookParams != null) {
                 val hookRequest = HookRequest()
                 hookRequest.source = component
@@ -75,7 +75,7 @@ object InterfaceComponentRenderer {
                 CS2Executor.executeHookInner(hookRequest)
             }
             Client.defaultMenuCursor = -1
-            Client.anInt7346 = -1
+            Client.selectedItemId = -1
             Client.interfaceSelectionActive = false
             if (component != null) {
                 Component.redrawComponent(component)
@@ -100,8 +100,8 @@ object InterfaceComponentRenderer {
             if (component != null && (component.parentId == i_1 || i_1 == -1412584499 && component === Client.draggingComponent)) {
                 val componentReference: Int
                 if (i_8 == -1) {
-                    Client.INTERFACE_BG_COMPONENTS[Client.anInt7407]!!.setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height)
-                    componentReference = ++Client.anInt7407 - 1
+                    Client.INTERFACE_BG_COMPONENTS[Client.componentBackgroundCount]!!.setBounds(component.x + offsetX, component.y + offsetY, component.width, component.height)
+                    componentReference = ++Client.componentBackgroundCount - 1
                 } else {
                     componentReference = i_8
                 }
@@ -126,7 +126,7 @@ object InterfaceComponentRenderer {
                             anInt5157 = offsetY
                             continue
                         }
-                        if (Client.aBool7364 && Client.isComponentSelected) {
+                        if (Client.isDragThresholdMet && Client.isComponentSelected) {
                             var dragX = MouseRecord.recorder!!.getMouseX()
                             var dragY = MouseRecord.recorder!!.getMouseY()
                             dragX -= Client.mouseX
@@ -268,7 +268,7 @@ object InterfaceComponentRenderer {
                             }
                             Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                         }
-                        if (Client.PREV_COMPONENT_ON_TOP[componentReference] || Client.anInt7412 > 1) {
+                        if (Client.PREV_COMPONENT_ON_TOP[componentReference] || Client.interfaceDebugMode > 1) {
                             if (component.type == ComponentType.FIGURE) {
                                 if (drawTransparency == 0) {
                                     if (component.filled) {
@@ -303,7 +303,7 @@ object InterfaceComponentRenderer {
                                     if (component.anInt1435 != -1) {
                                         itemDisplayText = SoundResourceManager.method2550(component.anInt1435)!!
                                     }
-                                    if (component === Client.aClass1187352) {
+                                    if (component === Client.activeDialogueContinue) {
                                         itemDisplayText = LocalizedText.PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!)
                                         color = component.color
                                     }
@@ -311,7 +311,7 @@ object InterfaceComponentRenderer {
                                         Renderers.activeToolkit!!.expandClipping(startX, startY, startX + component.width, startY + component.height)
                                     }
                                     if (component.textAntiMacro) {
-                                        fontRenderer.renderTextAntiMacro(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.anIntArray7438, StaticMedia.nameIconSprites, null)
+                                        fontRenderer.renderTextAntiMacro(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.nameIconSprites, null)
                                     } else {
                                         fontRenderer.renderText(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, component.anInt1358, component.maxTextLines, StaticMedia.nameIconSprites, null, null, 0, 0)
                                     }
@@ -635,7 +635,7 @@ object InterfaceComponentRenderer {
 
     @JvmStatic
     fun inboundsComponentToTop(x: Int, y: Int, offsetX: Int, offsetY: Int) {
-        for (index in 0 until Client.anInt7407) {
+        for (index in 0 until Client.componentBackgroundCount) {
             val rectangle = Client.INTERFACE_BG_COMPONENTS[index] ?: continue
             if (rectangle.x + rectangle.width > x && rectangle.x < x + offsetX && rectangle.height + rectangle.y > y && rectangle.y < offsetY + y) {
                 Client.IS_COMPONENT_ON_TOP[index] = true

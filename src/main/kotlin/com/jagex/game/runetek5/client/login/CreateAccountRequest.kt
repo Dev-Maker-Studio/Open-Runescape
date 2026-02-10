@@ -2,32 +2,32 @@ package com.jagex.game.runetek5.client.login
 
 import com.jagex.game.runetek5.config.Identifiable
 
-enum class CreateAccountRequest(@JvmField val anInt5793: Int) : Identifiable {
-    aClass4945786(-2),
-    aClass4945790(-3),
-    aClass4945781(2),
-    aClass4945782(3),
-    aClass4945783(9),
-    aClass4945784(10),
-    aClass4945785(20),
-    aClass4945792(21),
-    aClass4945787(30),
-    aClass4945788(31),
-    aClass4945789(32),
-    aClass4945780(33),
-    aClass4945779(34),
-    aClass4945791(38);
+enum class CreateAccountRequest(@JvmField val responseCode: Int) : Identifiable {
+    NOT_STARTED(-2),
+    AWAITING_RESPONSE(-3),
+    SUCCESS(2),
+    UNKNOWN_ERROR(3),
+    USERNAME_UNAVAILABLE(9),
+    INVALID_USERNAME(10),
+    INVALID_PASSWORD(20),
+    PASSWORD_TOO_SIMILAR(21),
+    INVALID_DOB(30),
+    EMAIL_ALREADY_IN_USE(31),
+    INVALID_EMAIL(32),
+    TERMS_NOT_ACCEPTED(33),
+    TOO_MANY_ATTEMPTS(34),
+    SERVER_UNAVAILABLE(38);
 
-    override fun getValue(): Int = anInt5793
+    override fun getValue(): Int = responseCode
 
     companion object {
         @JvmStatic
-        fun method8038(): Array<CreateAccountRequest> {
+        fun getAll(): Array<CreateAccountRequest> {
             return arrayOf(
-                aClass4945784, aClass4945792, aClass4945787, aClass4945789,
-                aClass4945786, aClass4945782, aClass4945788, aClass4945779,
-                aClass4945790, aClass4945783, aClass4945791, aClass4945781,
-                aClass4945785, aClass4945780
+                INVALID_USERNAME, PASSWORD_TOO_SIMILAR, INVALID_DOB, INVALID_EMAIL,
+                NOT_STARTED, UNKNOWN_ERROR, EMAIL_ALREADY_IN_USE, TOO_MANY_ATTEMPTS,
+                AWAITING_RESPONSE, USERNAME_UNAVAILABLE, SERVER_UNAVAILABLE, SUCCESS,
+                INVALID_PASSWORD, TERMS_NOT_ACCEPTED
             )
         }
     }

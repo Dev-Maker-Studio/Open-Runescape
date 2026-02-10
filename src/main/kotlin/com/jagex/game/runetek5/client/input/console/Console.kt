@@ -33,11 +33,11 @@ object Console {
     var consoleMessageCount: Int = 0
 
     @JvmField
-    var anInt2230: Int = 0
+    var inputLineHeight: Int = 0
     @JvmField
-    var anInt2222: Int = 0
+    var outputLineHeight: Int = 0
     @JvmField
-    var anInt2223: Int = 0
+    var scrollOffset: Int = 0
 
     @JvmField
     var clipboard: Clipboard? = null
@@ -53,7 +53,7 @@ object Console {
     @JvmField
     var pausedAtCommandIndex: Int = -1
     @JvmField
-    var anInt2226: Int = 0
+    var historyIndex: Int = 0
     @JvmField
     var pauseEndsAt: Long = 0
 
@@ -79,8 +79,8 @@ object Console {
 
     @JvmStatic
     fun initialize() {
-        anInt2230 = FontMetrics.aClass4143438!!.topPadding + FontMetrics.aClass4143438!!.bottomPadding + 2
-        anInt2222 = FontManager.messageboxFont!!.topPadding + FontManager.messageboxFont!!.bottomPadding + 2
+        inputLineHeight = FontMetrics.aClass4143438!!.topPadding + FontMetrics.aClass4143438!!.bottomPadding + 2
+        outputLineHeight = FontManager.messageboxFont!!.topPadding + FontManager.messageboxFont!!.bottomPadding + 2
         displayedOutput = Array(500) { "" }
         writeLine(LocalizedText.DEVELOPER_CONSOLE_INTRO.translate(Client.CURRENT_LANGUAGE!!)!!)
     }
@@ -90,7 +90,7 @@ object Console {
         if (commandString.isNotEmpty()) {
             writeLine("--> $commandString")
             CommandExecutor.executeCommand(commandString, false, save)
-            anInt2226 = 0
+            historyIndex = 0
             if (!save) {
                 commandLength = 0
                 commandString = ""
@@ -123,8 +123,8 @@ object Console {
             }
             if (consoleMessageCount < displayedOutput!!.size - 1) {
                 consoleMessageCount++
-                if (anInt2223 > 0) {
-                    anInt2223++
+                if (scrollOffset > 0) {
+                    scrollOffset++
                 }
             }
         }
@@ -132,12 +132,12 @@ object Console {
 
     @JvmStatic
     fun adjustCommandString() {
-        if (anInt2226 > 0) {
+        if (historyIndex > 0) {
             var arrowCount = 0
             for (index in displayedOutput!!.indices) {
                 if (displayedOutput!![index].indexOf("--> ") != -1) {
                     ++arrowCount
-                    if (arrowCount == anInt2226) {
+                    if (arrowCount == historyIndex) {
                         commandString = displayedOutput!![index].substring(displayedOutput!![index].indexOf('>') + 2)
                         break
                     }
@@ -173,15 +173,15 @@ object Console {
             }
             pausedAtCommandIndex = -1
         }
-        if (Client.anInt7191 != 0) {
-            anInt2223 -= Client.anInt7191 * 5
-            if (anInt2223 >= consoleMessageCount) {
-                anInt2223 = consoleMessageCount - 1
+        if (Client.mouseWheelDelta != 0) {
+            scrollOffset -= Client.mouseWheelDelta * 5
+            if (scrollOffset >= consoleMessageCount) {
+                scrollOffset = consoleMessageCount - 1
             }
-            if (anInt2223 < 0) {
-                anInt2223 = 0
+            if (scrollOffset < 0) {
+                scrollOffset = 0
             }
-            Client.anInt7191 = 0
+            Client.mouseWheelDelta = 0
         }
         for (index in 0 until Client.keyCachePointerPoss) {
             val keyRecord = Client.KEYS_PRESSED[index]
@@ -229,12 +229,12 @@ object Console {
                 commandLength = 0
             } else if (code == 103) {
                 commandLength = commandString.length
-            } else if (code == 104 && anInt2226 < displayedOutput!!.size) {
-                anInt2226++
+            } else if (code == 104 && historyIndex < displayedOutput!!.size) {
+                historyIndex++
                 adjustCommandString()
                 commandLength = commandString.length
-            } else if (code == 105 && anInt2226 > 0) {
-                anInt2226--
+            } else if (code == 105 && historyIndex > 0) {
+                historyIndex--
                 adjustCommandString()
                 commandLength = commandString.length
             } else if (TextUtils.isAlphabeticalOrNumeric(character) || "\\/.:, _-+[]~@".indexOf(character) != -1) {
@@ -282,29 +282,29 @@ object Console {
     fun renderConsole(toolkit: AbstractToolkit) {
         toolkit.setClipping(0, 0, GameShell.screenCanvasWidth, 350)
         toolkit.drawFilledRectangle(0, 0, GameShell.screenCanvasWidth, 350, backgroundAlpha shl 24 or 0x332277, 1)
-        val i_2 = 350 / anInt2222
+        val i_2 = 350 / outputLineHeight
         if (consoleMessageCount > 0) {
-            val i_3 = 346 - anInt2222 - 4
+            val i_3 = 346 - outputLineHeight - 4
             val i_4 = i_2 * i_3 / (i_2 + consoleMessageCount - 1)
             var i_5 = 4
             if (consoleMessageCount > 1) {
-                i_5 += (i_3 - i_4) * (consoleMessageCount - 1 - anInt2223) / (consoleMessageCount - 1)
+                i_5 += (i_3 - i_4) * (consoleMessageCount - 1 - scrollOffset) / (consoleMessageCount - 1)
             }
             toolkit.drawFilledRectangle(GameShell.screenCanvasWidth - 16, i_5, 12, i_4, backgroundAlpha shl 24 or 0x332277, 2)
-            for (i_6 in anInt2223 until i_2 + anInt2223) {
+            for (i_6 in scrollOffset until i_2 + scrollOffset) {
                 if (i_6 >= consoleMessageCount) break
                 val arr_7 = Utils.split(displayedOutput!![i_6], '\b')
                 val i_8 = (GameShell.screenCanvasWidth - 8 - 16) / arr_7.size
                 for (i_9 in arr_7.indices) {
                     val i_10 = i_9 * i_8 + 8
                     toolkit.setClipping(i_10, 0, i_8 + i_10 - 8, 350)
-                    FontManager.debugOverlayFont!!.renderPlain(formatCommand(arr_7[i_9]), i_10, 350 - anInt2230 - 2 - FontManager.messageboxFont!!.bottomPadding - (i_6 - anInt2223) * anInt2222, -1, 0xffffff.inv())
+                    FontManager.debugOverlayFont!!.renderPlain(formatCommand(arr_7[i_9]), i_10, 350 - inputLineHeight - 2 - FontManager.messageboxFont!!.bottomPadding - (i_6 - scrollOffset) * outputLineHeight, -1, 0xffffff.inv())
                 }
             }
         }
         Renderers.FONT_RENDERER!!.renderLeftAligned("727 1", GameShell.screenCanvasWidth - 25, 330, -1, 0xffffff.inv())
         toolkit.setClipping(0, 0, GameShell.screenCanvasWidth, 350)
-        toolkit.drawOpaqueHorizontalLine(0, 350 - anInt2230, GameShell.screenCanvasWidth, -1)
+        toolkit.drawOpaqueHorizontalLine(0, 350 - inputLineHeight, GameShell.screenCanvasWidth, -1)
         MiniMenu.minimenuHeader!!.renderPlain("--> ${formatCommand(commandString)}", 10, 350 - FontMetrics.aClass4143438!!.bottomPadding - 1, -1, 0xffffff.inv())
         if (GameShell.appletHasFocus) {
             var lineColor = -1

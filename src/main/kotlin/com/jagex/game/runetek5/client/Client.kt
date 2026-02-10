@@ -209,7 +209,7 @@ class Client : GameShell() {
                         WorldConnection.GAME_CONNECTION!!.worldId = paramString.toInt()
                     }
 
-                    17 -> aString7164 = paramString
+                    17 -> js5AuthToken = paramString
                     18 -> if ("true".equals(paramString, ignoreCase = true)) {
                         IS_MEMBER = true
                     }
@@ -228,13 +228,13 @@ class Client : GameShell() {
                     }
 
                     25 -> aBool7159 = "true".equals(paramString, ignoreCase = true)
-                    26 -> aLong7153 = paramString.toLong()
+                    26 -> machineUid = paramString.toLong()
                     27 -> anInt7163 = paramString.toInt()
                     28 -> aBool7189 = "true" == paramString
                     29 -> aBool7151 = "true" == paramString
                     30 -> anInt2831 = paramString.toInt()
                     31 -> CURRENT_LANGUAGE = Language.getLanguage(paramString.toInt())
-                    32 -> aString3643 = paramString
+                    32 -> mapOwnerIdentifier = paramString
                     33 -> affiliateP = paramString
                     34 -> Browser.errorWebsiteBaseUrl = paramString
                     35 -> {
@@ -319,7 +319,7 @@ class Client : GameShell() {
             StaticMethods.method8020()
             VorbisNode.method15536()
             KeyRecorder.keyRecorder!!.prepareAwaitingKeys()
-            MouseRecord.recorder!!.method3589()
+            MouseRecord.recorder!!.syncMouseState()
             if (Renderers.activeToolkit != null) {
                 Renderers.activeToolkit!!.animateTextures(Utils.time().toInt())
             }
@@ -351,7 +351,7 @@ class Client : GameShell() {
                 }
             }
 
-            anInt7191 = 0
+            mouseWheelDelta = 0
 
             var record = MouseRecord.recorder!!.nextSubmission()
             while (record != null) {
@@ -359,7 +359,7 @@ class Client : GameShell() {
                 if (type == -1) {
                     MouseRecord.record(record)
                 } else if (type == 6) {
-                    anInt7191 += record.getMeta()
+                    mouseWheelDelta += record.getMeta()
                     record.pushToTop()
                 } else if (MouseRecord.clicktypeRequiresRecord(type)) {
                     MOUSE_MOVEMENTS.addFirst(record)
@@ -386,16 +386,16 @@ class Client : GameShell() {
 
 
             if (GameState.isLoggedOut(gameState) && !GameState.isLoadingRegion(gameState)) {
-                method12044()
+                processLobbyTick()
                 AccountCreationStage.handleAccountCreationStart()
                 LoginManager.loginBlock()
             } else if (GameState.inLobby(gameState) && !GameState.isLoadingRegion(gameState)) {
-                method12044()
+                processLobbyTick()
                 LoginManager.loginBlock()
             } else if (gameState == GameState.UNK_12) {
                 LoginManager.loginBlock()
             } else if (GameState.isRenderingScene(gameState) && !GameState.isLoadingRegion(gameState)) {
-                method15386()
+                processGameTick()
             } else if (gameState == GameState.UNK_10 || gameState == GameState.UNK_17) {
                 LoginManager.loginBlock()
                 if (StaticMethods.anInt106 != -3 && StaticMethods.anInt106 != 2 && StaticMethods.anInt106 != 15) {
@@ -424,8 +424,8 @@ class Client : GameShell() {
 
     fun redraw() {
         if (gameState != GameState.UNK_16) {
-            val long_2: Long = currentCycle / 1000000L - aLong7170
-            aLong7170 = currentCycle / 1000000L
+            val long_2: Long = currentCycle / 1000000L - lastRedrawTimeMillis
+            lastRedrawTimeMillis = currentCycle / 1000000L
             val bool4 = SoundResourceManager.method7730()
             if (bool4 && SoundEffectPlayer.soundJinglePlaying && SoundEffectPlayer.jinglePlayer != null) {
                 SoundEffectPlayer.jinglePlayer!!.start()
@@ -481,10 +481,10 @@ class Client : GameShell() {
 
             if (GameState.isOnloginScreen(gameState)) {
                 LoadingStage.initialize(drawBackground)
-            } else if (method4198(gameState)) {
-                method11501()
-            } else if (method5789(gameState)) {
-                method11501()
+            } else if (isInLobbyOrCreation(gameState)) {
+                drawInterfaceFrame()
+            } else if (isInLobbyConnection(gameState)) {
+                drawInterfaceFrame()
             } else if (GameState.isLoadingRegion(gameState)) {
                 if (Resource.mapRegion!!.currentLoadingStage == RegionLoadingStage.LOADING_MAPS) {
                     val completion = Resource.mapRegion!!.completion / 2
@@ -496,15 +496,15 @@ class Client : GameShell() {
                     MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), true, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
                 }
             } else if (gameState == GameState.LOGGED_INGAME) {
-                method2601(long_2)
+                drawGameFrame(long_2)
             } else if (gameState == GameState.UNK_10) {
                 MessageBox.draw(LocalizedText.CONNECTION_LOST.translate(CURRENT_LANGUAGE!!) + "<br>" + LocalizedText.ATTEMPTING_TO_REESTABLISH.translate(CURRENT_LANGUAGE!!), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
             } else if (gameState == GameState.UNK_17) {
                 MessageBox.draw(LocalizedText.PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
             }
 
-            if (anInt7412 == 3) {
-                for (index in 0..<anInt7407) {
+            if (interfaceDebugMode == 3) {
+                for (index in 0..<componentBackgroundCount) {
                     val rectangle10: Rectangle? = INTERFACE_BG_COMPONENTS[index]
                     if (PREV_COMPONENT_ON_TOP[index]) {
                         checkNotNull(Renderers.activeToolkit)
@@ -582,8 +582,8 @@ class Client : GameShell() {
             }
 
             debug += " "
-            if (aString7164 != null) {
-                debug += aString7164
+            if (js5AuthToken != null) {
+                debug += js5AuthToken
             } else {
                 debug += ","
             }
@@ -698,23 +698,23 @@ class Client : GameShell() {
             if (updateStage == 1) {
                 Connection.updateConnection = AsyncConnection.createAsyncConnection(clientSocket!!, 125000)
                 if (Bot.PROD) {
-                    val length: Int = 13 + aString7164!!.length
+                    val length: Int = 13 + js5AuthToken!!.length
                     val stream = Packet(length + 4)
                     stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id)
                     stream.writeByte(length)
                     stream.writeInt(6)
                     stream.writeInt(Loader.MAJOR_BUILD)
                     stream.writeInt(Loader.MINOR_BUILD)
-                    stream.writeString(aString7164!!)
+                    stream.writeString(js5AuthToken!!)
                     Connection.updateConnection!!.write(stream.buffer, length + 2)
                 } else {
-                    val length: Int = 9 + aString7164!!.length
+                    val length: Int = 9 + js5AuthToken!!.length
                     val stream = Packet(length + 4)
                     stream.writeByte(LoginProt.INIT_JS5REMOTE_CONNECTION.id)
                     stream.writeByte(length)
                     stream.writeInt(Loader.MAJOR_BUILD)
                     stream.writeInt(Loader.MINOR_BUILD)
-                    stream.writeString(aString7164!!)
+                    stream.writeString(js5AuthToken!!)
                     Connection.updateConnection!!.write(stream.buffer, length + 2)
                 }
                 updateStage++
@@ -900,11 +900,11 @@ class Client : GameShell() {
         (Thread(Resource.mapRegionLoaderTask)).start()
     }
 
-    fun method12044() {
+    fun processLobbyTick() {
         if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
             if (REBOOT_TIMER > 1) {
                 REBOOT_TIMER--
-                anInt7397 = anInt7347
+                lastMiscUpdateTick = serverTick
             }
 
             if (!MiniMenu.isOpen) {
@@ -923,7 +923,7 @@ class Client : GameShell() {
         MiniMenu.method6451(-1, -1)
         InterfaceComponentRenderer.method544(null, -1, -1)
         Interface.ifHover()
-        anInt7347++
+        serverTick++
 
         for (index in 0..<npcCount) {
             val npc = NPC_ARRAY[index]!!.value as NpcEntity?
@@ -982,7 +982,7 @@ class Client : GameShell() {
             }
         }
 
-        if ((gameState == GameState.UNK_5 || gameState == GameState.UNK_7 || gameState == GameState.UNK_0 || gameState == GameState.IN_ACCOUNT_CREATION) && (!LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42) && !AccountCreationStage.method1466()) {
+        if ((gameState == GameState.UNK_5 || gameState == GameState.UNK_7 || gameState == GameState.UNK_0 || gameState == GameState.IN_ACCOUNT_CREATION) && (!LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42) && !AccountCreationStage.isCreatingAccount()) {
             if (Camera.cameraCalculationType == 5) {
                 Camera.calculateCameraPosition()
             } else {
@@ -999,18 +999,18 @@ class Client : GameShell() {
             var parentComponent: Component?
             var srcComponent: Component?
             do {
-                hookRequest = aClass4827233.popHead() as HookRequest?
+                hookRequest = TICK_HOOK_REQUESTS.popHead() as HookRequest?
                 if (hookRequest == null) {
                     while (true) {
                         do {
-                            hookRequest = aClass4827404.popHead() as HookRequest?
+                            hookRequest = MOUSE_HOOK_REQUESTS.popHead() as HookRequest?
                             if (hookRequest == null) {
                                 while (true) {
                                     do {
                                         hookRequest = PENDING_HOOK_REQUESTS.popHead() as HookRequest?
                                         if (hookRequest == null) {
                                             if (draggingComponent != null) {
-                                                method2827()
+                                                processDrag()
                                             }
 
                                             if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42) {
@@ -1105,7 +1105,7 @@ class Client : GameShell() {
         val KEY_RECORDS: Array<KeyRecord?> = arrayOfNulls<KeyRecord>(75)
         val DEBUG_LOAD_COLOR: Array<Color?> = arrayOf<Color?>(Color(9179409), Color(3289650), Color(3289650), Color(3289650))
         val DEBUG_BG_COLOR: Array<Color?> = arrayOf<Color?>(Color(9179409), Color(16777215), Color(16726277), Color(16726277))
-        val aColorArray7200: Array<Color?> = arrayOf<Color?>(Color(16777215), Color(16777215), Color(16741381), Color(16741381))
+        val DEBUG_TEXT_COLOR: Array<Color?> = arrayOf<Color?>(Color(16777215), Color(16777215), Color(16741381), Color(16741381))
         @JvmField
         val FONT_PROVIDER: FontProvider = BasicFontProvider()
         val NPC_MAP: IterableNodeMap<ObjectNode> = IterableNodeMap<ObjectNode>(64)
@@ -1121,9 +1121,9 @@ class Client : GameShell() {
         val npcSpawnMaps: IntArray
         val OBJECT_TYPE_SLOTS: IntArray
         @JvmField
-        val anInt7270: Int
+        val cameraBaseZoom: Int
         @JvmField
-        val anIntArrayArrayArray7302: Array<Array<IntArray?>?>
+        val cameraSplinePaths: Array<Array<IntArray?>?>
         @JvmField
         val HINT_POSITION: FloatArray
         val GROUND_ITEMS: IterableNodeMap<GroundItemWrapper>
@@ -1145,7 +1145,7 @@ class Client : GameShell() {
         val DUMMY: LRUCache = LRUCache(4)
         val SUN_MATRIX: Matrix43 = Matrix43()
         val INTERFACE_MODEL_MATRIX: Matrix43 = Matrix43()
-        val aLong7409: Long = (Math.random() * 9.999999999E9).toLong()
+        val clientRandomSeed: Long = (Math.random() * 9.999999999E9).toLong()
         val OVERHEAD_SPRITES: LRUCache = LRUCache(8)
         val NPC_INDICES: IntArray = IntArray(261)
         val LOCAL_NPC_INDICES: IntArray = IntArray(1005)
@@ -1160,7 +1160,7 @@ class Client : GameShell() {
         val ENTITY_OVERHEADS: EntityNodeList<EntityOverhead>
         val BORDER_WIDTH: Int
         val BORDER_HEIGHT: Int
-        val aShortArray7239: ShortArray
+        val PLAYER_OP_BASE_TYPES: ShortArray
         val PLAYER_OPTION_CURSORS: IntArray
         val PLAYER_OPTIONS: Array<String?>
         val PLAYER_OPTION_REDUCED_PRIORITY: BooleanArray
@@ -1169,29 +1169,29 @@ class Client : GameShell() {
         val CLIP_INTERFACES: Boolean
         val PULSE_EVENT_CONFIGS_CACHE: IntArray
         val RECENTLY_USED_ITEM_CONTAINERS: IntArray
-        val anIntArray7283: IntArray
-        val anIntArray7150: IntArray
+        val recentSkillUpdates: IntArray
+        val recentKeyUpdates: IntArray
         val recentMouseWheels: IntArray
         val CLAN_VAR_KEYS: IntArray
-        val aClass4827233: NodeCollection
-        val aClass4827404: NodeCollection
+        val TICK_HOOK_REQUESTS: NodeCollection
+        val MOUSE_HOOK_REQUESTS: NodeCollection
         val ICOMPONENT_SETTINGS_SLOTS: IterableNodeMap<IFEvents>
         val PREV_COMPONENT_ON_TOP: BooleanArray
         val INTERFACE_BG_COMPONENTS: Array<Rectangle?>
-        val anInt7412: Int
-        val anIntArray7438: IntArray
+        val interfaceDebugMode: Int
+        val ANTI_MACRO_TEXT_BOUNDS: IntArray
         val MAX_HINTS: Int
         val HINT_X: IntArray
         val HINT_Y: IntArray
         val HINT_WIDTH: IntArray
         val HINT_DETAILS: Array<HintDetails?>
-        val anIntArray7148: IntArray
+        val OVERHEAD_TEXT_COLORS: IntArray
         val CHAT_MESSAGE_UNIQUE_HASHES: LongArray
         val CAM_SHAKING: BooleanArray
-        val anIntArray7268: IntArray
+        val CAM_SHAKE_JITTER: IntArray
         val CUSTOM_LOWEST_YAW: IntArray
-        val anIntArray7462: IntArray
-        val anIntArray7435: IntArray
+        val CAM_SHAKE_FREQUENCY: IntArray
+        val CAM_SHAKE_PHASE: IntArray
         val PLAYER_LOGINSTATE_UPDATES: EntityNodeList<LoginStateUpdate>
         val ACTIVE_TIMEZONE_CALENDER: Calendar?
         val HITSPLAT_SIZE_CACHE: IntArray
@@ -1207,7 +1207,7 @@ class Client : GameShell() {
         @JvmField
         var base64Url: ByteArray? = null
         @JvmField
-        var aLong7153: Long = 0
+        var machineUid: Long = 0
         @JvmField
         var isForcedSafemode: Boolean = false
         @JvmField
@@ -1249,28 +1249,28 @@ class Client : GameShell() {
         var npcSpawnCursorPos: Int
         var CURRENT_CUTSCENE: Int
         var MAP_LOADING_STAGE: Int
-        var aBool7321: Boolean
+        var cutsceneCameraActive: Boolean
         @JvmField
-        var anInt7262: Int
+        var cameraTargetAbsX: Int
         @JvmField
-        var anInt7376: Int
+        var cameraTargetAbsY: Int
         @JvmField
-        var anInt7271: Int
+        var cameraMaxZoom: Int
         var sendCameraAngleToServer: Boolean
         @JvmField
-        var anInt7277: Int
+        var cameraPositionPathIndex: Int
         @JvmField
-        var anInt7448: Int
+        var cameraLookAtPathIndex: Int
         @JvmField
-        var anInt7279: Int
+        var cameraPositionKeyframe: Int
         @JvmField
-        var anInt7280: Int
+        var cameraLookAtKeyframe: Int
         @JvmField
-        var anInt7256: Int
+        var cameraSplineProgress: Int
         @JvmField
-        var anInt7327: Int
+        var cameraSplineSpeedStart: Int
         @JvmField
-        var anInt7182: Int
+        var cameraSplineSpeedEnd: Int
         var timesSceneRendered: Int
         var GAME_WIDTH: Int
         var GAME_HEIGHT: Int
@@ -1305,34 +1305,34 @@ class Client : GameShell() {
         @JvmField
         var OPEN_INTERFACES: IterableNodeMap<SubInterface>?
         @JvmField
-        var aClass1187352: Component?
+        var activeDialogueContinue: Component?
         @JvmField
         var RUN_ENERGY: Int
         @JvmField
         var RUN_WEIGHT: Int
         @JvmField
         var GAME_SCREEN_INTERFACE: Component?
-        var anInt7347: Int
-        var anInt7391: Int
+        var serverTick: Int
+        var lastChatMessageTick: Int
         var VARCS_BOOLS_LOADED: Int
         @JvmField
         var clientIsActive: Boolean
         @JvmField
-        var aShort7436: Short
+        var viewportFovMin: Short
         @JvmField
-        var aShort7437: Short
+        var viewportFovMax: Short
         @JvmField
-        var aShort7394: Short
+        var cameraZoomMin: Short
         @JvmField
-        var aShort7324: Short
+        var cameraZoomMax: Short
         @JvmField
-        var aShort7276: Short
+        var fovScaleMin: Short
         @JvmField
-        var aShort7441: Short
+        var fovScaleMax: Short
         @JvmField
-        var aShort7214: Short
+        var aspectFovMin: Short
         @JvmField
-        var aShort7474: Short
+        var aspectFovMax: Short
         @JvmField
         var gameAreaWidth: Int
         @JvmField
@@ -1345,15 +1345,15 @@ class Client : GameShell() {
         var aBool7160: Boolean = false
         var addGamescreenPadding: Boolean = false
         var anInt7163: Int = -1
-        var aString7164: String? = null
-        var aLong7170: Long = 0
+        var js5AuthToken: String? = null
+        var lastRedrawTimeMillis: Long = 0
         var awaitingPriorityRequests: Boolean = true
         var DRAW_DEBUG: Boolean = false
         var DEBUG_MODE: Boolean = false
         var aBool7241: Boolean = false
         var playingAltGame: Boolean = true
-        var anInt7396: Int = 0
-        var anInt7191: Int = 0
+        var drawsSinceLastPacket: Int = 0
+        var mouseWheelDelta: Int = 0
         var updateStage: Int = 0
         var pulsesBeforeJs5Reconnect: Int = 0
         var failedRequests: Int = 0
@@ -1365,26 +1365,26 @@ class Client : GameShell() {
         var sendTransmitVarVerifyid: Boolean
         var cycleCutsceneLoaded: Int
         var CUTSCENE_MISC_ACTION_INDEX: Int
-        var anInt7418: Int
+        var cameraRandomizationCycle: Int
         var minimapRotation: Int
-        var anInt7187: Int
+        var minimapRotationStep: Int
         var minimapZoom: Int
-        var anInt7258: Int
-        var anInt7259: Int
+        var minimapZoomStep: Int
+        var minimapRandomizationCycle: Int
         var animatingStep: Int
-        var aFloat7266: Float
-        var aFloat7284: Float
-        var aBool7331: Boolean
-        var aBool7269: Boolean
-        var aBool7355: Boolean
-        var aBool7285: Boolean
-        var anInt7304: Int
+        var cameraYawVelocity: Float
+        var cameraPitchVelocity: Float
+        var cameraPitchVelocityApplied: Boolean
+        var cameraYawVelocityApplied: Boolean
+        var cutsceneCameraCompleted: Boolean
+        var cutsceneCameraPreviouslyCompleted: Boolean
+        var overlappingEntityCount: Int
         var prioritizePlayerDraw: Boolean
         var crossX: Int
         var crossY: Int
         var crossSpritePtr: Int
         var crossType: Int
-        var anInt7297: Int
+        var menuItemHoverCycle: Int
         var ROOF_OVERRIDE: Int
         var visibleBelowDrawheight: IntArray?
         var visibleAboveX: IntArray?
@@ -1393,11 +1393,11 @@ class Client : GameShell() {
         var visibleAboveY: IntArray?
         var aBool7322: Boolean
         var REDUCE_ATTACK_PRIORITY: Boolean
-        var anInt7339: Int
+        var menuOpenMode: Int
         var defaultMenuCursor: Int
-        var anInt7345: Int
-        var anInt7346: Int
-        var anInt7351: Int
+        var selectedSlotId: Int
+        var selectedItemId: Int
+        var overheadChatFilter: Int
         var draggingComponent: Component?
         var selectedComponent: Component?
         var mouseX: Int
@@ -1411,31 +1411,31 @@ class Client : GameShell() {
         var isDraggingComponent: Boolean
         var dragStartX: Int
         var dragStartY: Int
-        var aBool7364: Boolean
+        var isDragThresholdMet: Boolean
         var menuItemCount: Int
         var isMapMoving: Boolean
         var pulseEventConfigsPtr: Int
         var RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS: Int
-        var anInt7384: Int
+        var skillUpdateCycle: Int
         var keyCycle: Int
         var mouseWheelCycle: Int
         var CLAN_VAR_COUNTER: Int
-        var anInt7386: Int
-        var anInt7179: Int
-        var anInt7192: Int
-        var anInt7395: Int
-        var anInt7320: Int
-        var anInt7397: Int
+        var lastFriendIgnoreUpdateTick: Int
+        var lastFriendsChatUpdateTick: Int
+        var lastClanSettingsUpdateTick: Int
+        var lastClanChannelUpdateTick: Int
+        var lastGrandExchangeUpdateTick: Int
+        var lastMiscUpdateTick: Int
         var exitTime: Long
-        var anInt7407: Int
-        var anInt7408: Int
+        var componentBackgroundCount: Int
+        var lastRenderedCycle: Int
         var currentHintPtr: Int
-        var anInt7389: Int
-        var anInt7429: Int
+        var chatMessageHashIndex: Int
+        var lastCameraSmoothCycle: Int
         var hintArrowOffsetX: Int
         var hintArrowOffsetY: Int
-        var anInt7451: Int
-        var anInt56: Int = 0
+        var viewportScaledFov: Int
+        var selectedComponentHash: Int = 0
         var requestManager: RequestManager? = null
         @JvmField
         var CURRENT_LANGUAGE: Language? = null
@@ -1457,7 +1457,7 @@ class Client : GameShell() {
             OBJECT_TYPE_SLOTS = intArrayOf(0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3)
             CURRENT_CUTSCENE = -1
             MAP_LOADING_STAGE = 1
-            aBool7321 = false
+            cutsceneCameraActive = false
             cycleCutsceneLoaded = -1
             CUTSCENE_MISC_ACTION_INDEX = 0
             InterfaceComponentRenderer.cycleCutsceneFadeStarted = -1
@@ -1477,40 +1477,40 @@ class Client : GameShell() {
             Camera.cameraStepV = 2
             Camera.cameraRandomisationA = 0
             Camera.cameraStepA = 1
-            anInt7418 = 0
+            cameraRandomizationCycle = 0
             minimapRotation = 0
-            anInt7187 = 2
+            minimapRotationStep = 2
             minimapZoom = 0
-            anInt7258 = 1
-            anInt7259 = 0
+            minimapZoomStep = 1
+            minimapRandomizationCycle = 0
             RANDOMIZER = Random()
             animatingStep = 0
-            anInt7262 = 0
-            anInt7376 = 0
+            cameraTargetAbsX = 0
+            cameraTargetAbsY = 0
             Camera.camAngleX = 1052.0f
             Camera.camAngleY = 0.0f
-            aFloat7266 = 0.0f
-            aFloat7284 = 0.0f
-            aBool7331 = false
-            aBool7269 = false
-            anInt7270 = 46
-            anInt7271 = anInt7270 + 800
+            cameraYawVelocity = 0.0f
+            cameraPitchVelocity = 0.0f
+            cameraPitchVelocityApplied = false
+            cameraYawVelocityApplied = false
+            cameraBaseZoom = 46
+            cameraMaxZoom = cameraBaseZoom + 800
             sendCameraAngleToServer = true
             Camera.regularLowestYaw = 0
-            anIntArrayArrayArray7302 = arrayOfNulls<Array<IntArray?>>(2)
-            anInt7277 = -1
-            anInt7448 = -1
-            anInt7279 = 0
-            anInt7280 = 0
-            anInt7256 = 0
-            anInt7327 = 0
-            anInt7182 = 0
-            aBool7355 = false
-            aBool7285 = false
+            cameraSplinePaths = arrayOfNulls<Array<IntArray?>>(2)
+            cameraPositionPathIndex = -1
+            cameraLookAtPathIndex = -1
+            cameraPositionKeyframe = 0
+            cameraLookAtKeyframe = 0
+            cameraSplineProgress = 0
+            cameraSplineSpeedStart = 0
+            cameraSplineSpeedEnd = 0
+            cutsceneCameraCompleted = false
+            cutsceneCameraPreviouslyCompleted = false
             timesSceneRendered = 0
             ENTITY_INDEX_REFERENCES = IntArray(508)
             NPC_INDEX_REFERENCES = IntArray(502)
-            anInt7304 = 0
+            overlappingEntityCount = 0
             ENTITY_OVERHEADS = EntityNodeList<EntityOverhead>()
             prioritizePlayerDraw = false
             HINT_POSITION = FloatArray(3)
@@ -1518,7 +1518,7 @@ class Client : GameShell() {
             crossY = 0
             crossSpritePtr = 0
             crossType = 0
-            anInt7297 = 0
+            menuItemHoverCycle = 0
             ROOF_OVERRIDE = -1
             visibleBelowDrawheight = IntArray(2)
             visibleAboveX = IntArray(2)
@@ -1543,7 +1543,7 @@ class Client : GameShell() {
             aBool7323 = false
             REDUCE_ATTACK_PRIORITY = true
             IS_QUICKCHAT_ONLY = false
-            aShortArray7239 = shortArrayOf(44.toShort(), 45.toShort(), 46.toShort(), 47.toShort(), 48.toShort(), 49.toShort(), 50.toShort(), 51.toShort())
+            PLAYER_OP_BASE_TYPES = shortArrayOf(44.toShort(), 45.toShort(), 46.toShort(), 47.toShort(), 48.toShort(), 49.toShort(), 50.toShort(), 51.toShort())
             PLAYER_OPTION_CURSORS = IntArray(8)
             PLAYER_OPTIONS = arrayOfNulls<String>(8)
             PLAYER_OPTION_REDUCED_PRIORITY = BooleanArray(8)
@@ -1555,20 +1555,20 @@ class Client : GameShell() {
             SKILL_LEVEL_VISIBLE = IntArray(25)
             SKILL_LEVEL_ACTUAL = IntArray(25)
             SKILL_XP = IntArray(25)
-            anInt7339 = 0
+            menuOpenMode = 0
             CursorManager.defaultCursorId = -1
             defaultMenuCursor = -1
             CursorManager.defaultAttackCursor = -1
             CURRENT_CURSOR = -1
             interfaceSelectionActive = false
-            anInt7345 = -1
-            anInt7346 = -1
+            selectedSlotId = -1
+            selectedItemId = -1
             useOnType = null
             useOnTarget = null
             BASE_WINDOW_ID = -1
             OPEN_INTERFACES = IterableNodeMap<SubInterface>(8)
-            anInt7351 = 0
-            aClass1187352 = null
+            overheadChatFilter = 0
+            activeDialogueContinue = null
             RUN_ENERGY = 0
             RUN_WEIGHT = 0
             DISPLAY_HIDDEN_MENU_OPTIONS = false
@@ -1588,39 +1588,39 @@ class Client : GameShell() {
             isDraggingComponent = false
             dragStartX = -1
             dragStartY = -1
-            aBool7364 = false
+            isDragThresholdMet = false
             menuItemCount = 0
             isMapMoving = false
             CommandExecutor.teleportCommandRequested = false
-            anInt7347 = 1
+            serverTick = 1
             PULSE_EVENT_CONFIGS_CACHE = IntArray(32)
             pulseEventConfigsPtr = 0
             RECENTLY_USED_ITEM_CONTAINERS = IntArray(32)
             RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS = 0
-            anIntArray7283 = IntArray(32)
-            anInt7384 = 0
-            anIntArray7150 = IntArray(32)
+            recentSkillUpdates = IntArray(32)
+            skillUpdateCycle = 0
+            recentKeyUpdates = IntArray(32)
             keyCycle = 0
             recentMouseWheels = IntArray(32)
             mouseWheelCycle = 0
             CLAN_VAR_KEYS = IntArray(32)
             CLAN_VAR_COUNTER = 0
-            anInt7391 = 0
-            anInt7386 = 0
-            anInt7179 = 0
-            anInt7192 = 0
-            anInt7395 = 0
-            anInt7320 = 0
-            anInt7397 = 0
+            lastChatMessageTick = 0
+            lastFriendIgnoreUpdateTick = 0
+            lastFriendsChatUpdateTick = 0
+            lastClanSettingsUpdateTick = 0
+            lastClanChannelUpdateTick = 0
+            lastGrandExchangeUpdateTick = 0
+            lastMiscUpdateTick = 0
             VARCS_BOOLS_LOADED = 0
             clientIsActive = false
             exitTime = -1L
             PENDING_HOOK_REQUESTS = NodeCollection()
-            aClass4827233 = NodeCollection()
-            aClass4827404 = NodeCollection()
+            TICK_HOOK_REQUESTS = NodeCollection()
+            MOUSE_HOOK_REQUESTS = NodeCollection()
             ICOMPONENT_SETTINGS_SLOTS = IterableNodeMap<IFEvents>(512)
-            anInt7407 = 0
-            anInt7408 = -2
+            componentBackgroundCount = 0
+            lastRenderedCycle = -2
             IS_COMPONENT_ON_TOP = BooleanArray(107)
             PREV_COMPONENT_ON_TOP = BooleanArray(107)
             INTERFACE_BG_COMPONENTS = arrayOfNulls<Rectangle>(107)
@@ -1629,39 +1629,39 @@ class Client : GameShell() {
                 INTERFACE_BG_COMPONENTS[i_0] = Rectangle()
             }
 
-            anInt7412 = 0
-            anIntArray7438 = IntArray(4)
+            interfaceDebugMode = 0
+            ANTI_MACRO_TEXT_BOUNDS = IntArray(4)
             currentHintPtr = 0
             MAX_HINTS = 51
             HINT_X = IntArray(MAX_HINTS)
             HINT_Y = IntArray(MAX_HINTS)
             HINT_WIDTH = IntArray(MAX_HINTS)
             HINT_DETAILS = arrayOfNulls<HintDetails>(MAX_HINTS)
-            anIntArray7148 = intArrayOf(16776960, 16711680, 65280, 65535, 16711935, 16777215)
+            OVERHEAD_TEXT_COLORS = intArrayOf(16776960, 16711680, 65280, 65535, 16711935, 16777215)
             CHAT_MESSAGE_UNIQUE_HASHES = LongArray(100)
-            anInt7389 = 0
+            chatMessageHashIndex = 0
             FriendsChat.FC_NAME = null
             FriendsChat.FC_OWNER_NAME = null
             GRAND_EXCHANGE_SLOTS = arrayOfNulls<GrandExchangeSlot>(6)
-            anInt7429 = 0
+            lastCameraSmoothCycle = 0
             CAM_SHAKING = BooleanArray(5)
-            anIntArray7268 = IntArray(5)
+            CAM_SHAKE_JITTER = IntArray(5)
             CUSTOM_LOWEST_YAW = IntArray(5)
-            anIntArray7462 = IntArray(5)
-            anIntArray7435 = IntArray(5)
-            aShort7436 = 256
-            aShort7437 = 205
-            aShort7394 = 256
-            aShort7324 = 320
-            aShort7276 = 1
-            aShort7441 = 32767
-            aShort7214 = 1
-            aShort7474 = 32767
+            CAM_SHAKE_FREQUENCY = IntArray(5)
+            CAM_SHAKE_PHASE = IntArray(5)
+            viewportFovMin = 256
+            viewportFovMax = 205
+            cameraZoomMin = 256
+            cameraZoomMax = 320
+            fovScaleMin = 1
+            fovScaleMax = 32767
+            aspectFovMin = 1
+            aspectFovMax = 32767
             hintArrowOffsetX = 0
             hintArrowOffsetY = 0
             gameAreaWidth = 0
             gameAreaHeight = 0
-            anInt7451 = 0
+            viewportScaledFov = 0
             PLAYER_LOGINSTATE_UPDATES = EntityNodeList<LoginStateUpdate>()
             ACTIVE_TIMEZONE_CALENDER = Calendar.getInstance(TimeZone.getTimeZone("GMT"))
             aByte7458 = -6
@@ -1675,7 +1675,7 @@ class Client : GameShell() {
             return if (class282Sub101 != null) class282Sub101 else icomponentdefinitions0.targetParams
         }
 
-        fun method11634(component: Component?): Component? {
+        fun getDragTarget(component: Component?): Component? {
             var component = component
             val targetParams: IFEvents? = getComponentSettings(component!!)
             if (targetParams!!.ignoresDepthFlags()) {
@@ -1695,8 +1695,8 @@ class Client : GameShell() {
             return component
         }
 
-        fun method11750() {
-            anInt7304 = 0
+        fun buildOverlappingEntityList() {
+            overlappingEntityCount = 0
 
             for (index in 0..<NPC_UPDATE_INDEX) {
                 val npc = (NPC_MAP.get(NPC_UPDATE_INDICES[index].toLong()))!!.value as NpcEntity?
@@ -1713,26 +1713,26 @@ class Client : GameShell() {
                         }
 
                         if (pathing.anInt10319 == 0 && pathing.getOverheadSprite() != -1) {
-                            ENTITY_INDEX_REFERENCES[anInt7304] = indexReference
-                            NPC_INDEX_REFERENCES[anInt7304] = indexReference
-                            anInt7304++
+                            ENTITY_INDEX_REFERENCES[overlappingEntityCount] = indexReference
+                            NPC_INDEX_REFERENCES[overlappingEntityCount] = indexReference
+                            overlappingEntityCount++
                             pathing.anInt10319++
                         }
 
-                        ENTITY_INDEX_REFERENCES[anInt7304] = indexReference
-                        NPC_INDEX_REFERENCES[anInt7304] = npc.playerIndex + 2048
-                        anInt7304++
+                        ENTITY_INDEX_REFERENCES[overlappingEntityCount] = indexReference
+                        NPC_INDEX_REFERENCES[overlappingEntityCount] = npc.playerIndex + 2048
+                        overlappingEntityCount++
                         pathing.anInt10319++
                     }
                 }
             }
 
-            ArrayUtils.quicksort(NPC_INDEX_REFERENCES, ENTITY_INDEX_REFERENCES, 0, anInt7304 - 1)
+            ArrayUtils.quicksort(NPC_INDEX_REFERENCES, ENTITY_INDEX_REFERENCES, 0, overlappingEntityCount - 1)
         }
 
         fun setGameState(state: GameState) {
             if (state != gameState) {
-                anInt7396 = 0
+                drawsSinceLastPacket = 0
                 if (state == GameState.UNK_10 || state == GameState.UNK_17) {
                     LoginManager.method1384()
                 }
@@ -1754,7 +1754,7 @@ class Client : GameShell() {
                     if (state == GameState.UNK_19 || state == GameState.UNK_7 && gameState != GameState.UNK_6) {
                         LoginManager.method1384()
                     } else if (state == GameState.UNK_8) {
-                        AccountCreationStage.method4251()
+                        AccountCreationStage.initAccountCreation()
                     }
                 } else {
                     LoginManager.method5921()
@@ -1815,8 +1815,8 @@ class Client : GameShell() {
             SongPlayer.method12658()
             AmbientSound.unlinkSounds(true)
             AbstractNativeToolkit.drawLoadingPleaseWaitHardware()
-            method3367()
-            method14562()
+            clearWorldMapCaches()
+            resetGameState()
             if (reconnect) {
                 setGameState(GameState.UNK_12)
             } else {
@@ -1853,25 +1853,25 @@ class Client : GameShell() {
         val currentCycle: Long
             get() = cycleManager!!.getCurrentCycle()
 
-        fun method3367() {
+        fun clearWorldMapCaches() {
             WorldMapSub1.aClass4658025.clear()
             WorldMapSub1.aClass4658029.clear()
         }
 
         @JvmStatic
-        fun method4195() {
-            if (!aBool7269) {
-                aFloat7266 += (24.0f - aFloat7266) / 2.0f
+        fun applyCameraYawRight() {
+            if (!cameraYawVelocityApplied) {
+                cameraYawVelocity += (24.0f - cameraYawVelocity) / 2.0f
                 sendCameraAngleToServer = true
-                aBool7269 = true
+                cameraYawVelocityApplied = true
             }
         }
 
-        fun method4198(i_0: GameState?): Boolean {
+        fun isInLobbyOrCreation(i_0: GameState?): Boolean {
             return i_0 == GameState.UNK_5 || i_0 == GameState.UNK_14 || i_0 == GameState.UNK_19 || i_0 == GameState.IN_ACCOUNT_CREATION || i_0 == GameState.UNK_8 || i_0 == GameState.UNK_9
         }
 
-        fun method5789(i_0: GameState?): Boolean {
+        fun isInLobbyConnection(i_0: GameState?): Boolean {
             return i_0 == GameState.UNK_0 || i_0 == GameState.UNK_7
         }
 
@@ -1893,10 +1893,10 @@ class Client : GameShell() {
             return true
         }
 
-        fun method15386() {
+        fun processGameTick() {
             if (REBOOT_TIMER > 1) {
                 REBOOT_TIMER--
-                anInt7397 = anInt7347
+                lastMiscUpdateTick = serverTick
             }
             if (GAME_CONNECTION_CONTEXT.dropped) {
                 GAME_CONNECTION_CONTEXT.dropped = false
@@ -1938,22 +1938,22 @@ class Client : GameShell() {
                             Camera.calculateCutsceneCameraPosition()
                         }
                     }
-                    if (aBool7331) {
-                        aBool7331 = false
+                    if (cameraPitchVelocityApplied) {
+                        cameraPitchVelocityApplied = false
                     } else {
-                        aFloat7284 /= 2.0f
+                        cameraPitchVelocity /= 2.0f
                     }
-                    if (aBool7269) {
-                        aBool7269 = false
+                    if (cameraYawVelocityApplied) {
+                        cameraYawVelocityApplied = false
                     } else {
-                        aFloat7266 /= 2.0f
+                        cameraYawVelocity /= 2.0f
                     }
                     ComponentMinimap.drawGame()
                     if (gameState == GameState.LOGGED_INGAME) {
                         Resource.mapRegion!!.getEnvironmentManager().updateAtmosphere(Resource.mapRegion!!)
                         LocAction.transformObjects()
                         AreaSoundPlayer.method1623()
-                        if (anInt7396 > 10) {
+                        if (drawsSinceLastPacket > 10) {
                             ++GAME_CONNECTION_CONTEXT.idleReadPulses
                         }
                         if (GAME_CONNECTION_CONTEXT.idleReadPulses > 2250) {
@@ -2009,8 +2009,8 @@ class Client : GameShell() {
                                 }
                             }
                             if (MenuInteraction.aClass1184825 != null) {
-                                ++anInt7297
-                                if (anInt7297 >= 15) {
+                                ++menuItemHoverCycle
+                                if (menuItemHoverCycle >= 15) {
                                     Component.redrawComponent(MenuInteraction.aClass1184825!!)
                                     MenuInteraction.aClass1184825 = null
                                 }
@@ -2024,7 +2024,7 @@ class Client : GameShell() {
                                 defaultMenuCursor = -1
                             }
                             Interface.ifHover()
-                            ++anInt7347
+                            ++serverTick
                             if (CommandExecutor.teleportCommandRequested) {
                                 val tpPacket = PacketEncoder.createPacket(ClientProt.WORLD_MAP_CLICK, GAME_CONNECTION_CONTEXT.isaac)
                                 tpPacket.buffer.writeIntLittle(CommandExecutor.teleportCommandPositionZ shl 28 or (CommandExecutor.teleportCommandPositionX shl 14) or CommandExecutor.teleportCommandPositionY)
@@ -2037,11 +2037,11 @@ class Client : GameShell() {
                                 var icomponentdefinitions11: Component?
                                 var hookRequest: HookRequest?
                                 do {
-                                    hookRequest = aClass4827233.popHead() as HookRequest?
+                                    hookRequest = TICK_HOOK_REQUESTS.popHead() as HookRequest?
                                     if (hookRequest == null) {
                                         while (true) {
                                             do {
-                                                hookRequest = aClass4827404.popHead() as HookRequest?
+                                                hookRequest = MOUSE_HOOK_REQUESTS.popHead() as HookRequest?
                                                 if (hookRequest == null) {
                                                     while (true) {
                                                         do {
@@ -2051,14 +2051,14 @@ class Client : GameShell() {
                                                                     menuItemCount = 0
                                                                 }
                                                                 if (draggingComponent != null) {
-                                                                    method2827()
+                                                                    processDrag()
                                                                 }
                                                                 MenuInteraction.method7703()
                                                                 /**
                                                                  * Shift & Control pressed --> Scroll mouse = change plane
                                                                  */
-                                                                if (PLAYER_RIGHTS > 0 && KeyRecorder.keyRecorder!!.held(82) && KeyRecorder.keyRecorder!!.held(81) && anInt7191 != 0) {
-                                                                    var plane: Int = PlayerUpdate.MY_PLAYER!!.plane - anInt7191
+                                                                if (PLAYER_RIGHTS > 0 && KeyRecorder.keyRecorder!!.held(82) && KeyRecorder.keyRecorder!!.held(81) && mouseWheelDelta != 0) {
+                                                                    var plane: Int = PlayerUpdate.MY_PLAYER!!.plane - mouseWheelDelta
                                                                     if (plane < 0) {
                                                                         plane = 0
                                                                     } else if (plane > 3) {
@@ -2068,7 +2068,7 @@ class Client : GameShell() {
                                                                     CommandExecutor.executeTeleportCommand(plane, PlayerUpdate.MY_PLAYER!!.movementBaseX[0] + base.x, PlayerUpdate.MY_PLAYER!!.movementBaseY[0] + base.y)
                                                                 }
                                                                 for (index in 0..4) {
-                                                                    anIntArray7435[index]++
+                                                                    CAM_SHAKE_PHASE[index]++
                                                                 }
                                                                 if (clientIsActive && exitTime < Utils.time() - 60000L) {
                                                                     PacketEncoder.writeVarcPreferences()
@@ -2086,9 +2086,9 @@ class Client : GameShell() {
                                                                     }
                                                                     loginStateUpdate = PLAYER_LOGINSTATE_UPDATES.getNext() as LoginStateUpdate?
                                                                 }
-                                                                ++anInt7418
-                                                                if (anInt7418 > 508) {
-                                                                    anInt7418 = 0
+                                                                ++cameraRandomizationCycle
+                                                                if (cameraRandomizationCycle > 508) {
+                                                                    cameraRandomizationCycle = 0
                                                                     val direction = (Math.random() * 8.0).toInt()
                                                                     if ((direction and 0x1) == 1) {
                                                                         Camera.cameraRandomisationH += Camera.cameraStepH
@@ -2118,28 +2118,28 @@ class Client : GameShell() {
                                                                 if (Camera.cameraRandomisationA > 40) {
                                                                     Camera.cameraStepA = -1
                                                                 }
-                                                                ++anInt7259
-                                                                if (anInt7259 > 508) {
-                                                                    anInt7259 = 0
+                                                                ++minimapRandomizationCycle
+                                                                if (minimapRandomizationCycle > 508) {
+                                                                    minimapRandomizationCycle = 0
                                                                     val i_2 = (Math.random() * 8.0).toInt()
                                                                     if ((i_2 and 0x1) == 1) {
-                                                                        minimapRotation += anInt7187
+                                                                        minimapRotation += minimapRotationStep
                                                                     }
                                                                     if ((i_2 and 0x2) == 2) {
-                                                                        minimapZoom += anInt7258
+                                                                        minimapZoom += minimapZoomStep
                                                                     }
                                                                 }
                                                                 if (minimapRotation < -60) {
-                                                                    anInt7187 = 2
+                                                                    minimapRotationStep = 2
                                                                 }
                                                                 if (minimapRotation > 65) {
-                                                                    anInt7187 = -2
+                                                                    minimapRotationStep = -2
                                                                 }
                                                                 if (minimapZoom < -20) {
-                                                                    anInt7258 = 1
+                                                                    minimapZoomStep = 1
                                                                 }
                                                                 if (minimapZoom > 11) {
-                                                                    anInt7258 = -1
+                                                                    minimapZoomStep = -1
                                                                 }
                                                                 if (++GAME_CONNECTION_CONTEXT.lastFlush > 50) {
                                                                     val pingPacket = PacketEncoder.createPacket(ClientProt.PING, GAME_CONNECTION_CONTEXT.isaac)
@@ -2191,9 +2191,9 @@ class Client : GameShell() {
         @JvmField
         var CLAN_CHANNEL: ClanChannel? = null
         @JvmField
-        var aString3643: String? = null
+        var mapOwnerIdentifier: String? = null
         @JvmField
-        var anInt3644: Int = 0
+        var lobbyMembershipStatus: Int = 0
         var aString5555: String? = null
         var frameComponent: Component? = null
         var ENTITY_DEFAULTS: EntityDefaults? = null
@@ -2224,7 +2224,7 @@ class Client : GameShell() {
                 val abs = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
                 var clearPixels = false
                 if (MAP_LOADING_STAGE != 1) {
-                    if (!aBool7321) {
+                    if (!cutsceneCameraActive) {
                         clearPixels = true
                     }
                 } else if (abs.x.toInt() < 0 || abs.x.toInt() >= Resource.mapRegion!!.sceneSizeX * 512 || abs.z.toInt() < 0 || abs.z.toInt() >= Resource.mapRegion!!.sceneSizeY * 512) {
@@ -2269,9 +2269,9 @@ class Client : GameShell() {
                             yaw = CUSTOM_LOWEST_YAW[4] + 128
                         }
                         val roll = Camera.camAngleY.toInt() and 0x3fff
-                        Camera.setCameraPosition(Camera.cameraBaseX, MapRegion.tileheightForAbsolutePosition(anInt7262, anInt7376, PlayerUpdate.MY_PLAYER_PLANE) - 200, Camera.cameraBaseY, yaw, roll, (yaw shr 3) * 3 + Camera.cameraZoom shl 2, gameAreaHeight)
+                        Camera.setCameraPosition(Camera.cameraBaseX, MapRegion.tileheightForAbsolutePosition(cameraTargetAbsX, cameraTargetAbsY, PlayerUpdate.MY_PLAYER_PLANE) - 200, Camera.cameraBaseY, yaw, roll, (yaw shr 3) * 3 + Camera.cameraZoom shl 2, gameAreaHeight)
                     } else if (Camera.cameraCalculationType == 1) {
-                        Camera.method3920(gameAreaHeight)
+                        Camera.updateSmoothTransitionCamera(gameAreaHeight)
                     }
                     val camAbsX = Camera.cameraPositionAbsoluteX
                     val camAbsZ = Camera.cameraPositionAbsoluteZ
@@ -2280,7 +2280,7 @@ class Client : GameShell() {
                     val roll = Camera.cameraRoll
                     for (slot in 0..4) {
                         if (CAM_SHAKING[slot]) {
-                            val transition = (Math.random() * (anIntArray7268[slot] * 2 + 1) - anIntArray7268[slot] + sin(anIntArray7435[slot] * (anIntArray7462[slot] / 100.0)) * CUSTOM_LOWEST_YAW[slot]).toInt()
+                            val transition = (Math.random() * (CAM_SHAKE_JITTER[slot] * 2 + 1) - CAM_SHAKE_JITTER[slot] + sin(CAM_SHAKE_PHASE[slot] * (CAM_SHAKE_FREQUENCY[slot] / 100.0)) * CUSTOM_LOWEST_YAW[slot]).toInt()
                             if (slot == 0) {
                                 Camera.cameraPositionAbsoluteX += transition shl 2
                             }
@@ -2325,8 +2325,8 @@ class Client : GameShell() {
                     SUN_MATRIX.rotate(-1.0f, 0.0f, 0.0f, MathUtils.getTheta(-Camera.cameraYaw and 0x3fff))
                     SUN_MATRIX.rotate(0.0f, 0.0f, -1.0f, MathUtils.getTheta(-Camera.cameraPitch and 0x3fff))
                     Renderers.activeToolkit!!.setSunPosition(SUN_MATRIX)
-                    StaticMethods.method3850(Camera.aClass3847167, (gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2).toFloat(), (anInt7451 shl 1).toFloat(), (anInt7451 shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
-                    Renderers.activeToolkit!!.setModelMatrix(Camera.aClass3847167)
+                    StaticMethods.method3850(Camera.projectionMatrix, (gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
+                    Renderers.activeToolkit!!.setModelMatrix(Camera.projectionMatrix)
                     if (sceneAtmosphere.getSkybox() != null) {
                         Renderers.activeToolkit!!.updateSun(1.0f)
                         Renderers.activeToolkit!!.applyLighting(16777215, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f)
@@ -2334,13 +2334,13 @@ class Client : GameShell() {
                     } else {
                         Renderers.activeToolkit!!.applyClearFlags(3, fogColor)
                     }
-                    Camera.method6934(SUN_MATRIX, Camera.aClass3847167, gameAreaWidth, gameAreaHeight)
+                    Camera.storePickingState(SUN_MATRIX, Camera.projectionMatrix, gameAreaWidth, gameAreaHeight)
                     Resource.mapRegion!!.getEnvironmentManager().updateAtmosphere(Resource.mapRegion!!)
                     val roofPreference = if (PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue() == 2) timesSceneRendered.toByte() else 1
                     Resource.mapRegion!!.getScene()!!.drawScene(
                         cycles, Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteZ, Camera.cameraPositionAbsoluteY, Resource.mapRegion!!.bits, visibleBelowDrawheight, visibleAboveX, visibleBelowX, visibleBelowY, visibleAboveY, PlayerUpdate.MY_PLAYER!!.plane + 1, roofPreference, PreferenceManager.preferences!!.flickeringEffects!!.getValue() == 0
                     )
-                    anInt7396++
+                    drawsSinceLastPacket++
                     SoundEffectPlayer.updatePlayers()
                     if (gameState == GameState.LOGGED_INGAME) {
                         StaticMethods.drawTileMessages(x, y)
@@ -2361,9 +2361,9 @@ class Client : GameShell() {
                         Renderers.activeToolkit!!.clearPixels(x, y, gameAreaWidth, gameAreaHeight, 0xffffff.inv())
                         MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
                     }
-                    StaticMethods.method3850(Camera.aClass3847167, (x + gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2 + y).toFloat(), (anInt7451 shl 1).toFloat(), (anInt7451 shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
-                    Renderers.activeToolkit!!.setModelMatrix(Camera.aClass3847167)
-                    Camera.method13296(Camera.aClass3847167)
+                    StaticMethods.method3850(Camera.projectionMatrix, (x + gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2 + y).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
+                    Renderers.activeToolkit!!.setModelMatrix(Camera.projectionMatrix)
+                    Camera.storeViewProjectionMatrix(Camera.projectionMatrix)
                 }
             }
         }
@@ -2390,7 +2390,7 @@ class Client : GameShell() {
             CutsceneTypeList.resetCutsceneConfigs()
         }
 
-        fun method7323() {
+        fun resetGraphicsState() {
             if (Renderers.activeToolkit != null) {
                 Resource.mapRegion!!.resetInteractiveEntities()
                 ComponentMinimap.reset()
@@ -2428,20 +2428,20 @@ class Client : GameShell() {
             }
         }
 
-        fun method11501() {
+        fun drawInterfaceFrame() {
             ParticleProducer.cycle(Renderers.activeToolkit!!, cycles.toLong())
             if (BASE_WINDOW_ID != -1) {
                 Component.update(BASE_WINDOW_ID)
             }
 
-            for (index in 0..<anInt7407) {
+            for (index in 0..<componentBackgroundCount) {
                 PREV_COMPONENT_ON_TOP[index] = IS_COMPONENT_ON_TOP[index]
                 IS_COMPONENT_ON_TOP[index] = false
             }
 
-            anInt7408 = cycles
+            lastRenderedCycle = cycles
             if (BASE_WINDOW_ID != -1) {
-                anInt7407 = 0
+                componentBackgroundCount = 0
                 StaticMethods.method7039()
             }
 
@@ -2460,7 +2460,7 @@ class Client : GameShell() {
             animatingStep = 0
         }
 
-        fun method2827() {
+        fun processDrag() {
             Component.redrawComponent(draggingComponent!!)
             ++InterfaceRenderer.anInt8308
             if (isDraggingComponent && isComponentSelected) {
@@ -2491,7 +2491,7 @@ class Client : GameShell() {
                 }
                 val hookrequest5: HookRequest?
                 if (!MouseRecord.recorder!!.isMouseButtonPressed()) {
-                    if (aBool7364) {
+                    if (isDragThresholdMet) {
                         InterfaceComponentRenderer.cancelInterfaceSelection()
                         if (draggingComponent!!.anObjectArray1394 != null) {
                             hookrequest5 = HookRequest()
@@ -2502,10 +2502,10 @@ class Client : GameShell() {
                             hookrequest5.params = draggingComponent!!.anObjectArray1394
                             CS2Executor.executeHookInner(hookrequest5)
                         }
-                        if (hoveredComponent != null && method11634(draggingComponent) != null) {
+                        if (hoveredComponent != null && getDragTarget(draggingComponent) != null) {
                             PacketEncoder.method2076(draggingComponent, hoveredComponent)
                         }
-                    } else if ((anInt7339 == 1 || MiniMenu.method12562()) && MiniMenu.entryCount > 2) {
+                    } else if ((menuOpenMode == 1 || MiniMenu.method12562()) && MiniMenu.entryCount > 2) {
                         StaticMethods.method4164(mouseX + dragStartX, dragStartY + mouseY)
                     } else if (MiniMenu.hasEntries()) {
                         StaticMethods.method4164(dragStartX + mouseX, dragStartY + mouseY)
@@ -2517,10 +2517,10 @@ class Client : GameShell() {
                         val i_7: Int = i_1 - dragStartX
                         val i_6: Int = i_2 - dragStartY
                         if (i_7 > draggingComponent!!.anInt1380 || i_7 < -draggingComponent!!.anInt1380 || i_6 > draggingComponent!!.anInt1380 || i_6 < -draggingComponent!!.anInt1380) {
-                            aBool7364 = true
+                            isDragThresholdMet = true
                         }
                     }
-                    if (draggingComponent!!.anObjectArray1451 != null && aBool7364) {
+                    if (draggingComponent!!.anObjectArray1451 != null && isDragThresholdMet) {
                         hookrequest5 = HookRequest()
                         hookrequest5.source = draggingComponent
                         hookrequest5.mouseX = i_3
@@ -2537,7 +2537,7 @@ class Client : GameShell() {
 
         fun loadAssets(toolkitId: Int, leftTopScreenboxText: String?, verifySettingsPreUpdate: Boolean) {
             LoadingStage.killLoginscreenThread()
-            method7323()
+            resetGraphicsState()
             buildCanvasComponents()
             Renderers.prepareForRendering(toolkitId, leftTopScreenboxText, verifySettingsPreUpdate)
             StaticMethods.initializedFontcombos!!.resetFontMap()
@@ -2570,28 +2570,28 @@ class Client : GameShell() {
             loadAssets(toolkitId, LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), verifySettingsPreUpdate)
         }
 
-        fun method2601(long_0: Long) {
+        fun drawGameFrame(long_0: Long) {
             if (Resource.mapRegion!!.getScene() != null) {
                 if (Camera.cameraCalculationType != 2 && Camera.cameraCalculationType != 1) {
                     if (Camera.cameraCalculationType == 4) {
-                        Camera.method4974(long_0)
+                        Camera.updateOrbitTargetCamera(long_0)
                     }
                 } else {
-                    Camera.method6286(long_0)
+                    Camera.updateFollowPlayerCamera(long_0)
                 }
             }
             ParticleProducer.cycle(Renderers.activeToolkit!!, cycles.toLong())
             if (BASE_WINDOW_ID != -1) {
                 Component.update(BASE_WINDOW_ID)
             }
-            for (index in 0..<anInt7407) {
+            for (index in 0..<componentBackgroundCount) {
                 PREV_COMPONENT_ON_TOP[index] = IS_COMPONENT_ON_TOP[index]
                 IS_COMPONENT_ON_TOP[index] = false
             }
-            anInt7408 = cycles
+            lastRenderedCycle = cycles
             MiniMenu.method6451(-1, -1)
             if (BASE_WINDOW_ID != -1) {
-                anInt7407 = 0
+                componentBackgroundCount = 0
                 StaticMethods.method7039()
             }
             Renderers.activeToolkit!!.resetClipping()
@@ -2610,7 +2610,7 @@ class Client : GameShell() {
             animatingStep = 0
         }
 
-        fun method14562() {
+        fun resetGameState() {
             resetCutscenes()
             Resource.mapRegion!!.resetBasePosition()
 

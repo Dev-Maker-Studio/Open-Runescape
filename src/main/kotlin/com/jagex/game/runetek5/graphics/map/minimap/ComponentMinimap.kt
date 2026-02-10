@@ -191,8 +191,8 @@ object ComponentMinimap {
                 val rotation: Int
                 val i_11: Int
                 if (Camera.cameraCalculationType == 4) {
-                    absX = Client.anInt7262
-                    absY = Client.anInt7376
+                    absX = Client.cameraTargetAbsX
+                    absY = Client.cameraTargetAbsY
                     rotation = (-Camera.camAngleY).toInt() and 0x3fff
                     i_11 = 4096
                 } else {

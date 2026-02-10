@@ -1142,8 +1142,8 @@ class MapRegion(var asyncMaploading: Boolean) {
         AreaSoundPlayer.initialize()
         AmbientSound.unlinkSounds(false)
         if (requestedGamestate == GameState.LOADING_PLEASE_WAIT) {
-            Client.anInt7262 -= deltaX * 512
-            Client.anInt7376 -= deltaY * 512
+            Client.cameraTargetAbsX -= deltaX * 512
+            Client.cameraTargetAbsY -= deltaY * 512
             Camera.cameraBaseX -= deltaX * 512
             Camera.cameraBaseY -= deltaY * 512
             if (Camera.cameraCalculationType != 4) {

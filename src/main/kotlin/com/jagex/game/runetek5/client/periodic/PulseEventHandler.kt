@@ -116,7 +116,7 @@ object PulseEventHandler {
                     ScriptExecutor.pushEvent(Varc(value.toInt(), VarcTypeList.VARC_INT!![value.toInt()], event.primary))
                     VarcTypeList.VARC_INT!![value.toInt()] = event.primary
                     Client.clientIsActive = Client.clientIsActive or VarcTypeList.VARC_BOOL!![value.toInt()]
-                    Client.anIntArray7150!![++Client.keyCycle - 1 and 0x1f] = value.toInt()
+                    Client.recentKeyUpdates!![++Client.keyCycle - 1 and 0x1f] = value.toInt()
                 }
                 CLIENT_SETVARCSTR -> {
                     VarcTypeList.VARC_STRING!![value.toInt()] = event.string

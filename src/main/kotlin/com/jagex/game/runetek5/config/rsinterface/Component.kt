@@ -222,7 +222,7 @@ class Component {
 
         @JvmStatic
         fun getDepthChild(icomponentdefinitions0: Component): Component? {
-            var icomponentdefinitions2 = Client.method11634(icomponentdefinitions0)
+            var icomponentdefinitions2 = Client.getDragTarget(icomponentdefinitions0)
             if (icomponentdefinitions2 == null) {
                 icomponentdefinitions2 = icomponentdefinitions0.depthChildOverride
             }
@@ -290,7 +290,7 @@ class Component {
 
         @JvmStatic
         fun redrawComponent(component: Component) {
-            if (component.lastRenderedCycle == Client.anInt7408) {
+            if (component.lastRenderedCycle == Client.lastRenderedCycle) {
                 Client.IS_COMPONENT_ON_TOP[component.cacheReference] = true
             }
         }

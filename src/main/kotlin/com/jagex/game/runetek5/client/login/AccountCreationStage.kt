@@ -20,28 +20,28 @@ class AccountCreationStage {
         @JvmField val RESPONSE = AccountCreationStage()
 
         @JvmField var LOGIN_XTEAS: IntArray? = null
-        @JvmField var anInt134 = 0
-        @JvmField var anInt133 = 0
+        @JvmField var connectionRetryCount = 0
+        @JvmField var connectionTickCount = 0
         @JvmField var ACCOUNT_CREATION_STAGE: AccountCreationStage? = null
-        @JvmField var aClass4942916: CreateAccountRequest? = null
+        @JvmField var currentRequest: CreateAccountRequest? = null
         @JvmField var RECEIVED_RESPONSE: AccountCreationResponseOpcodes? = null
         @JvmField var checkemailRequeststatus: CheckEmailRequest? = null
 
         @JvmStatic
-        fun method4251() {
+        fun initAccountCreation() {
             ACCOUNT_CREATION_STAGE = REQUEST
             RECEIVED_RESPONSE = AccountCreationResponseOpcodes.aClass4835729
-            aClass4942916 = CreateAccountRequest.aClass4945786
+            currentRequest = CreateAccountRequest.NOT_STARTED
             checkemailRequeststatus = CheckEmailRequest.DEFAULT
         }
 
         @JvmStatic
-        fun method297() {
+        fun retryOrFailConnection() {
             Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
-            if (anInt134 < 2) {
+            if (connectionRetryCount < 2) {
                 WorldConnection.LOBBY_CONNECTION_INFO!!.swap()
-                anInt133 = 0
-                ++anInt134
+                connectionTickCount = 0
+                ++connectionRetryCount
                 ACCOUNT_CREATION_STAGE = REQUEST
             } else {
                 ACCOUNT_CREATION_STAGE = null
@@ -55,15 +55,15 @@ class AccountCreationStage {
             if (ACCOUNT_CREATION_STAGE != null) {
                 try {
                     val s_1: Short
-                    if (anInt134 == 0) {
+                    if (connectionRetryCount == 0) {
                         s_1 = 250
                     } else {
                         s_1 = 2000
                     }
 
-                    ++anInt133
-                    if (anInt133 > s_1) {
-                        method297()
+                    ++connectionTickCount
+                    if (connectionTickCount > s_1) {
+                        retryOrFailConnection()
                     }
 
                     if (ACCOUNT_CREATION_STAGE == REQUEST) {
@@ -82,9 +82,9 @@ class AccountCreationStage {
                         packet.buffer.writeShort(MINOR_BUILD)
                         LOGIN_XTEAS = PacketEncoder.generateSeed(packet)
                         val i_4 = packet.buffer.currentPosition
-                        packet.buffer.writeString(Client.aString7164!!)
+                        packet.buffer.writeString(Client.js5AuthToken!!)
                         packet.buffer.writeShort(Client.AFFILIATE)
-                        packet.buffer.writeLong(Client.aLong7153)
+                        packet.buffer.writeLong(Client.machineUid)
                         packet.buffer.writeString(Client.aString5555!!)
                         packet.buffer.writeByte(Client.CURRENT_LANGUAGE!!.getValue())
                         packet.buffer.writeByte(Client.CURRENT_GAME!!.id)
@@ -106,7 +106,7 @@ class AccountCreationStage {
 
                     if (RESPONSE == ACCOUNT_CREATION_STAGE) {
                         if (Client.LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
-                            method297()
+                            retryOrFailConnection()
                         } else if (Client.LOBBY_CONNECTION_CONTEXT.getConnection()!!.available(1)) {
                             Client.LOBBY_CONNECTION_CONTEXT.getConnection()!!
                                 .read(Client.LOBBY_CONNECTION_CONTEXT.receivedBuffer.buffer, 0, 1)
@@ -140,13 +140,13 @@ class AccountCreationStage {
                         }
                     }
                 } catch (ioexception: IOException) {
-                    method297()
+                    retryOrFailConnection()
                 }
             }
         }
 
         @JvmStatic
-        fun method1466(): Boolean {
+        fun isCreatingAccount(): Boolean {
             return ACCOUNT_CREATION_STAGE != null
         }
 
@@ -156,8 +156,8 @@ class AccountCreationStage {
         }
 
         @JvmStatic
-        fun method12948(class4940: CreateAccountRequest) {
-            aClass4942916 = class4940
+        fun setCurrentRequest(class4940: CreateAccountRequest) {
+            currentRequest = class4940
         }
     }
 }

@@ -240,7 +240,7 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
             LoadingStage.plainLoginScreenRenderer!!.getLoadingText() ?: "",
             Client.DEBUG_LOAD_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX],
             Client.DEBUG_BG_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX],
-            Client.aColorArray7200[Client.DEBUG_DISPLAY_COLOR_INDEX]
+            Client.DEBUG_TEXT_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX]
         )
     }
 

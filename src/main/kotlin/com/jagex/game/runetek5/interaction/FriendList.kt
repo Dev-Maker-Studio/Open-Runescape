@@ -90,7 +90,7 @@ object FriendList {
                         if (--FRIEND_COUNT - index >= 0) {
                             System.arraycopy(FRIENDS, index + 1, FRIENDS, index, FRIEND_COUNT - index)
                         }
-                        Client.anInt7386 = Client.anInt7347
+                        Client.lastFriendIgnoreUpdateTick = Client.serverTick
                         val context = Client.connectionContext
                         val packet = PacketEncoder.createPacket(ClientProt.REMOVE_FRIEND, context.isaac)
                         packet.buffer.writeByte(TextUtils.getLength(displayName))

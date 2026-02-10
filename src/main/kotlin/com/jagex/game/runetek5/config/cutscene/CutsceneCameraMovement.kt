@@ -73,6 +73,6 @@ class CutsceneCameraMovement(packet: Packet) {
         }
 
         @Suppress("UNCHECKED_CAST")
-        Client.anIntArrayArrayArray7302!![pathIndex] = keyframeData as Array<IntArray?>
+        Client.cameraSplinePaths!![pathIndex] = keyframeData as Array<IntArray?>
     }
 }

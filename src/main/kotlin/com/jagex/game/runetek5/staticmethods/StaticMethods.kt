@@ -385,10 +385,10 @@ object StaticMethods {
 
     @JvmStatic
     fun method8146() {
-        if (!Client.aBool7269) {
-            Client.aFloat7266 += (-24.0f - Client.aFloat7266) / 2.0f
+        if (!Client.cameraYawVelocityApplied) {
+            Client.cameraYawVelocity += (-24.0f - Client.cameraYawVelocity) / 2.0f
             Client.sendCameraAngleToServer = true
-            Client.aBool7269 = true
+            Client.cameraYawVelocityApplied = true
         }
     }
 
@@ -407,10 +407,10 @@ object StaticMethods {
 
     @JvmStatic
     fun method16114() {
-        if (!Client.aBool7331) {
-            Client.aFloat7284 += (-12.0f - Client.aFloat7284) / 2.0f
+        if (!Client.cameraPitchVelocityApplied) {
+            Client.cameraPitchVelocity += (-12.0f - Client.cameraPitchVelocity) / 2.0f
             Client.sendCameraAngleToServer = true
-            Client.aBool7331 = true
+            Client.cameraPitchVelocityApplied = true
         }
     }
 
@@ -484,16 +484,16 @@ object StaticMethods {
 
     @JvmStatic
     fun method3953() {
-        aShort828 = Client.aShort7214
-        aShort829 = Client.aShort7474
-        AbstractMousePacket.aShort7079 = Client.aShort7276
-        aShort830 = Client.aShort7441
+        aShort828 = Client.aspectFovMin
+        aShort829 = Client.aspectFovMax
+        AbstractMousePacket.aShort7079 = Client.fovScaleMin
+        aShort830 = Client.fovScaleMax
         aBool826 = true
         if (anInt824 != 0 && CutsceneTypeList.anInt825 != 0) {
-            Client.aShort7276 = 334
-            Client.aShort7441 = 334
-            Client.aShort7474 = (anInt824 * 512 / CutsceneTypeList.anInt825).toShort()
-            Client.aShort7214 = Client.aShort7474
+            Client.fovScaleMin = 334
+            Client.fovScaleMax = 334
+            Client.aspectFovMax = (anInt824 * 512 / CutsceneTypeList.anInt825).toShort()
+            Client.aspectFovMin = Client.aspectFovMax
         }
     }
 
@@ -515,10 +515,10 @@ object StaticMethods {
 
     @JvmStatic
     fun method4166() {
-        if (!Client.aBool7331) {
-            Client.aFloat7284 += (12.0f - Client.aFloat7284) / 2.0f
+        if (!Client.cameraPitchVelocityApplied) {
+            Client.cameraPitchVelocity += (12.0f - Client.cameraPitchVelocity) / 2.0f
             Client.sendCameraAngleToServer = true
-            Client.aBool7331 = true
+            Client.cameraPitchVelocityApplied = true
         }
     }
 

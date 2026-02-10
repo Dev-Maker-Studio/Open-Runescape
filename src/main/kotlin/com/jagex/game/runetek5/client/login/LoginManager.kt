@@ -173,7 +173,7 @@ object LoginManager {
                         for (i in 0 until 6) {
                             seedBlock.writeInt((Math.random() * 9.9999999E7).toInt())
                         }
-                        seedBlock.writeLong(Client.aLong7409)
+                        seedBlock.writeLong(Client.clientRandomSeed)
                         seedBlock.writeByte(Client.CURRENT_GAME!!.id)
                         seedBlock.writeByte((Math.random() * 9.9999999E7).toInt())
                         seedBlock.applyRSA()
@@ -298,7 +298,7 @@ object LoginManager {
                         SystemInfo.SYSTEM_INFO!!.writeMachineInformation(systemInfoBlock)
                         loginBlock.writeBytes(systemInfoBlock.buffer, 0, systemInfoBlock.buffer.size)
                         loginBlock.writeInt(Client.varVerifyId)
-                        loginBlock.writeLong(Client.aLong7153)
+                        loginBlock.writeLong(Client.machineUid)
                         loginBlock.writeString(Client.aString5555!!)
                         val str7156 = Client.aString7156
                         loginBlock.writeByte(if (str7156 == null) 0 else 1)
@@ -310,7 +310,7 @@ object LoginManager {
                         loginBlock.writeByte(if (Client.aBool7160) 1 else 0)
                         loginBlock.writeByte(Client.anInt2831)
                         loginBlock.writeInt(Client.anInt7163)
-                        loginBlock.writeString(Client.aString7164!!)
+                        loginBlock.writeString(Client.js5AuthToken!!)
                         loginBlock.writeByte(if (WorldConnection.CONNECTION_INFO != null && GAME_CONNECTION_INFO!!.worldId == WorldConnection.CONNECTION_INFO!!.worldId) 0 else 1)
                         val worldId = GAME_CONNECTION_INFO!!.worldId
                         loginBlock.writeInt(worldId)
@@ -348,7 +348,7 @@ object LoginManager {
                         loginBlock.writeString(Client.aString5555!!)
                         loginBlock.writeInt(Client.AFFILIATE)
                         loginBlock.writeInt(Client.anInt7163)
-                        loginBlock.writeString(Client.aString7164!!)
+                        loginBlock.writeString(Client.js5AuthToken!!)
                         writeResourceCrc(loginBlock)
                     }
                     loginBlock.encryptXtea(clientSeed!!, startPositionLoginBlock, loginBlock.currentPosition)
@@ -492,7 +492,7 @@ object LoginManager {
                             Client.IS_MEMBER = buffer.readUByte() == 1
                             PLAYER_DOB = buffer.readMedium()
                             Client.memberWorld = buffer.readUByte() == 1
-                            Client.aString3643 = buffer.readString()
+                            Client.mapOwnerIdentifier = buffer.readString()
                             Resource.mapRegion!!.loctypeList!!.setMember(Client.memberWorld)
                             Resource.mapRegionLoaderTask!!.region.loctypeList!!.setMember(Client.memberWorld)
                             TypeLists.OBJ!!.setMembersOnly(Client.memberWorld)
@@ -530,7 +530,7 @@ object LoginManager {
                             FileOnDisk.anInt5357 = buffer.readUShort()
                             aBool5556 = buffer.readUByte() == 1
                             PlayerUpdate.MY_PLAYER!!.username = buffer.readJagString().also { PlayerUpdate.MY_PLAYER!!.displayName = it; PlayerUpdate.MY_PLAYER_USERNAME = it }
-                            Client.anInt3644 = buffer.readUByte()
+                            Client.lobbyMembershipStatus = buffer.readUByte()
                             anInt1526 = buffer.readInt()
                             Client.aBool7323 = buffer.readUByte() == 1
                             WorldConnection.CONNECTION_INFO = ConnectionInfo()
@@ -725,14 +725,14 @@ object LoginManager {
         clientSeed.writeLong(0L)
         clientSeed.writeString(if (password) StaticMethods.aString102!! else lobbyAuthToken!!)
         clientSeed.writeLong(aLong86)
-        clientSeed.writeLong(Client.aLong7409)
+        clientSeed.writeLong(Client.clientRandomSeed)
         clientSeed.applyRSA()
         return clientSeed
     }
 
     @JvmStatic
     fun method7777() {
-        if (Client.gameState == GameState.UNK_0 && !method3360() && !AccountCreationStage.method1466()) {
+        if (Client.gameState == GameState.UNK_0 && !method3360() && !AccountCreationStage.isCreatingAccount()) {
             Client.setGameState(GameState.UNK_7)
         }
     }
@@ -1005,7 +1005,7 @@ object LoginManager {
     @JvmStatic
     fun onEnterIngame() {
         if (Client.gameState == GameState.UNK_17) {
-            Client.method14562()
+            Client.resetGameState()
         }
 
         prepareForIngame()
@@ -1050,7 +1050,7 @@ object LoginManager {
         Camera.cameraVariableMoveSpeed = 0
         Camera.lookX = 0
         Camera.lookY = 0
-        Camera.anInt1527 = 0
+        Camera.lookAtHeightOffset = 0
         Camera.moveCameraSpeed = 0
         Camera.moveCameraAngle = 0
 
@@ -1079,7 +1079,7 @@ object LoginManager {
         Client.BASE_WINDOW_ID = -1
         Client.OPEN_INTERFACES = IterableNodeMap(8)
         Interface.initializeTables()
-        Client.aClass1187352 = null
+        Client.activeDialogueContinue = null
 
         for (index in 0 until 8) {
             Client.PLAYER_OPTIONS[index] = null

@@ -999,11 +999,11 @@ object PlayerUpdate {
         if (i_2 != 0) {
             val i_3 = VarProviders.PLAYER_VAR_PROVIDER.activeVars[i_0]
             if (i_2 == 5) {
-                Client.anInt7339 = i_3
+                Client.menuOpenMode = i_3
             }
 
             if (i_2 == 6) {
-                Client.anInt7351 = i_3
+                Client.overheadChatFilter = i_3
             }
         }
 

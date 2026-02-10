@@ -196,10 +196,10 @@ object CutsceneTypeList {
         activeCutsceneLoadingstage = null
         activeCutsceneId = -1
         if (StaticMethods.aBool826) {
-            Client.aShort7214 = StaticMethods.aShort828
-            Client.aShort7474 = StaticMethods.aShort829
-            Client.aShort7276 = AbstractMousePacket.aShort7079
-            Client.aShort7441 = StaticMethods.aShort830
+            Client.aspectFovMin = StaticMethods.aShort828
+            Client.aspectFovMax = StaticMethods.aShort829
+            Client.fovScaleMin = AbstractMousePacket.aShort7079
+            Client.fovScaleMax = StaticMethods.aShort830
             StaticMethods.aBool826 = false
         }
     }

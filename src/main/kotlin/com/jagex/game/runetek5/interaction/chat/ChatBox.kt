@@ -45,7 +45,7 @@ object ChatBox {
         }
         CHAT_LINES[0] = line
         NUM_CHAT_LINES++
-        Client.anInt7391 = Client.anInt7347
+        Client.lastChatMessageTick = Client.serverTick
     }
 
     @JvmStatic

@@ -707,7 +707,7 @@ object EntityUpdating {
             }
         }
 
-        for (index in 0 until Client.anInt7304) {
+        for (index in 0 until Client.overlappingEntityCount) {
             val ptr = Client.ENTITY_INDEX_REFERENCES[index]
             entity = if (ptr < 2048) {
                 PlayerUpdate.players[ptr]
@@ -743,12 +743,12 @@ object EntityUpdating {
             Client.HINT_Y[hintIndex] = hintY
             val drawnText = Client.HINT_DETAILS[hintIndex]!!.getText()
 
-            if (Client.anInt7351 == 0) {
+            if (Client.overheadChatFilter == 0) {
                 var color = 16776960
                 val i_18 = Client.HINT_DETAILS[hintIndex]!!.getColorType()
 
                 if (i_18 < 6) {
-                    color = Client.anIntArray7148[i_18]
+                    color = Client.OVERHEAD_TEXT_COLORS[i_18]
                 }
                 if (i_18 == 6) {
                     color = if (Client.timesSceneRendered % 20 < 10) 16711680 else 16776960
@@ -964,7 +964,7 @@ object EntityUpdating {
                 PlayerUpdate.updateDrawPriority(plane)
                 PlayerUpdate.method11629(plane)
             }
-            Client.method11750()
+            Client.buildOverlappingEntityList()
         }
         PlayerUpdate.method11619()
     }

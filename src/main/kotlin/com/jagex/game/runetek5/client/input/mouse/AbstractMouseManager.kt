@@ -22,7 +22,7 @@ abstract class AbstractMouseManager {
 
     abstract fun reset()
 
-    abstract fun method3589()
+    abstract fun syncMouseState()
 
     companion object {
         @JvmStatic

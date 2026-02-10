@@ -189,9 +189,9 @@ class Interface(
             if (parentComponent != null) {
                 Component.redrawComponent(parentComponent)
             }
-            if (Client.aClass1187352 != null) {
-                Component.redrawComponent(Client.aClass1187352!!)
-                Client.aClass1187352 = null
+            if (Client.activeDialogueContinue != null) {
+                Component.redrawComponent(Client.activeDialogueContinue!!)
+                Client.activeDialogueContinue = null
             }
             MiniMenu.method420()
             if (parentComponent != null) {

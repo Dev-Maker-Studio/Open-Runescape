@@ -60,7 +60,7 @@ object CommandExecutor {
                 }
                 command.equals("cls", ignoreCase = true) -> {
                     Console.consoleMessageCount = 0
-                    Console.anInt2223 = 0
+                    Console.scrollOffset = 0
                     return
                 }
                 command.equals("displayfps", ignoreCase = true) -> {
@@ -90,7 +90,7 @@ object CommandExecutor {
                     val lookTotalY = base.y.toInt() + Camera.lookY
 
                     Console.writeLine("Pos: ${PlayerUpdate.MY_PLAYER!!.plane},${cameraX shr 6},${cameraY shr 6},${cameraX and 0x3f},${cameraY and 0x3f} Height: ${MapRegion.tileheightForAbsolutePosition(Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteY, PlayerUpdate.MY_PLAYER!!.plane.toInt()) - Camera.cameraPositionAbsoluteZ}")
-                    Console.writeLine("Look: ${PlayerUpdate.MY_PLAYER!!.plane},${lookTotalX shr 6},${lookTotalY shr 6},${lookTotalX and 0x3f},${lookTotalY and 0x3f} Height: ${MapRegion.tileheightForAbsolutePosition(Camera.lookX, Camera.lookY, PlayerUpdate.MY_PLAYER!!.plane.toInt()) - Camera.anInt1527}")
+                    Console.writeLine("Look: ${PlayerUpdate.MY_PLAYER!!.plane},${lookTotalX shr 6},${lookTotalY shr 6},${lookTotalX and 0x3f},${lookTotalY and 0x3f} Height: ${MapRegion.tileheightForAbsolutePosition(Camera.lookX, Camera.lookY, PlayerUpdate.MY_PLAYER!!.plane.toInt()) - Camera.lookAtHeightOffset}")
                     return
                 }
             }
