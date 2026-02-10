@@ -34,226 +34,226 @@ object ArrayUtils {
 }
 	 */
 	@JvmStatic
-	fun arrayCopy(ints_0: IntArray, i_1: Int, ints_2: IntArray, i_3: Int, i_4: Int) {
-		var i_1 = i_1
-		var i_3 = i_3
-		var i_4 = i_4
-		if (ints_2 === ints_0) {
-			if (i_3 == i_1) {
+	fun arrayCopy(src: IntArray, srcPos: Int, dest: IntArray, destPos: Int, length: Int) {
+		var srcPos = srcPos
+		var destPos = destPos
+		var length = length
+		if (dest === src) {
+			if (destPos == srcPos) {
 				return
 			}
 
-			if (i_3 > i_1 && i_3 < i_4 + i_1) {
-				--i_4
-				i_1 += i_4
-				i_3 += i_4
-				i_4 = i_1 - i_4
+			if (destPos > srcPos && destPos < length + srcPos) {
+				--length
+				srcPos += length
+				destPos += length
+				length = srcPos - length
 
-				i_4 += 7
-				while (i_1 >= i_4) {
-					ints_2[i_3--] = ints_0[i_1--]
-					ints_2[i_3--] = ints_0[i_1--]
-					ints_2[i_3--] = ints_0[i_1--]
-					ints_2[i_3--] = ints_0[i_1--]
-					ints_2[i_3--] = ints_0[i_1--]
-					ints_2[i_3--] = ints_0[i_1--]
-					ints_2[i_3--] = ints_0[i_1--]
-					ints_2[i_3--] = ints_0[i_1--]
+				length += 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
 				}
 
-				i_4 -= 7
-				while (i_1 >= i_4) {
-					ints_2[i_3--] = ints_0[i_1--]
+				length -= 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
 				}
 
 				return
 			}
 		}
 
-		i_4 += i_1
+		length += srcPos
 
-		i_4 -= 7
-		while (i_1 < i_4) {
-			ints_2[i_3++] = ints_0[i_1++]
-			ints_2[i_3++] = ints_0[i_1++]
-			ints_2[i_3++] = ints_0[i_1++]
-			ints_2[i_3++] = ints_0[i_1++]
-			ints_2[i_3++] = ints_0[i_1++]
-			ints_2[i_3++] = ints_0[i_1++]
-			ints_2[i_3++] = ints_0[i_1++]
-			ints_2[i_3++] = ints_0[i_1++]
+		length -= 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
 		}
 
-		i_4 += 7
-		while (i_1 < i_4) {
-			ints_2[i_3++] = ints_0[i_1++]
+		length += 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
 		}
 
 	}
 
 	@JvmStatic
-	fun arrayCopy(bytes_0: ByteArray, i_1: Int, bytes_2: ByteArray, i_3: Int, i_4: Int) {
-		var i_1 = i_1
-		var i_3 = i_3
-		var i_4 = i_4
-		if (bytes_2 === bytes_0) {
-			if (i_3 == i_1) {
+	fun arrayCopy(src: ByteArray, srcPos: Int, dest: ByteArray, destPos: Int, length: Int) {
+		var srcPos = srcPos
+		var destPos = destPos
+		var length = length
+		if (dest === src) {
+			if (destPos == srcPos) {
 				return
 			}
 
-			if (i_3 > i_1 && i_3 < i_4 + i_1) {
-				--i_4
-				i_1 += i_4
-				i_3 += i_4
-				i_4 = i_1 - i_4
+			if (destPos > srcPos && destPos < length + srcPos) {
+				--length
+				srcPos += length
+				destPos += length
+				length = srcPos - length
 
-				i_4 += 7
-				while (i_1 >= i_4) {
-					bytes_2[i_3--] = bytes_0[i_1--]
-					bytes_2[i_3--] = bytes_0[i_1--]
-					bytes_2[i_3--] = bytes_0[i_1--]
-					bytes_2[i_3--] = bytes_0[i_1--]
-					bytes_2[i_3--] = bytes_0[i_1--]
-					bytes_2[i_3--] = bytes_0[i_1--]
-					bytes_2[i_3--] = bytes_0[i_1--]
-					bytes_2[i_3--] = bytes_0[i_1--]
+				length += 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
 				}
 
-				i_4 -= 7
-				while (i_1 >= i_4) {
-					bytes_2[i_3--] = bytes_0[i_1--]
+				length -= 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
 				}
 
 				return
 			}
 		}
 
-		i_4 += i_1
+		length += srcPos
 
-		i_4 -= 7
-		while (i_1 < i_4) {
-			bytes_2[i_3++] = bytes_0[i_1++]
-			bytes_2[i_3++] = bytes_0[i_1++]
-			bytes_2[i_3++] = bytes_0[i_1++]
-			bytes_2[i_3++] = bytes_0[i_1++]
-			bytes_2[i_3++] = bytes_0[i_1++]
-			bytes_2[i_3++] = bytes_0[i_1++]
-			bytes_2[i_3++] = bytes_0[i_1++]
-			bytes_2[i_3++] = bytes_0[i_1++]
+		length -= 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
 		}
 
-		i_4 += 7
-		while (i_1 < i_4) {
-			bytes_2[i_3++] = bytes_0[i_1++]
+		length += 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
 		}
 
 	}
 
 	@JvmStatic
-	fun arrayCopy(longs_0: LongArray, i_1: Int, longs_2: LongArray, i_3: Int, i_4: Int) {
-		var i_1 = i_1
-		var i_3 = i_3
-		var i_4 = i_4
-		if (longs_2 === longs_0) {
-			if (i_3 == i_1) {
+	fun arrayCopy(src: LongArray, srcPos: Int, dest: LongArray, destPos: Int, length: Int) {
+		var srcPos = srcPos
+		var destPos = destPos
+		var length = length
+		if (dest === src) {
+			if (destPos == srcPos) {
 				return
 			}
 
-			if (i_3 > i_1 && i_3 < i_4 + i_1) {
-				--i_4
-				i_1 += i_4
-				i_3 += i_4
-				i_4 = i_1 - i_4
+			if (destPos > srcPos && destPos < length + srcPos) {
+				--length
+				srcPos += length
+				destPos += length
+				length = srcPos - length
 
-				i_4 += 3
-				while (i_1 >= i_4) {
-					longs_2[i_3--] = longs_0[i_1--]
-					longs_2[i_3--] = longs_0[i_1--]
-					longs_2[i_3--] = longs_0[i_1--]
-					longs_2[i_3--] = longs_0[i_1--]
+				length += 3
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
 				}
 
-				i_4 -= 3
-				while (i_1 >= i_4) {
-					longs_2[i_3--] = longs_0[i_1--]
+				length -= 3
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
 				}
 
 				return
 			}
 		}
 
-		i_4 += i_1
+		length += srcPos
 
-		i_4 -= 3
-		while (i_1 < i_4) {
-			longs_2[i_3++] = longs_0[i_1++]
-			longs_2[i_3++] = longs_0[i_1++]
-			longs_2[i_3++] = longs_0[i_1++]
-			longs_2[i_3++] = longs_0[i_1++]
+		length -= 3
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
 		}
 
-		i_4 += 3
-		while (i_1 < i_4) {
-			longs_2[i_3++] = longs_0[i_1++]
+		length += 3
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
 		}
 
 	}
 
 	@JvmStatic
 	@Suppress("UNCHECKED_CAST")
-	fun <T> arrayCopy(arr_0: Array<T>, i_1: Int, arr_2: Array<in T>, i_3: Int, i_4: Int) {
-		var i_1 = i_1
-		var i_3 = i_3
-		var i_4 = i_4
-		if (arr_2 === arr_0) {
-			if (i_3 == i_1) {
+	fun <T> arrayCopy(src: Array<T>, srcPos: Int, dest: Array<in T>, destPos: Int, length: Int) {
+		var srcPos = srcPos
+		var destPos = destPos
+		var length = length
+		if (dest === src) {
+			if (destPos == srcPos) {
 				return
 			}
 
-			if (i_3 > i_1 && i_3 < i_4 + i_1) {
-				--i_4
-				i_1 += i_4
-				i_3 += i_4
-				i_4 = i_1 - i_4
+			if (destPos > srcPos && destPos < length + srcPos) {
+				--length
+				srcPos += length
+				destPos += length
+				length = srcPos - length
 
-				i_4 += 7
-				while (i_1 >= i_4) {
-					arr_2[i_3--] = arr_0[i_1--]
-					arr_2[i_3--] = arr_0[i_1--]
-					arr_2[i_3--] = arr_0[i_1--]
-					arr_2[i_3--] = arr_0[i_1--]
-					arr_2[i_3--] = arr_0[i_1--]
-					arr_2[i_3--] = arr_0[i_1--]
-					arr_2[i_3--] = arr_0[i_1--]
-					arr_2[i_3--] = arr_0[i_1--]
+				length += 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
 				}
 
-				i_4 -= 7
-				while (i_1 >= i_4) {
-					arr_2[i_3--] = arr_0[i_1--]
+				length -= 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
 				}
 
 				return
 			}
 		}
 
-		i_4 += i_1
+		length += srcPos
 
-		i_4 -= 7
-		while (i_1 < i_4) {
-			arr_2[i_3++] = arr_0[i_1++]
-			arr_2[i_3++] = arr_0[i_1++]
-			arr_2[i_3++] = arr_0[i_1++]
-			arr_2[i_3++] = arr_0[i_1++]
-			arr_2[i_3++] = arr_0[i_1++]
-			arr_2[i_3++] = arr_0[i_1++]
-			arr_2[i_3++] = arr_0[i_1++]
-			arr_2[i_3++] = arr_0[i_1++]
+		length -= 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
 		}
 
-		i_4 += 7
-		while (i_1 < i_4) {
-			arr_2[i_3++] = arr_0[i_1++]
+		length += 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
 		}
 
 	}
@@ -292,40 +292,40 @@ object ArrayUtils {
 }
 	 */
 	@JvmStatic
-	fun <T> quicksort(longs_0: LongArray, arr_1: Array<T>, srcPos: Int, size: Int) {
-		var SrcPos = srcPos
-		if (srcPos < size) {
-			val i_5 = (size + srcPos) / 2
-			SrcPos = srcPos
-			val long_7 = longs_0[i_5]
-			longs_0[i_5] = longs_0[size]
-			longs_0[size] = long_7
-			val object9 = arr_1[i_5]
-			arr_1[i_5] = arr_1[size]
-			arr_1[size] = object9
-			val i_10 = if (long_7 == Long.MAX_VALUE) 0 else 1
-			for (i_11 in srcPos until size) {
-				if (longs_0[i_11] < (i_11 and i_10) + long_7) {
-					val long_12 = longs_0[i_11]
-					longs_0[i_11] = longs_0[SrcPos]
-					longs_0[SrcPos] = long_12
-					val object14 = arr_1[i_11]
-					arr_1[i_11] = arr_1[SrcPos]
-					arr_1[SrcPos++] = object14
+	fun <T> quicksort(keys: LongArray, values: Array<T>, startIndex: Int, endIndex: Int) {
+		var partitionIndex = startIndex
+		if (startIndex < endIndex) {
+			val midIndex = (endIndex + startIndex) / 2
+			partitionIndex = startIndex
+			val pivotValue = keys[midIndex]
+			keys[midIndex] = keys[endIndex]
+			keys[endIndex] = pivotValue
+			val pivotObject = values[midIndex]
+			values[midIndex] = values[endIndex]
+			values[endIndex] = pivotObject
+			val tieBreakMask = if (pivotValue == Long.MAX_VALUE) 0 else 1
+			for (i in startIndex until endIndex) {
+				if (keys[i] < (i and tieBreakMask) + pivotValue) {
+					val tempKey = keys[i]
+					keys[i] = keys[partitionIndex]
+					keys[partitionIndex] = tempKey
+					val tempValue = values[i]
+					values[i] = values[partitionIndex]
+					values[partitionIndex++] = tempValue
 				}
 			}
-			longs_0[size] = longs_0[SrcPos]
-			longs_0[SrcPos] = long_7
-			arr_1[size] = arr_1[SrcPos]
-			arr_1[SrcPos] = object9
-			quicksort(longs_0, arr_1, srcPos, SrcPos - 1)
-			quicksort(longs_0, arr_1, SrcPos + 1, size)
+			keys[endIndex] = keys[partitionIndex]
+			keys[partitionIndex] = pivotValue
+			values[endIndex] = values[partitionIndex]
+			values[partitionIndex] = pivotObject
+			quicksort(keys, values, startIndex, partitionIndex - 1)
+			quicksort(keys, values, partitionIndex + 1, endIndex)
 		}
 	}
 
 	@JvmStatic
-	fun <T> quicksort(longs_0: LongArray, arr_1: Array<T>) {
-		quicksort(longs_0, arr_1, 0, longs_0.size - 1)
+	fun <T> quicksort(keys: LongArray, values: Array<T>) {
+		quicksort(keys, values, 0, keys.size - 1)
 	}
 
 	@JvmStatic
@@ -360,34 +360,34 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun <T> quicksort(ints_0: IntArray, arr_1: Array<T>, i_2: Int, i_3: Int) {
-		var i_6 = i_2
-		if (i_2 < i_3) {
-			val i_5 = (i_3 + i_2) / 2
-			i_6 = i_2
-			val i_7 = ints_0[i_5]
-			ints_0[i_5] = ints_0[i_3]
-			ints_0[i_3] = i_7
-			val object8 = arr_1[i_5]
-			arr_1[i_5] = arr_1[i_3]
-			arr_1[i_3] = object8
-			val i_9 = if (i_7 == Int.MAX_VALUE) 0 else 1
-			for (i_10 in i_2 until i_3) {
-				if (ints_0[i_10] < (i_10 and i_9) + i_7) {
-					val i_11 = ints_0[i_10]
-					ints_0[i_10] = ints_0[i_6]
-					ints_0[i_6] = i_11
-					val object12 = arr_1[i_10]
-					arr_1[i_10] = arr_1[i_6]
-					arr_1[i_6++] = object12
+	fun <T> quicksort(keys: IntArray, values: Array<T>, startIndex: Int, endIndex: Int) {
+		var partitionIndex = startIndex
+		if (startIndex < endIndex) {
+			val midIndex = (endIndex + startIndex) / 2
+			partitionIndex = startIndex
+			val pivotValue = keys[midIndex]
+			keys[midIndex] = keys[endIndex]
+			keys[endIndex] = pivotValue
+			val pivotObject = values[midIndex]
+			values[midIndex] = values[endIndex]
+			values[endIndex] = pivotObject
+			val tieBreakMask = if (pivotValue == Int.MAX_VALUE) 0 else 1
+			for (i in startIndex until endIndex) {
+				if (keys[i] < (i and tieBreakMask) + pivotValue) {
+					val tempKey = keys[i]
+					keys[i] = keys[partitionIndex]
+					keys[partitionIndex] = tempKey
+					val tempValue = values[i]
+					values[i] = values[partitionIndex]
+					values[partitionIndex++] = tempValue
 				}
 			}
-			ints_0[i_3] = ints_0[i_6]
-			ints_0[i_6] = i_7
-			arr_1[i_3] = arr_1[i_6]
-			arr_1[i_6] = object8
-			quicksort(ints_0, arr_1, i_2, i_6 - 1)
-			quicksort(ints_0, arr_1, i_6 + 1, i_3)
+			keys[endIndex] = keys[partitionIndex]
+			keys[partitionIndex] = pivotValue
+			values[endIndex] = values[partitionIndex]
+			values[partitionIndex] = pivotObject
+			quicksort(keys, values, startIndex, partitionIndex - 1)
+			quicksort(keys, values, partitionIndex + 1, endIndex)
 		}
 	}
 
@@ -402,33 +402,33 @@ object ArrayUtils {
 
 	@JvmStatic
 	@Suppress("UNCHECKED_CAST")
-	fun quicksort(arr_0: Array<String?>, shorts_1: ShortArray, i_2: Int, i_3: Int) {
-		var i_6 = i_2
-		if (i_2 < i_3) {
-			val i_5 = (i_3 + i_2) / 2
-			i_6 = i_2
-			val string_7 = arr_0[i_5]
-			arr_0[i_5] = arr_0[i_3]
-			arr_0[i_3] = string_7
-			val s_8 = shorts_1[i_5]
-			shorts_1[i_5] = shorts_1[i_3]
-			shorts_1[i_3] = s_8
-			for (i_9 in i_2 until i_3) {
-				if (string_7 == null || arr_0[i_9] != null && arr_0[i_9]!!.compareTo(string_7) < (i_9 and 0x1)) {
-					val string_10 = arr_0[i_9]
-					arr_0[i_9] = arr_0[i_6]
-					arr_0[i_6] = string_10
-					val s_11 = shorts_1[i_9]
-					shorts_1[i_9] = shorts_1[i_6]
-					shorts_1[i_6++] = s_11
+	fun quicksort(names: Array<String?>, ids: ShortArray, startIndex: Int, endIndex: Int) {
+		var partitionIndex = startIndex
+		if (startIndex < endIndex) {
+			val midIndex = (endIndex + startIndex) / 2
+			partitionIndex = startIndex
+			val pivotName = names[midIndex]
+			names[midIndex] = names[endIndex]
+			names[endIndex] = pivotName
+			val pivotId = ids[midIndex]
+			ids[midIndex] = ids[endIndex]
+			ids[endIndex] = pivotId
+			for (i in startIndex until endIndex) {
+				if (pivotName == null || names[i] != null && names[i]!!.compareTo(pivotName) < (i and 0x1)) {
+					val tempName = names[i]
+					names[i] = names[partitionIndex]
+					names[partitionIndex] = tempName
+					val tempId = ids[i]
+					ids[i] = ids[partitionIndex]
+					ids[partitionIndex++] = tempId
 				}
 			}
-			arr_0[i_3] = arr_0[i_6]
-			arr_0[i_6] = string_7
-			shorts_1[i_3] = shorts_1[i_6]
-			shorts_1[i_6] = s_8
-			quicksort(arr_0, shorts_1, i_2, i_6 - 1)
-			quicksort(arr_0, shorts_1, i_6 + 1, i_3)
+			names[endIndex] = names[partitionIndex]
+			names[partitionIndex] = pivotName
+			ids[endIndex] = ids[partitionIndex]
+			ids[partitionIndex] = pivotId
+			quicksort(names, ids, startIndex, partitionIndex - 1)
+			quicksort(names, ids, partitionIndex + 1, endIndex)
 		}
 	}
 
@@ -441,9 +441,9 @@ object ArrayUtils {
 			val offset = longs[center]
 			longs[center] = longs[endPosition]
 			longs[endPosition] = offset
-			val i_9 = ints[center]
+			val pivotInt = ints[center]
 			ints[center] = ints[endPosition]
-			ints[endPosition] = i_9
+			ints[endPosition] = pivotInt
 			val mask = if (offset == Long.MAX_VALUE) 0 else 1
 
 			for (index in startPosition until endPosition) {
@@ -460,66 +460,66 @@ object ArrayUtils {
 			longs[endPosition] = longs[curPosition]
 			longs[curPosition] = offset
 			ints[endPosition] = ints[curPosition]
-			ints[curPosition] = i_9
+			ints[curPosition] = pivotInt
 			quicksort(longs, ints, startPosition, curPosition - 1)
 			quicksort(longs, ints, curPosition + 1, endPosition)
 		}
 	}
 
 	@JvmStatic
-	fun arrayCopy(floats_0: FloatArray, i_1: Int, floats_2: FloatArray, i_3: Int, i_4: Int) {
-		var i_1 = i_1
-		var i_3 = i_3
-		var i_4 = i_4
-		if (floats_2 === floats_0) {
-			if (i_3 == i_1) {
+	fun arrayCopy(src: FloatArray, srcPos: Int, dest: FloatArray, destPos: Int, length: Int) {
+		var srcPos = srcPos
+		var destPos = destPos
+		var length = length
+		if (dest === src) {
+			if (destPos == srcPos) {
 				return
 			}
 
-			if (i_3 > i_1 && i_3 < i_4 + i_1) {
-				--i_4
-				i_1 += i_4
-				i_3 += i_4
-				i_4 = i_1 - i_4
+			if (destPos > srcPos && destPos < length + srcPos) {
+				--length
+				srcPos += length
+				destPos += length
+				length = srcPos - length
 
-				i_4 += 7
-				while (i_1 >= i_4) {
-					floats_2[i_3--] = floats_0[i_1--]
-					floats_2[i_3--] = floats_0[i_1--]
-					floats_2[i_3--] = floats_0[i_1--]
-					floats_2[i_3--] = floats_0[i_1--]
-					floats_2[i_3--] = floats_0[i_1--]
-					floats_2[i_3--] = floats_0[i_1--]
-					floats_2[i_3--] = floats_0[i_1--]
-					floats_2[i_3--] = floats_0[i_1--]
+				length += 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
+					dest[destPos--] = src[srcPos--]
 				}
 
-				i_4 -= 7
-				while (i_1 >= i_4) {
-					floats_2[i_3--] = floats_0[i_1--]
+				length -= 7
+				while (srcPos >= length) {
+					dest[destPos--] = src[srcPos--]
 				}
 
 				return
 			}
 		}
 
-		i_4 += i_1
+		length += srcPos
 
-		i_4 -= 7
-		while (i_1 < i_4) {
-			floats_2[i_3++] = floats_0[i_1++]
-			floats_2[i_3++] = floats_0[i_1++]
-			floats_2[i_3++] = floats_0[i_1++]
-			floats_2[i_3++] = floats_0[i_1++]
-			floats_2[i_3++] = floats_0[i_1++]
-			floats_2[i_3++] = floats_0[i_1++]
-			floats_2[i_3++] = floats_0[i_1++]
-			floats_2[i_3++] = floats_0[i_1++]
+		length -= 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
+			dest[destPos++] = src[srcPos++]
 		}
 
-		i_4 += 7
-		while (i_1 < i_4) {
-			floats_2[i_3++] = floats_0[i_1++]
+		length += 7
+		while (srcPos < length) {
+			dest[destPos++] = src[srcPos++]
 		}
 
 	}
@@ -530,8 +530,8 @@ object ArrayUtils {
 		var length = length
 		--index
 		--length
-		val i_5 = length - 7
-		while (index < i_5) {
+		val unrolledEnd = length - 7
+		while (index < unrolledEnd) {
 			array[++index] = dstValue
 			array[++index] = dstValue
 			array[++index] = dstValue
@@ -548,227 +548,227 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun drawUnclippedFilledAndStrokedCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-		ensureCircleBufferCapacity(i_2)
-		var i_7 = 0
-		var i_8 = i_2 - i_5
-		if (i_8 < 0) {
-			i_8 = 0
+	fun drawUnclippedFilledAndStrokedCircle(centerX: Int, centerY: Int, outerRadius: Int, fillColor: Int, strokeColor: Int, strokeWidth: Int) {
+		ensureCircleBufferCapacity(outerRadius)
+		var x = 0
+		var innerRadius = outerRadius - strokeWidth
+		if (innerRadius < 0) {
+			innerRadius = 0
 		}
-		var i_9 = i_2
-		var i_10 = -i_2
-		var i_11 = i_8
-		var i_12 = -i_8
-		var i_13 = -1
-		var i_14 = -1
-		val ints_15 = TextureShapeRasterizer.pixelBuffer!![i_1]
-		val i_16 = i_0 - i_8
-		val i_17 = i_0 + i_8
-		setArrayValuesTo(ints_15, i_0 - i_2, i_16, i_4)
-		setArrayValuesTo(ints_15, i_16, i_17, i_3)
-		setArrayValuesTo(ints_15, i_17, i_0 + i_2, i_4)
-		while (i_9 > i_7) {
-			i_13 += 2
-			i_14 += 2
-			i_10 += i_13
-			i_12 += i_14
-			if (i_12 >= 0 && i_11 >= 1) {
-				StaticMethods.circleInnerRadiusBuffer!![i_11] = i_7
-				--i_11
-				i_12 -= i_11 shl 1
+		var outerY = outerRadius
+		var outerError = -outerRadius
+		var innerY = innerRadius
+		var innerError = -innerRadius
+		var outerDelta = -1
+		var innerDelta = -1
+		val scanline = TextureShapeRasterizer.pixelBuffer!![centerY]
+		val innerLeft = centerX - innerRadius
+		val innerRight = centerX + innerRadius
+		setArrayValuesTo(scanline, centerX - outerRadius, innerLeft, strokeColor)
+		setArrayValuesTo(scanline, innerLeft, innerRight, fillColor)
+		setArrayValuesTo(scanline, innerRight, centerX + outerRadius, strokeColor)
+		while (outerY > x) {
+			outerDelta += 2
+			innerDelta += 2
+			outerError += outerDelta
+			innerError += innerDelta
+			if (innerError >= 0 && innerY >= 1) {
+				StaticMethods.circleInnerRadiusBuffer!![innerY] = x
+				--innerY
+				innerError -= innerY shl 1
 			}
-			++i_7
-			var ints_18: IntArray
-			var ints_19: IntArray
-			var i_20: Int
-			var i_21: Int
-			var i_22: Int
-			var i_23: Int
-			var i_24: Int
-			if (i_10 >= 0) {
-				--i_9
-				i_10 -= i_9 shl 1
-				if (i_9 >= i_8) {
-					ints_18 = TextureShapeRasterizer.pixelBuffer!![i_9 + i_1]
-					ints_19 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_9]
-					i_20 = i_0 + i_7
-					i_21 = i_0 - i_7
-					setArrayValuesTo(ints_18, i_21, i_20, i_4)
-					setArrayValuesTo(ints_19, i_21, i_20, i_4)
+			++x
+			var upperRow: IntArray
+			var lowerRow: IntArray
+			var right: Int
+			var left: Int
+			var innerRight2: Int
+			var innerLeft2: Int
+			var innerExtent: Int
+			if (outerError >= 0) {
+				--outerY
+				outerError -= outerY shl 1
+				if (outerY >= innerRadius) {
+					upperRow = TextureShapeRasterizer.pixelBuffer!![outerY + centerY]
+					lowerRow = TextureShapeRasterizer.pixelBuffer!![centerY - outerY]
+					right = centerX + x
+					left = centerX - x
+					setArrayValuesTo(upperRow, left, right, strokeColor)
+					setArrayValuesTo(lowerRow, left, right, strokeColor)
 				} else {
-					ints_18 = TextureShapeRasterizer.pixelBuffer!![i_9 + i_1]
-					ints_19 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_9]
-					i_20 = StaticMethods.circleInnerRadiusBuffer!![i_9]
-					i_21 = i_0 + i_7
-					i_22 = i_0 - i_7
-					i_23 = i_0 + i_20
-					i_24 = i_0 - i_20
-					setArrayValuesTo(ints_18, i_22, i_24, i_4)
-					setArrayValuesTo(ints_18, i_24, i_23, i_3)
-					setArrayValuesTo(ints_18, i_23, i_21, i_4)
-					setArrayValuesTo(ints_19, i_22, i_24, i_4)
-					setArrayValuesTo(ints_19, i_24, i_23, i_3)
-					setArrayValuesTo(ints_19, i_23, i_21, i_4)
+					upperRow = TextureShapeRasterizer.pixelBuffer!![outerY + centerY]
+					lowerRow = TextureShapeRasterizer.pixelBuffer!![centerY - outerY]
+					innerExtent = StaticMethods.circleInnerRadiusBuffer!![outerY]
+					right = centerX + x
+					left = centerX - x
+					innerRight2 = centerX + innerExtent
+					innerLeft2 = centerX - innerExtent
+					setArrayValuesTo(upperRow, left, innerLeft2, strokeColor)
+					setArrayValuesTo(upperRow, innerLeft2, innerRight2, fillColor)
+					setArrayValuesTo(upperRow, innerRight2, right, strokeColor)
+					setArrayValuesTo(lowerRow, left, innerLeft2, strokeColor)
+					setArrayValuesTo(lowerRow, innerLeft2, innerRight2, fillColor)
+					setArrayValuesTo(lowerRow, innerRight2, right, strokeColor)
 				}
 			}
-			ints_18 = TextureShapeRasterizer.pixelBuffer!![i_7 + i_1]
-			ints_19 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_7]
-			i_20 = i_0 + i_9
-			i_21 = i_0 - i_9
-			if (i_7 < i_8) {
-				i_22 = if (i_11 < i_7) StaticMethods.circleInnerRadiusBuffer!![i_7] else i_11
-				i_23 = i_0 + i_22
-				i_24 = i_0 - i_22
-				setArrayValuesTo(ints_18, i_21, i_24, i_4)
-				setArrayValuesTo(ints_18, i_24, i_23, i_3)
-				setArrayValuesTo(ints_18, i_23, i_20, i_4)
-				setArrayValuesTo(ints_19, i_21, i_24, i_4)
-				setArrayValuesTo(ints_19, i_24, i_23, i_3)
-				setArrayValuesTo(ints_19, i_23, i_20, i_4)
+			upperRow = TextureShapeRasterizer.pixelBuffer!![x + centerY]
+			lowerRow = TextureShapeRasterizer.pixelBuffer!![centerY - x]
+			right = centerX + outerY
+			left = centerX - outerY
+			if (x < innerRadius) {
+				innerExtent = if (innerY < x) StaticMethods.circleInnerRadiusBuffer!![x] else innerY
+				innerRight2 = centerX + innerExtent
+				innerLeft2 = centerX - innerExtent
+				setArrayValuesTo(upperRow, left, innerLeft2, strokeColor)
+				setArrayValuesTo(upperRow, innerLeft2, innerRight2, fillColor)
+				setArrayValuesTo(upperRow, innerRight2, right, strokeColor)
+				setArrayValuesTo(lowerRow, left, innerLeft2, strokeColor)
+				setArrayValuesTo(lowerRow, innerLeft2, innerRight2, fillColor)
+				setArrayValuesTo(lowerRow, innerRight2, right, strokeColor)
 			} else {
-				setArrayValuesTo(ints_18, i_21, i_20, i_4)
-				setArrayValuesTo(ints_19, i_21, i_20, i_4)
+				setArrayValuesTo(upperRow, left, right, strokeColor)
+				setArrayValuesTo(lowerRow, left, right, strokeColor)
 			}
 		}
 	}
 
 	@JvmStatic
-	fun drawClippedStrokedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-		val i_7 = clamp(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_8 = clamp(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_9 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_10 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_11 = clamp(i_5 + i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_12 = clamp(i_3 - i_5, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		var i_13: Int
-		i_13 = i_7
-		while (i_13 < i_11) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_13], i_9, i_10, i_4)
-			i_13++
+	fun drawClippedStrokedRectangle(left: Int, right: Int, top: Int, bottom: Int, color: Int, borderWidth: Int) {
+		val clippedTop = clamp(top, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val clippedBottom = clamp(bottom, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val clippedLeft = clamp(left, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val clippedRight = clamp(right, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val topBorderEnd = clamp(borderWidth + top, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val bottomBorderStart = clamp(bottom - borderWidth, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		var y: Int
+		y = clippedTop
+		while (y < topBorderEnd) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], clippedLeft, clippedRight, color)
+			y++
 		}
-		i_13 = i_8
-		while (i_13 > i_12) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_13], i_9, i_10, i_4)
-			--i_13
+		y = clippedBottom
+		while (y > bottomBorderStart) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], clippedLeft, clippedRight, color)
+			--y
 		}
-		i_13 = clamp(i_5 + i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_14 = clamp(i_1 - i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		for (i_15 in i_11..i_12) {
-			val ints_16 = TextureShapeRasterizer.pixelBuffer!![i_15]
-			setArrayValuesTo(ints_16, i_9, i_13, i_4)
-			setArrayValuesTo(ints_16, i_14, i_10, i_4)
+		y = clamp(borderWidth + left, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val rightBorderStart = clamp(right - borderWidth, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		for (row in topBorderEnd..bottomBorderStart) {
+			val scanline = TextureShapeRasterizer.pixelBuffer!![row]
+			setArrayValuesTo(scanline, clippedLeft, y, color)
+			setArrayValuesTo(scanline, rightBorderStart, clippedRight, color)
 		}
 	}
 
 	@JvmStatic
-	fun drawClippedFilledAndStrokedCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-		ensureCircleBufferCapacity(i_2)
-		var i_7 = 0
-		var i_8 = i_2 - i_5
-		if (i_8 < 0) {
-			i_8 = 0
+	fun drawClippedFilledAndStrokedCircle(centerX: Int, centerY: Int, outerRadius: Int, fillColor: Int, strokeColor: Int, strokeWidth: Int) {
+		ensureCircleBufferCapacity(outerRadius)
+		var x = 0
+		var innerRadius = outerRadius - strokeWidth
+		if (innerRadius < 0) {
+			innerRadius = 0
 		}
-		var i_9 = i_2
-		var i_10 = -i_2
-		var i_11 = i_8
-		var i_12 = -i_8
-		var i_13 = -1
-		var i_14 = -1
-		var i_16: Int
-		var i_17: Int
-		var i_18: Int
-		var i_19: Int
-		if (i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY) {
-			val ints_15 = TextureShapeRasterizer.pixelBuffer!![i_1]
-			i_16 = clamp(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_17 = clamp(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_18 = clamp(i_0 - i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_19 = clamp(i_0 + i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			setArrayValuesTo(ints_15, i_16, i_18, i_4)
-			setArrayValuesTo(ints_15, i_18, i_19, i_3)
-			setArrayValuesTo(ints_15, i_19, i_17, i_4)
+		var outerY = outerRadius
+		var outerError = -outerRadius
+		var innerY = innerRadius
+		var innerError = -innerRadius
+		var outerDelta = -1
+		var innerDelta = -1
+		var rowAbove: Int
+		var rowBelow: Int
+		var right: Int
+		var innerRight: Int
+		if (centerY >= TextureOpRasterizer.clipMinY && centerY <= TextureOpRasterizer.clipMaxY) {
+			val scanline = TextureShapeRasterizer.pixelBuffer!![centerY]
+			rowAbove = clamp(centerX - outerRadius, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			rowBelow = clamp(centerX + outerRadius, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			right = clamp(centerX - innerRadius, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			innerRight = clamp(centerX + innerRadius, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			setArrayValuesTo(scanline, rowAbove, right, strokeColor)
+			setArrayValuesTo(scanline, right, innerRight, fillColor)
+			setArrayValuesTo(scanline, innerRight, rowBelow, strokeColor)
 		}
-		while (i_9 > i_7) {
-			i_13 += 2
-			i_14 += 2
-			i_10 += i_13
-			i_12 += i_14
-			if (i_12 >= 0 && i_11 >= 1) {
-				--i_11
-				i_12 -= i_11 shl 1
-				StaticMethods.circleInnerRadiusBuffer!![i_11] = i_7
+		while (outerY > x) {
+			outerDelta += 2
+			innerDelta += 2
+			outerError += outerDelta
+			innerError += innerDelta
+			if (innerError >= 0 && innerY >= 1) {
+				--innerY
+				innerError -= innerY shl 1
+				StaticMethods.circleInnerRadiusBuffer!![innerY] = x
 			}
-			++i_7
-			var i_20: Int
-			var i_21: Int
-			var ints_22: IntArray
-			var i_23: Int
-			if (i_10 >= 0) {
-				--i_9
-				i_10 -= i_9 shl 1
-				i_23 = i_1 - i_9
-				i_16 = i_9 + i_1
-				if (i_16 >= TextureOpRasterizer.clipMinY && i_23 <= TextureOpRasterizer.clipMaxY) {
-					if (i_9 >= i_8) {
-						i_17 = clamp(i_0 + i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_18 = clamp(i_0 - i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						if (i_16 <= TextureOpRasterizer.clipMaxY) {
-							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_16], i_18, i_17, i_4)
+			++x
+			var innerExtent: Int
+			var left: Int
+			var upperRow: IntArray
+			var mirrorY: Int
+			if (outerError >= 0) {
+				--outerY
+				outerError -= outerY shl 1
+				mirrorY = centerY - outerY
+				rowAbove = outerY + centerY
+				if (rowAbove >= TextureOpRasterizer.clipMinY && mirrorY <= TextureOpRasterizer.clipMaxY) {
+					if (outerY >= innerRadius) {
+						rowBelow = clamp(centerX + x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						right = clamp(centerX - x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						if (rowAbove <= TextureOpRasterizer.clipMaxY) {
+							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowAbove], right, rowBelow, strokeColor)
 						}
-						if (i_23 >= TextureOpRasterizer.clipMinY) {
-							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_23], i_18, i_17, i_4)
-						}
-					} else {
-						i_17 = StaticMethods.circleInnerRadiusBuffer!![i_9]
-						i_18 = clamp(i_0 + i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_19 = clamp(i_0 - i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_20 = clamp(i_0 + i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_21 = clamp(i_0 - i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						if (i_16 <= TextureOpRasterizer.clipMaxY) {
-							ints_22 = TextureShapeRasterizer.pixelBuffer!![i_16]
-							setArrayValuesTo(ints_22, i_19, i_21, i_4)
-							setArrayValuesTo(ints_22, i_21, i_20, i_3)
-							setArrayValuesTo(ints_22, i_20, i_18, i_4)
-						}
-						if (i_23 >= TextureOpRasterizer.clipMinY) {
-							ints_22 = TextureShapeRasterizer.pixelBuffer!![i_23]
-							setArrayValuesTo(ints_22, i_19, i_21, i_4)
-							setArrayValuesTo(ints_22, i_21, i_20, i_3)
-							setArrayValuesTo(ints_22, i_20, i_18, i_4)
-						}
-					}
-				}
-			}
-			i_23 = i_1 - i_7
-			i_16 = i_7 + i_1
-			if (i_16 >= TextureOpRasterizer.clipMinY && i_23 <= TextureOpRasterizer.clipMaxY) {
-				i_17 = i_0 + i_9
-				i_18 = i_0 - i_9
-				if (i_17 >= TextureOpRasterizer.clipMinX && i_18 <= TextureOpRasterizer.clipMaxX) {
-					i_17 = clamp(i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-					i_18 = clamp(i_18, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-					if (i_7 < i_8) {
-						i_19 = if (i_11 < i_7) StaticMethods.circleInnerRadiusBuffer!![i_7] else i_11
-						i_20 = clamp(i_0 + i_19, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_21 = clamp(i_0 - i_19, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						if (i_16 <= TextureOpRasterizer.clipMaxY) {
-							ints_22 = TextureShapeRasterizer.pixelBuffer!![i_16]
-							setArrayValuesTo(ints_22, i_18, i_21, i_4)
-							setArrayValuesTo(ints_22, i_21, i_20, i_3)
-							setArrayValuesTo(ints_22, i_20, i_17, i_4)
-						}
-						if (i_23 >= TextureOpRasterizer.clipMinY) {
-							ints_22 = TextureShapeRasterizer.pixelBuffer!![i_23]
-							setArrayValuesTo(ints_22, i_18, i_21, i_4)
-							setArrayValuesTo(ints_22, i_21, i_20, i_3)
-							setArrayValuesTo(ints_22, i_20, i_17, i_4)
+						if (mirrorY >= TextureOpRasterizer.clipMinY) {
+							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![mirrorY], right, rowBelow, strokeColor)
 						}
 					} else {
-						if (i_16 <= TextureOpRasterizer.clipMaxY) {
-							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_16], i_18, i_17, i_4)
+						rowBelow = StaticMethods.circleInnerRadiusBuffer!![outerY]
+						right = clamp(centerX + x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						innerRight = clamp(centerX - x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						innerExtent = clamp(centerX + rowBelow, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						left = clamp(centerX - rowBelow, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						if (rowAbove <= TextureOpRasterizer.clipMaxY) {
+							upperRow = TextureShapeRasterizer.pixelBuffer!![rowAbove]
+							setArrayValuesTo(upperRow, innerRight, left, strokeColor)
+							setArrayValuesTo(upperRow, left, innerExtent, fillColor)
+							setArrayValuesTo(upperRow, innerExtent, right, strokeColor)
 						}
-						if (i_23 >= TextureOpRasterizer.clipMinY) {
-							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_23], i_18, i_17, i_4)
+						if (mirrorY >= TextureOpRasterizer.clipMinY) {
+							upperRow = TextureShapeRasterizer.pixelBuffer!![mirrorY]
+							setArrayValuesTo(upperRow, innerRight, left, strokeColor)
+							setArrayValuesTo(upperRow, left, innerExtent, fillColor)
+							setArrayValuesTo(upperRow, innerExtent, right, strokeColor)
+						}
+					}
+				}
+			}
+			mirrorY = centerY - x
+			rowAbove = x + centerY
+			if (rowAbove >= TextureOpRasterizer.clipMinY && mirrorY <= TextureOpRasterizer.clipMaxY) {
+				rowBelow = centerX + outerY
+				right = centerX - outerY
+				if (rowBelow >= TextureOpRasterizer.clipMinX && right <= TextureOpRasterizer.clipMaxX) {
+					rowBelow = clamp(rowBelow, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					right = clamp(right, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					if (x < innerRadius) {
+						innerRight = if (innerY < x) StaticMethods.circleInnerRadiusBuffer!![x] else innerY
+						innerExtent = clamp(centerX + innerRight, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						left = clamp(centerX - innerRight, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						if (rowAbove <= TextureOpRasterizer.clipMaxY) {
+							upperRow = TextureShapeRasterizer.pixelBuffer!![rowAbove]
+							setArrayValuesTo(upperRow, right, left, strokeColor)
+							setArrayValuesTo(upperRow, left, innerExtent, fillColor)
+							setArrayValuesTo(upperRow, innerExtent, rowBelow, strokeColor)
+						}
+						if (mirrorY >= TextureOpRasterizer.clipMinY) {
+							upperRow = TextureShapeRasterizer.pixelBuffer!![mirrorY]
+							setArrayValuesTo(upperRow, right, left, strokeColor)
+							setArrayValuesTo(upperRow, left, innerExtent, fillColor)
+							setArrayValuesTo(upperRow, innerExtent, rowBelow, strokeColor)
+						}
+					} else {
+						if (rowAbove <= TextureOpRasterizer.clipMaxY) {
+							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowAbove], right, rowBelow, strokeColor)
+						}
+						if (mirrorY >= TextureOpRasterizer.clipMinY) {
+							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![mirrorY], right, rowBelow, strokeColor)
 						}
 					}
 				}
@@ -777,261 +777,261 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun drawClippedFilledEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-		var i_6 = 0
-		var i_7 = i_3
-		val i_8 = i_2 * i_2
-		val i_9 = i_3 * i_3
-		val i_10 = i_9 shl 1
-		val i_11 = i_8 shl 1
-		val i_12 = i_3 shl 1
-		var i_13 = i_10 + (1 - i_12) * i_8
-		var i_14 = i_9 - i_11 * (i_12 - 1)
-		val i_15 = i_8 shl 2
-		val i_16 = i_9 shl 2
-		var i_17 = ((i_6 shl 1) + 3) * i_10
-		var i_18 = ((i_3 shl 1) - 3) * i_11
-		var i_19 = i_16 * (i_6 + 1)
-		var i_20 = i_15 * (i_3 - 1)
-		var i_21: Int
-		var i_22: Int
-		if (i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY) {
-			i_21 = clamp(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_22 = clamp(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_1], i_22, i_21, i_4)
+	fun drawClippedFilledEllipse(centerX: Int, centerY: Int, radiusX: Int, radiusY: Int, color: Int) {
+		var x = 0
+		var y = radiusY
+		val rxSq = radiusX * radiusX
+		val rySq = radiusY * radiusY
+		val twoRySq = rySq shl 1
+		val twoRxSq = rxSq shl 1
+		val diameterY = radiusY shl 1
+		var decisionParam1 = twoRySq + (1 - diameterY) * rxSq
+		var decisionParam2 = rySq - twoRxSq * (diameterY - 1)
+		val fourRxSq = rxSq shl 2
+		val fourRySq = rySq shl 2
+		var gradientX = ((x shl 1) + 3) * twoRySq
+		var gradientY = ((radiusY shl 1) - 3) * twoRxSq
+		var stepX = fourRySq * (x + 1)
+		var stepY = fourRxSq * (radiusY - 1)
+		var rowAbove: Int
+		var rowBelow: Int
+		if (centerY >= TextureOpRasterizer.clipMinY && centerY <= TextureOpRasterizer.clipMaxY) {
+			rowAbove = clamp(centerX + radiusX, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			rowBelow = clamp(centerX - radiusX, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![centerY], rowBelow, rowAbove, color)
 		}
-		while (i_7 > 0) {
-			if (i_13 < 0) {
-				while (i_13 < 0) {
-					i_13 += i_17
-					i_14 += i_19
-					i_17 += i_16
-					i_19 += i_16
-					++i_6
+		while (y > 0) {
+			if (decisionParam1 < 0) {
+				while (decisionParam1 < 0) {
+					decisionParam1 += gradientX
+					decisionParam2 += stepX
+					gradientX += fourRySq
+					stepX += fourRySq
+					++x
 				}
 			}
-			if (i_14 < 0) {
-				i_13 += i_17
-				i_14 += i_19
-				i_17 += i_16
-				i_19 += i_16
-				++i_6
+			if (decisionParam2 < 0) {
+				decisionParam1 += gradientX
+				decisionParam2 += stepX
+				gradientX += fourRySq
+				stepX += fourRySq
+				++x
 			}
-			i_13 += -i_20
-			i_14 += -i_18
-			i_18 -= i_15
-			i_20 -= i_15
-			--i_7
-			i_21 = i_1 - i_7
-			i_22 = i_7 + i_1
-			if (i_22 >= TextureOpRasterizer.clipMinY && i_21 <= TextureOpRasterizer.clipMaxY) {
-				val i_23 = clamp(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-				val i_24 = clamp(i_0 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-				if (i_21 >= TextureOpRasterizer.clipMinY) {
-					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_21], i_24, i_23, i_4)
+			decisionParam1 += -stepY
+			decisionParam2 += -gradientY
+			gradientY -= fourRxSq
+			stepY -= fourRxSq
+			--y
+			rowAbove = centerY - y
+			rowBelow = y + centerY
+			if (rowBelow >= TextureOpRasterizer.clipMinY && rowAbove <= TextureOpRasterizer.clipMaxY) {
+				val clippedRight = clamp(centerX + x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				val clippedLeft = clamp(centerX - x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				if (rowAbove >= TextureOpRasterizer.clipMinY) {
+					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowAbove], clippedLeft, clippedRight, color)
 				}
-				if (i_22 <= TextureOpRasterizer.clipMaxY) {
-					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_22], i_24, i_23, i_4)
+				if (rowBelow <= TextureOpRasterizer.clipMaxY) {
+					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowBelow], clippedLeft, clippedRight, color)
 				}
 			}
 		}
 	}
 
 	@JvmStatic
-	fun drawClippedFilledCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
-		var i_5 = 0
-		var i_6 = i_2
-		var i_7 = -i_2
-		var i_8 = -1
-		val i_9 = clamp(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_10 = clamp(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_1], i_10, i_9, i_3)
-		while (i_6 > i_5) {
-			i_8 += 2
-			i_7 += i_8
-			var i_11: Int
-			var i_12: Int
-			var i_13: Int
-			var i_14: Int
-			if (i_7 > 0) {
-				--i_6
-				i_7 -= i_6 shl 1
-				i_11 = i_1 - i_6
-				i_12 = i_6 + i_1
-				if (i_12 >= TextureOpRasterizer.clipMinY && i_11 <= TextureOpRasterizer.clipMaxY) {
-					i_13 = clamp(i_0 + i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-					i_14 = clamp(i_0 - i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-					if (i_12 <= TextureOpRasterizer.clipMaxY) {
-						setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_12], i_14, i_13, i_3)
+	fun drawClippedFilledCircle(centerX: Int, centerY: Int, radius: Int, color: Int) {
+		var x = 0
+		var y = radius
+		var error = -radius
+		var delta = -1
+		val clippedRight = clamp(centerX + radius, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val clippedLeft = clamp(centerX - radius, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![centerY], clippedLeft, clippedRight, color)
+		while (y > x) {
+			delta += 2
+			error += delta
+			var rowAbove: Int
+			var rowBelow: Int
+			var right: Int
+			var left: Int
+			if (error > 0) {
+				--y
+				error -= y shl 1
+				rowAbove = centerY - y
+				rowBelow = y + centerY
+				if (rowBelow >= TextureOpRasterizer.clipMinY && rowAbove <= TextureOpRasterizer.clipMaxY) {
+					right = clamp(centerX + x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					left = clamp(centerX - x, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					if (rowBelow <= TextureOpRasterizer.clipMaxY) {
+						setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowBelow], left, right, color)
 					}
-					if (i_11 >= TextureOpRasterizer.clipMinY) {
-						setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_11], i_14, i_13, i_3)
+					if (rowAbove >= TextureOpRasterizer.clipMinY) {
+						setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowAbove], left, right, color)
 					}
 				}
 			}
-			++i_5
-			i_11 = i_1 - i_5
-			i_12 = i_5 + i_1
-			if (i_12 >= TextureOpRasterizer.clipMinY && i_11 <= TextureOpRasterizer.clipMaxY) {
-				i_13 = clamp(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-				i_14 = clamp(i_0 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-				if (i_12 <= TextureOpRasterizer.clipMaxY) {
-					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_12], i_14, i_13, i_3)
+			++x
+			rowAbove = centerY - x
+			rowBelow = x + centerY
+			if (rowBelow >= TextureOpRasterizer.clipMinY && rowAbove <= TextureOpRasterizer.clipMaxY) {
+				right = clamp(centerX + y, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				left = clamp(centerX - y, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				if (rowBelow <= TextureOpRasterizer.clipMaxY) {
+					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowBelow], left, right, color)
 				}
-				if (i_11 >= TextureOpRasterizer.clipMinY) {
-					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_11], i_14, i_13, i_3)
+				if (rowAbove >= TextureOpRasterizer.clipMinY) {
+					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowAbove], left, right, color)
 				}
 			}
 		}
 	}
 
 	@JvmStatic
-	fun drawClippedStrokedAndFilledRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-		val i_8 = clamp(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_9 = clamp(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_10 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_11 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_12 = clamp(i_2 + i_6, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_13 = clamp(i_3 - i_6, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		var i_14: Int
-		i_14 = i_8
-		while (i_14 < i_12) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_14], i_10, i_11, i_5)
-			i_14++
+	fun drawClippedStrokedAndFilledRectangle(left: Int, right: Int, top: Int, bottom: Int, fillColor: Int, strokeColor: Int, borderWidth: Int) {
+		val clippedTop = clamp(top, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val clippedBottom = clamp(bottom, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val clippedLeft = clamp(left, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val clippedRight = clamp(right, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val topBorderEnd = clamp(top + borderWidth, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val bottomBorderStart = clamp(bottom - borderWidth, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		var y: Int
+		y = clippedTop
+		while (y < topBorderEnd) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], clippedLeft, clippedRight, strokeColor)
+			y++
 		}
-		i_14 = i_9
-		while (i_14 > i_13) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_14], i_10, i_11, i_5)
-			--i_14
+		y = clippedBottom
+		while (y > bottomBorderStart) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], clippedLeft, clippedRight, strokeColor)
+			--y
 		}
-		i_14 = clamp(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_15 = clamp(i_1 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		for (i_16 in i_12..i_13) {
-			val ints_17 = TextureShapeRasterizer.pixelBuffer!![i_16]
-			setArrayValuesTo(ints_17, i_10, i_14, i_5)
-			setArrayValuesTo(ints_17, i_14, i_15, i_4)
-			setArrayValuesTo(ints_17, i_15, i_11, i_5)
-		}
-	}
-
-	@JvmStatic
-	fun fillClippedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-		val i_6 = clamp(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_7 = clamp(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_8 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_9 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		for (i_10 in i_6..i_7) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_10], i_8, i_9, i_4)
+		y = clamp(left + borderWidth, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val rightBorderStart = clamp(right - borderWidth, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		for (row in topBorderEnd..bottomBorderStart) {
+			val scanline = TextureShapeRasterizer.pixelBuffer!![row]
+			setArrayValuesTo(scanline, clippedLeft, y, strokeColor)
+			setArrayValuesTo(scanline, y, rightBorderStart, fillColor)
+			setArrayValuesTo(scanline, rightBorderStart, clippedRight, strokeColor)
 		}
 	}
 
 	@JvmStatic
-	fun clamp(i_0: Int, i_1: Int, i_2: Int): Int {
-		return if (i_0 < i_1) i_1 else (Math.min(i_0, i_2))
+	fun fillClippedRectangle(left: Int, right: Int, top: Int, bottom: Int, color: Int) {
+		val clippedTop = clamp(top, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val clippedBottom = clamp(bottom, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val clippedLeft = clamp(left, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val clippedRight = clamp(right, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		for (y in clippedTop..clippedBottom) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], clippedLeft, clippedRight, color)
+		}
 	}
 
 	@JvmStatic
-	fun drawHorizontalLine(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
-		if (i_0 > i_1) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_2], i_1, i_0, i_3)
+	fun clamp(value: Int, min: Int, max: Int): Int {
+		return if (value < min) min else (Math.min(value, max))
+	}
+
+	@JvmStatic
+	fun drawHorizontalLine(x1: Int, x2: Int, y: Int, color: Int) {
+		if (x1 > x2) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], x2, x1, color)
 		} else {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_2], i_0, i_1, i_3)
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], x1, x2, color)
 		}
 	}
 
 	@JvmStatic
-	fun drawClippedHorizontalLine(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
-		var i_0 = i_0
-		var i_1 = i_1
-		if (i_2 >= TextureOpRasterizer.clipMinY && i_2 <= TextureOpRasterizer.clipMaxY) {
-			i_0 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_1 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			drawHorizontalLine(i_0, i_1, i_2, i_3)
+	fun drawClippedHorizontalLine(x1: Int, x2: Int, y: Int, color: Int) {
+		var x1 = x1
+		var x2 = x2
+		if (y >= TextureOpRasterizer.clipMinY && y <= TextureOpRasterizer.clipMaxY) {
+			x1 = clamp(x1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			x2 = clamp(x2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			drawHorizontalLine(x1, x2, y, color)
 		}
 	}
 
 	@JvmStatic
-	fun arrayCopy(bytes_0: ByteArray, i_1: Int): ByteArray {
-		val bytes_2 = ByteArray(i_1)
-		System.arraycopy(bytes_0, 0, bytes_2, 0, i_1)
-		return bytes_2
+	fun arrayCopy(src: ByteArray, length: Int): ByteArray {
+		val dest = ByteArray(length)
+		System.arraycopy(src, 0, dest, 0, length)
+		return dest
 	}
 
 	@JvmStatic
-	fun arrayCopy(floats_0: FloatArray, i_1: Int): FloatArray {
-		val floats_2 = FloatArray(i_1)
-		System.arraycopy(floats_0, 0, floats_2, 0, i_1)
-		return floats_2
+	fun arrayCopy(src: FloatArray, length: Int): FloatArray {
+		val dest = FloatArray(length)
+		System.arraycopy(src, 0, dest, 0, length)
+		return dest
 	}
 
 	@JvmStatic
-	fun arrayCopy(shorts_0: ShortArray, i_1: Int): ShortArray {
-		val shorts_2 = ShortArray(i_1)
-		System.arraycopy(shorts_0, 0, shorts_2, 0, i_1)
-		return shorts_2
+	fun arrayCopy(src: ShortArray, length: Int): ShortArray {
+		val dest = ShortArray(length)
+		System.arraycopy(src, 0, dest, 0, length)
+		return dest
 	}
 
 	@JvmStatic
 	@Suppress("UNCHECKED_CAST")
 	fun quicksort(strings: Array<String?>, ints: IntArray, fromIndex: Int, toIndex: Int) {
-		var i_6 = fromIndex
+		var partitionIndex = fromIndex
 		if (fromIndex < toIndex) {
 			val middle = (toIndex + fromIndex) / 2
-			i_6 = fromIndex
-			val string_7 = strings[middle]
+			partitionIndex = fromIndex
+			val pivotString = strings[middle]
 			strings[middle] = strings[toIndex]
-			strings[toIndex] = string_7
-			val i_8 = ints[middle]
+			strings[toIndex] = pivotString
+			val pivotInt = ints[middle]
 			ints[middle] = ints[toIndex]
-			ints[toIndex] = i_8
-			for (i_9 in fromIndex until toIndex) {
-				if (string_7 == null || strings[i_9] != null && strings[i_9]!!.compareTo(string_7) < (i_9 and 0x1)) {
-					val string_10 = strings[i_9]
-					strings[i_9] = strings[i_6]
-					strings[i_6] = string_10
-					val i_11 = ints[i_9]
-					ints[i_9] = ints[i_6]
-					ints[i_6++] = i_11
+			ints[toIndex] = pivotInt
+			for (i in fromIndex until toIndex) {
+				if (pivotString == null || strings[i] != null && strings[i]!!.compareTo(pivotString) < (i and 0x1)) {
+					val tempString = strings[i]
+					strings[i] = strings[partitionIndex]
+					strings[partitionIndex] = tempString
+					val tempInt = ints[i]
+					ints[i] = ints[partitionIndex]
+					ints[partitionIndex++] = tempInt
 				}
 			}
-			strings[toIndex] = strings[i_6]
-			strings[i_6] = string_7
-			ints[toIndex] = ints[i_6]
-			ints[i_6] = i_8
-			quicksort(strings, ints, fromIndex, i_6 - 1)
-			quicksort(strings, ints, i_6 + 1, toIndex)
+			strings[toIndex] = strings[partitionIndex]
+			strings[partitionIndex] = pivotString
+			ints[toIndex] = ints[partitionIndex]
+			ints[partitionIndex] = pivotInt
+			quicksort(strings, ints, fromIndex, partitionIndex - 1)
+			quicksort(strings, ints, partitionIndex + 1, toIndex)
 		}
 	}
 
 	@JvmStatic
-	fun quicksort(ints_0: IntArray, ints_1: IntArray, i_2: Int, i_3: Int) {
-		var i_6 = i_2
-		if (i_2 < i_3) {
-			val i_5 = (i_3 + i_2) / 2
-			i_6 = i_2
-			val i_7 = ints_0[i_5]
-			ints_0[i_5] = ints_0[i_3]
-			ints_0[i_3] = i_7
-			val i_8 = ints_1[i_5]
-			ints_1[i_5] = ints_1[i_3]
-			ints_1[i_3] = i_8
-			val i_9 = if (i_7 == Int.MAX_VALUE) 0 else 1
-			for (i_10 in i_2 until i_3) {
-				if (ints_0[i_10] < (i_10 and i_9) + i_7) {
-					val i_11 = ints_0[i_10]
-					ints_0[i_10] = ints_0[i_6]
-					ints_0[i_6] = i_11
-					val i_12 = ints_1[i_10]
-					ints_1[i_10] = ints_1[i_6]
-					ints_1[i_6++] = i_12
+	fun quicksort(keys: IntArray, values: IntArray, startIndex: Int, endIndex: Int) {
+		var partitionIndex = startIndex
+		if (startIndex < endIndex) {
+			val midIndex = (endIndex + startIndex) / 2
+			partitionIndex = startIndex
+			val pivotKey = keys[midIndex]
+			keys[midIndex] = keys[endIndex]
+			keys[endIndex] = pivotKey
+			val pivotValue = values[midIndex]
+			values[midIndex] = values[endIndex]
+			values[endIndex] = pivotValue
+			val tieBreakMask = if (pivotKey == Int.MAX_VALUE) 0 else 1
+			for (i in startIndex until endIndex) {
+				if (keys[i] < (i and tieBreakMask) + pivotKey) {
+					val tempKey = keys[i]
+					keys[i] = keys[partitionIndex]
+					keys[partitionIndex] = tempKey
+					val tempValue = values[i]
+					values[i] = values[partitionIndex]
+					values[partitionIndex++] = tempValue
 				}
 			}
-			ints_0[i_3] = ints_0[i_6]
-			ints_0[i_6] = i_7
-			ints_1[i_3] = ints_1[i_6]
-			ints_1[i_6] = i_8
-			quicksort(ints_0, ints_1, i_2, i_6 - 1)
-			quicksort(ints_0, ints_1, i_6 + 1, i_3)
+			keys[endIndex] = keys[partitionIndex]
+			keys[partitionIndex] = pivotKey
+			values[endIndex] = values[partitionIndex]
+			values[partitionIndex] = pivotValue
+			quicksort(keys, values, startIndex, partitionIndex - 1)
+			quicksort(keys, values, partitionIndex + 1, endIndex)
 		}
 	}
 
@@ -1045,11 +1045,11 @@ object ArrayUtils {
 				block[index] = index.toByte()
 			}
 			for (index in 0..254) {
-				val i_6 = 255 - index
-				val i_7 = StaticMethods.boundedRandom(random, i_6)
-				val temp = block[i_7]
-				block[i_7] = block[i_6]
-				block[i_6] = temp
+				val remaining = 255 - index
+				val swapIndex = StaticMethods.boundedRandom(random, remaining)
+				val temp = block[swapIndex]
+				block[swapIndex] = block[remaining]
+				block[remaining] = temp
 				block[511 - index] = temp
 			}
 			bytearrayNode = CacheableNodeByteArray(block)
@@ -1068,51 +1068,51 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun drawUnclippedFilledEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-		var i_6 = 0
-		var i_7 = i_3
-		val i_8 = i_2 * i_2
-		val i_9 = i_3 * i_3
-		val i_10 = i_9 shl 1
-		val i_11 = i_8 shl 1
-		val i_12 = i_3 shl 1
-		var i_13 = i_10 + (1 - i_12) * i_8
-		var i_14 = i_9 - i_11 * (i_12 - 1)
-		val i_15 = i_8 shl 2
-		val i_16 = i_9 shl 2
-		var i_17 = ((i_6 shl 1) + 3) * i_10
-		var i_18 = ((i_3 shl 1) - 3) * i_11
-		var i_19 = i_16 * (i_6 + 1)
-		var i_20 = i_15 * (i_3 - 1)
-		setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_1], i_0 - i_2, i_0 + i_2, i_4)
-		while (i_7 > 0) {
-			if (i_13 < 0) {
-				while (i_13 < 0) {
-					i_13 += i_17
-					i_14 += i_19
-					i_17 += i_16
-					i_19 += i_16
-					++i_6
+	fun drawUnclippedFilledEllipse(centerX: Int, centerY: Int, radiusX: Int, radiusY: Int, color: Int) {
+		var x = 0
+		var y = radiusY
+		val rxSq = radiusX * radiusX
+		val rySq = radiusY * radiusY
+		val twoRySq = rySq shl 1
+		val twoRxSq = rxSq shl 1
+		val diameterY = radiusY shl 1
+		var decisionParam1 = twoRySq + (1 - diameterY) * rxSq
+		var decisionParam2 = rySq - twoRxSq * (diameterY - 1)
+		val fourRxSq = rxSq shl 2
+		val fourRySq = rySq shl 2
+		var gradientX = ((x shl 1) + 3) * twoRySq
+		var gradientY = ((radiusY shl 1) - 3) * twoRxSq
+		var stepX = fourRySq * (x + 1)
+		var stepY = fourRxSq * (radiusY - 1)
+		setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![centerY], centerX - radiusX, centerX + radiusX, color)
+		while (y > 0) {
+			if (decisionParam1 < 0) {
+				while (decisionParam1 < 0) {
+					decisionParam1 += gradientX
+					decisionParam2 += stepX
+					gradientX += fourRySq
+					stepX += fourRySq
+					++x
 				}
 			}
-			if (i_14 < 0) {
-				i_13 += i_17
-				i_14 += i_19
-				i_17 += i_16
-				i_19 += i_16
-				++i_6
+			if (decisionParam2 < 0) {
+				decisionParam1 += gradientX
+				decisionParam2 += stepX
+				gradientX += fourRySq
+				stepX += fourRySq
+				++x
 			}
-			i_13 += -i_20
-			i_14 += -i_18
-			i_18 -= i_15
-			i_20 -= i_15
-			--i_7
-			val i_21 = i_1 - i_7
-			val i_22 = i_7 + i_1
-			val i_23 = i_0 + i_6
-			val i_24 = i_0 - i_6
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_21], i_24, i_23, i_4)
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_22], i_24, i_23, i_4)
+			decisionParam1 += -stepY
+			decisionParam2 += -gradientY
+			gradientY -= fourRxSq
+			stepY -= fourRxSq
+			--y
+			val rowAbove = centerY - y
+			val rowBelow = y + centerY
+			val pixelRight = centerX + x
+			val pixelLeft = centerX - x
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowAbove], pixelLeft, pixelRight, color)
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![rowBelow], pixelLeft, pixelRight, color)
 		}
 	}
 
@@ -1122,46 +1122,46 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun ensureCircleBufferCapacity(i_0: Int) {
-		if (StaticMethods.circleInnerRadiusBuffer == null || StaticMethods.circleInnerRadiusBuffer!!.size < i_0) {
-			StaticMethods.circleInnerRadiusBuffer = IntArray(i_0)
+	fun ensureCircleBufferCapacity(radius: Int) {
+		if (StaticMethods.circleInnerRadiusBuffer == null || StaticMethods.circleInnerRadiusBuffer!!.size < radius) {
+			StaticMethods.circleInnerRadiusBuffer = IntArray(radius)
 		}
 	}
 
 	@JvmStatic
-	fun drawFilledEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-		if (i_3 == i_2) {
-			StaticMethods.drawFilledCircle(i_0, i_1, i_2, i_4)
-		} else if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_3 >= TextureOpRasterizer.clipMinY && i_3 + i_1 <= TextureOpRasterizer.clipMaxY) {
-			drawUnclippedFilledEllipse(i_0, i_1, i_2, i_3, i_4)
+	fun drawFilledEllipse(centerX: Int, centerY: Int, radiusX: Int, radiusY: Int, color: Int) {
+		if (radiusY == radiusX) {
+			StaticMethods.drawFilledCircle(centerX, centerY, radiusX, color)
+		} else if (centerX - radiusX >= TextureOpRasterizer.clipMinX && centerX + radiusX <= TextureOpRasterizer.clipMaxX && centerY - radiusY >= TextureOpRasterizer.clipMinY && radiusY + centerY <= TextureOpRasterizer.clipMaxY) {
+			drawUnclippedFilledEllipse(centerX, centerY, radiusX, radiusY, color)
 		} else {
-			drawClippedFilledEllipse(i_0, i_1, i_2, i_3, i_4)
+			drawClippedFilledEllipse(centerX, centerY, radiusX, radiusY, color)
 		}
 
 	}
 
 	@JvmStatic
-	fun drawUnclippedStrokedAndFilledRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-		val i_8 = i_2 + i_6
-		val i_9 = i_3 - i_6
-		var i_10: Int
-		i_10 = i_2
-		while (i_10 < i_8) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_10], i_0, i_1, i_5)
-			i_10++
+	fun drawUnclippedStrokedAndFilledRectangle(left: Int, right: Int, top: Int, bottom: Int, fillColor: Int, strokeColor: Int, borderWidth: Int) {
+		val topBorderEnd = top + borderWidth
+		val bottomBorderStart = bottom - borderWidth
+		var y: Int
+		y = top
+		while (y < topBorderEnd) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], left, right, strokeColor)
+			y++
 		}
-		i_10 = i_3
-		while (i_10 > i_9) {
-			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_10], i_0, i_1, i_5)
-			--i_10
+		y = bottom
+		while (y > bottomBorderStart) {
+			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], left, right, strokeColor)
+			--y
 		}
-		i_10 = i_0 + i_6
-		val i_11 = i_1 - i_6
-		for (i_12 in i_8..i_9) {
-			val ints_13 = TextureShapeRasterizer.pixelBuffer!![i_12]
-			setArrayValuesTo(ints_13, i_0, i_10, i_5)
-			setArrayValuesTo(ints_13, i_10, i_11, i_4)
-			setArrayValuesTo(ints_13, i_11, i_1, i_5)
+		y = left + borderWidth
+		val rightBorderStart = right - borderWidth
+		for (row in topBorderEnd..bottomBorderStart) {
+			val scanline = TextureShapeRasterizer.pixelBuffer!![row]
+			setArrayValuesTo(scanline, left, y, strokeColor)
+			setArrayValuesTo(scanline, y, rightBorderStart, fillColor)
+			setArrayValuesTo(scanline, rightBorderStart, right, strokeColor)
 		}
 	}
 }

@@ -43,15 +43,15 @@ object ColorUtil {
     }
 
     @JvmStatic
-    fun blend(colorA: Int, colorB: Int, i_2: Int): Int {
+    fun blend(colorA: Int, colorB: Int, blendFactor: Int): Int {
         if (colorA == colorB) {
             return colorA
         } else {
-            val i_4 = 128 - i_2
-            val i_5 = i_4 * (colorA and 0x7f) + (colorB and 0x7f) * i_2 shr 7
-            val i_6 = i_4 * (colorA and 0x380) + i_2 * (colorB and 0x380) shr 7
-            val i_7 = (colorB and 0xfc00) * i_2 + i_4 * (colorA and 0xfc00) shr 7
-            return i_7 and 0xfc00 or (i_6 and 0x380) or (i_5 and 0x7f)
+            val inverseFactor = 128 - blendFactor
+            val blendedLightness = inverseFactor * (colorA and 0x7f) + (colorB and 0x7f) * blendFactor shr 7
+            val blendedSaturation = inverseFactor * (colorA and 0x380) + blendFactor * (colorB and 0x380) shr 7
+            val blendedHue = (colorB and 0xfc00) * blendFactor + inverseFactor * (colorA and 0xfc00) shr 7
+            return blendedHue and 0xfc00 or (blendedSaturation and 0x380) or (blendedLightness and 0x7f)
         }
     }
 
@@ -74,63 +74,63 @@ object ColorUtil {
     fun calculateHsvToRgbTable() {
         if (hsvToRgbTable == null) {
             hsvToRgbTable = IntArray(65536)
-            val d_1 = 0.7 + (Math.random() * 0.03 - 0.015)
-            var i_3 = 0
-            for (i_4 in 0 until 512) {
-                val f_5 = 360.0f * ((i_4 shr 3) / 64.0f + 0.0078125f)
-                val f_6 = (i_4 and 0x7) / 8.0f + 0.0625f
-                for (i_7 in 0 until 128) {
-                    val f_8 = i_7 / 128.0f
-                    var f_9 = 0.0f
-                    var f_10 = 0.0f
-                    var f_11 = 0.0f
-                    val f_12 = f_5 / 60.0f
-                    val i_13 = f_12.toInt()
-                    val i_14 = i_13 % 6
-                    val f_15 = f_12 - i_13
-                    val f_16 = f_8 * (1.0f - f_6)
-                    val f_17 = f_8 * (1.0f - f_6 * f_15)
-                    val f_18 = (1.0f - f_6 * (1.0f - f_15)) * f_8
-                    when (i_14) {
+            val gammaCorrection = 0.7 + (Math.random() * 0.03 - 0.015)
+            var tableIndex = 0
+            for (hueSatIndex in 0 until 512) {
+                val hueAngle = 360.0f * ((hueSatIndex shr 3) / 64.0f + 0.0078125f)
+                val saturation = (hueSatIndex and 0x7) / 8.0f + 0.0625f
+                for (valueIndex in 0 until 128) {
+                    val value = valueIndex / 128.0f
+                    var red = 0.0f
+                    var green = 0.0f
+                    var blue = 0.0f
+                    val hueSegment = hueAngle / 60.0f
+                    val hueSegmentInt = hueSegment.toInt()
+                    val hueRegion = hueSegmentInt % 6
+                    val fractionalHue = hueSegment - hueSegmentInt
+                    val minComponent = value * (1.0f - saturation)
+                    val fallingComponent = value * (1.0f - saturation * fractionalHue)
+                    val risingComponent = (1.0f - saturation * (1.0f - fractionalHue)) * value
+                    when (hueRegion) {
                         0 -> {
-                            f_9 = f_8
-                            f_10 = f_18
-                            f_11 = f_16
+                            red = value
+                            green = risingComponent
+                            blue = minComponent
                         }
                         1 -> {
-                            f_9 = f_17
-                            f_10 = f_8
-                            f_11 = f_16
+                            red = fallingComponent
+                            green = value
+                            blue = minComponent
                         }
                         2 -> {
-                            f_9 = f_16
-                            f_10 = f_8
-                            f_11 = f_18
+                            red = minComponent
+                            green = value
+                            blue = risingComponent
                         }
                         3 -> {
-                            f_9 = f_16
-                            f_10 = f_17
-                            f_11 = f_8
+                            red = minComponent
+                            green = fallingComponent
+                            blue = value
                         }
                         4 -> {
-                            f_9 = f_18
-                            f_10 = f_16
-                            f_11 = f_8
+                            red = risingComponent
+                            green = minComponent
+                            blue = value
                         }
                         5 -> {
-                            f_9 = f_8
-                            f_10 = f_16
-                            f_11 = f_17
+                            red = value
+                            green = minComponent
+                            blue = fallingComponent
                         }
                     }
-                    f_9 = f_9.toDouble().pow(d_1).toFloat()
-                    f_10 = f_10.toDouble().pow(d_1).toFloat()
-                    f_11 = f_11.toDouble().pow(d_1).toFloat()
-                    val i_19 = (f_9 * 256.0f).toInt()
-                    val i_20 = (256.0f * f_10).toInt()
-                    val i_21 = (256.0f * f_11).toInt()
-                    val i_22 = i_21 + (i_20 shl 8) + (i_19 shl 16) + 0xffffff.inv()
-                    hsvToRgbTable!![i_3++] = i_22
+                    red = red.toDouble().pow(gammaCorrection).toFloat()
+                    green = green.toDouble().pow(gammaCorrection).toFloat()
+                    blue = blue.toDouble().pow(gammaCorrection).toFloat()
+                    val redInt = (red * 256.0f).toInt()
+                    val greenInt = (256.0f * green).toInt()
+                    val blueInt = (256.0f * blue).toInt()
+                    val rgb = blueInt + (greenInt shl 8) + (redInt shl 16) + 0xffffff.inv()
+                    hsvToRgbTable!![tableIndex++] = rgb
                 }
             }
         }
@@ -141,68 +141,68 @@ object ColorUtil {
         if (hslToRgb == null) {
             hslToRgb = IntArray(65536)
             unsignedHslToRgb = IntArray(65536)
-            val d_1 = 0.7 + (Math.random() * 0.03 - 0.015)
-            for (i_3 in 0 until 65536) {
-                val d_4 = (i_3 shr 10 and 0x3f) / 64.0 + 0.0078125
-                val d_6 = 0.0625 + (i_3 shr 7 and 0x7) / 8.0
-                val d_8 = (i_3 and 0x7f) / 128.0
-                var d_10 = d_8
-                var d_12 = d_8
-                var d_14 = d_8
-                if (d_6 != 0.0) {
-                    val d_16: Double
-                    if (d_8 < 0.5) {
-                        d_16 = d_8 * (d_6 + 1.0)
+            val gammaCorrection = 0.7 + (Math.random() * 0.03 - 0.015)
+            for (hslIndex in 0 until 65536) {
+                val hue = (hslIndex shr 10 and 0x3f) / 64.0 + 0.0078125
+                val saturation = 0.0625 + (hslIndex shr 7 and 0x7) / 8.0
+                val lightness = (hslIndex and 0x7f) / 128.0
+                var red = lightness
+                var green = lightness
+                var blue = lightness
+                if (saturation != 0.0) {
+                    val chroma: Double
+                    if (lightness < 0.5) {
+                        chroma = lightness * (saturation + 1.0)
                     } else {
-                        d_16 = d_6 + d_8 - d_8 * d_6
+                        chroma = saturation + lightness - lightness * saturation
                     }
-                    val d_18 = d_8 * 2.0 - d_16
-                    var d_20 = 0.3333333333333333 + d_4
-                    if (d_20 > 1.0) {
-                        --d_20
+                    val minComponent = lightness * 2.0 - chroma
+                    var hueRed = 0.3333333333333333 + hue
+                    if (hueRed > 1.0) {
+                        --hueRed
                     }
-                    var d_24 = d_4 - 0.3333333333333333
-                    if (d_24 < 0.0) {
-                        ++d_24
+                    var hueBlue = hue - 0.3333333333333333
+                    if (hueBlue < 0.0) {
+                        ++hueBlue
                     }
-                    if (d_20 * 6.0 < 1.0) {
-                        d_10 = d_18 + (d_16 - d_18) * 6.0 * d_20
-                    } else if (2.0 * d_20 < 1.0) {
-                        d_10 = d_16
-                    } else if (3.0 * d_20 < 2.0) {
-                        d_10 = d_18 + 6.0 * (0.6666666666666666 - d_20) * (d_16 - d_18)
+                    if (hueRed * 6.0 < 1.0) {
+                        red = minComponent + (chroma - minComponent) * 6.0 * hueRed
+                    } else if (2.0 * hueRed < 1.0) {
+                        red = chroma
+                    } else if (3.0 * hueRed < 2.0) {
+                        red = minComponent + 6.0 * (0.6666666666666666 - hueRed) * (chroma - minComponent)
                     } else {
-                        d_10 = d_18
+                        red = minComponent
                     }
-                    if (6.0 * d_4 < 1.0) {
-                        d_12 = d_18 + 6.0 * (d_16 - d_18) * d_4
-                    } else if (d_4 * 2.0 < 1.0) {
-                        d_12 = d_16
-                    } else if (3.0 * d_4 < 2.0) {
-                        d_12 = 6.0 * (0.6666666666666666 - d_4) * (d_16 - d_18) + d_18
+                    if (6.0 * hue < 1.0) {
+                        green = minComponent + 6.0 * (chroma - minComponent) * hue
+                    } else if (hue * 2.0 < 1.0) {
+                        green = chroma
+                    } else if (3.0 * hue < 2.0) {
+                        green = 6.0 * (0.6666666666666666 - hue) * (chroma - minComponent) + minComponent
                     } else {
-                        d_12 = d_18
+                        green = minComponent
                     }
-                    if (d_24 * 6.0 < 1.0) {
-                        d_14 = d_24 * 6.0 * (d_16 - d_18) + d_18
-                    } else if (d_24 * 2.0 < 1.0) {
-                        d_14 = d_16
-                    } else if (d_24 * 3.0 < 2.0) {
-                        d_14 = 6.0 * (0.6666666666666666 - d_24) * (d_16 - d_18) + d_18
+                    if (hueBlue * 6.0 < 1.0) {
+                        blue = hueBlue * 6.0 * (chroma - minComponent) + minComponent
+                    } else if (hueBlue * 2.0 < 1.0) {
+                        blue = chroma
+                    } else if (hueBlue * 3.0 < 2.0) {
+                        blue = 6.0 * (0.6666666666666666 - hueBlue) * (chroma - minComponent) + minComponent
                     } else {
-                        d_14 = d_18
+                        blue = minComponent
                     }
                 }
-                d_10 = d_10.pow(d_1)
-                d_12 = d_12.pow(d_1)
-                d_14 = d_14.pow(d_1)
-                val i_26 = (d_10 * 256.0).toInt()
-                val i_17 = (d_12 * 256.0).toInt()
-                val i_27 = (256.0 * d_14).toInt()
-                val i_19 = i_27 + (i_17 shl 8) + (i_26 shl 16)
-                hslToRgb!![i_3] = i_19 and 0xffffff
-                val i_28 = i_26 + (i_17 shl 8) + (i_27 shl 16)
-                unsignedHslToRgb!![i_3] = i_28
+                red = red.pow(gammaCorrection)
+                green = green.pow(gammaCorrection)
+                blue = blue.pow(gammaCorrection)
+                val redInt = (red * 256.0).toInt()
+                val greenInt = (green * 256.0).toInt()
+                val blueInt = (256.0 * blue).toInt()
+                val rgbBgr = blueInt + (greenInt shl 8) + (redInt shl 16)
+                hslToRgb!![hslIndex] = rgbBgr and 0xffffff
+                val rgbNormal = redInt + (greenInt shl 8) + (blueInt shl 16)
+                unsignedHslToRgb!![hslIndex] = rgbNormal
             }
         }
     }
@@ -220,11 +220,11 @@ object ColorUtil {
     }
 
     @JvmStatic
-    fun blendMaterialColor(materialColor: Int, i_1: Int): Int {
-        val i_3 = i_1 ushr 24
-        val i_4 = 255 - i_3
-        val i_1_result = (i_3 * (i_1 and 0xff00ff) and -16711936 or (i_3 * (i_1 and 0xff00) and 0xff0000)) ushr 8
-        return ((i_4 * (materialColor and 0xff00ff) and -16711936 or ((materialColor and 0xff00) * i_4 and 0xff0000)) ushr 8) + i_1_result
+    fun blendMaterialColor(materialColor: Int, overlayColor: Int): Int {
+        val overlayAlpha = overlayColor ushr 24
+        val materialAlpha = 255 - overlayAlpha
+        val overlayResult = (overlayAlpha * (overlayColor and 0xff00ff) and -16711936 or (overlayAlpha * (overlayColor and 0xff00) and 0xff0000)) ushr 8
+        return ((materialAlpha * (materialColor and 0xff00ff) and -16711936 or ((materialColor and 0xff00) * materialAlpha and 0xff0000)) ushr 8) + overlayResult
     }
 
     @JvmStatic
@@ -254,83 +254,83 @@ object ColorUtil {
     }
 
     @JvmStatic
-    fun rgbToHsl24(i_0: Int): Int {
-        val d_2 = (i_0 shr 16 and 0xff) / 256.0
-        val d_4 = (i_0 shr 8 and 0xff) / 256.0
-        val d_6 = (i_0 and 0xff) / 256.0
-        var d_8 = d_2
-        if (d_4 < d_2) {
-            d_8 = d_4
+    fun rgbToHsl24(rgb: Int): Int {
+        val red = (rgb shr 16 and 0xff) / 256.0
+        val green = (rgb shr 8 and 0xff) / 256.0
+        val blue = (rgb and 0xff) / 256.0
+        var minChannel = red
+        if (green < red) {
+            minChannel = green
         }
-        if (d_6 < d_8) {
-            d_8 = d_6
+        if (blue < minChannel) {
+            minChannel = blue
         }
-        var d_10 = d_2
-        if (d_4 > d_2) {
-            d_10 = d_4
+        var maxChannel = red
+        if (green > red) {
+            maxChannel = green
         }
-        if (d_6 > d_10) {
-            d_10 = d_6
+        if (blue > maxChannel) {
+            maxChannel = blue
         }
-        var d_12 = 0.0
-        var d_14 = 0.0
-        val d_16 = (d_10 + d_8) / 2.0
-        if (d_10 != d_8) {
-            if (d_16 < 0.5) {
-                d_14 = (d_10 - d_8) / (d_8 + d_10)
+        var hue = 0.0
+        var saturation = 0.0
+        val lightness = (maxChannel + minChannel) / 2.0
+        if (maxChannel != minChannel) {
+            if (lightness < 0.5) {
+                saturation = (maxChannel - minChannel) / (minChannel + maxChannel)
             }
-            if (d_16 >= 0.5) {
-                d_14 = (d_10 - d_8) / (2.0 - d_10 - d_8)
+            if (lightness >= 0.5) {
+                saturation = (maxChannel - minChannel) / (2.0 - maxChannel - minChannel)
             }
-            if (d_2 == d_10) {
-                d_12 = (d_4 - d_6) / (d_10 - d_8)
-            } else if (d_4 == d_10) {
-                d_12 = 2.0 + (d_6 - d_2) / (d_10 - d_8)
-            } else if (d_10 == d_6) {
-                d_12 = 4.0 + (d_2 - d_4) / (d_10 - d_8)
+            if (red == maxChannel) {
+                hue = (green - blue) / (maxChannel - minChannel)
+            } else if (green == maxChannel) {
+                hue = 2.0 + (blue - red) / (maxChannel - minChannel)
+            } else if (maxChannel == blue) {
+                hue = 4.0 + (red - green) / (maxChannel - minChannel)
             }
         }
-        d_12 /= 6.0
-        val i_18 = (256.0 * d_12).toInt()
-        var i_19 = (d_14 * 256.0).toInt()
-        var i_20 = (d_16 * 256.0).toInt()
-        if (i_19 < 0) {
-            i_19 = 0
-        } else if (i_19 > 255) {
-            i_19 = 255
+        hue /= 6.0
+        val hueInt = (256.0 * hue).toInt()
+        var saturationInt = (saturation * 256.0).toInt()
+        var lightnessInt = (lightness * 256.0).toInt()
+        if (saturationInt < 0) {
+            saturationInt = 0
+        } else if (saturationInt > 255) {
+            saturationInt = 255
         }
-        if (i_20 < 0) {
-            i_20 = 0
-        } else if (i_20 > 255) {
-            i_20 = 255
+        if (lightnessInt < 0) {
+            lightnessInt = 0
+        } else if (lightnessInt > 255) {
+            lightnessInt = 255
         }
-        if (i_20 > 243) {
-            i_19 = i_19 shr 4
-        } else if (i_20 > 217) {
-            i_19 = i_19 shr 3
-        } else if (i_20 > 192) {
-            i_19 = i_19 shr 2
-        } else if (i_20 > 179) {
-            i_19 = i_19 shr 1
+        if (lightnessInt > 243) {
+            saturationInt = saturationInt shr 4
+        } else if (lightnessInt > 217) {
+            saturationInt = saturationInt shr 3
+        } else if (lightnessInt > 192) {
+            saturationInt = saturationInt shr 2
+        } else if (lightnessInt > 179) {
+            saturationInt = saturationInt shr 1
         }
-        return ((i_18 and 0xff) shr 2 shl 10) + (i_20 shr 1) + (i_19 shr 5 shl 7)
+        return ((hueInt and 0xff) shr 2 shl 10) + (lightnessInt shr 1) + (saturationInt shr 5 shl 7)
     }
 
     @JvmStatic
-    fun adjustHsv(i_0: Int): Short {
-        val i_2 = i_0 shr 10 and 0x3f
-        val i_3 = i_0 shr 3 and 0x70
-        val i_4 = i_0 and 0x7f
-        val i_3_result = if (i_4 <= 64) i_4 * i_3 shr 7 else i_3 * (127 - i_4) shr 7
-        val i_5 = i_3_result + i_4
-        val i_6: Int
-        if (i_5 != 0) {
-            i_6 = (i_3_result shl 8) / i_5
+    fun adjustHsv(hsvPacked: Int): Short {
+        val hue = hsvPacked shr 10 and 0x3f
+        val saturation = hsvPacked shr 3 and 0x70
+        val value = hsvPacked and 0x7f
+        val chromaComponent = if (value <= 64) value * saturation shr 7 else saturation * (127 - value) shr 7
+        val brightness = chromaComponent + value
+        val newSaturation: Int
+        if (brightness != 0) {
+            newSaturation = (chromaComponent shl 8) / brightness
         } else {
-            i_6 = i_3_result shl 1
+            newSaturation = chromaComponent shl 1
         }
 
-        return (i_2 shl 10 or (i_6 shr 4 shl 7) or i_5).toShort()
+        return (hue shl 10 or (newSaturation shr 4 shl 7) or brightness).toShort()
     }
 
     @JvmStatic
@@ -373,19 +373,19 @@ object ColorUtil {
     }
 
     @JvmStatic
-    fun repackHslSafe(i_0: Int, i_1: Int): Int {
-        var i_11 = i_1
-        if (i_0 == -1) {
+    fun repackHslSafe(hsl: Int, light: Int): Int {
+        var adjustedLight = light
+        if (hsl == -1) {
             return 12345678
         } else {
-            i_11 = (i_0 and 0x7f) * i_11 shr 7
-            if (i_11 < 2) {
-                i_11 = 2
-            } else if (i_11 > 126) {
-                i_11 = 126
+            adjustedLight = (hsl and 0x7f) * adjustedLight shr 7
+            if (adjustedLight < 2) {
+                adjustedLight = 2
+            } else if (adjustedLight > 126) {
+                adjustedLight = 126
             }
 
-            return (i_0 and 0xff80) + i_11
+            return (hsl and 0xff80) + adjustedLight
         }
     }
 

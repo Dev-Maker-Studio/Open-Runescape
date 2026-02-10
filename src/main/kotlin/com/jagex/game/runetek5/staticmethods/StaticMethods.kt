@@ -110,32 +110,32 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun drawUnclippedFilledCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
-        var i_5 = 0
-        var i_6 = i_2
-        var i_7 = -i_2
-        var i_8 = -1
-        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_1], i_0 - i_2, i_0 + i_2, i_3)
-        while (i_6 > i_5) {
-            i_8 += 2
-            i_7 += i_8
-            ++i_5
-            if (i_7 >= 0) {
-                --i_6
-                i_7 -= i_6 shl 1
-                val ints_9 = TextureShapeRasterizer.pixelBuffer!![i_6 + i_1]
-                val ints_10 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_6]
-                val i_11 = i_0 + i_5
-                val i_12 = i_0 - i_5
-                ArrayUtils.setArrayValuesTo(ints_9, i_12, i_11, i_3)
-                ArrayUtils.setArrayValuesTo(ints_10, i_12, i_11, i_3)
+    fun drawUnclippedFilledCircle(centerX: Int, centerY: Int, radius: Int, color: Int) {
+        var x = 0
+        var y = radius
+        var error = -radius
+        var delta = -1
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![centerY], centerX - radius, centerX + radius, color)
+        while (y > x) {
+            delta += 2
+            error += delta
+            ++x
+            if (error >= 0) {
+                --y
+                error -= y shl 1
+                val upperRow = TextureShapeRasterizer.pixelBuffer!![y + centerY]
+                val lowerRow = TextureShapeRasterizer.pixelBuffer!![centerY - y]
+                val right = centerX + x
+                val left = centerX - x
+                ArrayUtils.setArrayValuesTo(upperRow, left, right, color)
+                ArrayUtils.setArrayValuesTo(lowerRow, left, right, color)
             }
-            val i_13 = i_0 + i_6
-            val i_14 = i_0 - i_6
-            val ints_15 = TextureShapeRasterizer.pixelBuffer!![i_5 + i_1]
-            val ints_16 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_5]
-            ArrayUtils.setArrayValuesTo(ints_15, i_14, i_13, i_3)
-            ArrayUtils.setArrayValuesTo(ints_16, i_14, i_13, i_3)
+            val outerRight = centerX + y
+            val outerLeft = centerX - y
+            val upperScanline = TextureShapeRasterizer.pixelBuffer!![x + centerY]
+            val lowerScanline = TextureShapeRasterizer.pixelBuffer!![centerY - x]
+            ArrayUtils.setArrayValuesTo(upperScanline, outerLeft, outerRight, color)
+            ArrayUtils.setArrayValuesTo(lowerScanline, outerLeft, outerRight, color)
         }
     }
 
@@ -154,22 +154,22 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun drawStrokedAndFilledRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-        if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
-            ArrayUtils.drawUnclippedStrokedAndFilledRectangle(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
+    fun drawStrokedAndFilledRectangle(left: Int, right: Int, top: Int, bottom: Int, fillColor: Int, strokeColor: Int, borderWidth: Int) {
+        if (left >= TextureOpRasterizer.clipMinX && right <= TextureOpRasterizer.clipMaxX && top >= TextureOpRasterizer.clipMinY && bottom <= TextureOpRasterizer.clipMaxY) {
+            ArrayUtils.drawUnclippedStrokedAndFilledRectangle(left, right, top, bottom, fillColor, strokeColor, borderWidth)
         } else {
-            ArrayUtils.drawClippedStrokedAndFilledRectangle(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
+            ArrayUtils.drawClippedStrokedAndFilledRectangle(left, right, top, bottom, fillColor, strokeColor, borderWidth)
         }
     }
 
     @JvmStatic
-    fun setPixelBuffer(ints_0: Array<IntArray>?) {
-        TextureShapeRasterizer.pixelBuffer = ints_0
+    fun setPixelBuffer(pixelBuffer: Array<IntArray>?) {
+        TextureShapeRasterizer.pixelBuffer = pixelBuffer
     }
 
     @JvmStatic
-    fun millisToJagexDays(long_0: Long): Int {
-        return ((long_0 / 86400000L) - 11745).toInt()
+    fun millisToJagexDays(millis: Long): Int {
+        return ((millis / 86400000L) - 11745).toInt()
     }
 
     @JvmStatic
@@ -177,49 +177,49 @@ object StaticMethods {
         InterfaceComponentRenderer.deferredDragComponents = null
         Component.drawInterface(Client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
         if (InterfaceComponentRenderer.deferredDragComponents != null) {
-            val arr_1 = InterfaceComponentRenderer.deferredDragComponents
-            val i_2 = -1412584499
-            val b_3: Int = 0
-            val b_4: Int = 0
-            val i_5 = GameShell.screenCanvasWidth
-            val i_6 = GameShell.screenCanvasHeight * -969250379
-            val i_7 = InterfaceComponentRenderer.deferredDragOffsetX
-            val i_8 = InterfaceComponentRenderer.deferredDragOffsetY
-            val i_9: Int = if (Client.selectedComponent == Client.frameComponent) {
+            val components = InterfaceComponentRenderer.deferredDragComponents
+            val hash = -1412584499
+            val originX: Int = 0
+            val originY: Int = 0
+            val width = GameShell.screenCanvasWidth
+            val height = GameShell.screenCanvasHeight * -969250379
+            val dragOffsetX = InterfaceComponentRenderer.deferredDragOffsetX
+            val dragOffsetY = InterfaceComponentRenderer.deferredDragOffsetY
+            val excludeComponentRef: Int = if (Client.selectedComponent == Client.frameComponent) {
                 -1
             } else {
                 Client.selectedComponent!!.cacheReference
             }
 
-            InterfaceComponentRenderer.drawComponents(arr_1!!, i_2, b_3, b_4, i_5, i_6, i_7, i_8, i_9, true)
+            InterfaceComponentRenderer.drawComponents(components!!, hash, originX, originY, width, height, dragOffsetX, dragOffsetY, excludeComponentRef, true)
             InterfaceComponentRenderer.deferredDragComponents = null
         }
     }
 
     @JvmStatic
-    fun createShadowColorFromAlpha(var_3: Char): Int {
-        return 68 or 22528 or 5505024 or ((var_3.code and 0xff) shl 24)
+    fun createShadowColorFromAlpha(alpha: Char): Int {
+        return 68 or 22528 or 5505024 or ((alpha.code and 0xff) shl 24)
     }
 
     @JvmStatic
-    fun decodeUtf8(bytes_0: ByteArray, i_1: Int, i_2: Int): String {
-        val arr_4 = CharArray(i_2)
-        var i_5 = 0
-        var i_6 = i_1
-        val i_7 = i_2 + i_1
-        while (i_6 < i_7) {
-            val i_8 = bytes_0[i_6++].toInt() and 0xff
-            val i_9: Int = if (i_8 < 128) {
-                if (i_8 == 0) {
+    fun decodeUtf8(data: ByteArray, offset: Int, length: Int): String {
+        val chars = CharArray(length)
+        var charIndex = 0
+        var byteIndex = offset
+        val endIndex = length + offset
+        while (byteIndex < endIndex) {
+            val byte1 = data[byteIndex++].toInt() and 0xff
+            val codePoint: Int = if (byte1 < 128) {
+                if (byte1 == 0) {
                     65533
                 } else {
-                    i_8
+                    byte1
                 }
-            } else if (i_8 < 192) {
+            } else if (byte1 < 192) {
                 65533
-            } else if (i_8 < 224) {
-                if (i_6 < i_7 && (bytes_0[i_6].toInt() and 0xc0) == 128) {
-                    val temp = (i_8 and 0x1f) shl 6 or (bytes_0[i_6++].toInt() and 0x3f)
+            } else if (byte1 < 224) {
+                if (byteIndex < endIndex && (data[byteIndex].toInt() and 0xc0) == 128) {
+                    val temp = (byte1 and 0x1f) shl 6 or (data[byteIndex++].toInt() and 0x3f)
                     if (temp < 128) {
                         65533
                     } else {
@@ -228,9 +228,9 @@ object StaticMethods {
                 } else {
                     65533
                 }
-            } else if (i_8 < 240) {
-                if (i_6 + 1 < i_7 && (bytes_0[i_6].toInt() and 0xc0) == 128 && (bytes_0[i_6 + 1].toInt() and 0xc0) == 128) {
-                    val temp = (i_8 and 0xf) shl 12 or ((bytes_0[i_6++].toInt() and 0x3f) shl 6) or (bytes_0[i_6++].toInt() and 0x3f)
+            } else if (byte1 < 240) {
+                if (byteIndex + 1 < endIndex && (data[byteIndex].toInt() and 0xc0) == 128 && (data[byteIndex + 1].toInt() and 0xc0) == 128) {
+                    val temp = (byte1 and 0xf) shl 12 or ((data[byteIndex++].toInt() and 0x3f) shl 6) or (data[byteIndex++].toInt() and 0x3f)
                     if (temp < 2048) {
                         65533
                     } else {
@@ -239,11 +239,11 @@ object StaticMethods {
                 } else {
                     65533
                 }
-            } else if (i_8 < 248) {
-                if (i_6 + 2 < i_7 && (bytes_0[i_6].toInt() and 0xc0) == 128 && (bytes_0[i_6 + 1].toInt() and 0xc0) == 128 && (bytes_0[i_6 + 2].toInt() and 0xc0) == 128) {
-                    i_6++
-                    i_6++
-                    i_6++
+            } else if (byte1 < 248) {
+                if (byteIndex + 2 < endIndex && (data[byteIndex].toInt() and 0xc0) == 128 && (data[byteIndex + 1].toInt() and 0xc0) == 128 && (data[byteIndex + 2].toInt() and 0xc0) == 128) {
+                    byteIndex++
+                    byteIndex++
+                    byteIndex++
                     65533
                 } else {
                     65533
@@ -251,9 +251,9 @@ object StaticMethods {
             } else {
                 65533
             }
-            arr_4[i_5++] = i_9.toChar()
+            chars[charIndex++] = codePoint.toChar()
         }
-        return String(arr_4, 0, i_5)
+        return String(chars, 0, charIndex)
     }
 
     @JvmStatic
@@ -263,21 +263,21 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun isPlayerOption(i_0: Int): Boolean {
-        return i_0 == 44 || i_0 == 45 || i_0 == 46 || i_0 == 47 || i_0 == 48 || i_0 == 49 || i_0 == 50 || i_0 == 51 || i_0 == 52 || i_0 == 53 || i_0 == 15
+    fun isPlayerOption(opcode: Int): Boolean {
+        return opcode == 44 || opcode == 45 || opcode == 46 || opcode == 47 || opcode == 48 || opcode == 49 || opcode == 50 || opcode == 51 || opcode == 52 || opcode == 53 || opcode == 15
     }
 
     @JvmStatic
-    fun drawFilledRectangleToPixelBuffer(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
-            fillRectanglePixels(i_0, i_1, i_2, i_3, i_4)
+    fun drawFilledRectangleToPixelBuffer(left: Int, right: Int, top: Int, bottom: Int, color: Int) {
+        if (left >= TextureOpRasterizer.clipMinX && right <= TextureOpRasterizer.clipMaxX && top >= TextureOpRasterizer.clipMinY && bottom <= TextureOpRasterizer.clipMaxY) {
+            fillRectanglePixels(left, right, top, bottom, color)
         } else {
-            ArrayUtils.fillClippedRectangle(i_0, i_1, i_2, i_3, i_4)
+            ArrayUtils.fillClippedRectangle(left, right, top, bottom, color)
         }
     }
 
     @JvmStatic
-    fun drawMenuBorderSprites(toolkit: AbstractToolkit, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
+    fun drawMenuBorderSprites(toolkit: AbstractToolkit, x: Int, y: Int, width: Int, height: Int, headerHeight: Int) {
         if ((menuTopBorderSprite == null || StaticMedia.menuLeftSideBorderSprite == null || menuBottomLeftCornerSprite == null) && Resource.SPRITES!!.isFileCached(menuTopBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuSideBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuCornerSpriteId)) {
             val spriteType = SpriteType.listSingle(Resource.SPRITES, menuSideBorderSpriteId, 0)
             StaticMedia.menuLeftSideBorderSprite = toolkit.generateSprite(spriteType, true)
@@ -290,47 +290,47 @@ object StaticMethods {
             menuBottomRightCornerSprite = toolkit.generateSprite(class9111, true)
         }
         if (menuTopBorderSprite != null && StaticMedia.menuLeftSideBorderSprite != null && menuBottomLeftCornerSprite != null) {
-            val i_7 = (i_3 - menuBottomLeftCornerSprite!!.getWidth() * 2) / menuTopBorderSprite!!.getWidth()
-            var i_8: Int
-            i_8 = 0
-            while (i_8 < i_7) {
-                menuTopBorderSprite!!.draw(i_1 + menuBottomLeftCornerSprite!!.getWidth() + i_8 * menuTopBorderSprite!!.getWidth(), i_2 + i_4 - menuTopBorderSprite!!.getHeight())
-                i_8++
+            val topBorderCount = (width - menuBottomLeftCornerSprite!!.getWidth() * 2) / menuTopBorderSprite!!.getWidth()
+            var i: Int
+            i = 0
+            while (i < topBorderCount) {
+                menuTopBorderSprite!!.draw(x + menuBottomLeftCornerSprite!!.getWidth() + i * menuTopBorderSprite!!.getWidth(), y + height - menuTopBorderSprite!!.getHeight())
+                i++
             }
-            i_8 = (i_4 - i_5 - menuBottomLeftCornerSprite!!.getHeight()) / StaticMedia.menuLeftSideBorderSprite!!.getHeight()
-            for (i_9 in 0 until i_8) {
-                StaticMedia.menuLeftSideBorderSprite!!.draw(i_1, i_5 + i_2 + i_9 * StaticMedia.menuLeftSideBorderSprite!!.getHeight())
-                StaticMedia.menuRightSideBorderSprite!!.draw(i_3 + i_1 - StaticMedia.menuRightSideBorderSprite!!.getWidth(), i_5 + i_2 + i_9 * StaticMedia.menuLeftSideBorderSprite!!.getHeight())
+            i = (height - headerHeight - menuBottomLeftCornerSprite!!.getHeight()) / StaticMedia.menuLeftSideBorderSprite!!.getHeight()
+            for (j in 0 until i) {
+                StaticMedia.menuLeftSideBorderSprite!!.draw(x, headerHeight + y + j * StaticMedia.menuLeftSideBorderSprite!!.getHeight())
+                StaticMedia.menuRightSideBorderSprite!!.draw(width + x - StaticMedia.menuRightSideBorderSprite!!.getWidth(), headerHeight + y + j * StaticMedia.menuLeftSideBorderSprite!!.getHeight())
             }
-            menuBottomLeftCornerSprite!!.draw(i_1, i_2 + i_4 - menuBottomLeftCornerSprite!!.getHeight())
-            menuBottomRightCornerSprite!!.draw(i_3 + i_1 - menuBottomLeftCornerSprite!!.getWidth(), i_2 + i_4 - menuBottomLeftCornerSprite!!.getHeight())
+            menuBottomLeftCornerSprite!!.draw(x, y + height - menuBottomLeftCornerSprite!!.getHeight())
+            menuBottomRightCornerSprite!!.draw(width + x - menuBottomLeftCornerSprite!!.getWidth(), y + height - menuBottomLeftCornerSprite!!.getHeight())
         }
     }
 
     @JvmStatic
-    fun drawStrokedRectangleToPixelBuffer(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        var i_2Var = i_2
-        var i_3Var = i_3
-        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_2Var++], i_0, i_1, i_4)
-        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_3Var--], i_0, i_1, i_4)
+    fun drawStrokedRectangleToPixelBuffer(left: Int, right: Int, top: Int, bottom: Int, color: Int) {
+        var topRow = top
+        var bottomRow = bottom
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![topRow++], left, right, color)
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![bottomRow--], left, right, color)
 
-        var i_6 = i_2Var
-        while (i_6 <= i_3Var) {
-            val ints_7 = TextureShapeRasterizer.pixelBuffer!![i_6]
-            ints_7[i_0] = i_4
-            ints_7[i_1] = i_4
-            i_6++
+        var y = topRow
+        while (y <= bottomRow) {
+            val scanline = TextureShapeRasterizer.pixelBuffer!![y]
+            scanline[left] = color
+            scanline[right] = color
+            y++
         }
     }
 
     @JvmStatic
-    fun setSongVolume(i_0: Int, i_1: Int) {
-        SongPlayer.setChannelVolume(i_0, i_1)
+    fun setSongVolume(channel: Int, volume: Int) {
+        SongPlayer.setChannelVolume(channel, volume)
     }
 
     @JvmStatic
-    fun isAlphabetic(var_0: Char): Boolean {
-        return var_0 >= 'A' && var_0 <= 'Z' || var_0 >= 'a' && var_0 <= 'z'
+    fun isAlphabetic(ch: Char): Boolean {
+        return ch >= 'A' && ch <= 'Z' || ch >= 'a' && ch <= 'z'
     }
 
     @JvmStatic
@@ -339,9 +339,9 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun fillRectanglePixels(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        for (i_6 in i_2..i_3) {
-            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_6], i_0, i_1, i_4)
+    fun fillRectanglePixels(left: Int, right: Int, top: Int, bottom: Int, color: Int) {
+        for (y in top..bottom) {
+            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![y], left, right, color)
         }
     }
 
@@ -351,20 +351,20 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun setupOrthoProjection(matrix440: Matrix44, centerX: Float, centerY: Float, f_4: Float, f_5: Float, width: Int, length: Int) {
+    fun setupOrthoProjection(matrix: Matrix44, centerX: Float, centerY: Float, nearPlane: Float, farPlane: Float, width: Int, length: Int) {
         val viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
         val viewRangeStart = Resource.mapRegion!!.viewRangeStart
-        matrix440.setPerspective(centerX, centerY, f_4, f_5, viewRangeStart.toFloat(), viewRangeEnd.toFloat(), width.toFloat(), length.toFloat())
+        matrix.setPerspective(centerX, centerY, nearPlane, farPlane, viewRangeStart.toFloat(), viewRangeEnd.toFloat(), width.toFloat(), length.toFloat())
     }
 
     @JvmStatic
-    fun calculateSoundAttenuation(i_0: Int, i_1: Int): Int {
-        return if (i_1 < 0) i_0 else (i_0 * Math.sqrt(1.220703125E-4 * (16384 - i_1)) + 0.5).toInt()
+    fun calculateSoundAttenuation(baseVolume: Int, distance: Int): Int {
+        return if (distance < 0) baseVolume else (baseVolume * Math.sqrt(1.220703125E-4 * (16384 - distance)) + 0.5).toInt()
     }
 
     @JvmStatic
-    fun selectWorldMapElement(i_0: Int) {
-        WorldMapSub1.someMecId = i_0
+    fun selectWorldMapElement(elementId: Int) {
+        WorldMapSub1.someMecId = elementId
         WorldMapSub1.highlightedCategoryId = -1
         JSObjectManager.highlightFlashCycles = 3
         ServerEnvironment.flashCycleCounter = 100
@@ -379,8 +379,8 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun isPrintableChar(var_0: Char): Boolean {
-        return var_0 >= ' ' && var_0 <= '~' || (var_0.code >= 160 && var_0.code <= 255 || (var_0.code == 8364 || var_0.code == 338 || var_0.code == 8212 || var_0.code == 339 || var_0.code == 376))
+    fun isPrintableChar(ch: Char): Boolean {
+        return ch >= ' ' && ch <= '~' || (ch.code >= 160 && ch.code <= 255 || (ch.code == 8364 || ch.code == 338 || ch.code == 8212 || ch.code == 339 || ch.code == 376))
     }
 
     @JvmStatic
@@ -393,13 +393,13 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun switchToWorldLogin(i_0: Int) {
+    fun switchToWorldLogin(worldId: Int) {
         if (GameState.isReadyForLogin()) {
-            if (i_0 != selectedWorldId) {
+            if (worldId != selectedWorldId) {
                 LoginManager.socialNetworkToken = -1L
             }
 
-            selectedWorldId = i_0
+            selectedWorldId = worldId
             Client.LOBBY_CONNECTION_CONTEXT!!.closeConnection()
             Client.setGameState(GameState.UNK_14)
         }
@@ -415,18 +415,18 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun drawFilledCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
-        if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_2 >= TextureOpRasterizer.clipMinY && i_2 + i_1 <= TextureOpRasterizer.clipMaxY) {
-            drawUnclippedFilledCircle(i_0, i_1, i_2, i_3)
+    fun drawFilledCircle(centerX: Int, centerY: Int, radius: Int, color: Int) {
+        if (centerX - radius >= TextureOpRasterizer.clipMinX && centerX + radius <= TextureOpRasterizer.clipMaxX && centerY - radius >= TextureOpRasterizer.clipMinY && radius + centerY <= TextureOpRasterizer.clipMaxY) {
+            drawUnclippedFilledCircle(centerX, centerY, radius, color)
         } else {
-            ArrayUtils.drawClippedFilledCircle(i_0, i_1, i_2, i_3)
+            ArrayUtils.drawClippedFilledCircle(centerX, centerY, radius, color)
         }
     }
 
     @JvmStatic
-    fun setWorldMapScrollTarget(i_0: Int, i_1: Int) {
-        WorldMapSub1.scrollTargetX = i_0 - WorldMap.mapSquareAbsX
-        WorldMapSub1.scrollTargetY = i_1 - WorldMap.mapSquareAbsY
+    fun setWorldMapScrollTarget(targetX: Int, targetY: Int) {
+        WorldMapSub1.scrollTargetX = targetX - WorldMap.mapSquareAbsX
+        WorldMapSub1.scrollTargetY = targetY - WorldMap.mapSquareAbsY
     }
 
     @JvmStatic
@@ -470,16 +470,16 @@ object StaticMethods {
                     SoundResourceManager.songLoadState = 0
                 }
             }
-        } catch (exception3: Exception) {
-            exception3.printStackTrace()
+        } catch (exception: Exception) {
+            exception.printStackTrace()
             SoundResourceManager.midiPcmStream!!.turnOffSound()
             SongReference.reset()
         }
     }
 
     @JvmStatic
-    fun calculateSoundPan(i_0: Int, i_1: Int): Int {
-        return if (i_1 < 0) -i_0 else (i_0 * Math.sqrt(1.220703125E-4 * i_1) + 0.5).toInt()
+    fun calculateSoundPan(basePan: Int, distance: Int): Int {
+        return if (distance < 0) -basePan else (basePan * Math.sqrt(1.220703125E-4 * distance) + 0.5).toInt()
     }
 
     @JvmStatic
@@ -503,11 +503,11 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun processMenuSelection(i_0: Int, i_1: Int) {
+    fun processMenuSelection(mouseX: Int, mouseY: Int) {
         if (MiniMenu.deferredClickType == 1) {
-            MenuInteraction.processMenuclick(MiniMenu.deferredEntry, i_0, i_1)
+            MenuInteraction.processMenuclick(MiniMenu.deferredEntry, mouseX, mouseY)
         } else if (MiniMenu.deferredClickType == 2) {
-            openContextMenu(i_0, i_1)
+            openContextMenu(mouseX, mouseY)
         }
         MiniMenu.deferredClickType = 0
         MiniMenu.deferredEntry = null
@@ -523,87 +523,87 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun isInLobbyState(i_0: GameState): Boolean {
-        return i_0 == GameState.UNK_7 || i_0 == GameState.UNK_6
+    fun isInLobbyState(state: GameState): Boolean {
+        return state == GameState.UNK_7 || state == GameState.UNK_6
     }
 
     @JvmStatic
-    fun drawColoredMenuEntry(i_0: Int, i_1: Int, i_2: Int, i_4: Int, i_6: Int, class282Sub50Sub157: ColoredMiniMenuEntry, fontrenderer8: AbstractFontRenderer, fontmetrics9: FontMetrics, i_10: Int, i_11: Int) {
-        var i_101 = i_10
-        if (i_0 > i_2 && i_0 < i_2 + i_4 && i_1 > i_6 - fontmetrics9.topPadding - 1 && i_1 < fontmetrics9.bottomPadding + i_6) {
-            i_101 = i_11
+    fun drawColoredMenuEntry(mouseX: Int, mouseY: Int, entryX: Int, entryWidth: Int, entryY: Int, coloredEntry: ColoredMiniMenuEntry, fontRenderer: AbstractFontRenderer, fontMetrics: FontMetrics, textColor: Int, hoverColor: Int) {
+        var color = textColor
+        if (mouseX > entryX && mouseX < entryX + entryWidth && mouseY > entryY - fontMetrics.topPadding - 1 && mouseY < fontMetrics.bottomPadding + entryY) {
+            color = hoverColor
         }
-        val string_13 = MiniMenu.formatTag(class282Sub50Sub157)
+        val formattedText = MiniMenu.formatTag(coloredEntry)
         @Suppress("UNCHECKED_CAST")
-        fontrenderer8.renderAntiMacroText(string_13, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
+        fontRenderer.renderAntiMacroText(formattedText, entryX + 3, entryY, color, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
     }
 
     @JvmStatic
     fun openContextMenu(mouseX: Int, mouseY: Int) {
         if (Client.ENTITY_DEFAULTS!!.alwaysShowContextMenu || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.topEntry!!.action.equals(LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)))) {
             val fontMetrics = FontMetrics.getForMinimenu()
-            var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
-            val i_5: Int
-            var i_7: Int
+            var menuWidth = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
+            val menuHeight: Int
+            var entryWidth: Int
             if (!MiniMenu.isCollapsed) {
-                var class282Sub50Sub79 = MiniMenu.entryList!!.getFirst() as MiniMenuEntry?
-                while (class282Sub50Sub79 != null) {
-                    i_7 = MiniMenu.getWidthForEntryWithQuests(class282Sub50Sub79, fontMetrics)
-                    if (i_7 > i_4) {
-                        i_4 = i_7
+                var entry = MiniMenu.entryList!!.getFirst() as MiniMenuEntry?
+                while (entry != null) {
+                    entryWidth = MiniMenu.getWidthForEntryWithQuests(entry, fontMetrics)
+                    if (entryWidth > menuWidth) {
+                        menuWidth = entryWidth
                     }
-                    class282Sub50Sub79 = MiniMenu.entryList!!.next() as MiniMenuEntry?
+                    entry = MiniMenu.entryList!!.next() as MiniMenuEntry?
                 }
-                i_4 += 8
-                i_5 = MiniMenu.entryCount * MiniMenu.entryRowHeight + 21
+                menuWidth += 8
+                menuHeight = MiniMenu.entryCount * MiniMenu.entryRowHeight + 21
                 MiniMenu.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + MiniMenu.entryCount * MiniMenu.entryRowHeight
             } else {
                 var menuEntry = MiniMenu.sortedColoredEntries!!.getNext() as ColoredMiniMenuEntry?
                 while (menuEntry != null) {
-                    i_7 = if (menuEntry.queueSize == 1) {
+                    entryWidth = if (menuEntry.queueSize == 1) {
                         MiniMenu.getWidthForEntryWithQuests(menuEntry.nodeQueue!!.current!!.next as MiniMenuEntry, fontMetrics)
                     } else {
                         MiniMenu.getPrefixTextWidth(menuEntry, fontMetrics)
                     }
-                    if (i_7 > i_4) {
-                        i_4 = i_7
+                    if (entryWidth > menuWidth) {
+                        menuWidth = entryWidth
                     }
                     menuEntry = MiniMenu.sortedColoredEntries!!.getDirectNext() as ColoredMiniMenuEntry?
                 }
-                i_4 += 8
-                i_5 = MiniMenu.entryRowHeight * MiniMenu.coloredEntryCount + 21
+                menuWidth += 8
+                menuHeight = MiniMenu.entryRowHeight * MiniMenu.coloredEntryCount + 21
                 MiniMenu.menuHeight = MiniMenu.entryRowHeight * MiniMenu.coloredEntryCount + (if (FontMetrics.useBoldFont) 26 else 22)
             }
-            i_4 += 10
-            var i_8 = mouseX - i_4 / 2
-            if (i_8 + i_4 > GameShell.screenCanvasWidth) {
-                i_8 = GameShell.screenCanvasWidth - i_4
+            menuWidth += 10
+            var menuX = mouseX - menuWidth / 2
+            if (menuX + menuWidth > GameShell.screenCanvasWidth) {
+                menuX = GameShell.screenCanvasWidth - menuWidth
             }
-            if (i_8 < 0) {
-                i_8 = 0
+            if (menuX < 0) {
+                menuX = 0
             }
-            i_7 = mouseY
-            if (mouseY + i_5 > GameShell.screenCanvasHeight * -969250379) {
-                i_7 = GameShell.screenCanvasHeight * -969250379 - i_5
+            entryWidth = mouseY
+            if (mouseY + menuHeight > GameShell.screenCanvasHeight * -969250379) {
+                entryWidth = GameShell.screenCanvasHeight * -969250379 - menuHeight
             }
-            if (i_7 < 0) {
-                i_7 = 0
+            if (entryWidth < 0) {
+                entryWidth = 0
             }
-            menuOpenX = i_8
-            menuOpenY = i_7
-            MiniMenu.menuWidth = i_4
+            menuOpenX = menuX
+            menuOpenY = entryWidth
+            MiniMenu.menuWidth = menuWidth
             NativeSprite.alphaJitter = (Math.random() * 24.0).toInt()
             MiniMenu.isOpen = true
         }
     }
 
     @JvmStatic
-    fun decodeFriendchatName(charsequence_0: CharSequence): String {
-        var string_2 = TextUtils.decodeUidName(Utils.charseqTouid(charsequence_0))
-        if (string_2 == null) {
-            string_2 = ""
+    fun decodeFriendchatName(input: CharSequence): String {
+        var decoded = TextUtils.decodeUidName(Utils.charseqTouid(input))
+        if (decoded == null) {
+            decoded = ""
         }
-        return string_2
+        return decoded
     }
 
     @JvmStatic
@@ -614,11 +614,11 @@ object StaticMethods {
         if (OpenGlTexture.isPowerOfTwo(limit)) {
             return ((random.nextInt().toLong() and 0xffffffffL) * limit shr 32).toInt()
         }
-        val i_3 = Integer.MIN_VALUE - (4294967296L % limit).toInt()
+        val rejectionThreshold = Integer.MIN_VALUE - (4294967296L % limit).toInt()
         var randomInteger: Int
         do {
             randomInteger = random.nextInt()
-        } while (randomInteger >= i_3)
+        } while (randomInteger >= rejectionThreshold)
         return flooredMod(randomInteger, limit)
     }
 

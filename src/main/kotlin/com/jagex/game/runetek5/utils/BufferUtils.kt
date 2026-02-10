@@ -30,558 +30,558 @@ object BufferUtils {
     }
 
     @JvmStatic
-    fun generateBytePatterns(i_0: Int): Array<Array<ByteArray?>> {
-        val bytes_2 = Array(8) { arrayOfNulls<ByteArray>(4) }
-        val i_3 = i_0
-        val i_4 = i_0
-        var bytes_5 = ByteArray(i_0 * i_0)
-        var i_6 = 0
+    fun generateBytePatterns(tileSize: Int): Array<Array<ByteArray?>> {
+        val patterns = Array(8) { arrayOfNulls<ByteArray>(4) }
+        val width = tileSize
+        val height = tileSize
+        var mask = ByteArray(tileSize * tileSize)
+        var index = 0
 
-        var i_7: Int
-        var i_8: Int
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_7) {
-                    bytes_5[i_6] = -1
+        var row: Int
+        var col: Int
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col <= row) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[0][0] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[0][0] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_4) {
-                if (i_8 <= i_7) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < height) {
+                if (col <= row) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[0][1] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[0][1] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_7) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col >= row) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[0][2] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[0][2] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_7) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < width) {
+                if (col >= row) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[0][3] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[0][3] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < width) {
+                if (col <= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[1][0] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[1][0] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_6 >= 0 && i_6 < bytes_5.size) {
-                    if (i_8 >= i_7 shl 1) {
-                        bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (index >= 0 && index < mask.size) {
+                    if (col >= row shl 1) {
+                        mask[index] = -1
                     }
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[1][1] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[1][1] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 <= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = width - 1
+            while (col >= 0) {
+                if (col <= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            i_7++
+            row++
         }
 
-        bytes_2[1][2] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[1][2] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 >= i_7 shl 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = width - 1
+            while (col >= 0) {
+                if (col >= row shl 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            --i_7
+            --row
         }
 
-        bytes_2[1][3] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[1][3] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 <= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = width - 1
+            while (col >= 0) {
+                if (col <= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            --i_7
+            --row
         }
 
-        bytes_2[2][0] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[2][0] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_7 shl 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < width) {
+                if (col >= row shl 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[2][1] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[2][1] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col <= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[2][2] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[2][2] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 >= i_7 shl 1) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = width - 1
+            while (col >= 0) {
+                if (col >= row shl 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            i_7++
+            row++
         }
 
-        bytes_2[2][3] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[2][3] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < width) {
+                if (col >= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[3][0] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[3][0] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_7 shl 1) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col <= row shl 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[3][1] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[3][1] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 >= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = width - 1
+            while (col >= 0) {
+                if (col >= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            i_7++
+            row++
         }
 
-        bytes_2[3][2] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[3][2] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 <= i_7 shl 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = width - 1
+            while (col >= 0) {
+                if (col <= row shl 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            --i_7
+            --row
         }
 
-        bytes_2[3][3] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[3][3] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 >= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = width - 1
+            while (col >= 0) {
+                if (col >= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            --i_7
+            --row
         }
 
-        bytes_2[4][0] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[4][0] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_7 shl 1) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < width) {
+                if (col <= row shl 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[4][1] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[4][1] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_7 shr 1) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col >= row shr 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[4][2] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[4][2] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 <= i_7 shl 1) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = width - 1
+            while (col >= 0) {
+                if (col <= row shl 1) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            i_7++
+            row++
         }
 
-        bytes_2[4][3] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[4][3] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_3 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col <= width / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[5][0] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[5][0] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_7 <= i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (row <= height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[5][1] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[5][1] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_3 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col >= width / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[5][2] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[5][2] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_7 >= i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (row >= height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[5][3] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[5][3] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col <= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[6][0] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[6][0] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 <= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < width) {
+                if (col <= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[6][1] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[6][1] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 <= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = width - 1
+            while (col >= 0) {
+                if (col <= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            --i_7
+            --row
         }
 
-        bytes_2[6][2] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[6][2] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 <= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = width - 1
+            while (col >= 0) {
+                if (col <= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            i_7++
+            row++
         }
 
-        bytes_2[6][3] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[6][3] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = 0
+            while (col < width) {
+                if (col >= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            i_7++
+            row++
         }
 
-        bytes_2[7][0] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[7][0] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = 0
-            while (i_8 < i_3) {
-                if (i_8 >= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = 0
+            while (col < width) {
+                if (col >= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                i_8++
+                ++index
+                col++
             }
-            --i_7
+            --row
         }
 
-        bytes_2[7][1] = bytes_5
-        bytes_5 = ByteArray(i_4 * i_3)
-        i_6 = 0
+        patterns[7][1] = mask
+        mask = ByteArray(height * width)
+        index = 0
 
-        i_7 = i_4 - 1
-        while (i_7 >= 0) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 >= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = height - 1
+        while (row >= 0) {
+            col = width - 1
+            while (col >= 0) {
+                if (col >= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            --i_7
+            --row
         }
 
-        bytes_2[7][2] = bytes_5
-        bytes_5 = ByteArray(i_3 * i_4)
-        i_6 = 0
+        patterns[7][2] = mask
+        mask = ByteArray(width * height)
+        index = 0
 
-        i_7 = 0
-        while (i_7 < i_4) {
-            i_8 = i_3 - 1
-            while (i_8 >= 0) {
-                if (i_8 >= i_7 - i_4 / 2) {
-                    bytes_5[i_6] = -1
+        row = 0
+        while (row < height) {
+            col = width - 1
+            while (col >= 0) {
+                if (col >= row - height / 2) {
+                    mask[index] = -1
                 }
-                ++i_6
-                --i_8
+                ++index
+                --col
             }
-            i_7++
+            row++
         }
 
-        bytes_2[7][3] = bytes_5
-        return bytes_2
+        patterns[7][3] = mask
+        return patterns
     }
 }

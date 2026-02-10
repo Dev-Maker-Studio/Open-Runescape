@@ -10,44 +10,44 @@ object Utils {
 
     @JvmStatic
     fun cp1252ToChar(b: Byte): Char {
-        var `val` = b.toInt() and 0xff
-        if (`val` == 0) {
+        var codePoint = b.toInt() and 0xff
+        if (codePoint == 0) {
             throw IllegalArgumentException(Integer.toString(0, 16))
         } else {
-            if (`val` >= 128 && `val` < 160) {
-                var charValue = UNICODE_TABLE[`val` - 128]
+            if (codePoint >= 128 && codePoint < 160) {
+                var charValue = UNICODE_TABLE[codePoint - 128]
                 if (charValue.code == 0) {
                     charValue = 63.toChar()
                 }
-                `val` = charValue.code
+                codePoint = charValue.code
             }
-            return `val`.toChar()
+            return codePoint.toChar()
         }
     }
 
     @JvmStatic
-    fun readString(bytes_0: ByteArray, i_1: Int, i_2: Int): String {
-        val arr_4 = CharArray(i_2)
-        var i_5 = 0
-        for (i_6 in 0 until i_2) {
-            var i_7 = bytes_0[i_6 + i_1].toInt() and 0xff
-            if (i_7 != 0) {
-                if (i_7 >= 128 && i_7 < 160) {
-                    var var_8 = UNICODE_TABLE[i_7 - 128]
-                    if (var_8.code == 0) {
-                        var_8 = 63.toChar()
+    fun readString(data: ByteArray, offset: Int, length: Int): String {
+        val chars = CharArray(length)
+        var charIndex = 0
+        for (i in 0 until length) {
+            var codePoint = data[i + offset].toInt() and 0xff
+            if (codePoint != 0) {
+                if (codePoint >= 128 && codePoint < 160) {
+                    var mappedChar = UNICODE_TABLE[codePoint - 128]
+                    if (mappedChar.code == 0) {
+                        mappedChar = 63.toChar()
                     }
-                    i_7 = var_8.code
+                    codePoint = mappedChar.code
                 }
-                arr_4[i_5++] = i_7.toChar()
+                chars[charIndex++] = codePoint.toChar()
             }
         }
-        return String(arr_4, 0, i_5)
+        return String(chars, 0, charIndex)
     }
 
     @JvmStatic
-    fun stringLengthPlus2(string_0: String?): Int {
-        return (string_0?.length ?: 0) + 2
+    fun stringLengthPlus2(str: String?): Int {
+        return (str?.length ?: 0) + 2
     }
 
     @JvmStatic
@@ -73,9 +73,9 @@ object Utils {
         var offX = minX - x1
         var offY = minX - x3
         for (i in minX until maxX) {
-            val i_20 = heights[offX++] + widths[offY++]
-            if (i_20 < minKerning) {
-                minKerning = i_20
+            val gap = heights[offX++] + widths[offY++]
+            if (gap < minKerning) {
+                minKerning = gap
             }
         }
         return -minKerning
@@ -84,92 +84,92 @@ object Utils {
     @JvmStatic
     @Synchronized
     fun time(): Long {
-        val long_1 = System.currentTimeMillis()
-        if (long_1 < lastSystemTime) {
-            timeOffset += lastSystemTime - long_1
+        val currentTime = System.currentTimeMillis()
+        if (currentTime < lastSystemTime) {
+            timeOffset += lastSystemTime - currentTime
         }
-        lastSystemTime = long_1
-        return long_1 + timeOffset
+        lastSystemTime = currentTime
+        return currentTime + timeOffset
     }
 
     @JvmStatic
-    fun parseInt(charsequence_0: CharSequence): Int {
-        return parseInt(charsequence_0, 10)
+    fun parseInt(text: CharSequence): Int {
+        return parseInt(text, 10)
     }
 
     @JvmStatic
-    fun parseInt(charsequence_0: CharSequence, i_1: Int): Int {
-        if (i_1 >= 2 && i_1 <= 36) {
-            var bool4 = false
-            var bool5 = false
-            var i_6 = 0
-            val i_7 = charsequence_0.length
-            for (i_8 in 0 until i_7) {
-                val var_9 = charsequence_0[i_8]
-                if (i_8 == 0) {
-                    if (var_9 == '-') {
-                        bool4 = true
+    fun parseInt(text: CharSequence, radix: Int): Int {
+        if (radix >= 2 && radix <= 36) {
+            var isNegative = false
+            var hasDigits = false
+            var result = 0
+            val len = text.length
+            for (i in 0 until len) {
+                val ch = text[i]
+                if (i == 0) {
+                    if (ch == '-') {
+                        isNegative = true
                         continue
                     }
-                    if (var_9 == '+') {
+                    if (ch == '+') {
                         continue
                     }
                 }
-                val i_11: Int
-                if (var_9 in '0'..'9') {
-                    i_11 = var_9.code - 48
-                } else if (var_9 in 'A'..'Z') {
-                    i_11 = var_9.code - 55
+                val digitValue: Int
+                if (ch in '0'..'9') {
+                    digitValue = ch.code - 48
+                } else if (ch in 'A'..'Z') {
+                    digitValue = ch.code - 55
                 } else {
-                    if (var_9 < 'a' || var_9 > 'z') {
+                    if (ch < 'a' || ch > 'z') {
                         throw NumberFormatException()
                     }
-                    i_11 = var_9.code - 87
+                    digitValue = ch.code - 87
                 }
-                if (i_11 >= i_1) {
+                if (digitValue >= radix) {
                     throw NumberFormatException()
                 }
-                var i_11_final = i_11
-                if (bool4) {
-                    i_11_final = -i_11
+                var signedDigit = digitValue
+                if (isNegative) {
+                    signedDigit = -digitValue
                 }
-                val i_10 = i_11_final + i_6 * i_1
-                if (i_10 / i_1 != i_6) {
+                val accumulated = signedDigit + result * radix
+                if (accumulated / radix != result) {
                     throw NumberFormatException()
                 }
-                i_6 = i_10
-                bool5 = true
+                result = accumulated
+                hasDigits = true
             }
-            if (!bool5) {
+            if (!hasDigits) {
                 throw NumberFormatException()
             } else {
-                return i_6
+                return result
             }
         } else {
-            throw IllegalArgumentException("" + i_1)
+            throw IllegalArgumentException("" + radix)
         }
     }
 
     @JvmStatic
-    fun getStringFromLong(long_0: Long): String? {
-        var long_0_var = long_0
-        if (long_0_var > 0L && long_0_var < 6582952005840035281L) {
-            if (long_0_var % 37L == 0L) {
+    fun getStringFromLong(encoded: Long): String? {
+        var remaining = encoded
+        if (remaining > 0L && remaining < 6582952005840035281L) {
+            if (remaining % 37L == 0L) {
                 return null
             } else {
-                var i_2 = 0
-                var long_3 = long_0_var
-                while (long_3 != 0L) {
-                    long_3 /= 37L
-                    ++i_2
+                var charCount = 0
+                var temp = remaining
+                while (temp != 0L) {
+                    temp /= 37L
+                    ++charCount
                 }
-                val stringbuilder6 = StringBuilder(i_2)
-                while (long_0_var != 0L) {
-                    val long_4 = long_0_var
-                    long_0_var /= 37L
-                    stringbuilder6.append(aCharArray5825[(long_4 - 37L * long_0_var).toInt()])
+                val builder = StringBuilder(charCount)
+                while (remaining != 0L) {
+                    val previous = remaining
+                    remaining /= 37L
+                    builder.append(aCharArray5825[(previous - 37L * remaining).toInt()])
                 }
-                return stringbuilder6.reverse().toString()
+                return builder.reverse().toString()
             }
         } else {
             return null
@@ -177,109 +177,109 @@ object Utils {
     }
 
     @JvmStatic
-    fun countOccurrences(charsequence_0: CharSequence, var_1: Char): Int {
-        var i_3 = 0
-        val i_4 = charsequence_0.length
-        for (i_5 in 0 until i_4) {
-            if (charsequence_0[i_5] == var_1) {
-                ++i_3
+    fun countOccurrences(text: CharSequence, target: Char): Int {
+        var count = 0
+        val len = text.length
+        for (i in 0 until len) {
+            if (text[i] == target) {
+                ++count
             }
         }
-        return i_3
+        return count
     }
 
     @JvmStatic
-    fun hashAsLong(charsequence_0: CharSequence): Long {
-        val i_2 = charsequence_0.length
-        var long_3 = 0L
-        for (i_5 in 0 until i_2) {
-            long_3 = (long_3 shl 5) - long_3 + charsequence_0[i_5].code
+    fun hashAsLong(text: CharSequence): Long {
+        val len = text.length
+        var hash = 0L
+        for (i in 0 until len) {
+            hash = (hash shl 5) - hash + text[i].code
         }
-        return long_3
+        return hash
     }
 
     @JvmStatic
-    fun stringToInt(charsequence_0: CharSequence): Int {
-        val i_2 = charsequence_0.length
-        var i_3 = 0
-        for (i_4 in 0 until i_2) {
-            i_3 = (i_3 shl 5) - i_3 + charsequence_0[i_4].code
+    fun stringToInt(text: CharSequence): Int {
+        val len = text.length
+        var hash = 0
+        for (i in 0 until len) {
+            hash = (hash shl 5) - hash + text[i].code
         }
-        return i_3
+        return hash
     }
 
     @JvmStatic
-    fun isValidInteger(charsequence_0: CharSequence): Boolean {
-        var bool4 = false
-        var bool5 = false
-        var i_6 = 0
-        val i_7 = charsequence_0.length
-        for (i_8 in 0 until i_7) {
-            val var_9 = charsequence_0[i_8]
-            if (i_8 == 0) {
-                if (var_9 == '-') {
-                    bool4 = true
+    fun isValidInteger(text: CharSequence): Boolean {
+        var isNegative = false
+        var hasDigits = false
+        var result = 0
+        val len = text.length
+        for (i in 0 until len) {
+            val ch = text[i]
+            if (i == 0) {
+                if (ch == '-') {
+                    isNegative = true
                     continue
                 }
-                if (var_9 == '+') {
+                if (ch == '+') {
                     continue
                 }
             }
-            val i_11: Int
-            if (var_9 in '0'..'9') {
-                i_11 = var_9.code - 48
-            } else if (var_9 in 'A'..'Z') {
-                i_11 = var_9.code - 55
+            val digitValue: Int
+            if (ch in '0'..'9') {
+                digitValue = ch.code - 48
+            } else if (ch in 'A'..'Z') {
+                digitValue = ch.code - 55
             } else {
-                if (var_9 < 'a' || var_9 > 'z') {
+                if (ch < 'a' || ch > 'z') {
                     return false
                 }
-                i_11 = var_9.code - 87
+                digitValue = ch.code - 87
             }
-            if (i_11 >= 10) {
+            if (digitValue >= 10) {
                 return false
             }
-            var i_11_final = i_11
-            if (bool4) {
-                i_11_final = -i_11
+            var signedDigit = digitValue
+            if (isNegative) {
+                signedDigit = -digitValue
             }
-            val i_10 = i_11_final + i_6 * 10
-            if (i_10 / 10 != i_6) {
+            val accumulated = signedDigit + result * 10
+            if (accumulated / 10 != result) {
                 return false
             }
-            i_6 = i_10
-            bool5 = true
+            result = accumulated
+            hasDigits = true
         }
-        return bool5
+        return hasDigits
     }
 
     @JvmStatic
-    fun charseqTouid(charsequence_0: CharSequence): Long {
-        var long_2 = 0L
-        val i_4 = charsequence_0.length
-        for (i_5 in 0 until i_4) {
-            long_2 *= 37L
-            val var_6 = charsequence_0[i_5]
-            if (var_6 in 'A'..'Z') {
-                long_2 += var_6.code + 1 - 65
-            } else if (var_6 in 'a'..'z') {
-                long_2 += var_6.code + 1 - 97
-            } else if (var_6 in '0'..'9') {
-                long_2 += var_6.code + 27 - 48
+    fun charseqTouid(text: CharSequence): Long {
+        var uid = 0L
+        val len = text.length
+        for (i in 0 until len) {
+            uid *= 37L
+            val ch = text[i]
+            if (ch in 'A'..'Z') {
+                uid += ch.code + 1 - 65
+            } else if (ch in 'a'..'z') {
+                uid += ch.code + 1 - 97
+            } else if (ch in '0'..'9') {
+                uid += ch.code + 27 - 48
             }
-            if (long_2 >= 177917621779460413L) {
+            if (uid >= 177917621779460413L) {
                 break
             }
         }
-        while (long_2 % 37L == 0L && long_2 != 0L) {
-            long_2 /= 37L
+        while (uid % 37L == 0L && uid != 0L) {
+            uid /= 37L
         }
-        return long_2
+        return uid
     }
 
     @JvmStatic
-    fun getLigatureReplacement(var_0: Char): Char {
-        return when (var_0) {
+    fun getLigatureReplacement(ch: Char): Char {
+        return when (ch) {
             198.toChar() -> 'E'
             230.toChar() -> 'e'
             223.toChar() -> 's'
@@ -290,101 +290,101 @@ object Utils {
     }
 
     @JvmStatic
-    fun formatRequestParameter(charsequence_0: CharSequence): String {
-        val i_2 = charsequence_0.length
-        val stringbuilder3 = StringBuilder(i_2)
-        for (i_4 in 0 until i_2) {
-            val var_5 = charsequence_0[i_4]
-            if ((var_5 < 'a' || var_5 > 'z') && (var_5 < 'A' || var_5 > 'Z') && (var_5 < '0' || var_5 > '9') && var_5 != '.' && var_5 != '-' && var_5 != '*' && var_5 != '_') {
-                if (var_5 == ' ') {
-                    stringbuilder3.append('+')
+    fun formatRequestParameter(text: CharSequence): String {
+        val len = text.length
+        val builder = StringBuilder(len)
+        for (i in 0 until len) {
+            val ch = text[i]
+            if ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && ch != '.' && ch != '-' && ch != '*' && ch != '_') {
+                if (ch == ' ') {
+                    builder.append('+')
                 } else {
-                    val b_6 = byteForChar(var_5)
-                    stringbuilder3.append('%')
-                    var i_7 = b_6.toInt() shr 4 and 0xf
-                    if (i_7 >= 10) {
-                        stringbuilder3.append((i_7 + 55).toChar())
+                    val encodedByte = byteForChar(ch)
+                    builder.append('%')
+                    var nibble = encodedByte.toInt() shr 4 and 0xf
+                    if (nibble >= 10) {
+                        builder.append((nibble + 55).toChar())
                     } else {
-                        stringbuilder3.append((i_7 + 48).toChar())
+                        builder.append((nibble + 48).toChar())
                     }
-                    i_7 = b_6.toInt() and 0xf
-                    if (i_7 >= 10) {
-                        stringbuilder3.append((i_7 + 55).toChar())
+                    nibble = encodedByte.toInt() and 0xf
+                    if (nibble >= 10) {
+                        builder.append((nibble + 55).toChar())
                     } else {
-                        stringbuilder3.append((i_7 + 48).toChar())
+                        builder.append((nibble + 48).toChar())
                     }
                 }
             } else {
-                stringbuilder3.append(var_5)
+                builder.append(ch)
             }
         }
-        return stringbuilder3.toString()
+        return builder.toString()
     }
 
     @JvmStatic
-    fun getCollationKey(var_0: Char): Int {
-        var i_3 = var_0.code shl 4
-        if (Character.isUpperCase(var_0) || Character.isTitleCase(var_0)) {
-            val var_4 = Character.toLowerCase(var_0)
-            i_3 = (var_4.code shl 4) + 1
+    fun getCollationKey(ch: Char): Int {
+        var key = ch.code shl 4
+        if (Character.isUpperCase(ch) || Character.isTitleCase(ch)) {
+            val lowerCase = Character.toLowerCase(ch)
+            key = (lowerCase.code shl 4) + 1
         }
-        return i_3
+        return key
     }
 
     @JvmStatic
-    fun decodeWithUnicodeTable(bytes_0: ByteArray): String {
-        return readString(bytes_0, 0, bytes_0.size)
+    fun decodeWithUnicodeTable(data: ByteArray): String {
+        return readString(data, 0, data.size)
     }
 
     @JvmStatic
-    fun joinStrings(arr_0: Array<Any?>, i_1: Int, i_2: Int): String {
-        if (i_2 == 0) {
+    fun joinStrings(parts: Array<Any?>, startIndex: Int, count: Int): String {
+        if (count == 0) {
             return ""
-        } else if (i_2 == 1) {
-            val charsequence_4 = arr_0[i_1] as CharSequence?
-            return charsequence_4?.toString() ?: "null"
+        } else if (count == 1) {
+            val part = parts[startIndex] as CharSequence?
+            return part?.toString() ?: "null"
         } else {
-            val i_9 = i_2 + i_1
-            var i_5 = 0
-            for (i_6 in i_1 until i_9) {
-                val charsequence_11 = arr_0[i_6] as CharSequence?
-                if (charsequence_11 == null) {
-                    i_5 += 4
+            val endIndex = count + startIndex
+            var totalLength = 0
+            for (i in startIndex until endIndex) {
+                val part = parts[i] as CharSequence?
+                if (part == null) {
+                    totalLength += 4
                 } else {
-                    i_5 += charsequence_11.length
+                    totalLength += part.length
                 }
             }
-            val stringbuilder10 = StringBuilder(i_5)
-            for (i_7 in i_1 until i_9) {
-                val charsequence_8 = arr_0[i_7] as CharSequence?
-                if (charsequence_8 == null) {
-                    stringbuilder10.append("null")
+            val builder = StringBuilder(totalLength)
+            for (i in startIndex until endIndex) {
+                val part = parts[i] as CharSequence?
+                if (part == null) {
+                    builder.append("null")
                 } else {
-                    stringbuilder10.append(charsequence_8)
+                    builder.append(part)
                 }
             }
-            return stringbuilder10.toString()
+            return builder.toString()
         }
     }
 
     @JvmStatic
-    fun split(string_0: String, var_1: Char): Array<String> {
-        val i_3 = countOccurrences(string_0, var_1)
-        val arr_4 = Array(i_3 + 1) { "" }
-        var i_5 = 0
-        var i_6 = 0
+    fun split(input: String, delimiter: Char): Array<String> {
+        val delimiterCount = countOccurrences(input, delimiter)
+        val result = Array(delimiterCount + 1) { "" }
+        var resultIndex = 0
+        var searchStart = 0
 
-        for (i_7 in 0 until i_3) {
-            var i_8 = i_6
-            while (string_0[i_8] != var_1) {
-                i_8++
+        for (i in 0 until delimiterCount) {
+            var delimiterPos = searchStart
+            while (input[delimiterPos] != delimiter) {
+                delimiterPos++
             }
-            arr_4[i_5++] = string_0.substring(i_6, i_8)
-            i_6 = i_8 + 1
+            result[resultIndex++] = input.substring(searchStart, delimiterPos)
+            searchStart = delimiterPos + 1
         }
 
-        arr_4[i_3] = string_0.substring(i_6)
-        return arr_4
+        result[delimiterCount] = input.substring(searchStart)
+        return result
     }
 
     @JvmStatic
@@ -431,55 +431,55 @@ object Utils {
      * @deprecated Use [isWrongJava] instead
      */
     @JvmStatic
-    fun isValidIntegerDeprecated(charsequence_0: CharSequence): Boolean {
-        return isWrongJava(charsequence_0)
+    fun isValidIntegerDeprecated(text: CharSequence): Boolean {
+        return isWrongJava(text)
     }
 
     @JvmStatic
-    fun isWrongJava(charsequence_0: CharSequence): Boolean {
-        return isValidInteger(charsequence_0)
+    fun isWrongJava(text: CharSequence): Boolean {
+        return isValidInteger(text)
     }
 
     @JvmStatic
-    fun characterSequenceToBytearray(charsequence_0: CharSequence): ByteArray {
-        val i_2 = charsequence_0.length
-        val bytes_3 = ByteArray(i_2)
-        for (i_4 in 0 until i_2) {
-            val var_5 = charsequence_0[i_4]
-            if (var_5.code > 0 && var_5.code < 128 || var_5.code >= 160 && var_5.code <= 255) {
-                bytes_3[i_4] = var_5.code.toByte()
-            } else when (var_5.code) {
-                8364 -> bytes_3[i_4] = -128
-                8218 -> bytes_3[i_4] = -126
-                402 -> bytes_3[i_4] = -125
-                8222 -> bytes_3[i_4] = -124
-                8230 -> bytes_3[i_4] = -123
-                8224 -> bytes_3[i_4] = -122
-                8225 -> bytes_3[i_4] = -121
-                710 -> bytes_3[i_4] = -120
-                8240 -> bytes_3[i_4] = -119
-                352 -> bytes_3[i_4] = -118
-                8249 -> bytes_3[i_4] = -117
-                338 -> bytes_3[i_4] = -116
-                381 -> bytes_3[i_4] = -114
-                8216 -> bytes_3[i_4] = -111
-                8217 -> bytes_3[i_4] = -110
-                8220 -> bytes_3[i_4] = -109
-                8221 -> bytes_3[i_4] = -108
-                8226 -> bytes_3[i_4] = -107
-                8211 -> bytes_3[i_4] = -106
-                8212 -> bytes_3[i_4] = -105
-                732 -> bytes_3[i_4] = -104
-                8482 -> bytes_3[i_4] = -103
-                353 -> bytes_3[i_4] = -102
-                8250 -> bytes_3[i_4] = -101
-                339 -> bytes_3[i_4] = -100
-                382 -> bytes_3[i_4] = -98
-                376 -> bytes_3[i_4] = -97
-                else -> bytes_3[i_4] = 63
+    fun characterSequenceToBytearray(text: CharSequence): ByteArray {
+        val len = text.length
+        val bytes = ByteArray(len)
+        for (i in 0 until len) {
+            val ch = text[i]
+            if (ch.code > 0 && ch.code < 128 || ch.code >= 160 && ch.code <= 255) {
+                bytes[i] = ch.code.toByte()
+            } else when (ch.code) {
+                8364 -> bytes[i] = -128
+                8218 -> bytes[i] = -126
+                402 -> bytes[i] = -125
+                8222 -> bytes[i] = -124
+                8230 -> bytes[i] = -123
+                8224 -> bytes[i] = -122
+                8225 -> bytes[i] = -121
+                710 -> bytes[i] = -120
+                8240 -> bytes[i] = -119
+                352 -> bytes[i] = -118
+                8249 -> bytes[i] = -117
+                338 -> bytes[i] = -116
+                381 -> bytes[i] = -114
+                8216 -> bytes[i] = -111
+                8217 -> bytes[i] = -110
+                8220 -> bytes[i] = -109
+                8221 -> bytes[i] = -108
+                8226 -> bytes[i] = -107
+                8211 -> bytes[i] = -106
+                8212 -> bytes[i] = -105
+                732 -> bytes[i] = -104
+                8482 -> bytes[i] = -103
+                353 -> bytes[i] = -102
+                8250 -> bytes[i] = -101
+                339 -> bytes[i] = -100
+                382 -> bytes[i] = -98
+                376 -> bytes[i] = -97
+                else -> bytes[i] = 63
             }
         }
-        return bytes_3
+        return bytes
     }
 
     @JvmStatic
@@ -491,33 +491,33 @@ object Utils {
     }
 
     @JvmStatic
-    fun formatScript(fullProgramString: String, carriageReturn: Char, string_2: String): String {
-        val fullLength = fullProgramString.length
-        val i_5 = string_2.length
-        var i_6 = fullLength
-        val i_7 = i_5 - 1
-        if (i_7 != 0) {
-            var i_8 = 0
+    fun formatScript(source: String, carriageReturn: Char, replacement: String): String {
+        val sourceLength = source.length
+        val replacementLength = replacement.length
+        var resultLength = sourceLength
+        val extraCharsPerOccurrence = replacementLength - 1
+        if (extraCharsPerOccurrence != 0) {
+            var searchPos = 0
             while (true) {
-                i_8 = fullProgramString.indexOf(carriageReturn, i_8)
-                if (i_8 < 0) {
+                searchPos = source.indexOf(carriageReturn, searchPos)
+                if (searchPos < 0) {
                     break
                 }
-                ++i_8
-                i_6 += i_7
+                ++searchPos
+                resultLength += extraCharsPerOccurrence
             }
         }
-        val stringbuilder11 = StringBuilder(i_6)
-        var i_9 = 0
+        val builder = StringBuilder(resultLength)
+        var copyStart = 0
         while (true) {
-            val i_10 = fullProgramString.indexOf(carriageReturn, i_9)
-            if (i_10 < 0) {
-                stringbuilder11.append(fullProgramString.substring(i_9))
-                return stringbuilder11.toString()
+            val matchPos = source.indexOf(carriageReturn, copyStart)
+            if (matchPos < 0) {
+                builder.append(source.substring(copyStart))
+                return builder.toString()
             }
-            stringbuilder11.append(fullProgramString, i_9, i_10)
-            stringbuilder11.append(string_2)
-            i_9 = i_10 + 1
+            builder.append(source, copyStart, matchPos)
+            builder.append(replacement)
+            copyStart = matchPos + 1
         }
     }
 
@@ -538,8 +538,8 @@ object Utils {
     val aCharArray5825 = charArrayOf('_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 
     @JvmStatic
-    fun parse_int(charsequence_0: CharSequence): Int {
-        return parseInt(charsequence_0, 16)
+    fun parse_int(text: CharSequence): Int {
+        return parseInt(text, 16)
     }
 
     @JvmStatic
