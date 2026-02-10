@@ -15,81 +15,81 @@ class TextureOpRasterizer : TextureOperation(0, true) {
 
     @JvmField var shapes: Array<TextureShapeRasterizer?>? = null
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
             rasterizeShapes(monochromeImageCache.getAllPaletteData())
         }
-        return ints_3
+        return output
     }
 
-    override fun getColorOutput(i_1: Int): Array<IntArray> {
-        val ints_3 = colorImageCache.getPalette(i_1)
+    override fun getColorOutput(y: Int): Array<IntArray> {
+        val palette = colorImageCache.getPalette(y)
         if (colorImageCache.dirty) {
-            val i_4 = TextureRaster.currentWidth
-            val i_5 = TextureRaster.currentHeight
-            val ints_6 = Array(i_5) { IntArray(i_4) }
-            val ints_7 = colorImageCache.getAllPalettes()
+            val width = TextureRaster.currentWidth
+            val height = TextureRaster.currentHeight
+            val pixelBuffer = Array(height) { IntArray(width) }
+            val allPalettes = colorImageCache.getAllPalettes()
             @Suppress("UNCHECKED_CAST")
-            rasterizeShapes(ints_6 as Array<IntArray?>)
-            for (i_8 in 0 until TextureRaster.currentHeight) {
-                val ints_9 = ints_6[i_8]
-                val ints_10 = ints_7[i_8]
-                val ints_11 = ints_10[0]
-                val ints_12 = ints_10[1]
-                val ints_13 = ints_10[2]
-                for (i_14 in 0 until TextureRaster.currentWidth) {
-                    val i_15 = ints_9[i_14]
-                    ints_13[i_14] = (i_15 and 0xff) shl 4
-                    ints_12[i_14] = (i_15 and 0xff00) shr 4
-                    ints_11[i_14] = (i_15 and 0xff0000) shr 12
+            rasterizeShapes(pixelBuffer as Array<IntArray?>)
+            for (row in 0 until TextureRaster.currentHeight) {
+                val rowPixels = pixelBuffer[row]
+                val paletteRow = allPalettes[row]
+                val redChannel = paletteRow[0]
+                val greenChannel = paletteRow[1]
+                val blueChannel = paletteRow[2]
+                for (x in 0 until TextureRaster.currentWidth) {
+                    val rgb = rowPixels[x]
+                    blueChannel[x] = (rgb and 0xff) shl 4
+                    greenChannel[x] = (rgb and 0xff00) shr 4
+                    redChannel[x] = (rgb and 0xff0000) shr 12
                 }
             }
         }
-        return ints_3
+        return palette
     }
 
-    fun rasterizeShapes(ints_1: Array<IntArray?>) {
-        val i_3 = TextureRaster.currentWidth
-        val i_4 = TextureRaster.currentHeight
+    fun rasterizeShapes(pixelData: Array<IntArray?>) {
+        val width = TextureRaster.currentWidth
+        val height = TextureRaster.currentHeight
         @Suppress("UNCHECKED_CAST")
-        StaticMethods.setPixelBuffer(ints_1 as Array<IntArray>?)
+        StaticMethods.setPixelBuffer(pixelData as Array<IntArray>?)
         setClipBounds(TextureRaster.rowEnd, TextureRaster.columnEnd)
         if (shapes != null) {
-            for (i_5 in shapes!!.indices) {
-                val class1496 = shapes!![i_5] ?: continue
-                val i_7 = class1496.fillColor
-                val i_8 = class1496.strokeColor
-                if (i_7 >= 0) {
-                    if (i_8 >= 0) {
-                        class1496.drawFilledAndStroked(i_3, i_4)
+            for (i in shapes!!.indices) {
+                val shape = shapes!![i] ?: continue
+                val fill = shape.fillColor
+                val stroke = shape.strokeColor
+                if (fill >= 0) {
+                    if (stroke >= 0) {
+                        shape.drawFilledAndStroked(width, height)
                     } else {
-                        class1496.drawFilled(i_3, i_4)
+                        shape.drawFilled(width, height)
                     }
-                } else if (i_8 >= 0) {
-                    class1496.drawStroked(i_3, i_4)
+                } else if (stroke >= 0) {
+                    shape.drawStroked(width, height)
                 }
             }
         }
     }
 
-    override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
-        when (i_1) {
+    override fun decodeOpcode(opcode: Int, buffer: Packet) {
+        when (opcode) {
             0 -> {
-                val count = rsbytebuffer2.readUByte()
+                val count = buffer.readUByte()
                 shapes = arrayOfNulls<TextureShapeRasterizer>(count)
-                for (i_4 in 0 until count) {
-                    val i_5 = rsbytebuffer2.readUByte()
-                    shapes!![i_4] = when (i_5) {
-                        0 -> LineRasterizer.decode(rsbytebuffer2)
-                        1 -> BezierCurveRasterizer.decode(rsbytebuffer2)
-                        2 -> RectangleRasterizer.decode(rsbytebuffer2)
-                        3 -> EllipseRasterizer.decode(rsbytebuffer2)
+                for (i in 0 until count) {
+                    val shapeType = buffer.readUByte()
+                    shapes!![i] = when (shapeType) {
+                        0 -> LineRasterizer.decode(buffer)
+                        1 -> BezierCurveRasterizer.decode(buffer)
+                        2 -> RectangleRasterizer.decode(buffer)
+                        3 -> EllipseRasterizer.decode(buffer)
                         else -> null
                     }
                 }
             }
-            1 -> monochrome = rsbytebuffer2.readUByte() == 1
+            1 -> monochrome = buffer.readUByte() == 1
         }
     }
 
@@ -100,11 +100,11 @@ class TextureOpRasterizer : TextureOperation(0, true) {
         @JvmField var clipMaxY = 100
 
         @JvmStatic
-        fun setClipBounds(i_2: Int, i_3: Int) {
+        fun setClipBounds(maxX: Int, maxY: Int) {
             clipMinX = 0
-            clipMaxX = i_2
+            clipMaxX = maxX
             clipMinY = 0
-            clipMaxY = i_3
+            clipMaxY = maxY
         }
     }
 }

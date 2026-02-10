@@ -17,12 +17,12 @@ class TextureOpMandelbrot : TextureOperation(0, true) {
     @JvmField var zoom: Int = 1365
     @JvmField var maxIterations: Int = 20
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val output = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
             for (i in 0 until TextureRaster.currentWidth) {
                 val offsetX = (TextureRaster.horizontalTable!![i] shl 12) / zoom + centerX
-                val offsetY = (TextureRaster.verticalTable!![i_1] shl 12) / zoom + centerY
+                val offsetY = (TextureRaster.verticalTable!![y] shl 12) / zoom + centerY
                 val startX = offsetX
                 val startY = offsetY
                 var realPart = offsetX

@@ -16,10 +16,10 @@ class TextureOpColorize : TextureOperation(1, false) {
     @JvmField var greenMultiplier: Int = 4096
     @JvmField var blueMultiplier: Int = 4096
 
-    override fun getColorOutput(i_1: Int): Array<IntArray> {
-        val palette = colorImageCache.getPalette(i_1)
+    override fun getColorOutput(y: Int): Array<IntArray> {
+        val palette = colorImageCache.getPalette(y)
         if (colorImageCache.dirty) {
-            val childOutput = getChildColorOutput(0, i_1)
+            val childOutput = getChildColorOutput(0, y)
             val inputRed = childOutput[0]
             val inputGreen = childOutput[1]
             val inputBlue = childOutput[2]

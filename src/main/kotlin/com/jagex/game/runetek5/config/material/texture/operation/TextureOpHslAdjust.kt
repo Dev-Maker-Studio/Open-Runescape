@@ -24,19 +24,19 @@ class TextureOpHslAdjust : TextureOperation(1, false) {
     @JvmField var outputGreen: Int = 0
     @JvmField var outputRed: Int = 0
 
-    override fun getColorOutput(i_1: Int): Array<IntArray> {
-        val ints_3 = colorImageCache.getPalette(i_1)
+    override fun getColorOutput(y: Int): Array<IntArray> {
+        val palette = colorImageCache.getPalette(y)
         if (colorImageCache.dirty) {
-            val ints_4 = getChildColorOutput(0, i_1)
-            val ints_5 = ints_4[0]
-            val ints_6 = ints_4[1]
-            val ints_7 = ints_4[2]
-            val ints_8 = ints_3[0]
-            val ints_9 = ints_3[1]
-            val ints_10 = ints_3[2]
+            val childColors = getChildColorOutput(0, y)
+            val inRed = childColors[0]
+            val inGreen = childColors[1]
+            val inBlue = childColors[2]
+            val outRedPixels = palette[0]
+            val outGreenPixels = palette[1]
+            val outBluePixels = palette[2]
 
-            for (i_11 in 0 until TextureRaster.currentWidth) {
-                rgbToHsl(ints_5[i_11], ints_6[i_11], ints_7[i_11])
+            for (x in 0 until TextureRaster.currentWidth) {
+                rgbToHsl(inRed[x], inGreen[x], inBlue[x])
                 hue += hueAdjust
                 saturation += saturationAdjust
 
@@ -66,38 +66,38 @@ class TextureOpHslAdjust : TextureOperation(1, false) {
                 }
 
                 hslToRgb(hue, saturation, lightness)
-                ints_8[i_11] = outputRed
-                ints_9[i_11] = outputGreen
-                ints_10[i_11] = outputBlue
+                outRedPixels[x] = outputRed
+                outGreenPixels[x] = outputGreen
+                outBluePixels[x] = outputBlue
             }
         }
 
-        return ints_3
+        return palette
     }
 
-    fun rgbToHsl(i_1: Int, i_2: Int, i_3: Int) {
-        var i_5 = max(i_1, i_2)
-        i_5 = max(i_3, i_5)
-        var i_6 = min(i_1, i_2)
-        i_6 = min(i_3, i_6)
-        val i_7 = i_5 - i_6
-        lightness = (i_6 + i_5) / 2
+    fun rgbToHsl(red: Int, green: Int, blue: Int) {
+        var maxChannel = max(red, green)
+        maxChannel = max(blue, maxChannel)
+        var minChannel = min(red, green)
+        minChannel = min(blue, minChannel)
+        val chroma = maxChannel - minChannel
+        lightness = (minChannel + maxChannel) / 2
 
         if (lightness > 0 && lightness < 4096) {
-            saturation = (i_7 shl 12) / (if (lightness <= 2048) lightness * 2 else 8192 - lightness * 2)
+            saturation = (chroma shl 12) / (if (lightness <= 2048) lightness * 2 else 8192 - lightness * 2)
         } else {
             saturation = 0
         }
 
-        if (i_7 > 0) {
-            val i_8 = (i_5 - i_1 shl 12) / i_7
-            val i_9 = (i_5 - i_2 shl 12) / i_7
-            val i_10 = (i_5 - i_3 shl 12) / i_7
+        if (chroma > 0) {
+            val distRed = (maxChannel - red shl 12) / chroma
+            val distGreen = (maxChannel - green shl 12) / chroma
+            val distBlue = (maxChannel - blue shl 12) / chroma
 
             hue = when {
-                i_5 == i_1 -> if (i_6 == i_2) i_10 + 20480 else 4096 - i_9
-                i_5 == i_2 -> if (i_3 == i_6) i_8 + 4096 else 12288 - i_10
-                else -> if (i_6 == i_1) i_9 + 12288 else 20480 - i_8
+                maxChannel == red -> if (minChannel == green) distBlue + 20480 else 4096 - distGreen
+                maxChannel == green -> if (blue == minChannel) distRed + 4096 else 12288 - distBlue
+                else -> if (minChannel == red) distGreen + 12288 else 20480 - distRed
             }
 
             hue /= 6
@@ -106,56 +106,56 @@ class TextureOpHslAdjust : TextureOperation(1, false) {
         }
     }
 
-    fun hslToRgb(i_1: Int, i_2: Int, i_3: Int) {
-        val i_5 = if (i_3 <= 2048) i_3 * (i_2 + 4096) shr 12 else i_3 + i_2 - (i_3 * i_2 shr 12)
+    fun hslToRgb(h: Int, s: Int, l: Int) {
+        val chroma = if (l <= 2048) l * (s + 4096) shr 12 else l + s - (l * s shr 12)
 
-        if (i_5 > 0) {
-            val adjustedHue = i_1 * 6
-            val i_6 = i_3 + i_3 - i_5
-            val i_7 = (i_5 - i_6 shl 12) / i_5
-            val i_8 = adjustedHue shr 12
-            val i_9 = adjustedHue - (i_8 shl 12)
-            var i_10 = i_7 * i_5 shr 12
-            i_10 = i_9 * i_10 shr 12
-            val i_11 = i_6 + i_10
-            val i_12 = i_5 - i_10
+        if (chroma > 0) {
+            val adjustedHue = h * 6
+            val minComponent = l + l - chroma
+            val satRange = (chroma - minComponent shl 12) / chroma
+            val hueRegion = adjustedHue shr 12
+            val hueFraction = adjustedHue - (hueRegion shl 12)
+            var hueOffset = satRange * chroma shr 12
+            hueOffset = hueFraction * hueOffset shr 12
+            val ascending = minComponent + hueOffset
+            val descending = chroma - hueOffset
 
-            when (i_8) {
+            when (hueRegion) {
                 0 -> {
-                    outputRed = i_5
-                    outputGreen = i_11
-                    outputBlue = i_6
+                    outputRed = chroma
+                    outputGreen = ascending
+                    outputBlue = minComponent
                 }
                 1 -> {
-                    outputRed = i_12
-                    outputGreen = i_5
-                    outputBlue = i_6
+                    outputRed = descending
+                    outputGreen = chroma
+                    outputBlue = minComponent
                 }
                 2 -> {
-                    outputRed = i_6
-                    outputGreen = i_5
-                    outputBlue = i_11
+                    outputRed = minComponent
+                    outputGreen = chroma
+                    outputBlue = ascending
                 }
                 3 -> {
-                    outputRed = i_6
-                    outputGreen = i_12
-                    outputBlue = i_5
+                    outputRed = minComponent
+                    outputGreen = descending
+                    outputBlue = chroma
                 }
                 4 -> {
-                    outputRed = i_11
-                    outputGreen = i_6
-                    outputBlue = i_5
+                    outputRed = ascending
+                    outputGreen = minComponent
+                    outputBlue = chroma
                 }
                 5 -> {
-                    outputRed = i_5
-                    outputGreen = i_6
-                    outputBlue = i_12
+                    outputRed = chroma
+                    outputGreen = minComponent
+                    outputBlue = descending
                 }
             }
         } else {
-            outputBlue = i_3 * -680551435
-            outputRed = i_3
-            outputGreen = i_3
+            outputBlue = l * -680551435
+            outputRed = l
+            outputGreen = l
         }
     }
 

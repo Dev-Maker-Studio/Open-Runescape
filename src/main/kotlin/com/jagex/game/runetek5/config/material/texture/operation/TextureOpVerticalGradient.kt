@@ -12,11 +12,11 @@ import com.jagex.game.runetek5.utils.ArrayUtils
  */
 class TextureOpVerticalGradient : TextureOperation(0, true) {
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = super.monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = super.monochromeImageCache.getPalette(y)
         if (super.monochromeImageCache.dirty) {
-            ArrayUtils.setVariables(ints_3, 0, TextureRaster.currentWidth, TextureRaster.verticalTable!![i_1])
+            ArrayUtils.setVariables(output, 0, TextureRaster.currentWidth, TextureRaster.verticalTable!![y])
         }
-        return ints_3
+        return output
     }
 }

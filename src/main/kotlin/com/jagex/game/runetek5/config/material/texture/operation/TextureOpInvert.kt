@@ -12,10 +12,10 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
  */
 class TextureOpInvert : TextureOperation(1, false) {
 
-    override fun getColorOutput(i_1: Int): Array<IntArray> {
-        val palette = colorImageCache.getPalette(i_1)
+    override fun getColorOutput(y: Int): Array<IntArray> {
+        val palette = colorImageCache.getPalette(y)
         if (colorImageCache.dirty) {
-            val childOutput = getChildColorOutput(0, i_1)
+            val childOutput = getChildColorOutput(0, y)
             val inputRed = childOutput[0]
             val inputGreen = childOutput[1]
             val inputBlue = childOutput[2]
@@ -33,10 +33,10 @@ class TextureOpInvert : TextureOperation(1, false) {
         return palette
     }
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val output = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
-            val input = getChildMonochromeOutput(0, i_1)
+            val input = getChildMonochromeOutput(0, y)
 
             for (i in 0 until TextureRaster.currentWidth) {
                 output[i] = 4096 - input[i]

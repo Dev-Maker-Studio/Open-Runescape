@@ -15,313 +15,313 @@ class TextureOpCombine : TextureOperation(2, false) {
     @JvmField
     var blendMode: Int = 6
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = super.monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val outputPixels = super.monochromeImageCache.getPalette(y)
         if (super.monochromeImageCache.dirty) {
-            val ints_4 = getChildMonochromeOutput(0, i_1)
-            val ints_5 = getChildMonochromeOutput(1, i_1)
-            var i_6: Int
-            var i_7: Int
-            var i_8: Int
+            val inputPixelsA = getChildMonochromeOutput(0, y)
+            val inputPixelsB = getChildMonochromeOutput(1, y)
+            var x: Int
+            var valueB: Int
+            var valueA: Int
             when (this.blendMode) {
                 1 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        ints_3[i_6] = ints_5[i_6] + ints_4[i_6]
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outputPixels[x] = inputPixelsB[x] + inputPixelsA[x]
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 2 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        ints_3[i_6] = ints_4[i_6] - ints_5[i_6]
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outputPixels[x] = inputPixelsA[x] - inputPixelsB[x]
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 3 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        ints_3[i_6] = ints_4[i_6] * ints_5[i_6] shr 12
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outputPixels[x] = inputPixelsA[x] * inputPixelsB[x] shr 12
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 4 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_5[i_6]
-                        ints_3[i_6] = if (i_7 != 0) (ints_4[i_6] shl 12) / i_7 else 4096
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueB = inputPixelsB[x]
+                        outputPixels[x] = if (valueB != 0) (inputPixelsA[x] shl 12) / valueB else 4096
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 5 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        ints_3[i_6] = 4096 - ((4096 - ints_4[i_6]) * (4096 - ints_5[i_6]) shr 12)
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outputPixels[x] = 4096 - ((4096 - inputPixelsA[x]) * (4096 - inputPixelsB[x]) shr 12)
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 6 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_5[i_6]
-                        ints_3[i_6] = if (i_7 < 2048) i_7 * ints_4[i_6] shr 11 else 4096 - ((4096 - ints_4[i_6]) * (4096 - i_7) shr 11)
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueB = inputPixelsB[x]
+                        outputPixels[x] = if (valueB < 2048) valueB * inputPixelsA[x] shr 11 else 4096 - ((4096 - inputPixelsA[x]) * (4096 - valueB) shr 11)
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 7 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_4[i_6]
-                        ints_3[i_6] = if (i_7 == 4096) 4096 else (ints_5[i_6] shl 12) / (4096 - i_7)
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueA = inputPixelsA[x]
+                        outputPixels[x] = if (valueA == 4096) 4096 else (inputPixelsB[x] shl 12) / (4096 - valueA)
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 8 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_4[i_6]
-                        ints_3[i_6] = if (i_7 == 0) 0 else 4096 - (4096 - ints_5[i_6] shl 12) / i_7
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueA = inputPixelsA[x]
+                        outputPixels[x] = if (valueA == 0) 0 else 4096 - (4096 - inputPixelsB[x] shl 12) / valueA
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 9 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_4[i_6]
-                        i_8 = ints_5[i_6]
-                        ints_3[i_6] = Math.min(i_7, i_8)
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueA = inputPixelsA[x]
+                        valueB = inputPixelsB[x]
+                        outputPixels[x] = Math.min(valueA, valueB)
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 10 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_4[i_6]
-                        i_8 = ints_5[i_6]
-                        ints_3[i_6] = Math.max(i_7, i_8)
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueA = inputPixelsA[x]
+                        valueB = inputPixelsB[x]
+                        outputPixels[x] = Math.max(valueA, valueB)
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 11 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_4[i_6]
-                        i_8 = ints_5[i_6]
-                        ints_3[i_6] = if (i_7 > i_8) i_7 - i_8 else i_8 - i_7
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueA = inputPixelsA[x]
+                        valueB = inputPixelsB[x]
+                        outputPixels[x] = if (valueA > valueB) valueA - valueB else valueB - valueA
+                        x++
                     }
-                    return ints_3
+                    return outputPixels
                 }
                 12 -> {
-                    i_6 = 0
-                    while (i_6 < TextureRaster.currentWidth) {
-                        i_7 = ints_4[i_6]
-                        i_8 = ints_5[i_6]
-                        ints_3[i_6] = i_8 + i_7 - (i_7 * i_8 shr 11)
-                        i_6++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        valueA = inputPixelsA[x]
+                        valueB = inputPixelsB[x]
+                        outputPixels[x] = valueB + valueA - (valueA * valueB shr 11)
+                        x++
                     }
                 }
             }
         }
-        return ints_3
+        return outputPixels
     }
 
-    override fun getColorOutput(i_1: Int): Array<IntArray> {
-        val ints_3 = super.colorImageCache.getPalette(i_1)
+    override fun getColorOutput(y: Int): Array<IntArray> {
+        val palette = super.colorImageCache.getPalette(y)
         if (super.colorImageCache.dirty) {
-            val ints_4 = getChildColorOutput(0, i_1)
-            val ints_5 = getChildColorOutput(1, i_1)
-            val ints_6 = ints_3[0]
-            val ints_7 = ints_3[1]
-            val ints_8 = ints_3[2]
-            val ints_9 = ints_4[0]
-            val ints_10 = ints_4[1]
-            val ints_11 = ints_4[2]
-            val ints_12 = ints_5[0]
-            val ints_13 = ints_5[1]
-            val ints_14 = ints_5[2]
-            var i_15: Int
-            var i_16: Int
-            var i_17: Int
-            var i_18: Int
-            var i_19: Int
-            var i_20: Int
-            var i_21: Int
+            val childColorsA = getChildColorOutput(0, y)
+            val childColorsB = getChildColorOutput(1, y)
+            val outRed = palette[0]
+            val outGreen = palette[1]
+            val outBlue = palette[2]
+            val inRedA = childColorsA[0]
+            val inGreenA = childColorsA[1]
+            val inBlueA = childColorsA[2]
+            val inRedB = childColorsB[0]
+            val inGreenB = childColorsB[1]
+            val inBlueB = childColorsB[2]
+            var x: Int
+            var redB: Int
+            var greenB: Int
+            var blueB: Int
+            var redA: Int
+            var greenA: Int
+            var blueA: Int
             when (this.blendMode) {
                 1 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        ints_6[i_15] = ints_9[i_15] + ints_12[i_15]
-                        ints_7[i_15] = ints_10[i_15] + ints_13[i_15]
-                        ints_8[i_15] = ints_14[i_15] + ints_11[i_15]
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outRed[x] = inRedA[x] + inRedB[x]
+                        outGreen[x] = inGreenA[x] + inGreenB[x]
+                        outBlue[x] = inBlueB[x] + inBlueA[x]
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 2 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        ints_6[i_15] = ints_9[i_15] - ints_12[i_15]
-                        ints_7[i_15] = ints_10[i_15] - ints_13[i_15]
-                        ints_8[i_15] = ints_11[i_15] - ints_14[i_15]
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outRed[x] = inRedA[x] - inRedB[x]
+                        outGreen[x] = inGreenA[x] - inGreenB[x]
+                        outBlue[x] = inBlueA[x] - inBlueB[x]
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 3 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        ints_6[i_15] = ints_12[i_15] * ints_9[i_15] shr 12
-                        ints_7[i_15] = ints_10[i_15] * ints_13[i_15] shr 12
-                        ints_8[i_15] = ints_11[i_15] * ints_14[i_15] shr 12
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outRed[x] = inRedB[x] * inRedA[x] shr 12
+                        outGreen[x] = inGreenA[x] * inGreenB[x] shr 12
+                        outBlue[x] = inBlueA[x] * inBlueB[x] shr 12
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 4 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_12[i_15]
-                        i_17 = ints_13[i_15]
-                        i_18 = ints_14[i_15]
-                        ints_6[i_15] = if (i_16 != 0) (ints_9[i_15] shl 12) / i_16 else 4096
-                        ints_7[i_15] = if (i_17 != 0) (ints_10[i_15] shl 12) / i_17 else 4096
-                        ints_8[i_15] = if (i_18 != 0) (ints_11[i_15] shl 12) / i_18 else 4096
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redB = inRedB[x]
+                        greenB = inGreenB[x]
+                        blueB = inBlueB[x]
+                        outRed[x] = if (redB != 0) (inRedA[x] shl 12) / redB else 4096
+                        outGreen[x] = if (greenB != 0) (inGreenA[x] shl 12) / greenB else 4096
+                        outBlue[x] = if (blueB != 0) (inBlueA[x] shl 12) / blueB else 4096
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 5 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        ints_6[i_15] = 4096 - ((4096 - ints_12[i_15]) * (4096 - ints_9[i_15]) shr 12)
-                        ints_7[i_15] = 4096 - ((4096 - ints_10[i_15]) * (4096 - ints_13[i_15]) shr 12)
-                        ints_8[i_15] = 4096 - ((4096 - ints_11[i_15]) * (4096 - ints_14[i_15]) shr 12)
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        outRed[x] = 4096 - ((4096 - inRedB[x]) * (4096 - inRedA[x]) shr 12)
+                        outGreen[x] = 4096 - ((4096 - inGreenA[x]) * (4096 - inGreenB[x]) shr 12)
+                        outBlue[x] = 4096 - ((4096 - inBlueA[x]) * (4096 - inBlueB[x]) shr 12)
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 6 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_12[i_15]
-                        i_17 = ints_13[i_15]
-                        i_18 = ints_14[i_15]
-                        ints_6[i_15] = if (i_16 < 2048) i_16 * ints_9[i_15] shr 11 else 4096 - ((4096 - ints_9[i_15]) * (4096 - i_16) shr 11)
-                        ints_7[i_15] = if (i_17 < 2048) i_17 * ints_10[i_15] shr 11 else 4096 - ((4096 - ints_10[i_15]) * (4096 - i_17) shr 11)
-                        ints_8[i_15] = if (i_18 < 2048) i_18 * ints_11[i_15] shr 11 else 4096 - ((4096 - ints_11[i_15]) * (4096 - i_18) shr 11)
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redB = inRedB[x]
+                        greenB = inGreenB[x]
+                        blueB = inBlueB[x]
+                        outRed[x] = if (redB < 2048) redB * inRedA[x] shr 11 else 4096 - ((4096 - inRedA[x]) * (4096 - redB) shr 11)
+                        outGreen[x] = if (greenB < 2048) greenB * inGreenA[x] shr 11 else 4096 - ((4096 - inGreenA[x]) * (4096 - greenB) shr 11)
+                        outBlue[x] = if (blueB < 2048) blueB * inBlueA[x] shr 11 else 4096 - ((4096 - inBlueA[x]) * (4096 - blueB) shr 11)
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 7 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_9[i_15]
-                        i_17 = ints_10[i_15]
-                        i_18 = ints_11[i_15]
-                        ints_6[i_15] = if (i_16 == 4096) 4096 else (ints_12[i_15] shl 12) / (4096 - i_16)
-                        ints_7[i_15] = if (i_17 == 4096) 4096 else (ints_13[i_15] shl 12) / (4096 - i_17)
-                        ints_8[i_15] = if (i_18 == 4096) 4096 else (ints_14[i_15] shl 12) / (4096 - i_18)
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redA = inRedA[x]
+                        greenA = inGreenA[x]
+                        blueA = inBlueA[x]
+                        outRed[x] = if (redA == 4096) 4096 else (inRedB[x] shl 12) / (4096 - redA)
+                        outGreen[x] = if (greenA == 4096) 4096 else (inGreenB[x] shl 12) / (4096 - greenA)
+                        outBlue[x] = if (blueA == 4096) 4096 else (inBlueB[x] shl 12) / (4096 - blueA)
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 8 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_9[i_15]
-                        i_17 = ints_10[i_15]
-                        i_18 = ints_11[i_15]
-                        ints_6[i_15] = if (i_16 == 0) 0 else 4096 - (4096 - ints_12[i_15] shl 12) / i_16
-                        ints_7[i_15] = if (i_17 == 0) 0 else 4096 - (4096 - ints_13[i_15] shl 12) / i_17
-                        ints_8[i_15] = if (i_18 == 0) 0 else 4096 - (4096 - ints_14[i_15] shl 12) / i_18
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redA = inRedA[x]
+                        greenA = inGreenA[x]
+                        blueA = inBlueA[x]
+                        outRed[x] = if (redA == 0) 0 else 4096 - (4096 - inRedB[x] shl 12) / redA
+                        outGreen[x] = if (greenA == 0) 0 else 4096 - (4096 - inGreenB[x] shl 12) / greenA
+                        outBlue[x] = if (blueA == 0) 0 else 4096 - (4096 - inBlueB[x] shl 12) / blueA
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 9 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_9[i_15]
-                        i_17 = ints_10[i_15]
-                        i_18 = ints_11[i_15]
-                        i_19 = ints_12[i_15]
-                        i_20 = ints_13[i_15]
-                        i_21 = ints_14[i_15]
-                        ints_6[i_15] = Math.min(i_16, i_19)
-                        ints_7[i_15] = Math.min(i_17, i_20)
-                        ints_8[i_15] = Math.min(i_18, i_21)
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redA = inRedA[x]
+                        greenA = inGreenA[x]
+                        blueA = inBlueA[x]
+                        redB = inRedB[x]
+                        greenB = inGreenB[x]
+                        blueB = inBlueB[x]
+                        outRed[x] = Math.min(redA, redB)
+                        outGreen[x] = Math.min(greenA, greenB)
+                        outBlue[x] = Math.min(blueA, blueB)
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 10 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_9[i_15]
-                        i_17 = ints_10[i_15]
-                        i_18 = ints_11[i_15]
-                        i_19 = ints_12[i_15]
-                        i_20 = ints_13[i_15]
-                        i_21 = ints_14[i_15]
-                        ints_6[i_15] = Math.max(i_16, i_19)
-                        ints_7[i_15] = Math.max(i_17, i_20)
-                        ints_8[i_15] = Math.max(i_18, i_21)
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redA = inRedA[x]
+                        greenA = inGreenA[x]
+                        blueA = inBlueA[x]
+                        redB = inRedB[x]
+                        greenB = inGreenB[x]
+                        blueB = inBlueB[x]
+                        outRed[x] = Math.max(redA, redB)
+                        outGreen[x] = Math.max(greenA, greenB)
+                        outBlue[x] = Math.max(blueA, blueB)
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 11 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_9[i_15]
-                        i_17 = ints_10[i_15]
-                        i_18 = ints_11[i_15]
-                        i_19 = ints_12[i_15]
-                        i_20 = ints_13[i_15]
-                        i_21 = ints_14[i_15]
-                        ints_6[i_15] = if (i_16 > i_19) i_16 - i_19 else i_19 - i_16
-                        ints_7[i_15] = if (i_17 > i_20) i_17 - i_20 else i_20 - i_17
-                        ints_8[i_15] = if (i_18 > i_21) i_18 - i_21 else i_21 - i_18
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redA = inRedA[x]
+                        greenA = inGreenA[x]
+                        blueA = inBlueA[x]
+                        redB = inRedB[x]
+                        greenB = inGreenB[x]
+                        blueB = inBlueB[x]
+                        outRed[x] = if (redA > redB) redA - redB else redB - redA
+                        outGreen[x] = if (greenA > greenB) greenA - greenB else greenB - greenA
+                        outBlue[x] = if (blueA > blueB) blueA - blueB else blueB - blueA
+                        x++
                     }
-                    return ints_3
+                    return palette
                 }
                 12 -> {
-                    i_15 = 0
-                    while (i_15 < TextureRaster.currentWidth) {
-                        i_16 = ints_9[i_15]
-                        i_17 = ints_10[i_15]
-                        i_18 = ints_11[i_15]
-                        i_19 = ints_12[i_15]
-                        i_20 = ints_13[i_15]
-                        i_21 = ints_14[i_15]
-                        ints_6[i_15] = i_16 + i_19 - (i_19 * i_16 shr 11)
-                        ints_7[i_15] = i_20 + i_17 - (i_20 * i_17 shr 11)
-                        ints_8[i_15] = i_21 + i_18 - (i_21 * i_18 shr 11)
-                        i_15++
+                    x = 0
+                    while (x < TextureRaster.currentWidth) {
+                        redA = inRedA[x]
+                        greenA = inGreenA[x]
+                        blueA = inBlueA[x]
+                        redB = inRedB[x]
+                        greenB = inGreenB[x]
+                        blueB = inBlueB[x]
+                        outRed[x] = redA + redB - (redB * redA shr 11)
+                        outGreen[x] = greenB + greenA - (greenB * greenA shr 11)
+                        outBlue[x] = blueB + blueA - (blueB * blueA shr 11)
+                        x++
                     }
                 }
             }
         }
-        return ints_3
+        return palette
     }
 
-    override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
-        when (i_1) {
-            0 -> this.blendMode = rsbytebuffer2.readUByte()
-            1 -> super.monochrome = rsbytebuffer2.readUByte() == 1
+    override fun decodeOpcode(opcode: Int, buffer: Packet) {
+        when (opcode) {
+            0 -> this.blendMode = buffer.readUByte()
+            1 -> super.monochrome = buffer.readUByte() == 1
         }
     }
 }

@@ -42,169 +42,170 @@ class TextureOpPerlinNoise : TextureOperation(0, true) {
     @JvmField
     var amplitudeMultipliers: ShortArray? = null
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = super.monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = super.monochromeImageCache.getPalette(y)
         if (super.monochromeImageCache.dirty) {
-            computeNoiseStep(i_1, ints_3)
+            computeNoiseStep(y, output)
         }
-        return ints_3
+        return output
     }
 
-    fun computeNoiseStep(i_1: Int, ints_2: IntArray) {
-        val i_4 = TextureRaster.verticalTable!![i_1] * texCoordScaleY
-        var s_5: Short
-        var i_6: Int
-        var i_7: Int
-        var i_8: Int
-        var i_9: Int
-        var i_10: Int
-        var i_11: Int
-        var i_12: Int
-        var i_13: Int
-        var i_14: Int
-        var i_15: Int
-        var i_16: Int
-        var i_17: Int
+    fun computeNoiseStep(y: Int, pixels: IntArray) {
+        val scaledY = TextureRaster.verticalTable!![y] * texCoordScaleY
+        var stepMult: Short
+        var ampScale: Int
+        var rangeY: Int
+        var rangeX: Int
+        var coordY: Int
+        var gridY: Int
+        var nextGridY: Int
+        var fracY: Int
+        var lerpY: Int
+        var noiseRowA: Int
+        var noiseRowB: Int
+        var x: Int
+        var scaledX: Int
+        var noiseValue: Int
         if (numNoiseSteps == 1) {
-            s_5 = stepMultipliers!![0]
-            i_6 = amplitudeMultipliers!![0].toInt() shl 12
-            i_7 = i_6 * texCoordScaleY shr 12
-            i_8 = i_6 * texCoordScaleX shr 12
-            i_9 = i_6 * i_4 shr 12
-            i_10 = i_9 shr 12
-            i_11 = i_10 + 1
-            if (i_11 >= i_7) {
-                i_11 = 0
+            stepMult = stepMultipliers!![0]
+            ampScale = amplitudeMultipliers!![0].toInt() shl 12
+            rangeY = ampScale * texCoordScaleY shr 12
+            rangeX = ampScale * texCoordScaleX shr 12
+            coordY = ampScale * scaledY shr 12
+            gridY = coordY shr 12
+            nextGridY = gridY + 1
+            if (nextGridY >= rangeY) {
+                nextGridY = 0
             }
-            i_9 = i_9 and 0xfff
-            i_12 = WaterTextureGenerator.SINE_WAVE[i_9]
-            i_13 = noiseArray[i_10 and 0xff].toInt() and 0xff
-            i_14 = noiseArray[i_11 and 0xff].toInt() and 0xff
+            coordY = coordY and 0xfff
+            fracY = WaterTextureGenerator.SINE_WAVE[coordY]
+            noiseRowA = noiseArray[gridY and 0xff].toInt() and 0xff
+            noiseRowB = noiseArray[nextGridY and 0xff].toInt() and 0xff
             if (useFogEffect) {
-                i_15 = 0
-                while (i_15 < TextureRaster.currentWidth) {
-                    i_16 = TextureRaster.horizontalTable!![i_15] * texCoordScaleX
-                    i_17 = computeNoise(i_6 * i_16 shr 12, i_9, i_13, i_14, i_12, i_8)
-                    i_17 = s_5 * i_17 shr 12
-                    ints_2[i_15] = (i_17 shr 1) + 2048
-                    i_15++
+                x = 0
+                while (x < TextureRaster.currentWidth) {
+                    scaledX = TextureRaster.horizontalTable!![x] * texCoordScaleX
+                    noiseValue = computeNoise(ampScale * scaledX shr 12, coordY, noiseRowA, noiseRowB, fracY, rangeX)
+                    noiseValue = stepMult * noiseValue shr 12
+                    pixels[x] = (noiseValue shr 1) + 2048
+                    x++
                 }
             } else {
-                i_15 = 0
-                while (i_15 < TextureRaster.currentWidth) {
-                    i_16 = TextureRaster.horizontalTable!![i_15] * texCoordScaleX
-                    i_17 = computeNoise(i_6 * i_16 shr 12, i_9, i_13, i_14, i_12, i_8)
-                    ints_2[i_15] = s_5 * i_17 shr 12
-                    i_15++
+                x = 0
+                while (x < TextureRaster.currentWidth) {
+                    scaledX = TextureRaster.horizontalTable!![x] * texCoordScaleX
+                    noiseValue = computeNoise(ampScale * scaledX shr 12, coordY, noiseRowA, noiseRowB, fracY, rangeX)
+                    pixels[x] = stepMult * noiseValue shr 12
+                    x++
                 }
             }
         } else {
-            s_5 = stepMultipliers!![0]
-            if (s_5 > 8 || s_5 < -8) {
-                i_6 = amplitudeMultipliers!![0].toInt() shl 12
-                i_7 = i_6 * texCoordScaleY shr 12
-                i_8 = i_6 * texCoordScaleX shr 12
-                i_9 = i_4 * i_6 shr 12
-                i_10 = i_9 shr 12
-                i_11 = i_10 + 1
-                if (i_11 >= i_7) {
-                    i_11 = 0
+            stepMult = stepMultipliers!![0]
+            if (stepMult > 8 || stepMult < -8) {
+                ampScale = amplitudeMultipliers!![0].toInt() shl 12
+                rangeY = ampScale * texCoordScaleY shr 12
+                rangeX = ampScale * texCoordScaleX shr 12
+                coordY = scaledY * ampScale shr 12
+                gridY = coordY shr 12
+                nextGridY = gridY + 1
+                if (nextGridY >= rangeY) {
+                    nextGridY = 0
                 }
-                i_9 = i_9 and 0xfff
-                i_12 = WaterTextureGenerator.SINE_WAVE[i_9]
-                i_13 = noiseArray[i_10 and 0xff].toInt() and 0xff
-                i_14 = noiseArray[i_11 and 0xff].toInt() and 0xff
-                i_15 = 0
-                while (i_15 < TextureRaster.currentWidth) {
-                    i_16 = TextureRaster.horizontalTable!![i_15] * texCoordScaleX
-                    i_17 = computeNoise(i_6 * i_16 shr 12, i_9, i_13, i_14, i_12, i_8)
-                    ints_2[i_15] = i_17 * s_5 shr 12
-                    i_15++
+                coordY = coordY and 0xfff
+                fracY = WaterTextureGenerator.SINE_WAVE[coordY]
+                noiseRowA = noiseArray[gridY and 0xff].toInt() and 0xff
+                noiseRowB = noiseArray[nextGridY and 0xff].toInt() and 0xff
+                x = 0
+                while (x < TextureRaster.currentWidth) {
+                    scaledX = TextureRaster.horizontalTable!![x] * texCoordScaleX
+                    noiseValue = computeNoise(ampScale * scaledX shr 12, coordY, noiseRowA, noiseRowB, fracY, rangeX)
+                    pixels[x] = noiseValue * stepMult shr 12
+                    x++
                 }
             }
-            i_6 = 1
-            while (i_6 < numNoiseSteps) {
-                s_5 = stepMultipliers!![i_6]
-                if (s_5 > 8 || s_5 < -8) {
-                    i_7 = amplitudeMultipliers!![i_6].toInt() shl 12
-                    i_8 = i_7 * texCoordScaleY shr 12
-                    i_9 = i_7 * texCoordScaleX shr 12
-                    i_10 = i_4 * i_7 shr 12
-                    i_11 = i_10 shr 12
-                    i_12 = i_11 + 1
-                    if (i_12 >= i_8) {
-                        i_12 = 0
+            ampScale = 1
+            while (ampScale < numNoiseSteps) {
+                stepMult = stepMultipliers!![ampScale]
+                if (stepMult > 8 || stepMult < -8) {
+                    rangeY = amplitudeMultipliers!![ampScale].toInt() shl 12
+                    rangeX = rangeY * texCoordScaleY shr 12
+                    coordY = rangeY * texCoordScaleX shr 12
+                    gridY = scaledY * rangeY shr 12
+                    nextGridY = gridY shr 12
+                    fracY = nextGridY + 1
+                    if (fracY >= rangeX) {
+                        fracY = 0
                     }
-                    i_10 = i_10 and 0xfff
-                    i_13 = WaterTextureGenerator.SINE_WAVE[i_10]
-                    i_14 = noiseArray[i_11 and 0xff].toInt() and 0xff
-                    i_15 = noiseArray[i_12 and 0xff].toInt() and 0xff
-                    var i_18: Int
-                    if (useFogEffect && i_6 == numNoiseSteps - 1) {
-                        i_16 = 0
-                        while (i_16 < TextureRaster.currentWidth) {
-                            i_17 = TextureRaster.horizontalTable!![i_16] * texCoordScaleX
-                            i_18 = computeNoise(i_17 * i_7 shr 12, i_10, i_14, i_15, i_13, i_9)
-                            i_18 = ints_2[i_16] + (s_5 * i_18 shr 12)
-                            ints_2[i_16] = (i_18 shr 1) + 2048
-                            i_16++
+                    gridY = gridY and 0xfff
+                    noiseRowA = WaterTextureGenerator.SINE_WAVE[gridY]
+                    noiseRowB = noiseArray[nextGridY and 0xff].toInt() and 0xff
+                    x = noiseArray[fracY and 0xff].toInt() and 0xff
+                    var accumulated: Int
+                    if (useFogEffect && ampScale == numNoiseSteps - 1) {
+                        scaledX = 0
+                        while (scaledX < TextureRaster.currentWidth) {
+                            noiseValue = TextureRaster.horizontalTable!![scaledX] * texCoordScaleX
+                            accumulated = computeNoise(noiseValue * rangeY shr 12, gridY, noiseRowB, x, noiseRowA, coordY)
+                            accumulated = pixels[scaledX] + (stepMult * accumulated shr 12)
+                            pixels[scaledX] = (accumulated shr 1) + 2048
+                            scaledX++
                         }
                     } else {
-                        i_16 = 0
-                        while (i_16 < TextureRaster.currentWidth) {
-                            i_17 = TextureRaster.horizontalTable!![i_16] * texCoordScaleX
-                            i_18 = computeNoise(i_7 * i_17 shr 12, i_10, i_14, i_15, i_13, i_9)
-                            ints_2[i_16] += i_18 * s_5 shr 12
-                            i_16++
+                        scaledX = 0
+                        while (scaledX < TextureRaster.currentWidth) {
+                            noiseValue = TextureRaster.horizontalTable!![scaledX] * texCoordScaleX
+                            accumulated = computeNoise(rangeY * noiseValue shr 12, gridY, noiseRowB, x, noiseRowA, coordY)
+                            pixels[scaledX] += accumulated * stepMult shr 12
+                            scaledX++
                         }
                     }
                 }
-                i_6++
+                ampScale++
             }
         }
     }
 
-    fun computeNoise(coordX: Int, coordY: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
+    fun computeNoise(coordX: Int, coordY: Int, noiseRowA: Int, noiseRowB: Int, lerpY: Int, rangeX: Int): Int {
         var posX = coordX shr 12
         var nextPosX = posX + 1
-        if (nextPosX >= i_6) {
+        if (nextPosX >= rangeX) {
             nextPosX = 0
         }
-        val coordXMasked = coordX and 0xfff
+        val fracX = coordX and 0xfff
         posX = posX and 0xff
         nextPosX = nextPosX and 0xff
-        val negPosX = coordXMasked - 4096
-        val negPosY = coordY - 4096
-        val noise1 = WaterTextureGenerator.SINE_WAVE[coordXMasked]
-        var noiseType1 = noiseArray[i_3 + posX].toInt() and 0x3
-        var i_14: Int
-        i_14 = if (noiseType1 <= 1) {
-            if (noiseType1 == 0) coordY + coordXMasked else coordY - coordXMasked
+        val negFracX = fracX - 4096
+        val negFracY = coordY - 4096
+        val lerpX = WaterTextureGenerator.SINE_WAVE[fracX]
+        var gradientType = noiseArray[noiseRowA + posX].toInt() and 0x3
+        var gradientA: Int
+        gradientA = if (gradientType <= 1) {
+            if (gradientType == 0) coordY + fracX else coordY - fracX
         } else {
-            if (noiseType1 == 2) coordXMasked - coordY else -coordXMasked - coordY
+            if (gradientType == 2) fracX - coordY else -fracX - coordY
         }
-        noiseType1 = noiseArray[i_3 + nextPosX].toInt() and 0x3
-        var i_15: Int
-        i_15 = if (noiseType1 <= 1) {
-            if (noiseType1 == 0) negPosX + coordY else coordY - negPosX
+        gradientType = noiseArray[noiseRowA + nextPosX].toInt() and 0x3
+        var gradientB: Int
+        gradientB = if (gradientType <= 1) {
+            if (gradientType == 0) negFracX + coordY else coordY - negFracX
         } else {
-            if (noiseType1 == 2) negPosX - coordY else -negPosX - coordY
+            if (gradientType == 2) negFracX - coordY else -negFracX - coordY
         }
-        val i_16 = i_14 + (noise1 * (i_15 - i_14) shr 12)
-        noiseType1 = noiseArray[posX + i_4].toInt() and 0x3
-        i_14 = if (noiseType1 <= 1) {
-            if (noiseType1 == 0) negPosY + coordXMasked else negPosY - coordXMasked
+        val interpX = gradientA + (lerpX * (gradientB - gradientA) shr 12)
+        gradientType = noiseArray[posX + noiseRowB].toInt() and 0x3
+        gradientA = if (gradientType <= 1) {
+            if (gradientType == 0) negFracY + fracX else negFracY - fracX
         } else {
-            if (noiseType1 == 2) coordXMasked - negPosY else -coordXMasked - negPosY
+            if (gradientType == 2) fracX - negFracY else -fracX - negFracY
         }
-        noiseType1 = noiseArray[nextPosX + i_4].toInt() and 0x3
-        i_15 = if (noiseType1 <= 1) {
-            if (noiseType1 == 0) negPosX + negPosY else negPosY - negPosX
+        gradientType = noiseArray[nextPosX + noiseRowB].toInt() and 0x3
+        gradientB = if (gradientType <= 1) {
+            if (gradientType == 0) negFracX + negFracY else negFracY - negFracX
         } else {
-            if (noiseType1 == 2) negPosX - negPosY else -negPosX - negPosY
+            if (gradientType == 2) negFracX - negFracY else -negFracX - negFracY
         }
-        val i_17 = i_14 + (noise1 * (i_15 - i_14) shr 12)
-        return i_16 + (i_5 * (i_17 - i_16) shr 12)
+        val interpY = gradientA + (lerpX * (gradientB - gradientA) shr 12)
+        return interpX + (lerpY * (interpY - interpX) shr 12)
     }
 
     override fun postDecode() {
@@ -233,8 +234,8 @@ class TextureOpPerlinNoise : TextureOperation(0, true) {
                 noiseAmplitude = buffer.readShort()
                 if (noiseAmplitude < 0) {
                     stepMultipliers = ShortArray(numNoiseSteps)
-                    for (i_4 in 0 until numNoiseSteps) {
-                        stepMultipliers!![i_4] = buffer.readShort().toShort()
+                    for (i in 0 until numNoiseSteps) {
+                        stepMultipliers!![i] = buffer.readShort().toShort()
                     }
                 }
             }

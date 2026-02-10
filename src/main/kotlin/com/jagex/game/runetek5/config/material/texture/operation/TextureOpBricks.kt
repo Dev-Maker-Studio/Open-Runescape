@@ -30,63 +30,63 @@ class TextureOpBricks : TextureOperation(0, true) {
     @JvmField var columnBoundaries: Array<IntArray>? = null
     @JvmField var brickBrightness: Array<IntArray>? = null
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
-            var i_4 = 0
+            var rowIdx = 0
 
-            var i_5 = TextureRaster.verticalTable!![i_1] + verticalOffset
-            while (i_5 < 0) {
-                i_5 += 4096
+            var verticalPos = TextureRaster.verticalTable!![y] + verticalOffset
+            while (verticalPos < 0) {
+                verticalPos += 4096
             }
 
-            while (i_5 > 4096) {
-                i_5 -= 4096
+            while (verticalPos > 4096) {
+                verticalPos -= 4096
             }
 
-            while (i_4 < rowCount && i_5 >= rowBoundaries!![i_4]) {
-                ++i_4
+            while (rowIdx < rowCount && verticalPos >= rowBoundaries!![rowIdx]) {
+                ++rowIdx
             }
 
-            val i_6 = i_4 - 1
-            val bool7 = (i_4 and 0x1) == 0
-            val i_8 = rowBoundaries!![i_4]
-            val i_9 = rowBoundaries!![i_4 - 1]
+            val brickRow = rowIdx - 1
+            val isEvenRow = (rowIdx and 0x1) == 0
+            val rowTop = rowBoundaries!![rowIdx]
+            val rowBottom = rowBoundaries!![rowIdx - 1]
 
-            if (i_5 > i_9 + halfMortarThickness && i_5 < i_8 - halfMortarThickness) {
-                for (i_10 in 0 until TextureRaster.currentWidth) {
-                    var i_11 = 0
-                    val i_12 = if (bool7) staggerAmount else -staggerAmount
+            if (verticalPos > rowBottom + halfMortarThickness && verticalPos < rowTop - halfMortarThickness) {
+                for (x in 0 until TextureRaster.currentWidth) {
+                    var colIdx = 0
+                    val stagger = if (isEvenRow) staggerAmount else -staggerAmount
 
-                    var i_13 = TextureRaster.horizontalTable!![i_10] + (i_12 * columnWidth shr 12)
-                    while (i_13 < 0) {
-                        i_13 += 4096
+                    var horizontalPos = TextureRaster.horizontalTable!![x] + (stagger * columnWidth shr 12)
+                    while (horizontalPos < 0) {
+                        horizontalPos += 4096
                     }
 
-                    while (i_13 > 4096) {
-                        i_13 -= 4096
+                    while (horizontalPos > 4096) {
+                        horizontalPos -= 4096
                     }
 
-                    while (i_11 < columnsPerRow && i_13 >= columnBoundaries!![i_6][i_11]) {
-                        ++i_11
+                    while (colIdx < columnsPerRow && horizontalPos >= columnBoundaries!![brickRow][colIdx]) {
+                        ++colIdx
                     }
 
-                    val i_14 = i_11 - 1
-                    val i_15 = columnBoundaries!![i_6][i_14]
-                    val i_16 = columnBoundaries!![i_6][i_11]
+                    val brickCol = colIdx - 1
+                    val colLeft = columnBoundaries!![brickRow][brickCol]
+                    val colRight = columnBoundaries!![brickRow][colIdx]
 
-                    if (i_13 > i_15 + halfMortarThickness && i_13 < i_16 - halfMortarThickness) {
-                        ints_3[i_10] = brickBrightness!![i_6][i_14]
+                    if (horizontalPos > colLeft + halfMortarThickness && horizontalPos < colRight - halfMortarThickness) {
+                        output[x] = brickBrightness!![brickRow][brickCol]
                     } else {
-                        ints_3[i_10] = 0
+                        output[x] = 0
                     }
                 }
             } else {
-                ArrayUtils.setVariables(ints_3, 0, TextureRaster.currentWidth, 0)
+                ArrayUtils.setVariables(output, 0, TextureRaster.currentWidth, 0)
             }
         }
 
-        return ints_3
+        return output
     }
 
     override fun decodeOpcode(opcode: Int, buffer: Packet) {
@@ -103,45 +103,45 @@ class TextureOpBricks : TextureOperation(0, true) {
     }
 
     fun generateBrickLayout() {
-        val random2 = Random(rowCount.toLong())
+        val rng = Random(rowCount.toLong())
         halfMortarThickness = mortarThickness / 2
         columnWidth = 4096 / columnsPerRow
         rowHeight = 4096 / rowCount
-        val i_3 = columnWidth / 2
-        val i_4 = rowHeight / 2
+        val halfColumnWidth = columnWidth / 2
+        val halfRowHeight = rowHeight / 2
         rowBoundaries = IntArray(rowCount + 1)
         columnBoundaries = Array(rowCount) { IntArray(columnsPerRow + 1) }
         brickBrightness = Array(rowCount) { IntArray(columnsPerRow) }
         rowBoundaries!![0] = 0
 
-        for (i_5 in 0 until rowCount) {
-            var i_6: Int
-            var i_7: Int
-            if (i_5 > 0) {
-                i_6 = rowHeight
-                i_7 = (StaticMethods.boundedRandom(random2, 4096) - 2048) * rowHeightVariation shr 12
-                val adjusted = i_6 + (i_7 * i_4 shr 12)
-                rowBoundaries!![i_5] = adjusted + rowBoundaries!![i_5 - 1]
+        for (row in 0 until rowCount) {
+            var baseHeight: Int
+            var variation: Int
+            if (row > 0) {
+                baseHeight = rowHeight
+                variation = (StaticMethods.boundedRandom(rng, 4096) - 2048) * rowHeightVariation shr 12
+                val adjusted = baseHeight + (variation * halfRowHeight shr 12)
+                rowBoundaries!![row] = adjusted + rowBoundaries!![row - 1]
             }
 
-            columnBoundaries!![i_5][0] = 0
+            columnBoundaries!![row][0] = 0
 
-            for (i_6_2 in 0 until columnsPerRow) {
-                if (i_6_2 > 0) {
-                    i_7 = columnWidth
-                    val i_8 = (StaticMethods.boundedRandom(random2, 4096) - 2048) * columnWidthVariation shr 12
-                    val adjusted = i_7 + (i_8 * i_3 shr 12)
-                    columnBoundaries!![i_5][i_6_2] = columnBoundaries!![i_5][i_6_2 - 1] + adjusted
+            for (col in 0 until columnsPerRow) {
+                if (col > 0) {
+                    variation = columnWidth
+                    val widthVariation = (StaticMethods.boundedRandom(rng, 4096) - 2048) * columnWidthVariation shr 12
+                    val adjusted = variation + (widthVariation * halfColumnWidth shr 12)
+                    columnBoundaries!![row][col] = columnBoundaries!![row][col - 1] + adjusted
                 }
 
-                brickBrightness!![i_5][i_6_2] = if (brightnessVariation > 0) {
-                    4096 - StaticMethods.boundedRandom(random2, brightnessVariation)
+                brickBrightness!![row][col] = if (brightnessVariation > 0) {
+                    4096 - StaticMethods.boundedRandom(rng, brightnessVariation)
                 } else {
                     4096
                 }
             }
 
-            columnBoundaries!![i_5][columnsPerRow] = 4096
+            columnBoundaries!![row][columnsPerRow] = 4096
         }
 
         rowBoundaries!![rowCount] = 4096

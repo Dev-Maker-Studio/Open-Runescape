@@ -24,10 +24,10 @@ class TextureRaster {
             if (PALETTE_SIN == null || PALETTE_COS == null) {
                 PALETTE_SIN = IntArray(256)
                 PALETTE_COS = IntArray(256)
-                for (i_1 in 0 until 256) {
-                    val d_2 = 6.283185307179586 * (i_1 / 255.0)
-                    PALETTE_SIN!![i_1] = (sin(d_2) * 4096.0).toInt()
-                    PALETTE_COS!![i_1] = (cos(d_2) * 4096.0).toInt()
+                for (i in 0 until 256) {
+                    val angle = 6.283185307179586 * (i / 255.0)
+                    PALETTE_SIN!![i] = (sin(angle) * 4096.0).toInt()
+                    PALETTE_COS!![i] = (cos(angle) * 4096.0).toInt()
                 }
             }
         }

@@ -20,47 +20,47 @@ class TextureOpEmboss : TextureOperation(1, true) {
     @JvmField var lightElevation = 3216
     @JvmField val lightDirection = IntArray(3)
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
-            val i_4 = embossDepth * TextureRaster.scaledWidth shr 12
-            val ints_5 = getChildMonochromeOutput(0, i_1 - 1 and TextureRaster.columnEnd)
-            val ints_6 = getChildMonochromeOutput(0, i_1)
-            val ints_7 = getChildMonochromeOutput(0, i_1 + 1 and TextureRaster.columnEnd)
+            val scaledDepth = embossDepth * TextureRaster.scaledWidth shr 12
+            val prevRow = getChildMonochromeOutput(0, y - 1 and TextureRaster.columnEnd)
+            val currentRow = getChildMonochromeOutput(0, y)
+            val nextRow = getChildMonochromeOutput(0, y + 1 and TextureRaster.columnEnd)
 
-            for (i_8 in 0 until TextureRaster.currentWidth) {
-                val i_9 = (ints_7[i_8] - ints_5[i_8]) * i_4 shr 12
-                val i_10 = i_4 * (ints_6[i_8 - 1 and TextureRaster.rowEnd] - ints_6[i_8 + 1 and TextureRaster.rowEnd]) shr 12
-                var i_11 = i_10 shr 4
-                var i_12 = i_9 shr 4
-                if (i_11 < 0) {
-                    i_11 = -i_11
+            for (x in 0 until TextureRaster.currentWidth) {
+                val gradientY = (nextRow[x] - prevRow[x]) * scaledDepth shr 12
+                val gradientX = scaledDepth * (currentRow[x - 1 and TextureRaster.rowEnd] - currentRow[x + 1 and TextureRaster.rowEnd]) shr 12
+                var absGradX = gradientX shr 4
+                var absGradY = gradientY shr 4
+                if (absGradX < 0) {
+                    absGradX = -absGradX
                 }
 
-                if (i_11 > 255) {
-                    i_11 = 255
+                if (absGradX > 255) {
+                    absGradX = 255
                 }
 
-                if (i_12 < 0) {
-                    i_12 = -i_12
+                if (absGradY < 0) {
+                    absGradY = -absGradY
                 }
 
-                if (i_12 > 255) {
-                    i_12 = 255
+                if (absGradY > 255) {
+                    absGradY = 255
                 }
 
-                val i_13 = normalizeTable[i_11 + (i_12 * (i_12 + 1) shr 1)].toInt() and 0xff
-                val i_14 = i_10 * i_13 shr 8
-                val i_15 = i_9 * i_13 shr 8
-                val i_16 = i_13 * 4096 shr 8
-                val i_14_final = i_14 * lightDirection[0] shr 12
-                val i_15_final = lightDirection[1] * i_15 shr 12
-                val i_16_final = i_16 * lightDirection[2] shr 12
-                ints_3[i_8] = i_16_final + i_15_final + i_14_final
+                val normalScale = normalizeTable[absGradX + (absGradY * (absGradY + 1) shr 1)].toInt() and 0xff
+                val normalX = gradientX * normalScale shr 8
+                val normalY = gradientY * normalScale shr 8
+                val normalZ = normalScale * 4096 shr 8
+                val dotX = normalX * lightDirection[0] shr 12
+                val dotY = lightDirection[1] * normalY shr 12
+                val dotZ = normalZ * lightDirection[2] shr 12
+                output[x] = dotZ + dotY + dotX
             }
         }
 
-        return ints_3
+        return output
     }
 
     override fun postDecode() {
@@ -68,26 +68,26 @@ class TextureOpEmboss : TextureOperation(1, true) {
     }
 
     fun computeLightDirection() {
-        val d_2 = cos(lightElevation / 4096.0)
-        lightDirection[0] = (sin(lightAzimuth / 4096.0) * d_2 * 4096.0).toInt()
-        lightDirection[1] = (cos(lightAzimuth / 4096.0) * d_2 * 4096.0).toInt()
+        val cosElevation = cos(lightElevation / 4096.0)
+        lightDirection[0] = (sin(lightAzimuth / 4096.0) * cosElevation * 4096.0).toInt()
+        lightDirection[1] = (cos(lightAzimuth / 4096.0) * cosElevation * 4096.0).toInt()
         lightDirection[2] = (sin(lightElevation / 4096.0) * 4096.0).toInt()
-        val i_4 = lightDirection[0] * lightDirection[0] shr 12
-        val i_5 = lightDirection[1] * lightDirection[1] shr 12
-        val i_6 = lightDirection[2] * lightDirection[2] shr 12
-        val i_7 = (sqrt((i_4 + i_5 + i_6 shr 12).toDouble()) * 4096.0).toInt()
-        if (i_7 != 0) {
-            lightDirection[0] = (lightDirection[0] shl 12) / i_7
-            lightDirection[1] = (lightDirection[1] shl 12) / i_7
-            lightDirection[2] = (lightDirection[2] shl 12) / i_7
+        val dotXX = lightDirection[0] * lightDirection[0] shr 12
+        val dotYY = lightDirection[1] * lightDirection[1] shr 12
+        val dotZZ = lightDirection[2] * lightDirection[2] shr 12
+        val magnitude = (sqrt((dotXX + dotYY + dotZZ shr 12).toDouble()) * 4096.0).toInt()
+        if (magnitude != 0) {
+            lightDirection[0] = (lightDirection[0] shl 12) / magnitude
+            lightDirection[1] = (lightDirection[1] shl 12) / magnitude
+            lightDirection[2] = (lightDirection[2] shl 12) / magnitude
         }
     }
 
-    override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
-        when (i_1) {
-            0 -> embossDepth = rsbytebuffer2.readUShort()
-            1 -> lightAzimuth = rsbytebuffer2.readUShort()
-            2 -> lightElevation = rsbytebuffer2.readUShort()
+    override fun decodeOpcode(opcode: Int, buffer: Packet) {
+        when (opcode) {
+            0 -> embossDepth = buffer.readUShort()
+            1 -> lightAzimuth = buffer.readUShort()
+            2 -> lightElevation = buffer.readUShort()
         }
     }
 
@@ -95,12 +95,12 @@ class TextureOpEmboss : TextureOperation(1, true) {
         @JvmField val normalizeTable: ByteArray
 
         init {
-            var i_0 = 0
+            var idx = 0
             normalizeTable = ByteArray(32896)
 
-            for (i_1 in 0..255) {
-                for (i_2 in 0..i_1) {
-                    normalizeTable[i_0++] = (255.0 / sqrt((i_2 * i_2 + i_1 * i_1 + 65535) / 65535.0)).toInt().toByte()
+            for (row in 0..255) {
+                for (col in 0..row) {
+                    normalizeTable[idx++] = (255.0 / sqrt((col * col + row * row + 65535) / 65535.0)).toInt().toByte()
                 }
             }
         }

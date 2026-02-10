@@ -15,95 +15,95 @@ class BezierCurveRasterizer(
     @JvmField val controlY2: Int,
     @JvmField val controlX3: Int,
     @JvmField val controlY3: Int,
-    i_9: Int,
-    i_10: Int
-) : TextureShapeRasterizer(-1, i_9, i_10) {
+    strokeColorParam: Int,
+    strokeWidthParam: Int
+) : TextureShapeRasterizer(-1, strokeColorParam, strokeWidthParam) {
 
-    override fun drawFilled(var1: Int, var2: Int) {
+    override fun drawFilled(width: Int, height: Int) {
     }
 
-    override fun drawFilledAndStroked(var1: Int, var2: Int) {
+    override fun drawFilledAndStroked(width: Int, height: Int) {
     }
 
-    override fun drawStroked(var1: Int, var2: Int) {
-        val i_4 = controlX0 * var1 shr 12
-        val i_5 = var2 * controlY0 shr 12
-        val i_6 = controlX1 * var1 shr 12
-        val i_7 = var2 * controlY1 shr 12
-        val i_8 = controlX2 * var1 shr 12
-        val i_9 = var2 * controlY2 shr 12
-        val i_10 = controlX3 * var1 shr 12
-        val i_11 = var2 * controlY3 shr 12
-        drawBezierCurve(i_4, i_5, i_6, i_7, i_8, i_9, i_10, i_11, strokeColor)
+    override fun drawStroked(width: Int, height: Int) {
+        val scaledX0 = controlX0 * width shr 12
+        val scaledY0 = height * controlY0 shr 12
+        val scaledX1 = controlX1 * width shr 12
+        val scaledY1 = height * controlY1 shr 12
+        val scaledX2 = controlX2 * width shr 12
+        val scaledY2 = height * controlY2 shr 12
+        val scaledX3 = controlX3 * width shr 12
+        val scaledY3 = height * controlY3 shr 12
+        drawBezierCurve(scaledX0, scaledY0, scaledX1, scaledY1, scaledX2, scaledY2, scaledX3, scaledY3, strokeColor)
     }
 
     companion object {
         @JvmStatic
-        fun drawBresenhamLine(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-            var i_01 = i_0
-            var i_21 = i_2
-            var i_15 = i_1
-            var i_31 = i_3
-            val i_6 = i_31 - i_15
-            val i_7 = i_21 - i_01
+        fun drawBresenhamLine(x1: Int, y1: Int, x2: Int, y2: Int, color: Int) {
+            var startX = x1
+            var endX = x2
+            var startY = y1
+            var endY = y2
+            val dy = endY - startY
+            val dx = endX - startX
 
-            if (i_7 == 0) {
-                if (i_6 != 0) {
-                    TextureShapeRasterizer.drawVerticalLine(i_01, i_15, i_31, i_4)
+            if (dx == 0) {
+                if (dy != 0) {
+                    TextureShapeRasterizer.drawVerticalLine(startX, startY, endY, color)
                 }
-            } else if (i_6 == 0) {
-                ArrayUtils.drawHorizontalLine(i_01, i_21, i_15, i_4)
+            } else if (dy == 0) {
+                ArrayUtils.drawHorizontalLine(startX, endX, startY, color)
             } else {
-                var i_6_adj = if (i_6 < 0) -i_6 else i_6
-                var i_7_adj = if (i_7 < 0) -i_7 else i_7
-                val bool8 = i_6_adj > i_7_adj
+                var absDy = if (dy < 0) -dy else dy
+                var absDx = if (dx < 0) -dx else dx
+                val isSteep = absDy > absDx
 
-                var i_9: Int
-                var i_10: Int
-                if (bool8) {
-                    i_9 = i_01
-                    i_10 = i_21
-                    i_01 = i_15
-                    i_15 = i_9
-                    i_21 = i_31
-                    i_31 = i_10
+                var temp1: Int
+                var temp2: Int
+                if (isSteep) {
+                    temp1 = startX
+                    temp2 = endX
+                    startX = startY
+                    startY = temp1
+                    endX = endY
+                    endY = temp2
                 }
 
-                if (i_01 > i_21) {
-                    i_9 = i_01
-                    i_10 = i_15
-                    i_01 = i_21
-                    i_21 = i_9
-                    i_15 = i_31
-                    i_31 = i_10
+                if (startX > endX) {
+                    temp1 = startX
+                    temp2 = startY
+                    startX = endX
+                    endX = temp1
+                    startY = endY
+                    endY = temp2
                 }
 
-                i_9 = i_15
-                i_10 = i_21 - i_01
-                var i_11 = i_31 - i_15
-                var i_12 = -(i_10 shr 1)
-                val i_13 = if (i_15 < i_31) 1 else -1
+                temp1 = startY
+                temp2 = endX - startX
+                var deltaY = endY - startY
+                var error = -(temp2 shr 1)
+                val yStep = if (startY < endY) 1 else -1
 
-                if (i_11 < 0) {
-                    i_11 = -i_11
+                if (deltaY < 0) {
+                    deltaY = -deltaY
                 }
 
-                if (bool8) {
-                    for (i_14 in i_01..i_21) {
-                        TextureShapeRasterizer.pixelBuffer!![i_14][i_9] = i_4
-                        i_12 += i_11
-                        if (i_12 > 0) {
-                            i_9 += i_13
-                            i_12 -= i_10
+                if (isSteep) {
+                    for (i in startX..endX) {
+                        TextureShapeRasterizer.pixelBuffer!![i][temp1] = color
+                        error += deltaY
+                        if (error > 0) {
+                            temp1 += yStep
+                            error -= temp2
                         }
                     }
                 } else {
-                    for (i_14 in i_01..i_21) {
-                        TextureShapeRasterizer.pixelBuffer!![i_9][i_14] = i_4
-                        i_12 += i_11
-                        if (i_12 > 0) {
-                            i_9 += i_13
-                            i_12 -= i_10
+                    for (i in startX..endX) {
+                        TextureShapeRasterizer.pixelBuffer!![temp1][i] = color
+                        error += deltaY
+                        if (error > 0) {
+                            temp1 += yStep
+                            error -= temp2
                         }
                     }
                 }
@@ -111,81 +111,81 @@ class BezierCurveRasterizer(
         }
 
         @JvmStatic
-        fun drawUnclippedBezier(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
-            if (i_0 == i_2 && i_3 == i_1 && i_4 == i_6 && i_5 == i_7) {
-                drawBresenhamLine(i_0, i_1, i_6, i_7, i_8)
+        fun drawUnclippedBezier(p0x: Int, p0y: Int, p1x: Int, p1y: Int, p2x: Int, p2y: Int, p3x: Int, p3y: Int, color: Int) {
+            if (p0x == p1x && p1y == p0y && p2x == p3x && p2y == p3y) {
+                drawBresenhamLine(p0x, p0y, p3x, p3y, color)
             } else {
-                var i_10 = i_0
-                var i_11 = i_1
-                val i_12 = i_0 * 3
-                val i_13 = i_1 * 3
-                val i_14 = i_2 * 3
-                val i_15 = i_3 * 3
-                val i_16 = i_4 * 3
-                val i_17 = i_5 * 3
-                val i_18 = i_6 - i_16 + i_14 - i_0
-                val i_19 = i_15 + (i_7 - i_17) - i_1
-                val i_20 = i_12 + (i_16 - i_14 - i_14)
-                val i_21 = i_13 + (i_17 - i_15 - i_15)
-                val i_22 = i_14 - i_12
-                val i_23 = i_15 - i_13
+                var prevX = p0x
+                var prevY = p0y
+                val p0x3 = p0x * 3
+                val p0y3 = p0y * 3
+                val p1x3 = p1x * 3
+                val p1y3 = p1y * 3
+                val p2x3 = p2x * 3
+                val p2y3 = p2y * 3
+                val coeffAx = p3x - p2x3 + p1x3 - p0x
+                val coeffAy = p1y3 + (p3y - p2y3) - p0y
+                val coeffBx = p0x3 + (p2x3 - p1x3 - p1x3)
+                val coeffBy = p0y3 + (p2y3 - p1y3 - p1y3)
+                val coeffCx = p1x3 - p0x3
+                val coeffCy = p1y3 - p0y3
 
-                var i_24 = 128
-                while (i_24 <= 4096) {
-                    val i_25 = i_24 * i_24 shr 12
-                    val i_26 = i_25 * i_24 shr 12
-                    val i_27 = i_18 * i_26
-                    val i_28 = i_26 * i_19
-                    val i_29 = i_20 * i_25
-                    val i_30 = i_25 * i_21
-                    val i_31 = i_24 * i_22
-                    val i_32 = i_24 * i_23
-                    val i_33 = i_0 + (i_29 + i_27 + i_31 shr 12)
-                    val i_34 = (i_28 + i_30 + i_32 shr 12) + i_1
-                    drawBresenhamLine(i_10, i_11, i_33, i_34, i_8)
-                    i_10 = i_33
-                    i_11 = i_34
-                    i_24 += 128
+                var t = 128
+                while (t <= 4096) {
+                    val tSquared = t * t shr 12
+                    val tCubed = tSquared * t shr 12
+                    val axTerm = coeffAx * tCubed
+                    val ayTerm = tCubed * coeffAy
+                    val bxTerm = coeffBx * tSquared
+                    val byTerm = tSquared * coeffBy
+                    val cxTerm = t * coeffCx
+                    val cyTerm = t * coeffCy
+                    val curX = p0x + (bxTerm + axTerm + cxTerm shr 12)
+                    val curY = (ayTerm + byTerm + cyTerm shr 12) + p0y
+                    drawBresenhamLine(prevX, prevY, curX, curY, color)
+                    prevX = curX
+                    prevY = curY
+                    t += 128
                 }
             }
         }
 
         @JvmStatic
-        fun drawClippedBezier(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
-            if (i_0 == i_2 && i_3 == i_1 && i_4 == i_6 && i_5 == i_7) {
-                TextureShapeRasterizer.drawLine(i_0, i_1, i_6, i_7, i_8)
+        fun drawClippedBezier(p0x: Int, p0y: Int, p1x: Int, p1y: Int, p2x: Int, p2y: Int, p3x: Int, p3y: Int, color: Int) {
+            if (p0x == p1x && p1y == p0y && p2x == p3x && p2y == p3y) {
+                TextureShapeRasterizer.drawLine(p0x, p0y, p3x, p3y, color)
             } else {
-                var i_10 = i_0
-                var i_11 = i_1
-                val i_12 = i_0 * 3
-                val i_13 = i_1 * 3
-                val i_14 = i_2 * 3
-                val i_15 = i_3 * 3
-                val i_16 = i_4 * 3
-                val i_17 = i_5 * 3
-                val i_18 = i_6 - i_16 + i_14 - i_0
-                val i_19 = i_15 + (i_7 - i_17) - i_1
-                val i_20 = i_12 + (i_16 - i_14 - i_14)
-                val i_21 = i_13 + (i_17 - i_15 - i_15)
-                val i_22 = i_14 - i_12
-                val i_23 = i_15 - i_13
+                var prevX = p0x
+                var prevY = p0y
+                val p0x3 = p0x * 3
+                val p0y3 = p0y * 3
+                val p1x3 = p1x * 3
+                val p1y3 = p1y * 3
+                val p2x3 = p2x * 3
+                val p2y3 = p2y * 3
+                val coeffAx = p3x - p2x3 + p1x3 - p0x
+                val coeffAy = p1y3 + (p3y - p2y3) - p0y
+                val coeffBx = p0x3 + (p2x3 - p1x3 - p1x3)
+                val coeffBy = p0y3 + (p2y3 - p1y3 - p1y3)
+                val coeffCx = p1x3 - p0x3
+                val coeffCy = p1y3 - p0y3
 
-                var i_24 = 128
-                while (i_24 <= 4096) {
-                    val i_25 = i_24 * i_24 shr 12
-                    val i_26 = i_24 * i_25 shr 12
-                    val i_27 = i_18 * i_26
-                    val i_28 = i_19 * i_26
-                    val i_29 = i_25 * i_20
-                    val i_30 = i_21 * i_25
-                    val i_31 = i_22 * i_24
-                    val i_32 = i_24 * i_23
-                    val i_33 = i_0 + (i_29 + i_27 + i_31 shr 12)
-                    val i_34 = (i_30 + i_28 + i_32 shr 12) + i_1
-                    TextureShapeRasterizer.drawLine(i_10, i_11, i_33, i_34, i_8)
-                    i_10 = i_33
-                    i_11 = i_34
-                    i_24 += 128
+                var t = 128
+                while (t <= 4096) {
+                    val tSquared = t * t shr 12
+                    val tCubed = t * tSquared shr 12
+                    val axTerm = coeffAx * tCubed
+                    val ayTerm = coeffAy * tCubed
+                    val bxTerm = tSquared * coeffBx
+                    val byTerm = coeffBy * tSquared
+                    val cxTerm = coeffCx * t
+                    val cyTerm = t * coeffCy
+                    val curX = p0x + (bxTerm + axTerm + cxTerm shr 12)
+                    val curY = (byTerm + ayTerm + cyTerm shr 12) + p0y
+                    TextureShapeRasterizer.drawLine(prevX, prevY, curX, curY, color)
+                    prevX = curX
+                    prevY = curY
+                    t += 128
                 }
             }
         }
@@ -207,19 +207,19 @@ class BezierCurveRasterizer(
         }
 
         @JvmStatic
-        fun drawBezierCurve(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
-            if (i_0 >= TextureOpRasterizer.clipMinX && i_0 <= TextureOpRasterizer.clipMaxX &&
-                i_2 >= TextureOpRasterizer.clipMinX && i_2 <= TextureOpRasterizer.clipMaxX &&
-                i_4 >= TextureOpRasterizer.clipMinX && i_4 <= TextureOpRasterizer.clipMaxX &&
-                i_6 >= TextureOpRasterizer.clipMinX && i_6 <= TextureOpRasterizer.clipMaxX &&
-                i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY &&
-                i_3 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY &&
-                i_5 >= TextureOpRasterizer.clipMinY && i_5 <= TextureOpRasterizer.clipMaxY &&
-                i_7 >= TextureOpRasterizer.clipMinY && i_7 <= TextureOpRasterizer.clipMaxY
+        fun drawBezierCurve(p0x: Int, p0y: Int, p1x: Int, p1y: Int, p2x: Int, p2y: Int, p3x: Int, p3y: Int, color: Int) {
+            if (p0x >= TextureOpRasterizer.clipMinX && p0x <= TextureOpRasterizer.clipMaxX &&
+                p1x >= TextureOpRasterizer.clipMinX && p1x <= TextureOpRasterizer.clipMaxX &&
+                p2x >= TextureOpRasterizer.clipMinX && p2x <= TextureOpRasterizer.clipMaxX &&
+                p3x >= TextureOpRasterizer.clipMinX && p3x <= TextureOpRasterizer.clipMaxX &&
+                p0y >= TextureOpRasterizer.clipMinY && p0y <= TextureOpRasterizer.clipMaxY &&
+                p1y >= TextureOpRasterizer.clipMinY && p1y <= TextureOpRasterizer.clipMaxY &&
+                p2y >= TextureOpRasterizer.clipMinY && p2y <= TextureOpRasterizer.clipMaxY &&
+                p3y >= TextureOpRasterizer.clipMinY && p3y <= TextureOpRasterizer.clipMaxY
             ) {
-                drawUnclippedBezier(i_0, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
+                drawUnclippedBezier(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, color)
             } else {
-                drawClippedBezier(i_0, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
+                drawClippedBezier(p0x, p0y, p1x, p1y, p2x, p2y, p3x, p3y, color)
             }
         }
     }

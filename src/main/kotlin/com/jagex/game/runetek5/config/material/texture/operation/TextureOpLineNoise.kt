@@ -25,88 +25,88 @@ class TextureOpLineNoise : TextureOperation(0, true) {
         TextureRaster.caculateTable()
     }
 
-    override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
-        when (i_1) {
-            0 -> randomSeed = rsbytebuffer2.readUByte()
-            1 -> lineCount = rsbytebuffer2.readUShort()
-            2 -> lineLength = rsbytebuffer2.readUByte()
-            3 -> angleOffset = rsbytebuffer2.readUShort()
-            4 -> angleSpread = rsbytebuffer2.readUShort()
+    override fun decodeOpcode(opcode: Int, buffer: Packet) {
+        when (opcode) {
+            0 -> randomSeed = buffer.readUByte()
+            1 -> lineCount = buffer.readUShort()
+            2 -> lineLength = buffer.readUByte()
+            3 -> angleOffset = buffer.readUShort()
+            4 -> angleSpread = buffer.readUShort()
         }
     }
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
-            val i_4 = angleSpread shr 1
-            val ints_5 = monochromeImageCache.getAllPaletteData()
-            val random6 = Random(randomSeed.toLong())
+            val halfSpread = angleSpread shr 1
+            val allPaletteData = monochromeImageCache.getAllPaletteData()
+            val rng = Random(randomSeed.toLong())
 
-            for (i_7 in 0 until lineCount) {
-                var i_8 = if (angleSpread > 0) angleOffset + (StaticMethods.boundedRandom(random6, angleSpread) - i_4) else angleOffset
-                i_8 = i_8 shr 4 and 0xff
-                val i_9 = StaticMethods.boundedRandom(random6, TextureRaster.currentWidth)
-                val i_10 = StaticMethods.boundedRandom(random6, TextureRaster.currentHeight)
-                val i_11 = i_9 + (TextureRaster.PALETTE_COS!![i_8] * lineLength shr 12)
-                val i_12 = i_10 + (TextureRaster.PALETTE_SIN!![i_8] * lineLength shr 12)
-                val i_13 = i_12 - i_10
-                val i_14 = i_11 - i_9
-                if (i_14 != 0 || i_13 != 0) {
-                    var i_13_abs = if (i_13 < 0) -i_13 else i_13
-                    var i_14_abs = if (i_14 < 0) -i_14 else i_14
+            for (line in 0 until lineCount) {
+                var angle = if (angleSpread > 0) angleOffset + (StaticMethods.boundedRandom(rng, angleSpread) - halfSpread) else angleOffset
+                angle = angle shr 4 and 0xff
+                val startX = StaticMethods.boundedRandom(rng, TextureRaster.currentWidth)
+                val startY = StaticMethods.boundedRandom(rng, TextureRaster.currentHeight)
+                val endX = startX + (TextureRaster.PALETTE_COS!![angle] * lineLength shr 12)
+                val endY = startY + (TextureRaster.PALETTE_SIN!![angle] * lineLength shr 12)
+                val dy = endY - startY
+                val dx = endX - startX
+                if (dx != 0 || dy != 0) {
+                    var absDy = if (dy < 0) -dy else dy
+                    var absDx = if (dx < 0) -dx else dx
 
-                    val bool15 = i_13_abs > i_14_abs
-                    var i_9_swap = i_9
-                    var i_10_swap = i_10
-                    var i_11_swap = i_11
-                    var i_12_swap = i_12
-                    if (bool15) {
-                        i_9_swap = i_10
-                        i_10_swap = i_9
-                        i_11_swap = i_12
-                        i_12_swap = i_11
+                    val isSteep = absDy > absDx
+                    var x1 = startX
+                    var y1 = startY
+                    var x2 = endX
+                    var y2 = endY
+                    if (isSteep) {
+                        x1 = startY
+                        y1 = startX
+                        x2 = endY
+                        y2 = endX
                     }
 
-                    if (i_9_swap > i_11_swap) {
-                        val temp1 = i_9_swap
-                        val temp2 = i_10_swap
-                        i_9_swap = i_11_swap
-                        i_11_swap = temp1
-                        i_10_swap = i_12_swap
-                        i_12_swap = temp2
+                    if (x1 > x2) {
+                        val tempX = x1
+                        val tempY = y1
+                        x1 = x2
+                        x2 = tempX
+                        y1 = y2
+                        y2 = tempY
                     }
 
-                    var i_16 = i_10_swap
-                    val i_17 = i_11_swap - i_9_swap
-                    var i_18 = i_12_swap - i_10_swap
-                    var i_19 = -i_17 / 2
-                    val i_20 = 2048 / i_17
-                    val i_21 = 1024 - (StaticMethods.boundedRandom(random6, 4096) shr 2)
-                    val i_22 = if (i_10_swap < i_12_swap) 1 else -1
-                    if (i_18 < 0) {
-                        i_18 = -i_18
+                    var currentY = y1
+                    val deltaX = x2 - x1
+                    var deltaY = y2 - y1
+                    var error = -deltaX / 2
+                    val brightnessStep = 2048 / deltaX
+                    val baseBrightness = 1024 - (StaticMethods.boundedRandom(rng, 4096) shr 2)
+                    val yStep = if (y1 < y2) 1 else -1
+                    if (deltaY < 0) {
+                        deltaY = -deltaY
                     }
 
-                    for (i_23 in i_9_swap until i_11_swap) {
-                        val i_24 = i_21 + i_20 * (i_23 - i_9_swap) + 1024
-                        val i_25 = i_23 and TextureRaster.rowEnd
-                        val i_26 = i_16 and TextureRaster.columnEnd
-                        if (bool15) {
-                            ints_5[i_26]!![i_25] = i_24
+                    for (px in x1 until x2) {
+                        val brightness = baseBrightness + brightnessStep * (px - x1) + 1024
+                        val wrappedX = px and TextureRaster.rowEnd
+                        val wrappedY = currentY and TextureRaster.columnEnd
+                        if (isSteep) {
+                            allPaletteData[wrappedY]!![wrappedX] = brightness
                         } else {
-                            ints_5[i_25]!![i_26] = i_24
+                            allPaletteData[wrappedX]!![wrappedY] = brightness
                         }
 
-                        i_19 += i_18
-                        if (i_19 > 0) {
-                            i_19 -= i_17
-                            i_16 += i_22
+                        error += deltaY
+                        if (error > 0) {
+                            error -= deltaX
+                            currentY += yStep
                         }
                     }
                 }
             }
         }
 
-        return ints_3
+        return output
     }
 }

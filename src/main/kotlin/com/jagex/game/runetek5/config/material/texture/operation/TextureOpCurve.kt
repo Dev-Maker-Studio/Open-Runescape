@@ -18,33 +18,33 @@ class TextureOpCurve : TextureOperation(1, true) {
     @JvmField var interpolationMode: Int = 0
     @JvmField val curveLookup: ShortArray = ShortArray(257)
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
-            val ints_4 = getChildMonochromeOutput(0, i_1)
+            val childPixels = getChildMonochromeOutput(0, y)
 
-            for (i_5 in 0 until TextureRaster.currentWidth) {
-                var i_6 = ints_4[i_5] shr 4
-                if (i_6 < 0) {
-                    i_6 = 0
+            for (x in 0 until TextureRaster.currentWidth) {
+                var index = childPixels[x] shr 4
+                if (index < 0) {
+                    index = 0
                 }
 
-                if (i_6 > 256) {
-                    i_6 = 256
+                if (index > 256) {
+                    index = 256
                 }
 
-                ints_3[i_5] = curveLookup[i_6].toInt()
+                output[x] = curveLookup[index].toInt()
             }
         }
 
-        return ints_3
+        return output
     }
 
-    fun getControlPoint(i_1: Int): IntArray {
+    fun getControlPoint(index: Int): IntArray {
         return when {
-            i_1 < 0 -> extrapolatedStart!!
-            i_1 >= controlPoints!!.size -> extrapolatedEnd!!
-            else -> controlPoints!![i_1]
+            index < 0 -> extrapolatedStart!!
+            index >= controlPoints!!.size -> extrapolatedEnd!!
+            else -> controlPoints!![index]
         }
     }
 
@@ -66,121 +66,120 @@ class TextureOpCurve : TextureOperation(1, true) {
     }
 
     fun buildCurveLookup() {
-        var i_2: Int
-        var i_3: Int
-        var i_4: Int
-        var ints_5: IntArray
-        var ints_6: IntArray
-        var i_7: Int
-        var i_8: Int
-        var i_9: Int
-        var i_10: Int
+        var inputValue: Int
+        var segment: Int
+        var startPoint: IntArray
+        var endPoint: IntArray
+        var interpParam: Int
+        var weightB: Int
+        var weightA: Int
+        var result: Int
 
         when (interpolationMode) {
             1 -> {
-                for (i_2_loop in 0..256) {
-                    i_3 = i_2_loop shl 4
+                for (i in 0..256) {
+                    inputValue = i shl 4
 
-                    i_4 = 1
-                    while (i_4 < controlPoints!!.size - 1 && controlPoints!![i_4][0] <= i_3) {
-                        i_4++
+                    segment = 1
+                    while (segment < controlPoints!!.size - 1 && controlPoints!![segment][0] <= inputValue) {
+                        segment++
                     }
 
-                    ints_5 = controlPoints!![i_4 - 1]
-                    ints_6 = controlPoints!![i_4]
-                    i_7 = (i_3 - ints_5[0] shl 12) / (ints_6[0] - ints_5[0])
-                    i_8 = 4096 - TextureRaster.PALETTE_COS!![i_7 shr 5 and 0xff] shr 1
-                    i_9 = 4096 - i_8
-                    i_10 = i_8 * ints_6[1] + i_9 * ints_5[1] shr 12
+                    startPoint = controlPoints!![segment - 1]
+                    endPoint = controlPoints!![segment]
+                    interpParam = (inputValue - startPoint[0] shl 12) / (endPoint[0] - startPoint[0])
+                    weightB = 4096 - TextureRaster.PALETTE_COS!![interpParam shr 5 and 0xff] shr 1
+                    weightA = 4096 - weightB
+                    result = weightB * endPoint[1] + weightA * startPoint[1] shr 12
 
-                    if (i_10 <= -32768) {
-                        i_10 = -32767
+                    if (result <= -32768) {
+                        result = -32767
                     }
 
-                    if (i_10 >= 32768) {
-                        i_10 = 32767
+                    if (result >= 32768) {
+                        result = 32767
                     }
 
-                    curveLookup[i_2_loop] = i_10.toShort()
+                    curveLookup[i] = result.toShort()
                 }
             }
             2 -> {
-                for (i_2_loop in 0..256) {
-                    i_3 = i_2_loop shl 4
+                for (i in 0..256) {
+                    inputValue = i shl 4
 
-                    i_4 = 1
-                    while (i_4 < controlPoints!!.size - 1 && controlPoints!![i_4][0] <= i_3) {
-                        i_4++
+                    segment = 1
+                    while (segment < controlPoints!!.size - 1 && controlPoints!![segment][0] <= inputValue) {
+                        segment++
                     }
 
-                    ints_5 = controlPoints!![i_4 - 1]
-                    ints_6 = controlPoints!![i_4]
-                    i_7 = getControlPoint(i_4 - 2)[1]
-                    i_8 = ints_5[1]
-                    i_9 = ints_6[1]
-                    i_10 = getControlPoint(i_4 + 1)[1]
-                    val i_11 = (i_3 - ints_5[0] shl 12) / (ints_6[0] - ints_5[0])
-                    val i_12 = i_11 * i_11 shr 12
-                    val i_13 = i_8 + (i_10 - i_9 - i_7)
-                    val i_14 = i_7 - i_8 - i_13
-                    val i_15 = i_9 - i_7
-                    val i_17 = i_12 * (i_13 * i_11 shr 12) shr 12
-                    val i_18 = i_14 * i_12 shr 12
-                    val i_19 = i_11 * i_15 shr 12
-                    var i_20 = i_17 + i_18 + i_19 + i_8
+                    startPoint = controlPoints!![segment - 1]
+                    endPoint = controlPoints!![segment]
+                    interpParam = getControlPoint(segment - 2)[1]
+                    weightB = startPoint[1]
+                    weightA = endPoint[1]
+                    result = getControlPoint(segment + 1)[1]
+                    val tParam = (inputValue - startPoint[0] shl 12) / (endPoint[0] - startPoint[0])
+                    val tSquared = tParam * tParam shr 12
+                    val coeffA = weightB + (result - weightA - interpParam)
+                    val coeffB = interpParam - weightB - coeffA
+                    val coeffC = weightA - interpParam
+                    val cubicTerm = tSquared * (coeffA * tParam shr 12) shr 12
+                    val quadTerm = coeffB * tSquared shr 12
+                    val linearTerm = tParam * coeffC shr 12
+                    var splineResult = cubicTerm + quadTerm + linearTerm + weightB
 
-                    if (i_20 <= -32768) {
-                        i_20 = -32767
+                    if (splineResult <= -32768) {
+                        splineResult = -32767
                     }
 
-                    if (i_20 >= 32768) {
-                        i_20 = 32767
+                    if (splineResult >= 32768) {
+                        splineResult = 32767
                     }
 
-                    curveLookup[i_2_loop] = i_20.toShort()
+                    curveLookup[i] = splineResult.toShort()
                 }
             }
             else -> {
-                for (i_2_loop in 0..256) {
-                    i_3 = i_2_loop shl 4
+                for (i in 0..256) {
+                    inputValue = i shl 4
 
-                    i_4 = 1
-                    while (i_4 < controlPoints!!.size - 1 && controlPoints!![i_4][0] <= i_3) {
-                        i_4++
+                    segment = 1
+                    while (segment < controlPoints!!.size - 1 && controlPoints!![segment][0] <= inputValue) {
+                        segment++
                     }
 
-                    ints_5 = controlPoints!![i_4 - 1]
-                    ints_6 = controlPoints!![i_4]
-                    i_7 = (i_3 - ints_5[0] shl 12) / (ints_6[0] - ints_5[0])
-                    i_8 = 4096 - i_7
-                    i_9 = i_7 * ints_6[1] + i_8 * ints_5[1] shr 12
+                    startPoint = controlPoints!![segment - 1]
+                    endPoint = controlPoints!![segment]
+                    interpParam = (inputValue - startPoint[0] shl 12) / (endPoint[0] - startPoint[0])
+                    weightB = 4096 - interpParam
+                    weightA = interpParam * endPoint[1] + weightB * startPoint[1] shr 12
 
-                    if (i_9 <= -32768) {
-                        i_9 = -32767
+                    if (weightA <= -32768) {
+                        weightA = -32767
                     }
 
-                    if (i_9 >= 32768) {
-                        i_9 = 32767
+                    if (weightA >= 32768) {
+                        weightA = 32767
                     }
 
-                    curveLookup[i_2_loop] = i_9.toShort()
+                    curveLookup[i] = weightA.toShort()
                 }
             }
         }
     }
 
     fun computeExtrapolatedEndpoints() {
-        val ints_2 = controlPoints!![0]
-        val ints_3 = controlPoints!![1]
-        val ints_4 = controlPoints!![controlPoints!!.size - 2]
-        val ints_5 = controlPoints!![controlPoints!!.size - 1]
+        val firstPoint = controlPoints!![0]
+        val secondPoint = controlPoints!![1]
+        val secondToLast = controlPoints!![controlPoints!!.size - 2]
+        val lastPoint = controlPoints!![controlPoints!!.size - 1]
         extrapolatedStart = intArrayOf(
-            ints_2[0] - ints_3[0] + ints_2[0],
-            ints_2[1] - ints_3[1] + ints_2[1]
+            firstPoint[0] - secondPoint[0] + firstPoint[0],
+            firstPoint[1] - secondPoint[1] + firstPoint[1]
         )
         extrapolatedEnd = intArrayOf(
-            ints_4[0] - ints_5[0] + ints_4[0],
-            ints_4[1] - ints_5[1] + ints_4[1]
+            secondToLast[0] - lastPoint[0] + secondToLast[0],
+            secondToLast[1] - lastPoint[1] + secondToLast[1]
         )
     }
 
@@ -189,9 +188,9 @@ class TextureOpCurve : TextureOperation(1, true) {
             interpolationMode = buffer.readUByte()
             controlPoints = Array(buffer.readUByte()) { IntArray(2) }
 
-            for (i_4 in controlPoints!!.indices) {
-                controlPoints!![i_4][0] = buffer.readUShort()
-                controlPoints!![i_4][1] = buffer.readUShort()
+            for (i in controlPoints!!.indices) {
+                controlPoints!![i][0] = buffer.readUShort()
+                controlPoints!![i][1] = buffer.readUShort()
             }
         }
     }

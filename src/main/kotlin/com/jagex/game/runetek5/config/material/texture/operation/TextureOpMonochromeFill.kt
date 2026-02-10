@@ -15,12 +15,12 @@ class TextureOpMonochromeFill : TextureOperation(0, true) {
 
     @JvmField var fillValue: Int = 4096
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = super.monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = super.monochromeImageCache.getPalette(y)
         if (super.monochromeImageCache.dirty) {
-            ArrayUtils.setVariables(ints_3, 0, TextureRaster.currentWidth, this.fillValue)
+            ArrayUtils.setVariables(output, 0, TextureRaster.currentWidth, this.fillValue)
         }
-        return ints_3
+        return output
     }
 
     override fun decodeOpcode(opcode: Int, stream: Packet) {

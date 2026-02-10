@@ -21,10 +21,10 @@ class TextureOpWeave : TextureOperation(0, true) {
         }
     }
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val output = monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
-            val verticalValue = TextureRaster.verticalTable!![i_1]
+            val verticalValue = TextureRaster.verticalTable!![y]
             for (i in 0 until TextureRaster.currentWidth) {
                 val horizontalValue = TextureRaster.horizontalTable!![i]
                 val result: Int

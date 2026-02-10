@@ -15,32 +15,32 @@ class TextureOpMonochromeEdgeDetector : TextureOperation(1, true) {
 
     @JvmField var strength: Int = 4096
 
-    override fun getMonochromeOutput(i_1: Int): IntArray {
-        val ints_3 = super.monochromeImageCache.getPalette(i_1)
+    override fun getMonochromeOutput(y: Int): IntArray {
+        val output = super.monochromeImageCache.getPalette(y)
         if (super.monochromeImageCache.dirty) {
-            val ints_4 = getChildMonochromeOutput(0, i_1 - 1 and TextureRaster.columnEnd)
-            val ints_5 = getChildMonochromeOutput(0, i_1)
-            val ints_6 = getChildMonochromeOutput(0, i_1 + 1 and TextureRaster.columnEnd)
+            val prevRow = getChildMonochromeOutput(0, y - 1 and TextureRaster.columnEnd)
+            val currentRow = getChildMonochromeOutput(0, y)
+            val nextRow = getChildMonochromeOutput(0, y + 1 and TextureRaster.columnEnd)
 
-            for (i_7 in 0 until TextureRaster.currentWidth) {
-                val i_8 = (ints_6[i_7] - ints_4[i_7]) * this.strength
-                val i_9 = (ints_5[i_7 + 1 and TextureRaster.rowEnd] - ints_5[i_7 - 1 and TextureRaster.rowEnd]) * this.strength
-                val i_10 = i_9 shr 12
-                val i_11 = i_8 shr 12
-                val i_12 = i_10 * i_10 shr 12
-                val i_13 = i_11 * i_11 shr 12
-                val i_14 = (sqrt((i_13 + i_12 + 4096) / 4096.0f.toDouble()) * 4096.0).toInt()
-                val i_15 = if (i_14 != 0) 16777216 / i_14 else 0
-                ints_3[i_7] = 4096 - i_15
+            for (x in 0 until TextureRaster.currentWidth) {
+                val gradientY = (nextRow[x] - prevRow[x]) * this.strength
+                val gradientX = (currentRow[x + 1 and TextureRaster.rowEnd] - currentRow[x - 1 and TextureRaster.rowEnd]) * this.strength
+                val scaledGradX = gradientX shr 12
+                val scaledGradY = gradientY shr 12
+                val gradXSq = scaledGradX * scaledGradX shr 12
+                val gradYSq = scaledGradY * scaledGradY shr 12
+                val normalLength = (sqrt((gradYSq + gradXSq + 4096) / 4096.0f.toDouble()) * 4096.0).toInt()
+                val invNormal = if (normalLength != 0) 16777216 / normalLength else 0
+                output[x] = 4096 - invNormal
             }
         }
 
-        return ints_3
+        return output
     }
 
-    override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
-        if (i_1 == 0) {
-            this.strength = rsbytebuffer2.readUShort()
+    override fun decodeOpcode(opcode: Int, buffer: Packet) {
+        if (opcode == 0) {
+            this.strength = buffer.readUShort()
         }
     }
 }

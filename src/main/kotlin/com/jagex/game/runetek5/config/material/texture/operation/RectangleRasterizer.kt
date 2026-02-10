@@ -5,156 +5,156 @@ import com.jagex.game.runetek5.staticmethods.StaticMethods
 import com.jagex.game.runetek5.utils.ArrayUtils
 
 class RectangleRasterizer(
-    i_1: Int,
-    i_2: Int,
-    i_3: Int,
-    i_4: Int,
-    i_5: Int,
-    i_6: Int,
-    i_7: Int
-) : TextureShapeRasterizer(i_5, i_6, i_7) {
+    x1: Int,
+    y1: Int,
+    x2: Int,
+    y2: Int,
+    fill: Int,
+    stroke: Int,
+    strokeW: Int
+) : TextureShapeRasterizer(fill, stroke, strokeW) {
 
-    @JvmField val left: Int = i_1
-    @JvmField val top: Int = i_2
-    @JvmField val right: Int = i_3
-    @JvmField val bottom: Int = i_4
+    @JvmField val left: Int = x1
+    @JvmField val top: Int = y1
+    @JvmField val right: Int = x2
+    @JvmField val bottom: Int = y2
 
-    override fun drawStroked(i_1: Int, i_2: Int) {
-        val i_4 = left * i_1 shr 12
-        val i_5 = right * i_1 shr 12
-        val i_6 = i_2 * top shr 12
-        val i_7 = i_2 * bottom shr 12
-        drawStrokedRectangle(i_4, i_5, i_6, i_7, strokeColor, strokeWidth)
+    override fun drawStroked(width: Int, height: Int) {
+        val scaledLeft = left * width shr 12
+        val scaledRight = right * width shr 12
+        val scaledTop = height * top shr 12
+        val scaledBottom = height * bottom shr 12
+        drawStrokedRectangle(scaledLeft, scaledRight, scaledTop, scaledBottom, strokeColor, strokeWidth)
     }
 
-    override fun drawFilled(i_1: Int, i_2: Int) {
-        val i_4 = left * i_1 shr 12
-        val i_5 = right * i_1 shr 12
-        val i_6 = i_2 * top shr 12
-        val i_7 = i_2 * bottom shr 12
-        StaticMethods.drawFilledRectangleToPixelBuffer(i_4, i_5, i_6, i_7, fillColor)
+    override fun drawFilled(width: Int, height: Int) {
+        val scaledLeft = left * width shr 12
+        val scaledRight = right * width shr 12
+        val scaledTop = height * top shr 12
+        val scaledBottom = height * bottom shr 12
+        StaticMethods.drawFilledRectangleToPixelBuffer(scaledLeft, scaledRight, scaledTop, scaledBottom, fillColor)
     }
 
-    override fun drawFilledAndStroked(i_1: Int, i_2: Int) {
-        val i_4 = left * i_1 shr 12
-        val i_5 = right * i_1 shr 12
-        val i_6 = i_2 * top shr 12
-        val i_7 = i_2 * bottom shr 12
-        StaticMethods.drawStrokedAndFilledRectangle(i_4, i_5, i_6, i_7, fillColor, strokeColor, strokeWidth)
+    override fun drawFilledAndStroked(width: Int, height: Int) {
+        val scaledLeft = left * width shr 12
+        val scaledRight = right * width shr 12
+        val scaledTop = height * top shr 12
+        val scaledBottom = height * bottom shr 12
+        StaticMethods.drawStrokedAndFilledRectangle(scaledLeft, scaledRight, scaledTop, scaledBottom, fillColor, strokeColor, strokeWidth)
     }
 
     companion object {
         @JvmStatic
-        fun decode(rsbytebuffer0: Packet): RectangleRasterizer {
+        fun decode(buffer: Packet): RectangleRasterizer {
             return RectangleRasterizer(
-                rsbytebuffer0.readShort(),
-                rsbytebuffer0.readShort(),
-                rsbytebuffer0.readShort(),
-                rsbytebuffer0.readShort(),
-                rsbytebuffer0.readUMedium(),
-                rsbytebuffer0.readUMedium(),
-                rsbytebuffer0.readUByte()
+                buffer.readShort(),
+                buffer.readShort(),
+                buffer.readShort(),
+                buffer.readShort(),
+                buffer.readUMedium(),
+                buffer.readUMedium(),
+                buffer.readUByte()
             )
         }
 
         @JvmStatic
-        fun drawUnclippedStrokedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-            val i_7 = i_5 + i_2
-            val i_8 = i_3 - i_5
-            var i_9: Int
-            i_9 = i_2
-            while (i_9 < i_7) {
-                ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_9], i_0, i_1, i_4)
-                i_9++
+        fun drawUnclippedStrokedRectangle(leftEdge: Int, rightEdge: Int, topEdge: Int, bottomEdge: Int, color: Int, thickness: Int) {
+            val topBorder = thickness + topEdge
+            val bottomBorder = bottomEdge - thickness
+            var row: Int
+            row = topEdge
+            while (row < topBorder) {
+                ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![row], leftEdge, rightEdge, color)
+                row++
             }
-            i_9 = i_3
-            while (i_9 > i_8) {
-                ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_9], i_0, i_1, i_4)
-                --i_9
+            row = bottomEdge
+            while (row > bottomBorder) {
+                ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![row], leftEdge, rightEdge, color)
+                --row
             }
-            i_9 = i_5 + i_0
-            val i_10 = i_1 - i_5
-            for (i_11 in i_7..i_8) {
-                val ints_12 = TextureShapeRasterizer.pixelBuffer!![i_11]
-                ArrayUtils.setArrayValuesTo(ints_12, i_0, i_9, i_4)
-                ArrayUtils.setArrayValuesTo(ints_12, i_10, i_1, i_4)
-            }
-        }
-
-        @JvmStatic
-        fun drawClippedStrokedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-            var i_01 = i_0
-            var i_11 = i_1
-            var i_21 = i_2
-            var i_31 = i_3
-            if (i_21 <= TextureOpRasterizer.clipMaxY && i_31 >= TextureOpRasterizer.clipMinY) {
-                val bool6: Boolean
-                if (i_01 < TextureOpRasterizer.clipMinX) {
-                    i_01 = TextureOpRasterizer.clipMinX
-                    bool6 = false
-                } else if (i_01 > TextureOpRasterizer.clipMaxX) {
-                    i_01 = TextureOpRasterizer.clipMaxX
-                    bool6 = false
-                } else {
-                    bool6 = true
-                }
-                val bool7: Boolean
-                if (i_11 < TextureOpRasterizer.clipMinX) {
-                    i_11 = TextureOpRasterizer.clipMinX
-                    bool7 = false
-                } else if (i_11 > TextureOpRasterizer.clipMaxX) {
-                    i_11 = TextureOpRasterizer.clipMaxX
-                    bool7 = false
-                } else {
-                    bool7 = true
-                }
-                if (i_21 >= TextureOpRasterizer.clipMinY) {
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_21++], i_01, i_11, i_4)
-                } else {
-                    i_21 = TextureOpRasterizer.clipMinY
-                }
-                if (i_31 <= TextureOpRasterizer.clipMaxY) {
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_31--], i_01, i_11, i_4)
-                } else {
-                    i_31 = TextureOpRasterizer.clipMaxY
-                }
-                var i_8: Int
-                if (bool6 && bool7) {
-                    i_8 = i_21
-                    while (i_8 <= i_31) {
-                        val ints_9 = TextureShapeRasterizer.pixelBuffer!![i_8]
-                        ints_9[i_01] = i_4
-                        ints_9[i_11] = i_4
-                        i_8++
-                    }
-                } else if (bool6) {
-                    i_8 = i_21
-                    while (i_8 <= i_31) {
-                        TextureShapeRasterizer.pixelBuffer!![i_8][i_01] = i_4
-                        i_8++
-                    }
-                } else if (bool7) {
-                    i_8 = i_21
-                    while (i_8 <= i_31) {
-                        TextureShapeRasterizer.pixelBuffer!![i_8][i_11] = i_4
-                        i_8++
-                    }
-                }
+            row = thickness + leftEdge
+            val rightBorder = rightEdge - thickness
+            for (y in topBorder..bottomBorder) {
+                val rowPixels = TextureShapeRasterizer.pixelBuffer!![y]
+                ArrayUtils.setArrayValuesTo(rowPixels, leftEdge, row, color)
+                ArrayUtils.setArrayValuesTo(rowPixels, rightBorder, rightEdge, color)
             }
         }
 
         @JvmStatic
-        fun drawStrokedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-            if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
-                if (i_5 == 1) {
-                    StaticMethods.drawStrokedRectangleToPixelBuffer(i_0, i_1, i_2, i_3, i_4)
+        fun drawClippedStrokedRectangle(leftEdge: Int, rightEdge: Int, topEdge: Int, bottomEdge: Int, color: Int) {
+            var clampedLeft = leftEdge
+            var clampedRight = rightEdge
+            var clampedTop = topEdge
+            var clampedBottom = bottomEdge
+            if (clampedTop <= TextureOpRasterizer.clipMaxY && clampedBottom >= TextureOpRasterizer.clipMinY) {
+                val leftVisible: Boolean
+                if (clampedLeft < TextureOpRasterizer.clipMinX) {
+                    clampedLeft = TextureOpRasterizer.clipMinX
+                    leftVisible = false
+                } else if (clampedLeft > TextureOpRasterizer.clipMaxX) {
+                    clampedLeft = TextureOpRasterizer.clipMaxX
+                    leftVisible = false
                 } else {
-                    drawUnclippedStrokedRectangle(i_0, i_1, i_2, i_3, i_4, i_5)
+                    leftVisible = true
                 }
-            } else if (i_5 == 1) {
-                drawClippedStrokedRectangle(i_0, i_1, i_2, i_3, i_4)
+                val rightVisible: Boolean
+                if (clampedRight < TextureOpRasterizer.clipMinX) {
+                    clampedRight = TextureOpRasterizer.clipMinX
+                    rightVisible = false
+                } else if (clampedRight > TextureOpRasterizer.clipMaxX) {
+                    clampedRight = TextureOpRasterizer.clipMaxX
+                    rightVisible = false
+                } else {
+                    rightVisible = true
+                }
+                if (clampedTop >= TextureOpRasterizer.clipMinY) {
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![clampedTop++], clampedLeft, clampedRight, color)
+                } else {
+                    clampedTop = TextureOpRasterizer.clipMinY
+                }
+                if (clampedBottom <= TextureOpRasterizer.clipMaxY) {
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![clampedBottom--], clampedLeft, clampedRight, color)
+                } else {
+                    clampedBottom = TextureOpRasterizer.clipMaxY
+                }
+                var y: Int
+                if (leftVisible && rightVisible) {
+                    y = clampedTop
+                    while (y <= clampedBottom) {
+                        val rowPixels = TextureShapeRasterizer.pixelBuffer!![y]
+                        rowPixels[clampedLeft] = color
+                        rowPixels[clampedRight] = color
+                        y++
+                    }
+                } else if (leftVisible) {
+                    y = clampedTop
+                    while (y <= clampedBottom) {
+                        TextureShapeRasterizer.pixelBuffer!![y][clampedLeft] = color
+                        y++
+                    }
+                } else if (rightVisible) {
+                    y = clampedTop
+                    while (y <= clampedBottom) {
+                        TextureShapeRasterizer.pixelBuffer!![y][clampedRight] = color
+                        y++
+                    }
+                }
+            }
+        }
+
+        @JvmStatic
+        fun drawStrokedRectangle(leftEdge: Int, rightEdge: Int, topEdge: Int, bottomEdge: Int, color: Int, thickness: Int) {
+            if (leftEdge >= TextureOpRasterizer.clipMinX && rightEdge <= TextureOpRasterizer.clipMaxX && topEdge >= TextureOpRasterizer.clipMinY && bottomEdge <= TextureOpRasterizer.clipMaxY) {
+                if (thickness == 1) {
+                    StaticMethods.drawStrokedRectangleToPixelBuffer(leftEdge, rightEdge, topEdge, bottomEdge, color)
+                } else {
+                    drawUnclippedStrokedRectangle(leftEdge, rightEdge, topEdge, bottomEdge, color, thickness)
+                }
+            } else if (thickness == 1) {
+                drawClippedStrokedRectangle(leftEdge, rightEdge, topEdge, bottomEdge, color)
             } else {
-                ArrayUtils.drawClippedStrokedRectangle(i_0, i_1, i_2, i_3, i_4, i_5)
+                ArrayUtils.drawClippedStrokedRectangle(leftEdge, rightEdge, topEdge, bottomEdge, color, thickness)
             }
         }
     }

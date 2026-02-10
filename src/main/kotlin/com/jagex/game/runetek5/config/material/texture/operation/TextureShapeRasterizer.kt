@@ -8,11 +8,11 @@ abstract class TextureShapeRasterizer(
     @JvmField val strokeWidth: Int
 ) {
 
-    abstract fun drawFilled(var1: Int, var2: Int)
+    abstract fun drawFilled(width: Int, height: Int)
 
-    abstract fun drawFilledAndStroked(var1: Int, var2: Int)
+    abstract fun drawFilledAndStroked(width: Int, height: Int)
 
-    abstract fun drawStroked(var1: Int, var2: Int)
+    abstract fun drawStroked(width: Int, height: Int)
 
     companion object {
         @JvmField

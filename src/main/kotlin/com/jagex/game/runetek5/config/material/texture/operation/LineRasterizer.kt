@@ -7,28 +7,28 @@ class LineRasterizer(
     @JvmField val startY: Int,
     @JvmField val endX: Int,
     @JvmField val endY: Int,
-    i_5: Int,
-    i_6: Int
-) : TextureShapeRasterizer(-1, i_5, i_6) {
+    strokeColorParam: Int,
+    strokeWidthParam: Int
+) : TextureShapeRasterizer(-1, strokeColorParam, strokeWidthParam) {
 
-    override fun drawStroked(i_1: Int, i_2: Int) {
-        val i_4 = this.startX * i_1 shr 12
-        val i_5 = this.endX * i_1 shr 12
-        val i_6 = i_2 * this.startY shr 12
-        val i_7 = i_2 * this.endY shr 12
-        TextureShapeRasterizer.drawLine(i_4, i_6, i_5, i_7, super.strokeColor)
+    override fun drawStroked(width: Int, height: Int) {
+        val scaledStartX = this.startX * width shr 12
+        val scaledEndX = this.endX * width shr 12
+        val scaledStartY = height * this.startY shr 12
+        val scaledEndY = height * this.endY shr 12
+        TextureShapeRasterizer.drawLine(scaledStartX, scaledStartY, scaledEndX, scaledEndY, super.strokeColor)
     }
 
-    override fun drawFilled(i_1: Int, i_2: Int) {
+    override fun drawFilled(width: Int, height: Int) {
     }
 
-    override fun drawFilledAndStroked(i_1: Int, i_2: Int) {
+    override fun drawFilledAndStroked(width: Int, height: Int) {
     }
 
     companion object {
         @JvmStatic
-        fun decode(rsbytebuffer0: Packet): LineRasterizer {
-            return LineRasterizer(rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readShort(), rsbytebuffer0.readUMedium(), rsbytebuffer0.readUByte())
+        fun decode(buffer: Packet): LineRasterizer {
+            return LineRasterizer(buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readShort(), buffer.readUMedium(), buffer.readUByte())
         }
     }
 }

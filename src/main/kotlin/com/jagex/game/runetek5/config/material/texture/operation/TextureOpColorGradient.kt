@@ -12,74 +12,74 @@ class TextureOpColorGradient : TextureOperation(1, false) {
     var colorStops: Array<IntArray>? = null
     val gradientLookup = IntArray(257)
 
-    override fun getColorOutput(i_1: Int): Array<IntArray> {
-        val ints_3 = colorImageCache.getPalette(i_1)
+    override fun getColorOutput(y: Int): Array<IntArray> {
+        val palette = colorImageCache.getPalette(y)
         if (colorImageCache.dirty) {
-            val ints_4 = getChildMonochromeOutput(0, i_1)
-            val ints_5 = ints_3[0]
-            val ints_6 = ints_3[1]
-            val ints_7 = ints_3[2]
+            val childPixels = getChildMonochromeOutput(0, y)
+            val outRed = palette[0]
+            val outGreen = palette[1]
+            val outBlue = palette[2]
 
-            for (i_8 in 0 until TextureRaster.currentWidth) {
-                var i_9 = ints_4[i_8] shr 4
-                if (i_9 < 0) {
-                    i_9 = 0
+            for (x in 0 until TextureRaster.currentWidth) {
+                var index = childPixels[x] shr 4
+                if (index < 0) {
+                    index = 0
                 }
 
-                if (i_9 > 256) {
-                    i_9 = 256
+                if (index > 256) {
+                    index = 256
                 }
 
-                i_9 = this.gradientLookup[i_9]
-                ints_5[i_8] = (i_9 and 0xff0000) shr 12
-                ints_6[i_8] = (i_9 and 0xff00) shr 4
-                ints_7[i_8] = (i_9 and 0xff) shl 4
+                index = this.gradientLookup[index]
+                outRed[x] = (index and 0xff0000) shr 12
+                outGreen[x] = (index and 0xff00) shr 4
+                outBlue[x] = (index and 0xff) shl 4
             }
         }
 
-        return ints_3
+        return palette
     }
 
     fun buildLookupTable() {
-        val i_2 = this.colorStops?.size ?: 0
-        if (i_2 > 0) {
-            for (i_3 in 0..256) {
-                var i_4 = 0
-                val i_5 = i_3 shl 4
+        val stopCount = this.colorStops?.size ?: 0
+        if (stopCount > 0) {
+            for (i in 0..256) {
+                var stopIdx = 0
+                val inputValue = i shl 4
 
-                var i_6 = 0
-                while (i_6 < i_2 && i_5 >= this.colorStops!![i_6][0]) {
-                    ++i_4
-                    i_6++
+                var j = 0
+                while (j < stopCount && inputValue >= this.colorStops!![j][0]) {
+                    ++stopIdx
+                    j++
                 }
 
-                val i_7: Int
-                val i_8: Int
-                val ints_9: IntArray
-                if (i_4 < i_2) {
-                    ints_9 = this.colorStops!![i_4]
-                    if (i_4 > 0) {
-                        val ints_10 = this.colorStops!![i_4 - 1]
-                        val i_11 = (i_5 - ints_10[0] shl 12) / (ints_9[0] - ints_10[0])
-                        val i_12 = 4096 - i_11
-                        i_6 = i_11 * ints_9[1] + i_12 * ints_10[1] shr 12
-                        i_7 = i_11 * ints_9[2] + i_12 * ints_10[2] shr 12
-                        i_8 = i_11 * ints_9[3] + i_12 * ints_10[3] shr 12
+                val interpRed: Int
+                val interpGreen: Int
+                val currentStop: IntArray
+                if (stopIdx < stopCount) {
+                    currentStop = this.colorStops!![stopIdx]
+                    if (stopIdx > 0) {
+                        val prevStop = this.colorStops!![stopIdx - 1]
+                        val lerpFactor = (inputValue - prevStop[0] shl 12) / (currentStop[0] - prevStop[0])
+                        val invLerp = 4096 - lerpFactor
+                        j = lerpFactor * currentStop[1] + invLerp * prevStop[1] shr 12
+                        interpRed = lerpFactor * currentStop[2] + invLerp * prevStop[2] shr 12
+                        interpGreen = lerpFactor * currentStop[3] + invLerp * prevStop[3] shr 12
                     } else {
-                        i_6 = ints_9[1]
-                        i_7 = ints_9[2]
-                        i_8 = ints_9[3]
+                        j = currentStop[1]
+                        interpRed = currentStop[2]
+                        interpGreen = currentStop[3]
                     }
                 } else {
-                    ints_9 = this.colorStops!![i_2 - 1]
-                    i_6 = ints_9[1]
-                    i_7 = ints_9[2]
-                    i_8 = ints_9[3]
+                    currentStop = this.colorStops!![stopCount - 1]
+                    j = currentStop[1]
+                    interpRed = currentStop[2]
+                    interpGreen = currentStop[3]
                 }
 
-                var red = i_6 shr 4
-                var green = i_7 shr 4
-                var blue = i_8 shr 4
+                var red = j shr 4
+                var green = interpRed shr 4
+                var blue = interpGreen shr 4
 
                 if (red < 0) {
                     red = 0
@@ -99,14 +99,14 @@ class TextureOpColorGradient : TextureOperation(1, false) {
                     blue = 255
                 }
 
-                this.gradientLookup[i_3] = red shl 16 or (green shl 8) or blue
+                this.gradientLookup[i] = red shl 16 or (green shl 8) or blue
             }
         }
     }
 
-    fun loadPresetGradient(i_1: Int) {
-        if (i_1 != 0) {
-            when (i_1) {
+    fun loadPresetGradient(presetId: Int) {
+        if (presetId != 0) {
+            when (presetId) {
                 1 -> {
                     this.colorStops = Array(2) { IntArray(4) }
                     this.colorStops!![0][0] = 0
@@ -187,20 +187,20 @@ class TextureOpColorGradient : TextureOperation(1, false) {
         buildLookupTable()
     }
 
-    override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
-        if (i_1 == 0) {
-            val i_4 = rsbytebuffer2.readUByte()
-            if (i_4 == 0) {
-                this.colorStops = Array(rsbytebuffer2.readUByte()) { IntArray(4) }
+    override fun decodeOpcode(opcode: Int, buffer: Packet) {
+        if (opcode == 0) {
+            val presetId = buffer.readUByte()
+            if (presetId == 0) {
+                this.colorStops = Array(buffer.readUByte()) { IntArray(4) }
 
-                for (i_5 in this.colorStops!!.indices) {
-                    this.colorStops!![i_5][0] = rsbytebuffer2.readUShort()
-                    this.colorStops!![i_5][1] = rsbytebuffer2.readUByte() shl 4
-                    this.colorStops!![i_5][2] = rsbytebuffer2.readUByte() shl 4
-                    this.colorStops!![i_5][3] = rsbytebuffer2.readUByte() shl 4
+                for (i in this.colorStops!!.indices) {
+                    this.colorStops!![i][0] = buffer.readUShort()
+                    this.colorStops!![i][1] = buffer.readUByte() shl 4
+                    this.colorStops!![i][2] = buffer.readUByte() shl 4
+                    this.colorStops!![i][3] = buffer.readUByte() shl 4
                 }
             } else {
-                loadPresetGradient(i_4)
+                loadPresetGradient(presetId)
             }
         }
     }
