@@ -325,7 +325,7 @@ class GroundSM(
             blendedTexturedTile.positionZ = ShortArray(blendedTexturedTile.verticeCount.toInt())
             blendedTexturedTile.colors = IntArray(blendedTexturedTile.verticeCount.toInt())
             blendedTexturedTile.materialId = ShortArray(blendedTexturedTile.verticeCount.toInt())
-            blendedTexturedTile.aShortArray2254 = ShortArray(blendedTexturedTile.verticeCount.toInt())
+            blendedTexturedTile.textureScale = ShortArray(blendedTexturedTile.verticeCount.toInt())
             blendedTexturedTile.lightIntensity = ByteArray(blendedTexturedTile.verticeCount.toInt())
             if (faceAlphas != null) {
                 blendedTexturedTile.alpha = ShortArray(blendedTexturedTile.verticeCount.toInt())
@@ -388,7 +388,7 @@ class GroundSM(
                 }
 
                 blendedTexturedTile.materialId!![vertice] = materialIds[vertice].toShort()
-                blendedTexturedTile.aShortArray2254!![vertice] = textureScales[vertice].toShort()
+                blendedTexturedTile.textureScale!![vertice] = textureScales[vertice].toShort()
             }
 
             if (adjustedMaterialColors != null) {
@@ -674,7 +674,7 @@ class GroundSM(
 
                 if (textured) {
                     shapedBlendedTile.materialIds = ShortArray(shapedBlendedTile.faceCount.toInt())
-                    shapedBlendedTile.aShortArray2422 = ShortArray(shapedBlendedTile.faceCount.toInt())
+                    shapedBlendedTile.textureScale = ShortArray(shapedBlendedTile.faceCount.toInt())
                 }
 
                 for (face in 0 until shapedBlendedTile.faceCount) {
@@ -712,7 +712,7 @@ class GroundSM(
 
                         if (detailsOnly) {
                             shapedBlendedTile.materialIds!![face] = materialId.toShort()
-                            shapedBlendedTile.aShortArray2422!![face] = textureScales[verticeA].toShort()
+                            shapedBlendedTile.textureScale!![face] = textureScales[verticeA].toShort()
                         } else {
                             if (texturesEnabled) {
                                 materialId = materialIds[verticeA]
@@ -815,27 +815,27 @@ class GroundSM(
                     farZD = vertexZFarD + vertexZFarA * startX + farZOffset + vertexZFarC * endY
                     if (nearZD < -farZD) return
 
-                    perspZA = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZA / farZA
-                    perspZB = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZB / farZB
-                    perspZC = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZC / farZC
-                    perspZD = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZD / farZD
+                    perspZA = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZA / farZA
+                    perspZB = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZB / farZB
+                    perspZC = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZC / farZC
+                    perspZD = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZD / farZD
 
-                    if (thread.aBool2304) {
-                        var dist = nearZA - thread.aFloat2305
+                    if (thread.fogEnabled) {
+                        var dist = nearZA - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaA = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaA = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
-                        dist = nearZB - thread.aFloat2305
+                        dist = nearZB - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaB = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaB = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
-                        dist = nearZC - thread.aFloat2305
+                        dist = nearZC - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaC = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaC = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
-                        dist = nearZD - thread.aFloat2305
+                        dist = nearZD - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaD = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaD = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
                     }
 
@@ -883,56 +883,56 @@ class GroundSM(
                     farZD = vertexZFarD + vertexZFarA * startX + vertexZFarB * heightD + vertexZFarC * endY
                     if (nearZD < -farZD) return
 
-                    perspZA = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZA / farZA
-                    perspZB = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZB / farZB
-                    perspZC = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZC / farZC
-                    perspZD = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZD / farZD
+                    perspZA = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZA / farZA
+                    perspZB = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZB / farZB
+                    perspZC = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZC / farZC
+                    perspZD = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZD / farZD
 
                     if (hasWaterUpdate) {
-                        var dist = nearZA - thread.aFloat2305
+                        var dist = nearZA - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            dist = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            dist = (dist / thread.fogRange).coerceAtMost(1.0f)
                             fogAlphaA = dist
                             val alphaAdjust = (tile.alphaSouthWest * dist).toInt()
                             if (alphaAdjust > 0) heightA -= alphaAdjust
                         }
-                        dist = nearZB - thread.aFloat2305
+                        dist = nearZB - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            dist = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            dist = (dist / thread.fogRange).coerceAtMost(1.0f)
                             fogAlphaB = dist
                             val alphaAdjust = (tile.alphaSouthEast * dist).toInt()
                             if (alphaAdjust > 0) heightB -= alphaAdjust
                         }
-                        dist = nearZC - thread.aFloat2305
+                        dist = nearZC - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            dist = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            dist = (dist / thread.fogRange).coerceAtMost(1.0f)
                             fogAlphaC = dist
                             val alphaAdjust = (tile.alphaNorthEast * dist).toInt()
                             if (alphaAdjust > 0) heightC -= alphaAdjust
                         }
-                        dist = nearZD - thread.aFloat2305
+                        dist = nearZD - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            dist = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            dist = (dist / thread.fogRange).coerceAtMost(1.0f)
                             fogAlphaD = dist
                             val alphaAdjust = (tile.alphaNorthWest * dist).toInt()
                             if (alphaAdjust > 0) heightD -= alphaAdjust
                         }
-                    } else if (thread.aBool2304) {
-                        var dist = nearZA - thread.aFloat2305
+                    } else if (thread.fogEnabled) {
+                        var dist = nearZA - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaA = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaA = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
-                        dist = nearZB - thread.aFloat2305
+                        dist = nearZB - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaB = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaB = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
-                        dist = nearZC - thread.aFloat2305
+                        dist = nearZC - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaC = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaC = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
-                        dist = nearZD - thread.aFloat2305
+                        dist = nearZD - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            fogAlphaD = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            fogAlphaD = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
                     }
 
@@ -1037,21 +1037,21 @@ class GroundSM(
                     val farZ = vertexZFarD + vertexZFarA * posX + vertexZFarB * posZ + vertexZFarC * posY
                     if (nearZ < -farZ) return
 
-                    val perspZ = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZ / farZ
+                    val perspZ = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZ / farZ
                     floatsAlpha[vertIdx] = 0.0f
 
                     if (hasWaterUpdate) {
-                        var dist = nearZ - thread.aFloat2305
+                        var dist = nearZ - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            dist = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            dist = (dist / thread.fogRange).coerceAtMost(1.0f)
                             floatsAlpha[vertIdx] = dist
                             val alphaAdjust = (shapedTile.alpha!![vertIdx] * dist).toInt()
                             if (alphaAdjust > 0) posZ -= alphaAdjust
                         }
-                    } else if (thread.aBool2304) {
-                        val dist = nearZ - thread.aFloat2305
+                    } else if (thread.fogEnabled) {
+                        val dist = nearZ - thread.fogStartDistance
                         if (dist > 0.0f) {
-                            floatsAlpha[vertIdx] = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                            floatsAlpha[vertIdx] = (dist / thread.fogRange).coerceAtMost(1.0f)
                         }
                     }
 
@@ -1305,17 +1305,17 @@ class GroundSM(
 
                 floatsAlpha[verticeIndex] = 0.0f
                 if (hasWaterUpdate) {
-                    var dist = nearZ - thread.aFloat2305
+                    var dist = nearZ - thread.fogStartDistance
                     if (dist > 0.0f) {
-                        dist = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                        dist = (dist / thread.fogRange).coerceAtMost(1.0f)
                         floatsAlpha[verticeIndex] = dist
                         val alpha = (blendedTexturedTile.alpha!![verticeIndex] * dist).toInt()
                         if (alpha > 0) posZ -= alpha
                     }
-                } else if (thread.aBool2304) {
-                    val dist = nearZ - thread.aFloat2305
+                } else if (thread.fogEnabled) {
+                    val dist = nearZ - thread.fogStartDistance
                     if (dist > 0.0f) {
-                        floatsAlpha[verticeIndex] = (dist / thread.aFloat2303).coerceAtMost(1.0f)
+                        floatsAlpha[verticeIndex] = (dist / thread.fogRange).coerceAtMost(1.0f)
                     }
                 }
 
@@ -1323,7 +1323,7 @@ class GroundSM(
                 val viewY = vertexYD + vertexYA * posX + vertexYB * posZ + vertexYC * posY
                 perspectiveX[verticeIndex] = rasterizer.centerX + rasterizer.offsetX * viewX / farZ
                 perspectiveY[verticeIndex] = rasterizer.centerY + rasterizer.offsetY * viewY / farZ
-                perspectiveZ[verticeIndex] = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZ / farZ
+                perspectiveZ[verticeIndex] = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZ / farZ
                 perspectiveZB[verticeIndex] = farZ
             }
 
@@ -1346,10 +1346,10 @@ class GroundSM(
                         val scaledX = x shl tileScale
                         val scaledY = y shl tileScale
                         if ((blendedTexturedTile.colors!![a] and 0xffffff) != 0) {
-                            if (blendedTexturedTile.materialId!![a] == blendedTexturedTile.materialId!![b] && blendedTexturedTile.materialId!![a] == blendedTexturedTile.materialId!![c] && blendedTexturedTile.aShortArray2254!![a] == blendedTexturedTile.aShortArray2254!![b] && blendedTexturedTile.aShortArray2254!![a] == blendedTexturedTile.aShortArray2254!![c]) {
-                                rasterizer.drawMaterializedTriangle(true, true, false, yA, yB, yC, xA, xB, xC, perspectiveZ[a], perspectiveZ[b], perspectiveZ[c], perspectiveZB[a], perspectiveZB[b], perspectiveZB[c], (blendedTexturedTile.positionX!![a] + scaledX).toFloat() / blendedTexturedTile.aShortArray2254!![a], (blendedTexturedTile.positionX!![b] + scaledX).toFloat() / blendedTexturedTile.aShortArray2254!![b], (blendedTexturedTile.positionX!![c] + scaledX).toFloat() / blendedTexturedTile.aShortArray2254!![c], (blendedTexturedTile.positionZ!![a] + scaledY).toFloat() / blendedTexturedTile.aShortArray2254!![a], (blendedTexturedTile.positionZ!![b] + scaledY).toFloat() / blendedTexturedTile.aShortArray2254!![b], (blendedTexturedTile.positionZ!![c] + scaledY).toFloat() / blendedTexturedTile.aShortArray2254!![c], blendedTexturedTile.colors!![a], blendedTexturedTile.colors!![b], blendedTexturedTile.colors!![c], thread.fogColor, floatsAlpha[a] * 255.0f, floatsAlpha[b] * 255.0f, floatsAlpha[c] * 255.0f, blendedTexturedTile.materialId!![a].toInt())
+                            if (blendedTexturedTile.materialId!![a] == blendedTexturedTile.materialId!![b] && blendedTexturedTile.materialId!![a] == blendedTexturedTile.materialId!![c] && blendedTexturedTile.textureScale!![a] == blendedTexturedTile.textureScale!![b] && blendedTexturedTile.textureScale!![a] == blendedTexturedTile.textureScale!![c]) {
+                                rasterizer.drawMaterializedTriangle(true, true, false, yA, yB, yC, xA, xB, xC, perspectiveZ[a], perspectiveZ[b], perspectiveZ[c], perspectiveZB[a], perspectiveZB[b], perspectiveZB[c], (blendedTexturedTile.positionX!![a] + scaledX).toFloat() / blendedTexturedTile.textureScale!![a], (blendedTexturedTile.positionX!![b] + scaledX).toFloat() / blendedTexturedTile.textureScale!![b], (blendedTexturedTile.positionX!![c] + scaledX).toFloat() / blendedTexturedTile.textureScale!![c], (blendedTexturedTile.positionZ!![a] + scaledY).toFloat() / blendedTexturedTile.textureScale!![a], (blendedTexturedTile.positionZ!![b] + scaledY).toFloat() / blendedTexturedTile.textureScale!![b], (blendedTexturedTile.positionZ!![c] + scaledY).toFloat() / blendedTexturedTile.textureScale!![c], blendedTexturedTile.colors!![a], blendedTexturedTile.colors!![b], blendedTexturedTile.colors!![c], thread.fogColor, floatsAlpha[a] * 255.0f, floatsAlpha[b] * 255.0f, floatsAlpha[c] * 255.0f, blendedTexturedTile.materialId!![a].toInt())
                             } else {
-                                rasterizer.drawMultiMaterializedTriangle(yA, yB, yC, xA, xB, xC, perspectiveZ[a], perspectiveZ[b], perspectiveZ[c], perspectiveZB[a], perspectiveZB[b], perspectiveZB[c], (blendedTexturedTile.positionX!![a] + scaledX) / tileUnitsF, (blendedTexturedTile.positionX!![b] + scaledX) / tileUnitsF, (blendedTexturedTile.positionX!![c] + scaledX) / tileUnitsF, (blendedTexturedTile.positionZ!![a] + scaledY) / tileUnitsF, (blendedTexturedTile.positionZ!![b] + scaledY) / tileUnitsF, (blendedTexturedTile.positionZ!![c] + scaledY) / tileUnitsF, blendedTexturedTile.colors!![a], blendedTexturedTile.colors!![b], blendedTexturedTile.colors!![c], thread.fogColor, floatsAlpha[a] * 255.0f, floatsAlpha[b] * 255.0f, floatsAlpha[c] * 255.0f, blendedTexturedTile.materialId!![a].toInt(), tileUnitsF / blendedTexturedTile.aShortArray2254!![a], blendedTexturedTile.materialId!![b].toInt(), tileUnitsF / blendedTexturedTile.aShortArray2254!![b], blendedTexturedTile.materialId!![c].toInt(), tileUnitsF / blendedTexturedTile.aShortArray2254!![c])
+                                rasterizer.drawMultiMaterializedTriangle(yA, yB, yC, xA, xB, xC, perspectiveZ[a], perspectiveZ[b], perspectiveZ[c], perspectiveZB[a], perspectiveZB[b], perspectiveZB[c], (blendedTexturedTile.positionX!![a] + scaledX) / tileUnitsF, (blendedTexturedTile.positionX!![b] + scaledX) / tileUnitsF, (blendedTexturedTile.positionX!![c] + scaledX) / tileUnitsF, (blendedTexturedTile.positionZ!![a] + scaledY) / tileUnitsF, (blendedTexturedTile.positionZ!![b] + scaledY) / tileUnitsF, (blendedTexturedTile.positionZ!![c] + scaledY) / tileUnitsF, blendedTexturedTile.colors!![a], blendedTexturedTile.colors!![b], blendedTexturedTile.colors!![c], thread.fogColor, floatsAlpha[a] * 255.0f, floatsAlpha[b] * 255.0f, floatsAlpha[c] * 255.0f, blendedTexturedTile.materialId!![a].toInt(), tileUnitsF / blendedTexturedTile.textureScale!![a], blendedTexturedTile.materialId!![b].toInt(), tileUnitsF / blendedTexturedTile.textureScale!![b], blendedTexturedTile.materialId!![c].toInt(), tileUnitsF / blendedTexturedTile.textureScale!![c])
                             }
                         }
                     } else {
@@ -1551,25 +1551,25 @@ class GroundSM(
                     xA = rasterizer.centerX + rasterizer.offsetX * viewXA / farZA
                     val viewYA = vertexYD + vertexYA * tileunitsStartX + heightYB + vertexYC * tileunitsStartY
                     yA = rasterizer.centerY + rasterizer.offsetY * viewYA / farZA
-                    zA = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZA / farZA
+                    zA = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZA / farZA
 
                     val viewXB = vertexXD + vertexXA * tileunitsEndX + heightXB + vertexXC * tileunitsStartY
                     xB = rasterizer.centerX + rasterizer.offsetX * viewXB / farZB
                     val viewYB = vertexYD + vertexYA * tileunitsEndX + heightYB + vertexYC * tileunitsStartY
                     yB = rasterizer.centerY + rasterizer.offsetY * viewYB / farZB
-                    zB = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZB / farZB
+                    zB = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZB / farZB
 
                     val viewXC = vertexXD + vertexXA * tileunitsEndX + heightXB + vertexXC * tileunitsEndY
                     xC = rasterizer.centerX + rasterizer.offsetX * viewXC / farZC
                     val viewYC = vertexYD + vertexYA * tileunitsEndX + heightYB + vertexYC * tileunitsEndY
                     yC = rasterizer.centerY + rasterizer.offsetY * viewYC / farZC
-                    zC = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZC / farZC
+                    zC = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZC / farZC
 
                     val viewXD = vertexXD + vertexXA * tileunitsStartX + heightXB + vertexXC * tileunitsEndY
                     xD = rasterizer.centerX + rasterizer.offsetX * viewXD / farZD
                     val viewYD = vertexYD + vertexYA * tileunitsStartX + heightYB + vertexYC * tileunitsEndY
                     yD = rasterizer.centerY + rasterizer.offsetY * viewYD / farZD
-                    zD = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZD / farZD
+                    zD = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZD / farZD
                 } else {
                     val heightNorthWest = tileHeights[x][y]
                     val heightNorthEast = tileHeights[x + 1][y]
@@ -1596,25 +1596,25 @@ class GroundSM(
                     xA = rasterizer.centerX + rasterizer.offsetX * viewXA / farZA
                     val viewYA = vertexYD + vertexYA * tileunitsStartX + vertexYB * heightNorthWest + vertexYC * tileunitsStartY
                     yA = rasterizer.centerY + rasterizer.offsetY * viewYA / farZA
-                    zA = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZA / farZA
+                    zA = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZA / farZA
 
                     val viewXB = vertexXD + vertexXA * tileunitsEndX + vertexXB * heightNorthEast + vertexXC * tileunitsStartY
                     xB = rasterizer.centerX + rasterizer.offsetX * viewXB / farZB
                     val viewYB = vertexYD + vertexYA * tileunitsEndX + vertexYB * heightNorthEast + vertexYC * tileunitsStartY
                     yB = rasterizer.centerY + rasterizer.offsetY * viewYB / farZB
-                    zB = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZB / farZB
+                    zB = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZB / farZB
 
                     val viewXC = vertexXD + vertexXA * tileunitsEndX + vertexXB * heightSouthEast + vertexXC * tileunitsEndY
                     xC = rasterizer.centerX + rasterizer.offsetX * viewXC / farZC
                     val viewYC = vertexYD + vertexYA * tileunitsEndX + vertexYB * heightSouthEast + vertexYC * tileunitsEndY
                     yC = rasterizer.centerY + rasterizer.offsetY * viewYC / farZC
-                    zC = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZC / farZC
+                    zC = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZC / farZC
 
                     val viewXD = vertexXD + vertexXA * tileunitsStartX + vertexXB * heightSouthWest + vertexXC * tileunitsEndY
                     xD = rasterizer.centerX + rasterizer.offsetX * viewXD / farZD
                     val viewYD = vertexYD + vertexYA * tileunitsStartX + vertexYB * heightSouthWest + vertexYC * tileunitsEndY
                     yD = rasterizer.centerY + rasterizer.offsetY * viewYD / farZD
-                    zD = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZD / farZD
+                    zD = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZD / farZD
                 }
 
                 // Triangle 1: C-D-B (NorthEast-NorthWest-SouthEast)
@@ -1660,7 +1660,7 @@ class GroundSM(
                     val viewY = vertexYD + vertexYA * offsetX + vertexYB * offsetZ + vertexYC * offsetY
                     perspectiveX[triangleIndex] = rasterizer.centerX + rasterizer.offsetX * viewX / farZ
                     perspectiveY[triangleIndex] = rasterizer.centerY + rasterizer.offsetY * viewY / farZ
-                    perspectiveZNear[triangleIndex] = rasterizer.aFloat1682 + rasterizer.aFloat1683 * nearZ / farZ
+                    perspectiveZNear[triangleIndex] = rasterizer.depthRangeNear + rasterizer.depthRangeFar * nearZ / farZ
                     perspectiveZFar[triangleIndex] = farZ
                 }
 
@@ -1719,9 +1719,9 @@ class GroundSM(
         val rasterizer = thread.rasterizer!!
         rasterizer.blendingAlpha = 0
         when {
-            plainBlendedTiles != null -> renderBlendedUntexturedTile(x, y, thread.hasWaterUpdate, thread, rasterizer, thread.perspectiveX, thread.perspectiveY, thread.perspectiveZNear, thread.perspectiveZFar, thread.aFloatArray2345, 0)
+            plainBlendedTiles != null -> renderBlendedUntexturedTile(x, y, thread.hasWaterUpdate, thread, rasterizer, thread.perspectiveX, thread.perspectiveY, thread.perspectiveZNear, thread.perspectiveZFar, thread.fogAlphaBuffer, 0)
             scenePlainTiles != null -> renderBlockTile(x, y, rasterizer, thread.perspectiveX, thread.perspectiveY, thread.perspectiveZNear, thread.perspectiveZFar, 0)
-            blendedTexturedTiles != null -> renderBlendedTexturesTile(x, y, thread.hasWaterUpdate, thread, rasterizer, thread.perspectiveX, thread.perspectiveY, thread.perspectiveZNear, thread.perspectiveZFar, thread.aFloatArray2345, 0)
+            blendedTexturedTiles != null -> renderBlendedTexturesTile(x, y, thread.hasWaterUpdate, thread, rasterizer, thread.perspectiveX, thread.perspectiveY, thread.perspectiveZNear, thread.perspectiveZFar, thread.fogAlphaBuffer, 0)
         }
     }
 

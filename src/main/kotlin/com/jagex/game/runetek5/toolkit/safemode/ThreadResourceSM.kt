@@ -14,7 +14,7 @@ import com.jagex.game.runetek5.toolkit.SafeModeToolkit
 class ThreadResourceSM(
     @JvmField val toolkit: SafeModeToolkit
 ) {
-    @JvmField var aBool2304: Boolean = false
+    @JvmField var fogEnabled: Boolean = false
     @JvmField var offsetX: Float = 0f
     @JvmField var centerX: Float = 0f
     @JvmField var offsetY: Float = 0f
@@ -22,8 +22,8 @@ class ThreadResourceSM(
     @JvmField var clipWidth: Int = 0
     @JvmField var runnable: Runnable? = null
     @JvmField var rasterizer: RasterizerSM? = null
-    @JvmField var aFloat2305 = 0.85f
-    @JvmField var aFloat2303: Float = 0f
+    @JvmField var fogStartDistance = 0.85f
+    @JvmField var fogRange: Float = 0f
     @JvmField var fogColor: Int = 0
     @JvmField var lastWaterColor: Int = 0
 
@@ -35,9 +35,9 @@ class ThreadResourceSM(
     @JvmField var waterAverageHeight: Int = 0
     @JvmField var waterScale: Int = 0 // water depth?
     @JvmField var zbuffering: Boolean = false
-    @JvmField val aClass3842346: Matrix44
-    @JvmField val aClass2942314: Matrix43
-    @JvmField val aClass2942316: Matrix43
+    @JvmField val scratchMatrix44: Matrix44
+    @JvmField val renderingMatrix43: Matrix43
+    @JvmField val submeshMatrix43: Matrix43
     @JvmField val particleMatrix: Matrix44
     @JvmField val renderingMatrix: Matrix44
     @JvmField val waterRenderHeight: IntArray
@@ -50,9 +50,9 @@ class ThreadResourceSM(
     @JvmField val matrixZ: IntArray
     @JvmField val renderCycleByVertex: IntArray
     @JvmField val renderCycleByDepth: IntArray
-    @JvmField var aFloat2311: Float = 0f
-    @JvmField var aFloat2335: Float = 0f
-    @JvmField var aFloat2308: Float = 0f
+    @JvmField var cachedDepthRangeFar: Float = 0f
+    @JvmField var cachedDepthRangeNear: Float = 0f
+    @JvmField var inverseDepthRangeFar: Float = 0f
     @JvmField val uvTypes: FloatArray
     @JvmField val copyDstModels: Array<ModelSM>
     @JvmField val copySrcModels: Array<ModelSM>
@@ -60,21 +60,21 @@ class ThreadResourceSM(
     @JvmField val perspectiveY: FloatArray
     @JvmField val perspectiveZNear: FloatArray
     @JvmField val perspectiveZFar: FloatArray
-    @JvmField val aFloatArray2345: FloatArray
+    @JvmField val fogAlphaBuffer: FloatArray
     @JvmField val particleOffsets: FloatArray
     @JvmField val billboardIdByFace: IntArray
 
     init {
-        aFloat2303 = 1.0f - aFloat2305
+        fogRange = 1.0f - fogStartDistance
         fogColor = 0
         lastWaterColor = 0
         hasWaterUpdate = false
         waterAverageHeight = 0
         waterScale = 0
         zbuffering = true
-        aClass3842346 = Matrix44()
-        aClass2942314 = Matrix43()
-        aClass2942316 = Matrix43()
+        scratchMatrix44 = Matrix44()
+        renderingMatrix43 = Matrix43()
+        submeshMatrix43 = Matrix43()
         particleMatrix = Matrix44()
         renderingMatrix = Matrix44()
         waterRenderHeight = IntArray(ModelSM.maxModelVertices)
@@ -87,9 +87,9 @@ class ThreadResourceSM(
         matrixZ = IntArray(8)
         renderCycleByVertex = IntArray(10000)
         renderCycleByDepth = IntArray(10000)
-        aFloat2311 = 1.0f
-        aFloat2335 = 0.0f
-        aFloat2308 = 1.0f
+        cachedDepthRangeFar = 1.0f
+        cachedDepthRangeNear = 0.0f
+        inverseDepthRangeFar = 1.0f
         uvTypes = FloatArray(2)
         copyDstModels = Array(7) { ModelSM(toolkit) }
         copySrcModels = Array(7) { ModelSM(toolkit) }
@@ -97,7 +97,7 @@ class ThreadResourceSM(
         perspectiveY = FloatArray(64)
         perspectiveZNear = FloatArray(64)
         perspectiveZFar = FloatArray(64)
-        aFloatArray2345 = FloatArray(64)
+        fogAlphaBuffer = FloatArray(64)
         particleOffsets = FloatArray(3)
         rasterizer = RasterizerSM(toolkit, this)
         billboardIdByFace = IntArray(ModelSM.maxModelTriangles)

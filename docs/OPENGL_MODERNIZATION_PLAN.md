@@ -61,8 +61,8 @@ AbstractToolkit (abstract interface)
 
 **Current Flow:**
 1. `upload()` - Pack vertex data into interleaved buffer (position, normal, texcoord, color)
-2. `method13536()` - Create index buffer from face arrays
-3. `method13534()` - Main render method:
+2. `buildElementsBuffer()` - Create index buffer from face arrays
+3. `drawOpaqueFaces()` - Main render method:
    - Enable client states for vertex arrays
    - For each material group:
      - `toolkit.renderTexture(materialId)` - Set up material state
@@ -318,7 +318,7 @@ fun renderModern(renderer: ModernRenderer, transform: Matrix4f) {
 
 // Keep legacy method for compatibility during migration
 fun renderLegacy() {
-    method13534() // Existing implementation
+    drawOpaqueFaces() // Existing implementation
 }
 ```
 

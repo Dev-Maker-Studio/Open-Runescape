@@ -214,7 +214,7 @@ open class ModelSM : Model {
     var billboardEffects: Array<BillboardEffect?>? = null
 
     @JvmField
-    var aShortArray8623: ShortArray? = null
+    var sortedFaceIndices: ShortArray? = null
 
     @JvmField
     var functionMask: Int = 0
@@ -579,9 +579,9 @@ open class ModelSM : Model {
             this.facesMaterial = null
         }
         if (this.accountForPriorities || this.billboardEffects != null) {
-            this.aShortArray8623 = ShortArray(this.numFaces)
+            this.sortedFaceIndices = ShortArray(this.numFaces)
             for (faceIndex in 0 until this.numFaces) {
-                this.aShortArray8623!![faceIndex] = faces[faceIndex].toShort()
+                this.sortedFaceIndices!![faceIndex] = faces[faceIndex].toShort()
             }
         }
     }
@@ -608,11 +608,11 @@ open class ModelSM : Model {
         }
     }
 
-    override fun setContrast(i_1: Int) {
+    override fun setContrast(contrast: Int) {
         if ((this.functionMask and ModelFunctionMask.ALTERS_CONTRAST) != 8192) {
             throw IllegalStateException()
         } else {
-            this.contrast = i_1
+            this.contrast = contrast
             this.appearanceUpdateStage = 0
         }
     }
@@ -796,9 +796,9 @@ open class ModelSM : Model {
                     if (renderType.toInt() != 0) {
                         if (renderType.toInt() == 1) {
                             val faceNormal = this.facesNormal!![faceIndex]!!
-                            val i_14 = lightX * faceNormal.x + lightY * faceNormal.y + lightZ * faceNormal.z shr 16
-                            val i_20 = if (i_14 > 256) lowContrast else highContrast
-                            val lightness = signLight((light shr 2) + (i_20 * i_14 shr 18))
+                            val dotProduct = lightX * faceNormal.x + lightY * faceNormal.y + lightZ * faceNormal.z shr 16
+                            val contrastFactor = if (dotProduct > 256) lowContrast else highContrast
+                            val lightness = signLight((light shr 2) + (contrastFactor * dotProduct shr 18))
                             this.facesColourA!![faceIndex] = lightness shl 24 or getMaterialColor(colorHsl, materialId, lightness)
                             this.facesColourC!![faceIndex] = -1
                         } else {
@@ -810,27 +810,27 @@ open class ModelSM : Model {
                         } else {
                             this.vertexNormals!![this.facesA!![faceIndex].toInt()]!!
                         }
-                        var i_14 = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
-                        var finalContrast = if (i_14 > 256) lowContrast else highContrast
-                        var lightness = signLight((light shr 2) + (finalContrast * i_14 shr 18))
+                        var dotProduct = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
+                        var finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                        var lightness = signLight((light shr 2) + (finalContrast * dotProduct shr 18))
                         this.facesColourA!![faceIndex] = lightness shl 24 or getMaterialColor(colorHsl, materialId, lightness)
                         vertexNormal = if (this.vertexNormalOffsets != null && this.vertexNormalOffsets!![this.facesB!![faceIndex].toInt()] != null) {
                             this.vertexNormalOffsets!![this.facesB!![faceIndex].toInt()]!!
                         } else {
                             this.vertexNormals!![this.facesB!![faceIndex].toInt()]!!
                         }
-                        i_14 = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
-                        finalContrast = if (i_14 > 256) lowContrast else highContrast
-                        lightness = signLight((light shr 2) + (finalContrast * i_14 shr 18))
+                        dotProduct = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
+                        finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                        lightness = signLight((light shr 2) + (finalContrast * dotProduct shr 18))
                         this.facesColourB!![faceIndex] = lightness shl 24 or getMaterialColor(colorHsl, materialId, lightness)
                         vertexNormal = if (this.vertexNormalOffsets != null && this.vertexNormalOffsets!![this.facesC!![faceIndex].toInt()] != null) {
                             this.vertexNormalOffsets!![this.facesC!![faceIndex].toInt()]!!
                         } else {
                             this.vertexNormals!![this.facesC!![faceIndex].toInt()]!!
                         }
-                        i_14 = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
-                        finalContrast = if (i_14 > 256) lowContrast else highContrast
-                        lightness = signLight((light shr 2) + (finalContrast * i_14 shr 18))
+                        dotProduct = (lightX * vertexNormal.x + lightY * vertexNormal.y + lightZ * vertexNormal.z) / vertexNormal.magnitude shr 16
+                        finalContrast = if (dotProduct > 256) lowContrast else highContrast
+                        lightness = signLight((light shr 2) + (finalContrast * dotProduct shr 18))
                         this.facesColourC!![faceIndex] = lightness shl 24 or getMaterialColor(colorHsl, materialId, lightness)
                     }
                 }
@@ -895,14 +895,14 @@ open class ModelSM : Model {
         return copy(dstModel, srcModel, copyFlags, fromCache, recalculateBeforeCopy)
     }
 
-    fun signLight(i_1: Int): Int {
-        var i_11 = i_1
-        if (i_11 < 2) {
-            i_11 = 2
-        } else if (i_11 > 126) {
-            i_11 = 126
+    fun signLight(lightValue: Int): Int {
+        var clamped = lightValue
+        if (clamped < 2) {
+            clamped = 2
+        } else if (clamped > 126) {
+            clamped = 126
         }
-        return i_11
+        return clamped
     }
 
     fun recalculateColorsThreaded() {
@@ -1206,7 +1206,7 @@ open class ModelSM : Model {
         modelDst.particleEmitters = this.particleEmitters
         modelDst.effectors = this.effectors
         modelDst.billboardEffects = this.billboardEffects
-        modelDst.aShortArray8623 = this.aShortArray8623
+        modelDst.sortedFaceIndices = this.sortedFaceIndices
         modelDst.functionMask = functionMask
         return modelDst
     }
@@ -2450,11 +2450,11 @@ open class ModelSM : Model {
             var offscreen = false
             this.threadResource!!.offsetX = this.rasterizer!!.offsetX
             this.threadResource!!.offsetY = this.rasterizer!!.offsetY
-            this.threadResource!!.aFloat2311 = this.rasterizer!!.aFloat1683
-            this.threadResource!!.aFloat2308 = 1.0f / this.rasterizer!!.aFloat1683
+            this.threadResource!!.cachedDepthRangeFar = this.rasterizer!!.depthRangeFar
+            this.threadResource!!.inverseDepthRangeFar = 1.0f / this.rasterizer!!.depthRangeFar
             this.threadResource!!.centerX = this.rasterizer!!.centerX
             this.threadResource!!.centerY = this.rasterizer!!.centerY
-            this.threadResource!!.aFloat2335 = this.rasterizer!!.aFloat1682
+            this.threadResource!!.cachedDepthRangeNear = this.rasterizer!!.depthRangeNear
             this.threadResource!!.clipWidth = this.rasterizer!!.clipWidth
             for (verticeIndex in 0 until this.numVertices) {
                 val verticeX = this.verticesX!![verticeIndex]
@@ -2464,7 +2464,7 @@ open class ModelSM : Model {
                 val matrixY = renderMatrix.elements[1] * verticeX + renderMatrix.elements[5] * verticeY + renderMatrix.elements[9] * verticeZ + renderMatrix.elements[13]
                 val matrixZ = renderMatrix.elements[2] * verticeX + renderMatrix.elements[6] * verticeY + renderMatrix.elements[10] * verticeZ + renderMatrix.elements[14]
                 val zz = renderMatrix.elements[3] * verticeX + renderMatrix.elements[7] * verticeY + renderMatrix.elements[11] * verticeZ + renderMatrix.elements[15]
-                this.projectedVerticesZ!![verticeIndex] = this.threadResource!!.aFloat2335 + this.threadResource!!.aFloat2311 * matrixZ / zz
+                this.projectedVerticesZ!![verticeIndex] = this.threadResource!!.cachedDepthRangeNear + this.threadResource!!.cachedDepthRangeFar * matrixZ / zz
                 this.projectedVerticesZ2!![verticeIndex] = zz
                 if (matrixZ >= -zz) {
                     this.projectedVerticesX!![verticeIndex] = (this.threadResource!!.centerX + this.threadResource!!.offsetX * matrixX / zz)
@@ -2579,7 +2579,7 @@ open class ModelSM : Model {
             this.rasterizer!!.smoothEdges = (rasterizerFlags and ModelFunctionMaskGL.SMOOTH_EDGES) == 0
             this.rasterizer!!.blending = false
             try {
-                draw(this.toolkit.colourBuffer != null, this.toolkit.depthBuffer != null, (rasterizerFlags and ModelFunctionMaskGL.TRANSPARENT) != 0, offscreen, this.threadResource!!.aBool2304 && f_21 > this.threadResource!!.aFloat2305 || this.threadResource!!.hasWaterUpdate)
+                draw(this.toolkit.colourBuffer != null, this.toolkit.depthBuffer != null, (rasterizerFlags and ModelFunctionMaskGL.TRANSPARENT) != 0, offscreen, this.threadResource!!.fogEnabled && f_21 > this.threadResource!!.fogStartDistance || this.threadResource!!.hasWaterUpdate)
             } catch (ex: Exception) {
                 // NOOP
             }
@@ -2706,9 +2706,9 @@ open class ModelSM : Model {
             for (faceIndex in 0 until this.numFaces) {
                 translateToScreen(colorWrite, depthWrite, transparent, faceIndex, offscreen, allowReduce)
             }
-        } else if ((this.functionMask and ModelFunctionMask.ALTERS_ALPHA) == 0 && this.aShortArray8623 != null) {
+        } else if ((this.functionMask and ModelFunctionMask.ALTERS_ALPHA) == 0 && this.sortedFaceIndices != null) {
             for (faceIndex in 0 until this.numFaces) {
-                val face = this.aShortArray8623!![faceIndex]
+                val face = this.sortedFaceIndices!![faceIndex]
                 translateToScreen(colorWrite, depthWrite, transparent, face.toInt(), offscreen, allowReduce)
             }
         } else {
@@ -2746,25 +2746,25 @@ open class ModelSM : Model {
             val f_11 = matrix448.elements[11]
             val f_12 = matrix448.elements[15]
             val f_13 = f_10 * f_11 - f_9 * f_12
-            val f_14 = (this.projectedVerticesZ!![a] - this.threadResource!!.aFloat2335) * this.threadResource!!.aFloat2308
-            val f_15 = (this.projectedVerticesZ!![b] - this.threadResource!!.aFloat2335) * this.threadResource!!.aFloat2308
-            val f_16 = (this.projectedVerticesZ!![c] - this.threadResource!!.aFloat2335) * this.threadResource!!.aFloat2308
+            val f_14 = (this.projectedVerticesZ!![a] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
+            val f_15 = (this.projectedVerticesZ!![b] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
+            val f_16 = (this.projectedVerticesZ!![c] - this.threadResource!!.cachedDepthRangeNear) * this.threadResource!!.inverseDepthRangeFar
             val f_17 = f_14 * f_13 / (f_14 * f_11 - f_9)
             val f_18 = f_15 * f_13 / (f_15 * f_11 - f_9)
             val f_19 = f_16 * f_13 / (f_16 * f_11 - f_9)
-            var mixAlphaA = (f_17 - this.threadResource!!.aFloat2305) / this.threadResource!!.aFloat2303
+            var mixAlphaA = (f_17 - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
             if (mixAlphaA > 1.0f) {
                 mixAlphaA = 1.0f
             } else if (mixAlphaA < 0.0f) {
                 mixAlphaA = 0.0f
             }
-            var mixAlphaB = (f_18 - this.threadResource!!.aFloat2305) / this.threadResource!!.aFloat2303
+            var mixAlphaB = (f_18 - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
             if (mixAlphaB > 1.0f) {
                 mixAlphaB = 1.0f
             } else if (mixAlphaB < 0.0f) {
                 mixAlphaB = 0.0f
             }
-            var mixAlphaC = (f_19 - this.threadResource!!.aFloat2305) / this.threadResource!!.aFloat2303
+            var mixAlphaC = (f_19 - this.threadResource!!.fogStartDistance) / this.threadResource!!.fogRange
             if (mixAlphaC > 1.0f) {
                 mixAlphaC = 1.0f
             } else if (mixAlphaC < 0.0f) {
@@ -2949,8 +2949,8 @@ open class ModelSM : Model {
         return false
     }
 
-    fun isHovering(i_1: Int, i_2: Int, f_3: Float, f_4: Float, f_5: Float, f_6: Float, f_7: Float, f_8: Float): Boolean {
-        return (i_2 >= f_3 || i_2 >= f_4 || i_2 >= f_5) && (i_2 <= f_3 || i_2 <= f_4 || i_2 <= f_5) && (i_1 >= f_6 || i_1 >= f_7 || i_1 >= f_8) && (i_1 <= f_6 || i_1 <= f_7 || i_1 <= f_8)
+    fun isHovering(mouseX: Int, mouseY: Int, yA: Float, yB: Float, yC: Float, xA: Float, xB: Float, xC: Float): Boolean {
+        return (mouseY >= yA || mouseY >= yB || mouseY >= yC) && (mouseY <= yA || mouseY <= yB || mouseY <= yC) && (mouseX >= xA || mouseX >= xB || mouseX >= xC) && (mouseX <= xA || mouseX <= xB || mouseX <= xC)
     }
 
     override fun awaitLock() {
@@ -3222,20 +3222,20 @@ open class ModelSM : Model {
         }
     }
 
-    fun mixLightness(i_1: Int, i_21: Int): Int {
-        var i_211 = (i_1 and 0x7f) * i_21 shr 7
-        if (i_211 < 2) {
-            i_211 = 2
-        } else if (i_211 > 126) {
-            i_211 = 126
+    fun mixLightness(hsl: Int, lightness: Int): Int {
+        var result = (hsl and 0x7f) * lightness shr 7
+        if (result < 2) {
+            result = 2
+        } else if (result > 126) {
+            result = 126
         }
-        return i_211 + (i_1 and 0xff80)
+        return result + (hsl and 0xff80)
     }
 
     override fun offsetSubmesh(matrix44var1: Matrix43, submeshFlags: Int, updateIdentityMatrix: Boolean) {
         if (this.verticesSubmeshes != null) {
             val resource = this.toolkit.getThreadResource(Thread.currentThread())!!
-            val matrix44var5 = resource.aClass2942316
+            val matrix44var5 = resource.submeshMatrix43
             matrix44var5.copyFrom(matrix44var1)
             if (updateIdentityMatrix) {
                 matrix44var5.updateIdentitiyMatrix()

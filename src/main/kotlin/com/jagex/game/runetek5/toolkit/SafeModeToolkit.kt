@@ -473,7 +473,7 @@ open class SafeModeToolkit : AbstractToolkit {
             val f_13 = this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[7] * positionY + this.floorMatrix!!.elements[3] * positionX + this.floorMatrix!!.elements[11] * positionZ
             if (f_12 >= -f_13) {
                 val f_14 = this.depthRangeNear + f_12 * this.depthRangeFar / f_13
-                if (f_12 <= threadResource!!.aFloat2305) {
+                if (f_12 <= threadResource!!.fogStartDistance) {
                     val f_15 = this.floorMatrix!!.elements[0] * positionX + this.floorMatrix!!.elements[4] * positionY + positionZ * this.floorMatrix!!.elements[8] + this.floorMatrix!!.elements[12]
                     val f_16 = positionZ * this.floorMatrix!!.elements[9] + this.floorMatrix!!.elements[1] * positionX + this.floorMatrix!!.elements[5] * positionY + this.floorMatrix!!.elements[13]
                     if (f_15 >= -f_13 && f_15 <= f_13 && f_16 >= -f_13 && f_16 <= f_13) {
@@ -1281,7 +1281,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
     override fun getScratchMatrix(): Matrix44 {
         val class1851 = getThreadResource(Thread.currentThread())
-        return class1851!!.aClass3842346!!
+        return class1851!!.scratchMatrix44!!
     }
 
     override fun drawSurfaceLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
@@ -1645,8 +1645,8 @@ open class SafeModeToolkit : AbstractToolkit {
         for (i_3 in 0 until this.executingThreadCount) {
             val class1854 = this.renderingThreads!![i_3]
             val choppyitemfixclass5 = class1854.rasterizer
-            choppyitemfixclass5!!.aFloat1683 = this.depthRangeFar
-            choppyitemfixclass5.aFloat1682 = this.depthRangeNear
+            choppyitemfixclass5!!.depthRangeFar = this.depthRangeFar
+            choppyitemfixclass5.depthRangeNear = this.depthRangeNear
         }
 
     }
@@ -1666,7 +1666,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
     override fun getRenderingMatrix(): Matrix43 {
         val class1851 = getThreadResource(Thread.currentThread())
-        return class1851!!.aClass2942314!!
+        return class1851!!.renderingMatrix43!!
     }
 
     override fun bloomEnabled(): Boolean {
@@ -2073,7 +2073,7 @@ open class SafeModeToolkit : AbstractToolkit {
                 b = 2
             }
             resource.fogColor = r shl 16 or (g shl 8) or b
-            resource.aBool2304 = count >= 0
+            resource.fogEnabled = count >= 0
         }
     }
 
@@ -2099,8 +2099,8 @@ open class SafeModeToolkit : AbstractToolkit {
 
         for (i_5 in 0 until this.executingThreadCount) {
             val class1856 = this.renderingThreads!![i_5]
-            class1856.aFloat2305 = f_2
-            class1856.aFloat2303 = f_4
+            class1856.fogStartDistance = f_2
+            class1856.fogRange = f_4
         }
 
     }

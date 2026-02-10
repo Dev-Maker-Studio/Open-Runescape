@@ -43,7 +43,9 @@
   - OpenGLNativeToolkit: 2 own fields + 1 method (currentElementsBuffer, activeArrayBuffers, toGlTextureSource)
   - SafeModeToolkit: 12+ fields + 6 methods (viewport, depth, frustum, dash lines, particles)
   - scratchMatrix (was incorrectly named shadowProjectionMatrix -- only used as getScratchMatrix() return)
-- **ModelGL/Sound/Graphics**: model-gl.md, sound-package.md
+- **ModelGL (COMPLETE)**: model-gl.md -- ALL own identifiers deobfuscated (6 fields, 7 methods, ~200 locals)
+- **ModelFunctionMaskGL (COMPLETE)**: 12 methods + all params deobfuscated
+- **Sound/Graphics**: sound-package.md
 - **Shader system**: shader-deobfuscation.md (THIS SESSION + previous)
   - ShaderAttribute, ShaderVariableDecoder, ShaderMappingGL (all fields/methods)
   - AbstractEnvironmentShader (8 fields), AbstractSpriteShader (7 fields)
@@ -181,6 +183,9 @@
 - **Constructor param name conflicts in Kotlin**: When renaming @JvmField val fields, the constructor params cannot share the same name. Rename constructor params differently (e.g., `toolkit` for param, `openGlToolkit` for field) and use `this.` prefix for assignment.
 - **Incremental build cache can mask pre-existing errors**: First `./gradlew build` can succeed due to cache. Use `./gradlew clean build` if you see errors that seem unrelated to your changes.
 - **Matrix44.scale() shares name with Model.scale()**: Cannot rename with sed without distinguishing types. Leave alone or use file-specific targeting.
+- **NEVER sed-replace f_N/i_N locals file-wide**: These decompiler-generated local variable names (f_31, i_14, etc.) recur in DIFFERENT method scopes with DIFFERENT meanings. File-wide sed silently corrupts unrelated code. Must use line-specific targeted replacement or git revert + targeted redo.
+- **For large methods with reused vars**: Write the entire renamed method body to a file, then use sed delete+insert to replace the section. Safer than dozens of line-range sed commands.
+- **Linter modifies ModelFunctionMaskGL.kt and ModelGL.kt**: Always revert these files after builds, as the linter corrupts them.
 
 - **Parameter.kt (COMPLETE)**: 10 parameter constants renamed (USE_BROWSER_APPLET, CUSTOM_STRING_PARAM, SUPPLEMENTARY_LOGIN_DATA, LOGIN_TOKEN, SIGNED_TERMS_AGREEMENT, SUPPRESS_TUTORIALS, SESSION_TOKEN, ACCOUNT_CREATED_FLAG, BILLING_FLAG, LOGIN_TYPE)
 - **Client.kt Phase 2B (COMPLETE)**: 14 remaining fields renamed (useBrowserAppletMode, customStringParam, supplementaryLoginData, loginToken, hasSignedTermsAgreement, suppressTutorials, sessionToken, hasJustCreatedAccount, billingFlag, loginType, hasDisplayNamePending, hasAccountSecurity, displayNameChangeState, hideNpcs)
@@ -190,3 +195,8 @@
 - **SongPlayer.kt**: resetChannelVolumes (from method12658)
 - **CutsceneBasicMovement.kt**: musicFadeStep (from anInt9440)
 - **CS2Interpreter.kt**: sendDisplayNameChangeRequest (from sendAClass3794624)
+- **ModelSM + GroundSM + SafeMode Pipeline (COMPLETE)**: ~20 field renames + 6 method param renames across 7 files
+  - RasterizerSM: depthRangeNear (aFloat1682), depthRangeFar (aFloat1683), skipDepthTest (aBool1676)
+  - ThreadResourceSM: fogEnabled (aBool2304), fogStartDistance (aFloat2305), fogRange (aFloat2303), cachedDepthRangeFar (aFloat2311), cachedDepthRangeNear (aFloat2335), inverseDepthRangeFar (aFloat2308), scratchMatrix44 (aClass3842346), renderingMatrix43 (aClass2942314), submeshMatrix43 (aClass2942316), fogAlphaBuffer (aFloatArray2345)
+  - ModelSM: sortedFaceIndices (aShortArray8623), signLight/mixLightness/setContrast/isHovering params renamed, lighting dotProduct/contrastFactor locals
+  - TextureBlendedTile + ShapedTileBlended: textureScale (aShortArray2254/aShortArray2422)

@@ -40,9 +40,9 @@ class RasterizerSM(
     @JvmField var blending: Boolean = false
 
     @JvmField var smoothEdges: Boolean = true
-    @JvmField var aBool1676: Boolean = false
-    @JvmField var aFloat1682: Float = 0f
-    @JvmField var aFloat1683: Float = 1.0f
+    @JvmField var skipDepthTest: Boolean = false
+    @JvmField var depthRangeNear: Float = 0f
+    @JvmField var depthRangeFar: Float = 1.0f
     @JvmField val scanlineOffsets: IntArray = IntArray(4096)
     @JvmField val textureB: Int = -1
     @JvmField val textureA: Int = -1
@@ -1078,7 +1078,7 @@ class RasterizerSM(
             var pixel: Int
             var invertedAlpha: Int
             val depthBuf = depthBuffer!!
-            if (aBool1676) {
+            if (skipDepthTest) {
                 bufferOffset += xA
                 red += slopeRed * xA
                 green += slopeGreen * xA

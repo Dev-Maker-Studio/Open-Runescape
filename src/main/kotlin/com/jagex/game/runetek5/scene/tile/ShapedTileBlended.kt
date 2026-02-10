@@ -29,7 +29,7 @@ class ShapedTileBlended {
     var verticeCount: Short = 0
 
     @JvmField
-    var aShortArray2422: ShortArray? = null
+    var textureScale: ShortArray? = null
 
     @JvmField
     var materialColors: IntArray? = null

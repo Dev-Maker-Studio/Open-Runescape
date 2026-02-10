@@ -85,15 +85,15 @@ class ModelGL : Model {
         }
 
         @JvmStatic
-        fun method13538(i_0: Int, i_1: Int): Int {
-            var i_11 = i_1
-            i_11 = (i_0 and 0x7f) * i_11 shr 7
-            if (i_11 < 2) {
-                i_11 = 2
-            } else if (i_11 > 126) {
-                i_11 = 126
+        fun adjustLuminance(hsl: Int, luminanceFactor: Int): Int {
+            var adjustedLuminance = luminanceFactor
+            adjustedLuminance = (hsl and 0x7f) * adjustedLuminance shr 7
+            if (adjustedLuminance < 2) {
+                adjustedLuminance = 2
+            } else if (adjustedLuminance > 126) {
+                adjustedLuminance = 126
             }
-            return (i_0 and 0xff80) + i_11
+            return (hsl and 0xff80) + adjustedLuminance
         }
     }
 
@@ -119,7 +119,7 @@ class ModelGL : Model {
     var numFaces: Int = 0
 
     @JvmField
-    var anInt8302: Int = 0
+    var renderedFaceCount: Int = 0
 
     @JvmField
     var updateRequired: Boolean = true
@@ -224,10 +224,10 @@ class ModelGL : Model {
     var contrast: Short = 0
 
     @JvmField
-    var aShortArray8288: ShortArray? = null
+    var vertexNormalIndices: ShortArray? = null
 
     @JvmField
-    var anIntArray8289: IntArray? = null
+    var materialBatchOffsets: IntArray? = null
 
     @JvmField
     var vertexGroups: Array<IntArray?>? = null
@@ -239,7 +239,7 @@ class ModelGL : Model {
     var faceGroups: Array<IntArray?>? = null
 
     @JvmField
-    var aClass1668259: ModelNormalsGL? = null
+    var mergedNormals: ModelNormalsGL? = null
 
     @JvmField
     var renderState: Byte = 0
@@ -269,10 +269,10 @@ class ModelGL : Model {
     var maxZ: Short = 0
 
     @JvmField
-    var anInterface158277: ElementsBufferGL? = null
+    var dynamicElementsBuffer: ElementsBufferGL? = null
 
     @JvmField
-    var anInterface148305: ArrayBufferGL? = null
+    var dynamicArrayBuffer: ArrayBufferGL? = null
 
     constructor(toolkit: OpenGlToolkit) {
         this.toolkit = toolkit
@@ -283,7 +283,7 @@ class ModelGL : Model {
         this.modelElementsBuffer = ModelElementsBufferGL()
     }
 
-    constructor(renderer: OpenGlToolkit, mesh: Mesh, rasterizerFlags: Int, i_4: Int, i_5: Int, otherFlags: Int) {
+    constructor(renderer: OpenGlToolkit, mesh: Mesh, rasterizerFlags: Int, ambient: Int, contrast: Int, otherFlags: Int) {
         this.toolkit = renderer
         this.functionMask = rasterizerFlags
         this.preferenceFlags = otherFlags
@@ -332,7 +332,7 @@ class ModelGL : Model {
             }
         }
 
-        this.anInt8302 = this.numFaces
+        this.renderedFaceCount = this.numFaces
         val billboardUids = LongArray(this.numFaces)
         val hasTransitions = (this.functionMask and 0x100) != 0
 
@@ -346,7 +346,7 @@ class ModelGL : Model {
             currentFace = faces[triangleIndex]
             var billboardMaterial: MaterialType? = null
             billboardMainUid = 0
-            var b_67: Byte = 0
+            var renderFlags: Byte = 0
             var effectId: Byte = 0
             var effectParam1: Byte = 0
 
@@ -372,7 +372,7 @@ class ModelGL : Model {
 
                 if (hasUid) {
                     billboardUids[triangleIndex] = Long.MAX_VALUE
-                    this.anInt8302--
+                    this.renderedFaceCount--
                     continue
                 }
             }
@@ -407,7 +407,7 @@ class ModelGL : Model {
 
             billboardMainUid += (effectId.toInt() and 0xff) shl 8
             billboardMainUid += effectParam1.toInt() and 0xff
-            appliesOnFace = b_67 + ((billboardMaterialId.toInt() and 0xffff) shl 16)
+            appliesOnFace = renderFlags + ((billboardMaterialId.toInt() and 0xffff) shl 16)
             appliesOnFace += triangleIndex and 0xffff
             billboardUids[triangleIndex] = (billboardMainUid.toLong() shl 32) + appliesOnFace
             this.hasAlphaTransition = this.hasAlphaTransition or alphaTransition
@@ -488,27 +488,27 @@ class ModelGL : Model {
             this.facesSubmeshes = ShortArray(this.numFaces)
         }
 
-        this.ambient = i_4.toShort()
-        this.contrast = i_5.toShort()
-        this.aShortArray8288 = ShortArray(currentFace)
+        this.ambient = ambient.toShort()
+        this.contrast = contrast.toShort()
+        this.vertexNormalIndices = ShortArray(currentFace)
         normalsUid = LongArray(currentFace)
-        var i_13 = 0
+        var normalSlotOffset = 0
 
         billboardMainUid = 0
         while (billboardMainUid < mesh.maxDepth) {
             appliesOnFace = this.triangles!![billboardMainUid]
-            this.triangles!![billboardMainUid] = i_13
-            i_13 += appliesOnFace
+            this.triangles!![billboardMainUid] = normalSlotOffset
+            normalSlotOffset += appliesOnFace
             vertexNormals[billboardMainUid] = VertexNormalGL()
             billboardMainUid++
         }
 
-        this.triangles!![mesh.maxDepth] = i_13
+        this.triangles!![mesh.maxDepth] = normalSlotOffset
         val transformMatrix = generateTextureMatrix(mesh, faces, this.numFaces)
         val faceNormals = arrayOfNulls<FaceNormalGL>(mesh.numFaces)
 
         var alphaAmt: Int
-        var i_21: Int
+        var deltaY: Int
         var lastMaterial: Short
 
         for (faceTriangleIndex in 0 until mesh.numFaces) {
@@ -516,32 +516,32 @@ class ModelGL : Model {
             billboardMaterialId = mesh.facesB!![faceTriangleIndex]
             val materialId = mesh.facesC!![faceTriangleIndex]
             alphaAmt = this.verticesX!![billboardMaterialId.toInt()] - this.verticesX!![lastMaterial.toInt()]
-            i_21 = this.verticesY!![billboardMaterialId.toInt()] - this.verticesY!![lastMaterial.toInt()]
-            var i_22 = this.verticesZ!![billboardMaterialId.toInt()] - this.verticesZ!![lastMaterial.toInt()]
-            var i_23 = this.verticesX!![materialId.toInt()] - this.verticesX!![lastMaterial.toInt()]
-            var i_24 = this.verticesY!![materialId.toInt()] - this.verticesY!![lastMaterial.toInt()]
-            var i_25 = this.verticesZ!![materialId.toInt()] - this.verticesZ!![lastMaterial.toInt()]
-            var x = i_21 * i_25 - i_24 * i_22
-            var y = i_22 * i_23 - i_25 * alphaAmt
+            deltaY = this.verticesY!![billboardMaterialId.toInt()] - this.verticesY!![lastMaterial.toInt()]
+            var deltaZ1 = this.verticesZ!![billboardMaterialId.toInt()] - this.verticesZ!![lastMaterial.toInt()]
+            var deltaX2 = this.verticesX!![materialId.toInt()] - this.verticesX!![lastMaterial.toInt()]
+            var deltaY2 = this.verticesY!![materialId.toInt()] - this.verticesY!![lastMaterial.toInt()]
+            var deltaZ2 = this.verticesZ!![materialId.toInt()] - this.verticesZ!![lastMaterial.toInt()]
+            var x = deltaY * deltaZ2 - deltaY2 * deltaZ1
+            var y = deltaZ1 * deltaX2 - deltaZ2 * alphaAmt
 
-            var z = alphaAmt * i_24 - i_23 * i_21
+            var z = alphaAmt * deltaY2 - deltaX2 * deltaY
             while (x > 8192 || y > 8192 || z > 8192 || x < -8192 || y < -8192 || z < -8192) {
                 x = x shr 1
                 y = y shr 1
                 z = z shr 1
             }
 
-            var i_29 = sqrt((x * x + y * y + z * z).toDouble()).toInt()
-            if (i_29 <= 0) {
-                i_29 = 1
+            var normalMagnitude = sqrt((x * x + y * y + z * z).toDouble()).toInt()
+            if (normalMagnitude <= 0) {
+                normalMagnitude = 1
             }
 
-            x = x * 256 / i_29
-            y = y * 256 / i_29
-            z = z * 256 / i_29
+            x = x * 256 / normalMagnitude
+            y = y * 256 / normalMagnitude
+            z = z * 256 / normalMagnitude
 
-            val b_30: Byte = if (mesh.faceRenderType == null) 0 else mesh.faceRenderType!![faceTriangleIndex]
-            if (b_30.toInt() == 0) {
+            val faceRenderType: Byte = if (mesh.faceRenderType == null) 0 else mesh.faceRenderType!![faceTriangleIndex]
+            if (faceRenderType.toInt() == 0) {
                 var vertexNormal = vertexNormals[lastMaterial.toInt()]!!
                 vertexNormal.x += x
                 vertexNormal.y += y
@@ -557,7 +557,7 @@ class ModelGL : Model {
                 vertexNormal.y += y
                 vertexNormal.z += z
                 vertexNormal.magnitude++
-            } else if (b_30.toInt() == 1) {
+            } else if (faceRenderType.toInt() == 1) {
                 val faceNormal = FaceNormalGL()
                 faceNormals[faceTriangleIndex] = faceNormal
                 faceNormal.x = x
@@ -598,7 +598,7 @@ class ModelGL : Model {
             var cV = 0.0f
             var uidOffsetB: Byte = 0
             var uidOffsetC: Byte = 0
-            var i_95 = 0
+            var cubeFaceIndex = 0
             var renderType: Byte
 
             if (materialId.toInt() != -1) {
@@ -619,134 +619,134 @@ class ModelGL : Model {
                     val faceC = mesh.facesC!![faceIndex]
 
                     if (renderType.toInt() == 0) {
-                        val s_35 = mesh.textureFaceX!![texFace]
-                        val s_36 = mesh.textureFaceY!![texFace]
-                        val s_77 = mesh.textureFaceZ!![texFace]
-                        val f_38 = mesh.verticesX!![s_35.toInt()].toFloat()
-                        val f_39 = mesh.verticesY!![s_35.toInt()].toFloat()
-                        val f_40 = mesh.verticesZ!![s_35.toInt()].toFloat()
-                        val f_41 = mesh.verticesX!![s_36.toInt()].toFloat() - f_38
-                        val f_42 = mesh.verticesY!![s_36.toInt()].toFloat() - f_39
-                        val f_43 = mesh.verticesZ!![s_36.toInt()].toFloat() - f_40
-                        val f_44 = mesh.verticesX!![s_77.toInt()].toFloat() - f_38
-                        val f_45 = mesh.verticesY!![s_77.toInt()].toFloat() - f_39
-                        val f_46 = mesh.verticesZ!![s_77.toInt()].toFloat() - f_40
-                        val f_47 = mesh.verticesX!![faceA.toInt()].toFloat() - f_38
-                        val f_48 = mesh.verticesY!![faceA.toInt()].toFloat() - f_39
-                        val f_49 = mesh.verticesZ!![faceA.toInt()].toFloat() - f_40
-                        val f_50 = mesh.verticesX!![faceB.toInt()].toFloat() - f_38
-                        val f_51 = mesh.verticesY!![faceB.toInt()].toFloat() - f_39
-                        val f_52 = mesh.verticesZ!![faceB.toInt()].toFloat() - f_40
-                        val f_53 = mesh.verticesX!![faceC.toInt()].toFloat() - f_38
-                        val f_54 = mesh.verticesY!![faceC.toInt()].toFloat() - f_39
-                        val f_55 = mesh.verticesZ!![faceC.toInt()].toFloat() - f_40
-                        val f_56 = f_42 * f_46 - f_43 * f_45
-                        val f_57 = f_43 * f_44 - f_41 * f_46
-                        val f_58 = f_41 * f_45 - f_42 * f_44
-                        var f_59 = f_45 * f_58 - f_46 * f_57
-                        var f_60 = f_46 * f_56 - f_44 * f_58
-                        var f_61 = f_44 * f_57 - f_45 * f_56
-                        var f_62 = 1.0f / (f_59 * f_41 + f_60 * f_42 + f_61 * f_43)
-                        aU = (f_59 * f_47 + f_60 * f_48 + f_61 * f_49) * f_62
-                        bU = (f_59 * f_50 + f_60 * f_51 + f_61 * f_52) * f_62
-                        cU = (f_59 * f_53 + f_60 * f_54 + f_61 * f_55) * f_62
-                        f_59 = f_42 * f_58 - f_43 * f_57
-                        f_60 = f_43 * f_56 - f_41 * f_58
-                        f_61 = f_41 * f_57 - f_42 * f_56
-                        f_62 = 1.0f / (f_59 * f_44 + f_60 * f_45 + f_61 * f_46)
-                        aV = (f_59 * f_47 + f_60 * f_48 + f_61 * f_49) * f_62
-                        bV = (f_59 * f_50 + f_60 * f_51 + f_61 * f_52) * f_62
-                        cV = (f_59 * f_53 + f_60 * f_54 + f_61 * f_55) * f_62
+                        val texVertexA = mesh.textureFaceX!![texFace]
+                        val texVertexB = mesh.textureFaceY!![texFace]
+                        val texVertexC = mesh.textureFaceZ!![texFace]
+                        val texOriginX = mesh.verticesX!![texVertexA.toInt()].toFloat()
+                        val texOriginY = mesh.verticesY!![texVertexA.toInt()].toFloat()
+                        val texOriginZ = mesh.verticesZ!![texVertexA.toInt()].toFloat()
+                        val texEdge1X = mesh.verticesX!![texVertexB.toInt()].toFloat() - texOriginX
+                        val texEdge1Y = mesh.verticesY!![texVertexB.toInt()].toFloat() - texOriginY
+                        val texEdge1Z = mesh.verticesZ!![texVertexB.toInt()].toFloat() - texOriginZ
+                        val texEdge2X = mesh.verticesX!![texVertexC.toInt()].toFloat() - texOriginX
+                        val texEdge2Y = mesh.verticesY!![texVertexC.toInt()].toFloat() - texOriginY
+                        val texEdge2Z = mesh.verticesZ!![texVertexC.toInt()].toFloat() - texOriginZ
+                        val vertexAOffX = mesh.verticesX!![faceA.toInt()].toFloat() - texOriginX
+                        val vertexAOffY = mesh.verticesY!![faceA.toInt()].toFloat() - texOriginY
+                        val vertexAOffZ = mesh.verticesZ!![faceA.toInt()].toFloat() - texOriginZ
+                        val vertexBOffX = mesh.verticesX!![faceB.toInt()].toFloat() - texOriginX
+                        val vertexBOffY = mesh.verticesY!![faceB.toInt()].toFloat() - texOriginY
+                        val vertexBOffZ = mesh.verticesZ!![faceB.toInt()].toFloat() - texOriginZ
+                        val vertexCOffX = mesh.verticesX!![faceC.toInt()].toFloat() - texOriginX
+                        val vertexCOffY = mesh.verticesY!![faceC.toInt()].toFloat() - texOriginY
+                        val vertexCOffZ = mesh.verticesZ!![faceC.toInt()].toFloat() - texOriginZ
+                        val texCrossX = texEdge1Y * texEdge2Z - texEdge1Z * texEdge2Y
+                        val texCrossY = texEdge1Z * texEdge2X - texEdge1X * texEdge2Z
+                        val texCrossZ = texEdge1X * texEdge2Y - texEdge1Y * texEdge2X
+                        var basisX = texEdge2Y * texCrossZ - texEdge2Z * texCrossY
+                        var basisY = texEdge2Z * texCrossX - texEdge2X * texCrossZ
+                        var basisZ = texEdge2X * texCrossY - texEdge2Y * texCrossX
+                        var invDeterminant = 1.0f / (basisX * texEdge1X + basisY * texEdge1Y + basisZ * texEdge1Z)
+                        aU = (basisX * vertexAOffX + basisY * vertexAOffY + basisZ * vertexAOffZ) * invDeterminant
+                        bU = (basisX * vertexBOffX + basisY * vertexBOffY + basisZ * vertexBOffZ) * invDeterminant
+                        cU = (basisX * vertexCOffX + basisY * vertexCOffY + basisZ * vertexCOffZ) * invDeterminant
+                        basisX = texEdge1Y * texCrossZ - texEdge1Z * texCrossY
+                        basisY = texEdge1Z * texCrossX - texEdge1X * texCrossZ
+                        basisZ = texEdge1X * texCrossY - texEdge1Y * texCrossX
+                        invDeterminant = 1.0f / (basisX * texEdge2X + basisY * texEdge2Y + basisZ * texEdge2Z)
+                        aV = (basisX * vertexAOffX + basisY * vertexAOffY + basisZ * vertexAOffZ) * invDeterminant
+                        bV = (basisX * vertexBOffX + basisY * vertexBOffY + basisZ * vertexBOffZ) * invDeterminant
+                        cV = (basisX * vertexCOffX + basisY * vertexCOffY + basisZ * vertexCOffZ) * invDeterminant
                     } else {
                         val centerX = transformMatrix!!.centerX!![texFace]
                         val centerY = transformMatrix.centerY!![texFace]
                         val centerZ = transformMatrix.centerZ!![texFace]
                         val matrix = transformMatrix.matrix!![texFace]
                         val direction = mesh.texturesDirection!![texFace]
-                        val f_40 = mesh.texturesSpeed!![texFace] / 256.0f
+                        val textureSpeed = mesh.texturesSpeed!![texFace] / 256.0f
 
                         if (renderType.toInt() == 1) {
-                            val f_41 = mesh.texturesScaleZ!![texFace] / 1024.0f
-                            mapCylindericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, f_41, direction.toInt(), f_40, uvTypes)
+                            val cylindricalScale = mesh.texturesScaleZ!![texFace] / 1024.0f
+                            mapCylindericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uvTypes)
                             aU = uvTypes[0]
                             aV = uvTypes[1]
-                            mapCylindericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, f_41, direction.toInt(), f_40, uvTypes)
+                            mapCylindericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uvTypes)
                             bU = uvTypes[0]
                             bV = uvTypes[1]
-                            mapCylindericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, f_41, direction.toInt(), f_40, uvTypes)
+                            mapCylindericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, cylindricalScale, direction.toInt(), textureSpeed, uvTypes)
                             cU = uvTypes[0]
                             cV = uvTypes[1]
-                            val f_42 = f_41 / 2.0f
+                            val halfCylindricalScale = cylindricalScale / 2.0f
 
                             if ((direction.toInt() and 0x1) == 0) {
-                                if (bU - aU > f_42) {
-                                    bU -= f_41
+                                if (bU - aU > halfCylindricalScale) {
+                                    bU -= cylindricalScale
                                     uidOffsetB = 1
-                                } else if (aU - bU > f_42) {
-                                    bU += f_41
+                                } else if (aU - bU > halfCylindricalScale) {
+                                    bU += cylindricalScale
                                     uidOffsetB = 2
                                 }
 
-                                if (cU - aU > f_42) {
-                                    cU -= f_41
+                                if (cU - aU > halfCylindricalScale) {
+                                    cU -= cylindricalScale
                                     uidOffsetC = 1
-                                } else if (aU - cU > f_42) {
-                                    cU += f_41
+                                } else if (aU - cU > halfCylindricalScale) {
+                                    cU += cylindricalScale
                                     uidOffsetC = 2
                                 }
                             } else {
-                                if (bV - aV > f_42) {
-                                    bV -= f_41
+                                if (bV - aV > halfCylindricalScale) {
+                                    bV -= cylindricalScale
                                     uidOffsetB = 1
-                                } else if (aV - bV > f_42) {
-                                    bV += f_41
+                                } else if (aV - bV > halfCylindricalScale) {
+                                    bV += cylindricalScale
                                     uidOffsetB = 2
                                 }
 
-                                if (cV - aV > f_42) {
-                                    cV -= f_41
+                                if (cV - aV > halfCylindricalScale) {
+                                    cV -= cylindricalScale
                                     uidOffsetC = 1
-                                } else if (aV - cV > f_42) {
-                                    cV += f_41
+                                } else if (aV - cV > halfCylindricalScale) {
+                                    cV += cylindricalScale
                                     uidOffsetC = 2
                                 }
                             }
                         } else if (renderType.toInt() == 2) {
-                            val f_41 = mesh.texturesUtrans!![texFace] / 256.0f
-                            val f_42 = mesh.texturesVtrans!![texFace] / 256.0f
-                            val i_100 = mesh.verticesX!![faceB.toInt()] - mesh.verticesX!![faceA.toInt()]
-                            val i_101 = mesh.verticesY!![faceB.toInt()] - mesh.verticesY!![faceA.toInt()]
-                            val i_102 = mesh.verticesZ!![faceB.toInt()] - mesh.verticesZ!![faceA.toInt()]
-                            val i_103 = mesh.verticesX!![faceC.toInt()] - mesh.verticesX!![faceA.toInt()]
-                            val i_104 = mesh.verticesY!![faceC.toInt()] - mesh.verticesY!![faceA.toInt()]
-                            val i_105 = mesh.verticesZ!![faceC.toInt()] - mesh.verticesZ!![faceA.toInt()]
-                            val i_106 = i_101 * i_105 - i_104 * i_102
-                            val i_107 = i_102 * i_103 - i_105 * i_100
-                            val i_108 = i_100 * i_104 - i_103 * i_101
-                            val f_52 = 64.0f / mesh.texturesScaleX!![texFace]
-                            val f_53 = 64.0f / mesh.texturesScaleY!![texFace]
-                            val f_54 = 64.0f / mesh.texturesScaleZ!![texFace]
-                            val f_55 = (i_106 * matrix!![0] + i_107 * matrix[1] + i_108 * matrix[2]) / f_52
-                            val f_56 = (i_106 * matrix[3] + i_107 * matrix[4] + i_108 * matrix[5]) / f_53
-                            val f_57 = (i_106 * matrix[6] + i_107 * matrix[7] + i_108 * matrix[8]) / f_54
-                            i_95 = getCubeFace(f_55, f_56, f_57)
-                            mapRectangularUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, i_95, matrix, direction.toInt(), f_40, f_41, f_42, uvTypes)
+                            val uTrans = mesh.texturesUtrans!![texFace] / 256.0f
+                            val vTrans = mesh.texturesVtrans!![texFace] / 256.0f
+                            val edgeDX = mesh.verticesX!![faceB.toInt()] - mesh.verticesX!![faceA.toInt()]
+                            val edgeDY = mesh.verticesY!![faceB.toInt()] - mesh.verticesY!![faceA.toInt()]
+                            val edgeDZ = mesh.verticesZ!![faceB.toInt()] - mesh.verticesZ!![faceA.toInt()]
+                            val edgeDX2 = mesh.verticesX!![faceC.toInt()] - mesh.verticesX!![faceA.toInt()]
+                            val edgeDY2 = mesh.verticesY!![faceC.toInt()] - mesh.verticesY!![faceA.toInt()]
+                            val edgeDZ2 = mesh.verticesZ!![faceC.toInt()] - mesh.verticesZ!![faceA.toInt()]
+                            val crossX = edgeDY * edgeDZ2 - edgeDY2 * edgeDZ
+                            val crossY = edgeDZ * edgeDX2 - edgeDZ2 * edgeDX
+                            val crossZ = edgeDX * edgeDY2 - edgeDX2 * edgeDY
+                            val scaleFactorX = 64.0f / mesh.texturesScaleX!![texFace]
+                            val scaleFactorY = 64.0f / mesh.texturesScaleY!![texFace]
+                            val scaleFactorZ = 64.0f / mesh.texturesScaleZ!![texFace]
+                            val projectedNormalX = (crossX * matrix!![0] + crossY * matrix[1] + crossZ * matrix[2]) / scaleFactorX
+                            val projectedNormalY = (crossX * matrix[3] + crossY * matrix[4] + crossZ * matrix[5]) / scaleFactorY
+                            val projectedNormalZ = (crossX * matrix[6] + crossY * matrix[7] + crossZ * matrix[8]) / scaleFactorZ
+                            cubeFaceIndex = getCubeFace(projectedNormalX, projectedNormalY, projectedNormalZ)
+                            mapRectangularUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uvTypes)
                             aU = uvTypes[0]
                             aV = uvTypes[1]
-                            mapRectangularUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, i_95, matrix, direction.toInt(), f_40, f_41, f_42, uvTypes)
+                            mapRectangularUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uvTypes)
                             bU = uvTypes[0]
                             bV = uvTypes[1]
-                            mapRectangularUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, i_95, matrix, direction.toInt(), f_40, f_41, f_42, uvTypes)
+                            mapRectangularUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, cubeFaceIndex, matrix, direction.toInt(), textureSpeed, uTrans, vTrans, uvTypes)
                             cU = uvTypes[0]
                             cV = uvTypes[1]
                         } else if (renderType.toInt() == 3) {
-                            mapSphericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), f_40, uvTypes)
+                            mapSphericalUv(mesh.verticesX!![faceA.toInt()], mesh.verticesY!![faceA.toInt()], mesh.verticesZ!![faceA.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uvTypes)
                             aU = uvTypes[0]
                             aV = uvTypes[1]
-                            mapSphericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), f_40, uvTypes)
+                            mapSphericalUv(mesh.verticesX!![faceB.toInt()], mesh.verticesY!![faceB.toInt()], mesh.verticesZ!![faceB.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uvTypes)
                             bU = uvTypes[0]
                             bV = uvTypes[1]
-                            mapSphericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), f_40, uvTypes)
+                            mapSphericalUv(mesh.verticesX!![faceC.toInt()], mesh.verticesY!![faceC.toInt()], mesh.verticesZ!![faceC.toInt()], centerX, centerY, centerZ, matrix, direction.toInt(), textureSpeed, uvTypes)
                             cU = uvTypes[0]
                             cV = uvTypes[1]
 
@@ -795,7 +795,7 @@ class ModelGL : Model {
             }
 
             if (renderType.toInt() == 0) {
-                val uid = (texturedFace.toLong() shl 2) + ((i_95.toLong() shl 24) + (color.toLong() shl 8) + alphaAmt shl 32)
+                val uid = (texturedFace.toLong() shl 2) + ((cubeFaceIndex.toLong() shl 24) + (color.toLong() shl 8) + alphaAmt shl 32)
                 val faceA = mesh.facesA!![faceIndex]
                 val faceB = mesh.facesB!![faceIndex]
                 val faceC = mesh.facesC!![faceIndex]
@@ -807,7 +807,7 @@ class ModelGL : Model {
                 this.facesC!![faceTriangleIndex] = connectNormal(faceC.toInt(), uid + uidOffsetC, vertexNormal.x, vertexNormal.y, vertexNormal.z, vertexNormal.magnitude, cU, cV)
             } else if (renderType.toInt() == 1) {
                 val faceNormal = faceNormals[faceIndex]!!
-                val uid = ((texturedFace.toLong() shl 2) + (if (faceNormal.x > 0) 1024 else 2048) + ((faceNormal.y + 256).toLong() shl 12) + ((faceNormal.z + 256).toLong() shl 22)) + ((i_95.toLong() shl 24) + (color.toLong() shl 8) + alphaAmt shl 32)
+                val uid = ((texturedFace.toLong() shl 2) + (if (faceNormal.x > 0) 1024 else 2048) + ((faceNormal.y + 256).toLong() shl 12) + ((faceNormal.z + 256).toLong() shl 22)) + ((cubeFaceIndex.toLong() shl 24) + (color.toLong() shl 8) + alphaAmt shl 32)
                 this.facesA!![faceTriangleIndex] = connectNormal(mesh.facesA!![faceIndex].toInt(), uid, faceNormal.x, faceNormal.y, faceNormal.z, 0, aU, aV)
                 this.facesB!![faceTriangleIndex] = connectNormal(mesh.facesB!![faceIndex].toInt(), uid + uidOffsetB, faceNormal.x, faceNormal.y, faceNormal.z, 0, bU, bV)
                 this.facesC!![faceTriangleIndex] = connectNormal(mesh.facesC!![faceIndex].toInt(), uid + uidOffsetC, faceNormal.x, faceNormal.y, faceNormal.z, 0, cU, cV)
@@ -828,27 +828,27 @@ class ModelGL : Model {
         triangleIndex = 0
         lastMaterial = -10000
 
-        for (i_85 in 0 until this.anInt8302) {
-            val materialId = this.facesMaterial!![i_85]
+        for (face in 0 until this.renderedFaceCount) {
+            val materialId = this.facesMaterial!![face]
             if (materialId != lastMaterial) {
                 triangleIndex++
                 lastMaterial = materialId
             }
         }
 
-        this.anIntArray8289 = IntArray(triangleIndex + 1)
+        this.materialBatchOffsets = IntArray(triangleIndex + 1)
         triangleIndex = 0
         lastMaterial = -10000
 
-        for (face in 0 until this.anInt8302) {
+        for (face in 0 until this.renderedFaceCount) {
             val materialId = this.facesMaterial!![face]
             if (materialId != lastMaterial) {
-                this.anIntArray8289!![triangleIndex++] = face
+                this.materialBatchOffsets!![triangleIndex++] = face
                 lastMaterial = materialId
             }
         }
 
-        this.anIntArray8289!![triangleIndex] = this.anInt8302
+        this.materialBatchOffsets!![triangleIndex] = this.renderedFaceCount
         normalsUid = null
         this.normalsX = clone(this.normalsX!!, this.numNormals)
         this.normalsY = clone(this.normalsY!!, this.numNormals)
@@ -866,54 +866,54 @@ class ModelGL : Model {
         }
 
         if (mesh.faceGroups != null && ModelFunctionMaskGL.altersFaces(rasterizerFlags)) {
-            var i_85 = 0
-            val ints_68 = IntArray(256)
+            var maxGroupIndex = 0
+            val groupCounts = IntArray(256)
 
             for (faceAlphaAmt in 0 until this.numFaces) {
-                i_21 = mesh.faceGroups!![faces[faceAlphaAmt]]
-                if (i_21 >= 0) {
-                    ++ints_68[i_21]
-                    if (i_21 > i_85) {
-                        i_85 = i_21
+                deltaY = mesh.faceGroups!![faces[faceAlphaAmt]]
+                if (deltaY >= 0) {
+                    ++groupCounts[deltaY]
+                    if (deltaY > maxGroupIndex) {
+                        maxGroupIndex = deltaY
                     }
                 }
             }
 
-            this.faceGroups = arrayOfNulls(i_85 + 1)
+            this.faceGroups = arrayOfNulls(maxGroupIndex + 1)
 
-            for (faceAlphaAmt in 0..i_85) {
-                this.faceGroups!![faceAlphaAmt] = IntArray(ints_68[faceAlphaAmt])
-                ints_68[faceAlphaAmt] = 0
+            for (faceAlphaAmt in 0..maxGroupIndex) {
+                this.faceGroups!![faceAlphaAmt] = IntArray(groupCounts[faceAlphaAmt])
+                groupCounts[faceAlphaAmt] = 0
             }
 
             for (faceAlphaAmt in 0 until this.numFaces) {
-                i_21 = mesh.faceGroups!![faces[faceAlphaAmt]]
-                if (i_21 >= 0) {
-                    this.faceGroups!![i_21]!![ints_68[i_21]++] = faceAlphaAmt
+                deltaY = mesh.faceGroups!![faces[faceAlphaAmt]]
+                if (deltaY >= 0) {
+                    this.faceGroups!![deltaY]!![groupCounts[deltaY]++] = faceAlphaAmt
                 }
             }
         }
     }
 
     private fun connectNormal(face: Int, uid: Long, x: Int, y: Int, z: Int, magnitude: Int, u: Float, v: Float): Short {
-        val i_11 = this.triangles!![face]
-        val i_12 = this.triangles!![face + 1]
-        var i_13 = 0
+        val startIndex = this.triangles!![face]
+        val endIndex = this.triangles!![face + 1]
+        var slotIndex = 0
 
-        for (i_14 in i_11 until i_12) {
-            val s_15 = this.aShortArray8288!![i_14]
-            if (s_15.toInt() == 0) {
-                i_13 = i_14
+        for (searchIndex in startIndex until endIndex) {
+            val normalRef = this.vertexNormalIndices!![searchIndex]
+            if (normalRef.toInt() == 0) {
+                slotIndex = searchIndex
                 break
             }
 
-            if (normalsUid!![i_14] == uid) {
-                return (s_15 - 1).toShort()
+            if (normalsUid!![searchIndex] == uid) {
+                return (normalRef - 1).toShort()
             }
         }
 
-        this.aShortArray8288!![i_13] = (this.numNormals + 1).toShort()
-        normalsUid!![i_13] = uid
+        this.vertexNormalIndices!![slotIndex] = (this.numNormals + 1).toShort()
+        normalsUid!![slotIndex] = uid
         this.normalsX!![this.numNormals] = x.toShort()
         this.normalsY!![this.numNormals] = y.toShort()
         this.normalsZ!![this.numNormals] = z.toShort()
@@ -923,7 +923,7 @@ class ModelGL : Model {
         return (this.numNormals++).toShort()
     }
 
-    fun method13522(shadowgl: ShadowGL) {
+    fun projectShadow(shadowgl: ShadowGL) {
         if (this.toolkit.projectedVerticesX.size < this.numNormals) {
             this.toolkit.projectedVerticesX = IntArray(this.numNormals)
             this.toolkit.projectedVerticesY = IntArray(this.numNormals)
@@ -935,21 +935,21 @@ class ModelGL : Model {
         for (v in 0 until this.maxDepth) {
             val x = ((this.verticesX!![v] - (this.toolkit.shadowOffsetX * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startX
             val y = ((this.verticesZ!![v] - (this.toolkit.shadowOffsetZ * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startY
-            val i_7 = this.triangles!![v]
-            val i_8 = this.triangles!![v + 1]
+            val triStart = this.triangles!![v]
+            val triEnd = this.triangles!![v + 1]
 
-            for (i_9 in i_7 until i_8) {
-                val i_10 = (this.aShortArray8288!![i_9].toInt() and 0xffff) - 1
-                if (i_10 == -1) {
+            for (triIdx in triStart until triEnd) {
+                val normalIdx = (this.vertexNormalIndices!![triIdx].toInt() and 0xffff) - 1
+                if (normalIdx == -1) {
                     break
                 }
 
-                projectedVerticesX[i_10] = x
-                projectedVerticesY[i_10] = y
+                projectedVerticesX[normalIdx] = x
+                projectedVerticesY[normalIdx] = y
             }
         }
 
-        for (face in 0 until this.anInt8302) {
+        for (face in 0 until this.renderedFaceCount) {
             val faceA = this.facesA!![face].toInt() and 0xffff
             val faceB = this.facesB!![face].toInt() and 0xffff
             val faceC = this.facesC!![face].toInt() and 0xffff
@@ -965,38 +965,38 @@ class ModelGL : Model {
         }
     }
 
-    override fun applyShading(i_1: Int) {
-        this.functionMask = i_1
-        if (this.aClass1668259 != null && (this.functionMask and 0x10000) == 0) {
-            this.normalsX = this.aClass1668259!!.normalsX
-            this.normalsY = this.aClass1668259!!.normalsY
-            this.normalsZ = this.aClass1668259!!.normalsZ
-            this.magnitudes = this.aClass1668259!!.magnitude
-            this.aClass1668259 = null
+    override fun applyShading(functionMask: Int) {
+        this.functionMask = functionMask
+        if (this.mergedNormals != null && (this.functionMask and 0x10000) == 0) {
+            this.normalsX = this.mergedNormals!!.normalsX
+            this.normalsY = this.mergedNormals!!.normalsY
+            this.normalsZ = this.mergedNormals!!.normalsZ
+            this.magnitudes = this.mergedNormals!!.magnitude
+            this.mergedNormals = null
         }
 
         this.updateRequired = true
-        method13525()
+        releaseUploadedData()
     }
 
-    override fun copy(b_1: Byte, functionMask: Int, bool3: Boolean): Model? {
-        var bool4 = false
-        val class528Sub15: ModelGL
-        val class528Sub16: ModelGL
+    override fun copy(copyType: Byte, functionMask: Int, recalculateBeforeCopy: Boolean): Model? {
+        var usesPreallocated = false
+        val dst: ModelGL
+        val src: ModelGL
 
-        if (b_1 > 0 && b_1 <= 7) {
-            class528Sub16 = this.toolkit.copyDst[b_1 - 1]!!
-            class528Sub15 = this.toolkit.copySrc[b_1 - 1]!!
-            bool4 = true
+        if (copyType > 0 && copyType <= 7) {
+            src = this.toolkit.copyDst[copyType - 1]!!
+            dst = this.toolkit.copySrc[copyType - 1]!!
+            usesPreallocated = true
         } else {
-            class528Sub15 = ModelGL(this.toolkit)
-            class528Sub16 = class528Sub15
+            dst = ModelGL(this.toolkit)
+            src = dst
         }
 
-        return method13524(class528Sub15, class528Sub16, functionMask, bool4)
+        return copyModelData(dst, src, functionMask, usesPreallocated)
     }
 
-    fun method13524(dst: ModelGL, src: ModelGL, flags: Int, bool4: Boolean): Model {
+    fun copyModelData(dst: ModelGL, src: ModelGL, flags: Int, usesPreallocated: Boolean): Model {
         dst.renderState = 0
         dst.functionMask = flags
         dst.preferenceFlags = this.preferenceFlags
@@ -1007,7 +1007,7 @@ class ModelGL : Model {
         dst.maxDepth = minOf(this.maxDepth, this.numVertices)
         dst.numNormals = this.numNormals
         dst.numFaces = this.numFaces
-        dst.anInt8302 = this.anInt8302
+        dst.renderedFaceCount = this.renderedFaceCount
         dst.billboardCount = this.billboardCount
 
         if ((flags and 0x100) != 0) {
@@ -1021,7 +1021,7 @@ class ModelGL : Model {
         val copyVerticesY = ModelFunctionMaskGL.altersVerticesY(flags)
         val copyVerticesZ = ModelFunctionMaskGL.altersVerticesZ(flags)
         val copyAnyVertices = copyVerticesX or copyVerticesY or copyVerticesZ
-        var i_10: Int
+        var arraySize: Int
 
         if (copyAnyVertices) {
             if (copyVerticesX) {
@@ -1077,7 +1077,7 @@ class ModelGL : Model {
         }
 
         if (ModelFunctionMaskGL.altersAnyVerticeType(flags)) {
-            if (bool4) {
+            if (usesPreallocated) {
                 dst.renderState = (dst.renderState.toInt() or 0x1).toByte()
             }
 
@@ -1120,8 +1120,8 @@ class ModelGL : Model {
             dst.facesAlpha = this.facesAlpha
         }
 
-        if (ModelFunctionMaskGL.method2199(flags, this.preferenceFlags)) {
-            if (bool4) {
+        if (ModelFunctionMaskGL.requiresColorBufferRebuild(flags, this.preferenceFlags)) {
+            if (usesPreallocated) {
                 dst.renderState = (dst.renderState.toInt() or 0x2).toByte()
             }
 
@@ -1134,46 +1134,46 @@ class ModelGL : Model {
             dst.colorsBuffer = null
         }
 
-        var i_11: Int
+        var normalCount: Int
         if (ModelFunctionMaskGL.altersLight(flags)) {
             if (src.normalsX != null && src.normalsX!!.size >= this.numNormals) {
                 dst.normalsX = src.normalsX
                 dst.normalsY = src.normalsY
                 dst.normalsZ = src.normalsZ
             } else {
-                i_10 = this.numNormals
-                dst.normalsX = ShortArray(i_10)
+                arraySize = this.numNormals
+                dst.normalsX = ShortArray(arraySize)
                 src.normalsX = dst.normalsX
-                dst.normalsY = ShortArray(i_10)
+                dst.normalsY = ShortArray(arraySize)
                 src.normalsY = dst.normalsY
-                dst.normalsZ = ShortArray(i_10)
+                dst.normalsZ = ShortArray(arraySize)
                 src.normalsZ = dst.normalsZ
             }
 
-            if (this.aClass1668259 != null) {
-                if (src.aClass1668259 == null) {
-                    src.aClass1668259 = ModelNormalsGL()
+            if (this.mergedNormals != null) {
+                if (src.mergedNormals == null) {
+                    src.mergedNormals = ModelNormalsGL()
                 }
 
-                val class16612 = src.aClass1668259!!
-                dst.aClass1668259 = class16612
+                val dstMergedNormals = src.mergedNormals!!
+                dst.mergedNormals = dstMergedNormals
 
-                if (class16612.normalsX == null || class16612.normalsX!!.size < this.numNormals) {
-                    i_11 = this.numNormals
-                    class16612.normalsX = ShortArray(i_11)
-                    class16612.normalsY = ShortArray(i_11)
-                    class16612.normalsZ = ShortArray(i_11)
-                    class16612.magnitude = ByteArray(i_11)
+                if (dstMergedNormals.normalsX == null || dstMergedNormals.normalsX!!.size < this.numNormals) {
+                    normalCount = this.numNormals
+                    dstMergedNormals.normalsX = ShortArray(normalCount)
+                    dstMergedNormals.normalsY = ShortArray(normalCount)
+                    dstMergedNormals.normalsZ = ShortArray(normalCount)
+                    dstMergedNormals.magnitude = ByteArray(normalCount)
                 }
 
                 for (idx in 0 until this.numNormals) {
                     dst.normalsX!![idx] = this.normalsX!![idx]
                     dst.normalsY!![idx] = this.normalsY!![idx]
                     dst.normalsZ!![idx] = this.normalsZ!![idx]
-                    class16612.normalsX!![idx] = this.aClass1668259!!.normalsX!![idx]
-                    class16612.normalsY!![idx] = this.aClass1668259!!.normalsY!![idx]
-                    class16612.normalsZ!![idx] = this.aClass1668259!!.normalsZ!![idx]
-                    class16612.magnitude!![idx] = this.aClass1668259!!.magnitude!![idx]
+                    dstMergedNormals.normalsX!![idx] = this.mergedNormals!!.normalsX!![idx]
+                    dstMergedNormals.normalsY!![idx] = this.mergedNormals!!.normalsY!![idx]
+                    dstMergedNormals.normalsZ!![idx] = this.mergedNormals!!.normalsZ!![idx]
+                    dstMergedNormals.magnitude!![idx] = this.mergedNormals!!.magnitude!![idx]
                 }
             } else {
                 for (idx in 0 until this.numNormals) {
@@ -1183,7 +1183,7 @@ class ModelGL : Model {
                 }
             }
         } else {
-            dst.aClass1668259 = this.aClass1668259
+            dst.mergedNormals = this.mergedNormals
             dst.normalsX = this.normalsX
             dst.normalsY = this.normalsY
             dst.normalsZ = this.normalsZ
@@ -1191,8 +1191,8 @@ class ModelGL : Model {
 
         dst.magnitudes = this.magnitudes
 
-        if (ModelFunctionMaskGL.method2261(flags, this.preferenceFlags)) {
-            if (bool4) {
+        if (ModelFunctionMaskGL.requiresNormalsBufferRebuild(flags, this.preferenceFlags)) {
+            if (usesPreallocated) {
                 dst.renderState = (dst.renderState.toInt() or 0x4).toByte()
             }
 
@@ -1208,8 +1208,8 @@ class ModelGL : Model {
         dst.textureU = this.textureU
         dst.textureV = this.textureV
 
-        if (ModelFunctionMaskGL.method2200()) {
-            if (bool4) {
+        if (ModelFunctionMaskGL.altersTextureCoordinates()) {
+            if (usesPreallocated) {
                 dst.renderState = (dst.renderState.toInt() or 0x8).toByte()
             }
 
@@ -1228,12 +1228,12 @@ class ModelGL : Model {
                 dst.facesB = src.facesB
                 dst.facesC = src.facesC
             } else {
-                i_10 = this.numFaces
-                dst.facesA = ShortArray(i_10)
+                arraySize = this.numFaces
+                dst.facesA = ShortArray(arraySize)
                 src.facesA = dst.facesA
-                dst.facesB = ShortArray(i_10)
+                dst.facesB = ShortArray(arraySize)
                 src.facesB = dst.facesB
-                dst.facesC = ShortArray(i_10)
+                dst.facesC = ShortArray(arraySize)
                 src.facesC = dst.facesC
             }
 
@@ -1249,7 +1249,7 @@ class ModelGL : Model {
         }
 
         if (ModelFunctionMaskGL.copyElementsBuffer(flags)) {
-            if (bool4) {
+            if (usesPreallocated) {
                 dst.renderState = (dst.renderState.toInt() or 0x10).toByte()
             }
 
@@ -1265,8 +1265,8 @@ class ModelGL : Model {
             if (src.facesMaterial != null && src.facesMaterial!!.size >= this.numFaces) {
                 dst.facesMaterial = src.facesMaterial
             } else {
-                i_10 = this.numFaces
-                dst.facesMaterial = ShortArray(i_10)
+                arraySize = this.numFaces
+                dst.facesMaterial = ShortArray(arraySize)
                 src.facesMaterial = dst.facesMaterial
             }
 
@@ -1285,8 +1285,8 @@ class ModelGL : Model {
                     dst.billboardSurfaces!![i]!!.copyFrom(this.billboardSurfaces!![i]!!)
                 }
             } else {
-                i_10 = this.billboardCount
-                dst.billboardSurfaces = arrayOfNulls(i_10)
+                arraySize = this.billboardCount
+                dst.billboardSurfaces = arrayOfNulls(arraySize)
                 src.billboardSurfaces = dst.billboardSurfaces
 
                 for (idx in 0 until this.billboardCount) {
@@ -1316,17 +1316,17 @@ class ModelGL : Model {
         dst.vertexGroups = this.vertexGroups
         dst.faceGroups = this.faceGroups
         dst.billboardGroups = this.billboardGroups
-        dst.aShortArray8288 = this.aShortArray8288
+        dst.vertexNormalIndices = this.vertexNormalIndices
         dst.triangles = this.triangles
         dst.verticesSubmeshes = this.verticesSubmeshes
         dst.facesSubmeshes = this.facesSubmeshes
-        dst.anIntArray8289 = this.anIntArray8289
+        dst.materialBatchOffsets = this.materialBatchOffsets
         dst.emissiveTriangles = this.emissiveTriangles
         dst.effectiveVertices = this.effectiveVertices
         return dst
     }
 
-    fun method13525() {
+    fun releaseUploadedData() {
         if (this.updateRequired) {
             this.updateRequired = false
             if (this.emissiveTriangles == null && this.effectiveVertices == null && this.billboardEffects == null && !ModelFunctionMaskGL.altersVerticePosition(this.functionMask)) {
@@ -1334,7 +1334,7 @@ class ModelGL : Model {
                 var verticesYUploaded = false
                 var verticesZUploaded = false
 
-                if (this.verticesX != null && !ModelFunctionMaskGL.method2202(this.functionMask)) {
+                if (this.verticesX != null && !ModelFunctionMaskGL.retainsVerticesX(this.functionMask)) {
                     if (this.vertexBuffer != null && this.vertexBuffer!!.buffer == null) {
                         this.updateRequired = true
                     } else {
@@ -1346,7 +1346,7 @@ class ModelGL : Model {
                     }
                 }
 
-                if (this.verticesY != null && !ModelFunctionMaskGL.method2229(this.functionMask)) {
+                if (this.verticesY != null && !ModelFunctionMaskGL.retainsVerticesY(this.functionMask)) {
                     if (this.vertexBuffer != null && this.vertexBuffer!!.buffer == null) {
                         this.updateRequired = true
                     } else {
@@ -1358,7 +1358,7 @@ class ModelGL : Model {
                     }
                 }
 
-                if (this.verticesZ != null && !ModelFunctionMaskGL.method2252(this.functionMask)) {
+                if (this.verticesZ != null && !ModelFunctionMaskGL.retainsVerticesZ(this.functionMask)) {
                     if (this.vertexBuffer != null && this.vertexBuffer!!.buffer == null) {
                         this.updateRequired = true
                     } else {
@@ -1383,12 +1383,12 @@ class ModelGL : Model {
                 }
             }
 
-            if (this.aShortArray8288 != null && this.verticesX == null && this.verticesY == null && this.verticesZ == null) {
-                this.aShortArray8288 = null
+            if (this.vertexNormalIndices != null && this.verticesX == null && this.verticesY == null && this.verticesZ == null) {
+                this.vertexNormalIndices = null
                 this.triangles = null
             }
 
-            if (this.magnitudes != null && !ModelFunctionMaskGL.method2204(this.functionMask, this.preferenceFlags)) {
+            if (this.magnitudes != null && !ModelFunctionMaskGL.retainsNormals(this.functionMask, this.preferenceFlags)) {
                 if (this.normalsBuffer != null) {
                     if (this.normalsBuffer!!.buffer != null) {
                         this.normalsZ = null
@@ -1408,7 +1408,7 @@ class ModelGL : Model {
                 }
             }
 
-            if (this.facesColor != null && !ModelFunctionMaskGL.method2205(this.functionMask, this.preferenceFlags)) {
+            if (this.facesColor != null && !ModelFunctionMaskGL.retainsFaceColors(this.functionMask, this.preferenceFlags)) {
                 if (this.colorsBuffer != null && this.colorsBuffer!!.buffer == null) {
                     this.updateRequired = true
                 } else {
@@ -1416,7 +1416,7 @@ class ModelGL : Model {
                 }
             }
 
-            if (this.facesAlpha != null && !ModelFunctionMaskGL.method2206(this.functionMask, this.preferenceFlags)) {
+            if (this.facesAlpha != null && !ModelFunctionMaskGL.retainsFaceAlphas(this.functionMask, this.preferenceFlags)) {
                 if (this.colorsBuffer != null && this.colorsBuffer!!.buffer == null) {
                     this.updateRequired = true
                 } else {
@@ -1424,7 +1424,7 @@ class ModelGL : Model {
                 }
             }
 
-            if (this.textureU != null && !ModelFunctionMaskGL.method2241()) {
+            if (this.textureU != null && !ModelFunctionMaskGL.altersTextureUV()) {
                 if (this.textureCoordinatesBuffer != null && this.textureCoordinatesBuffer!!.buffer == null) {
                     this.updateRequired = true
                 } else {
@@ -1433,7 +1433,7 @@ class ModelGL : Model {
                 }
             }
 
-            if (this.facesMaterial != null && !ModelFunctionMaskGL.method2212(this.functionMask, this.preferenceFlags)) {
+            if (this.facesMaterial != null && !ModelFunctionMaskGL.retainsFaceMaterials(this.functionMask, this.preferenceFlags)) {
                 if (this.colorsBuffer != null && this.colorsBuffer!!.buffer == null) {
                     this.updateRequired = true
                 } else {
@@ -1441,7 +1441,7 @@ class ModelGL : Model {
                 }
             }
 
-            if (this.facesA != null && !ModelFunctionMaskGL.method2211(this.functionMask, this.preferenceFlags)) {
+            if (this.facesA != null && !ModelFunctionMaskGL.retainsFaceIndices(this.functionMask, this.preferenceFlags)) {
                 if ((this.modelElementsBuffer != null && this.modelElementsBuffer!!.openglElementsBuffer == null) || (this.colorsBuffer != null && this.colorsBuffer!!.buffer == null)) {
                     this.updateRequired = true
                 } else {
@@ -1465,20 +1465,20 @@ class ModelGL : Model {
                 this.billboardGroups = null
             }
 
-            if (this.anIntArray8289 != null && (this.functionMask and 0x800) == 0 && (this.functionMask and 0x40000) == 0) {
-                this.anIntArray8289 = null
+            if (this.materialBatchOffsets != null && (this.functionMask and 0x800) == 0 && (this.functionMask and 0x40000) == 0) {
+                this.materialBatchOffsets = null
             }
         }
     }
 
-    override fun yaxisRotateWithoutNormals(i_1: Int) {
-        val i_2 = MathUtils.SINE[i_1]
-        val i_3 = MathUtils.COSINE[i_1]
+    override fun yaxisRotateWithoutNormals(rotation: Int) {
+        val sin = MathUtils.SINE[rotation]
+        val cos = MathUtils.COSINE[rotation]
 
-        for (i_4 in 0 until this.maxDepth) {
-            val i_5 = (i_2 * this.verticesZ!![i_4] + i_3 * this.verticesX!![i_4]) shr 14
-            this.verticesZ!![i_4] = (i_3 * this.verticesZ!![i_4] - i_2 * this.verticesX!![i_4]) shr 14
-            this.verticesX!![i_4] = i_5
+        for (v in 0 until this.maxDepth) {
+            val tmp = (sin * this.verticesZ!![v] + cos * this.verticesX!![v]) shr 14
+            this.verticesZ!![v] = (cos * this.verticesZ!![v] - sin * this.verticesX!![v]) shr 14
+            this.verticesX!![v] = tmp
         }
 
         if (this.vertexBuffer != null) {
@@ -1488,23 +1488,23 @@ class ModelGL : Model {
         this.boundsCalculated = false
     }
 
-    override fun rotateWithNormals(i_1: Int) {
-        val i_2 = MathUtils.SINE[i_1]
-        val i_3 = MathUtils.COSINE[i_1]
+    override fun rotateWithNormals(rotation: Int) {
+        val sin = MathUtils.SINE[rotation]
+        val cos = MathUtils.COSINE[rotation]
 
-        var i_4: Int
-        var i_5: Int
+        var unusedVar: Int
+        var tmp: Int
 
         for (v in 0 until this.maxDepth) {
-            i_5 = (i_2 * this.verticesZ!![v] + i_3 * this.verticesX!![v]) shr 14
-            this.verticesZ!![v] = (i_3 * this.verticesZ!![v] - i_2 * this.verticesX!![v]) shr 14
-            this.verticesX!![v] = i_5
+            tmp = (sin * this.verticesZ!![v] + cos * this.verticesX!![v]) shr 14
+            this.verticesZ!![v] = (cos * this.verticesZ!![v] - sin * this.verticesX!![v]) shr 14
+            this.verticesX!![v] = tmp
         }
 
         for (n in 0 until this.numNormals) {
-            i_5 = (this.normalsZ!![n] * i_2 + this.normalsX!![n] * i_3) shr 14
-            this.normalsZ!![n] = ((this.normalsZ!![n] * i_3 - this.normalsX!![n] * i_2) shr 14).toShort()
-            this.normalsX!![n] = i_5.toShort()
+            tmp = (this.normalsZ!![n] * sin + this.normalsX!![n] * cos) shr 14
+            this.normalsZ!![n] = ((this.normalsZ!![n] * cos - this.normalsX!![n] * sin) shr 14).toShort()
+            this.normalsX!![n] = tmp.toShort()
         }
 
         if (this.normalsBuffer == null && this.colorsBuffer != null) {
@@ -1522,8 +1522,8 @@ class ModelGL : Model {
         this.boundsCalculated = false
     }
 
-    fun method13534() {
-        if (this.anInt8302 != 0) {
+    fun drawOpaqueFaces() {
+        if (this.renderedFaceCount != 0) {
             if (this.renderState.toInt() != 0) {
                 upload(true)
             }
@@ -1532,42 +1532,42 @@ class ModelGL : Model {
             val modelElements = this.modelElementsBuffer
             if (modelElements != null) {
                 if (modelElements.openglElementsBuffer == null) {
-                    method13536((this.renderState.toInt() and 0x10) != 0)
+                    buildElementsBuffer((this.renderState.toInt() and 0x10) != 0)
                 }
 
                 val glElementsBuffer = modelElements.openglElementsBuffer
-                val intArray = this.anIntArray8289
+                val intArray = this.materialBatchOffsets
                 val facesMaterialLocal = this.facesMaterial
                 if (glElementsBuffer != null && intArray != null && facesMaterialLocal != null) {
                     this.toolkit.setLightingEnabled(this.normalsBuffer != null)
                     this.toolkit.toggleDrawingClientstates(this.vertexBuffer, this.normalsBuffer, this.colorsBuffer, this.textureCoordinatesBuffer)
-                    val i_1 = intArray.size - 1
+                    val batchCount = intArray.size - 1
 
-                    for (i_2 in 0 until i_1) {
-                        val i_3 = intArray[i_2]
-                        val i_4 = intArray[i_2 + 1]
-                        var materialId = facesMaterialLocal[i_3].toInt() and 0xffff
+                    for (batchIndex in 0 until batchCount) {
+                        val batchStart = intArray[batchIndex]
+                        val batchEnd = intArray[batchIndex + 1]
+                        var materialId = facesMaterialLocal[batchStart].toInt() and 0xffff
                         if (materialId == 65535) {
                             materialId = -1
                         }
 
                         this.toolkit.renderTexture(materialId, this.normalsBuffer != null)
-                        this.toolkit.drawElements(glElementsBuffer, i_3 * 3, (i_4 - i_3) * 3)
+                        this.toolkit.drawElements(glElementsBuffer, batchStart * 3, (batchEnd - batchStart) * 3)
                     }
                 }
             }
 
-            method13525()
+            releaseUploadedData()
         }
     }
 
-    fun method13535(matrix441: Matrix44) {
+    fun drawBillboards(modelViewMatrix: Matrix44) {
         val billboardEffectsLocal = this.billboardEffects
         val billboardSurfacesLocal = this.billboardSurfaces
         val verticesXLocal = this.verticesX
         val verticesYLocal = this.verticesY
         val verticesZLocal = this.verticesZ
-        val elements = matrix441.elements
+        val elements = modelViewMatrix.elements
 
         if (billboardEffectsLocal != null && billboardSurfacesLocal != null &&
             verticesXLocal != null && verticesYLocal != null && verticesZLocal != null && elements != null) {
@@ -1581,14 +1581,14 @@ class ModelGL : Model {
                 val effect = billboardEffectsLocal[b] ?: continue
                 val surface = billboardSurfacesLocal[b] ?: continue
                 if (!effect.stationary || !this.toolkit.bloomEnabled()) {
-                    val f_6 = (verticesXLocal[effect.faceA] + verticesXLocal[effect.faceB] + verticesXLocal[effect.faceC]) * 0.3333333f
-                    val f_7 = (verticesYLocal[effect.faceA] + verticesYLocal[effect.faceB] + verticesYLocal[effect.faceC]) * 0.3333333f
-                    val f_8 = (verticesZLocal[effect.faceA] + verticesZLocal[effect.faceB] + verticesZLocal[effect.faceC]) * 0.3333333f
-                    val f_9 = elements[0] * f_6 + elements[4] * f_7 + elements[8] * f_8 + elements[12]
-                    val f_10 = elements[1] * f_6 + elements[5] * f_7 + elements[9] * f_8 + elements[13]
-                    val f_11 = elements[2] * f_6 + elements[6] * f_7 + elements[10] * f_8 + elements[14]
-                    val f_12 = (1.0 / sqrt((f_9 * f_9 + f_10 * f_10 + f_11 * f_11).toDouble())).toFloat() * effect.distance
-                    matrix442.setRotatedTranslation(surface.rotation, (surface.scaleX * effect.sizeX) shr 7, (surface.scaleY * effect.sizeY) shr 7, f_9 + surface.offsetX - f_9 * f_12, f_10 + surface.offsetY - f_10 * f_12, f_11 - f_11 * f_12)
+                    val centerX = (verticesXLocal[effect.faceA] + verticesXLocal[effect.faceB] + verticesXLocal[effect.faceC]) * 0.3333333f
+                    val centerY = (verticesYLocal[effect.faceA] + verticesYLocal[effect.faceB] + verticesYLocal[effect.faceC]) * 0.3333333f
+                    val centerZ = (verticesZLocal[effect.faceA] + verticesZLocal[effect.faceB] + verticesZLocal[effect.faceC]) * 0.3333333f
+                    val eyeX = elements[0] * centerX + elements[4] * centerY + elements[8] * centerZ + elements[12]
+                    val eyeY = elements[1] * centerX + elements[5] * centerY + elements[9] * centerZ + elements[13]
+                    val eyeZ = elements[2] * centerX + elements[6] * centerY + elements[10] * centerZ + elements[14]
+                    val distanceScale = (1.0 / sqrt((eyeX * eyeX + eyeY * eyeY + eyeZ * eyeZ).toDouble())).toFloat() * effect.distance
+                    matrix442.setRotatedTranslation(surface.rotation, (surface.scaleX * effect.sizeX) shr 7, (surface.scaleY * effect.sizeY) shr 7, eyeX + surface.offsetX - eyeX * distanceScale, eyeY + surface.offsetY - eyeY * distanceScale, eyeZ - eyeZ * distanceScale)
                     this.toolkit.loadMatrix(matrix442)
                     val diffuseColor = surface.diffuseColor
                     OpenGL.glColor4ub((diffuseColor shr 16).toByte(), (diffuseColor shr 8).toByte(), diffuseColor.toByte(), (diffuseColor shr 24).toByte())
@@ -1603,7 +1603,7 @@ class ModelGL : Model {
         }
     }
 
-    fun method13536(bool1: Boolean) {
+    fun buildElementsBuffer(reuseBuffer: Boolean) {
         val facesALocal = this.facesA
         val facesBLocal = this.facesB
         val facesCLocal = this.facesC
@@ -1613,42 +1613,42 @@ class ModelGL : Model {
             return
         }
 
-        if (this.toolkit.textureBuffer.buffer.size < this.anInt8302 * 6) {
-            this.toolkit.textureBuffer = GlBitBuffer((this.anInt8302 + 100) * 6)
+        if (this.toolkit.textureBuffer.buffer.size < this.renderedFaceCount * 6) {
+            this.toolkit.textureBuffer = GlBitBuffer((this.renderedFaceCount + 100) * 6)
         } else {
             this.toolkit.textureBuffer.currentPosition = 0
         }
 
         val textureBuffer = this.toolkit.textureBuffer
         if (this.toolkit.bigEndianess) {
-            for (i_3 in 0 until this.anInt8302) {
-                textureBuffer.writeShort(facesALocal[i_3].toInt())
-                textureBuffer.writeShort(facesBLocal[i_3].toInt())
-                textureBuffer.writeShort(facesCLocal[i_3].toInt())
+            for (faceIndex in 0 until this.renderedFaceCount) {
+                textureBuffer.writeShort(facesALocal[faceIndex].toInt())
+                textureBuffer.writeShort(facesBLocal[faceIndex].toInt())
+                textureBuffer.writeShort(facesCLocal[faceIndex].toInt())
             }
         } else {
-            for (i_3 in 0 until this.anInt8302) {
-                textureBuffer.writeShortLittle(facesALocal[i_3].toInt())
-                textureBuffer.writeShortLittle(facesBLocal[i_3].toInt())
-                textureBuffer.writeShortLittle(facesCLocal[i_3].toInt())
+            for (faceIndex in 0 until this.renderedFaceCount) {
+                textureBuffer.writeShortLittle(facesALocal[faceIndex].toInt())
+                textureBuffer.writeShortLittle(facesBLocal[faceIndex].toInt())
+                textureBuffer.writeShortLittle(facesCLocal[faceIndex].toInt())
             }
         }
 
         if (textureBuffer.currentPosition != 0) {
-            if (bool1) {
-                val existingBuffer = this.anInterface158277
+            if (reuseBuffer) {
+                val existingBuffer = this.dynamicElementsBuffer
                 if (existingBuffer == null) {
-                    this.anInterface158277 = this.toolkit.createElementsArrayBuffer(textureBuffer.buffer, textureBuffer.currentPosition, true)
+                    this.dynamicElementsBuffer = this.toolkit.createElementsArrayBuffer(textureBuffer.buffer, textureBuffer.currentPosition, true)
                 } else {
                     existingBuffer.putElements(textureBuffer.buffer, textureBuffer.currentPosition)
                 }
 
-                modelElements.openglElementsBuffer = this.anInterface158277
+                modelElements.openglElementsBuffer = this.dynamicElementsBuffer
             } else {
                 modelElements.openglElementsBuffer = this.toolkit.createElementsArrayBuffer(textureBuffer.buffer, textureBuffer.currentPosition, false)
             }
 
-            if (!bool1) {
+            if (!reuseBuffer) {
                 this.updateRequired = true
             }
         }
@@ -1708,7 +1708,7 @@ class ModelGL : Model {
                 val verticesYLocal = this.verticesY
                 val verticesZLocal = this.verticesZ
                 val trianglesLocal = this.triangles
-                val shortArrayLocal = this.aShortArray8288
+                val shortArrayLocal = this.vertexNormalIndices
 
                 if (verticesXLocal == null || verticesYLocal == null || verticesZLocal == null ||
                     trianglesLocal == null || shortArrayLocal == null) {
@@ -1720,16 +1720,16 @@ class ModelGL : Model {
                         val vertexX = Stream.floatToRawIntBits(verticesXLocal[vertice].toFloat())
                         val vertexY = Stream.floatToRawIntBits(verticesYLocal[vertice].toFloat())
                         val vertexZ = Stream.floatToRawIntBits(verticesZLocal[vertice].toFloat())
-                        val i_16 = trianglesLocal[vertice]
-                        val i_17 = trianglesLocal[vertice + 1]
+                        val triStart = trianglesLocal[vertice]
+                        val triEnd = trianglesLocal[vertice + 1]
 
-                        for (i_18 in i_16 until i_17) {
-                            val i_19 = shortArrayLocal[i_18] - 1
-                            if (i_19 == -1) {
+                        for (triIdx in triStart until triEnd) {
+                            val normalIdx = shortArrayLocal[triIdx] - 1
+                            if (normalIdx == -1) {
                                 break
                             }
 
-                            bitBuffer.currentPosition = i_19 * entrySize
+                            bitBuffer.currentPosition = normalIdx * entrySize
                             bitBuffer.writeInt(vertexX)
                             bitBuffer.writeInt(vertexY)
                             bitBuffer.writeInt(vertexZ)
@@ -1740,16 +1740,16 @@ class ModelGL : Model {
                         val vertexX = Stream.floatToRawIntBits(verticesXLocal[v].toFloat())
                         val vertexY = Stream.floatToRawIntBits(verticesYLocal[v].toFloat())
                         val vertexZ = Stream.floatToRawIntBits(verticesZLocal[v].toFloat())
-                        val i_16 = trianglesLocal[v]
-                        val i_17 = trianglesLocal[v + 1]
+                        val triStart = trianglesLocal[v]
+                        val triEnd = trianglesLocal[v + 1]
 
-                        for (i_18 in i_16 until i_17) {
-                            val i_19 = (shortArrayLocal[i_18].toInt() and 0xffff) - 1
-                            if (i_19 == -1) {
+                        for (triIdx in triStart until triEnd) {
+                            val normalIdx = (shortArrayLocal[triIdx].toInt() and 0xffff) - 1
+                            if (normalIdx == -1) {
                                 break
                             }
 
-                            bitBuffer.currentPosition = i_19 * entrySize
+                            bitBuffer.currentPosition = normalIdx * entrySize
                             bitBuffer.writeIntLittle(vertexX)
                             bitBuffer.writeIntLittle(vertexY)
                             bitBuffer.writeIntLittle(vertexZ)
@@ -1758,13 +1758,13 @@ class ModelGL : Model {
                 }
             }
 
-            var f_20: Float
-            var shorts_34: ShortArray?
-            var shorts_35: ShortArray?
-            var shorts_36: ShortArray?
-            var bytes_37: ByteArray?
-            var f_38: Float
-            var f_39: Float
+            var normalScale: Float
+            var normalsXArr: ShortArray?
+            var normalsYArr: ShortArray?
+            var normalsZArr: ShortArray?
+            var magnitudesArr: ByteArray?
+            var sunX: Float
+            var sunY: Float
             if (hasColors) {
                 val facesColorLocal = this.facesColor
                 val facesMaterialLocal = this.facesMaterial
@@ -1779,144 +1779,144 @@ class ModelGL : Model {
                 }
 
                 if (normalsBufferLocal == null) {
-                    val normalsClass = this.aClass1668259
+                    val normalsClass = this.mergedNormals
                     if (normalsClass != null) {
-                        shorts_34 = normalsClass.normalsX
-                        shorts_35 = normalsClass.normalsY
-                        shorts_36 = normalsClass.normalsZ
-                        bytes_37 = normalsClass.magnitude
+                        normalsXArr = normalsClass.normalsX
+                        normalsYArr = normalsClass.normalsY
+                        normalsZArr = normalsClass.normalsZ
+                        magnitudesArr = normalsClass.magnitude
                     } else {
-                        shorts_34 = this.normalsX
-                        shorts_35 = this.normalsY
-                        shorts_36 = this.normalsZ
-                        bytes_37 = this.magnitudes
+                        normalsXArr = this.normalsX
+                        normalsYArr = this.normalsY
+                        normalsZArr = this.normalsZ
+                        magnitudesArr = this.magnitudes
                     }
 
                     val sunDirection = this.toolkit.sunDirection
-                    if (sunDirection == null || shorts_34 == null || shorts_35 == null ||
-                        shorts_36 == null || bytes_37 == null) {
+                    if (sunDirection == null || normalsXArr == null || normalsYArr == null ||
+                        normalsZArr == null || magnitudesArr == null) {
                         return
                     }
 
-                    f_38 = sunDirection[0]
-                    f_39 = sunDirection[1]
-                    val f_40 = sunDirection[2]
-                    val f_41 = this.toolkit.sunBrightness
-                    f_20 = this.toolkit.sunColorIntensity * 768.0f / this.contrast
-                    val f_21 = this.toolkit.antiSunColorIntensity * 768.0f / this.contrast
+                    sunX = sunDirection[0]
+                    sunY = sunDirection[1]
+                    val sunZ = sunDirection[2]
+                    val sunBrightness = this.toolkit.sunBrightness
+                    normalScale = this.toolkit.sunColorIntensity * 768.0f / this.contrast
+                    val antiSunScale = this.toolkit.antiSunColorIntensity * 768.0f / this.contrast
 
-                    for (i_22 in 0 until this.numFaces) {
-                        val i_23 = hslToRgb(facesColorLocal[i_22], facesMaterialLocal[i_22], this.ambient, facesAlphaLocal[i_22])
-                        val f_24 = (i_23 ushr 24) * this.toolkit.sunColorRed
-                        val f_25 = ((i_23 shr 16) and 0xff) * this.toolkit.sunColorGreen
-                        val f_26 = ((i_23 shr 8) and 0xff) * this.toolkit.sunColorBlue
+                    for (faceIdx in 0 until this.numFaces) {
+                        val rgbColor = hslToRgb(facesColorLocal[faceIdx], facesMaterialLocal[faceIdx], this.ambient, facesAlphaLocal[faceIdx])
+                        val redComponent = (rgbColor ushr 24) * this.toolkit.sunColorRed
+                        val greenComponent = ((rgbColor shr 16) and 0xff) * this.toolkit.sunColorGreen
+                        val blueComponent = ((rgbColor shr 8) and 0xff) * this.toolkit.sunColorBlue
 
-                        var s_27 = facesALocal[i_22]
-                        var s_28 = bytes_37[s_27.toInt()].toInt()
-                        var f_29: Float
-                        if (s_28 == 0) {
-                            f_29 = (f_38 * shorts_34[s_27.toInt()] + f_39 * shorts_35[s_27.toInt()] + f_40 * shorts_36[s_27.toInt()]) * 0.0026041667f
+                        var vertexRef = facesALocal[faceIdx]
+                        var normalMag = magnitudesArr[vertexRef.toInt()].toInt()
+                        var lightFactor: Float
+                        if (normalMag == 0) {
+                            lightFactor = (sunX * normalsXArr[vertexRef.toInt()] + sunY * normalsYArr[vertexRef.toInt()] + sunZ * normalsZArr[vertexRef.toInt()]) * 0.0026041667f
                         } else {
-                            f_29 = (f_38 * shorts_34[s_27.toInt()] + f_39 * shorts_35[s_27.toInt()] + f_40 * shorts_36[s_27.toInt()]) / (s_28 * 256)
+                            lightFactor = (sunX * normalsXArr[vertexRef.toInt()] + sunY * normalsYArr[vertexRef.toInt()] + sunZ * normalsZArr[vertexRef.toInt()]) / (normalMag * 256)
                         }
 
-                        var f_30 = f_41 + f_29 * (if (f_29 < 0.0f) f_21 else f_20)
-                        var i_31 = (f_24 * f_30).toInt()
-                        if (i_31 < 0) {
-                            i_31 = 0
-                        } else if (i_31 > 255) {
-                            i_31 = 255
+                        var brightness = sunBrightness + lightFactor * (if (lightFactor < 0.0f) antiSunScale else normalScale)
+                        var red = (redComponent * brightness).toInt()
+                        if (red < 0) {
+                            red = 0
+                        } else if (red > 255) {
+                            red = 255
                         }
 
-                        var i_32 = (f_25 * f_30).toInt()
-                        if (i_32 < 0) {
-                            i_32 = 0
-                        } else if (i_32 > 255) {
-                            i_32 = 255
+                        var green = (greenComponent * brightness).toInt()
+                        if (green < 0) {
+                            green = 0
+                        } else if (green > 255) {
+                            green = 255
                         }
 
-                        var i_33 = (f_26 * f_30).toInt()
-                        if (i_33 < 0) {
-                            i_33 = 0
-                        } else if (i_33 > 255) {
-                            i_33 = 255
+                        var blue = (blueComponent * brightness).toInt()
+                        if (blue < 0) {
+                            blue = 0
+                        } else if (blue > 255) {
+                            blue = 255
                         }
 
-                        bitBuffer.currentPosition = colorsOffset + s_27 * entrySize
-                        bitBuffer.writeByte(i_31)
-                        bitBuffer.writeByte(i_32)
-                        bitBuffer.writeByte(i_33)
-                        bitBuffer.writeByte(255 - (facesAlphaLocal[i_22].toInt() and 0xff))
-                        s_27 = facesBLocal[i_22]
-                        s_28 = bytes_37[s_27.toInt()].toInt()
-                        if (s_28 == 0) {
-                            f_29 = (f_38 * shorts_34[s_27.toInt()] + f_39 * shorts_35[s_27.toInt()] + f_40 * shorts_36[s_27.toInt()]) * 0.0026041667f
+                        bitBuffer.currentPosition = colorsOffset + vertexRef * entrySize
+                        bitBuffer.writeByte(red)
+                        bitBuffer.writeByte(green)
+                        bitBuffer.writeByte(blue)
+                        bitBuffer.writeByte(255 - (facesAlphaLocal[faceIdx].toInt() and 0xff))
+                        vertexRef = facesBLocal[faceIdx]
+                        normalMag = magnitudesArr[vertexRef.toInt()].toInt()
+                        if (normalMag == 0) {
+                            lightFactor = (sunX * normalsXArr[vertexRef.toInt()] + sunY * normalsYArr[vertexRef.toInt()] + sunZ * normalsZArr[vertexRef.toInt()]) * 0.0026041667f
                         } else {
-                            f_29 = (f_38 * shorts_34[s_27.toInt()] + f_39 * shorts_35[s_27.toInt()] + f_40 * shorts_36[s_27.toInt()]) / (s_28 * 256)
+                            lightFactor = (sunX * normalsXArr[vertexRef.toInt()] + sunY * normalsYArr[vertexRef.toInt()] + sunZ * normalsZArr[vertexRef.toInt()]) / (normalMag * 256)
                         }
 
-                        f_30 = f_41 + f_29 * (if (f_29 < 0.0f) f_21 else f_20)
-                        i_31 = (f_24 * f_30).toInt()
-                        if (i_31 < 0) {
-                            i_31 = 0
-                        } else if (i_31 > 255) {
-                            i_31 = 255
+                        brightness = sunBrightness + lightFactor * (if (lightFactor < 0.0f) antiSunScale else normalScale)
+                        red = (redComponent * brightness).toInt()
+                        if (red < 0) {
+                            red = 0
+                        } else if (red > 255) {
+                            red = 255
                         }
 
-                        i_32 = (f_25 * f_30).toInt()
-                        if (i_32 < 0) {
-                            i_32 = 0
-                        } else if (i_32 > 255) {
-                            i_32 = 255
+                        green = (greenComponent * brightness).toInt()
+                        if (green < 0) {
+                            green = 0
+                        } else if (green > 255) {
+                            green = 255
                         }
 
-                        i_33 = (f_26 * f_30).toInt()
-                        if (i_33 < 0) {
-                            i_33 = 0
-                        } else if (i_33 > 255) {
-                            i_33 = 255
+                        blue = (blueComponent * brightness).toInt()
+                        if (blue < 0) {
+                            blue = 0
+                        } else if (blue > 255) {
+                            blue = 255
                         }
 
-                        bitBuffer.currentPosition = colorsOffset + s_27 * entrySize
-                        bitBuffer.writeByte(i_31)
-                        bitBuffer.writeByte(i_32)
-                        bitBuffer.writeByte(i_33)
-                        bitBuffer.writeByte(255 - (facesAlphaLocal[i_22].toInt() and 0xff))
-                        s_27 = facesCLocal[i_22]
-                        s_28 = bytes_37[s_27.toInt()].toInt()
-                        if (s_28 == 0) {
-                            f_29 = (f_38 * shorts_34[s_27.toInt()] + f_39 * shorts_35[s_27.toInt()] + f_40 * shorts_36[s_27.toInt()]) * 0.0026041667f
+                        bitBuffer.currentPosition = colorsOffset + vertexRef * entrySize
+                        bitBuffer.writeByte(red)
+                        bitBuffer.writeByte(green)
+                        bitBuffer.writeByte(blue)
+                        bitBuffer.writeByte(255 - (facesAlphaLocal[faceIdx].toInt() and 0xff))
+                        vertexRef = facesCLocal[faceIdx]
+                        normalMag = magnitudesArr[vertexRef.toInt()].toInt()
+                        if (normalMag == 0) {
+                            lightFactor = (sunX * normalsXArr[vertexRef.toInt()] + sunY * normalsYArr[vertexRef.toInt()] + sunZ * normalsZArr[vertexRef.toInt()]) * 0.0026041667f
                         } else {
-                            f_29 = (f_38 * shorts_34[s_27.toInt()] + f_39 * shorts_35[s_27.toInt()] + f_40 * shorts_36[s_27.toInt()]) / (s_28 * 256)
+                            lightFactor = (sunX * normalsXArr[vertexRef.toInt()] + sunY * normalsYArr[vertexRef.toInt()] + sunZ * normalsZArr[vertexRef.toInt()]) / (normalMag * 256)
                         }
 
-                        f_30 = f_41 + f_29 * (if (f_29 < 0.0f) f_21 else f_20)
-                        i_31 = (f_24 * f_30).toInt()
-                        if (i_31 < 0) {
-                            i_31 = 0
-                        } else if (i_31 > 255) {
-                            i_31 = 255
+                        brightness = sunBrightness + lightFactor * (if (lightFactor < 0.0f) antiSunScale else normalScale)
+                        red = (redComponent * brightness).toInt()
+                        if (red < 0) {
+                            red = 0
+                        } else if (red > 255) {
+                            red = 255
                         }
 
-                        i_32 = (f_25 * f_30).toInt()
-                        if (i_32 < 0) {
-                            i_32 = 0
-                        } else if (i_32 > 255) {
-                            i_32 = 255
+                        green = (greenComponent * brightness).toInt()
+                        if (green < 0) {
+                            green = 0
+                        } else if (green > 255) {
+                            green = 255
                         }
 
-                        i_33 = (f_26 * f_30).toInt()
-                        if (i_33 < 0) {
-                            i_33 = 0
-                        } else if (i_33 > 255) {
-                            i_33 = 255
+                        blue = (blueComponent * brightness).toInt()
+                        if (blue < 0) {
+                            blue = 0
+                        } else if (blue > 255) {
+                            blue = 255
                         }
 
-                        bitBuffer.currentPosition = colorsOffset + s_27 * entrySize
-                        bitBuffer.writeByte(i_31)
-                        bitBuffer.writeByte(i_32)
-                        bitBuffer.writeByte(i_33)
-                        bitBuffer.writeByte(255 - (facesAlphaLocal[i_22].toInt() and 0xff))
+                        bitBuffer.currentPosition = colorsOffset + vertexRef * entrySize
+                        bitBuffer.writeByte(red)
+                        bitBuffer.writeByte(green)
+                        bitBuffer.writeByte(blue)
+                        bitBuffer.writeByte(255 - (facesAlphaLocal[faceIdx].toInt() and 0xff))
                     }
                 } else {
                     for (vertice in 0 until this.numFaces) {
@@ -1932,54 +1932,54 @@ class ModelGL : Model {
             }
 
             if (hasNormals) {
-                val normalsClass = this.aClass1668259
+                val normalsClass = this.mergedNormals
                 if (normalsClass != null) {
-                    shorts_34 = normalsClass.normalsX
-                    shorts_35 = normalsClass.normalsY
-                    shorts_36 = normalsClass.normalsZ
-                    bytes_37 = normalsClass.magnitude
+                    normalsXArr = normalsClass.normalsX
+                    normalsYArr = normalsClass.normalsY
+                    normalsZArr = normalsClass.normalsZ
+                    magnitudesArr = normalsClass.magnitude
                 } else {
-                    shorts_34 = this.normalsX
-                    shorts_35 = this.normalsY
-                    shorts_36 = this.normalsZ
-                    bytes_37 = this.magnitudes
+                    normalsXArr = this.normalsX
+                    normalsYArr = this.normalsY
+                    normalsZArr = this.normalsZ
+                    magnitudesArr = this.magnitudes
                 }
 
-                if (shorts_34 == null || shorts_35 == null || shorts_36 == null || bytes_37 == null) {
+                if (normalsXArr == null || normalsYArr == null || normalsZArr == null || magnitudesArr == null) {
                     return
                 }
 
-                f_38 = 3.0f / this.contrast
-                f_39 = 3.0f / (this.contrast / 2 + this.contrast)
+                sunX = 3.0f / this.contrast
+                sunY = 3.0f / (this.contrast / 2 + this.contrast)
                 bitBuffer.currentPosition = normalsOffset
                 if (this.toolkit.bigEndianess) {
-                    for (i_18 in 0 until this.numNormals) {
-                        val i_19 = bytes_37[i_18].toInt() and 0xff
-                        if (i_19 == 0) {
-                            bitBuffer.writeFloatBigEndian(shorts_34[i_18] * f_39)
-                            bitBuffer.writeFloatBigEndian(shorts_35[i_18] * f_39)
-                            bitBuffer.writeFloatBigEndian(shorts_36[i_18] * f_39)
+                    for (triIdx in 0 until this.numNormals) {
+                        val normalIdx = magnitudesArr[triIdx].toInt() and 0xff
+                        if (normalIdx == 0) {
+                            bitBuffer.writeFloatBigEndian(normalsXArr[triIdx] * sunY)
+                            bitBuffer.writeFloatBigEndian(normalsYArr[triIdx] * sunY)
+                            bitBuffer.writeFloatBigEndian(normalsZArr[triIdx] * sunY)
                         } else {
-                            f_20 = f_38 / i_19
-                            bitBuffer.writeFloatBigEndian(shorts_34[i_18] * f_20)
-                            bitBuffer.writeFloatBigEndian(shorts_35[i_18] * f_20)
-                            bitBuffer.writeFloatBigEndian(shorts_36[i_18] * f_20)
+                            normalScale = sunX / normalIdx
+                            bitBuffer.writeFloatBigEndian(normalsXArr[triIdx] * normalScale)
+                            bitBuffer.writeFloatBigEndian(normalsYArr[triIdx] * normalScale)
+                            bitBuffer.writeFloatBigEndian(normalsZArr[triIdx] * normalScale)
                         }
 
                         bitBuffer.currentPosition += entrySize - 12
                     }
                 } else {
-                    for (i_18 in 0 until this.numNormals) {
-                        val i_19 = bytes_37[i_18].toInt() and 0xff
-                        if (i_19 == 0) {
-                            bitBuffer.writeFloatLittleEndian(shorts_34[i_18] * f_39)
-                            bitBuffer.writeFloatLittleEndian(shorts_35[i_18] * f_39)
-                            bitBuffer.writeFloatLittleEndian(shorts_36[i_18] * f_39)
+                    for (triIdx in 0 until this.numNormals) {
+                        val normalIdx = magnitudesArr[triIdx].toInt() and 0xff
+                        if (normalIdx == 0) {
+                            bitBuffer.writeFloatLittleEndian(normalsXArr[triIdx] * sunY)
+                            bitBuffer.writeFloatLittleEndian(normalsYArr[triIdx] * sunY)
+                            bitBuffer.writeFloatLittleEndian(normalsZArr[triIdx] * sunY)
                         } else {
-                            f_20 = f_38 / i_19
-                            bitBuffer.writeFloatLittleEndian(shorts_34[i_18] * f_20)
-                            bitBuffer.writeFloatLittleEndian(shorts_35[i_18] * f_20)
-                            bitBuffer.writeFloatLittleEndian(shorts_36[i_18] * f_20)
+                            normalScale = sunX / normalIdx
+                            bitBuffer.writeFloatLittleEndian(normalsXArr[triIdx] * normalScale)
+                            bitBuffer.writeFloatLittleEndian(normalsYArr[triIdx] * normalScale)
+                            bitBuffer.writeFloatLittleEndian(normalsZArr[triIdx] * normalScale)
                         }
 
                         bitBuffer.currentPosition += entrySize - 12
@@ -2013,14 +2013,14 @@ class ModelGL : Model {
             bitBuffer.currentPosition = entrySize * this.numNormals
             val buffer: ArrayBufferGL?
             if (checkFlags) {
-                val existingBuffer = this.anInterface148305
+                val existingBuffer = this.dynamicArrayBuffer
                 if (existingBuffer == null) {
-                    this.anInterface148305 = this.toolkit.createArrayBuffer(entrySize, bitBuffer.buffer, bitBuffer.currentPosition, true)
+                    this.dynamicArrayBuffer = this.toolkit.createArrayBuffer(entrySize, bitBuffer.buffer, bitBuffer.currentPosition, true)
                 } else {
                     existingBuffer.putArray(entrySize, bitBuffer.buffer, bitBuffer.currentPosition)
                 }
 
-                buffer = this.anInterface148305
+                buffer = this.dynamicArrayBuffer
                 this.renderState = 0
             } else {
                 buffer = this.toolkit.createArrayBuffer(entrySize, bitBuffer.buffer, bitBuffer.currentPosition, false)
@@ -2058,14 +2058,14 @@ class ModelGL : Model {
     }
 
     override fun uploadToGpu() {
-        if (this.numNormals > 0 && this.anInt8302 > 0) {
+        if (this.numNormals > 0 && this.renderedFaceCount > 0) {
             upload(false)
             val elementsBuffer = this.modelElementsBuffer
             if ((this.renderState.toInt() and 0x10) == 0 && elementsBuffer != null && elementsBuffer.openglElementsBuffer == null) {
-                method13536(false)
+                buildElementsBuffer(false)
             }
 
-            method13525()
+            releaseUploadedData()
         }
     }
 
@@ -2083,11 +2083,11 @@ class ModelGL : Model {
         val matrix446 = this.toolkit.tempModelMatrix
         matrix446.fromMatrix(modelMatrix)
         matrix446.multiplyBy(this.toolkit.viewProjectionMatrix)
-        var bool7 = false
-        var i_8 = Int.MAX_VALUE
-        var i_9 = Int.MIN_VALUE
-        var i_10 = Int.MAX_VALUE
-        var i_11 = Int.MIN_VALUE
+        var isInView = false
+        var screenMinX = Int.MAX_VALUE
+        var screenMaxX = Int.MIN_VALUE
+        var screenMinY = Int.MAX_VALUE
+        var screenMaxY = Int.MIN_VALUE
         if (!this.boundsCalculated) {
             calculateBounds()
         }
@@ -2095,72 +2095,72 @@ class ModelGL : Model {
         val centerX = (this.maxX - this.minX) shr 1
         val centerY = (this.maxY - this.minY) shr 1
         val centerZ = (this.maxZ - this.minZ) shr 1
-        val i_15 = centerX + this.minX
-        val i_16 = centerY + this.minY
-        val i_17 = centerZ + this.minZ
-        val i_18 = i_15 - (centerX shl sizeShift)
-        val i_19 = i_16 - (centerY shl sizeShift)
-        val i_20 = i_17 - (centerZ shl sizeShift)
-        val i_21 = i_15 + (centerX shl sizeShift)
-        val i_22 = i_16 + (centerY shl sizeShift)
-        val i_23 = i_17 + (centerZ shl sizeShift)
-        matrixX[0] = i_18
-        matrixY[0] = i_19
-        matrixZ[0] = i_20
-        matrixX[1] = i_21
-        matrixY[1] = i_19
-        matrixZ[1] = i_20
-        matrixX[2] = i_18
-        matrixY[2] = i_22
-        matrixZ[2] = i_20
-        matrixX[3] = i_21
-        matrixY[3] = i_22
-        matrixZ[3] = i_20
-        matrixX[4] = i_18
-        matrixY[4] = i_19
-        matrixZ[4] = i_23
-        matrixX[5] = i_21
-        matrixY[5] = i_19
-        matrixZ[5] = i_23
-        matrixX[6] = i_18
-        matrixY[6] = i_22
-        matrixZ[6] = i_23
-        matrixX[7] = i_21
-        matrixY[7] = i_22
-        matrixZ[7] = i_23
+        val boundsOriginX = centerX + this.minX
+        val boundsOriginY = centerY + this.minY
+        val boundsOriginZ = centerZ + this.minZ
+        val bbMinX = boundsOriginX - (centerX shl sizeShift)
+        val bbMinY = boundsOriginY - (centerY shl sizeShift)
+        val bbMinZ = boundsOriginZ - (centerZ shl sizeShift)
+        val bbMaxX = boundsOriginX + (centerX shl sizeShift)
+        val bbMaxY = boundsOriginY + (centerY shl sizeShift)
+        val bbMaxZ = boundsOriginZ + (centerZ shl sizeShift)
+        matrixX[0] = bbMinX
+        matrixY[0] = bbMinY
+        matrixZ[0] = bbMinZ
+        matrixX[1] = bbMaxX
+        matrixY[1] = bbMinY
+        matrixZ[1] = bbMinZ
+        matrixX[2] = bbMinX
+        matrixY[2] = bbMaxY
+        matrixZ[2] = bbMinZ
+        matrixX[3] = bbMaxX
+        matrixY[3] = bbMaxY
+        matrixZ[3] = bbMinZ
+        matrixX[4] = bbMinX
+        matrixY[4] = bbMinY
+        matrixZ[4] = bbMaxZ
+        matrixX[5] = bbMaxX
+        matrixY[5] = bbMinY
+        matrixZ[5] = bbMaxZ
+        matrixX[6] = bbMinX
+        matrixY[6] = bbMaxY
+        matrixZ[6] = bbMaxZ
+        matrixX[7] = bbMaxX
+        matrixY[7] = bbMaxY
+        matrixZ[7] = bbMaxZ
 
-        for (i_24 in 0 until 8) {
-            val i_39 = matrixX[i_24]
-            val i_26 = matrixY[i_24]
-            val i_27 = matrixZ[i_24]
-            val f_28 = matrix446.elements!![2] * i_39 + matrix446.elements!![6] * i_26 + matrix446.elements!![10] * i_27 + matrix446.elements!![14]
-            val f_29 = matrix446.elements!![3] * i_39 + matrix446.elements!![7] * i_26 + matrix446.elements!![11] * i_27 + matrix446.elements!![15]
-            if (f_28 >= -f_29) {
-                val f_30 = matrix446.elements!![0] * i_39 + matrix446.elements!![4] * i_26 + matrix446.elements!![8] * i_27 + matrix446.elements!![12]
-                val f_31 = matrix446.elements!![1] * i_39 + matrix446.elements!![5] * i_26 + matrix446.elements!![9] * i_27 + matrix446.elements!![13]
-                val i_32 = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_30 / f_29).toInt()
-                val i_33 = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_31 / f_29).toInt()
-                if (i_32 < i_8) {
-                    i_8 = i_32
+        for (cornerIdx in 0 until 8) {
+            val cornerX = matrixX[cornerIdx]
+            val cornerY = matrixY[cornerIdx]
+            val cornerZ = matrixZ[cornerIdx]
+            val clipZ = matrix446.elements!![2] * cornerX + matrix446.elements!![6] * cornerY + matrix446.elements!![10] * cornerZ + matrix446.elements!![14]
+            val clipW = matrix446.elements!![3] * cornerX + matrix446.elements!![7] * cornerY + matrix446.elements!![11] * cornerZ + matrix446.elements!![15]
+            if (clipZ >= -clipW) {
+                val clipX = matrix446.elements!![0] * cornerX + matrix446.elements!![4] * cornerY + matrix446.elements!![8] * cornerZ + matrix446.elements!![12]
+                val clipY = matrix446.elements!![1] * cornerX + matrix446.elements!![5] * cornerY + matrix446.elements!![9] * cornerZ + matrix446.elements!![13]
+                val screenX = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX / clipW).toInt()
+                val screenY = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY / clipW).toInt()
+                if (screenX < screenMinX) {
+                    screenMinX = screenX
                 }
 
-                if (i_32 > i_9) {
-                    i_9 = i_32
+                if (screenX > screenMaxX) {
+                    screenMaxX = screenX
                 }
 
-                if (i_33 < i_10) {
-                    i_10 = i_33
+                if (screenY < screenMinY) {
+                    screenMinY = screenY
                 }
 
-                if (i_33 > i_11) {
-                    i_11 = i_33
+                if (screenY > screenMaxY) {
+                    screenMaxY = screenY
                 }
 
-                bool7 = true
+                isInView = true
             }
         }
 
-        if (bool7 && camX > i_8 && camX < i_9 && camY > i_10 && camY < i_11) {
+        if (isInView && camX > screenMinX && camX < screenMaxX && camY > screenMinY && camY < screenMaxY) {
             if (notRendered) {
                 return true
             }
@@ -2173,44 +2173,44 @@ class ModelGL : Model {
             val projectedVerticesX = this.toolkit.projectedVerticesX!!
             val projectedVerticesY = this.toolkit.projectedVerticesY!!
 
-            for (i_26 in 0 until this.maxDepth) {
-                val i_27 = this.verticesX!![i_26]
-                val i_40 = this.verticesY!![i_26]
-                val i_41 = this.verticesZ!![i_26]
-                val f_30 = matrix446.elements!![2] * i_27 + matrix446.elements!![6] * i_40 + matrix446.elements!![10] * i_41 + matrix446.elements!![14]
-                val f_31 = matrix446.elements!![3] * i_27 + matrix446.elements!![7] * i_40 + matrix446.elements!![11] * i_41 + matrix446.elements!![15]
-                if (f_30 >= -f_31) {
-                    val f_42 = matrix446.elements!![0] * i_27 + matrix446.elements!![4] * i_40 + matrix446.elements!![8] * i_41 + matrix446.elements!![12]
-                    val f_43 = matrix446.elements!![1] * i_27 + matrix446.elements!![5] * i_40 + matrix446.elements!![9] * i_41 + matrix446.elements!![13]
-                    val i_34 = this.triangles!![i_26]
-                    val i_35 = this.triangles!![i_26 + 1]
+            for (vertIdx in 0 until this.maxDepth) {
+                val vx = this.verticesX!![vertIdx]
+                val vy = this.verticesY!![vertIdx]
+                val vz = this.verticesZ!![vertIdx]
+                val clipZ = matrix446.elements!![2] * vx + matrix446.elements!![6] * vy + matrix446.elements!![10] * vz + matrix446.elements!![14]
+                val clipW = matrix446.elements!![3] * vx + matrix446.elements!![7] * vy + matrix446.elements!![11] * vz + matrix446.elements!![15]
+                if (clipZ >= -clipW) {
+                    val clipX = matrix446.elements!![0] * vx + matrix446.elements!![4] * vy + matrix446.elements!![8] * vz + matrix446.elements!![12]
+                    val clipY = matrix446.elements!![1] * vx + matrix446.elements!![5] * vy + matrix446.elements!![9] * vz + matrix446.elements!![13]
+                    val triStart = this.triangles!![vertIdx]
+                    val triEnd = this.triangles!![vertIdx + 1]
 
-                    for (i_36 in i_34 until i_35) {
-                        val i_37 = this.aShortArray8288!![i_36] - 1
-                        if (i_37 == -1) {
+                    for (triIdx in triStart until triEnd) {
+                        val normalIdx = this.vertexNormalIndices!![triIdx] - 1
+                        if (normalIdx == -1) {
                             break
                         }
 
-                        projectedVerticesX[i_37] = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_42 / f_31).toInt()
-                        projectedVerticesY[i_37] = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_43 / f_31).toInt()
+                        projectedVerticesX[normalIdx] = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX / clipW).toInt()
+                        projectedVerticesY[normalIdx] = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY / clipW).toInt()
                     }
                 } else {
-                    val i_32 = this.triangles!![i_26]
-                    val i_33 = this.triangles!![i_26 + 1]
+                    val triStart = this.triangles!![vertIdx]
+                    val triEnd = this.triangles!![vertIdx + 1]
 
-                    for (i_34 in i_32 until i_33) {
-                        val i_35 = this.aShortArray8288!![i_34] - 1
-                        if (i_35 == -1) {
+                    for (triIdx in triStart until triEnd) {
+                        val normalIdx = this.vertexNormalIndices!![triIdx] - 1
+                        if (normalIdx == -1) {
                             break
                         }
 
-                        projectedVerticesX[this.aShortArray8288!![i_34] - 1] = -999999
+                        projectedVerticesX[this.vertexNormalIndices!![triIdx] - 1] = -999999
                     }
                 }
             }
 
-            for (i_26 in 0 until this.numFaces) {
-                if (projectedVerticesX[this.facesA!![i_26].toInt()] != -999999 && projectedVerticesX[this.facesB!![i_26].toInt()] != -999999 && projectedVerticesX[this.facesC!![i_26].toInt()] != -999999 && isHovering(camX, camY, projectedVerticesY[this.facesA!![i_26].toInt()], projectedVerticesY[this.facesB!![i_26].toInt()], projectedVerticesY[this.facesC!![i_26].toInt()], projectedVerticesX[this.facesA!![i_26].toInt()], projectedVerticesX[this.facesB!![i_26].toInt()], projectedVerticesX[this.facesC!![i_26].toInt()])) {
+            for (faceIdx in 0 until this.numFaces) {
+                if (projectedVerticesX[this.facesA!![faceIdx].toInt()] != -999999 && projectedVerticesX[this.facesB!![faceIdx].toInt()] != -999999 && projectedVerticesX[this.facesC!![faceIdx].toInt()] != -999999 && isHovering(camX, camY, projectedVerticesY[this.facesA!![faceIdx].toInt()], projectedVerticesY[this.facesB!![faceIdx].toInt()], projectedVerticesY[this.facesC!![faceIdx].toInt()], projectedVerticesX[this.facesA!![faceIdx].toInt()], projectedVerticesX[this.facesB!![faceIdx].toInt()], projectedVerticesX[this.facesC!![faceIdx].toInt()])) {
                     return true
                 }
             }
@@ -2219,8 +2219,8 @@ class ModelGL : Model {
         return false
     }
 
-    fun isHovering(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int): Boolean {
-        return (i_2 >= i_3 || i_2 >= i_4 || i_2 >= i_5) && ((i_2 <= i_3 || i_2 <= i_4 || i_2 <= i_5) && ((i_1 >= i_6 || i_1 >= i_7 || i_1 >= i_8) && (i_1 <= i_6 || i_1 <= i_7 || i_1 <= i_8)))
+    fun isHovering(mouseX: Int, mouseY: Int, yA: Int, yB: Int, yC: Int, xA: Int, xB: Int, xC: Int): Boolean {
+        return (mouseY >= yA || mouseY >= yB || mouseY >= yC) && ((mouseY <= yA || mouseY <= yB || mouseY <= yC) && ((mouseX >= xA || mouseX >= xB || mouseX >= xC) && (mouseX <= xA || mouseX <= xB || mouseX <= xC)))
     }
 
     override fun drawMatrixThreaded(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon?, rasterizerFunctionMask: Int) {
@@ -2239,89 +2239,89 @@ class ModelGL : Model {
                 calculateBounds()
             }
 
-            val floats_7 = this.toolkit.lightParameterBuffer
-            matrix445.scale(0.0f, this.minY.toFloat(), 0.0f, floats_7)
-            val f_8 = floats_7[0]
-            val f_9 = floats_7[1]
-            val f_10 = floats_7[2]
-            matrix445.scale(0.0f, this.maxY.toFloat(), 0.0f, floats_7)
-            val f_11 = floats_7[0]
-            val f_12 = floats_7[1]
-            val f_13 = floats_7[2]
+            val scaleBuffer = this.toolkit.lightParameterBuffer
+            matrix445.scale(0.0f, this.minY.toFloat(), 0.0f, scaleBuffer)
+            val minWorldX = scaleBuffer[0]
+            val minWorldY = scaleBuffer[1]
+            val minWorldZ = scaleBuffer[2]
+            matrix445.scale(0.0f, this.maxY.toFloat(), 0.0f, scaleBuffer)
+            val maxWorldX = scaleBuffer[0]
+            val maxWorldY = scaleBuffer[1]
+            val maxWorldZ = scaleBuffer[2]
 
-            for (i_14 in 0 until 6) {
-                val floats_33 = this.toolkit.frustumPlanes!![i_14]
-                val f_16 = floats_33[0] * f_8 + floats_33[1] * f_9 + floats_33[2] * f_10 + floats_33[3] + this.size2d
-                val f_17 = floats_33[0] * f_11 + floats_33[1] * f_12 + floats_33[2] * f_13 + floats_33[3] + this.size2d
-                if (f_16 < 0.0f && f_17 < 0.0f) {
+            for (planeIdx in 0 until 6) {
+                val frustumPlane = this.toolkit.frustumPlanes!![planeIdx]
+                val distMin = frustumPlane[0] * minWorldX + frustumPlane[1] * minWorldY + frustumPlane[2] * minWorldZ + frustumPlane[3] + this.size2d
+                val distMax = frustumPlane[0] * maxWorldX + frustumPlane[1] * maxWorldY + frustumPlane[2] * maxWorldZ + frustumPlane[3] + this.size2d
+                if (distMin < 0.0f && distMax < 0.0f) {
                     return
                 }
             }
 
             if (boundingBox != null) {
-                var bool34 = false
-                var bool15 = true
-                val i_35 = (this.minX + this.maxX) shr 1
-                val i_36 = (this.minZ + this.maxZ) shr 1
-                var s_19 = this.minY
-                var f_21 = matrix446.elements!![0] * i_35 + matrix446.elements!![4] * s_19 + matrix446.elements!![8] * i_36 + matrix446.elements!![12]
-                var f_22 = matrix446.elements!![1] * i_35 + matrix446.elements!![5] * s_19 + matrix446.elements!![9] * i_36 + matrix446.elements!![13]
-                var f_23 = matrix446.elements!![2] * i_35 + matrix446.elements!![6] * s_19 + matrix446.elements!![10] * i_36 + matrix446.elements!![14]
-                var f_24 = matrix446.elements!![3] * i_35 + matrix446.elements!![7] * s_19 + matrix446.elements!![11] * i_36 + matrix446.elements!![15]
-                if (f_23 >= -f_24) {
-                    boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_21 / f_24).toInt()
-                    boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_22 / f_24).toInt()
+                var hasBehindFrustum = false
+                var isVisible = true
+                val centerModelX = (this.minX + this.maxX) shr 1
+                val centerModelZ = (this.minZ + this.maxZ) shr 1
+                var modelY = this.minY
+                var clipMinX = matrix446.elements!![0] * centerModelX + matrix446.elements!![4] * modelY + matrix446.elements!![8] * centerModelZ + matrix446.elements!![12]
+                var clipMinY = matrix446.elements!![1] * centerModelX + matrix446.elements!![5] * modelY + matrix446.elements!![9] * centerModelZ + matrix446.elements!![13]
+                var clipMinZ = matrix446.elements!![2] * centerModelX + matrix446.elements!![6] * modelY + matrix446.elements!![10] * centerModelZ + matrix446.elements!![14]
+                var clipMinW = matrix446.elements!![3] * centerModelX + matrix446.elements!![7] * modelY + matrix446.elements!![11] * centerModelZ + matrix446.elements!![15]
+                if (clipMinZ >= -clipMinW) {
+                    boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipMinX / clipMinW).toInt()
+                    boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipMinY / clipMinW).toInt()
                 } else {
-                    bool34 = true
+                    hasBehindFrustum = true
                 }
 
-                s_19 = this.maxY
-                val f_25 = matrix446.elements!![0] * i_35 + matrix446.elements!![4] * s_19 + matrix446.elements!![8] * i_36 + matrix446.elements!![12]
-                val f_26 = matrix446.elements!![1] * i_35 + matrix446.elements!![5] * s_19 + matrix446.elements!![9] * i_36 + matrix446.elements!![13]
-                val f_27 = matrix446.elements!![2] * i_35 + matrix446.elements!![6] * s_19 + matrix446.elements!![10] * i_36 + matrix446.elements!![14]
-                val f_28 = matrix446.elements!![3] * i_35 + matrix446.elements!![7] * s_19 + matrix446.elements!![11] * i_36 + matrix446.elements!![15]
-                if (f_27 >= -f_28) {
-                    boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_25 / f_28).toInt()
-                    boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_26 / f_28).toInt()
+                modelY = this.maxY
+                val clipMaxX = matrix446.elements!![0] * centerModelX + matrix446.elements!![4] * modelY + matrix446.elements!![8] * centerModelZ + matrix446.elements!![12]
+                val clipMaxY = matrix446.elements!![1] * centerModelX + matrix446.elements!![5] * modelY + matrix446.elements!![9] * centerModelZ + matrix446.elements!![13]
+                val clipMaxZ = matrix446.elements!![2] * centerModelX + matrix446.elements!![6] * modelY + matrix446.elements!![10] * centerModelZ + matrix446.elements!![14]
+                val clipMaxW = matrix446.elements!![3] * centerModelX + matrix446.elements!![7] * modelY + matrix446.elements!![11] * centerModelZ + matrix446.elements!![15]
+                if (clipMaxZ >= -clipMaxW) {
+                    boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipMaxX / clipMaxW).toInt()
+                    boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipMaxY / clipMaxW).toInt()
                 } else {
-                    bool34 = true
+                    hasBehindFrustum = true
                 }
 
-                var f_29: Float
-                var f_30: Float
-                if (bool34) {
-                    if (f_23 < -f_24 && f_27 < -f_28) {
-                        bool15 = false
+                var interpFactor: Float
+                var interpX: Float
+                if (hasBehindFrustum) {
+                    if (clipMinZ < -clipMinW && clipMaxZ < -clipMaxW) {
+                        isVisible = false
                     } else {
-                        var f_31: Float
-                        var f_32: Float
-                        if (f_23 < -f_24) {
-                            f_29 = (f_23 + f_24) / (f_27 + f_28) - 1.0f
-                            f_30 = f_21 + f_29 * (f_25 - f_21)
-                            f_31 = f_22 + f_29 * (f_26 - f_22)
-                            f_32 = f_24 + f_29 * (f_28 - f_24)
-                            boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_30 / f_32).toInt()
-                            boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_31 / f_32).toInt()
-                        } else if (f_27 < -f_28) {
-                            f_29 = (f_27 + f_28) / (f_23 + f_24) - 1.0f
-                            f_30 = f_25 + f_29 * (f_21 - f_25)
-                            f_31 = f_26 + f_29 * (f_22 - f_26)
-                            f_32 = f_28 + f_29 * (f_24 - f_28)
-                            boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_30 / f_32).toInt()
-                            boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_31 / f_32).toInt()
+                        var interpY: Float
+                        var interpW: Float
+                        if (clipMinZ < -clipMinW) {
+                            interpFactor = (clipMinZ + clipMinW) / (clipMaxZ + clipMaxW) - 1.0f
+                            interpX = clipMinX + interpFactor * (clipMaxX - clipMinX)
+                            interpY = clipMinY + interpFactor * (clipMaxY - clipMinY)
+                            interpW = clipMinW + interpFactor * (clipMaxW - clipMinW)
+                            boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+                            boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * interpY / interpW).toInt()
+                        } else if (clipMaxZ < -clipMaxW) {
+                            interpFactor = (clipMaxZ + clipMaxW) / (clipMinZ + clipMinW) - 1.0f
+                            interpX = clipMaxX + interpFactor * (clipMinX - clipMaxX)
+                            interpY = clipMaxY + interpFactor * (clipMinY - clipMaxY)
+                            interpW = clipMaxW + interpFactor * (clipMinW - clipMaxW)
+                            boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+                            boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * interpY / interpW).toInt()
                         }
                     }
                 }
 
-                if (bool15) {
-                    if (f_23 / f_24 > f_27 / f_28) {
-                        f_29 = f_21 + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
-                        f_30 = f_24 + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
-                        boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
+                if (isVisible) {
+                    if (clipMinZ / clipMinW > clipMaxZ / clipMaxW) {
+                        interpFactor = clipMinX + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
+                        interpX = clipMinW + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
+                        boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * interpFactor / interpX).toInt()
                     } else {
-                        f_29 = f_25 + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
-                        f_30 = f_28 + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
-                        boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
+                        interpFactor = clipMaxX + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
+                        interpX = clipMaxW + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
+                        boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * interpFactor / interpX).toInt()
                     }
 
                     boundingBox.positionCalculated = true
@@ -2330,10 +2330,10 @@ class ModelGL : Model {
 
             this.toolkit.setupMatrixRendering()
             this.toolkit.multiMatrix(matrix445)
-            method13534()
+            drawOpaqueFaces()
             this.toolkit.popMatrix()
             matrix445.multiplyBy(this.toolkit.viewMatrix44)
-            method13535(matrix445)
+            drawBillboards(matrix445)
             if ((rasterizerFunctionMask and 0x2) != 0) {
                 OpenGL.glPolygonMode(1032, 6914)  // Reset GL_FRONT_AND_BACK to GL_FILL
             }
@@ -2363,9 +2363,9 @@ class ModelGL : Model {
             this.normalsZ!![i] = (-this.normalsZ!![i].toInt()).toShort()
         }
 
-        if (this.aClass1668259 != null) {
+        if (this.mergedNormals != null) {
             for (i in 0 until this.numNormals) {
-                this.aClass1668259!!.normalsZ!![i] = (-this.aClass1668259!!.normalsZ!![i].toInt()).toShort()
+                this.mergedNormals!!.normalsZ!![i] = (-this.mergedNormals!!.normalsZ!![i].toInt()).toShort()
             }
         }
 
@@ -2523,48 +2523,48 @@ class ModelGL : Model {
     }
 
     fun hslToRgb(colorHsl: Short, materialId: Short, ambient: Short, alpha: Byte): Int {
-        var i_5 = ColorUtil.hslToRgb!![method13538(colorHsl.toInt(), ambient.toInt())]
+        var rgb = ColorUtil.hslToRgb!![adjustLuminance(colorHsl.toInt(), ambient.toInt())]
         if (materialId.toInt() != -1) {
             val materialType = this.toolkit.materialProvider!!.getMaterial(materialId.toInt() and 0xffff)
             val a = materialType.alpha.toInt() and 0xff
-            var i_10: Int
+            var tempVal: Int
             if (a != 0) {
-                val i_8: Int
+                val ambientRgb: Int
                 if (ambient < 0) {
-                    i_8 = 0
+                    ambientRgb = 0
                 } else if (ambient > 127) {
-                    i_8 = 16777215
+                    ambientRgb = 16777215
                 } else {
-                    i_8 = ambient.toInt() * 131586
+                    ambientRgb = ambient.toInt() * 131586
                 }
 
-                i_10 = 256 - a
-                i_5 = (((i_8 and 0xff00ff) * a + (i_5 and 0xff00ff) * i_10 and -16711936) + (a * (i_8 and 0xff00) + i_10 * (i_5 and 0xff00) and 0xff0000)) shr 8
+                tempVal = 256 - a
+                rgb = (((ambientRgb and 0xff00ff) * a + (rgb and 0xff00ff) * tempVal and -16711936) + (a * (ambientRgb and 0xff00) + tempVal * (rgb and 0xff00) and 0xff0000)) shr 8
             }
 
             val b = (materialType.brightness.toInt() and 0xff)
             if (b != 0) {
                 val brightness = b + 256
-                var i_9 = brightness * ((i_5 and 0xff0000) shr 16)
-                if (i_9 > 65535) {
-                    i_9 = 65535
+                var scaledR = brightness * ((rgb and 0xff0000) shr 16)
+                if (scaledR > 65535) {
+                    scaledR = 65535
                 }
 
-                i_10 = brightness * ((i_5 and 0xff00) shr 8)
-                if (i_10 > 65535) {
-                    i_10 = 65535
+                tempVal = brightness * ((rgb and 0xff00) shr 8)
+                if (tempVal > 65535) {
+                    tempVal = 65535
                 }
 
-                var i_11 = (i_5 and 0xff) * brightness
-                if (i_11 > 65535) {
-                    i_11 = 65535
+                var scaledB = (rgb and 0xff) * brightness
+                if (scaledB > 65535) {
+                    scaledB = 65535
                 }
 
-                i_5 = (i_11 shr 8) + (i_10 and 0xff00) + ((i_9 shl 8) and 0xff0000)
+                rgb = (scaledB shr 8) + (tempVal and 0xff00) + ((scaledR shl 8) and 0xff0000)
             }
         }
 
-        return (i_5 shl 8) or (255 - (alpha.toInt() and 0xff))
+        return (rgb shl 8) or (255 - (alpha.toInt() and 0xff))
     }
 
     override fun createShadowSprite(shadow: Shadow?): Shadow? {
@@ -2572,7 +2572,7 @@ class ModelGL : Model {
             return null
         }
         val shadowGL = shadow as ShadowGL
-        method13522(shadowGL)
+        projectShadow(shadowGL)
         return shadowGL
     }
 
@@ -2587,124 +2587,124 @@ class ModelGL : Model {
             val normY = openglModel.normalsY
             val normZ = openglModel.normalsZ
             val normMag = openglModel.magnitudes
-            var shorts_15: ShortArray?
-            var shorts_16: ShortArray?
-            var shorts_17: ShortArray?
-            var bytes_18: ByteArray?
-            if (this.aClass1668259 != null) {
-                shorts_15 = this.aClass1668259!!.normalsX
-                shorts_16 = this.aClass1668259!!.normalsY
-                shorts_17 = this.aClass1668259!!.normalsZ
-                bytes_18 = this.aClass1668259!!.magnitude
+            var mergedNormalsX: ShortArray?
+            var mergedNormalsY: ShortArray?
+            var mergedNormalsZ: ShortArray?
+            var mergedMagnitudes: ByteArray?
+            if (this.mergedNormals != null) {
+                mergedNormalsX = this.mergedNormals!!.normalsX
+                mergedNormalsY = this.mergedNormals!!.normalsY
+                mergedNormalsZ = this.mergedNormals!!.normalsZ
+                mergedMagnitudes = this.mergedNormals!!.magnitude
             } else {
-                shorts_15 = null
-                shorts_16 = null
-                shorts_17 = null
-                bytes_18 = null
+                mergedNormalsX = null
+                mergedNormalsY = null
+                mergedNormalsZ = null
+                mergedMagnitudes = null
             }
 
-            var shorts_19: ShortArray?
-            var shorts_20: ShortArray?
-            var shorts_21: ShortArray?
-            var bytes_22: ByteArray?
-            if (openglModel.aClass1668259 != null) {
-                shorts_19 = openglModel.aClass1668259!!.normalsX
-                shorts_20 = openglModel.aClass1668259!!.normalsY
-                shorts_21 = openglModel.aClass1668259!!.normalsZ
-                bytes_22 = openglModel.aClass1668259!!.magnitude
+            var otherNormalsX: ShortArray?
+            var otherNormalsY: ShortArray?
+            var otherNormalsZ: ShortArray?
+            var otherMagnitudes: ByteArray?
+            if (openglModel.mergedNormals != null) {
+                otherNormalsX = openglModel.mergedNormals!!.normalsX
+                otherNormalsY = openglModel.mergedNormals!!.normalsY
+                otherNormalsZ = openglModel.mergedNormals!!.normalsZ
+                otherMagnitudes = openglModel.mergedNormals!!.magnitude
             } else {
-                shorts_19 = null
-                shorts_20 = null
-                shorts_21 = null
-                bytes_22 = null
+                otherNormalsX = null
+                otherNormalsY = null
+                otherNormalsZ = null
+                otherMagnitudes = null
             }
 
-            val ints_23 = openglModel.triangles
-            val shorts_24 = openglModel.aShortArray8288
+            val otherTriangles = openglModel.triangles
+            val otherNormalIndices = openglModel.vertexNormalIndices
             if (!openglModel.boundsCalculated) {
                 openglModel.calculateBounds()
             }
 
-            val s_25 = openglModel.minY
-            val s_26 = openglModel.maxY
-            val s_27 = openglModel.minX
-            val s_28 = openglModel.maxX
-            val s_29 = openglModel.minZ
-            val s_30 = openglModel.maxZ
+            val otherMinY = openglModel.minY
+            val otherMaxY = openglModel.maxY
+            val otherMinX = openglModel.minX
+            val otherMaxX = openglModel.maxX
+            val otherMinZ = openglModel.minZ
+            val otherMaxZ = openglModel.maxZ
 
-            for (i_31 in 0 until this.maxDepth) {
-                val i_32 = this.verticesY!![i_31] - y
-                if (i_32 >= s_25 && i_32 <= s_26) {
-                    val i_33 = this.verticesX!![i_31] - x
-                    if (i_33 >= s_27 && i_33 <= s_28) {
-                        val i_34 = this.verticesZ!![i_31] - z
-                        if (i_34 >= s_29 && i_34 <= s_30) {
-                            var i_35 = -1
-                            var i_36 = this.triangles!![i_31]
-                            var i_37 = this.triangles!![i_31 + 1]
+            for (vertexIdx in 0 until this.maxDepth) {
+                val vertexY = this.verticesY!![vertexIdx] - y
+                if (vertexY >= otherMinY && vertexY <= otherMaxY) {
+                    val vertexX = this.verticesX!![vertexIdx] - x
+                    if (vertexX >= otherMinX && vertexX <= otherMaxX) {
+                        val vertexZ = this.verticesZ!![vertexIdx] - z
+                        if (vertexZ >= otherMinZ && vertexZ <= otherMaxZ) {
+                            var thisNormalIdx = -1
+                            var bucketStart = this.triangles!![vertexIdx]
+                            var bucketEnd = this.triangles!![vertexIdx + 1]
 
-                            var i_38 = i_36
-                            while (i_38 < i_37) {
-                                i_35 = this.aShortArray8288!![i_38] - 1
-                                if (i_35 == -1 || this.magnitudes!![i_35].toInt() != 0) {
+                            var searchIdx = bucketStart
+                            while (searchIdx < bucketEnd) {
+                                thisNormalIdx = this.vertexNormalIndices!![searchIdx] - 1
+                                if (thisNormalIdx == -1 || this.magnitudes!![thisNormalIdx].toInt() != 0) {
                                     break
                                 }
-                                i_38++
+                                searchIdx++
                             }
 
-                            if (i_35 != -1) {
-                                i_38 = 0
-                                while (i_38 < glMaxDepth) {
-                                    if (i_33 == vertX!![i_38] && i_34 == vertZ!![i_38] && i_32 == vertY!![i_38]) {
-                                        var i_39 = -1
-                                        i_36 = ints_23!![i_38]
-                                        i_37 = ints_23[i_38 + 1]
+                            if (thisNormalIdx != -1) {
+                                searchIdx = 0
+                                while (searchIdx < glMaxDepth) {
+                                    if (vertexX == vertX!![searchIdx] && vertexZ == vertZ!![searchIdx] && vertexY == vertY!![searchIdx]) {
+                                        var otherNormalIdx = -1
+                                        bucketStart = otherTriangles!![searchIdx]
+                                        bucketEnd = otherTriangles[searchIdx + 1]
 
-                                        for (i_40 in i_36 until i_37) {
-                                            i_39 = shorts_24!![i_40] - 1
-                                            if (i_39 == -1 || normMag!![i_39].toInt() != 0) {
+                                        for (bucketIdx in bucketStart until bucketEnd) {
+                                            otherNormalIdx = otherNormalIndices!![bucketIdx] - 1
+                                            if (otherNormalIdx == -1 || normMag!![otherNormalIdx].toInt() != 0) {
                                                 break
                                             }
                                         }
 
-                                        if (i_39 != -1) {
-                                            if (shorts_15 == null) {
-                                                this.aClass1668259 = ModelNormalsGL()
-                                                shorts_15 = ArrayUtils.arraycopy(this.normalsX)
-                                                this.aClass1668259!!.normalsX = shorts_15
-                                                shorts_16 = ArrayUtils.arraycopy(this.normalsY)
-                                                this.aClass1668259!!.normalsY = shorts_16
-                                                shorts_17 = ArrayUtils.arraycopy(this.normalsZ)
-                                                this.aClass1668259!!.normalsZ = shorts_17
-                                                bytes_18 = ArrayUtils.safeFullArraycopy(this.magnitudes)
-                                                this.aClass1668259!!.magnitude = bytes_18
+                                        if (otherNormalIdx != -1) {
+                                            if (mergedNormalsX == null) {
+                                                this.mergedNormals = ModelNormalsGL()
+                                                mergedNormalsX = ArrayUtils.arraycopy(this.normalsX)
+                                                this.mergedNormals!!.normalsX = mergedNormalsX
+                                                mergedNormalsY = ArrayUtils.arraycopy(this.normalsY)
+                                                this.mergedNormals!!.normalsY = mergedNormalsY
+                                                mergedNormalsZ = ArrayUtils.arraycopy(this.normalsZ)
+                                                this.mergedNormals!!.normalsZ = mergedNormalsZ
+                                                mergedMagnitudes = ArrayUtils.safeFullArraycopy(this.magnitudes)
+                                                this.mergedNormals!!.magnitude = mergedMagnitudes
                                             }
 
-                                            if (shorts_19 == null) {
-                                                val class16646 = ModelNormalsGL()
-                                                openglModel.aClass1668259 = class16646
-                                                shorts_19 = ArrayUtils.arraycopy(openglModel.normalsX)
-                                                class16646.normalsX = shorts_19
-                                                shorts_20 = ArrayUtils.arraycopy(openglModel.normalsY)
-                                                class16646.normalsY = shorts_20
-                                                shorts_21 = ArrayUtils.arraycopy(openglModel.normalsZ)
-                                                class16646.normalsZ = shorts_21
-                                                bytes_22 = ArrayUtils.safeFullArraycopy(openglModel.magnitudes)
-                                                class16646.magnitude = bytes_22
+                                            if (otherNormalsX == null) {
+                                                val otherMergedNormalsGL = ModelNormalsGL()
+                                                openglModel.mergedNormals = otherMergedNormalsGL
+                                                otherNormalsX = ArrayUtils.arraycopy(openglModel.normalsX)
+                                                otherMergedNormalsGL.normalsX = otherNormalsX
+                                                otherNormalsY = ArrayUtils.arraycopy(openglModel.normalsY)
+                                                otherMergedNormalsGL.normalsY = otherNormalsY
+                                                otherNormalsZ = ArrayUtils.arraycopy(openglModel.normalsZ)
+                                                otherMergedNormalsGL.normalsZ = otherNormalsZ
+                                                otherMagnitudes = ArrayUtils.safeFullArraycopy(openglModel.magnitudes)
+                                                otherMergedNormalsGL.magnitude = otherMagnitudes
                                             }
 
-                                            shorts_15!![i_35] = (shorts_15[i_35] + normX!![i_39]).toShort()
-                                            shorts_16!![i_35] = (shorts_16[i_35] + normY!![i_39]).toShort()
-                                            shorts_17!![i_35] = (shorts_17[i_35] + normZ!![i_39]).toShort()
-                                            bytes_18!![i_35] = (bytes_18[i_35] + normMag!![i_39]).toByte()
-                                            shorts_19!![i_39] = (shorts_19[i_39] + this.normalsX!![i_35]).toShort()
-                                            shorts_20!![i_39] = (shorts_20[i_39] + this.normalsY!![i_35]).toShort()
-                                            shorts_21!![i_39] = (shorts_21[i_39] + this.normalsZ!![i_35]).toShort()
-                                            bytes_22!![i_39] = (bytes_22[i_39] + this.magnitudes!![i_35]).toByte()
+                                            mergedNormalsX!![thisNormalIdx] = (mergedNormalsX[thisNormalIdx] + normX!![otherNormalIdx]).toShort()
+                                            mergedNormalsY!![thisNormalIdx] = (mergedNormalsY[thisNormalIdx] + normY!![otherNormalIdx]).toShort()
+                                            mergedNormalsZ!![thisNormalIdx] = (mergedNormalsZ[thisNormalIdx] + normZ!![otherNormalIdx]).toShort()
+                                            mergedMagnitudes!![thisNormalIdx] = (mergedMagnitudes[thisNormalIdx] + normMag!![otherNormalIdx]).toByte()
+                                            otherNormalsX!![otherNormalIdx] = (otherNormalsX[otherNormalIdx] + this.normalsX!![thisNormalIdx]).toShort()
+                                            otherNormalsY!![otherNormalIdx] = (otherNormalsY[otherNormalIdx] + this.normalsY!![thisNormalIdx]).toShort()
+                                            otherNormalsZ!![otherNormalIdx] = (otherNormalsZ[otherNormalIdx] + this.normalsZ!![thisNormalIdx]).toShort()
+                                            otherMagnitudes!![otherNormalIdx] = (otherMagnitudes[otherNormalIdx] + this.magnitudes!![thisNormalIdx]).toByte()
                                         }
                                         break
                                     }
-                                    i_38++
+                                    searchIdx++
                                 }
                             }
                         }
@@ -2738,14 +2738,14 @@ class ModelGL : Model {
                 matrix44var4.updateMatrix(var1)
             }
 
-            val floats_5 = FloatArray(3)
+            val resultBuffer = FloatArray(3)
 
-            for (i_6 in 0 until this.maxDepth) {
-                if ((functionMask and this.verticesSubmeshes!![i_6].toInt()) != 0) {
-                    matrix44var4.calculatePerspective(this.verticesX!![i_6].toFloat(), this.verticesY!![i_6].toFloat(), this.verticesZ!![i_6].toFloat(), floats_5)
-                    this.verticesX!![i_6] = floats_5[0].toInt()
-                    this.verticesY!![i_6] = floats_5[1].toInt()
-                    this.verticesZ!![i_6] = floats_5[2].toInt()
+            for (vertexIdx in 0 until this.maxDepth) {
+                if ((functionMask and this.verticesSubmeshes!![vertexIdx].toInt()) != 0) {
+                    matrix44var4.calculatePerspective(this.verticesX!![vertexIdx].toFloat(), this.verticesY!![vertexIdx].toFloat(), this.verticesZ!![vertexIdx].toFloat(), resultBuffer)
+                    this.verticesX!![vertexIdx] = resultBuffer[0].toInt()
+                    this.verticesY!![vertexIdx] = resultBuffer[1].toInt()
+                    this.verticesZ!![vertexIdx] = resultBuffer[2].toInt()
                 }
             }
         }
@@ -2755,36 +2755,36 @@ class ModelGL : Model {
         val matrix442 = this.toolkit.tempModelMatrix
         matrix442.fromMatrix(projectionMatrix)
         if (this.emissiveTriangles != null) {
-            for (i_3 in this.emissiveTriangles!!.indices) {
-                val class874 = this.emissiveTriangles!![i_3]
-                val class875 = if (class874.child != null) class874.child!! else class874
+            for (idx in this.emissiveTriangles!!.indices) {
+                val emitter = this.emissiveTriangles!![idx]
+                val activeEmitter = if (emitter.child != null) emitter.child!! else emitter
 
-                class875.verticeXA = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class874.faceA] + matrix442.elements!![4] * this.verticesY!![class874.faceA] + matrix442.elements!![8] * this.verticesZ!![class874.faceA]).toInt()
-                class875.verticeYA = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class874.faceA] + matrix442.elements!![5] * this.verticesY!![class874.faceA] + matrix442.elements!![9] * this.verticesZ!![class874.faceA]).toInt()
-                class875.verticeZA = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class874.faceA] + matrix442.elements!![6] * this.verticesY!![class874.faceA] + matrix442.elements!![10] * this.verticesZ!![class874.faceA]).toInt()
-                class875.verticeXB = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class874.faceB] + matrix442.elements!![4] * this.verticesY!![class874.faceB] + matrix442.elements!![8] * this.verticesZ!![class874.faceB]).toInt()
-                class875.verticeYB = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class874.faceB] + matrix442.elements!![5] * this.verticesY!![class874.faceB] + matrix442.elements!![9] * this.verticesZ!![class874.faceB]).toInt()
-                class875.verticeZB = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class874.faceB] + matrix442.elements!![6] * this.verticesY!![class874.faceB] + matrix442.elements!![10] * this.verticesZ!![class874.faceB]).toInt()
-                class875.verticeXC = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class874.faceC] + matrix442.elements!![4] * this.verticesY!![class874.faceC] + matrix442.elements!![8] * this.verticesZ!![class874.faceC]).toInt()
-                class875.verticeYC = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class874.faceC] + matrix442.elements!![5] * this.verticesY!![class874.faceC] + matrix442.elements!![9] * this.verticesZ!![class874.faceC]).toInt()
-                class875.verticeZC = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class874.faceC] + matrix442.elements!![6] * this.verticesY!![class874.faceC] + matrix442.elements!![10] * this.verticesZ!![class874.faceC]).toInt()
+                activeEmitter.verticeXA = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![emitter.faceA] + matrix442.elements!![4] * this.verticesY!![emitter.faceA] + matrix442.elements!![8] * this.verticesZ!![emitter.faceA]).toInt()
+                activeEmitter.verticeYA = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![emitter.faceA] + matrix442.elements!![5] * this.verticesY!![emitter.faceA] + matrix442.elements!![9] * this.verticesZ!![emitter.faceA]).toInt()
+                activeEmitter.verticeZA = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![emitter.faceA] + matrix442.elements!![6] * this.verticesY!![emitter.faceA] + matrix442.elements!![10] * this.verticesZ!![emitter.faceA]).toInt()
+                activeEmitter.verticeXB = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![emitter.faceB] + matrix442.elements!![4] * this.verticesY!![emitter.faceB] + matrix442.elements!![8] * this.verticesZ!![emitter.faceB]).toInt()
+                activeEmitter.verticeYB = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![emitter.faceB] + matrix442.elements!![5] * this.verticesY!![emitter.faceB] + matrix442.elements!![9] * this.verticesZ!![emitter.faceB]).toInt()
+                activeEmitter.verticeZB = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![emitter.faceB] + matrix442.elements!![6] * this.verticesY!![emitter.faceB] + matrix442.elements!![10] * this.verticesZ!![emitter.faceB]).toInt()
+                activeEmitter.verticeXC = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![emitter.faceC] + matrix442.elements!![4] * this.verticesY!![emitter.faceC] + matrix442.elements!![8] * this.verticesZ!![emitter.faceC]).toInt()
+                activeEmitter.verticeYC = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![emitter.faceC] + matrix442.elements!![5] * this.verticesY!![emitter.faceC] + matrix442.elements!![9] * this.verticesZ!![emitter.faceC]).toInt()
+                activeEmitter.verticeZC = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![emitter.faceC] + matrix442.elements!![6] * this.verticesY!![emitter.faceC] + matrix442.elements!![10] * this.verticesZ!![emitter.faceC]).toInt()
             }
         }
 
         if (this.effectiveVertices != null) {
-            for (i_3 in this.effectiveVertices!!.indices) {
-                val class1726 = this.effectiveVertices!![i_3]
-                val class1727 = if (class1726.child != null) class1726.child!! else class1726
+            for (idx in this.effectiveVertices!!.indices) {
+                val effector = this.effectiveVertices!![idx]
+                val activeEffector = if (effector.child != null) effector.child!! else effector
 
-                if (class1726.matrix != null) {
-                    class1726.matrix!!.copyFrom(matrix442)
+                if (effector.matrix != null) {
+                    effector.matrix!!.copyFrom(matrix442)
                 } else {
-                    class1726.matrix = Matrix44(matrix442)
+                    effector.matrix = Matrix44(matrix442)
                 }
 
-                class1727.verticeX = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class1726.appliesOnVertex] + matrix442.elements!![4] * this.verticesY!![class1726.appliesOnVertex] + matrix442.elements!![8] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
-                class1727.verticeY = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class1726.appliesOnVertex] + matrix442.elements!![5] * this.verticesY!![class1726.appliesOnVertex] + matrix442.elements!![9] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
-                class1727.verticeZ = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class1726.appliesOnVertex] + matrix442.elements!![6] * this.verticesY!![class1726.appliesOnVertex] + matrix442.elements!![10] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
+                activeEffector.verticeX = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![effector.appliesOnVertex] + matrix442.elements!![4] * this.verticesY!![effector.appliesOnVertex] + matrix442.elements!![8] * this.verticesZ!![effector.appliesOnVertex]).toInt()
+                activeEffector.verticeY = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![effector.appliesOnVertex] + matrix442.elements!![5] * this.verticesY!![effector.appliesOnVertex] + matrix442.elements!![9] * this.verticesZ!![effector.appliesOnVertex]).toInt()
+                activeEffector.verticeZ = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![effector.appliesOnVertex] + matrix442.elements!![6] * this.verticesY!![effector.appliesOnVertex] + matrix442.elements!![10] * this.verticesZ!![effector.appliesOnVertex]).toInt()
             }
         }
     }
@@ -2819,8 +2819,8 @@ class ModelGL : Model {
 
     override fun areTexturesCached(): Boolean {
         if (this.facesMaterial != null) {
-            for (i_1 in this.facesMaterial!!.indices) {
-                if (this.facesMaterial!![i_1].toInt() != -1 && !this.toolkit.materialProvider!!.isCached(this.facesMaterial!![i_1].toInt())) {
+            for (face in this.facesMaterial!!.indices) {
+                if (this.facesMaterial!![face].toInt() != -1 && !this.toolkit.materialProvider!!.isCached(this.facesMaterial!![face].toInt())) {
                     return false
                 }
             }
@@ -3034,7 +3034,7 @@ class ModelGL : Model {
                             val triStart = this.triangles!![v]
                             val triEnd = this.triangles!![v + 1]
                             for (triIdx in triStart until triEnd) {
-                                val n = this.aShortArray8288!![triIdx].toInt() - 1
+                                val n = this.vertexNormalIndices!![triIdx].toInt() - 1
                                 if (n == -1) break
                                 if (z != 0) {
                                     val sin = MathUtils.SINE[z]
@@ -3193,15 +3193,15 @@ class ModelGL : Model {
     }
 
     override fun animateTransform(transformationType: Int, labels: IntArray, rotationX: Int, rotationY: Int, rotationZ: Int, lights: Boolean, submesh: Int, verticesData: IntArray) {
-        var i_31 = rotationX
-        var i_41 = rotationY
-        var i_51 = rotationZ
+        var paramX = rotationX
+        var paramY = rotationY
+        var paramZ = rotationZ
         val numLabels = labels.size
 
         if (transformationType == 0) {
-            i_31 = i_31 shl 4
-            i_41 = i_41 shl 4
-            i_51 = i_51 shl 4
+            paramX = paramX shl 4
+            paramY = paramY shl 4
+            paramZ = paramZ shl 4
             var count = 0
             originX = 0
             originY = 0
@@ -3224,28 +3224,28 @@ class ModelGL : Model {
             }
 
             if (count > 0) {
-                originX = i_31 + originX / count
-                originY = i_41 + originY / count
-                originZ = i_51 + originZ / count
+                originX = paramX + originX / count
+                originY = paramY + originY / count
+                originZ = paramZ + originZ / count
                 withinOrigin = true
             } else {
-                originX = i_31
-                originY = i_41
-                originZ = i_51
+                originX = paramX
+                originY = paramY
+                originZ = paramZ
             }
         } else if (transformationType == 1) {
             if (verticesData != null) {
-                var i_10 = ((i_51 * verticesData[2] + verticesData[1] * i_41 + i_31 * verticesData[0] + 8192) shr 14)
-                var i_11 = ((i_31 * verticesData[3] + i_51 * verticesData[5] + i_41 * verticesData[4] + 8192) shr 14)
-                var i_12 = ((i_31 * verticesData[6] + verticesData[7] * i_41 + i_51 * verticesData[8] + 8192) shr 14)
-                i_31 = i_10
-                i_41 = i_11
-                i_51 = i_12
+                var transformedX = ((paramZ * verticesData[2] + verticesData[1] * paramY + paramX * verticesData[0] + 8192) shr 14)
+                var transformedY = ((paramX * verticesData[3] + paramZ * verticesData[5] + paramY * verticesData[4] + 8192) shr 14)
+                var transformedZ = ((paramX * verticesData[6] + verticesData[7] * paramY + paramZ * verticesData[8] + 8192) shr 14)
+                paramX = transformedX
+                paramY = transformedY
+                paramZ = transformedZ
             }
 
-            i_31 = i_31 shl 4
-            i_41 = i_41 shl 4
-            i_51 = i_51 shl 4
+            paramX = paramX shl 4
+            paramY = paramY shl 4
+            paramZ = paramZ shl 4
 
             for (labelIdx in 0 until numLabels) {
                 val label = labels[labelIdx]
@@ -3254,111 +3254,111 @@ class ModelGL : Model {
                     for (i in group.indices) {
                         val v = group[i]
                         if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
-                            this.verticesX!![v] += i_31
-                            this.verticesY!![v] += i_41
-                            this.verticesZ!![v] += i_51
+                            this.verticesX!![v] += paramX
+                            this.verticesY!![v] += paramY
+                            this.verticesZ!![v] += paramZ
                         }
                     }
                 }
             }
         } else if (transformationType == 2) {
             if (verticesData != null) {
-                val i_10 = verticesData[9] shl 4
-                val i_11 = verticesData[10] shl 4
-                val i_12 = verticesData[11] shl 4
-                val i_48 = verticesData[12] shl 4
-                val i_14 = verticesData[13] shl 4
-                val i_15 = verticesData[14] shl 4
+                val parentOriginX = verticesData[9] shl 4
+                val parentOriginY = verticesData[10] shl 4
+                val parentOriginZ = verticesData[11] shl 4
+                val parentTranslateX = verticesData[12] shl 4
+                val parentTranslateY = verticesData[13] shl 4
+                val parentTranslateZ = verticesData[14] shl 4
                 if (withinOrigin) {
-                    var i_16 = ((verticesData[0] * originX + verticesData[6] * originZ + verticesData[3] * originY + 8192) shr 14)
-                    var i_17 = ((verticesData[7] * originZ + verticesData[4] * originY + verticesData[1] * originX + 8192) shr 14)
-                    var i_18 = ((verticesData[8] * originZ + verticesData[2] * originX + verticesData[5] * originY + 8192) shr 14)
-                    i_16 += i_48
-                    i_17 += i_14
-                    i_18 += i_15
-                    originX = i_16
-                    originY = i_17
-                    originZ = i_18
+                    var txOriginX = ((verticesData[0] * originX + verticesData[6] * originZ + verticesData[3] * originY + 8192) shr 14)
+                    var txOriginY = ((verticesData[7] * originZ + verticesData[4] * originY + verticesData[1] * originX + 8192) shr 14)
+                    var txOriginZ = ((verticesData[8] * originZ + verticesData[2] * originX + verticesData[5] * originY + 8192) shr 14)
+                    txOriginX += parentTranslateX
+                    txOriginY += parentTranslateY
+                    txOriginZ += parentTranslateZ
+                    originX = txOriginX
+                    originY = txOriginY
+                    originZ = txOriginZ
                     withinOrigin = false
                 }
 
-                val ints_49 = IntArray(9)
-                val i_17 = MathUtils.COSINE[i_31]
-                val i_18 = MathUtils.SINE[i_31]
-                val i_19 = MathUtils.COSINE[i_41]
-                val i_20 = MathUtils.SINE[i_41]
-                val i_21 = MathUtils.COSINE[i_51]
-                val i_22 = MathUtils.SINE[i_51]
-                val i_23 = ((i_18 * i_21 + 8192) shr 14)
-                val i_24 = ((i_18 * i_22 + 8192) shr 14)
-                ints_49[0] = ((i_19 * i_21 + i_20 * i_24 + 8192) shr 14)
-                ints_49[1] = ((i_20 * i_23 + -i_19 * i_22 + 8192) shr 14)
-                ints_49[2] = ((i_20 * i_17 + 8192) shr 14)
-                ints_49[3] = ((i_17 * i_22 + 8192) shr 14)
-                ints_49[4] = ((i_17 * i_21 + 8192) shr 14)
-                ints_49[5] = -i_18
-                ints_49[6] = ((i_19 * i_24 + -i_20 * i_21 + 8192) shr 14)
-                ints_49[7] = ((i_20 * i_22 + i_19 * i_23 + 8192) shr 14)
-                ints_49[8] = ((i_19 * i_17 + 8192) shr 14)
-                val i_25 = ((ints_49[1] * -originY + ints_49[0] * -originX + ints_49[2] * -originZ + 8192) shr 14)
-                val i_26 = ((-originY * ints_49[4] + ints_49[3] * -originX + -originZ * ints_49[5] + 8192) shr 14)
-                val i_27 = ((ints_49[7] * -originY + ints_49[6] * -originX + ints_49[8] * -originZ + 8192) shr 14)
-                val i_28 = i_25 + originX
-                val i_29 = i_26 + originY
-                val i_30 = i_27 + originZ
-                val ints_31 = IntArray(9)
+                val rotationMatrix = IntArray(9)
+                val cosX = MathUtils.COSINE[paramX]
+                val sinX = MathUtils.SINE[paramX]
+                val cosY = MathUtils.COSINE[paramY]
+                val sinY = MathUtils.SINE[paramY]
+                val cosZ = MathUtils.COSINE[paramZ]
+                val sinZ = MathUtils.SINE[paramZ]
+                val sinXcosZ = ((sinX * cosZ + 8192) shr 14)
+                val sinXsinZ = ((sinX * sinZ + 8192) shr 14)
+                rotationMatrix[0] = ((cosY * cosZ + sinY * sinXsinZ + 8192) shr 14)
+                rotationMatrix[1] = ((sinY * sinXcosZ + -cosY * sinZ + 8192) shr 14)
+                rotationMatrix[2] = ((sinY * cosX + 8192) shr 14)
+                rotationMatrix[3] = ((cosX * sinZ + 8192) shr 14)
+                rotationMatrix[4] = ((cosX * cosZ + 8192) shr 14)
+                rotationMatrix[5] = -sinX
+                rotationMatrix[6] = ((cosY * sinXsinZ + -sinY * cosZ + 8192) shr 14)
+                rotationMatrix[7] = ((sinY * sinZ + cosY * sinXcosZ + 8192) shr 14)
+                rotationMatrix[8] = ((cosY * cosX + 8192) shr 14)
+                val invOriginRotX = ((rotationMatrix[1] * -originY + rotationMatrix[0] * -originX + rotationMatrix[2] * -originZ + 8192) shr 14)
+                val invOriginRotY = ((-originY * rotationMatrix[4] + rotationMatrix[3] * -originX + -originZ * rotationMatrix[5] + 8192) shr 14)
+                val invOriginRotZ = ((rotationMatrix[7] * -originY + rotationMatrix[6] * -originX + rotationMatrix[8] * -originZ + 8192) shr 14)
+                val rotOriginOffsetX = invOriginRotX + originX
+                val rotOriginOffsetY = invOriginRotY + originY
+                val rotOriginOffsetZ = invOriginRotZ + originZ
+                val combinedRotMatrix = IntArray(9)
 
-                for (i_32 in 0 until 3) {
-                    for (i_33 in 0 until 3) {
-                        var i_34 = 0
-                        for (i_53 in 0 until 3) {
-                            i_34 += verticesData[i_53 + i_33 * 3] * ints_49[i_53 + i_32 * 3]
+                for (rowIdx in 0 until 3) {
+                    for (colIdx in 0 until 3) {
+                        var dotProduct = 0
+                        for (innerIdx in 0 until 3) {
+                            dotProduct += verticesData[innerIdx + colIdx * 3] * rotationMatrix[innerIdx + rowIdx * 3]
                         }
-                        ints_31[i_33 + i_32 * 3] = ((i_34 + 8192) shr 14)
+                        combinedRotMatrix[colIdx + rowIdx * 3] = ((dotProduct + 8192) shr 14)
                     }
                 }
 
-                var i_32 = ((i_14 * ints_49[1] + i_48 * ints_49[0] + i_15 * ints_49[2] + 8192) shr 14)
-                var i_33 = ((i_14 * ints_49[4] + i_48 * ints_49[3] + i_15 * ints_49[5] + 8192) shr 14)
-                var i_34 = ((ints_49[6] * i_48 + i_15 * ints_49[8] + ints_49[7] * i_14 + 8192) shr 14)
-                i_32 += i_28
-                i_33 += i_29
-                i_34 += i_30
-                val ints_35 = IntArray(9)
+                var translatedX = ((parentTranslateY * rotationMatrix[1] + parentTranslateX * rotationMatrix[0] + parentTranslateZ * rotationMatrix[2] + 8192) shr 14)
+                var translatedY = ((parentTranslateY * rotationMatrix[4] + parentTranslateX * rotationMatrix[3] + parentTranslateZ * rotationMatrix[5] + 8192) shr 14)
+                var translatedZ = ((rotationMatrix[6] * parentTranslateX + parentTranslateZ * rotationMatrix[8] + rotationMatrix[7] * parentTranslateY + 8192) shr 14)
+                translatedX += rotOriginOffsetX
+                translatedY += rotOriginOffsetY
+                translatedZ += rotOriginOffsetZ
+                val finalMatrix = IntArray(9)
 
-                for (i_36 in 0 until 3) {
-                    for (i_37 in 0 until 3) {
-                        var i_38 = 0
-                        for (i_39 in 0 until 3) {
-                            i_38 += ints_31[i_37 + i_39 * 3] * verticesData[i_39 + i_36 * 3]
+                for (rowIdx in 0 until 3) {
+                    for (colIdx in 0 until 3) {
+                        var dotProduct = 0
+                        for (innerIdx in 0 until 3) {
+                            dotProduct += combinedRotMatrix[colIdx + innerIdx * 3] * verticesData[innerIdx + rowIdx * 3]
                         }
-                        ints_35[i_37 + i_36 * 3] = ((i_38 + 8192) shr 14)
+                        finalMatrix[colIdx + rowIdx * 3] = ((dotProduct + 8192) shr 14)
                     }
                 }
 
-                var i_36 = ((i_34 * verticesData[2] + i_32 * verticesData[0] + i_33 * verticesData[1] + 8192) shr 14)
-                var i_37 = ((i_32 * verticesData[3] + i_33 * verticesData[4] + verticesData[5] * i_34 + 8192) shr 14)
-                var i_38 = ((i_32 * verticesData[6] + i_34 * verticesData[8] + verticesData[7] * i_33 + 8192) shr 14)
-                i_36 += i_10
-                i_37 += i_11
-                i_38 += i_12
+                var finalTranslateX = ((translatedZ * verticesData[2] + translatedX * verticesData[0] + translatedY * verticesData[1] + 8192) shr 14)
+                var finalTranslateY = ((translatedX * verticesData[3] + translatedY * verticesData[4] + verticesData[5] * translatedZ + 8192) shr 14)
+                var finalTranslateZ = ((translatedX * verticesData[6] + translatedZ * verticesData[8] + verticesData[7] * translatedY + 8192) shr 14)
+                finalTranslateX += parentOriginX
+                finalTranslateY += parentOriginY
+                finalTranslateZ += parentOriginZ
 
-                for (i_39 in 0 until numLabels) {
-                    val i_40 = labels[i_39]
-                    if (i_40 < (this.vertexGroups?.size ?: 0)) {
-                        val ints_41 = this.vertexGroups!![i_40]!!
-                        for (i_42 in ints_41.indices) {
-                            val i_43 = ints_41[i_42]
-                            if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![i_43].toInt()) != 0) {
-                                var i_44 = ((ints_35[0] * this.verticesX!![i_43] + ints_35[2] * this.verticesZ!![i_43] + ints_35[1] * this.verticesY!![i_43] + 8192) shr 14)
-                                var i_45 = ((ints_35[4] * this.verticesY!![i_43] + ints_35[5] * this.verticesZ!![i_43] + ints_35[3] * this.verticesX!![i_43] + 8192) shr 14)
-                                var i_46 = ((ints_35[6] * this.verticesX!![i_43] + ints_35[7] * this.verticesY!![i_43] + ints_35[8] * this.verticesZ!![i_43] + 8192) shr 14)
-                                i_44 += i_36
-                                i_45 += i_37
-                                i_46 += i_38
-                                this.verticesX!![i_43] = i_44
-                                this.verticesY!![i_43] = i_45
-                                this.verticesZ!![i_43] = i_46
+                for (labelIdx in 0 until numLabels) {
+                    val label = labels[labelIdx]
+                    if (label < (this.vertexGroups?.size ?: 0)) {
+                        val group = this.vertexGroups!![label]!!
+                        for (i in group.indices) {
+                            val v = group[i]
+                            if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
+                                var newX = ((finalMatrix[0] * this.verticesX!![v] + finalMatrix[2] * this.verticesZ!![v] + finalMatrix[1] * this.verticesY!![v] + 8192) shr 14)
+                                var newY = ((finalMatrix[4] * this.verticesY!![v] + finalMatrix[5] * this.verticesZ!![v] + finalMatrix[3] * this.verticesX!![v] + 8192) shr 14)
+                                var newZ = ((finalMatrix[6] * this.verticesX!![v] + finalMatrix[7] * this.verticesY!![v] + finalMatrix[8] * this.verticesZ!![v] + 8192) shr 14)
+                                newX += finalTranslateX
+                                newY += finalTranslateY
+                                newZ += finalTranslateZ
+                                this.verticesX!![v] = newX
+                                this.verticesY!![v] = newY
+                                this.verticesZ!![v] = newZ
                             }
                         }
                     }
@@ -3375,23 +3375,23 @@ class ModelGL : Model {
                                 this.verticesX!![v] -= originX
                                 this.verticesY!![v] -= originY
                                 this.verticesZ!![v] -= originZ
-                                if (i_51 != 0) {
-                                    val sin = MathUtils.SINE[i_51]
-                                    val cos = MathUtils.COSINE[i_51]
+                                if (paramZ != 0) {
+                                    val sin = MathUtils.SINE[paramZ]
+                                    val cos = MathUtils.COSINE[paramZ]
                                     val tmp = ((sin * this.verticesY!![v] + cos * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesY!![v] = ((cos * this.verticesY!![v] - sin * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesX!![v] = tmp
                                 }
-                                if (i_31 != 0) {
-                                    val sin = MathUtils.SINE[i_31]
-                                    val cos = MathUtils.COSINE[i_31]
+                                if (paramX != 0) {
+                                    val sin = MathUtils.SINE[paramX]
+                                    val cos = MathUtils.COSINE[paramX]
                                     val tmp = ((cos * this.verticesY!![v] - sin * this.verticesZ!![v] + 16383) shr 14)
                                     this.verticesZ!![v] = ((sin * this.verticesY!![v] + cos * this.verticesZ!![v] + 16383) shr 14)
                                     this.verticesY!![v] = tmp
                                 }
-                                if (i_41 != 0) {
-                                    val sin = MathUtils.SINE[i_41]
-                                    val cos = MathUtils.COSINE[i_41]
+                                if (paramY != 0) {
+                                    val sin = MathUtils.SINE[paramY]
+                                    val cos = MathUtils.COSINE[paramY]
                                     val tmp = ((sin * this.verticesZ!![v] + cos * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesZ!![v] = ((cos * this.verticesZ!![v] - sin * this.verticesX!![v] + 16383) shr 14)
                                     this.verticesX!![v] = tmp
@@ -3415,25 +3415,25 @@ class ModelGL : Model {
                                     val triStart = this.triangles!![v]
                                     val triEnd = this.triangles!![v + 1]
                                     for (triIdx in triStart until triEnd) {
-                                        val normalIdx = this.aShortArray8288!![triIdx].toInt() - 1
+                                        val normalIdx = this.vertexNormalIndices!![triIdx].toInt() - 1
                                         if (normalIdx == -1) break
-                                        if (i_51 != 0) {
-                                            val sin = MathUtils.SINE[i_51]
-                                            val cos = MathUtils.COSINE[i_51]
+                                        if (paramZ != 0) {
+                                            val sin = MathUtils.SINE[paramZ]
+                                            val cos = MathUtils.COSINE[paramZ]
                                             val tmp = ((this.normalsY!![normalIdx] * sin + this.normalsX!![normalIdx] * cos + 16383) shr 14)
                                             this.normalsY!![normalIdx] = (((this.normalsY!![normalIdx] * cos - this.normalsX!![normalIdx] * sin + 16383) shr 14)).toShort()
                                             this.normalsX!![normalIdx] = tmp.toShort()
                                         }
-                                        if (i_31 != 0) {
-                                            val sin = MathUtils.SINE[i_31]
-                                            val cos = MathUtils.COSINE[i_31]
+                                        if (paramX != 0) {
+                                            val sin = MathUtils.SINE[paramX]
+                                            val cos = MathUtils.COSINE[paramX]
                                             val tmp = ((this.normalsY!![normalIdx] * cos - this.normalsZ!![normalIdx] * sin + 16383) shr 14)
                                             this.normalsZ!![normalIdx] = (((this.normalsY!![normalIdx] * sin + this.normalsZ!![normalIdx] * cos + 16383) shr 14)).toShort()
                                             this.normalsY!![normalIdx] = tmp.toShort()
                                         }
-                                        if (i_41 != 0) {
-                                            val sin = MathUtils.SINE[i_41]
-                                            val cos = MathUtils.COSINE[i_41]
+                                        if (paramY != 0) {
+                                            val sin = MathUtils.SINE[paramY]
+                                            val cos = MathUtils.COSINE[paramY]
                                             val tmp = ((this.normalsZ!![normalIdx] * sin + this.normalsX!![normalIdx] * cos + 16383) shr 14)
                                             this.normalsZ!![normalIdx] = (((this.normalsZ!![normalIdx] * cos - this.normalsX!![normalIdx] * sin + 16383) shr 14)).toShort()
                                             this.normalsX!![normalIdx] = tmp.toShort()
@@ -3454,86 +3454,86 @@ class ModelGL : Model {
             }
         } else if (transformationType == 3) {
             if (verticesData != null) {
-                val i_10 = verticesData[9] shl 4
-                val i_11 = verticesData[10] shl 4
-                val i_12 = verticesData[11] shl 4
-                val i_48 = verticesData[12] shl 4
-                val i_14 = verticesData[13] shl 4
-                val i_15 = verticesData[14] shl 4
+                val parentOriginX = verticesData[9] shl 4
+                val parentOriginY = verticesData[10] shl 4
+                val parentOriginZ = verticesData[11] shl 4
+                val parentTranslateX = verticesData[12] shl 4
+                val parentTranslateY = verticesData[13] shl 4
+                val parentTranslateZ = verticesData[14] shl 4
                 if (withinOrigin) {
-                    var i_16 = ((verticesData[0] * originX + verticesData[6] * originZ + verticesData[3] * originY + 8192) shr 14)
-                    var i_17 = ((verticesData[7] * originZ + verticesData[4] * originY + verticesData[1] * originX + 8192) shr 14)
-                    var i_18 = ((verticesData[8] * originZ + verticesData[2] * originX + verticesData[5] * originY + 8192) shr 14)
-                    i_16 += i_48
-                    i_17 += i_14
-                    i_18 += i_15
-                    originX = i_16
-                    originY = i_17
-                    originZ = i_18
+                    var txOriginX = ((verticesData[0] * originX + verticesData[6] * originZ + verticesData[3] * originY + 8192) shr 14)
+                    var txOriginY = ((verticesData[7] * originZ + verticesData[4] * originY + verticesData[1] * originX + 8192) shr 14)
+                    var txOriginZ = ((verticesData[8] * originZ + verticesData[2] * originX + verticesData[5] * originY + 8192) shr 14)
+                    txOriginX += parentTranslateX
+                    txOriginY += parentTranslateY
+                    txOriginZ += parentTranslateZ
+                    originX = txOriginX
+                    originY = txOriginY
+                    originZ = txOriginZ
                     withinOrigin = false
                 }
 
-                val i_16 = (i_31 shl 15) shr 7
-                val i_17 = (i_41 shl 15) shr 7
-                val i_18 = (i_51 shl 15) shr 7
-                val i_19 = ((i_16 * -originX + 8192) shr 14)
-                val i_20 = ((i_17 * -originY + 8192) shr 14)
-                val i_21 = ((i_18 * -originZ + 8192) shr 14)
-                val i_22 = i_19 + originX
-                val i_23 = i_20 + originY
-                val i_24 = i_21 + originZ
-                val ints_50 = intArrayOf(
-                    ((i_16 * verticesData[0] + 8192) shr 14),
-                    ((i_16 * verticesData[3] + 8192) shr 14),
-                    ((i_16 * verticesData[6] + 8192) shr 14),
-                    ((i_17 * verticesData[1] + 8192) shr 14),
-                    ((i_17 * verticesData[4] + 8192) shr 14),
-                    ((verticesData[7] * i_17 + 8192) shr 14),
-                    ((i_18 * verticesData[2] + 8192) shr 14),
-                    ((verticesData[5] * i_18 + 8192) shr 14),
-                    ((i_18 * verticesData[8] + 8192) shr 14)
+                val scaleX = (paramX shl 15) shr 7
+                val scaleY = (paramY shl 15) shr 7
+                val scaleZ = (paramZ shl 15) shr 7
+                val scaledInvOriginX = ((scaleX * -originX + 8192) shr 14)
+                val scaledInvOriginY = ((scaleY * -originY + 8192) shr 14)
+                val scaledInvOriginZ = ((scaleZ * -originZ + 8192) shr 14)
+                val scaleOriginOffsetX = scaledInvOriginX + originX
+                val scaleOriginOffsetY = scaledInvOriginY + originY
+                val scaleOriginOffsetZ = scaledInvOriginZ + originZ
+                val scaleMatrix = intArrayOf(
+                    ((scaleX * verticesData[0] + 8192) shr 14),
+                    ((scaleX * verticesData[3] + 8192) shr 14),
+                    ((scaleX * verticesData[6] + 8192) shr 14),
+                    ((scaleY * verticesData[1] + 8192) shr 14),
+                    ((scaleY * verticesData[4] + 8192) shr 14),
+                    ((verticesData[7] * scaleY + 8192) shr 14),
+                    ((scaleZ * verticesData[2] + 8192) shr 14),
+                    ((verticesData[5] * scaleZ + 8192) shr 14),
+                    ((scaleZ * verticesData[8] + 8192) shr 14)
                 )
-                var i_26 = ((i_16 * i_48 + 8192) shr 14)
-                var i_27 = ((i_17 * i_14 + 8192) shr 14)
-                var i_28 = ((i_18 * i_15 + 8192) shr 14)
-                i_26 += i_22
-                i_27 += i_23
-                i_28 += i_24
-                val ints_51 = IntArray(9)
+                var scaledTranslateX = ((scaleX * parentTranslateX + 8192) shr 14)
+                var scaledTranslateY = ((scaleY * parentTranslateY + 8192) shr 14)
+                var scaledTranslateZ = ((scaleZ * parentTranslateZ + 8192) shr 14)
+                scaledTranslateX += scaleOriginOffsetX
+                scaledTranslateY += scaleOriginOffsetY
+                scaledTranslateZ += scaleOriginOffsetZ
+                val combinedScaleMatrix = IntArray(9)
 
-                for (i_30 in 0 until 3) {
-                    for (i_52 in 0 until 3) {
-                        var i_32 = 0
-                        for (i_33 in 0 until 3) {
-                            i_32 += ints_50[i_52 + i_33 * 3] * verticesData[i_33 + i_30 * 3]
+                for (rowIdx in 0 until 3) {
+                    for (colIdx in 0 until 3) {
+                        var dotProduct = 0
+                        for (innerIdx in 0 until 3) {
+                            dotProduct += scaleMatrix[colIdx + innerIdx * 3] * verticesData[innerIdx + rowIdx * 3]
                         }
-                        ints_51[i_52 + i_30 * 3] = ((i_32 + 8192) shr 14)
+                        combinedScaleMatrix[colIdx + rowIdx * 3] = ((dotProduct + 8192) shr 14)
                     }
                 }
 
-                var i_30 = ((i_28 * verticesData[2] + i_26 * verticesData[0] + i_27 * verticesData[1] + 8192) shr 14)
-                var i_52 = ((i_26 * verticesData[3] + i_27 * verticesData[4] + verticesData[5] * i_28 + 8192) shr 14)
-                var i_32 = ((i_26 * verticesData[6] + i_28 * verticesData[8] + verticesData[7] * i_27 + 8192) shr 14)
-                i_30 += i_10
-                i_52 += i_11
-                i_32 += i_12
+                var finalTranslateX = ((scaledTranslateZ * verticesData[2] + scaledTranslateX * verticesData[0] + scaledTranslateY * verticesData[1] + 8192) shr 14)
+                var finalTranslateY = ((scaledTranslateX * verticesData[3] + scaledTranslateY * verticesData[4] + verticesData[5] * scaledTranslateZ + 8192) shr 14)
+                var finalTranslateZ = ((scaledTranslateX * verticesData[6] + scaledTranslateZ * verticesData[8] + verticesData[7] * scaledTranslateY + 8192) shr 14)
+                finalTranslateX += parentOriginX
+                finalTranslateY += parentOriginY
+                finalTranslateZ += parentOriginZ
 
-                for (i_33 in 0 until numLabels) {
-                    val i_34 = labels[i_33]
-                    if (i_34 < (this.vertexGroups?.size ?: 0)) {
-                        val ints_35 = this.vertexGroups!![i_34]!!
-                        for (i_36 in ints_35.indices) {
-                            val i_37 = ints_35[i_36]
-                            if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![i_37].toInt()) != 0) {
-                                var i_38 = ((ints_51[0] * this.verticesX!![i_37] + ints_51[2] * this.verticesZ!![i_37] + ints_51[1] * this.verticesY!![i_37] + 8192) shr 14)
-                                var i_39 = ((ints_51[4] * this.verticesY!![i_37] + ints_51[5] * this.verticesZ!![i_37] + ints_51[3] * this.verticesX!![i_37] + 8192) shr 14)
-                                var i_40 = ((ints_51[6] * this.verticesX!![i_37] + ints_51[7] * this.verticesY!![i_37] + ints_51[8] * this.verticesZ!![i_37] + 8192) shr 14)
-                                i_38 += i_30
-                                i_39 += i_52
-                                i_40 += i_32
-                                this.verticesX!![i_37] = i_38
-                                this.verticesY!![i_37] = i_39
-                                this.verticesZ!![i_37] = i_40
+                for (labelIdx in 0 until numLabels) {
+                    val label = labels[labelIdx]
+                    if (label < (this.vertexGroups?.size ?: 0)) {
+                        val group = this.vertexGroups!![label]!!
+                        for (i in group.indices) {
+                            val v = group[i]
+                            if (this.verticesSubmeshes == null || (submesh and this.verticesSubmeshes!![v].toInt()) != 0) {
+                                var newX = ((combinedScaleMatrix[0] * this.verticesX!![v] + combinedScaleMatrix[2] * this.verticesZ!![v] + combinedScaleMatrix[1] * this.verticesY!![v] + 8192) shr 14)
+                                var newY = ((combinedScaleMatrix[4] * this.verticesY!![v] + combinedScaleMatrix[5] * this.verticesZ!![v] + combinedScaleMatrix[3] * this.verticesX!![v] + 8192) shr 14)
+                                var newZ = ((combinedScaleMatrix[6] * this.verticesX!![v] + combinedScaleMatrix[7] * this.verticesY!![v] + combinedScaleMatrix[8] * this.verticesZ!![v] + 8192) shr 14)
+                                newX += finalTranslateX
+                                newY += finalTranslateY
+                                newZ += finalTranslateZ
+                                this.verticesX!![v] = newX
+                                this.verticesY!![v] = newY
+                                this.verticesZ!![v] = newZ
                             }
                         }
                     }
@@ -3550,9 +3550,9 @@ class ModelGL : Model {
                                 this.verticesX!![v] -= originX
                                 this.verticesY!![v] -= originY
                                 this.verticesZ!![v] -= originZ
-                                this.verticesX!![v] = (i_31 * this.verticesX!![v]) shr 7
-                                this.verticesY!![v] = (i_41 * this.verticesY!![v]) shr 7
-                                this.verticesZ!![v] = (i_51 * this.verticesZ!![v]) shr 7
+                                this.verticesX!![v] = (paramX * this.verticesX!![v]) shr 7
+                                this.verticesY!![v] = (paramY * this.verticesY!![v]) shr 7
+                                this.verticesZ!![v] = (paramZ * this.verticesZ!![v]) shr 7
                                 this.verticesX!![v] += originX
                                 this.verticesY!![v] += originY
                                 this.verticesZ!![v] += originZ
@@ -3573,7 +3573,7 @@ class ModelGL : Model {
                             for (i in group.indices) {
                                 val face = group[i]
                                 if (this.facesSubmeshes == null || (submesh and this.facesSubmeshes!![face].toInt()) != 0) {
-                                    var alpha = (this.facesAlpha!![face].toInt() and 0xff) + i_31 * 8
+                                    var alpha = (this.facesAlpha!![face].toInt() and 0xff) + paramX * 8
                                     if (alpha < 0) alpha = 0
                                     else if (alpha > 255) alpha = 255
                                     this.facesAlpha!![face] = alpha.toByte()
@@ -3607,11 +3607,11 @@ class ModelGL : Model {
                                     var h = (hsl shr 10) and 0x3f
                                     var s = (hsl shr 7) and 0x7
                                     var l = hsl and 0x7f
-                                    h = (i_31 + h) and 0x3f
-                                    s += i_41 / 4
+                                    h = (paramX + h) and 0x3f
+                                    s += paramY / 4
                                     if (s < 0) s = 0
                                     else if (s > 7) s = 7
-                                    l += i_51
+                                    l += paramZ
                                     if (l < 0) l = 0
                                     else if (l > 127) l = 127
                                     this.facesColor!![face] = ((h shl 10) or (s shl 7) or l).toShort()
@@ -3641,8 +3641,8 @@ class ModelGL : Model {
                                 val group = this.billboardGroups!![label]!!
                                 for (i in group.indices) {
                                     val surface = this.billboardSurfaces!![group[i]]!!
-                                    surface.offsetX += i_31
-                                    surface.offsetY += i_41
+                                    surface.offsetX += paramX
+                                    surface.offsetY += paramY
                                 }
                             }
                         }
@@ -3656,8 +3656,8 @@ class ModelGL : Model {
                                 val group = this.billboardGroups!![label]!!
                                 for (i in group.indices) {
                                     val surface = this.billboardSurfaces!![group[i]]!!
-                                    surface.scaleX = (i_31 * surface.scaleX) shr 7
-                                    surface.scaleY = (i_41 * surface.scaleY) shr 7
+                                    surface.scaleX = (paramX * surface.scaleX) shr 7
+                                    surface.scaleY = (paramY * surface.scaleY) shr 7
                                 }
                             }
                         }
@@ -3670,7 +3670,7 @@ class ModelGL : Model {
                             val group = this.billboardGroups!![label]!!
                             for (i in group.indices) {
                                 val surface = this.billboardSurfaces!![group[i]]!!
-                                surface.rotation = (i_31 + surface.rotation) and 0x3fff
+                                surface.rotation = (paramX + surface.rotation) and 0x3fff
                             }
                         }
                     }
@@ -3843,9 +3843,9 @@ class ModelGL : Model {
                 }
 
                 for (v in 0 until this.maxDepth) {
-                    val i_14 = (this.verticesY!![v] shl 16) / minYVal
-                    if (i_14 < contourModifier) {
-                        this.verticesY!![v] += (currentLvl!!.getAverageHeight(this.verticesX!![v] + sceneX, this.verticesZ!![v] + sceneY) - averageHeight) * (contourModifier - i_14) / contourModifier
+                    val heightRatio = (this.verticesY!![v] shl 16) / minYVal
+                    if (heightRatio < contourModifier) {
+                        this.verticesY!![v] += (currentLvl!!.getAverageHeight(this.verticesX!![v] + sceneX, this.verticesZ!![v] + sceneY) - averageHeight) * (contourModifier - heightRatio) / contourModifier
                     }
                 }
             } else if (contourType == 3) {

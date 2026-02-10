@@ -23,7 +23,7 @@ class TextureBlendedTile {
     var materialId: ShortArray? = null
 
     @JvmField
-    var aShortArray2254: ShortArray? = null
+    var textureScale: ShortArray? = null
 
     @JvmField
     var tileDrawHeight: ShortArray? = null
