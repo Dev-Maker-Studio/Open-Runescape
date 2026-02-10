@@ -9,14 +9,14 @@ class MiniMenuEntry(
     clickType: Int,
     @JvmField val itemId: Int,
     @JvmField val entityUid: Long,
-    @JvmField val anInt9581: Int,
-    @JvmField val anInt9582: Int,
-    @JvmField val aBool9583: Boolean,
-    @JvmField val aBool9577: Boolean,
+    @JvmField val param0: Int,
+    @JvmField val param1: Int,
+    @JvmField val isSelectable: Boolean,
+    @JvmField val showOtherLevelIcon: Boolean,
     @JvmField val bitpacked: Long,
-    @JvmField val aBool9586: Boolean
+    @JvmField val isUncategorized: Boolean
 ) : CacheableNode() {
 
-    @JvmField var aString9585: String? = null
+    @JvmField var targetName: String? = null
     @JvmField var clickType: Int = clickType
 }

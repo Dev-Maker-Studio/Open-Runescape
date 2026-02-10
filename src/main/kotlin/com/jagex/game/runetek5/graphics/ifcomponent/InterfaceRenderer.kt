@@ -441,7 +441,7 @@ object InterfaceRenderer {
 									}
 
 									if (Client.menuItemCount > 0 && !Client.isMapMoving) {
-										if ((Client.menuOpenMode == 1 || MiniMenu.method12562()) && MiniMenu.entryCount > 2) {
+										if ((Client.menuOpenMode == 1 || MiniMenu.isTopEntryInterfaceAction()) && MiniMenu.entryCount > 2) {
 											StaticMethods.processMenuSelection(Client.mouseX, Client.mouseY)
 										} else if (MiniMenu.hasEntries()) {
 											StaticMethods.processMenuSelection(Client.mouseX, Client.mouseY)

@@ -34,13 +34,13 @@ import com.jagex.game.runetek5.utils.TextUtils
 object MenuInteraction {
 
     @JvmField
-    var aClass1184825: Component? = null
+    var lastHoveredComponent: Component? = null
 
     @JvmStatic
     fun processMenuclick(entry: MiniMenuEntry?, x: Int, y: Int) {
-        if (entry != null && MiniMenu.aClass482171!!.tail != entry) {
-            val attr1 = entry.anInt9581
-            val attr2 = entry.anInt9582
+        if (entry != null && MiniMenu.entryList!!.tail != entry) {
+            val attr1 = entry.param0
+            val attr2 = entry.param1
             var clickType = entry.clickType
             val uid = entry.entityUid.toInt()
             val bitpackedEntity = entry.entityUid
@@ -342,7 +342,7 @@ object MenuInteraction {
                     InterfaceComponentRenderer.cancelInterfaceSelection()
                 }
 
-                val component = aClass1184825
+                val component = lastHoveredComponent
                 if (component != null && Client.menuItemHoverCycle == 0) {
                     Component.redrawComponent(component)
                 }
@@ -351,44 +351,44 @@ object MenuInteraction {
     }
 
     @JvmStatic
-    fun method7703() {
+    fun processMenuInput() {
         if (Client.CURRENT_CUTSCENE < 0) {
             val menufont = FontMetrics.getForMinimenu()
             if (!MiniMenu.isOpen) {
-                MiniMenu.aBool162 = MiniMenu.anInt198 != -1 && MiniMenu.entryCount >= MiniMenu.anInt198 || (if (FontMetrics.useBoldFont) 26 else 22) + MiniMenu.anInt178 * MiniMenu.entryCount > GameShell.screenCanvasHeight * -969250379
+                MiniMenu.isCollapsed = MiniMenu.maxVisibleEntries != -1 && MiniMenu.entryCount >= MiniMenu.maxVisibleEntries || (if (FontMetrics.useBoldFont) 26 else 22) + MiniMenu.entryRowHeight * MiniMenu.entryCount > GameShell.screenCanvasHeight * -969250379
             }
-            MiniMenu.aClass482174!!.remove_all()
-            MiniMenu.aClass482175!!.remove_all()
-            var entry = MiniMenu.aClass482171!!.getFirst() as MiniMenuEntry?
+            MiniMenu.lowPriorityEntries!!.remove_all()
+            MiniMenu.interfaceEntries!!.remove_all()
+            var entry = MiniMenu.entryList!!.getFirst() as MiniMenuEntry?
             while (entry != null) {
                 val clickType = entry.clickType
                 if (clickType < 1000) {
                     entry.unlink()
                     if (clickType != 59 && clickType != 2 && clickType != 8 && clickType != 17 && clickType != 15 && clickType != 16 && clickType != 58) {
-                        MiniMenu.aClass482174!!.addFirst(entry)
+                        MiniMenu.lowPriorityEntries!!.addFirst(entry)
                     } else {
-                        MiniMenu.aClass482175!!.addFirst(entry)
+                        MiniMenu.interfaceEntries!!.addFirst(entry)
                     }
                 }
-                entry = MiniMenu.aClass482171!!.next() as MiniMenuEntry?
+                entry = MiniMenu.entryList!!.next() as MiniMenuEntry?
             }
-            MiniMenu.aClass482174!!.method8063(MiniMenu.aClass482171)
-            MiniMenu.aClass482175!!.method8063(MiniMenu.aClass482171)
+            MiniMenu.lowPriorityEntries!!.transferAllTo(MiniMenu.entryList)
+            MiniMenu.interfaceEntries!!.transferAllTo(MiniMenu.entryList)
             if (MiniMenu.entryCount <= 1) {
-                MiniMenu.aCacheableNodeSub79445 = null
-                MiniMenu.aCacheableNodeSub712 = null
-                MiniMenu.aCacheableNodeSub7168 = null
+                MiniMenu.activeEntry = null
+                MiniMenu.topEntry = null
+                MiniMenu.secondaryEntry = null
             } else {
                 if (KeyDownCommand.minimenuKeyDown() && MiniMenu.entryCount > 2) {
-                    MiniMenu.aCacheableNodeSub79445 = MiniMenu.aClass482171!!.tail!!.previous!!.previous as MiniMenuEntry?
+                    MiniMenu.activeEntry = MiniMenu.entryList!!.tail!!.previous!!.previous as MiniMenuEntry?
                 } else {
-                    MiniMenu.aCacheableNodeSub79445 = MiniMenu.aClass482171!!.tail!!.previous as MiniMenuEntry?
+                    MiniMenu.activeEntry = MiniMenu.entryList!!.tail!!.previous as MiniMenuEntry?
                 }
-                MiniMenu.aCacheableNodeSub712 = MiniMenu.aClass482171!!.tail!!.previous as MiniMenuEntry?
+                MiniMenu.topEntry = MiniMenu.entryList!!.tail!!.previous as MiniMenuEntry?
                 if (MiniMenu.entryCount > 2) {
-                    MiniMenu.aCacheableNodeSub7168 = MiniMenu.aCacheableNodeSub712!!.previous as MiniMenuEntry?
+                    MiniMenu.secondaryEntry = MiniMenu.topEntry!!.previous as MiniMenuEntry?
                 } else {
-                    MiniMenu.aCacheableNodeSub7168 = null
+                    MiniMenu.secondaryEntry = null
                 }
             }
             val mouseRecord = Client.MOUSE_MOVEMENTS.getFirst() as MouseRecord?
@@ -407,17 +407,17 @@ object MenuInteraction {
                 if (KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.openMinimenuInputSubscriber, mouseRecord)) {
                     var i_5: Int
                     var class46915: QueueIterator?
-                    if (MiniMenu.aCacheableNodeSub15163 != null && mouseX >= MiniMenu.anInt3996 && mouseX <= MiniMenu.anInt3996 + MiniMenu.anInt8518 && mouseY >= MiniMenu.anInt9471 && mouseY <= StationaryWall.menuHeight + MiniMenu.anInt9471) {
+                    if (MiniMenu.activeSubmenu != null && mouseX >= MiniMenu.submenuX && mouseX <= MiniMenu.submenuX + MiniMenu.submenuWidth && mouseY >= MiniMenu.submenuY && mouseY <= StationaryWall.menuHeight + MiniMenu.submenuY) {
                         i_5 = -1
                         i_6 = 0
-                        while (i_6 < MiniMenu.aCacheableNodeSub15163!!.queueSize) {
+                        while (i_6 < MiniMenu.activeSubmenu!!.queueSize) {
                             if (FontMetrics.useBoldFont) {
-                                i_11 = i_6 * MiniMenu.anInt178 + menufont!!.topPadding + MiniMenu.anInt9471 + 1 + 20
+                                i_11 = i_6 * MiniMenu.entryRowHeight + menufont!!.topPadding + MiniMenu.submenuY + 1 + 20
                                 if (mouseY > i_11 - menufont.topPadding - 1 && mouseY < i_11 + menufont.bottomPadding) {
                                     i_5 = i_6
                                 }
                             } else {
-                                i_11 = i_6 * MiniMenu.anInt178 + MiniMenu.anInt9471 + 31
+                                i_11 = i_6 * MiniMenu.entryRowHeight + MiniMenu.submenuY + 31
                                 if (mouseY > i_11 - 13 && mouseY < i_11 + 3) {
                                     i_5 = i_6
                                 }
@@ -426,7 +426,7 @@ object MenuInteraction {
                         }
                         if (i_5 != -1) {
                             i_6 = 0
-                            class46915 = QueueIterator(MiniMenu.aCacheableNodeSub15163!!.nodeQueue)
+                            class46915 = QueueIterator(MiniMenu.activeSubmenu!!.nodeQueue)
                             var clickedEntry = class46915.nextAndReset() as MiniMenuEntry?
                             while (clickedEntry != null) {
                                 if (i_5 == i_6) {
@@ -438,18 +438,18 @@ object MenuInteraction {
                             }
                         }
                         MiniMenu.close()
-                    } else if (mouseX >= StaticMethods.menuOpenX && mouseX <= MiniMenu.anInt8975 + StaticMethods.menuOpenX && mouseY >= StaticMethods.menuOpenY && mouseY <= StaticMethods.menuOpenY + MiniMenu.anInt1104) {
-                        if (!MiniMenu.aBool162) {
+                    } else if (mouseX >= StaticMethods.menuOpenX && mouseX <= MiniMenu.menuWidth + StaticMethods.menuOpenX && mouseY >= StaticMethods.menuOpenY && mouseY <= StaticMethods.menuOpenY + MiniMenu.menuHeight) {
+                        if (!MiniMenu.isCollapsed) {
                             i_5 = -1
                             i_6 = 0
                             while (i_6 < MiniMenu.entryCount) {
                                 if (FontMetrics.useBoldFont) {
-                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
+                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.entryRowHeight + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
                                     if (mouseY > i_11 - menufont.topPadding - 1 && mouseY < i_11 + menufont.bottomPadding) {
                                         i_5 = i_6
                                     }
                                 } else {
-                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.anInt178 + StaticMethods.menuOpenY + 31
+                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.entryRowHeight + StaticMethods.menuOpenY + 31
                                     if (mouseY > i_11 - 13 && mouseY < i_11 + 3) {
                                         i_5 = i_6
                                     }
@@ -458,7 +458,7 @@ object MenuInteraction {
                             }
                             if (i_5 != -1) {
                                 i_6 = 0
-                                val nodeiterator7 = NodeIterator(MiniMenu.aClass482171)
+                                val nodeiterator7 = NodeIterator(MiniMenu.entryList)
                                 var clickedEntry = nodeiterator7.nextAndReset() as MiniMenuEntry?
                                 while (clickedEntry != null) {
                                     if (i_6 == i_5) {
@@ -473,15 +473,15 @@ object MenuInteraction {
                         } else {
                             i_5 = -1
                             i_6 = 0
-                            while (i_6 < MiniMenu.anInt170) {
+                            while (i_6 < MiniMenu.coloredEntryCount) {
                                 if (FontMetrics.useBoldFont) {
-                                    i_11 = i_6 * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
+                                    i_11 = i_6 * MiniMenu.entryRowHeight + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
                                     if (mouseY > i_11 - menufont.topPadding - 1 && mouseY < i_11 + menufont.bottomPadding) {
                                         i_5 = i_6
                                         break
                                     }
                                 } else {
-                                    i_11 = i_6 * MiniMenu.anInt178 + StaticMethods.menuOpenY + 31
+                                    i_11 = i_6 * MiniMenu.entryRowHeight + StaticMethods.menuOpenY + 31
                                     if (mouseY > i_11 - 13 && mouseY < i_11 + 3) {
                                         i_5 = i_6
                                         break
@@ -491,7 +491,7 @@ object MenuInteraction {
                             }
                             if (i_5 != -1) {
                                 i_6 = 0
-                                class46915 = QueueIterator(MiniMenu.aClass477182)
+                                class46915 = QueueIterator(MiniMenu.sortedColoredEntries)
                                 var class282Sub50Sub1517 = class46915.nextAndReset() as ColoredMiniMenuEntry?
                                 while (class282Sub50Sub1517 != null) {
                                     if (i_5 == i_6) {
@@ -507,31 +507,31 @@ object MenuInteraction {
                     }
                 } else {
                     var bool16 = false
-                    if (MiniMenu.aCacheableNodeSub15163 != null) {
-                        if (mouseX >= MiniMenu.anInt3996 - 10 && mouseX <= MiniMenu.anInt8518 + MiniMenu.anInt3996 + 10 && mouseY >= MiniMenu.anInt9471 - 10 && mouseY <= StationaryWall.menuHeight + MiniMenu.anInt9471 + 10) {
+                    if (MiniMenu.activeSubmenu != null) {
+                        if (mouseX >= MiniMenu.submenuX - 10 && mouseX <= MiniMenu.submenuWidth + MiniMenu.submenuX + 10 && mouseY >= MiniMenu.submenuY - 10 && mouseY <= StationaryWall.menuHeight + MiniMenu.submenuY + 10) {
                             bool16 = true
                         } else {
-                            MiniMenu.method6810()
+                            MiniMenu.closeSubmenu()
                         }
                     }
                     if (!bool16) {
-                        if (mouseX >= StaticMethods.menuOpenX - 10 && mouseX <= MiniMenu.anInt8975 + StaticMethods.menuOpenX + 10 && mouseY >= StaticMethods.menuOpenY - 10 && mouseY <= MiniMenu.anInt1104 + StaticMethods.menuOpenY + 10) {
-                            if (MiniMenu.aBool162) {
+                        if (mouseX >= StaticMethods.menuOpenX - 10 && mouseX <= MiniMenu.menuWidth + StaticMethods.menuOpenX + 10 && mouseY >= StaticMethods.menuOpenY - 10 && mouseY <= MiniMenu.menuHeight + StaticMethods.menuOpenY + 10) {
+                            if (MiniMenu.isCollapsed) {
                                 i_6 = -1
                                 i_11 = -1
                                 var i_12: Int
                                 i_12 = 0
-                                while (i_12 < MiniMenu.anInt170) {
+                                while (i_12 < MiniMenu.coloredEntryCount) {
                                     val i_13: Int
                                     if (FontMetrics.useBoldFont) {
-                                        i_13 = i_12 * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
+                                        i_13 = i_12 * MiniMenu.entryRowHeight + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
                                         if (mouseY > i_13 - menufont.topPadding - 1 && mouseY < i_13 + menufont.bottomPadding) {
                                             i_6 = i_12
                                             i_11 = i_13 - menufont.topPadding - 1
                                             break
                                         }
                                     } else {
-                                        i_13 = i_12 * MiniMenu.anInt178 + StaticMethods.menuOpenY + 31
+                                        i_13 = i_12 * MiniMenu.entryRowHeight + StaticMethods.menuOpenY + 31
                                         if (mouseY > i_13 - 13 && mouseY < i_13 + 3) {
                                             i_6 = i_12
                                             i_11 = i_13 - 13
@@ -542,12 +542,12 @@ object MenuInteraction {
                                 }
                                 if (i_6 != -1) {
                                     i_12 = 0
-                                    val class4699 = QueueIterator(MiniMenu.aClass477182)
+                                    val class4699 = QueueIterator(MiniMenu.sortedColoredEntries)
                                     var class282Sub50Sub1510 = class4699.nextAndReset() as ColoredMiniMenuEntry?
                                     while (class282Sub50Sub1510 != null) {
                                         if (i_6 == i_12) {
                                             if (class282Sub50Sub1510.queueSize > 1) {
-                                                MiniMenu.method12212(class282Sub50Sub1510, i_11)
+                                                MiniMenu.openSubmenu(class282Sub50Sub1510, i_11)
                                             }
                                             break
                                         }
@@ -562,40 +562,40 @@ object MenuInteraction {
                     }
                 }
             } else {
-                val bool16 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.anInterface175878, mouseRecord)
-                val bool18 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.anInterface175874, mouseRecord)
-                var bool20 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.anInterface175875, mouseRecord)
-                if ((bool16 || bool18) && (Client.menuOpenMode == 1 && MiniMenu.entryCount > 2 || MiniMenu.method12562())) {
+                val bool16 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.primaryClickSubscriber, mouseRecord)
+                val bool18 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.secondaryClickSubscriber, mouseRecord)
+                var bool20 = KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.contextMenuSubscriber, mouseRecord)
+                if ((bool16 || bool18) && (Client.menuOpenMode == 1 && MiniMenu.entryCount > 2 || MiniMenu.isTopEntryInterfaceAction())) {
                     bool20 = true
                 }
                 if (bool20 && MiniMenu.entryCount > 0) {
                     if (Client.draggingComponent == null && Client.menuItemCount == 0) {
                         StaticMethods.openContextMenu(mouseX, mouseY)
                     } else {
-                        MiniMenu.anInt167 = 2
+                        MiniMenu.deferredClickType = 2
                     }
                 } else if (bool18) {
-                    if (MiniMenu.aCacheableNodeSub7168 != null) {
-                        processMenuclick(MiniMenu.aCacheableNodeSub7168, mouseX, mouseY)
+                    if (MiniMenu.secondaryEntry != null) {
+                        processMenuclick(MiniMenu.secondaryEntry, mouseX, mouseY)
                     }
                 } else if (bool16) {
-                    if (MiniMenu.aCacheableNodeSub79445 == null) {
+                    if (MiniMenu.activeEntry == null) {
                         if (Client.interfaceSelectionActive) {
                             InterfaceComponentRenderer.cancelInterfaceSelection()
                         }
                     } else {
                         val bool19 = Client.draggingComponent != null || Client.menuItemCount > 0
                         if (bool19) {
-                            MiniMenu.anInt167 = 1
-                            MiniMenu.aCacheableNodeSub7438 = MiniMenu.aCacheableNodeSub79445
+                            MiniMenu.deferredClickType = 1
+                            MiniMenu.deferredEntry = MiniMenu.activeEntry
                         } else {
-                            processMenuclick(MiniMenu.aCacheableNodeSub79445, mouseX, mouseY)
+                            processMenuclick(MiniMenu.activeEntry, mouseX, mouseY)
                         }
                     }
                 }
                 if (Client.draggingComponent == null && Client.menuItemCount == 0) {
-                    MiniMenu.anInt167 = 0
-                    MiniMenu.aCacheableNodeSub7438 = null
+                    MiniMenu.deferredClickType = 0
+                    MiniMenu.deferredEntry = null
                 }
             }
         }

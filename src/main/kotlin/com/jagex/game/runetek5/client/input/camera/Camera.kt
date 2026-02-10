@@ -316,7 +316,7 @@ object Camera {
 
     @JvmStatic
     fun storeViewProjectionMatrix(matrix440: Matrix44) {
-        StaticMethods.aClass384185.copyFrom(matrix440)
+        StaticMethods.storedViewProjectionMatrix.copyFrom(matrix440)
     }
 
     @JvmStatic

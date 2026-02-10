@@ -171,13 +171,13 @@ fun playerHovered(player: PlayerEntity, onDifferentPlane: Boolean) {
         }
 
         if (!onDifferentPlane) {
-            var entry = MiniMenu.aClass482171.getFirst() as? MiniMenuEntry
+            var entry = MiniMenu.entryList.getFirst() as? MiniMenuEntry
             while (entry != null) {
                 if (entry.clickType == 23) {
-                    entry.aString9585 = "${TextUtils.setTextColor(16777215)}$username"
+                    entry.targetName = "${TextUtils.setTextColor(16777215)}$username"
                     break
                 }
-                entry = MiniMenu.aClass482171.next() as? MiniMenuEntry
+                entry = MiniMenu.entryList.next() as? MiniMenuEntry
             }
         }
     }
@@ -194,14 +194,14 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     val matrix445 = toolkit.getScratchMatrix()
     toolkit.setModelMatrix(cameraMatrix)
     toolkit.setSunPosition(Camera.sunMatrix)
-    toolkit.setClipping(MiniMenu.anInt180, MiniMenu.anInt181, MiniMenu.anInt180 + Camera.gameAreaWidth, Camera.gameAreaHeight + MiniMenu.anInt181)
-    toolkit.setDrawableArea(MiniMenu.anInt180, MiniMenu.anInt181, Camera.gameAreaWidth, Camera.gameAreaHeight)
+    toolkit.setClipping(MiniMenu.viewportX, MiniMenu.viewportY, MiniMenu.viewportX + Camera.gameAreaWidth, Camera.gameAreaHeight + MiniMenu.viewportY)
+    toolkit.setDrawableArea(MiniMenu.viewportX, MiniMenu.viewportY, Camera.gameAreaWidth, Camera.gameAreaHeight)
     matrix445.fromMatrix(Camera.sunMatrix)
     matrix445.multiplyBy(cameraMatrix)
     matrix445.invert()
 
-    val i_3 = mouseX - MiniMenu.anInt180
-    val i_4 = mouseY - MiniMenu.anInt181
+    val i_3 = mouseX - MiniMenu.viewportX
+    val i_4 = mouseY - MiniMenu.viewportY
 
     if (Resource.mapRegion?.getScene()!! != null && (!Client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
         var x = -1
@@ -210,17 +210,17 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
         val f_10 = 2.0f * i_3 / Camera.gameAreaWidth - 1.0f
         val f_11 = 2.0f * i_4 / Camera.gameAreaHeight - 1.0f
 
-        matrix445.scale(f_10, f_11, -1.0f, StaticMethods.aFloatArray194)
-        val f_12 = StaticMethods.aFloatArray194[0] / StaticMethods.aFloatArray194[3]
-        val f_13 = StaticMethods.aFloatArray194[1] / StaticMethods.aFloatArray194[3]
-        val f_14 = StaticMethods.aFloatArray194[2] / StaticMethods.aFloatArray194[3]
+        matrix445.scale(f_10, f_11, -1.0f, StaticMethods.unprojectionBuffer)
+        val f_12 = StaticMethods.unprojectionBuffer[0] / StaticMethods.unprojectionBuffer[3]
+        val f_13 = StaticMethods.unprojectionBuffer[1] / StaticMethods.unprojectionBuffer[3]
+        val f_14 = StaticMethods.unprojectionBuffer[2] / StaticMethods.unprojectionBuffer[3]
 
-        matrix445.scale(f_10, f_11, 1.0f, StaticMethods.aFloatArray194)
-        val f_15 = StaticMethods.aFloatArray194[0] / StaticMethods.aFloatArray194[3]
-        val f_16 = StaticMethods.aFloatArray194[1] / StaticMethods.aFloatArray194[3]
-        val f_17 = StaticMethods.aFloatArray194[2] / StaticMethods.aFloatArray194[3]
+        matrix445.scale(f_10, f_11, 1.0f, StaticMethods.unprojectionBuffer)
+        val f_15 = StaticMethods.unprojectionBuffer[0] / StaticMethods.unprojectionBuffer[3]
+        val f_16 = StaticMethods.unprojectionBuffer[1] / StaticMethods.unprojectionBuffer[3]
+        val f_17 = StaticMethods.unprojectionBuffer[2] / StaticMethods.unprojectionBuffer[3]
 
-        val f_18 = MiniMenu.method288(f_12, f_13, f_14, f_15, f_16, f_17, 4)
+        val f_18 = MiniMenu.raycastTerrainIntersection(f_12, f_13, f_14, f_15, f_16, f_17, 4)
 
         if (f_18 > 0.0f) {
             val f_19 = f_15 - f_12

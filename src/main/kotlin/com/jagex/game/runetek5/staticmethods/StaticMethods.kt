@@ -53,8 +53,8 @@ import com.jagex.game.runetek5.utils.*
 
 object StaticMethods {
 
-    @JvmField val aFloatArray194: FloatArray = FloatArray(4)
-    @JvmField val aClass384185: Matrix44 = Matrix44()
+    @JvmField val unprojectionBuffer: FloatArray = FloatArray(4)
+    @JvmField val storedViewProjectionMatrix: Matrix44 = Matrix44()
     @JvmField val INDEX36_FILE_CACHE: IterableNodeMap<VorbisNode> = IterableNodeMap(4)
     @JvmField var WORLD_LIST_VERSION: Int = 0
     @JvmField var menuFontIndex: Int = 0
@@ -83,7 +83,7 @@ object StaticMethods {
     @JvmField var errorReportUserId: Long = 0
     @JvmField var SPRITES_INDEX: Js5ResourceProvider? = null
     @JvmField var circleInnerRadiusBuffer: IntArray? = null
-    @JvmField var aClass2505450: SoundBankCache? = null
+    @JvmField var pendingSoundBankCache: SoundBankCache? = null
     @JvmField var menuBackgroundAlpha: Int = 0
     @JvmField var menuHoverTextColor: Int = 0
     @JvmField var menuCornerSpriteId: Int = 0
@@ -93,7 +93,7 @@ object StaticMethods {
     @JvmField var menuSideBorderSpriteId: Int = 0
     @JvmField var menuBottomRightCornerSprite: NativeSprite? = null
     @JvmField var menuOpenY: Int = 0
-    @JvmField var aNodeSub79563: MusicTrack? = null
+    @JvmField var pendingMusicTrack: MusicTrack? = null
     @JvmField var menuBottomLeftCornerSprite: NativeSprite? = null
     @JvmField var menuTopBorderSpriteId: Int = 0
     @JvmField var cameraUpdateCooldown: Int = 0
@@ -454,8 +454,8 @@ object StaticMethods {
                 } else {
                     SoundResourceManager.songLoadState = 0
                 }
-                aNodeSub79563 = null
-                aClass2505450 = null
+                pendingMusicTrack = null
+                pendingSoundBankCache = null
             }
             if (SoundResourceManager.songLoadState == 3) {
                 var volume = SoundResourceManager.midiPcmStream!!.getMusicVolume()
@@ -504,13 +504,13 @@ object StaticMethods {
 
     @JvmStatic
     fun processMenuSelection(i_0: Int, i_1: Int) {
-        if (MiniMenu.anInt167 == 1) {
-            MenuInteraction.processMenuclick(MiniMenu.aCacheableNodeSub7438, i_0, i_1)
-        } else if (MiniMenu.anInt167 == 2) {
+        if (MiniMenu.deferredClickType == 1) {
+            MenuInteraction.processMenuclick(MiniMenu.deferredEntry, i_0, i_1)
+        } else if (MiniMenu.deferredClickType == 2) {
             openContextMenu(i_0, i_1)
         }
-        MiniMenu.anInt167 = 0
-        MiniMenu.aCacheableNodeSub7438 = null
+        MiniMenu.deferredClickType = 0
+        MiniMenu.deferredEntry = null
     }
 
     @JvmStatic
@@ -540,25 +540,25 @@ object StaticMethods {
 
     @JvmStatic
     fun openContextMenu(mouseX: Int, mouseY: Int) {
-        if (Client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712!!.action.equals(LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)))) {
+        if (Client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.topEntry!!.action.equals(LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)))) {
             val fontMetrics = FontMetrics.getForMinimenu()
             var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
             val i_5: Int
             var i_7: Int
-            if (!MiniMenu.aBool162) {
-                var class282Sub50Sub79 = MiniMenu.aClass482171!!.getFirst() as MiniMenuEntry?
+            if (!MiniMenu.isCollapsed) {
+                var class282Sub50Sub79 = MiniMenu.entryList!!.getFirst() as MiniMenuEntry?
                 while (class282Sub50Sub79 != null) {
                     i_7 = MiniMenu.getWidthForEntryWithQuests(class282Sub50Sub79, fontMetrics)
                     if (i_7 > i_4) {
                         i_4 = i_7
                     }
-                    class282Sub50Sub79 = MiniMenu.aClass482171!!.next() as MiniMenuEntry?
+                    class282Sub50Sub79 = MiniMenu.entryList!!.next() as MiniMenuEntry?
                 }
                 i_4 += 8
-                i_5 = MiniMenu.entryCount * MiniMenu.anInt178 + 21
-                MiniMenu.anInt1104 = (if (FontMetrics.useBoldFont) 26 else 22) + MiniMenu.entryCount * MiniMenu.anInt178
+                i_5 = MiniMenu.entryCount * MiniMenu.entryRowHeight + 21
+                MiniMenu.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + MiniMenu.entryCount * MiniMenu.entryRowHeight
             } else {
-                var menuEntry = MiniMenu.aClass477182!!.getNext() as ColoredMiniMenuEntry?
+                var menuEntry = MiniMenu.sortedColoredEntries!!.getNext() as ColoredMiniMenuEntry?
                 while (menuEntry != null) {
                     i_7 = if (menuEntry.queueSize == 1) {
                         MiniMenu.getWidthForEntryWithQuests(menuEntry.nodeQueue!!.current!!.next as MiniMenuEntry, fontMetrics)
@@ -568,11 +568,11 @@ object StaticMethods {
                     if (i_7 > i_4) {
                         i_4 = i_7
                     }
-                    menuEntry = MiniMenu.aClass477182!!.getDirectNext() as ColoredMiniMenuEntry?
+                    menuEntry = MiniMenu.sortedColoredEntries!!.getDirectNext() as ColoredMiniMenuEntry?
                 }
                 i_4 += 8
-                i_5 = MiniMenu.anInt178 * MiniMenu.anInt170 + 21
-                MiniMenu.anInt1104 = MiniMenu.anInt178 * MiniMenu.anInt170 + (if (FontMetrics.useBoldFont) 26 else 22)
+                i_5 = MiniMenu.entryRowHeight * MiniMenu.coloredEntryCount + 21
+                MiniMenu.menuHeight = MiniMenu.entryRowHeight * MiniMenu.coloredEntryCount + (if (FontMetrics.useBoldFont) 26 else 22)
             }
             i_4 += 10
             var i_8 = mouseX - i_4 / 2
@@ -591,7 +591,7 @@ object StaticMethods {
             }
             menuOpenX = i_8
             menuOpenY = i_7
-            MiniMenu.anInt8975 = i_4
+            MiniMenu.menuWidth = i_4
             NativeSprite.alphaJitter = (Math.random() * 24.0).toInt()
             MiniMenu.isOpen = true
         }

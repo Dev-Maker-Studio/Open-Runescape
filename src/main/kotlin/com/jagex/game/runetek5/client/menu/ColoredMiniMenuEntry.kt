@@ -39,7 +39,7 @@ class ColoredMiniMenuEntry(
 
         var subEntry = nodeQueue.getNext() as MiniMenuEntry?
         while (subEntry != null) {
-            if (MiniMenu.method5334(baseEntry.clickType, subEntry.clickType)) {
+            if (MiniMenu.hasHigherPriority(baseEntry.clickType, subEntry.clickType)) {
                 push(baseEntry, subEntry)
                 queueSize++
                 return !isFirst
@@ -66,8 +66,8 @@ class ColoredMiniMenuEntry(
         if (queueSize == 0) {
             unlink()
             unlinkSub()
-            MiniMenu.anInt170--
-            MiniMenu.aClass229164.put(this, entry.bitpacked)
+            MiniMenu.coloredEntryCount--
+            MiniMenu.coloredEntryCache.put(this, entry.bitpacked)
             return false
         } else {
             return clickType != getClickType()

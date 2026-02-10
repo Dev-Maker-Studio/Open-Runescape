@@ -14,9 +14,9 @@ import com.jagex.game.runetek5.js5.Js5ResourceProvider
  */
 class InteractionDefaultsType(resource: Js5ResourceProvider) {
 
-    @JvmField var anInterface175878: InputSubscriber? = null
-    @JvmField var anInterface175874: InputSubscriber? = null
-    @JvmField var anInterface175875: InputSubscriber? = null
+    @JvmField var primaryClickSubscriber: InputSubscriber? = null
+    @JvmField var secondaryClickSubscriber: InputSubscriber? = null
+    @JvmField var contextMenuSubscriber: InputSubscriber? = null
     @JvmField var openMinimenuInputSubscriber: InputSubscriber? = null
     @JvmField var minimenuKey: KeyHoldInputSubscriber? = null
     @JvmField var toggleRunKey: KeyHoldInputSubscriber? = null
@@ -42,9 +42,9 @@ class InteractionDefaultsType(resource: Js5ResourceProvider) {
                 return
             }
             when (opcode) {
-                1 -> anInterface175878 = InputSubscriber.decode(buffer) // minimenu
-                2 -> anInterface175874 = InputSubscriber.decode(buffer) // minimenu
-                3 -> anInterface175875 = InputSubscriber.decode(buffer) // minimenu
+                1 -> primaryClickSubscriber = InputSubscriber.decode(buffer) // minimenu
+                2 -> secondaryClickSubscriber = InputSubscriber.decode(buffer) // minimenu
+                3 -> contextMenuSubscriber = InputSubscriber.decode(buffer) // minimenu
                 4 -> openMinimenuInputSubscriber = InputSubscriber.decode(buffer)
                 5 -> minimenuKey = KeyHoldInputSubscriber.decode(buffer) // minimenu
                 6 -> toggleRunKey = KeyHoldInputSubscriber.decode(buffer)

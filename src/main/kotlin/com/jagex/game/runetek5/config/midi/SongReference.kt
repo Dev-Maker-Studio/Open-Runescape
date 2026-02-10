@@ -73,8 +73,8 @@ class SongReference(
         @JvmStatic
         fun reset() {
             SoundResourceManager.songLoadState = 0
-            StaticMethods.aNodeSub79563 = null
-            StaticMethods.aClass2505450 = null
+            StaticMethods.pendingMusicTrack = null
+            StaticMethods.pendingSoundBankCache = null
             AreaSoundPlayer.MUSIC_RESOURCE = null
             SoundResourceManager.pendingMidiStream = null
         }

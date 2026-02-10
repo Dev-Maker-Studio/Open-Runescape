@@ -31,7 +31,7 @@ class NodeCollection {
         }
     }
 
-    fun method8062(nodecollection1: NodeCollection, node2: Node<*>?) {
+    fun spliceInto(nodecollection1: NodeCollection, node2: Node<*>?) {
         val node4 = tail.previous
         (tail as Node<Any>).previous = (node2 as Node<Any>).previous
         (node2.previous as Node<Any>).next = tail
@@ -43,9 +43,9 @@ class NodeCollection {
         }
     }
 
-    fun method8063(nodecollection1: NodeCollection) {
+    fun transferAllTo(nodecollection1: NodeCollection) {
         if (tail.next != tail) {
-            method8062(nodecollection1, tail.next)
+            spliceInto(nodecollection1, tail.next)
         }
     }
 

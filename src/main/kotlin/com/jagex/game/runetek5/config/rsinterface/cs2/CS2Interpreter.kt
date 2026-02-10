@@ -5074,7 +5074,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7322(executor: CS2Executor) {
-        method11160(MiniMenu.method8727()!!, executor)
+        method11160(MiniMenu.getSecondaryEntry()!!, executor)
     }
 
     @JvmStatic
@@ -5555,7 +5555,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6121(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = MiniMenu.entryCount
-        executor.intStack[++executor.intStackPtr - 1] = MiniMenu.anInt170
+        executor.intStack[++executor.intStackPtr - 1] = MiniMenu.coloredEntryCount
     }
 
     @JvmStatic
@@ -7269,7 +7269,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7209(executor: CS2Executor) {
-        MiniMenu.anInt198 = executor.intStack[--executor.intStackPtr]
+        MiniMenu.maxVisibleEntries = executor.intStack[--executor.intStackPtr]
     }
 
     @JvmStatic
@@ -7796,7 +7796,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8697(): MiniMenuEntry? {
-        return MiniMenu.aCacheableNodeSub79445
+        return MiniMenu.activeEntry
     }
 
     @JvmStatic
@@ -7950,14 +7950,14 @@ object CS2Interpreter {
         StaticMedia.resetChatMedia()
         TextureOpIrregularBricks.backgroundColor = executor.intStack[executor.intStackPtr]
         NativeSprite.backgroundTransparency = executor.intStack[executor.intStackPtr + 1]
-        MiniMenu.anInt188 = executor.intStack[executor.intStackPtr + 2]
+        MiniMenu.menuHoverHighlightColor = executor.intStack[executor.intStackPtr + 2]
         StaticMethods.menuBackgroundAlpha = executor.intStack[executor.intStackPtr + 3]
         StaticMethods.loadingBarBackgroundSpriteId = executor.intStack[executor.intStackPtr + 4]
         NativeSprite.loadingBarTileSpriteId = executor.intStack[executor.intStackPtr + 5]
         StaticMethods.menuTopBorderSpriteId = executor.intStack[executor.intStackPtr + 6]
         StaticMethods.menuSideBorderSpriteId = executor.intStack[executor.intStackPtr + 7]
         StaticMethods.menuCornerSpriteId = executor.intStack[executor.intStackPtr + 8]
-        MiniMenu.anInt4722 = executor.intStack[executor.intStackPtr + 9]
+        MiniMenu.menuTextColor = executor.intStack[executor.intStackPtr + 9]
         StaticMethods.menuHoverTextColor = executor.intStack[executor.intStackPtr + 10]
         StaticMethods.menuFontIndex = executor.intStack[executor.intStackPtr + 11]
         Resource.SPRITES!!.isFileCached(StaticMethods.loadingBarBackgroundSpriteId)
@@ -10344,8 +10344,8 @@ object CS2Interpreter {
     @JvmStatic
     fun method11160(class282Sub50Sub70: MiniMenuEntry?, cs2executor1: CS2Executor) {
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = MiniMenu.getClickType(class282Sub50Sub70)
-        cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.method13768(class282Sub50Sub70)
-        cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.method7303(class282Sub50Sub70)
+        cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.getActionText(class282Sub50Sub70)
+        cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.getColoredNameText(class282Sub50Sub70)
         cs2executor1.stringStack[++cs2executor1.stringStackPtr - 1] = MiniMenu.addQuestChaticons(class282Sub50Sub70)
     }
 

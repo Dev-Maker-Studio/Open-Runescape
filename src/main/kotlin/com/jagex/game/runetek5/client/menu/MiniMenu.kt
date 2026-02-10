@@ -37,7 +37,7 @@ object MiniMenu {
     var entryCount = 0
 
     @JvmField
-    var aCacheableNodeSub712: MiniMenuEntry? = null
+    var topEntry: MiniMenuEntry? = null
 
     @JvmStatic
     fun prefixWithIndex(srcOptions: Array<String?>?): Array<String?> {
@@ -54,32 +54,32 @@ object MiniMenu {
     @JvmStatic
     fun addEntry(entry: MiniMenuEntry?) {
         if (entry != null) {
-            aClass482171.addFirst(entry)
+            entryList.addFirst(entry)
             entryCount++
             var c: ColoredMiniMenuEntry?
-            if (!entry.aBool9586 && entry.coloredName != null && !entry.coloredName.isEmpty()) {
+            if (!entry.isUncategorized && entry.coloredName != null && !entry.coloredName.isEmpty()) {
                 val hash = entry.bitpacked
-                c = aClass465172.get(hash) as? ColoredMiniMenuEntry
+                c = coloredEntryMap.get(hash) as? ColoredMiniMenuEntry
                 while (c != null && !c.tagStart.equals(entry.coloredName)) {
-                    c = aClass465172.nextInBucket() as? ColoredMiniMenuEntry
+                    c = coloredEntryMap.nextInBucket() as? ColoredMiniMenuEntry
                 }
                 if (c == null) {
-                    c = aClass229164.get(hash) as? ColoredMiniMenuEntry
+                    c = coloredEntryCache.get(hash) as? ColoredMiniMenuEntry
                     if (c != null && !c.tagStart.equals(entry.coloredName)) {
                         c = null
                     }
                     if (c == null) {
                         c = ColoredMiniMenuEntry(entry.coloredName)
                     }
-                    aClass465172.put(c, hash)
-                    ++anInt170
+                    coloredEntryMap.put(c, hash)
+                    ++coloredEntryCount
                 }
             } else {
                 c = ColoredMiniMenuEntry(entry.coloredName)
-                ++anInt170
+                ++coloredEntryCount
             }
             if (c.addEntry(entry)) {
-                method503(c)
+                insertSortedEntry(c)
             }
         }
     }
@@ -93,19 +93,19 @@ object MiniMenu {
         }
         @Suppress("UNCHECKED_CAST")
         var width = fontmetrics.getTextWidth(text, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.Sprite>?)
-        if (menuEntry.aBool9577) {
+        if (menuEntry.showOtherLevelIcon) {
             width += (StaticMedia.otherLevelSprite?.getWidth() ?: 0) + 4
         }
         return width
     }
 
     @JvmStatic
-    fun method13768(class282Sub50Sub70: MiniMenuEntry?): String {
+    fun getActionText(class282Sub50Sub70: MiniMenuEntry?): String {
         return if (!isOpen && class282Sub50Sub70 != null) class282Sub50Sub70.action else ""
     }
 
     @JvmStatic
-    fun method12212(class282Sub50Sub150: ColoredMiniMenuEntry, i_1: Int) {
+    fun openSubmenu(class282Sub50Sub150: ColoredMiniMenuEntry, i_1: Int) {
         if (isOpen) {
             val fontmetrics3 = FontMetrics.getForMinimenu()
             var i_4 = 0
@@ -121,9 +121,9 @@ object MiniMenu {
             }
 
             i_4 += 8
-            val i_9 = class282Sub50Sub150.queueSize * anInt178 + 21
-            StationaryWall.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + anInt178 * class282Sub50Sub150.queueSize
-            i_6 = StaticMethods.menuOpenX + anInt8975
+            val i_9 = class282Sub50Sub150.queueSize * entryRowHeight + 21
+            StationaryWall.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + entryRowHeight * class282Sub50Sub150.queueSize
+            i_6 = StaticMethods.menuOpenX + menuWidth
             if (i_4 + i_6 > GameShell.screenCanvasWidth) {
                 i_6 = StaticMethods.menuOpenX - i_4
             }
@@ -142,24 +142,24 @@ object MiniMenu {
                 i_8 = 0
             }
 
-            anInt3996 = i_6
-            anInt9471 = i_8
-            anInt8518 = i_4
-            aCacheableNodeSub15163 = class282Sub50Sub150
+            submenuX = i_6
+            submenuY = i_8
+            submenuWidth = i_4
+            activeSubmenu = class282Sub50Sub150
         }
 
     }
 
     @JvmStatic
-    fun method4800() {
+    fun renderTooltipText() {
         if ((entryCount >= 2 || Client.interfaceSelectionActive) && Client.draggingComponent == null) {
             var menuText: String
             if (Client.interfaceSelectionActive && entryCount < 2) {
                 menuText = Client.useOnType + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + Client.useOnTarget + " " + "->"
             } else if (KeyDownCommand.minimenuKeyDown() && entryCount > 2) {
-                menuText = getTextFrom(aCacheableNodeSub79445!!)
+                menuText = getTextFrom(activeEntry!!)
             } else {
-                val menuEntry = aCacheableNodeSub79445
+                val menuEntry = activeEntry
                 if (menuEntry == null) {
                     return
                 }
@@ -186,9 +186,9 @@ object MiniMenu {
     }
 
     @JvmStatic
-    fun method7303(entry: MiniMenuEntry?): String {
+    fun getColoredNameText(entry: MiniMenuEntry?): String {
         if (!isOpen && entry != null) {
-            val aString = entry.aString9585
+            val aString = entry.targetName
             val colorName = entry.coloredName
             return if ((colorName == null || colorName.isEmpty()) && aString != null && !aString.isEmpty()) aString else (colorName ?: "")
         }
@@ -196,8 +196,8 @@ object MiniMenu {
     }
 
     @JvmStatic
-    fun method8727(): MiniMenuEntry? {
-        return aCacheableNodeSub7168
+    fun getSecondaryEntry(): MiniMenuEntry? {
+        return secondaryEntry
     }
 
     @JvmStatic
@@ -232,44 +232,44 @@ object MiniMenu {
 
     @JvmStatic
     fun resetEntries() {
-        var class282Sub50Sub151: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
+        var class282Sub50Sub151: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
         while (class282Sub50Sub151 != null) {
             if (class282Sub50Sub151.queueSize > 1) {
                 class282Sub50Sub151.queueSize = 0
-                aClass229164.put(class282Sub50Sub151, ((class282Sub50Sub151.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
+                coloredEntryCache.put(class282Sub50Sub151, ((class282Sub50Sub151.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
                 class282Sub50Sub151.nodeQueue.reset()
             }
-            class282Sub50Sub151 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
+            class282Sub50Sub151 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
         }
 
-        anInt170 = 0
+        coloredEntryCount = 0
         entryCount = 0
-        aClass482171.remove_all()
-        aClass465172.clear()
-        aClass477182.reset()
+        entryList.remove_all()
+        coloredEntryMap.clear()
+        sortedColoredEntries.reset()
         addEntry(cancelOption)
     }
 
     @JvmStatic
-    fun method420() {
-        var menuEntry: MiniMenuEntry? = aClass482171.getFirst() as? MiniMenuEntry
+    fun removeMatchingEntries() {
+        var menuEntry: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
         while (menuEntry != null) {
             if (Mouse.method539(menuEntry.clickType)) {
-                method2095(menuEntry)
+                removeEntry(menuEntry)
             }
-            menuEntry = aClass482171.next() as? MiniMenuEntry
+            menuEntry = entryList.next() as? MiniMenuEntry
         }
     }
 
     @JvmStatic
-    fun method12562(): Boolean {
-        return if (aCacheableNodeSub712 == null) {
+    fun isTopEntryInterfaceAction(): Boolean {
+        return if (topEntry == null) {
             false
         } else {
-            if (aCacheableNodeSub712!!.clickType >= 2000) {
-                aCacheableNodeSub712!!.clickType -= 2000
+            if (topEntry!!.clickType >= 2000) {
+                topEntry!!.clickType -= 2000
             }
-            aCacheableNodeSub712!!.clickType == 1007
+            topEntry!!.clickType == 1007
         }
     }
 
@@ -287,7 +287,7 @@ object MiniMenu {
 
     @JvmStatic
     fun getTextFrom(menuEntry: MiniMenuEntry): String {
-        val aString = menuEntry.aString9585
+        val aString = menuEntry.targetName
         val colorName = menuEntry.coloredName
         return if (aString != null && !aString.isEmpty())
             if (colorName != null && !colorName.isEmpty())
@@ -355,21 +355,21 @@ object MiniMenu {
     }
 
     @JvmStatic
-    fun method2095(entry: MiniMenuEntry) {
+    fun removeEntry(entry: MiniMenuEntry) {
         if (!isOpen) {
             entry.unlink()
             --entryCount
-            if (!entry.aBool9586) {
+            if (!entry.isUncategorized) {
                 val long_2 = entry.bitpacked
-                var class282Sub50Sub154: ColoredMiniMenuEntry? = aClass465172.get(long_2) as? ColoredMiniMenuEntry
+                var class282Sub50Sub154: ColoredMiniMenuEntry? = coloredEntryMap.get(long_2) as? ColoredMiniMenuEntry
                 while (class282Sub50Sub154 != null && !class282Sub50Sub154.tagStart.equals(entry.coloredName)) {
-                    class282Sub50Sub154 = aClass465172.nextInBucket() as? ColoredMiniMenuEntry
+                    class282Sub50Sub154 = coloredEntryMap.nextInBucket() as? ColoredMiniMenuEntry
                 }
                 if (class282Sub50Sub154 != null && class282Sub50Sub154.removeEntry(entry)) {
-                    method503(class282Sub50Sub154)
+                    insertSortedEntry(class282Sub50Sub154)
                 }
             } else {
-                var class282Sub50Sub155: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
+                var class282Sub50Sub155: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
                 while (class282Sub50Sub155 != null) {
                     if (class282Sub50Sub155.tagStart.equals(entry.coloredName)) {
                         var bool3 = false
@@ -377,7 +377,7 @@ object MiniMenu {
                         while (class282Sub50Sub76 != null) {
                             if (class282Sub50Sub76 == entry) {
                                 if (class282Sub50Sub155.removeEntry(entry)) {
-                                    method503(class282Sub50Sub155)
+                                    insertSortedEntry(class282Sub50Sub155)
                                 }
                                 bool3 = true
                                 break
@@ -388,50 +388,50 @@ object MiniMenu {
                             break
                         }
                     }
-                    class282Sub50Sub155 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
+                    class282Sub50Sub155 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
                 }
             }
         }
     }
 
     @JvmField
-    val aClass482171 = NodeCollection()
+    val entryList = NodeCollection()
 
     @JvmStatic
-    fun method5334(clicktypeBase: Int, clicktypeSub: Int): Boolean {
-        return clicktypeSub >= 1000 && clicktypeBase < 1000 || (clicktypeSub < 1000 && clicktypeBase < 1000 && (method13788(clicktypeBase) || !method13788(clicktypeSub)) || clicktypeSub >= 1000)
+    fun hasHigherPriority(clicktypeBase: Int, clicktypeSub: Int): Boolean {
+        return clicktypeSub >= 1000 && clicktypeBase < 1000 || (clicktypeSub < 1000 && clicktypeBase < 1000 && (isInterfaceClickType(clicktypeBase) || !isInterfaceClickType(clicktypeSub)) || clicktypeSub >= 1000)
     }
 
     @JvmStatic
-    fun method13788(clickType: Int): Boolean {
+    fun isInterfaceClickType(clickType: Int): Boolean {
         return clickType == 59 || clickType == 2 || clickType == 8 || clickType == 17 || clickType == 15 || clickType == 16 || clickType == 58
     }
 
     @JvmStatic
     fun reset() {
-        var class282Sub50Sub151: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
+        var class282Sub50Sub151: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
         while (class282Sub50Sub151 != null) {
             if (class282Sub50Sub151.queueSize > 1) {
                 class282Sub50Sub151.queueSize = 0
-                aClass229164.put(class282Sub50Sub151, ((class282Sub50Sub151.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
+                coloredEntryCache.put(class282Sub50Sub151, ((class282Sub50Sub151.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
                 class282Sub50Sub151.nodeQueue.reset()
             }
-            class282Sub50Sub151 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
+            class282Sub50Sub151 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
         }
-        anInt170 = 0
+        coloredEntryCount = 0
         entryCount = 0
-        aClass482171.remove_all()
-        aClass465172.clear()
-        aClass477182.reset()
+        entryList.remove_all()
+        coloredEntryMap.clear()
+        sortedColoredEntries.reset()
         isOpen = false
     }
 
     @JvmStatic
-    fun method15411(toolkit: AbstractToolkit) {
+    fun render(toolkit: AbstractToolkit) {
         if (isOpen) {
-            method6216(toolkit)
+            renderOpenMenu(toolkit)
         } else {
-            method4800()
+            renderTooltipText()
         }
 
     }
@@ -442,25 +442,25 @@ object MiniMenu {
     }
 
     @JvmStatic
-    fun method503(class282Sub50Sub150: ColoredMiniMenuEntry) {
+    fun insertSortedEntry(class282Sub50Sub150: ColoredMiniMenuEntry) {
         var bool2 = false
         class282Sub50Sub150.unlinkSub()
-        var class282Sub50Sub153: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
+        var class282Sub50Sub153: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
         while (class282Sub50Sub153 != null) {
-            if (method5334(class282Sub50Sub150.getClickType(), class282Sub50Sub153.getClickType())) {
+            if (hasHigherPriority(class282Sub50Sub150.getClickType(), class282Sub50Sub153.getClickType())) {
                 CacheableNode.rebuild(class282Sub50Sub150, class282Sub50Sub153)
                 bool2 = true
                 break
             }
-            class282Sub50Sub153 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
+            class282Sub50Sub153 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
         }
         if (!bool2) {
-            aClass477182.insert(class282Sub50Sub150)
+            sortedColoredEntries.insert(class282Sub50Sub150)
         }
     }
 
     @JvmStatic
-    fun method288(deltaX: Float, deltaY: Float, deltaZ: Float, x: Float, y: Float, z: Float, i_6: Int): Float {
+    fun raycastTerrainIntersection(deltaX: Float, deltaY: Float, deltaZ: Float, x: Float, y: Float, z: Float, i_6: Int): Float {
         var f_8 = 0.0F
         val f_9 = x - deltaX
         val f_10 = y - deltaY
@@ -485,7 +485,7 @@ object MiniMenu {
                     val height = scene.surfaceHeightmap!![plane]!!.getAverageHeight(absX.toInt(), absZ.toInt())
                     if (height < absY) {
                         if (i_6 >= 2) {
-                            return f_8 - 0.1F + method288(f_12, f_13, f_14, absX, absY, absZ, i_6 - 1) * 0.1F
+                            return f_8 - 0.1F + raycastTerrainIntersection(f_12, f_13, f_14, absX, absY, absZ, i_6 - 1) * 0.1F
                         }
                         return f_8
                     }
@@ -500,54 +500,54 @@ object MiniMenu {
     }
 
     @JvmField
-    var aCacheableNodeSub7438: MiniMenuEntry? = null
+    var deferredEntry: MiniMenuEntry? = null
 
     @JvmField
-    var anInt9471 = 0
+    var submenuY = 0
 
     @JvmStatic
-    fun method4908(toolkit: AbstractToolkit) {
+    fun renderOpenMenuSimple(toolkit: AbstractToolkit) {
         val fillColor = -10660793
-        AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104, fillColor)
+        AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, fillColor)
         minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!), StaticMethods.menuOpenX + 3, StaticMethods.menuOpenY + 14, fillColor, -1)
         val mouseX = MouseRecord.recorder!!.getMouseX()
         val mouseY = MouseRecord.recorder!!.getMouseY()
         var i_5: Int
         var class282Sub50Sub76: MiniMenuEntry?
         var i_7: Int
-        if (!aBool162) {
+        if (!isCollapsed) {
             i_5 = 0
-            var class282Sub50Sub76Temp: MiniMenuEntry? = aClass482171.getFirst() as? MiniMenuEntry
+            var class282Sub50Sub76Temp: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
             while (class282Sub50Sub76Temp != null) {
                 class282Sub50Sub76 = class282Sub50Sub76Temp
-                i_7 = (entryCount - 1 - i_5) * anInt178 + StaticMethods.menuOpenY + 31
-                method12400(mouseX, mouseY, StaticMethods.menuOpenX, anInt8975, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                i_7 = (entryCount - 1 - i_5) * entryRowHeight + StaticMethods.menuOpenY + 31
+                drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
                 ++i_5
-                class282Sub50Sub76Temp = aClass482171.next() as? MiniMenuEntry
+                class282Sub50Sub76Temp = entryList.next() as? MiniMenuEntry
             }
         } else {
             i_5 = 0
-            var class282Sub50Sub158: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
+            var class282Sub50Sub158: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
             while (class282Sub50Sub158 != null) {
-                i_7 = i_5 * anInt178 + StaticMethods.menuOpenY + 31
+                i_7 = i_5 * entryRowHeight + StaticMethods.menuOpenY + 31
                 if (class282Sub50Sub158.queueSize == 1) {
-                    method12400(mouseX, mouseY, StaticMethods.menuOpenX, anInt8975, i_7, (class282Sub50Sub158.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, (class282Sub50Sub158.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
                 } else {
-                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, anInt8975, i_7, class282Sub50Sub158, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub158, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
                 }
                 ++i_5
-                class282Sub50Sub158 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
+                class282Sub50Sub158 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
-            if (aCacheableNodeSub15163 != null) {
-                AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight, fillColor)
-                minimenuHeader!!.renderPlain(aCacheableNodeSub15163!!.tagStart, anInt3996 + 3, anInt9471 + 14, fillColor, -1)
+            if (activeSubmenu != null) {
+                AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, fillColor)
+                minimenuHeader!!.renderPlain(activeSubmenu!!.tagStart, submenuX + 3, submenuY + 14, fillColor, -1)
                 i_5 = 0
-                class282Sub50Sub76 = aCacheableNodeSub15163!!.nodeQueue.getNext() as? MiniMenuEntry
+                class282Sub50Sub76 = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (class282Sub50Sub76 != null) {
-                    i_7 = i_5 * anInt178 + anInt9471 + 31
-                    method12400(mouseX, mouseY, anInt3996, anInt8518, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    i_7 = i_5 * entryRowHeight + submenuY + 31
+                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
                     ++i_5
-                    class282Sub50Sub76 = aCacheableNodeSub15163!!.nodeQueue.getDirectNext() as? MiniMenuEntry
+                    class282Sub50Sub76 = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
             }
         }
@@ -555,74 +555,74 @@ object MiniMenu {
 
     @JvmStatic
     fun close() {
-        method6810()
+        closeSubmenu()
         isOpen = false
-        InterfaceComponentRenderer.inboundsComponentToTop(StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104)
-        aCacheableNodeSub79445 = null
-        aCacheableNodeSub7168 = null
+        InterfaceComponentRenderer.inboundsComponentToTop(StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight)
+        activeEntry = null
+        secondaryEntry = null
     }
 
     @JvmStatic
     fun containsEntryForNpc(uid: Int): Boolean {
-        var entry: MiniMenuEntry? = aClass482171.getFirst() as? MiniMenuEntry
+        var entry: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
         while (entry != null) {
             if (Mouse.isClicktypeNpc(entry.clickType) && uid == entry.entityUid.toInt()) {
                 return true
             }
-            entry = aClass482171.next() as? MiniMenuEntry
+            entry = entryList.next() as? MiniMenuEntry
         }
         return false
     }
 
     @JvmField
-    var anInt170 = 0
+    var coloredEntryCount = 0
 
     @JvmField
-    var anInt198 = -1
+    var maxVisibleEntries = -1
 
     @JvmField
     var cancelOption: MiniMenuEntry? = null
 
     @JvmField
-    var aCacheableNodeSub7168: MiniMenuEntry? = null
+    var secondaryEntry: MiniMenuEntry? = null
 
     @JvmField
-    var anInt178 = 16
+    var entryRowHeight = 16
 
     @JvmField
-    var aBool162 = false
+    var isCollapsed = false
 
     @JvmField
-    var aCacheableNodeSub15163: ColoredMiniMenuEntry? = null
+    var activeSubmenu: ColoredMiniMenuEntry? = null
 
     @JvmField
-    var anInt167 = 0
+    var deferredClickType = 0
 
     @JvmField
-    val aClass465172 = IterableNodeMap<ColoredMiniMenuEntry>(16)
+    val coloredEntryMap = IterableNodeMap<ColoredMiniMenuEntry>(16)
 
     @JvmField
-    val aClass477182 = Queue<ColoredMiniMenuEntry>()
+    val sortedColoredEntries = Queue<ColoredMiniMenuEntry>()
 
     @JvmField
-    val aClass229164 = LRUCache(30)
+    val coloredEntryCache = LRUCache(30)
 
     @JvmField
-    var anInt180 = -1
+    var viewportX = -1
 
     @JvmField
-    var anInt181 = -1
+    var viewportY = -1
 
     @JvmStatic
     fun getMinimenuCursor(): Int {
         if (Client.draggingComponent == null) {
             if (!isOpen) {
                 if (TypeLists.INTERACTION_DEFAULTS!!.minimenuCursor) { // own cursor?
-                    if (aCacheableNodeSub7168 != null) {
-                        return aCacheableNodeSub7168!!.cursor
+                    if (secondaryEntry != null) {
+                        return secondaryEntry!!.cursor
                     }
-                } else if (aCacheableNodeSub79445 != null) { // default cursor?
-                    return aCacheableNodeSub79445!!.cursor
+                } else if (activeEntry != null) { // default cursor?
+                    return activeEntry!!.cursor
                 }
             } else {
                 val minimenuFont = FontMetrics.getForMinimenu()
@@ -632,15 +632,15 @@ object MiniMenu {
                 var i_5: Int
                 var class282Sub50Sub77: MiniMenuEntry?
                 var i_8: Int
-                if (!aBool162) {
-                    if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + anInt8975) {
+                if (!isCollapsed) {
+                    if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + menuWidth) {
                         i_4 = -1
                         i_5 = 0
                         while (i_5 < entryCount) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = (entryCount - 1 - i_5) * anInt178 + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
+                                i_8 = (entryCount - 1 - i_5) * entryRowHeight + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
                             } else {
-                                i_8 = (entryCount - 1 - i_5) * anInt178 + StaticMethods.menuOpenY + 31
+                                i_8 = (entryCount - 1 - i_5) * entryRowHeight + StaticMethods.menuOpenY + 31
                             }
                             if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
                                 i_4 = i_5
@@ -649,7 +649,7 @@ object MiniMenu {
                         }
                         if (i_4 != -1) {
                             i_5 = 0
-                            val nodeiterator6 = NodeIterator(aClass482171)
+                            val nodeiterator6 = NodeIterator(entryList)
                             class282Sub50Sub77 = nodeiterator6.nextAndReset() as? MiniMenuEntry
                             while (class282Sub50Sub77 != null) {
                                 if (i_5++ == i_4) {
@@ -661,14 +661,14 @@ object MiniMenu {
                     }
                 } else {
                     var class4699: QueueIterator
-                    if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + anInt8975) {
+                    if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + menuWidth) {
                         i_4 = -1
                         i_5 = 0
-                        while (i_5 < anInt170) {
+                        while (i_5 < coloredEntryCount) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = i_5 * anInt178 + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
+                                i_8 = i_5 * entryRowHeight + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
                             } else {
-                                i_8 = i_5 * anInt178 + StaticMethods.menuOpenY + 31
+                                i_8 = i_5 * entryRowHeight + StaticMethods.menuOpenY + 31
                             }
                             if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
                                 i_4 = i_5
@@ -677,7 +677,7 @@ object MiniMenu {
                         }
                         if (i_4 != -1) {
                             i_5 = 0
-                            class4699 = QueueIterator(aClass477182)
+                            class4699 = QueueIterator(sortedColoredEntries)
                             var class282Sub50Sub1510: ColoredMiniMenuEntry? = class4699.nextAndReset() as? ColoredMiniMenuEntry
                             while (class282Sub50Sub1510 != null) {
                                 if (i_5++ == i_4) {
@@ -686,14 +686,14 @@ object MiniMenu {
                                 class282Sub50Sub1510 = class4699.next() as? ColoredMiniMenuEntry
                             }
                         }
-                    } else if (aCacheableNodeSub15163 != null && mouseX > anInt3996 && mouseX < anInt8518 + anInt3996) {
+                    } else if (activeSubmenu != null && mouseX > submenuX && mouseX < submenuWidth + submenuX) {
                         i_4 = -1
                         i_5 = 0
-                        while (i_5 < aCacheableNodeSub15163!!.queueSize) {
+                        while (i_5 < activeSubmenu!!.queueSize) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = i_5 * anInt178 + minimenuFont.topPadding + anInt9471 + 1 + 20
+                                i_8 = i_5 * entryRowHeight + minimenuFont.topPadding + submenuY + 1 + 20
                             } else {
-                                i_8 = i_5 * anInt178 + anInt9471 + 31
+                                i_8 = i_5 * entryRowHeight + submenuY + 31
                             }
                             if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
                                 i_4 = i_5
@@ -702,7 +702,7 @@ object MiniMenu {
                         }
                         if (i_4 != -1) {
                             i_5 = 0
-                            class4699 = QueueIterator(aCacheableNodeSub15163!!.nodeQueue)
+                            class4699 = QueueIterator(activeSubmenu!!.nodeQueue)
                             class282Sub50Sub77 = class4699.nextAndReset() as? MiniMenuEntry
                             while (class282Sub50Sub77 != null) {
                                 if (i_5++ == i_4) {
@@ -719,23 +719,23 @@ object MiniMenu {
     }
 
     @JvmStatic
-    fun method6810() {
-        if (aCacheableNodeSub15163 != null) {
-            aCacheableNodeSub15163 = null
-            InterfaceComponentRenderer.inboundsComponentToTop(anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight)
+    fun closeSubmenu() {
+        if (activeSubmenu != null) {
+            activeSubmenu = null
+            InterfaceComponentRenderer.inboundsComponentToTop(submenuX, submenuY, submenuWidth, StationaryWall.menuHeight)
         }
 
     }
 
     @JvmField
-    var anInt3996 = 0
+    var submenuX = 0
 
     @JvmStatic
-    fun method857(toolkit: AbstractToolkit) {
+    fun renderOpenMenuStyled(toolkit: AbstractToolkit) {
         val i_2 = StaticMethods.menuOpenX
         val i_3 = StaticMethods.menuOpenY
-        val i_4 = anInt8975
-        val i_5 = anInt1104 - 3
+        val i_4 = menuWidth
+        val i_5 = menuHeight - 3
         val b_6 = 20
         if (FontMetrics.aFontRenderer2348 == null || StaticMedia.aClass4142200 == null) {
             FontMetrics.aFontRenderer2348 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex, true, true) as? AbstractFontRenderer
@@ -760,7 +760,7 @@ object MiniMenu {
             fontrenderer7 = minimenuHeader
         }
         val fontmetrics8 = FontMetrics.getForMinimenu()
-        NativeSprite.drawLoadingBarBackground(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
+        NativeSprite.drawLoadingBarBackground(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
         var alpha = 255 - StaticMethods.menuBackgroundAlpha - NativeSprite.alphaJitter
         if (alpha < 0) {
             alpha = 0
@@ -771,100 +771,100 @@ object MiniMenu {
         var class282Sub50Sub713: MiniMenuEntry?
         var i_14: Int
         var class282Sub50Sub1516: ColoredMiniMenuEntry?
-        if (!aBool162) {
+        if (!isCollapsed) {
             i_12 = 0
-            var class282Sub50Sub713Temp: MiniMenuEntry? = aClass482171.getFirst() as? MiniMenuEntry
+            var class282Sub50Sub713Temp: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
             while (class282Sub50Sub713Temp != null) {
                 class282Sub50Sub713 = class282Sub50Sub713Temp
-                i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * anInt178 + fontmetrics8.topPadding + 1
-                if (i_10 > StaticMethods.menuOpenX && i_10 < StaticMethods.menuOpenX + anInt8975 && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.aBool9583) {
-                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, anInt8975, anInt178, alpha shl 24 or anInt188, 1)
+                i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * entryRowHeight + fontmetrics8.topPadding + 1
+                if (i_10 > StaticMethods.menuOpenX && i_10 < StaticMethods.menuOpenX + menuWidth && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.isSelectable) {
+                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, menuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
                 }
                 ++i_12
-                class282Sub50Sub713Temp = aClass482171.next() as? MiniMenuEntry
+                class282Sub50Sub713Temp = entryList.next() as? MiniMenuEntry
             }
         } else {
             i_12 = 0
-            var class282Sub50Sub1516Temp: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
+            var class282Sub50Sub1516Temp: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
             while (class282Sub50Sub1516Temp != null) {
                 class282Sub50Sub1516 = class282Sub50Sub1516Temp
-                i_14 = i_3 + b_6 + i_12 * anInt178 + fontmetrics8.topPadding + 1
-                if (i_10 > StaticMethods.menuOpenX && i_10 < anInt8975 + StaticMethods.menuOpenX && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && (class282Sub50Sub1516.queueSize > 1 || ((class282Sub50Sub1516.nodeQueue.current.nextCache as MiniMenuEntry).aBool9583))) {
-                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, anInt8975, anInt178, alpha shl 24 or anInt188, 1)
+                i_14 = i_3 + b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + 1
+                if (i_10 > StaticMethods.menuOpenX && i_10 < menuWidth + StaticMethods.menuOpenX && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && (class282Sub50Sub1516.queueSize > 1 || ((class282Sub50Sub1516.nodeQueue.current.nextCache as MiniMenuEntry).isSelectable))) {
+                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, menuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
                 }
                 ++i_12
-                class282Sub50Sub1516Temp = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
+                class282Sub50Sub1516Temp = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
-            if (aCacheableNodeSub15163 != null) {
-                NativeSprite.drawLoadingBarBackground(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight, b_6, fontrenderer7, fontmetrics8, aCacheableNodeSub15163!!.tagStart)
+            if (activeSubmenu != null) {
+                NativeSprite.drawLoadingBarBackground(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, b_6, fontrenderer7, fontmetrics8, activeSubmenu!!.tagStart)
                 i_12 = 0
-                class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getNext() as? MiniMenuEntry
+                class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (class282Sub50Sub713 != null) {
-                    i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + anInt9471 + 1
-                    if (i_10 > anInt3996 && i_10 < anInt8518 + anInt3996 && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.aBool9583) {
-                        toolkit.drawFilledRectangle(anInt3996, i_14 - fontmetrics8.topPadding, anInt8518, anInt178, alpha shl 24 or anInt188, 1)
+                    i_14 = b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + submenuY + 1
+                    if (i_10 > submenuX && i_10 < submenuWidth + submenuX && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.isSelectable) {
+                        toolkit.drawFilledRectangle(submenuX, i_14 - fontmetrics8.topPadding, submenuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
                     }
                     ++i_12
-                    class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getDirectNext() as? MiniMenuEntry
+                    class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
-                StaticMethods.drawMenuBorderSprites(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight, b_6)
+                StaticMethods.drawMenuBorderSprites(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, b_6)
             }
         }
-        StaticMethods.drawMenuBorderSprites(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104, b_6)
-        if (!aBool162) {
+        StaticMethods.drawMenuBorderSprites(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, b_6)
+        if (!isCollapsed) {
             i_12 = 0
-            var class282Sub50Sub713Temp2: MiniMenuEntry? = aClass482171.getFirst() as? MiniMenuEntry
+            var class282Sub50Sub713Temp2: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
             while (class282Sub50Sub713Temp2 != null) {
                 class282Sub50Sub713 = class282Sub50Sub713Temp2
-                i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * anInt178 + fontmetrics8.topPadding + 1
-                method12400(i_10, i_11, i_2, i_4, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * entryRowHeight + fontmetrics8.topPadding + 1
+                drawMenuEntry(i_10, i_11, i_2, i_4, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 ++i_12
-                class282Sub50Sub713Temp2 = aClass482171.next() as? MiniMenuEntry
+                class282Sub50Sub713Temp2 = entryList.next() as? MiniMenuEntry
             }
         } else {
             i_12 = 0
-            var class282Sub50Sub1516Temp2: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
+            var class282Sub50Sub1516Temp2: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
             while (class282Sub50Sub1516Temp2 != null) {
                 class282Sub50Sub1516 = class282Sub50Sub1516Temp2
-                i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + StaticMethods.menuOpenY + 1
+                i_14 = b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + StaticMethods.menuOpenY + 1
                 if (class282Sub50Sub1516.queueSize == 1) {
-                    method12400(i_10, i_11, StaticMethods.menuOpenX, anInt8975, i_14, (class282Sub50Sub1516.nodeQueue.current.next as MiniMenuEntry), fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    drawMenuEntry(i_10, i_11, StaticMethods.menuOpenX, menuWidth, i_14, (class282Sub50Sub1516.nodeQueue.current.next as MiniMenuEntry), fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 } else {
-                    StaticMethods.drawColoredMenuEntry(i_10, i_11, StaticMethods.menuOpenX, anInt8975, i_14, class282Sub50Sub1516, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    StaticMethods.drawColoredMenuEntry(i_10, i_11, StaticMethods.menuOpenX, menuWidth, i_14, class282Sub50Sub1516, fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 }
                 ++i_12
-                class282Sub50Sub1516Temp2 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
+                class282Sub50Sub1516Temp2 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
-            if (aCacheableNodeSub15163 != null) {
+            if (activeSubmenu != null) {
                 i_12 = 0
-                class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getNext() as? MiniMenuEntry
+                class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (class282Sub50Sub713 != null) {
-                    i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + anInt9471 + 1
-                    method12400(i_10, i_11, anInt3996, anInt8518, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    i_14 = b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + submenuY + 1
+                    drawMenuEntry(i_10, i_11, submenuX, submenuWidth, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                     ++i_12
-                    class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getDirectNext() as? MiniMenuEntry
+                    class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
             }
         }
     }
 
     @JvmStatic
-    fun method6216(toolkit: AbstractToolkit) {
+    fun renderOpenMenu(toolkit: AbstractToolkit) {
         if (!FontMetrics.useBoldFont) {
-            method4908(toolkit)
+            renderOpenMenuSimple(toolkit)
         } else {
-            method857(toolkit)
+            renderOpenMenuStyled(toolkit)
         }
     }
 
     @JvmField
-    var aCacheableNodeSub79445: MiniMenuEntry? = null
+    var activeEntry: MiniMenuEntry? = null
 
     @JvmField
-    var anInt8975 = 0
+    var menuWidth = 0
 
     @JvmField
-    var anInt1104 = 0
+    var menuHeight = 0
 
     @JvmField
     var useOnCursor = 0
@@ -873,21 +873,21 @@ object MiniMenu {
     var minimenuHeader: AbstractFontRenderer? = null
 
     @JvmField
-    var anInt188 = 0
+    var menuHoverHighlightColor = 0
 
     @JvmField
     var USE_INTERFACE_ID = 0
 
     @JvmField
-    val aClass482174 = NodeCollection()
+    val lowPriorityEntries = NodeCollection()
 
     @JvmField
-    val aClass482175 = NodeCollection()
+    val interfaceEntries = NodeCollection()
 
     @JvmStatic
-    fun method6451(i_0: Int, i_1: Int) {
-        anInt180 = i_0
-        anInt181 = i_1
+    fun setViewportOrigin(i_0: Int, i_1: Int) {
+        viewportX = i_0
+        viewportY = i_1
     }
 
     @JvmStatic
@@ -896,12 +896,12 @@ object MiniMenu {
     }
 
     @JvmField
-    var anInt4722 = 0
+    var menuTextColor = 0
 
     @JvmStatic
-    fun method12400(i_0: Int, i_1: Int, i_2: Int, i_4: Int, i_6: Int, entry: MiniMenuEntry, fontRenderer: AbstractFontRenderer?, fontmetrics9: FontMetrics, i_10: Int, i_11: Int) {
+    fun drawMenuEntry(i_0: Int, i_1: Int, i_2: Int, i_4: Int, i_6: Int, entry: MiniMenuEntry, fontRenderer: AbstractFontRenderer?, fontmetrics9: FontMetrics, i_10: Int, i_11: Int) {
         var i_101 = i_10
-        if (i_0 > i_2 && i_0 < i_2 + i_4 && i_1 > i_6 - fontmetrics9.topPadding - 1 && i_1 < fontmetrics9.bottomPadding + i_6 && entry.aBool9583) {
+        if (i_0 > i_2 && i_0 < i_2 + i_4 && i_1 > i_6 - fontmetrics9.topPadding - 1 && i_1 < fontmetrics9.bottomPadding + i_6 && entry.isSelectable) {
             i_101 = i_11
         }
         val questIds = getQuestsFrom(entry)
@@ -911,11 +911,11 @@ object MiniMenu {
         }
         @Suppress("UNCHECKED_CAST")
         fontRenderer?.method386(text, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
-        if (entry.aBool9577) {
+        if (entry.showOtherLevelIcon) {
             StaticMedia.otherLevelSprite!!.draw(5 + i_2 + fontmetrics9.getWidthNoSprites(text), i_6 - fontmetrics9.topPadding)
         }
     }
 
     @JvmField
-    var anInt8518 = 0
+    var submenuWidth = 0
 }

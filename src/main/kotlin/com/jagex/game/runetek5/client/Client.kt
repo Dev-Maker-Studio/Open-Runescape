@@ -920,7 +920,7 @@ class Client : GameShell() {
         PulseEventHandler.processPulseEvents()
         MouseActionServer.refreshCache()
         animatingStep++
-        MiniMenu.method6451(-1, -1)
+        MiniMenu.setViewportOrigin(-1, -1)
         InterfaceComponentRenderer.setChatDisplay(null, -1, -1)
         Interface.ifHover()
         serverTick++
@@ -1014,7 +1014,7 @@ class Client : GameShell() {
                                             }
 
                                             if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42) {
-                                                MenuInteraction.method7703()
+                                                MenuInteraction.processMenuInput()
                                             }
 
                                             WorldMeta.pingWorlds()
@@ -2008,11 +2008,11 @@ class Client : GameShell() {
                                     crossType = 0
                                 }
                             }
-                            if (MenuInteraction.aClass1184825 != null) {
+                            if (MenuInteraction.lastHoveredComponent != null) {
                                 ++menuItemHoverCycle
                                 if (menuItemHoverCycle >= 15) {
-                                    Component.redrawComponent(MenuInteraction.aClass1184825!!)
-                                    MenuInteraction.aClass1184825 = null
+                                    Component.redrawComponent(MenuInteraction.lastHoveredComponent!!)
+                                    MenuInteraction.lastHoveredComponent = null
                                 }
                             }
                             hoveredComponent = null
@@ -2053,7 +2053,7 @@ class Client : GameShell() {
                                                                 if (draggingComponent != null) {
                                                                     processDrag()
                                                                 }
-                                                                MenuInteraction.method7703()
+                                                                MenuInteraction.processMenuInput()
                                                                 /**
                                                                  * Shift & Control pressed --> Scroll mouse = change plane
                                                                  */
@@ -2249,7 +2249,7 @@ class Client : GameShell() {
                     y = hintArrowOffsetY
                     gameAreaWidth = gameAreaWidth
                     gameAreaHeight = gameAreaHeight
-                    MiniMenu.method6451(x, y)
+                    MiniMenu.setViewportOrigin(x, y)
                     if (Camera.cameraCalculationType == 2) {
                         var yaw = Camera.camAngleX.toInt()
                         if (Camera.regularLowestYaw shr 8 > yaw) {
@@ -2446,7 +2446,7 @@ class Client : GameShell() {
             }
 
             Renderers.activeToolkit!!.resetClipping()
-            MiniMenu.method15411(Renderers.activeToolkit!!)
+            MiniMenu.render(Renderers.activeToolkit!!)
             var cursorId = MiniMenu.getMinimenuCursor()
             if (cursorId == -1) {
                 cursorId = defaultMenuCursor
@@ -2505,7 +2505,7 @@ class Client : GameShell() {
                         if (hoveredComponent != null && getDragTarget(draggingComponent) != null) {
                             PacketEncoder.sendInterfaceDragOntoInterface(draggingComponent, hoveredComponent)
                         }
-                    } else if ((menuOpenMode == 1 || MiniMenu.method12562()) && MiniMenu.entryCount > 2) {
+                    } else if ((menuOpenMode == 1 || MiniMenu.isTopEntryInterfaceAction()) && MiniMenu.entryCount > 2) {
                         StaticMethods.processMenuSelection(mouseX + dragStartX, dragStartY + mouseY)
                     } else if (MiniMenu.hasEntries()) {
                         StaticMethods.processMenuSelection(dragStartX + mouseX, dragStartY + mouseY)
@@ -2589,13 +2589,13 @@ class Client : GameShell() {
                 IS_COMPONENT_ON_TOP[index] = false
             }
             lastRenderedCycle = cycles
-            MiniMenu.method6451(-1, -1)
+            MiniMenu.setViewportOrigin(-1, -1)
             if (BASE_WINDOW_ID != -1) {
                 componentBackgroundCount = 0
                 StaticMethods.drawInterfaces()
             }
             Renderers.activeToolkit!!.resetClipping()
-            MiniMenu.method15411(Renderers.activeToolkit!!)
+            MiniMenu.render(Renderers.activeToolkit!!)
             var cursor = MiniMenu.getMinimenuCursor()
             if (cursor == -1) {
                 cursor = defaultMenuCursor

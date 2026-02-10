@@ -145,29 +145,12 @@
   - ImageProducerGL2: 7 fields + 1 method (isDisposed, openGlToolkit, canvas, openGL, surfaceHandle, displayHeight, displayWidth, updateDimensions)
   - SpriteSM: 6 instance fields + 25 companion statics + 4 methods (offsetX/Y, trimRight/Bottom, imageWidth/Height, viewportStride, pixelOffset, dudx/dvdx/dudy/dvdy, subpixelOffsetX/Y, uBase/vBase, uOffsetX/vOffsetX, drawMinX/Width/MinY/Height, blendColor, colorAlpha/InverseAlpha/Red/Green/Blue, overlayAlpha/InverseAlpha/Precomputed, drawAffineTransformed, drawParticle, computeAffineTransform, drawMasked)
   - Matrix44: faceList->elements (529 refs), 16 methods (determinant, setDiagonal, isIdentity, transformPoint, setOrtho, setPerspective, setPerspectiveFromViewport, getNearClipDistance, extractRotationInto, extractLeftPlane, extractRightPlane, extractTopPlane, extractNearPlane, extractFarPlane, extractBottomPlane, setRotatedTranslation, setProduct, transpose, getComponentsXY typo fix)
-- **Phase 5B Entity/Scene/Cutscene/Sound (COMPLETE)**: ~100 renames across 26 files, BUILD SUCCESSFUL
-  - CutsceneProjectile: 11 fields (startTileX/Y, endTileX/Y, sourceEntityIndex, targetEntityIndex, fixedPlane, startHeight, duration, angle, slope)
-  - CutsceneDirectCameraTransition: 6 fields (positionMovementIndex, lookAtMovementIndex, positionKeyframe, lookAtKeyframe, splineSpeedStart/End)
-  - CutsceneAction+PlaySynth+PlayVorbis+PacketEncoder: method1593→stopAction
-  - CutscenePlaySynth: 5 fields (areaSound, soundId, volume, sampleRate, timesRepeated)
-  - CutsceneExecuteScript: 2 fields (scriptStringParam, scriptIntParam)
-  - CutsceneArea+MapRegion: chunkBaseX/Y
-  - CutsceneTypeList+StaticMethods: cutsceneViewportHeight
-  - SceneGraphNode+Scene: 5 fields + 1 method (calculateNegatedPosition, firstChild, parent, nextSibling, _negatedPosition, detach)
-  - AnimatedGameObject: isShadowCurrent, progressAnimation
-  - AnimatedWallDecoration: hasTransparency
-  - StationaryInteractiveObject: 7 fields + 2 methods (locTypeList, overlayHidden, shapeAsByte, rotationAsByte, interactive, hasTileShadow, hasDynamicShadow, getModel, getTypeResult)
-  - StationaryWall+MenuInteraction+MiniMenu: 7 ids (cachedShadow, overlayHidden, hasDynamicShadow, getTypeResult, menuHeight, WALL_STRAIGHT_CULLING_BITS, WALL_CORNER_CULLING_BITS)
-  - EntityHitbar+EntityUpdating+Bot: getActiveDisplay, isEmpty
-  - EntityUpdating+InterfaceComponentRenderer+Client: drawOverheadInterfaces, drawOverheadSprite, recycleOverhead, positionAllEntities
-  - PlayerEntity: getAnimatedBodyModel
-  - NpcEntity+NPCUpdate: setOverheadText
-  - FrustumCulling+Culling: depthWriteCount, processDepthScanline
-  - GroundGL: lightOffsetsA/B, projectShadow, renderShadows
-  - ShadowMapperGL+GroundGL: 9 ids (shadowTiles, renderShadowOverlay, applyShadow, invalidate/initializeShadowTiles, removeShadow, subtract/add/hasShadowData)
-  - AreaSoundPlayer+Client+CS2Interpreter+SongPlayer: 6 methods (updateAreaSounds, playMusicWithTransition, playMusic, playMusicFromStart, loadAndPlayMusic, updateSpatialMusicVolume)
-  - SoundEffectPlayer+CS2Interpreter+Client: 4 methods (setMusicVolume, updateAllAmbientSounds, updateAmbientSound, getCurrentMidiStream)
-  - PcmPlayer: 5 ids (streamUpdateCountdown, fillSoundBuffer, enqueueStreamByPriority, skipAudioSamples, resetStreamFillState)
+- **Phase 5B Entity/Scene/Cutscene/Sound (COMPLETE)**: ~100 renames across 26 files (see previous memory entries)
+- **MiniMenu/MiniMenuEntry/MenuInteraction/MiniMenuBuilder (COMPLETE)**: ~55 renames across 17 files
+  - MiniMenu.kt: 25 fields + 19 methods (entryList, coloredEntryMap, sortedColoredEntries, coloredEntryCache, menuWidth/Height, submenuX/Y/Width, entryRowHeight, isCollapsed, coloredEntryCount, maxVisibleEntries, topEntry, activeEntry, secondaryEntry, deferredEntry, activeSubmenu, deferredClickType, viewportX/Y, menuTextColor, menuHoverHighlightColor, lowPriorityEntries, interfaceEntries; render, renderOpenMenu/Simple/Styled, drawMenuEntry, renderTooltipText, openSubmenu, closeSubmenu, removeEntry, removeMatchingEntries, insertSortedEntry, hasHigherPriority, isInterfaceClickType, getActionText, getColoredNameText, getSecondaryEntry, isTopEntryInterfaceAction, setViewportOrigin, raycastTerrainIntersection)
+  - MiniMenuEntry.kt: 6 fields (param0, param1, isSelectable, showOtherLevelIcon, isUncategorized, targetName)
+  - MenuInteraction.kt: 1 field + 1 method (lastHoveredComponent, processMenuInput)
+  - Linter bonus renames: InteractionDefaultsType (3 fields: primaryClickSubscriber, secondaryClickSubscriber, contextMenuSubscriber), StaticMethods (unprojectionBuffer, storedViewProjectionMatrix, pendingMusicTrack, pendingSoundBankCache), NodeCollection (spliceInto, transferAllTo)
 
 ## Lessons Learned
 

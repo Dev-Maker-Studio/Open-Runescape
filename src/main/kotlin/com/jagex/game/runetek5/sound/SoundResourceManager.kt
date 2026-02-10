@@ -71,21 +71,21 @@ object SoundResourceManager {
     fun loadPendingSong(): Boolean {
         try {
             if (songLoadState == 2) {
-                if (StaticMethods.aNodeSub79563 == null) {
-                    StaticMethods.aNodeSub79563 = MusicTrack.loadMusictrack(AreaSoundPlayer.MUSIC_RESOURCE!!, SongPlayer.musicArchiveId, musicFileId)
-                    if (StaticMethods.aNodeSub79563 == null) {
+                if (StaticMethods.pendingMusicTrack == null) {
+                    StaticMethods.pendingMusicTrack = MusicTrack.loadMusictrack(AreaSoundPlayer.MUSIC_RESOURCE!!, SongPlayer.musicArchiveId, musicFileId)
+                    if (StaticMethods.pendingMusicTrack == null) {
                         return false
                     }
                 }
-                if (StaticMethods.aClass2505450 == null) {
-                    StaticMethods.aClass2505450 = SoundBankCache(SOUND_EFFECT_PROVIDER!!, MIDI_INSTRUMENT_PROVIDER!!)
+                if (StaticMethods.pendingSoundBankCache == null) {
+                    StaticMethods.pendingSoundBankCache = SoundBankCache(SOUND_EFFECT_PROVIDER!!, MIDI_INSTRUMENT_PROVIDER!!)
                 }
                 var class282Sub15Sub22 = midiPcmStream
                 if (pendingMidiStream != null) {
                     class282Sub15Sub22 = pendingMidiStream
                 }
-                val aNodeSub79563 = StaticMethods.aNodeSub79563!!
-                if (class282Sub15Sub22!!.ready(aNodeSub79563, SOUND_MIDI_PROVIDER!!, StaticMethods.aClass2505450!!)) {
+                val pendingMusicTrack = StaticMethods.pendingMusicTrack!!
+                if (class282Sub15Sub22!!.ready(pendingMusicTrack, SOUND_MIDI_PROVIDER!!, StaticMethods.pendingSoundBankCache!!)) {
                     midiPcmStream = class282Sub15Sub22
                     midiPcmStream!!.resetMusicPatches()
                     if (StaticMethods.songFadeInRate > 0) {
@@ -105,9 +105,9 @@ object SoundResourceManager {
                     }
                     if (pendingMidiStream == null) {
                         if (songStartPosition > 0L) {
-                            midiPcmStream!!.setMusicTrackAtPosition(aNodeSub79563, StaticMethods.songLooping, songStartPosition)
+                            midiPcmStream!!.setMusicTrackAtPosition(pendingMusicTrack, StaticMethods.songLooping, songStartPosition)
                         } else {
-                            midiPcmStream!!.setMusicTrack(aNodeSub79563, StaticMethods.songLooping)
+                            midiPcmStream!!.setMusicTrack(pendingMusicTrack, StaticMethods.songLooping)
                         }
                         if (SongPlayer.songTransition != null) {
                             SongPlayer.songTransition!!.transition()
@@ -116,8 +116,8 @@ object SoundResourceManager {
                     if (SongPlayer.pcmPlayer != null) {
                         SongPlayer.pcmPlayer!!.currentPcmStream = midiPcmStream
                     }
-                    StaticMethods.aNodeSub79563 = null
-                    StaticMethods.aClass2505450 = null
+                    StaticMethods.pendingMusicTrack = null
+                    StaticMethods.pendingSoundBankCache = null
                     AreaSoundPlayer.MUSIC_RESOURCE = null
                     songStartPosition = 0L
                     pendingMidiStream = null

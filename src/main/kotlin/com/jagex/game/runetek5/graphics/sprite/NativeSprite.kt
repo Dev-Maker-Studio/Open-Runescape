@@ -173,7 +173,7 @@ abstract class NativeSprite : Sprite {
                 StaticMethods.loadingBarTileSprite!!.draw(width + x - StaticMethods.loadingBarTileSprite!!.getWidth(), y)
             }
 
-            fontrenderer.renderPlain(string_8, x + 3, (20 - fontmetrics.topPadding) / 2 + y + fontmetrics.topPadding, MiniMenu.anInt4722 or 0xffffff.inv(), -1)
+            fontrenderer.renderPlain(string_8, x + 3, (20 - fontmetrics.topPadding) / 2 + y + fontmetrics.topPadding, MiniMenu.menuTextColor or 0xffffff.inv(), -1)
             toolkit.drawFilledRectangle(x, height + y, width, i_4 - height, i_10 shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
         }
 

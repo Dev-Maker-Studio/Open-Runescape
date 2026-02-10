@@ -568,7 +568,7 @@ class FontMetrics(bytes: ByteArray) {
             } else {
                 aClass4143438
             }
-            MiniMenu.anInt178 = fontmetrics!!.bottomPadding + fontmetrics.topPadding
+            MiniMenu.entryRowHeight = fontmetrics!!.bottomPadding + fontmetrics.topPadding
             return fontmetrics
         }
     }

@@ -145,7 +145,7 @@ class Interface(
             if (component != null) {
                 Component.redrawComponent(component)
             }
-            MiniMenu.method420()
+            MiniMenu.removeMatchingEntries()
             if (!bool2 && Client.BASE_WINDOW_ID != -1) {
                 openSub(Client.BASE_WINDOW_ID, 1)
             }
@@ -193,7 +193,7 @@ class Interface(
                 Component.redrawComponent(Client.activeDialogueContinue!!)
                 Client.activeDialogueContinue = null
             }
-            MiniMenu.method420()
+            MiniMenu.removeMatchingEntries()
             if (parentComponent != null) {
                 Component.updateEntityLayout(INTERFACES!![parentComponent.idHash ushr 16]!!, parentComponent, !bool3)
             }
@@ -302,10 +302,10 @@ class Interface(
             if (INTERFACES!![interId] != null && INTERFACES!![interId]!!.components[compId] != null) {
                 val component = INTERFACES!![interId]!!.components[compId]!!
                 if (i1 == -1 && component.type == ComponentType.CONTAINER) {
-                    var menuEntry = MiniMenu.aClass482171.first() as MiniMenuEntry?
+                    var menuEntry = MiniMenu.entryList.first() as MiniMenuEntry?
                     while (menuEntry != null) {
                         if (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30) {
-                            var component2: Component? = Component.fromHash(menuEntry.anInt9582)
+                            var component2: Component? = Component.fromHash(menuEntry.param1)
                             while (component2 != null) {
                                 if (component2.idHash == component.idHash) {
                                     return true
@@ -313,15 +313,15 @@ class Interface(
                                 component2 = getSub(INTERFACES!![component2.idHash shr 16]!!, component2)
                             }
                         }
-                        menuEntry = MiniMenu.aClass482171.next() as MiniMenuEntry?
+                        menuEntry = MiniMenu.entryList.next() as MiniMenuEntry?
                     }
                 } else {
-                    var menuEntry = MiniMenu.aClass482171.first() as MiniMenuEntry?
+                    var menuEntry = MiniMenu.entryList.first() as MiniMenuEntry?
                     while (menuEntry != null) {
-                        if (menuEntry.anInt9581 == i1 && component.idHash == menuEntry.anInt9582 && (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30)) {
+                        if (menuEntry.param0 == i1 && component.idHash == menuEntry.param1 && (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30)) {
                             return true
                         }
-                        menuEntry = MiniMenu.aClass482171.next() as MiniMenuEntry?
+                        menuEntry = MiniMenu.entryList.next() as MiniMenuEntry?
                     }
                 }
             }
