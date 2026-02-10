@@ -23,20 +23,20 @@ class NativeBloomRenderer(
     @JvmField var height: Int
 ) {
 
-    @JvmField var anInterface4376: NativeStream? = null
-    @JvmField var aClass70377: VertexDeclaration? = null
+    @JvmField var triangleVertexStream: NativeStream? = null
+    @JvmField var triangleVertexDeclaration: VertexDeclaration? = null
     @JvmField var format: GLActionFormat
     @JvmField var directDisplay: DirectDisplay? = null
-    @JvmField var anInterface29363: RectangleTextureSampler? = null
-    @JvmField var anInterface9364: FrameBuffer? = null
-    @JvmField var anInterface29372: RectangleTextureSampler? = null
-    @JvmField var anInterface9368: FrameBuffer? = null
-    @JvmField var anInterface29366: RectangleTextureSampler? = null
-    @JvmField var anInterface9369: FrameBuffer? = null
-    @JvmField var anInterface8362: RenderBuffer? = null
+    @JvmField var pingTextureSampler: RectangleTextureSampler? = null
+    @JvmField var pingFramebuffer: FrameBuffer? = null
+    @JvmField var pongTextureSampler: RectangleTextureSampler? = null
+    @JvmField var pongFramebuffer: FrameBuffer? = null
+    @JvmField var compositeTextureSampler: RectangleTextureSampler? = null
+    @JvmField var compositeFramebuffer: FrameBuffer? = null
+    @JvmField var depthRenderBuffer: RenderBuffer? = null
     @JvmField var formatType: Int = 0
     @JvmField val bloomVector: Vector<AbstractBloomShader> = Vector<AbstractBloomShader>()
-    @JvmField var aBool370: Boolean = false
+    @JvmField var isCapturingBloom: Boolean = false
 
     init {
         this.format = GLActionFormat.PIXEL_FORMAT
@@ -46,30 +46,30 @@ class NativeBloomRenderer(
         return initialize(this.bloomVector.size, bloomShader)
     }
 
-    fun method817() {
-        if (this.anInterface4376 == null) {
-            this.anInterface4376 = this.toolkit.createStream(false)
-            this.anInterface4376!!.create(12, 4)
+    fun initializeTriangleStream() {
+        if (this.triangleVertexStream == null) {
+            this.triangleVertexStream = this.toolkit.createStream(false)
+            this.triangleVertexStream!!.create(12, 4)
             val buffer = this.toolkit.directBuffer
             buffer.clear()
             buffer.putFloat(0.0F)
             buffer.putFloat(1.0F)
             buffer.putFloat(2.0F)
-            this.anInterface4376!!.upload(0, buffer.position(), this.toolkit.directBufferAddress)
-            this.aClass70377 = this.toolkit.createVertexDeclaration(arrayOf(VertexDeclarationComponent(VertexDeclarationAction.TEXCOORD_1F)))
+            this.triangleVertexStream!!.upload(0, buffer.position(), this.toolkit.directBufferAddress)
+            this.triangleVertexDeclaration = this.toolkit.createVertexDeclaration(arrayOf(VertexDeclarationComponent(VertexDeclarationAction.TEXCOORD_1F)))
         }
 
     }
 
     fun destroy() {
         this.directDisplay!!.cleanup()
-        this.anInterface9364!!.deallocate()
-        this.anInterface9368!!.deallocate()
-        this.anInterface9369!!.deallocate()
-        this.anInterface29363!!.deallocate()
-        this.anInterface29372!!.deallocate()
-        this.anInterface29366!!.deallocate()
-        this.anInterface8362!!.deallocate()
+        this.pingFramebuffer!!.deallocate()
+        this.pongFramebuffer!!.deallocate()
+        this.compositeFramebuffer!!.deallocate()
+        this.pingTextureSampler!!.deallocate()
+        this.pongTextureSampler!!.deallocate()
+        this.compositeTextureSampler!!.deallocate()
+        this.depthRenderBuffer!!.deallocate()
         val elements = this.bloomVector.size
         for (index in 0 until elements) {
             val bloom = this.bloomVector.elementAt(index)
@@ -78,7 +78,7 @@ class NativeBloomRenderer(
     }
 
     fun getFormat() {
-        method817()
+        initializeTriangleStream()
         when (this.formatType) {
             0 -> this.format = GLActionFormat.PIXEL_FORMAT
             1 -> this.format = GLActionFormat.FLOAT_16_ARB
@@ -87,13 +87,13 @@ class NativeBloomRenderer(
         }
 
         this.directDisplay = this.toolkit.getImageProducer()
-        this.anInterface29363 = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
-        this.anInterface9364 = this.anInterface29363!!.getFramebuffer()
-        this.anInterface29372 = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
-        this.anInterface9368 = this.anInterface29372!!.getFramebuffer()
-        this.anInterface29366 = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
-        this.anInterface9369 = this.anInterface29366!!.getFramebuffer()
-        this.anInterface8362 = this.toolkit.getRenderBuffer(this.width, this.height)
+        this.pingTextureSampler = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
+        this.pingFramebuffer = this.pingTextureSampler!!.getFramebuffer()
+        this.pongTextureSampler = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
+        this.pongFramebuffer = this.pongTextureSampler!!.getFramebuffer()
+        this.compositeTextureSampler = this.toolkit.createRectangleTexture(GLFormat.HDR, this.format, this.width, this.height)
+        this.compositeFramebuffer = this.compositeTextureSampler!!.getFramebuffer()
+        this.depthRenderBuffer = this.toolkit.getRenderBuffer(this.width, this.height)
         val i_1 = this.bloomVector.size
 
         for (i_2 in 0 until i_1) {
@@ -104,14 +104,14 @@ class NativeBloomRenderer(
     }
 
     fun drawTriangles() {
-        this.toolkit.setStreamSource(0, this.anInterface4376!!)
-        this.toolkit.setVertexDeclaration(this.aClass70377!!)
+        this.toolkit.setStreamSource(0, this.triangleVertexStream!!)
+        this.toolkit.setVertexDeclaration(this.triangleVertexDeclaration!!)
         this.toolkit.drawPrimitive(PrimitiveDrawMode.TRIANGLES, 0, 1)
     }
 
     fun initialize(insertAtIndex: Int, bloom: AbstractBloomShader): Boolean {
         if (!bloom.isLoaded() && !bloom.loadShader()) {
-            method822(bloom)
+            removeBloomShader(bloom)
             return true
         }
         this.bloomVector.insertElementAt(bloom, insertAtIndex)
@@ -124,7 +124,7 @@ class NativeBloomRenderer(
         return true
     }
 
-    fun method822(bloom: AbstractBloomShader) {
+    fun removeBloomShader(bloom: AbstractBloomShader) {
         bloom.destroy()
         bloom.hasLinkedVector = false
         this.bloomVector.removeElement(bloom)
@@ -138,7 +138,7 @@ class NativeBloomRenderer(
         this.directDisplay!!.setRenderBuffer(null)
         this.toolkit.resetViewportOffsets()
         val count = this.bloomVector.size
-        this.anInterface29366!!.enableMipmapping()
+        this.compositeTextureSampler!!.enableMipmapping()
 
         for (index in 0 until count) {
             val bloomShader = this.bloomVector.elementAt(index)
@@ -149,23 +149,23 @@ class NativeBloomRenderer(
                 if (resize && type == iterations - 1) {
                     this.toolkit.resizeDisplay(this.directDisplay!!)
                 } else {
-                    this.directDisplay!!.setFramebuffer(0, this.anInterface9368)
+                    this.directDisplay!!.setFramebuffer(0, this.pongFramebuffer)
                 }
 
-                var compositeSampler = this.anInterface29363
+                var compositeSampler = this.pingTextureSampler
                 if (type == 0) {
-                    compositeSampler = this.anInterface29366
+                    compositeSampler = this.compositeTextureSampler
                 }
 
-                bloomShader.initialize(type, this.directDisplay!!, compositeSampler!!, this.anInterface29366!!)
+                bloomShader.initialize(type, this.directDisplay!!, compositeSampler!!, this.compositeTextureSampler!!)
                 drawTriangles()
                 bloomShader.reset()
-                val interface298 = this.anInterface29363
-                this.anInterface29363 = this.anInterface29372
-                this.anInterface29372 = interface298
-                val interface99 = this.anInterface9364
-                this.anInterface9364 = this.anInterface9368
-                this.anInterface9368 = interface99
+                val interface298 = this.pingTextureSampler
+                this.pingTextureSampler = this.pongTextureSampler
+                this.pongTextureSampler = interface298
+                val interface99 = this.pingFramebuffer
+                this.pingFramebuffer = this.pongFramebuffer
+                this.pongFramebuffer = interface99
             }
         }
 
@@ -173,7 +173,7 @@ class NativeBloomRenderer(
         this.toolkit.setColourType(0)
     }
 
-    fun method830(w: Int, h: Int): Boolean {
+    fun beginCapture(w: Int, h: Int): Boolean {
         if (this.bloomVector.isEmpty()) {
             return false
         }
@@ -184,9 +184,9 @@ class NativeBloomRenderer(
             getFormat()
         }
 
-        this.directDisplay!!.setFramebuffer(0, this.anInterface9369)
-        if (this.anInterface8362 != null) {
-            this.directDisplay!!.setRenderBuffer(this.anInterface8362)
+        this.directDisplay!!.setFramebuffer(0, this.compositeFramebuffer)
+        if (this.depthRenderBuffer != null) {
+            this.directDisplay!!.setRenderBuffer(this.depthRenderBuffer)
         }
 
         this.toolkit.setDisplay(this.directDisplay!!)
@@ -196,14 +196,14 @@ class NativeBloomRenderer(
         if (!this.directDisplay!!.isFramebufferComplete()) {
             throw RuntimeException("")
         }
-        this.aBool370 = true
+        this.isCapturingBloom = true
         return true
     }
 
-    fun method833() {
-        if (this.aBool370) {
+    fun endCapture() {
+        if (this.isCapturingBloom) {
             draw()
-            this.aBool370 = false
+            this.isCapturingBloom = false
         }
     }
 }

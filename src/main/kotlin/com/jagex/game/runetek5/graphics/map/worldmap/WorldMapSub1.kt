@@ -345,7 +345,7 @@ object WorldMapSub1 {
     fun highlightCategory(i_0: Int) {
         someMecId = -1
         highlightedCategoryId = i_0
-        JSObjectManager.anInt4185 = 3
+        JSObjectManager.highlightFlashCycles = 3
         ServerEnvironment.flashCycleCounter = 100
     }
 
@@ -373,19 +373,19 @@ object WorldMapSub1 {
                 mectype.getIcon(toolkit, false)
             }
             if (iconSprite != null) {
-                spriteLeft = mapCategory.anInt7990 - (iconSprite.getSpriteWidth() + 1 shr 1)
+                spriteLeft = mapCategory.screenX - (iconSprite.getSpriteWidth() + 1 shr 1)
                 if (spriteLeft < i_6) {
                     i_6 = spriteLeft
                 }
-                spriteRight = mapCategory.anInt7990 + (iconSprite.getSpriteWidth() + 1 shr 1)
+                spriteRight = mapCategory.screenX + (iconSprite.getSpriteWidth() + 1 shr 1)
                 if (spriteRight > i_7) {
                     i_7 = spriteRight
                 }
-                spriteBottom = mapCategory.anInt7992 - (iconSprite.getSpriteHeight() + 1 shr 1)
+                spriteBottom = mapCategory.screenY - (iconSprite.getSpriteHeight() + 1 shr 1)
                 if (spriteBottom < i_8) {
                     i_8 = spriteBottom
                 }
-                spriteTop = mapCategory.anInt7992 + (iconSprite.getSpriteHeight() + 1 shr 1)
+                spriteTop = mapCategory.screenY + (iconSprite.getSpriteHeight() + 1 shr 1)
                 if (spriteTop > i_9) {
                     i_9 = spriteTop
                 }
@@ -405,10 +405,10 @@ object WorldMapSub1 {
             font = getZoomedHelveticafont(mectype.baseTextzoom)
             if (font != null) {
                 i_16 = FontManager.worldMapAreaFont!!.splitLinesToBuffer(areaName, null, RENDERED_WORLDMAP_AREA_NAMELINES, null)
-                i_17 = (WorldMap.pixelViewEndX - WorldMap.pixelViewStartX) * mectype.anInt2750 / (WorldMap.tileViewEndX - WorldMap.tileViewStartX) + mapCategory.anInt7990
-                i_18 = mapCategory.anInt7992 - (WorldMap.pixelViewEndY - WorldMap.pixelViewStartY) * mectype.anInt2752 / (WorldMap.tileViewEndY - WorldMap.tileViewStartY)
+                i_17 = (WorldMap.pixelViewEndX - WorldMap.pixelViewStartX) * mectype.labelOffsetX / (WorldMap.tileViewEndX - WorldMap.tileViewStartX) + mapCategory.screenX
+                i_18 = mapCategory.screenY - (WorldMap.pixelViewEndY - WorldMap.pixelViewStartY) * mectype.labelOffsetY / (WorldMap.tileViewEndY - WorldMap.tileViewStartY)
                 if (iconSprite == null) {
-                    i_18 -= font.method3186() * i_16 / 2
+                    i_18 -= font.getHeight() * i_16 / 2
                 } else {
                     i_18 -= (iconSprite.getSpriteHeight() shr 1) + font.getLineHeight() * i_16
                 }
@@ -447,20 +447,20 @@ object WorldMapSub1 {
         if (i_7 >= WorldMap.pixelViewStartX && i_6 <= WorldMap.pixelViewEndX && i_9 >= WorldMap.pixelViewStartY && i_8 <= WorldMap.pixelViewEndY) {
             WorldMap.renderCategoryLines(toolkit, mapCategory, mectype)
             if (iconSprite != null) {
-                if (JSObjectManager.anInt4185 > 0 && (someMecId != -1 && someMecId == mapCategory.mecId || highlightedCategoryId != -1 && mectype.anInt2718 == highlightedCategoryId)) {
+                if (JSObjectManager.highlightFlashCycles > 0 && (someMecId != -1 && someMecId == mapCategory.mecId || highlightedCategoryId != -1 && mectype.categoryId == highlightedCategoryId)) {
                     val color = if (ServerEnvironment.flashCycleCounter > 50) {
                         200 - ServerEnvironment.flashCycleCounter * 2
                     } else {
                         ServerEnvironment.flashCycleCounter * 2
                     }
                     val alpha = color shl 24 or 0xffff00
-                    toolkit.drawMapCategory(mapCategory.anInt7990, mapCategory.anInt7992, iconSprite.getWidth() / 2 + 7, alpha)
-                    toolkit.drawMapCategory(mapCategory.anInt7990, mapCategory.anInt7992, iconSprite.getWidth() / 2 + 5, alpha)
-                    toolkit.drawMapCategory(mapCategory.anInt7990, mapCategory.anInt7992, iconSprite.getWidth() / 2 + 3, alpha)
-                    toolkit.drawMapCategory(mapCategory.anInt7990, mapCategory.anInt7992, iconSprite.getWidth() / 2 + 1, alpha)
-                    toolkit.drawMapCategory(mapCategory.anInt7990, mapCategory.anInt7992, iconSprite.getWidth() / 2, alpha)
+                    toolkit.drawMapCategory(mapCategory.screenX, mapCategory.screenY, iconSprite.getWidth() / 2 + 7, alpha)
+                    toolkit.drawMapCategory(mapCategory.screenX, mapCategory.screenY, iconSprite.getWidth() / 2 + 5, alpha)
+                    toolkit.drawMapCategory(mapCategory.screenX, mapCategory.screenY, iconSprite.getWidth() / 2 + 3, alpha)
+                    toolkit.drawMapCategory(mapCategory.screenX, mapCategory.screenY, iconSprite.getWidth() / 2 + 1, alpha)
+                    toolkit.drawMapCategory(mapCategory.screenX, mapCategory.screenY, iconSprite.getWidth() / 2, alpha)
                 }
-                iconSprite.draw(mapCategory.anInt7990 - (iconSprite.getSpriteWidth() shr 1), mapCategory.anInt7992 - (iconSprite.getSpriteHeight() shr 1))
+                iconSprite.draw(mapCategory.screenX - (iconSprite.getSpriteWidth() shr 1), mapCategory.screenY - (iconSprite.getSpriteHeight() shr 1))
             }
             if (mectype.areaName != null && font != null) {
                 WorldMapElement.renderWorldmapAreaText(toolkit, mapCategory, mectype, i_16, i_17, i_18, i_19, font)
@@ -549,7 +549,7 @@ object WorldMapSub1 {
     @JvmStatic
     fun shouldDraw(mecType: MECType?): Boolean {
         return mecType != null && mecType.displayedOnWorldmap && mecType.shouldDraw(WorldMap.PLAYER_VAR_PROVIDER!!) &&
-               hiddenMecIds.get(mecType.mectypeId.toLong()) == null && hiddenCategoryIds.get(mecType.anInt2718.toLong()) == null
+               hiddenMecIds.get(mecType.mectypeId.toLong()) == null && hiddenCategoryIds.get(mecType.categoryId.toLong()) == null
     }
 
     @JvmStatic
@@ -562,8 +562,8 @@ object WorldMapSub1 {
         }
 
         val b_6: Byte = 10
-        var spriteCenterX = category.anInt7990
-        var spriteCenterY = category.anInt7992
+        var spriteCenterX = category.screenX
+        var spriteCenterY = category.screenY
         var i_9 = 0
         var i_10 = 0
         var i_11 = 0
@@ -588,11 +588,11 @@ object WorldMapSub1 {
                 }
             }
 
-            i_11 = Resource.helvetica14Font!!.getLineHeight() * i_9 + Resource.helvetica14Font!!.method3186() / 2
+            i_11 = Resource.helvetica14Font!!.getLineHeight() * i_9 + Resource.helvetica14Font!!.getHeight() / 2
         }
 
-        var x = spriteDimension / 2 + category.anInt7990
-        var y = category.anInt7992
+        var x = spriteDimension / 2 + category.screenX
+        var y = category.screenY
         if (spriteCenterX < spriteDimension + WorldMap.pixelViewStartX) {
             spriteCenterX = WorldMap.pixelViewStartX
             x = spriteDimension / 2 + i_10 / 2 + b_6 + WorldMap.pixelViewStartX + 5
@@ -609,7 +609,7 @@ object WorldMapSub1 {
             y = WorldMap.pixelViewEndY - spriteDimension / 2 - b_6 - i_11
         }
 
-        i_14 = (atan2((spriteCenterX - category.anInt7990).toDouble(), (spriteCenterY - category.anInt7992).toDouble()) / Math.PI * 32767.0).toInt() and 0xffff
+        i_14 = (atan2((spriteCenterX - category.screenX).toDouble(), (spriteCenterY - category.screenY).toDouble()) / Math.PI * 32767.0).toInt() and 0xffff
         sprite.drawRotatedCenter(spriteCenterX + spriteDimension / 2.0f, spriteDimension / 2.0f + spriteCenterY, 4096, i_14)
         var textLeft = -2
         var textBottom = -2

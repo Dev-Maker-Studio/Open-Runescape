@@ -198,7 +198,7 @@ object CutsceneTypeList {
         if (StaticMethods.hasSavedFov) {
             Client.aspectFovMin = StaticMethods.savedAspectFovMin
             Client.aspectFovMax = StaticMethods.savedAspectFovMax
-            Client.fovScaleMin = AbstractMousePacket.aShort7079
+            Client.fovScaleMin = AbstractMousePacket.previousFovScaleMin
             Client.fovScaleMax = StaticMethods.savedFovScaleMax
             StaticMethods.hasSavedFov = false
         }

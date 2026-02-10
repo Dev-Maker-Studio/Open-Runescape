@@ -79,7 +79,7 @@ class ParticleProducerType {
     var activeFirst: Boolean = true
 
     @JvmField
-    var anInt537: Int = -1
+    var emissionEndTime: Int = -1
 
     @JvmField
     var lifetime: Int = -1
@@ -115,7 +115,7 @@ class ParticleProducerType {
     var killOverlapping: Boolean = false
 
     @JvmField
-    var aBool541: Boolean = true
+    var killAboveSurface: Boolean = true
 
     @JvmField
     var adjustsToScene: Boolean = false
@@ -273,7 +273,7 @@ class ParticleProducerType {
             }
             16 -> {
                 activeFirst = buffer.readUByte() == 1
-                anInt537 = buffer.readUShort()
+                emissionEndTime = buffer.readUShort()
                 lifetime = buffer.readUShort()
                 periodic = buffer.readUByte() == 1
             }
@@ -334,7 +334,7 @@ class ParticleProducerType {
                 killOverlapping = true
             }
             34 -> {
-                aBool541 = false
+                killAboveSurface = false
             }
         }
     }
@@ -420,7 +420,7 @@ class ParticleProducerType {
         }
 
         @JvmStatic
-        fun method3166() {
+        fun resetCache() {
             particleProducers.reset()
         }
     }

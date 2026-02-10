@@ -15,8 +15,8 @@ class ColorLoadingBarElement(
     i_7: Int,
     i_8: Int,
     i_9: Int,
-    @JvmField val anInt7813: Int,
-    @JvmField val anInt7814: Int
+    @JvmField val fillColor: Int,
+    @JvmField val outlineColor: Int
 ) : AnchoredElement(class3561, class3532, i_3, i_4, i_5, i_6, i_7, i_8, i_9) {
 
     override fun getRenderDetails(): TipRenderDetails {

@@ -113,7 +113,7 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
                 val ints_15 = IntArray(eightBlock)
                 val i_10 = BufferUtils.ilog(eightBlock - 1)
                 for (i_11 in 0 until eightBlock) {
-                    ints_15[i_11] = method285(i_11, i_10)
+                    ints_15[i_11] = reverseBits(i_11, i_10)
                 }
                 if (blockType != 0) {
                     CdAg = trig1
@@ -252,20 +252,20 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
         }
 
         @JvmStatic
-        fun method7042() {
+        fun processAndTrimSamples() {
             val numSamples = MUSIC_SAMPLES.size
             val sampleIt = MUSIC_SAMPLES.iterator()
             while (sampleIt.hasNext()) {
                 val sample = sampleIt.next()
                 sample.calculateAudioBufferLength(sample.getSampleLength() + sample.getSampleRate() / (2 * numSamples))
-                if (!sample.method12276()) {
+                if (!sample.hasMoreSamples()) {
                     sampleIt.remove()
                 }
             }
         }
 
         @JvmStatic
-        fun method285(i_0: Int, i_1: Int): Int {
+        fun reverseBits(i_0: Int, i_1: Int): Int {
             var value = i_0
             var bits = i_1
             var i_3 = 0
@@ -559,7 +559,7 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
 
     fun getAudioBuffer(): AudioBuffer? {
         addIfAbsent(this)
-        return if (!method12276() || this.sampleLength > this.sampleRate && this.audioBufferLength > this.sampleRate / GameShell.gameCyclesPerSecond())
+        return if (!hasMoreSamples() || this.sampleLength > this.sampleRate && this.audioBufferLength > this.sampleRate / GameShell.gameCyclesPerSecond())
             AudioBuffer(this.sampleRate, this.samples!!, this.start, this.end, this.loopConsistency) else null
     }
 
@@ -598,7 +598,7 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
         return this.sampleLength
     }
 
-    fun method12276(): Boolean {
+    fun hasMoreSamples(): Boolean {
         return this.sampleLength < this.sampleCount - 1
     }
 
@@ -618,7 +618,7 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
             this.audioBufferLength = 0
         }
 
-        if (!method12276()) {
+        if (!hasMoreSamples()) {
             this.T = null
         }
     }

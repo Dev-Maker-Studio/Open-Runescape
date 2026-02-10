@@ -20,7 +20,7 @@ class OpenGlRenderBuffer : CacheableNode, NativeRenderBuffer {
     @JvmField val height: Int
     @JvmField val format: GLFormat
     @JvmField val actionformat: GLActionFormat
-    @JvmField val anInt10284: Int
+    @JvmField val bufferSizeBytes: Int
 
     constructor(
         openglToolkit: OpenGlToolkit,
@@ -43,7 +43,7 @@ class OpenGlRenderBuffer : CacheableNode, NativeRenderBuffer {
             OpenGlToolkit.getInternalTextureFormat(this.format, this.actionformat),
             this.width, this.height
         )
-        this.anInt10284 = this.format.bytesPerPixel * this.actionformat.bytesPerEntry * this.width * this.height
+        this.bufferSizeBytes = this.format.bytesPerPixel * this.actionformat.bytesPerEntry * this.width * this.height
     }
 
     constructor(
@@ -66,7 +66,7 @@ class OpenGlRenderBuffer : CacheableNode, NativeRenderBuffer {
             OpenGlToolkit.getInternalTextureFormat(this.format, this.actionformat),
             this.width, this.height
         )
-        this.anInt10284 = this.format.bytesPerPixel * this.actionformat.bytesPerEntry * this.width * this.height
+        this.bufferSizeBytes = this.format.bytesPerPixel * this.actionformat.bytesPerEntry * this.width * this.height
     }
 
     override fun getUseHeight(): Int {
@@ -87,7 +87,7 @@ class OpenGlRenderBuffer : CacheableNode, NativeRenderBuffer {
 
     fun dispose() {
         if (handle > 0) {
-            activeToolkit.requestRenderBufferCleanup(handle, anInt10284)
+            activeToolkit.requestRenderBufferCleanup(handle, bufferSizeBytes)
             handle = 0
         }
     }

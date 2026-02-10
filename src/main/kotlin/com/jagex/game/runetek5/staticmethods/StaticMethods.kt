@@ -278,18 +278,18 @@ object StaticMethods {
 
     @JvmStatic
     fun drawMenuBorderSprites(toolkit: AbstractToolkit, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-        if ((menuTopBorderSprite == null || StaticMedia.aNativeSprite5339 == null || menuBottomLeftCornerSprite == null) && Resource.SPRITES!!.isFileCached(menuTopBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuSideBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuCornerSpriteId)) {
+        if ((menuTopBorderSprite == null || StaticMedia.menuLeftSideBorderSprite == null || menuBottomLeftCornerSprite == null) && Resource.SPRITES!!.isFileCached(menuTopBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuSideBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuCornerSpriteId)) {
             val spriteType = SpriteType.listSingle(Resource.SPRITES, menuSideBorderSpriteId, 0)
-            StaticMedia.aNativeSprite5339 = toolkit.generateSprite(spriteType, true)
+            StaticMedia.menuLeftSideBorderSprite = toolkit.generateSprite(spriteType, true)
             spriteType!!.flipHorizontal()
-            StaticMedia.aNativeSprite3452 = toolkit.generateSprite(spriteType, true)
+            StaticMedia.menuRightSideBorderSprite = toolkit.generateSprite(spriteType, true)
             menuTopBorderSprite = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES, menuTopBorderSpriteId, 0), true)
             val class9111 = SpriteType.listSingle(Resource.SPRITES, menuCornerSpriteId, 0)
             menuBottomLeftCornerSprite = toolkit.generateSprite(class9111, true)
             class9111!!.flipHorizontal()
             menuBottomRightCornerSprite = toolkit.generateSprite(class9111, true)
         }
-        if (menuTopBorderSprite != null && StaticMedia.aNativeSprite5339 != null && menuBottomLeftCornerSprite != null) {
+        if (menuTopBorderSprite != null && StaticMedia.menuLeftSideBorderSprite != null && menuBottomLeftCornerSprite != null) {
             val i_7 = (i_3 - menuBottomLeftCornerSprite!!.getWidth() * 2) / menuTopBorderSprite!!.getWidth()
             var i_8: Int
             i_8 = 0
@@ -297,10 +297,10 @@ object StaticMethods {
                 menuTopBorderSprite!!.draw(i_1 + menuBottomLeftCornerSprite!!.getWidth() + i_8 * menuTopBorderSprite!!.getWidth(), i_2 + i_4 - menuTopBorderSprite!!.getHeight())
                 i_8++
             }
-            i_8 = (i_4 - i_5 - menuBottomLeftCornerSprite!!.getHeight()) / StaticMedia.aNativeSprite5339!!.getHeight()
+            i_8 = (i_4 - i_5 - menuBottomLeftCornerSprite!!.getHeight()) / StaticMedia.menuLeftSideBorderSprite!!.getHeight()
             for (i_9 in 0 until i_8) {
-                StaticMedia.aNativeSprite5339!!.draw(i_1, i_5 + i_2 + i_9 * StaticMedia.aNativeSprite5339!!.getHeight())
-                StaticMedia.aNativeSprite3452!!.draw(i_3 + i_1 - StaticMedia.aNativeSprite3452!!.getWidth(), i_5 + i_2 + i_9 * StaticMedia.aNativeSprite5339!!.getHeight())
+                StaticMedia.menuLeftSideBorderSprite!!.draw(i_1, i_5 + i_2 + i_9 * StaticMedia.menuLeftSideBorderSprite!!.getHeight())
+                StaticMedia.menuRightSideBorderSprite!!.draw(i_3 + i_1 - StaticMedia.menuRightSideBorderSprite!!.getWidth(), i_5 + i_2 + i_9 * StaticMedia.menuLeftSideBorderSprite!!.getHeight())
             }
             menuBottomLeftCornerSprite!!.draw(i_1, i_2 + i_4 - menuBottomLeftCornerSprite!!.getHeight())
             menuBottomRightCornerSprite!!.draw(i_3 + i_1 - menuBottomLeftCornerSprite!!.getWidth(), i_2 + i_4 - menuBottomLeftCornerSprite!!.getHeight())
@@ -325,7 +325,7 @@ object StaticMethods {
 
     @JvmStatic
     fun setSongVolume(i_0: Int, i_1: Int) {
-        SongPlayer.method2580(i_0, i_1)
+        SongPlayer.setChannelVolume(i_0, i_1)
     }
 
     @JvmStatic
@@ -366,13 +366,13 @@ object StaticMethods {
     fun selectWorldMapElement(i_0: Int) {
         WorldMapSub1.someMecId = i_0
         WorldMapSub1.highlightedCategoryId = -1
-        JSObjectManager.anInt4185 = 3
+        JSObjectManager.highlightFlashCycles = 3
         ServerEnvironment.flashCycleCounter = 100
     }
 
     @JvmStatic
     fun updateSoundSystems() {
-        MusicSample.method7042()
+        MusicSample.processAndTrimSamples()
         updateSongFade()
         SoundEffectPlayer.updatePlayers()
         AreaSoundPlayer.updateSpatialMusicVolume()
@@ -394,7 +394,7 @@ object StaticMethods {
 
     @JvmStatic
     fun switchToWorldLogin(i_0: Int) {
-        if (GameState.method6693()) {
+        if (GameState.isReadyForLogin()) {
             if (i_0 != selectedWorldId) {
                 LoginManager.socialNetworkToken = -1L
             }
@@ -486,7 +486,7 @@ object StaticMethods {
     fun saveFovForCutscene() {
         savedAspectFovMin = Client.aspectFovMin
         savedAspectFovMax = Client.aspectFovMax
-        AbstractMousePacket.aShort7079 = Client.fovScaleMin
+        AbstractMousePacket.previousFovScaleMin = Client.fovScaleMin
         savedFovScaleMax = Client.fovScaleMax
         hasSavedFov = true
         if (cutsceneViewportWidth != 0 && CutsceneTypeList.cutsceneViewportHeight != 0) {
@@ -540,7 +540,7 @@ object StaticMethods {
 
     @JvmStatic
     fun openContextMenu(mouseX: Int, mouseY: Int) {
-        if (Client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.topEntry!!.action.equals(LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)))) {
+        if (Client.ENTITY_DEFAULTS!!.alwaysShowContextMenu || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.topEntry!!.action.equals(LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)))) {
             val fontMetrics = FontMetrics.getForMinimenu()
             var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
             val i_5: Int
@@ -635,8 +635,8 @@ object StaticMethods {
     fun setVorbisSound(fileId: Int) {
         val vorbis = INDEX36_FILE_CACHE.get(fileId.toLong())
         if (vorbis != null) {
-            vorbis.aBool7995 = !vorbis.aBool7995
-            vorbis.vfReference!!.togglePause(vorbis.aBool7995)
+            vorbis.isPaused = !vorbis.isPaused
+            vorbis.vfReference!!.togglePause(vorbis.isPaused)
         }
     }
 

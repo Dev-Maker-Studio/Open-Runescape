@@ -181,13 +181,13 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
             eyePosOsMatrix.transformPoint(floats5)
             val floats6 = floatArrayOf(0.0f, 0.0f, 0.0f)
             toolkit.copySunPosition().calculatePerspective(0.0f, 0.0f, 0.0f, floats6)
-            matrix44var2.method5243(eyePos)
+            matrix44var2.transformPointToInteger(eyePos)
             activeShader!!.uniform3f(eyePositionOS!!, eyePos[0], eyePos[1], eyePos[2])
         }
     }
 
     override fun resetModelMatrix() {
-        loadModelMatrix(Matrix43.aClass2943518)
+        loadModelMatrix(Matrix43.TEMP)
     }
 
     open fun loadLights(dummy: Boolean) {
@@ -231,7 +231,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
     }
 
     override fun loadDefaultModelMatrix() {
-        loadModelMatrix(Matrix43.aClass2943518)
+        loadModelMatrix(Matrix43.TEMP)
     }
 
     fun loadModelMatrix(matrix44var1: Matrix43) {
@@ -270,7 +270,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
     }
 
     override fun resetModelMatrixForPass() {
-        loadModelMatrix(Matrix43.aClass2943518)
+        loadModelMatrix(Matrix43.TEMP)
     }
 
     fun setTextured() {
@@ -292,7 +292,7 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
     fun loadSunDirectionOS(matrix44var2: Matrix43) {
         if (sunDirectionOS != null) {
             val sunPosition = floatArrayOf(toolkit.sunPosition[0], toolkit.sunPosition[1], toolkit.sunPosition[2])
-            matrix44var2.method5230(sunPosition)
+            matrix44var2.transformDirection(sunPosition)
             activeShader!!.uniform3f(sunDirectionOS!!, sunPosition[0], sunPosition[1], sunPosition[2])
         }
     }

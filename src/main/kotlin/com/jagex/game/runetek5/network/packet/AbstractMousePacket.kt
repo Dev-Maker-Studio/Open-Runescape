@@ -150,6 +150,6 @@ abstract class AbstractMousePacket {
 
     companion object {
         @JvmField
-        var aShort7079: Short = 0
+        var previousFovScaleMin: Short = 0
     }
 }

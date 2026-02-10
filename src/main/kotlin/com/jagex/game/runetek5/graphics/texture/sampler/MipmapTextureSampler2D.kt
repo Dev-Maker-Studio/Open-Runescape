@@ -120,7 +120,7 @@ class MipmapTextureSampler2D : MipmapTextureSampler, RectangleTextureSampler {
         return height
     }
 
-    fun method14494(i_3: Int, i_4: Int, floats_5: FloatArray, class1506: GLFormat) {
+    fun updateSubImageFloat(i_3: Int, i_4: Int, floats_5: FloatArray, class1506: GLFormat) {
         activeToolkit.setTextureSampler(this)
         OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
         OpenGL.glTexSubImage2Df(textureTarget, 0, 0, 0, i_3, i_4, OpenGLNativeToolkit.texture2dFormat(class1506), GL_UNSIGNED_BYTE, floats_5, 0)

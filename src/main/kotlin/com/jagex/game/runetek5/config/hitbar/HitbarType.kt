@@ -7,11 +7,11 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
 class HitbarType {
 
-    @JvmField var anInt2446 = 255
+    @JvmField var hitbarAlpha = 255
     @JvmField var priority = 255
-    @JvmField var anInt2439 = -1
-    @JvmField var anInt2443 = 70
-    @JvmField val anInt2442 = 1
+    @JvmField var fadeStartOffset = -1
+    @JvmField var fadeOutDuration = 70
+    @JvmField val animationStepSize = 1
 
     /**
      * HitbarTypeList reference
@@ -45,16 +45,16 @@ class HitbarType {
     fun decode(stream: Packet, opcode: Int) {
         when (opcode) {
             1 -> stream.readUShort()
-            2 -> anInt2446 = stream.readUByte()
+            2 -> hitbarAlpha = stream.readUByte()
             3 -> priority = stream.readUByte()
-            4 -> anInt2439 = 0
-            5 -> anInt2443 = stream.readUShort()
+            4 -> fadeStartOffset = 0
+            5 -> fadeOutDuration = stream.readUShort()
             6 -> stream.readUByte()
             7 -> greenBarSpriteId = stream.readBigSmart()
             8 -> redBarSpriteId = stream.readBigSmart()
             9 -> pGreenBarSpriteId = stream.readBigSmart()
             10 -> pRedBarSpriteId = stream.readBigSmart()
-            11 -> anInt2439 = stream.readUShort()
+            11 -> fadeStartOffset = stream.readUShort()
         }
     }
 

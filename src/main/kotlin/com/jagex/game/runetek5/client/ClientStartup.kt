@@ -352,7 +352,7 @@ object ClientStartup {
             VarcTypeList.VARC_STRING = Array<String?>(TypeLists.VARC_STRING!!.size) { null }
 
             for (varcId in 0 until TypeLists.VARC!!.size) {
-                if (TypeLists.VARC!!.list(varcId).anInt4983 == 0) {
+                if (TypeLists.VARC!!.list(varcId).persistenceType == 0) {
                     VarcTypeList.VARC_BOOL!![varcId] = true
                     Client.VARCS_BOOLS_LOADED++
                 }
@@ -575,7 +575,7 @@ object ClientStartup {
             GameShell.setComponentsOnTop()
             Component.runScriptsIfLoaded(Client.BASE_WINDOW_ID, null)
         }
-        method12708()
+        clearLoginCredentials()
         LoginManager.currentlyInLobby = false
         MiniMenu.addCancelOption()
         Client.defaultMenuCursor = -1
@@ -596,7 +596,7 @@ object ClientStartup {
     }
 
     @JvmStatic
-    fun method12708() {
+    fun clearLoginCredentials() {
         StaticMethods.loginPassword = ""
         StaticMethods.loginUsername = ""
     }

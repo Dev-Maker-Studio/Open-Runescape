@@ -17,7 +17,7 @@ object ParticleSystemManager {
     @JvmField var particleCache: Array<Particle?>? = null
     @JvmField var particleCacheCursorPos: Int = 0
     @JvmField var killIndex: Int = 0
-    @JvmField var anInt2899: Int = 0
+    @JvmField var removalQueueSize: Int = 0
     @JvmField var awaitingRemovalCursorPosition: Int = 0
     @JvmField var lastRenderedParticleCount: Int = 0
     @JvmField var activeEffectiveVertexEffects = IterableNodeMap<EffectiveVerticeEffect>(8)
@@ -25,7 +25,7 @@ object ParticleSystemManager {
     @JvmField var detailsSetting: Int = 2
     @JvmField var renderedParticleCount: Int = 0
     @JvmField var particleSystemsAwaitingRemoval: Array<ParticleSystem?>? = null
-    @JvmField val anIntArray931 = intArrayOf(3, 7, 15)
+    @JvmField val DETAIL_LEVEL_LIMITS = intArrayOf(3, 7, 15)
 
     @JvmStatic
     fun initializeIndex(particleProvider: Js5ResourceProvider) {
@@ -33,8 +33,8 @@ object ParticleSystemManager {
         killIndex = 0
         activeParticleSystems = LinkedList()
         particleCache = arrayOfNulls(1024)
-        particleSystemsAwaitingRemoval = arrayOfNulls(anIntArray931[detailsSetting] + 1)
-        anInt2899 = 0
+        particleSystemsAwaitingRemoval = arrayOfNulls(DETAIL_LEVEL_LIMITS[detailsSetting] + 1)
+        removalQueueSize = 0
         awaitingRemovalCursorPosition = 0
         initialize(particleProvider)
         ParticleTypeList.initialize(particleProvider)
@@ -70,13 +70,13 @@ object ParticleSystemManager {
             adjustedValue = 0
         }
         detailsSetting = adjustedValue
-        particleSystemsAwaitingRemoval = arrayOfNulls(anIntArray931[detailsSetting] + 1)
-        anInt2899 = 0
+        particleSystemsAwaitingRemoval = arrayOfNulls(DETAIL_LEVEL_LIMITS[detailsSetting] + 1)
+        removalQueueSize = 0
         awaitingRemovalCursorPosition = 0
     }
 
     @JvmStatic
-    fun method5206(): Int {
+    fun getDetailLevel(): Int {
         return detailsSetting
     }
 }

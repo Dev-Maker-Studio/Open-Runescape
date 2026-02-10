@@ -24,7 +24,7 @@ open class PcmPlayer {
     var lastDataConsumed: Int = 0
     var shutdown: Boolean = false
     var streamUpdateCountdown: Int = 0
-    val anInt3123: Int = 32
+    val maxActiveVoices: Int = 32
     val activeStreams: Array<PcmStream?> = arrayOfNulls(8)
     val inactiveStreams: Array<PcmStream?> = arrayOfNulls(8)
 
@@ -205,7 +205,7 @@ open class PcmPlayer {
                                 }
 
                                 val class282Sub2612 = activeStream.buffer
-                                if (class282Sub2612 != null && class282Sub2612.anInt7690 > i_17) {
+                                if (class282Sub2612 != null && class282Sub2612.activeVoiceCount > i_17) {
                                     i_5 = i_5 or (1 shl i_16)
                                     inactive = activeStream
                                     activeStream = activeStream.nextStream
@@ -214,10 +214,10 @@ open class PcmPlayer {
                                     val i_13 = activeStream.getActiveVoiceCount()
                                     i_4 += i_13
                                     if (class282Sub2612 != null) {
-                                        class282Sub2612.anInt7690 += i_13
+                                        class282Sub2612.activeVoiceCount += i_13
                                     }
 
-                                    if (i_4 >= this.anInt3123) {
+                                    if (i_4 >= this.maxActiveVoices) {
                                         break@label107
                                     }
 
@@ -333,7 +333,7 @@ open class PcmPlayer {
         fun resetStreamFillState(stream: PcmStream) {
             stream.fill = false
             if (stream.buffer != null) {
-                stream.buffer!!.anInt7690 = 0
+                stream.buffer!!.activeVoiceCount = 0
             }
 
             var patchStream: PcmStream? = stream.getFirstStream()

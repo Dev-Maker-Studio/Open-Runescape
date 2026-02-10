@@ -51,7 +51,7 @@ class StationaryInteractiveObject(
     i_13,
     i_14,
     objectdefinitions4.supportsItems == 1,
-    ObjectShapes.method7853(i_15, i_16)
+    ObjectShapes.getWallInteractByte(i_15, i_16)
 ), GameObject {
 
     @JvmField

@@ -25,7 +25,7 @@ class ShadowTileGL(
     @JvmField val materialCount: Int
     @JvmField var cachedTexture: OpenGl2DTexture? = null
     @JvmField var elementsBuffer: ElementsBufferGL? = null
-    @JvmField var aClass131Sub21567: GlElementsArrayBuffer? = null
+    @JvmField var indexBuffer: GlElementsArrayBuffer? = null
 
     init {
         val size = 1 shl sizeShift
@@ -76,19 +76,19 @@ class ShadowTileGL(
             }
 
             elementsBuffer = toolkit.createElementsArrayBuffer(buffer.buffer, buffer.currentPosition, false)
-            aClass131Sub21567 = GlElementsArrayBuffer(toolkit, null, 1)
+            indexBuffer = GlElementsArrayBuffer(toolkit, null, 1)
         } else {
             cachedTexture = null
         }
     }
 
-    fun method2155() {
-        method2165(elementsBuffer, materialCount)
+    fun drawShadow() {
+        drawShadowElements(elementsBuffer, materialCount)
     }
 
-    fun method2156(bytes_1: ByteArray, i_2: Int) {
-        aClass131Sub21567!!.putElements(bytes_1, i_2 * 2)
-        method2165(aClass131Sub21567!!, i_2)
+    fun drawShadowWithIndices(bytes_1: ByteArray, i_2: Int) {
+        indexBuffer!!.putElements(bytes_1, i_2 * 2)
+        drawShadowElements(indexBuffer!!, i_2)
     }
 
     fun regenerateTexture() {
@@ -163,7 +163,7 @@ class ShadowTileGL(
         }
     }
 
-    fun method2165(interface151: ElementsBufferGL?, i_2: Int) {
+    fun drawShadowElements(interface151: ElementsBufferGL?, i_2: Int) {
         if (i_2 != 0) {
             regenerateTexture()
             toolkit.setActiveTexture(cachedTexture)

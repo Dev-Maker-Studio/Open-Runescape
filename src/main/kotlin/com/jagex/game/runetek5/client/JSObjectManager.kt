@@ -20,6 +20,6 @@ class JSObjectManager(@JvmField val type: Int) {
         @JvmField val CS2_INS6869 = JSObjectManager(12)
         @JvmField val CS2_INS6058 = JSObjectManager(14)
 
-        @JvmField var anInt4185: Int = 0
+        @JvmField var highlightFlashCycles: Int = 0
     }
 }

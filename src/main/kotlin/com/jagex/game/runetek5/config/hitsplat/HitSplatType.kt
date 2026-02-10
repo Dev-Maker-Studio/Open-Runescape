@@ -16,12 +16,12 @@ class HitSplatType {
     @JvmField var fontId = -1
     @JvmField var color = 16777215
     @JvmField var hasColor = false
-    @JvmField var anInt2846 = 0
+    @JvmField var scrollOffsetX = 0
     @JvmField var cyclesVisible = 70
-    @JvmField var anInt2833 = 0
-    @JvmField var anInt2847 = -1
+    @JvmField var scrollOffsetY = 0
+    @JvmField var fadeStartCycle = -1
     @JvmField var displayType = -1
-    @JvmField var anInt2832 = 0
+    @JvmField var textOffsetY = 0
     @JvmField var typelist: HitSplatTypeList? = null
     @JvmField var spriteA = -1
     @JvmField var spriteB = -1
@@ -40,14 +40,14 @@ class HitSplatType {
             4 -> spriteB = stream.readBigSmart()
             5 -> spriteC = stream.readBigSmart()
             6 -> spriteD = stream.readBigSmart()
-            7 -> anInt2846 = stream.readShort()
+            7 -> scrollOffsetX = stream.readShort()
             8 -> placementExampleString = stream.readJagString()
             9 -> cyclesVisible = stream.readUShort()
-            10 -> anInt2833 = stream.readShort()
-            11 -> anInt2847 = 0
+            10 -> scrollOffsetY = stream.readShort()
+            11 -> fadeStartCycle = 0
             12 -> displayType = stream.readUByte()
-            13 -> anInt2832 = stream.readShort()
-            14 -> anInt2847 = stream.readUShort()
+            13 -> textOffsetY = stream.readShort()
+            14 -> fadeStartCycle = stream.readUShort()
         }
     }
 
@@ -96,7 +96,7 @@ class HitSplatType {
         }
     }
 
-    fun method3835(graphicalrenderer1: AbstractToolkit): NativeSprite? {
+    fun getLeftCapSprite(graphicalrenderer1: AbstractToolkit): NativeSprite? {
         if (spriteA < 0) {
             return null
         }
@@ -108,7 +108,7 @@ class HitSplatType {
         return nativeSprite
     }
 
-    fun method3832(graphicalrenderer1: AbstractToolkit): NativeSprite? {
+    fun getInnerLeftSprite(graphicalrenderer1: AbstractToolkit): NativeSprite? {
         if (spriteB < 0) {
             return null
         }
@@ -120,7 +120,7 @@ class HitSplatType {
         return hitsplatSprite
     }
 
-    fun method3836(graphicalrenderer1: AbstractToolkit): NativeSprite? {
+    fun getMiddleFillSprite(graphicalrenderer1: AbstractToolkit): NativeSprite? {
         if (spriteC < 0) {
             return null
         }
@@ -132,7 +132,7 @@ class HitSplatType {
         return nativeSprite
     }
 
-    fun method3838(graphicalrenderer1: AbstractToolkit): NativeSprite? {
+    fun getRightCapSprite(graphicalrenderer1: AbstractToolkit): NativeSprite? {
         if (spriteD < 0) {
             return null
         }

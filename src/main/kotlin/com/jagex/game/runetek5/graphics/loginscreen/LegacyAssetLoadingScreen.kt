@@ -21,10 +21,10 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
     var candyBarOffsetY = 0
     var candyBarWidth = 0
     var candyBarHeight = 0
-    var anInt3569 = 0
-    var anInt3590 = 0
-    var anInt3591 = 0
-    var anInt3592 = 0
+    var loadBarCenterX = 0
+    var loadBarOffsetY = 0
+    var loadBarWidth = 0
+    var textOffsetY = 0
     var font: Font? = null
     var fontMetrics: FontMetrics? = null
     var color: Color? = null
@@ -98,10 +98,10 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
                 candyBarOffsetY = Utils.parseInt(resourceNames[3])
                 candyBarWidth = Utils.parseInt(resourceNames[4])
                 candyBarHeight = Utils.parseInt(resourceNames[5])
-                anInt3569 = Utils.parseInt(resourceNames[6])
-                anInt3590 = Utils.parseInt(resourceNames[7])
-                anInt3591 = Utils.parseInt(resourceNames[8])
-                anInt3592 = Utils.parseInt(resourceNames[9])
+                loadBarCenterX = Utils.parseInt(resourceNames[6])
+                loadBarOffsetY = Utils.parseInt(resourceNames[7])
+                loadBarWidth = Utils.parseInt(resourceNames[8])
+                textOffsetY = Utils.parseInt(resourceNames[9])
                 val fontName = resourceNames[10]
                 val size = Utils.parseInt(resourceNames[11])
                 val colorValue = Utils.parse_int(resourceNames[12].substring(2))
@@ -153,15 +153,15 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
                     val loadbarLeftHeight = loadbarBodyLeft!!.getHeight(null)
                     val loadbarRightHeight = loadbarBodyRight!!.getHeight(null)
                     val loadbarFillHeight = loadbarBodyFill!!.getHeight(null)
-                    canvasImgGraphics.drawImage(loadbarBodyLeft, getDrawX(loadbarLeftWidth) + anInt3569 - anInt3591 / 2, getDrawY(loadbarLeftHeight) + anInt3590, null)
-                    val i13 = anInt3569 - anInt3591 / 2 + loadbarLeftWidth
-                    val i14 = anInt3591 / 2 + anInt3569
+                    canvasImgGraphics.drawImage(loadbarBodyLeft, getDrawX(loadbarLeftWidth) + loadBarCenterX - loadBarWidth / 2, getDrawY(loadbarLeftHeight) + loadBarOffsetY, null)
+                    val i13 = loadBarCenterX - loadBarWidth / 2 + loadbarLeftWidth
+                    val i14 = loadBarWidth / 2 + loadBarCenterX
                     var i15 = i13
                     while (i15 <= i14) {
-                        canvasImgGraphics.drawImage(loadbarBodyFill, getDrawX(loadbarLeftWidth) + anInt3569 + i15, getDrawY(loadbarFillHeight) + anInt3590, null)
+                        canvasImgGraphics.drawImage(loadbarBodyFill, getDrawX(loadbarLeftWidth) + loadBarCenterX + i15, getDrawY(loadbarFillHeight) + loadBarOffsetY, null)
                         i15 += loadbarFillWidth
                     }
-                    canvasImgGraphics.drawImage(loadbarBodyRight, getDrawX(loadbarRightWidth) + anInt3569 + anInt3591 / 2, getDrawY(loadbarRightHeight) + anInt3590, null)
+                    canvasImgGraphics.drawImage(loadbarBodyRight, getDrawX(loadbarRightWidth) + loadBarCenterX + loadBarWidth / 2, getDrawY(loadbarRightHeight) + loadBarOffsetY, null)
                     val candyLeftWidth = candyBarOutlineLeft!!.getWidth(null)
                     val candyLeftHeight = candyBarOutlineLeft!!.getHeight(null)
                     val candyRightWidth = candyBarOutlineRight!!.getWidth(null)
@@ -196,7 +196,7 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
                         val image29 = GameShell.gameCanvas!!.createImage(completionWidth, candyBarHeight - candyTopHeight - candyBottomHeight)
                         val i30 = image29.getWidth(null)
                         val graphics31 = image29.graphics
-                        val i32 = candyBarElementCount * method8740() / 10 % candyMiddleWidth
+                        val i32 = candyBarElementCount * getCandyBarCycle() / 10 % candyMiddleWidth
                         x = i32 - candyMiddleWidth
                         while (x < i30) {
                             graphics31.drawImage(candyBarMiddle, x, 0, null)
@@ -220,7 +220,7 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
                     canvasImgGraphics.drawImage(candyBarImage, candyBarX + candyLeftWidth, candyBarY, null)
                     canvasImgGraphics.font = font
                     canvasImgGraphics.color = color
-                    canvasImgGraphics.drawString(loadText, candyBarX + (candyBarWidth - fontMetrics!!.stringWidth(loadText)) / 2, candyBarHeight / 2 + candyBarY + anInt3592 + 4)
+                    canvasImgGraphics.drawString(loadText, candyBarX + (candyBarWidth - fontMetrics!!.stringWidth(loadText)) / 2, candyBarHeight / 2 + candyBarY + textOffsetY + 4)
                     graphics.drawImage(canvasImage, 0, 0, null)
                 } catch (exception43: Exception) {
                     resourcesUnavailable = true
@@ -249,7 +249,7 @@ class LegacyAssetLoadingScreen : LoginScreenComponent {
         var canvasImage: Image? = null
 
         @JvmStatic
-        fun method8740(): Int {
+        fun getCandyBarCycle(): Int {
             return LoadingStage.plainLoginScreenRenderer!!.getCycle()
         }
 

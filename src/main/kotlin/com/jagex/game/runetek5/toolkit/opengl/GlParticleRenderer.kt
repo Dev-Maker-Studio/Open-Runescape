@@ -17,24 +17,24 @@ class GlParticleRenderer {
     var textureCoordinates: OpenGlArrayDrawBuffer? = null
     var vertices: OpenGlArrayDrawBuffer? = null
     var colors: OpenGlArrayDrawBuffer? = null
-    var anInt1616: Int = 0
+    var overflowBucketCount: Int = 0
     val modelviewMatrix: FloatArray = FloatArray(16)
     val textureBuffer = GlBitBuffer(786336)
-    val anInt1609: Int
+    val depthBucketShiftBits: Int
     val particleDepths: IntArray
-    val anIntArray1615: IntArray
-    val anIntArray1604: IntArray
-    val aEntityNodeSub1Sub1ArrayArray1614: Array<Array<PointEntity?>>
-    val aEntityNodeSub1Sub1ArrayArray1607: Array<Array<PointEntity?>>
+    val depthBucketCounts: IntArray
+    val overflowBucketSizes: IntArray
+    val depthBucketEntities: Array<Array<PointEntity?>>
+    val overflowBucketEntities: Array<Array<PointEntity?>>
 
     init {
-        this.anInt1609 = BufferUtils.ilog(1600)
+        this.depthBucketShiftBits = BufferUtils.ilog(1600)
         this.particleDepths = IntArray(8191)
-        this.anIntArray1615 = IntArray(1600)
-        this.anIntArray1604 = IntArray(64)
-        this.aEntityNodeSub1Sub1ArrayArray1614 = Array(1600) { arrayOfNulls(64) }
-        this.aEntityNodeSub1Sub1ArrayArray1607 = Array(64) { arrayOfNulls(768) }
-        this.anInt1616 = 0
+        this.depthBucketCounts = IntArray(1600)
+        this.overflowBucketSizes = IntArray(64)
+        this.depthBucketEntities = Array(1600) { arrayOfNulls(64) }
+        this.overflowBucketEntities = Array(64) { arrayOfNulls(768) }
+        this.overflowBucketCount = 0
     }
 
     fun initialize(toolkit: OpenGlToolkit) {
@@ -76,7 +76,7 @@ class GlParticleRenderer {
             var depthRange = maxDepth - minDepth
             val i_20: Int
             if (depthRange + 2 > 1600) {
-                i_20 = 1 + BufferUtils.ilog(depthRange) - this.anInt1609
+                i_20 = 1 + BufferUtils.ilog(depthRange) - this.depthBucketShiftBits
                 depthRange = (depthRange shr i_20) + 2
             } else {
                 i_20 = 0
@@ -90,14 +90,14 @@ class GlParticleRenderer {
 
             var updateRequired = true
             while (particles != tree) {
-                this.anInt1616 = 0
+                this.overflowBucketCount = 0
 
                 for (i_17 in 0 until depthRange) {
-                    this.anIntArray1615[i_17] = 0
+                    this.depthBucketCounts[i_17] = 0
                 }
 
                 for (i_17 in 0 until 64) {
-                    this.anIntArray1604[i_17] = 0
+                    this.overflowBucketSizes[i_17] = 0
                 }
 
                 while (particles != tree) {
@@ -115,22 +115,22 @@ class GlParticleRenderer {
 
                     val depth = this.particleDepths[particlePtr++] - minDepth shr i_20
                     if (depth < 1600) {
-                        if (this.anIntArray1615[depth] < 64) {
-                            this.aEntityNodeSub1Sub1ArrayArray1614[depth][this.anIntArray1615[depth]++] = particleEntity
+                        if (this.depthBucketCounts[depth] < 64) {
+                            this.depthBucketEntities[depth][this.depthBucketCounts[depth]++] = particleEntity
                         } else {
-                            if (this.anIntArray1615[depth] == 64) {
-                                if (this.anInt1616 == 64) {
+                            if (this.depthBucketCounts[depth] == 64) {
+                                if (this.overflowBucketCount == 64) {
                                     particles = particles.child
                                     continue
                                 }
 
-                                this.anIntArray1615[depth] += 1 + this.anInt1616++
+                                this.depthBucketCounts[depth] += 1 + this.overflowBucketCount++
                             }
 
-                            val arr_10000 = this.aEntityNodeSub1Sub1ArrayArray1607[this.anIntArray1615[depth] - 64 - 1]
-                            val i_10002 = this.anIntArray1615[depth] - 64 - 1
-                            val i_10004 = this.anIntArray1604[this.anIntArray1615[depth] - 64 - 1]
-                            this.anIntArray1604[i_10002] = this.anIntArray1604[this.anIntArray1615[depth] - 64 - 1] + 1
+                            val arr_10000 = this.overflowBucketEntities[this.depthBucketCounts[depth] - 64 - 1]
+                            val i_10002 = this.depthBucketCounts[depth] - 64 - 1
+                            val i_10004 = this.overflowBucketSizes[this.depthBucketCounts[depth] - 64 - 1]
+                            this.overflowBucketSizes[i_10002] = this.overflowBucketSizes[this.depthBucketCounts[depth] - 64 - 1] + 1
                             arr_10000[i_10004] = particleEntity
                         }
                     }
@@ -179,10 +179,10 @@ class GlParticleRenderer {
         this.textureBuffer.currentPosition = 0
         if (toolkit.bigEndianess) {
             for (i_18 in depthRange - 1 downTo 0) {
-                val i_19 = Math.min(64, this.anIntArray1615[i_18])
+                val i_19 = Math.min(64, this.depthBucketCounts[i_18])
                 if (i_19 > 0) {
                     for (i_20 in i_19 - 1 downTo 0) {
-                        val pointEntity = this.aEntityNodeSub1Sub1ArrayArray1614[i_18][i_20]!!
+                        val pointEntity = this.depthBucketEntities[i_18][i_20]!!
                         val color = pointEntity.colorArgb
                         val red = (color shr 16).toByte()
                         val green = (color shr 8).toByte()
@@ -230,11 +230,11 @@ class GlParticleRenderer {
                         this.textureBuffer.writeByte(alpha.toInt())
                     }
 
-                    if (this.anIntArray1615[i_18] > 64) {
-                        val i_20 = this.anIntArray1615[i_18] - 64 - 1
+                    if (this.depthBucketCounts[i_18] > 64) {
+                        val i_20 = this.depthBucketCounts[i_18] - 64 - 1
 
-                        for (i_21 in this.anIntArray1604[i_20] - 1 downTo 0) {
-                            val entity = this.aEntityNodeSub1Sub1ArrayArray1607[i_20][i_21]!!
+                        for (i_21 in this.overflowBucketSizes[i_20] - 1 downTo 0) {
+                            val entity = this.overflowBucketEntities[i_20][i_21]!!
                             val color = entity.colorArgb
                             val red = (color shr 16).toByte()
                             val green = (color shr 8).toByte()
@@ -286,10 +286,10 @@ class GlParticleRenderer {
             }
         } else {
             for (i_18 in depthRange - 1 downTo 0) {
-                val i_19 = Math.min(64, this.anIntArray1615[i_18])
+                val i_19 = Math.min(64, this.depthBucketCounts[i_18])
                 if (i_19 > 0) {
                     for (i_20 in i_19 - 1 downTo 0) {
-                        val pointEntity = this.aEntityNodeSub1Sub1ArrayArray1614[i_18][i_20]!!
+                        val pointEntity = this.depthBucketEntities[i_18][i_20]!!
                         val color = pointEntity.colorArgb
                         val red = (color shr 16).toByte()
                         val green = (color shr 8).toByte()
@@ -337,11 +337,11 @@ class GlParticleRenderer {
                         this.textureBuffer.writeByte(alpha.toInt())
                     }
 
-                    if (this.anIntArray1615[i_18] > 64) {
-                        val main = this.anIntArray1615[i_18] - 64 - 1
+                    if (this.depthBucketCounts[i_18] > 64) {
+                        val main = this.depthBucketCounts[i_18] - 64 - 1
 
-                        for (sub in this.anIntArray1604[main] - 1 downTo 0) {
-                            val entity = this.aEntityNodeSub1Sub1ArrayArray1607[main][sub]!!
+                        for (sub in this.overflowBucketSizes[main] - 1 downTo 0) {
+                            val entity = this.overflowBucketEntities[main][sub]!!
                             val color = entity.colorArgb
                             val red = (color shr 16).toByte()
                             val green = (color shr 8).toByte()

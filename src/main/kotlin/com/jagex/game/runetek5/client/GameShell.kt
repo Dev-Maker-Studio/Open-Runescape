@@ -574,7 +574,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         return File(parentPath!!)
     }
 
-    fun method4658(file1: File?): Boolean {
+    fun validateCacheDirectory(file1: File?): Boolean {
         return when {
             file1 == null -> false
             !file1.exists() -> false

@@ -68,7 +68,7 @@ object GraphicsCache {
         WorldMapSub1.reset()
         WorldMap.worldMapCategories.remove_all()
         WorldMap.staticElements = null
-        ComponentMinimap.aNativeSprite5883 = null
+        ComponentMinimap.worldMapOverviewSprite = null
         WorldMapSub1.scrollTargetX = -1
         WorldMapSub1.scrollTargetY = -1
         Resource.helvetica11Font = null

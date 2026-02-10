@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.config.quickchat
 
 class QuickChatMessage {
     @JvmField
-    var anIntArray4046: IntArray? = null
+    var dynamicValues: IntArray? = null
     @JvmField
     var message: QuickchatMessageType? = null
     @JvmField

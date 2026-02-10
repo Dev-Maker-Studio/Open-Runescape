@@ -180,7 +180,7 @@ class MusicSampleFloor {
             }
         }
 
-        method6035(0, values - 1)
+        sortByX(0, values - 1)
         var lx = 0
         var ly = finalY!![0] * floor1Multiplier
 
@@ -203,7 +203,7 @@ class MusicSampleFloor {
         }
     }
 
-    fun method6035(i_1: Int, i_2: Int) {
+    fun sortByX(i_1: Int, i_2: Int) {
         if (i_1 < i_2) {
             var i_3 = i_1
             val i_4 = finalX!![i_1]
@@ -226,8 +226,8 @@ class MusicSampleFloor {
             finalX!![i_3] = i_4
             finalY!![i_3] = i_5
             step2Flag!![i_3] = bool6
-            method6035(i_1, i_3 - 1)
-            method6035(i_3 + 1, i_2)
+            sortByX(i_1, i_3 - 1)
+            sortByX(i_3 + 1, i_2)
         }
     }
 

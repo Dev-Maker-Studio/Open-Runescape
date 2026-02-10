@@ -17,13 +17,13 @@ class MaterialEffect1GL(
 
     @JvmField var listUtils: GlListUtils? = null
     @JvmField var enabled: Boolean = false
-    @JvmField var aBool9025: Boolean = false
+    @JvmField var isLimitedTextureUnits: Boolean = false
     @JvmField var cubeMapTextures: Array<OpenGlArbCubeMapTexture>? = null
 
     init {
         if (toolkit.arbTextureCubeMap) {
-            aBool9025 = toolkit.maxTextureUnits < 3
-            val i_2 = if (aBool9025) 48 else 127
+            isLimitedTextureUnits = toolkit.maxTextureUnits < 3
+            val i_2 = if (isLimitedTextureUnits) 48 else 127
             val bytes_3 = Array(6) { ByteArray(4096) }
             val bytes_4 = Array(6) { ByteArray(4096) }
             val bytes_5 = Array(6) { ByteArray(4096) }
@@ -74,11 +74,11 @@ class MaterialEffect1GL(
                 OpenGlArbCubeMapTexture(glToolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, bytes_5, GLFormat.RGBA),
                 OpenGlArbCubeMapTexture(glToolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, bytes_3, GLFormat.RGBA)
             )
-            method14411()
+            initializeCombineLists()
         }
     }
 
-    fun method14411() {
+    fun initializeCombineLists() {
         listUtils = GlListUtils(2)
         listUtils!!.newList(0)
         glToolkit.activateTexture(1)
@@ -92,7 +92,7 @@ class MaterialEffect1GL(
         OpenGL.glLoadIdentity()
         OpenGL.glRotatef(22.5f, 1.0f, 0.0f, 0.0f)
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        if (!aBool9025) {
+        if (!isLimitedTextureUnits) {
             glToolkit.loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
             glToolkit.setTexture(0, GL_PREVIOUS, GL_SRC_COLOR)
             glToolkit.activateTexture(2)
@@ -115,7 +115,7 @@ class MaterialEffect1GL(
         OpenGL.glMatrixMode(GL_TEXTURE)
         OpenGL.glLoadIdentity()
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        if (!aBool9025) {
+        if (!isLimitedTextureUnits) {
             glToolkit.loadTextureCombineMode(GL_MODULATE, GL_MODULATE)
             glToolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
             glToolkit.activateTexture(2)
@@ -138,7 +138,7 @@ class MaterialEffect1GL(
 
     override fun toggle(bool1: Boolean) {
         if (listUtils != null && bool1) {
-            if (!aBool9025) {
+            if (!isLimitedTextureUnits) {
                 glToolkit.activateTexture(2)
                 glToolkit.setActiveTexture(glToolkit.texture2d)
                 glToolkit.activateTexture(0)
@@ -157,7 +157,7 @@ class MaterialEffect1GL(
 
     override fun disable() {
         if (enabled) {
-            if (!aBool9025) {
+            if (!isLimitedTextureUnits) {
                 glToolkit.activateTexture(2)
                 glToolkit.setActiveTexture(null)
             }

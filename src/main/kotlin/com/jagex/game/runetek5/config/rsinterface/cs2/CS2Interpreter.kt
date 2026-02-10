@@ -1146,7 +1146,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetFront(bool: Boolean, executor: CS2Executor) {
-        var underlaydefinition3: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition3: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions4: Component? = underlaydefinition3!!.comp
         var interface5: Interface? = underlaydefinition3!!.inter
         if (bool) {
@@ -1191,7 +1191,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3546(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method5017(icomponentdefinitions3!!, executor)
@@ -1293,7 +1293,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetOpBase(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setOpBase(icomponentdefinitions3!!, executor)
@@ -1420,10 +1420,10 @@ object CS2Interpreter {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub63 != null) {
-            var bool4 = class282Sub50Sub63.mapToGameCoords((i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
+            var bool4 = class282Sub50Sub63.mapToGameCoords((i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.coordConversionBuffer)
             if (bool4) {
-                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![1]
-                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![2]
+                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![1]
+                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![2]
             } else {
                 executor.intStack[++executor.intStackPtr - 1] = -1
                 executor.intStack[++executor.intStackPtr - 1] = -1
@@ -1442,7 +1442,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8714(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method2960(icomponentdefinitions3!!, interface4!!, executor)
@@ -1458,7 +1458,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method8716(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.method5908()
+        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
         executor.intStack[++executor.intStackPtr - 1] = if (i_3 == 2) 1 else 0
     }
 
@@ -1561,9 +1561,9 @@ object CS2Interpreter {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub63 != null) {
-            var bool4 = class282Sub50Sub63.gameToMapCoordsForPlane((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
+            var bool4 = class282Sub50Sub63.gameToMapCoordsForPlane((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.coordConversionBuffer)
             if (bool4) {
-                StaticMethods.setWorldMapScrollTarget(CS2Executor.anIntArray5900!![1], CS2Executor.anIntArray5900!![2])
+                StaticMethods.setWorldMapScrollTarget(CS2Executor.coordConversionBuffer!![1], CS2Executor.coordConversionBuffer!![2])
             }
         }
     }
@@ -1596,7 +1596,7 @@ object CS2Interpreter {
         var i_4 = tcpmessage3!!.buffer.currentPosition
         tcpmessage3!!.buffer.writeByte(2)
         tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.method14896(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.anIntArray4046!!)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
         tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - i_4)
         class1842!!.queuePacket(tcpmessage3)
     }
@@ -1678,7 +1678,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3172() {
-        GameState.method12426()
+        GameState.startGameLogin()
     }
 
     @JvmStatic
@@ -1724,7 +1724,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun setCCFont(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setIfFont(icomponentdefinitions3!!, interface4!!, executor)
@@ -1764,7 +1764,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3892(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method3078(icomponentdefinitions3!!, executor)
@@ -1807,7 +1807,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5099(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method4159(icomponentdefinitions3!!, executor)
@@ -1916,13 +1916,13 @@ object CS2Interpreter {
             } else if (i_3 < 0) {
                 i_3 = 0
             }
-            VorbisSoundManager.method1575(i_2, i_3, false)
+            VorbisSoundManager.preloadVorbisSound(i_2, i_3, false)
         }
     }
 
     @JvmStatic
     fun setCCText(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setCompText(icomponentdefinitions3!!, interface4!!, executor)
@@ -1989,7 +1989,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5833(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method13468(icomponentdefinitions3!!, interface4!!, executor)
@@ -1998,7 +1998,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method12659(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -2015,7 +2015,7 @@ object CS2Interpreter {
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var i_4 = (i_3 shr 14) and 0x3fff
         var i_5 = i_3 and 0x3fff
-        var i_6 = WorldMapCategory.method12702(i_2, i_4, i_5)
+        var i_6 = WorldMapCategory.findNearestElement(i_2, i_4, i_5)
         if (i_6 < 0) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
@@ -2030,14 +2030,14 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method12925(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.spritePitch
     }
 
     @JvmStatic
     fun method1864(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         if (icomponentdefinitions3!!.opBase == null) {
             executor.stringStack[++executor.stringStackPtr - 1] = ""
@@ -2053,7 +2053,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method741(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method5455(icomponentdefinitions3!!, executor)
@@ -2117,7 +2117,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3676(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method7889(icomponentdefinitions3!!, executor)
@@ -2145,7 +2145,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6800(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method12630(icomponentdefinitions3!!)
@@ -2169,7 +2169,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetItem(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setItemIFComp(icomponentdefinitions3!!, interface4!!, false, Component.StackMode.WHEN_MULTIPLE, executor)
@@ -2182,7 +2182,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6796(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.y
     }
@@ -2190,7 +2190,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6797(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.method5908()
+        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
         executor.intStack[++executor.intStackPtr - 1] = if (i_3 == 0) 1 else 0
     }
 
@@ -2239,7 +2239,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4865(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method1494(icomponentdefinitions3!!, executor)
     }
@@ -2277,7 +2277,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method11125(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.scrollX
     }
@@ -2340,7 +2340,7 @@ object CS2Interpreter {
         var ifComp = executor.intStack[executor.intStackPtr]
         var slotId = executor.intStack[executor.intStackPtr + 1]
         var inter: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             inter = executor.hookedInterface2
         } else {
             inter = executor.hookedInterface1
@@ -2380,14 +2380,14 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6449(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = if (icomponentdefinitions3!!.mediaType == MediaType.RAW_MODEL) icomponentdefinitions3!!.primaryMediaId else -1
     }
 
     @JvmStatic
     fun method6452(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method5291(icomponentdefinitions3!!, executor)
@@ -2395,7 +2395,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4030(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method3365(icomponentdefinitions3!!, executor)
@@ -2474,7 +2474,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4277(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.containerItemId
     }
@@ -2487,12 +2487,12 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4279(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = ParticleSystemManager.method5206()
+        executor.intStack[++executor.intStackPtr - 1] = ParticleSystemManager.getDetailLevel()
     }
 
     @JvmStatic
     fun method4283(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method11221(icomponentdefinitions3!!, executor)
@@ -2522,7 +2522,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method779(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var i_4 = executor.intStack[--executor.intStackPtr]
         --i_4
@@ -2587,7 +2587,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5008(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method11223(icomponentdefinitions3!!, executor)
@@ -2633,7 +2633,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetAspect(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         ifSetAspect(icomponentdefinitions3!!, interface4!!, executor)
@@ -2641,7 +2641,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6283(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method5066(icomponentdefinitions3!!, interface4!!, executor)
@@ -2688,7 +2688,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3356(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         ifSetNPCHead(icomponentdefinitions3!!, interface4!!, executor)
@@ -2769,7 +2769,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6210(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method789(icomponentdefinitions3!!, interface4!!, executor)
@@ -2785,7 +2785,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7929(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method506(icomponentdefinitions3!!, interface4!!, executor)
@@ -2810,7 +2810,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7933(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method2741(icomponentdefinitions3!!, executor)
@@ -2818,7 +2818,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method893(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         ifSetModelOrigin(icomponentdefinitions3!!, executor)
@@ -2899,7 +2899,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method14340(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -2945,7 +2945,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8753(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStackPtr -= 2
         var i_4 = executor.intStack[executor.intStackPtr]
@@ -3015,7 +3015,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method5123(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -3026,7 +3026,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method14578(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.scrollHeight
     }
@@ -3042,7 +3042,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6687(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method14892(icomponentdefinitions3!!, executor)
@@ -3051,7 +3051,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6688(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -3133,7 +3133,7 @@ object CS2Interpreter {
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var i_4 = executor.intStack[executor.intStackPtr + 2]
-        method2738(executor.currentEntity!!.inter!!, i_2 and 0xffff, i_3, i_4, executor.aBool7022, executor)
+        method2738(executor.currentEntity!!.inter!!, i_2 and 0xffff, i_3, i_4, executor.hasIntOperand, executor)
     }
 
     @JvmStatic
@@ -3317,7 +3317,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3918(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method8754(icomponentdefinitions3!!, executor)
@@ -3336,14 +3336,14 @@ object CS2Interpreter {
         var i_4 = tcpmessage3!!.buffer.currentPosition
         tcpmessage3!!.buffer.writeByte(1)
         tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.method14896(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.anIntArray4046!!)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
         tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - i_4)
         class1842!!.queuePacket(tcpmessage3)
     }
 
     @JvmStatic
     fun method6138(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method5001(icomponentdefinitions3!!, executor)
     }
@@ -3383,7 +3383,7 @@ object CS2Interpreter {
     fun method290(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var worldmapareadefs3: MECType? = TypeLists.MEC!!.list(i_2)
-        executor.intStack[++executor.intStackPtr - 1] = worldmapareadefs3!!.anInt2718
+        executor.intStack[++executor.intStackPtr - 1] = worldmapareadefs3!!.categoryId
     }
 
     @JvmStatic
@@ -3427,7 +3427,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method504(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anInt5904
+        executor.intStack[++executor.intStackPtr - 1] = CS2Executor.instructionCount
     }
 
     @JvmStatic
@@ -3449,7 +3449,7 @@ object CS2Interpreter {
     fun method1070(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
         var bool3 = executor.intStack[--executor.intStackPtr] == 1
-        QuickchatMessageType.method1360(string_2!!, bool3)
+        QuickchatMessageType.searchQuickchatMessages(string_2!!, bool3)
         executor.intStack[++executor.intStackPtr - 1] = CS2_QUERY_RESULTS_LEN
     }
 
@@ -3513,7 +3513,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1562(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = Client.getComponentSettings(icomponentdefinitions3!!)!!.getUseOptionFlags()
     }
@@ -3541,7 +3541,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6776(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method2955(icomponentdefinitions3!!, executor)
@@ -3550,7 +3550,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method5697(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_2).method14898()
+        executor.stringStack[++executor.stringStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_2).getPlaceholderText()
     }
 
     @JvmStatic
@@ -3567,7 +3567,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetItemWearColNoNum(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setItemIFComp(icomponentdefinitions3!!, interface4!!, true, Component.StackMode.NONUM, executor)
@@ -3603,7 +3603,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method2567(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method7729(icomponentdefinitions3!!, executor)
@@ -3656,13 +3656,13 @@ object CS2Interpreter {
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var i_4 = executor.intStack[executor.intStackPtr + 2]
         Component.fromHash(i_2)
-        method2738(Interface.INTERFACES!![i_2 ushr 16]!!, i_2 and 0xffff, i_3, i_4, executor.aBool7022, executor)
+        method2738(Interface.INTERFACES!![i_2 ushr 16]!!, i_2 and 0xffff, i_3, i_4, executor.hasIntOperand, executor)
     }
 
     @JvmStatic
     fun method5296(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -3675,7 +3675,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method5297(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.method5908()
+        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
         var ints_4: IntArray? = executor.intStack
         var i_5 = ++executor.intStackPtr - 1
         var b_6: Int
@@ -3719,7 +3719,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5487(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setTransparency(icomponentdefinitions3!!, executor)
@@ -3761,7 +3761,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6314(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.spriteId
     }
@@ -3774,7 +3774,7 @@ object CS2Interpreter {
         var i_4 = tcpmessage3!!.buffer.currentPosition
         tcpmessage3!!.buffer.writeByte(0)
         tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.method14896(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.anIntArray4046!!)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
         tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - i_4)
         class1842!!.queuePacket(tcpmessage3)
     }
@@ -3792,7 +3792,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetItemWearCol(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setItemIFComp(icomponentdefinitions3!!, interface4!!, true, Component.StackMode.WHEN_MULTIPLE, executor)
@@ -3847,7 +3847,7 @@ object CS2Interpreter {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = class282Sub362.mecId
-            var i_3 = (class282Sub362!!.anInt7988 shl 28) or class282Sub362.absX + (WorldMap.mapSquareAbsX shl 14) or class282Sub362.absY + WorldMap.mapSquareAbsY
+            var i_3 = (class282Sub362!!.plane shl 28) or class282Sub362.absX + (WorldMap.mapSquareAbsX shl 14) or class282Sub362.absY + WorldMap.mapSquareAbsY
             executor.intStack[++executor.intStackPtr - 1] = i_3
         }
     }
@@ -3937,7 +3937,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6071(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method8390(icomponentdefinitions3!!, interface4!!, executor)
@@ -4008,7 +4008,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4200(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStackPtr -= 10
         var bytes_4: ByteArray? = null
@@ -4070,7 +4070,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6802(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method3987(icomponentdefinitions3!!, interface4!!)
@@ -4078,7 +4078,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8327(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method7555(icomponentdefinitions3!!, interface4!!, executor)
@@ -4091,7 +4091,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15523(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method7267(icomponentdefinitions3!!, executor)
@@ -4144,7 +4144,7 @@ object CS2Interpreter {
         if (class5373 == null) {
             throw RuntimeException()
         } else {
-            var integer4: Int? = executor.currentClanSettings!!.method1225((Client.CURRENT_GAME!!.id shl 16) or class5373!!.baseVar, class5373!!.startBit, class5373!!.endBit)
+            var integer4: Int? = executor.currentClanSettings!!.getVariableBitfield((Client.CURRENT_GAME!!.id shl 16) or class5373!!.baseVar, class5373!!.startBit, class5373!!.endBit)
             var i_5: Int = 0
             if (integer4 == null) {
                 i_5 = 0
@@ -4158,7 +4158,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method8859(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -4169,7 +4169,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8863(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.x
     }
@@ -4239,7 +4239,7 @@ object CS2Interpreter {
     fun method1784(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var underlaydefinition3: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition3 = executor.hookedInterface2
         } else {
             underlaydefinition3 = executor.hookedInterface1
@@ -4348,7 +4348,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8344(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6186(icomponentdefinitions3!!, interface4!!, executor)
@@ -4403,7 +4403,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4558(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method505(icomponentdefinitions3!!, executor)
@@ -4447,7 +4447,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method8219(executor: CS2Executor) {
         executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldMapViewWidth
-        executor.intStack[++executor.intStackPtr - 1] = ComponentMinimap.anInt4097
+        executor.intStack[++executor.intStackPtr - 1] = ComponentMinimap.mapViewportScale
     }
 
     @JvmStatic
@@ -4471,7 +4471,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method1631(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -4502,7 +4502,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6395(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -4625,7 +4625,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15448(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method774(icomponentdefinitions3!!, executor)
@@ -4675,7 +4675,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4965(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method4160(icomponentdefinitions3!!, executor)
@@ -4692,7 +4692,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun fromDate(executor: CS2Executor) {
-        executor.stringStack[++executor.stringStackPtr - 1] = CalenderUtil.method13045(CalenderUtil.method5363(executor.intStack[--executor.intStackPtr]), Client.CURRENT_LANGUAGE!!.getValue())
+        executor.stringStack[++executor.stringStackPtr - 1] = CalenderUtil.getLocalDateString(CalenderUtil.convertDaysToMilliseconds(executor.intStack[--executor.intStackPtr]), Client.CURRENT_LANGUAGE!!.getValue())
     }
 
     @JvmStatic
@@ -4703,7 +4703,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4970(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6313(icomponentdefinitions3!!, executor)
@@ -4711,7 +4711,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4971(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method910(icomponentdefinitions3!!, executor)
@@ -4782,7 +4782,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun setCCTextAlign(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setIfTextAlign(icomponentdefinitions3!!, executor)
@@ -4870,7 +4870,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method2965(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -5057,7 +5057,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method485(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -5087,7 +5087,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8723(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method3338(icomponentdefinitions3!!, executor)
@@ -5107,7 +5107,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8726(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method797(icomponentdefinitions3!!, interface4!!, executor)
@@ -5115,7 +5115,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7270(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method502(icomponentdefinitions3!!, executor)
@@ -5155,7 +5155,7 @@ object CS2Interpreter {
         if (quickchatdefinitions5!!.getValueType(i_3)!!.id != 0) {
             throw RuntimeException("")
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = quickchatdefinitions5!!.method14901(i_3, i_4)
+            executor.intStack[++executor.intStackPtr - 1] = quickchatdefinitions5!!.getValueConfig(i_3, i_4)
         }
     }
 
@@ -5191,7 +5191,7 @@ object CS2Interpreter {
     @JvmStatic
     fun ccSetHide(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -5229,13 +5229,13 @@ object CS2Interpreter {
     fun returnInstr(executor: CS2Executor) {
         if (executor.returnValuesPtr != 0) {
             var class5092: CS2ReturnValue? = executor.returnValues[--executor.returnValuesPtr]
-            executor.current = class5092!!.aCacheableNodeSub55869
+            executor.current = class5092!!.savedScript
             executor.operations = executor.current!!.operations
             executor.intOpValues = executor.current!!.intOpValues
-            executor.instrPtr = class5092!!.anInt5866
-            executor.intLocals = class5092!!.anIntArray5867
-            executor.objectLocals = class5092!!.anObjectArray5865
-            executor.longLocals = class5092!!.aLongArray5868
+            executor.instrPtr = class5092!!.savedInstrPtr
+            executor.intLocals = class5092!!.savedIntLocals
+            executor.objectLocals = class5092!!.savedStringLocals
+            executor.longLocals = class5092!!.savedLongLocals
         }
     }
 
@@ -5259,7 +5259,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method5314(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -5293,11 +5293,11 @@ object CS2Interpreter {
             executor.stringStackPtr -= cs2script3!!.stringArgsCount
             executor.longStackPtr -= cs2script3!!.longArgsCount
             var class5098: CS2ReturnValue? = CS2ReturnValue()
-            class5098!!.aCacheableNodeSub55869 = executor.current
-            class5098!!.anInt5866 = executor.instrPtr
-            class5098!!.anIntArray5867 = executor.intLocals
-            class5098!!.anObjectArray5865 = executor.objectLocals
-            class5098!!.aLongArray5868 = executor.longLocals
+            class5098!!.savedScript = executor.current
+            class5098!!.savedInstrPtr = executor.instrPtr
+            class5098!!.savedIntLocals = executor.intLocals
+            class5098!!.savedStringLocals = executor.objectLocals
+            class5098!!.savedLongLocals = executor.longLocals
             if (executor.returnValuesPtr >= executor.returnValues!!.size) {
                 throw RuntimeException()
             } else {
@@ -5353,7 +5353,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7032(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.width
     }
@@ -5385,7 +5385,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1259(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method13450(icomponentdefinitions3!!, executor)
@@ -5429,7 +5429,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetDepthChild(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setDepthChild(icomponentdefinitions3!!, executor)
@@ -5499,7 +5499,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetNoClickThrough(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setNoClickThrough(icomponentdefinitions3!!, executor)
@@ -5513,7 +5513,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3168(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         var icomponentdefinitions5: Component? = Interface.getSub(interface4!!, icomponentdefinitions3!!)
@@ -5523,7 +5523,7 @@ object CS2Interpreter {
     @JvmStatic
     fun ccSetSize(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -5546,7 +5546,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6120(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method1083(icomponentdefinitions3!!, executor)
@@ -5560,7 +5560,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1084(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6158(icomponentdefinitions3!!, executor)
@@ -5571,7 +5571,7 @@ object CS2Interpreter {
         executor.intStackPtr -= 2
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.currentQuickChatMessage!!.anIntArray4046!![i_2] = i_3
+        executor.currentQuickChatMessage!!.dynamicValues!![i_2] = i_3
     }
 
     @JvmStatic
@@ -5596,7 +5596,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method2169(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method869(icomponentdefinitions3!!, executor)
@@ -5683,7 +5683,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method11350(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.offsetX
     }
@@ -5706,7 +5706,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7676(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var i_4 = -1
         var i_5 = -1
@@ -5721,7 +5721,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method892(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = if (icomponentdefinitions3!!.hidden) 1  else 0
     }
@@ -5773,7 +5773,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5332(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method8310(icomponentdefinitions3!!, executor)
@@ -5817,7 +5817,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1949(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method569(icomponentdefinitions3!!, executor)
@@ -5826,7 +5826,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method1951(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.method5908()
+        var i_3 = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.getSlotState()
         executor.intStack[++executor.intStackPtr - 1] = if (i_3 == 5) 1 else 0
     }
 
@@ -5878,7 +5878,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4901(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.scrollWidth
     }
@@ -5951,12 +5951,12 @@ object CS2Interpreter {
     @JvmStatic
     fun method6304(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_2).method14916()
+        executor.intStack[++executor.intStackPtr - 1] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_2).getValueTypeCount()
     }
 
     @JvmStatic
     fun method6305(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method7927(icomponentdefinitions3!!, executor)
     }
@@ -6010,7 +6010,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1497(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method2915(icomponentdefinitions3!!, executor)
@@ -6018,7 +6018,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1498(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.offsetY
     }
@@ -6092,7 +6092,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method541(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setResumeText(icomponentdefinitions3!!, executor)
@@ -6231,7 +6231,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method12846(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6697(icomponentdefinitions3!!, interface4!!, executor)
@@ -6244,7 +6244,7 @@ object CS2Interpreter {
         var bool3 = executor.intStack[executor.intStackPtr + 1] == 1
         var i_4 = executor.intStack[executor.intStackPtr + 2]
         var bool5 = executor.intStack[executor.intStackPtr + 3] == 1
-        WorldConnection.method6299(i_2, bool3, i_4, bool5)
+        WorldConnection.sortAndClearPings(i_2, bool3, i_4, bool5)
     }
 
     @JvmStatic
@@ -6276,7 +6276,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetTargetVerb(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setTargetVerb(icomponentdefinitions3!!, executor)
@@ -6334,7 +6334,7 @@ object CS2Interpreter {
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var underlaydefinition4: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition4 = executor.hookedInterface2
         } else {
             underlaydefinition4 = executor.hookedInterface1
@@ -6390,7 +6390,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15416(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method12209(icomponentdefinitions3!!, executor)
@@ -6420,7 +6420,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method13491(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.parentId
     }
@@ -6433,12 +6433,12 @@ object CS2Interpreter {
     @JvmStatic
     fun method4194(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = (CalenderUtil.method5363(i_2) / 60000L).toInt()
+        executor.intStack[++executor.intStackPtr - 1] = (CalenderUtil.convertDaysToMilliseconds(i_2) / 60000L).toInt()
     }
 
     @JvmStatic
     fun method6236(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.spriteRoll
     }
@@ -6493,7 +6493,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6231(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.method5909()
+        executor.intStack[++executor.intStackPtr - 1] = Client.GRAND_EXCHANGE_SLOTS[i_2]!!.isBuyOffer()
     }
 
     @JvmStatic
@@ -6556,11 +6556,11 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccDelete(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         if (underlaydefinition2!!.comp!!.slotId == -1) {
             throw RuntimeException("")
         } else {
-            var icomponentdefinitions3: Component? = underlaydefinition2!!.method8772()
+            var icomponentdefinitions3: Component? = underlaydefinition2!!.getComponentFromInterface()
             @Suppress("UNCHECKED_CAST")
             (icomponentdefinitions3!!.slotChildren as Array<Component?>?)!![underlaydefinition2!!.comp!!.slotId] = null
             Component.redrawComponent(icomponentdefinitions3)
@@ -6661,7 +6661,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetPosition(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setComponentPosition(icomponentdefinitions3!!, interface4!!, executor)
@@ -6707,7 +6707,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method11249(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.spriteScale
     }
@@ -6765,7 +6765,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7219(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.color
     }
@@ -6905,7 +6905,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3041(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method1845(icomponentdefinitions3!!, executor)
@@ -6965,7 +6965,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3370(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method542(icomponentdefinitions3!!, executor)
@@ -7112,13 +7112,13 @@ object CS2Interpreter {
     fun mergeStrings(executor: CS2Executor) {
         var i_2 = executor.intOpValues!![executor.instrPtr]
         executor.stringStackPtr -= i_2
-        var string_3: String? = Utils.method6398(executor.stringStack, executor.stringStackPtr, i_2)
+        var string_3: String? = Utils.joinStrings(executor.stringStack, executor.stringStackPtr, i_2)
         executor.stringStack[++executor.stringStackPtr - 1] = string_3
     }
 
     @JvmStatic
     fun method12499(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method3672(icomponentdefinitions3!!, executor)
@@ -7147,7 +7147,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccResumePauseButton(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method6942(icomponentdefinitions3!!)
     }
@@ -7216,7 +7216,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5203(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method14482(icomponentdefinitions3!!, executor)
@@ -7294,7 +7294,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3031(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method1454(icomponentdefinitions3!!, executor)
@@ -7311,7 +7311,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15559(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.fontId
     }
@@ -7344,7 +7344,7 @@ object CS2Interpreter {
         executor.intStackPtr -= 2
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
-        executor.currentQuickChatMessage!!.anIntArray4046!![i_2] = i_3
+        executor.currentQuickChatMessage!!.dynamicValues!![i_2] = i_3
     }
 
     @JvmStatic
@@ -7419,14 +7419,14 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8211(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.spriteYaw
     }
 
     @JvmStatic
     fun method8212(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method11337(icomponentdefinitions3!!, interface4!!, executor)
@@ -7440,7 +7440,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6364(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method4276(icomponentdefinitions3!!, interface4!!, executor)
@@ -7478,7 +7478,7 @@ object CS2Interpreter {
         var i_4 = tcpmessage3!!.buffer.currentPosition
         tcpmessage3!!.buffer.writeByte(3)
         tcpmessage3!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.method14896(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.anIntArray4046!!)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage3!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
         tcpmessage3!!.buffer.writeIndex(tcpmessage3!!.buffer.currentPosition - i_4)
         class1842!!.queuePacket(tcpmessage3)
     }
@@ -7490,7 +7490,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1606(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method15409(icomponentdefinitions3!!, executor)
@@ -7523,14 +7523,14 @@ object CS2Interpreter {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
             executor.intStack[++executor.intStackPtr - 1] = class282Sub362.mecId
-            var i_3 = (class282Sub362!!.anInt7988 shl 28) or class282Sub362.absX + (WorldMap.mapSquareAbsX shl 14) or class282Sub362.absY + WorldMap.mapSquareAbsY
+            var i_3 = (class282Sub362!!.plane shl 28) or class282Sub362.absX + (WorldMap.mapSquareAbsX shl 14) or class282Sub362.absY + WorldMap.mapSquareAbsY
             executor.intStack[++executor.intStackPtr - 1] = i_3
         }
     }
 
     @JvmStatic
     fun method12583(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method3601(icomponentdefinitions3!!, executor)
     }
@@ -7593,14 +7593,14 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5029(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method15207(icomponentdefinitions3!!, executor)
     }
 
     @JvmStatic
     fun method14746(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method2593(icomponentdefinitions3!!, executor)
@@ -7609,7 +7609,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method8735(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -7688,7 +7688,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method12802(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method4651(icomponentdefinitions3!!, executor)
@@ -7709,7 +7709,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6510(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method1455(icomponentdefinitions3!!, interface4!!, executor)
@@ -7731,10 +7731,10 @@ object CS2Interpreter {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub63 != null) {
-            var bool4 = class282Sub50Sub63.gameToMapCoordsForPlane((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
+            var bool4 = class282Sub50Sub63.gameToMapCoordsForPlane((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.coordConversionBuffer)
             if (bool4) {
-                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![1]
-                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![2]
+                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![1]
+                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![2]
             } else {
                 executor.intStack[++executor.intStackPtr - 1] = -1
                 executor.intStack[++executor.intStackPtr - 1] = -1
@@ -7801,7 +7801,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method260(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setOnMouseOver(icomponentdefinitions3!!, executor)
@@ -7875,7 +7875,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method13359(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        var bool3 = ClientStartup.activeClient!!.method4658(File(string_2))
+        var bool3 = ClientStartup.activeClient!!.validateCacheDirectory(File(string_2))
         executor.intStack[++executor.intStackPtr - 1] = if (bool3) 1  else 0
     }
 
@@ -7887,7 +7887,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5454(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6689(icomponentdefinitions3!!, executor)
@@ -7918,7 +7918,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1967(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method14680(icomponentdefinitions3!!, executor)
     }
@@ -7935,7 +7935,7 @@ object CS2Interpreter {
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var i_4 = executor.intStack[executor.intStackPtr + 2]
-        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.method1198(i_2, i_3, i_4)
+        executor.intStack[++executor.intStackPtr - 1] = executor.currentClanSettings!!.getClanFlagBitfield(i_2, i_3, i_4)
     }
 
     @JvmStatic
@@ -7971,10 +7971,10 @@ object CS2Interpreter {
         StaticMethods.menuBottomRightCornerSprite = null
         StaticMethods.menuBottomLeftCornerSprite = null
         StaticMethods.loadingBarTileSprite = null
-        StaticMedia.aNativeSprite647 = null
-        StaticMedia.aNativeSprite5576 = null
-        StaticMedia.aNativeSprite3452 = null
-        StaticMedia.aNativeSprite5339 = null
+        StaticMedia.loadingBarEdgeSprite = null
+        StaticMedia.loadingBarBackgroundSprite = null
+        StaticMedia.menuRightSideBorderSprite = null
+        StaticMedia.menuLeftSideBorderSprite = null
         FontMetrics.useBoldFont = true
     }
 
@@ -8072,7 +8072,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5004(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6690(icomponentdefinitions3!!, executor)
@@ -8085,7 +8085,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method16095(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method4772(icomponentdefinitions3!!, executor)
@@ -8206,7 +8206,7 @@ object CS2Interpreter {
         executor.intStackPtr -= 2
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
-        var underlaydefinition4: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition4: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         InterfaceRenderer.startDragging(underlaydefinition4!!.comp!!, i_2, i_3)
     }
 
@@ -8291,7 +8291,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6043(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setOnMouseLeave(icomponentdefinitions3!!, executor)
@@ -8317,7 +8317,7 @@ object CS2Interpreter {
     @JvmStatic
     fun ccSetItemNoNum(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -8329,7 +8329,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8285(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6289(icomponentdefinitions3!!, executor)
@@ -8353,7 +8353,7 @@ object CS2Interpreter {
         var i_5 = tcpmessage4!!.buffer.currentPosition
         tcpmessage4!!.buffer.writeString(string_2!!)
         tcpmessage4!!.buffer.writeShort(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.message!!.method14896(tcpmessage4!!.buffer, executor.currentQuickChatMessage!!.anIntArray4046!!)
+        executor.currentQuickChatMessage!!.message!!.encodeValues(tcpmessage4!!.buffer, executor.currentQuickChatMessage!!.dynamicValues!!)
         tcpmessage4!!.buffer.writeIndex(tcpmessage4!!.buffer.currentPosition - i_5)
         class1843!!.queuePacket(tcpmessage4)
     }
@@ -8370,7 +8370,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method8298(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -8412,7 +8412,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method4381(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -8530,7 +8530,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetScrollPos(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method1852(icomponentdefinitions3!!, interface4!!, executor)
@@ -8547,7 +8547,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5774(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method501(icomponentdefinitions3!!, executor)
@@ -8555,7 +8555,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5775(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method6288(icomponentdefinitions3!!, executor)
@@ -8716,7 +8716,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method401(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method3251(icomponentdefinitions3!!, executor)
     }
@@ -8748,7 +8748,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method7502(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -8787,7 +8787,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5512(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         method14605(icomponentdefinitions3!!, executor)
     }
@@ -8821,7 +8821,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1569(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method4280(icomponentdefinitions3!!, executor)
@@ -8829,7 +8829,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetItemWearColAlwaysNum(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setItemIFComp(icomponentdefinitions3!!, interface4!!, true, Component.StackMode.ALWAYS_NUM, executor)
@@ -8869,7 +8869,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method12723(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.angle2d
     }
@@ -8890,7 +8890,7 @@ object CS2Interpreter {
         executor.currentQuickChatMessage = QuickChatMessage()
         executor.currentQuickChatMessage!!.id = executor.intStack[--executor.intStackPtr]
         executor.currentQuickChatMessage!!.message = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(executor.currentQuickChatMessage!!.id)
-        executor.currentQuickChatMessage!!.anIntArray4046 = IntArray(executor.currentQuickChatMessage!!.message!!.method14916())
+        executor.currentQuickChatMessage!!.dynamicValues = IntArray(executor.currentQuickChatMessage!!.message!!.getValueTypeCount())
     }
 
     @JvmStatic
@@ -8924,7 +8924,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method11380(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method7667(icomponentdefinitions3!!, interface4!!, executor)
@@ -9171,7 +9171,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3561(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method2170(icomponentdefinitions3!!, executor)
@@ -9224,7 +9224,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method12116(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method15511(icomponentdefinitions3!!, interface4!!, executor)
@@ -9232,7 +9232,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetTargetOpCursor(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setTargetOpCursor(icomponentdefinitions3!!, executor)
@@ -9256,7 +9256,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6150(executor: CS2Executor) {
         var underlaydefinition2: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition2 = executor.hookedInterface2
         } else {
             underlaydefinition2 = executor.hookedInterface1
@@ -9325,10 +9325,10 @@ object CS2Interpreter {
     fun method7043(executor: CS2Executor) {
         var class282Sub50Sub62: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub62 != null) {
-            var bool3 = class282Sub50Sub62.mapToGameCoords(WorldMap.mapSquareAbsX + WorldMapSub1.mapCenterX, WorldMap.mapSquareAbsY + WorldMapSub1.mapCenterY, CS2Executor.anIntArray5900)
+            var bool3 = class282Sub50Sub62.mapToGameCoords(WorldMap.mapSquareAbsX + WorldMapSub1.mapCenterX, WorldMap.mapSquareAbsY + WorldMapSub1.mapCenterY, CS2Executor.coordConversionBuffer)
             if (bool3) {
-                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![1]
-                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![2]
+                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![1]
+                executor.intStack[++executor.intStackPtr - 1] = CS2Executor.coordConversionBuffer!![2]
             } else {
                 executor.intStack[++executor.intStackPtr - 1] = -1
                 executor.intStack[++executor.intStackPtr - 1] = -1
@@ -9341,7 +9341,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4797(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method2874(icomponentdefinitions3!!, executor)
@@ -9354,7 +9354,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4801(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method15256(icomponentdefinitions3!!, executor)
@@ -9362,7 +9362,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4802(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.slotId
     }
@@ -9424,7 +9424,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4565(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         if (icomponentdefinitions3!!.containerItemId != -1) {
             executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.itemStackSize
@@ -9540,7 +9540,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8154(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.fontId
     }
@@ -9608,7 +9608,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method14521(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         method4136(icomponentdefinitions3!!, executor)
@@ -9660,7 +9660,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5598(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.height
     }
@@ -9686,7 +9686,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun ccSetItemAlwaysNum(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var interface4: Interface? = underlaydefinition2!!.inter
         setItemIFComp(icomponentdefinitions3!!, interface4!!, false, Component.StackMode.ALWAYS_NUM, executor)
@@ -9726,7 +9726,7 @@ object CS2Interpreter {
     fun method2620(executor: CS2Executor) {
         var ifComp = executor.intStack[--executor.intStackPtr]
         var underlaydefinition3: CS2Interface? = null
-        if (executor.aBool7022) {
+        if (executor.hasIntOperand) {
             underlaydefinition3 = executor.hookedInterface2
         } else {
             underlaydefinition3 = executor.hookedInterface1
@@ -9736,7 +9736,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1134(executor: CS2Executor) {
-        var underlaydefinition2: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
+        var underlaydefinition2: CS2Interface? = if (executor.hasIntOperand) executor.hookedInterface2  else executor.hookedInterface1
         var icomponentdefinitions3: Component? = underlaydefinition2!!.comp
         var i_4 = executor.intStack[--executor.intStackPtr]
         var attributedefault5: ParamType? = TypeLists.PARAMS!!.list(i_4)
@@ -9772,7 +9772,7 @@ object CS2Interpreter {
             if (icomponentdefinitions0!!.npcCustomisation == null) {
                 icomponentdefinitions0!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, true)
             }
-            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.method1480()
+            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (i_4 >= 0 && i_4 < npcdefinitions5!!.modelIds!!.size) {
                 icomponentdefinitions0!!.npcCustomisation!!.modelIds[i_4] = i_3
                 Component.redrawComponent(icomponentdefinitions0!!)
@@ -9871,7 +9871,7 @@ object CS2Interpreter {
             if (icomponentdefinitions0!!.npcCustomisation == null) {
                 icomponentdefinitions0!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, icomponentdefinitions0!!.mediaType == MediaType.NPC_MODEL)
             }
-            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.method1480()
+            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (npcdefinitions5!!.recolorDst != null && i_4 >= 0 && i_4 < npcdefinitions5!!.recolorDst!!.size) {
                 icomponentdefinitions0!!.npcCustomisation!!.recolorDst!![i_4] = i_3.toShort()
                 Component.redrawComponent(icomponentdefinitions0!!)
@@ -10704,7 +10704,7 @@ object CS2Interpreter {
             if (icomponentdefinitions0!!.npcCustomisation == null) {
                 icomponentdefinitions0!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, false)
             }
-            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.method1480()
+            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (i_4 >= 0 && i_4 < npcdefinitions5!!.headModels!!.size) {
                 icomponentdefinitions0!!.npcCustomisation!!.modelIds[i_4] = i_3
                 Component.redrawComponent(icomponentdefinitions0!!)
@@ -10803,7 +10803,7 @@ object CS2Interpreter {
             if (icomponentdefinitions0!!.npcCustomisation == null) {
                 icomponentdefinitions0!!.npcCustomisation = NPCTypeCustomisation(npcdefinitions5!!, icomponentdefinitions0!!.mediaType == MediaType.NPC_MODEL)
             }
-            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.method1480()
+            icomponentdefinitions0!!.npcCustomisation!!.uid = CS2Executor.generateUniqueId()
             if (npcdefinitions5!!.retextureDst != null && i_4 >= 0 && i_4 < npcdefinitions5!!.retextureDst!!.size) {
                 icomponentdefinitions0!!.npcCustomisation!!.retextureDst!![i_4] = i_3.toShort()
                 Component.redrawComponent(icomponentdefinitions0!!)
@@ -10867,7 +10867,7 @@ object CS2Interpreter {
             Component.redrawComponent(icomponentdefinitions0!!)
         }
         if (icomponentdefinitions0!!.slotId == -1 && !interface1.preventInteraction) {
-            PulseEventQueue.method5581(icomponentdefinitions0!!.idHash)
+            PulseEventQueue.queueT17Event(icomponentdefinitions0!!.idHash)
         }
     }
 

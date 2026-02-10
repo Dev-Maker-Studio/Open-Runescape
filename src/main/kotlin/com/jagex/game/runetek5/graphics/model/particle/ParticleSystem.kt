@@ -230,9 +230,9 @@ class ParticleSystem(cycle: Int, hasOntick: Boolean) {
 
         @JvmStatic
         fun get(cycle: Int, hasOntick: Boolean): ParticleSystem {
-            if (ParticleSystemManager.awaitingRemovalCursorPosition != ParticleSystemManager.anInt2899) {
-                val cachedParticleSystem = ParticleSystemManager.particleSystemsAwaitingRemoval!![ParticleSystemManager.anInt2899]!!
-                ParticleSystemManager.anInt2899 = ParticleSystemManager.anInt2899 + 1 and ParticleSystemManager.anIntArray931!![ParticleSystemManager.detailsSetting]
+            if (ParticleSystemManager.awaitingRemovalCursorPosition != ParticleSystemManager.removalQueueSize) {
+                val cachedParticleSystem = ParticleSystemManager.particleSystemsAwaitingRemoval!![ParticleSystemManager.removalQueueSize]!!
+                ParticleSystemManager.removalQueueSize = ParticleSystemManager.removalQueueSize + 1 and ParticleSystemManager.DETAIL_LEVEL_LIMITS!![ParticleSystemManager.detailsSetting]
                 cachedParticleSystem.activate(cycle, hasOntick)
                 return cachedParticleSystem
             }

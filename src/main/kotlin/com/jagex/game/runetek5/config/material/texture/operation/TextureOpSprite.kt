@@ -34,7 +34,7 @@ open class TextureOpSprite : TextureOperation(0, false) {
                 SpriteType.listSingle(TextureTypeList.textureSpriteResource, spriteId)
             }
             assert(sprite != null)
-            sprite!!.method1523()
+            sprite!!.expandToFullSize()
             spritePixels = sprite.getPixels()
             spriteWidth = sprite.width
             spriteHeight = sprite.height

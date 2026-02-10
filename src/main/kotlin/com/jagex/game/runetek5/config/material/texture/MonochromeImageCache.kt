@@ -10,7 +10,7 @@ import com.jagex.game.runetek5.cache.node.LinkedList
  */
 class MonochromeImageCache(
     @JvmField val paletteSize: Int,
-    @JvmField val anInt3715: Int,
+    @JvmField val maxCachedEntries: Int,
     dataLength: Int
 ) {
 
@@ -18,7 +18,7 @@ class MonochromeImageCache(
     @JvmField var nodes: Array<MonochromeImageCacheEntry?>
     @JvmField var paletteData: Array<IntArray?>
     @JvmField var nodelist: LinkedList? = LinkedList()
-    @JvmField var anInt3714: Int = 0
+    @JvmField var allocatedEntryCount: Int = 0
     @JvmField var lastUsedNodeIndex: Int = -1
 
     init {
@@ -26,7 +26,7 @@ class MonochromeImageCache(
         for (i in 0 until paletteSize) {
             paletteData[i] = IntArray(dataLength)
         }
-        nodes = arrayOfNulls(anInt3715)
+        nodes = arrayOfNulls(maxCachedEntries)
     }
 
     /**
@@ -49,7 +49,7 @@ class MonochromeImageCache(
      * @return The palette data for this row
      */
     fun getPalette(index: Int): IntArray {
-        if (anInt3715 == paletteSize) {
+        if (maxCachedEntries == paletteSize) {
             dirty = nodes[index] == null
             nodes[index] = EMPTY
             return paletteData[index]!!
@@ -59,21 +59,21 @@ class MonochromeImageCache(
             var entry = nodes[index]
             if (entry == null) {
                 dirty = true
-                if (anInt3714 >= paletteSize) {
+                if (allocatedEntryCount >= paletteSize) {
                     val oldEntry = nodelist!!.getNext() as MonochromeImageCacheEntry
-                    entry = MonochromeImageCacheEntry(index, oldEntry.anInt7689)
+                    entry = MonochromeImageCacheEntry(index, oldEntry.paletteIndex)
                     nodes[oldEntry.nodeRef] = null
                     oldEntry.unlink()
                 } else {
-                    entry = MonochromeImageCacheEntry(index, anInt3714)
-                    anInt3714++
+                    entry = MonochromeImageCacheEntry(index, allocatedEntryCount)
+                    allocatedEntryCount++
                 }
                 nodes[index] = entry
             } else {
                 dirty = false
             }
             nodelist!!.insertHead(entry)
-            return paletteData[entry.anInt7689]!!
+            return paletteData[entry.paletteIndex]!!
         }
 
         dirty = lastUsedNodeIndex != index
@@ -86,8 +86,8 @@ class MonochromeImageCache(
      *
      * @return All palette data
      */
-    fun method5722(): Array<IntArray?> {
-        if (paletteSize != anInt3715) {
+    fun getAllPaletteData(): Array<IntArray?> {
+        if (paletteSize != maxCachedEntries) {
             throw RuntimeException()
         }
         for (i in 0 until paletteSize) {

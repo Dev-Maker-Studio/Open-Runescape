@@ -8,9 +8,9 @@ class WorldMapCategory(
 ) : Node<WorldMapCategory>() {
 
     @JvmField var absX: Int = 0
-    @JvmField var anInt7988: Int = 0
-    @JvmField var anInt7990: Int = 0
-    @JvmField var anInt7992: Int = 0
+    @JvmField var plane: Int = 0
+    @JvmField var screenX: Int = 0
+    @JvmField var screenY: Int = 0
     @JvmField var absY: Int = 0
     @JvmField var mecId: Int = -1
     @JvmField var isMouseOver: Boolean = false
@@ -21,7 +21,7 @@ class WorldMapCategory(
 
     companion object {
         @JvmStatic
-        fun method12702(i_0: Int, i_1: Int, i_2: Int): Int {
+        fun findNearestElement(i_0: Int, i_1: Int, i_2: Int): Int {
             if (ComponentMinimap.mapAssetLoadingPercentage < 100) {
                 return -2
             } else {

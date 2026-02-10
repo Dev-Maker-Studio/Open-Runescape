@@ -370,7 +370,7 @@ abstract class AbstractNativeToolkit(
         initializeQuadStream()
         initializeLineStream()
         initializeCircleStream()
-        particleRenderer!!.method1089()
+        particleRenderer!!.resetVertexStream()
     }
 
     fun deallocate() {
@@ -541,7 +541,7 @@ abstract class AbstractNativeToolkit(
 
     override fun resetBloom() {
         if (bloomManager[1] != null && bloomManager[1]!!.isLinked()) {
-            bloomRenderer!!.method822(bloomManager[1]!!)
+            bloomRenderer!!.removeBloomShader(bloomManager[1]!!)
             materialCache!!.reset()
         }
     }
@@ -1602,7 +1602,7 @@ abstract class AbstractNativeToolkit(
     internal abstract fun setDepthRenderState()
 
     override fun beginBloomCapture(i_3: Int, i_4: Int) {
-        bloomRenderer!!.method830(i_3, i_4)
+        bloomRenderer!!.beginCapture(i_3, i_4)
     }
 
     fun updateFogAndWater() {
@@ -1820,7 +1820,7 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun compositeBloomEffects() {
-        bloomRenderer!!.method833()
+        bloomRenderer!!.endCapture()
     }
 
     internal abstract fun toggleLights()

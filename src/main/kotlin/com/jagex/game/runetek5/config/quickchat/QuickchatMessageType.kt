@@ -47,7 +47,7 @@ class QuickchatMessageType : CacheableNode() {
         }
     }
 
-    fun method14896(buffer: Packet, ints_2: IntArray) {
+    fun encodeValues(buffer: Packet, ints_2: IntArray) {
         if (valueTypes != null) {
             for (typeIndex in valueTypes!!.indices) {
                 if (typeIndex >= ints_2.size) break
@@ -75,7 +75,7 @@ class QuickchatMessageType : CacheableNode() {
         return builder.toString()
     }
 
-    fun method14898(): String {
+    fun getPlaceholderText(): String {
         val builder = StringBuilder(80)
         if (message == null) {
             return ""
@@ -92,7 +92,7 @@ class QuickchatMessageType : CacheableNode() {
         return builder.toString()
     }
 
-    fun method14901(i_1: Int, i_2: Int): Int {
+    fun getValueConfig(i_1: Int, i_2: Int): Int {
         return if (valueTypes != null && i_1 >= 0 && i_1 <= valueTypes!!.size) {
             if (configs!![i_1] != null && i_2 >= 0 && i_2 <= configs!![i_1]!!.size) configs!![i_1]!![i_2] else -1
         } else -1
@@ -117,7 +117,7 @@ class QuickchatMessageType : CacheableNode() {
         }
     }
 
-    fun method14916(): Int {
+    fun getValueTypeCount(): Int {
         return if (valueTypes == null) 0 else valueTypes!!.size
     }
 
@@ -127,7 +127,7 @@ class QuickchatMessageType : CacheableNode() {
 
     companion object {
         @JvmStatic
-        fun method1360(string_0: String, bool1: Boolean) {
+        fun searchQuickchatMessages(string_0: String, bool1: Boolean) {
             val searchString = string_0.lowercase()
             var shorts_3 = ShortArray(16)
             var i_4 = 0
@@ -135,7 +135,7 @@ class QuickchatMessageType : CacheableNode() {
             val i_6 = (if (bool1) TypeLists.QUICK_CHAT_MESSAGE!!.menuCount else TypeLists.QUICK_CHAT_MESSAGE!!.messageCount) + i_5
             for (i_7 in i_5 until i_6) {
                 val quickchatdefinitions12 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_7)
-                if (quickchatdefinitions12.searchable && quickchatdefinitions12.method14898().lowercase().indexOf(searchString) != -1) {
+                if (quickchatdefinitions12.searchable && quickchatdefinitions12.getPlaceholderText().lowercase().indexOf(searchString) != -1) {
                     if (i_4 >= 50) {
                         CS2Interpreter.CS2_QUERY_RESULTS_LEN = -1
                         ColorImageCache.CS2_QUERY_RESULTS = null
@@ -154,7 +154,7 @@ class QuickchatMessageType : CacheableNode() {
             CS2Interpreter.CS2_QUERY_RESULTS_LEN = i_4
             val arr_11 = Array(CS2Interpreter.CS2_QUERY_RESULTS_LEN) { "" }
             for (i_8 in 0 until CS2Interpreter.CS2_QUERY_RESULTS_LEN) {
-                arr_11[i_8] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(shorts_3[i_8].toInt()).method14898()
+                arr_11[i_8] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(shorts_3[i_8].toInt()).getPlaceholderText()
             }
             Utils.sortAlphabetically(arr_11, ColorImageCache.CS2_QUERY_RESULTS)
         }

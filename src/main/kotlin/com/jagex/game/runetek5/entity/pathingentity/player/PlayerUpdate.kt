@@ -866,7 +866,7 @@ object PlayerUpdate {
                                     }
                                     1 -> {
                                         entitySequence.reset()
-                                        entitySequence.anInt10065 = i_8
+                                        entitySequence.delayTicks = i_8
                                     }
                                     2 -> entitySequence.resetLoops()
                                 }
@@ -878,7 +878,7 @@ object PlayerUpdate {
                         if (entitySequence == null || !entitySequence.hasType()) {
                             entitySequence = PathingEntitySequence(animable).also { animable.sequences[seq] = it }
                             entitySequence.update(seqId)
-                            entitySequence.anInt10065 = i_8
+                            entitySequence.delayTicks = i_8
                         }
                     }
                 }
@@ -995,7 +995,7 @@ object PlayerUpdate {
     @JvmStatic
     fun onVarChange(i_0: Int) {
         AmbientSound.update()
-        val i_2 = TypeLists.VAR!!.list(i_0)!!.anInt4327
+        val i_2 = TypeLists.VAR!!.list(i_0)!!.clientCode
         if (i_2 != 0) {
             val i_3 = VarProviders.PLAYER_VAR_PROVIDER.activeVars[i_0]
             if (i_2 == 5) {

@@ -32,7 +32,7 @@ class EntityHitbar(
                 nextDetails = entityList.getNext()
             }
 
-            if (hitbarType.anInt2443 + details.discardAtCycle + details.lifetimeCycles > clientCycle) {
+            if (hitbarType.fadeOutDuration + details.discardAtCycle + details.lifetimeCycles > clientCycle) {
                 return details
             }
             details.unlinkNode()
@@ -68,12 +68,12 @@ class EntityHitbar(
         }
 
         if (adjustedHitbar == null) {
-            if (hitbarCount < Client.ENTITY_DEFAULTS!!.anInt7030) {
+            if (hitbarCount < Client.ENTITY_DEFAULTS!!.maxVisibleHitbars) {
                 entityList.getPrevious(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles))
             }
         } else {
             replace(EntityHitbarDisplayDetails(discardCycle, fromPercentage, toPercentage, lifetimeCycles), adjustedHitbar)
-            if (hitbarCount >= Client.ENTITY_DEFAULTS!!.anInt7030) {
+            if (hitbarCount >= Client.ENTITY_DEFAULTS!!.maxVisibleHitbars) {
                 entityList.getFirst()!!.unlinkNode()
             }
         }

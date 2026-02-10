@@ -46,7 +46,7 @@ class AssetLoadingScreenRenderer : Runnable {
         val stage = loadingStage ?: return 0
 
         val stageNumber = stage.number
-        if (stage.aBool4718 && loadingPercentage < stage.secondaryCompletionDisplay) {
+        if (stage.hasProgressTracking && loadingPercentage < stage.secondaryCompletionDisplay) {
             return loadingPercentage + 1
         }
         if (stageNumber < 0 || stageNumber >= LoadingStage.LOADING_STAGES!!.size - 1) {

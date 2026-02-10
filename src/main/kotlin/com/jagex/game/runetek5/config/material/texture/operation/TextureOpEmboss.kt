@@ -23,7 +23,7 @@ class TextureOpEmboss : TextureOperation(1, true) {
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = monochromeImageCache.getPalette(i_1)
         if (monochromeImageCache.dirty) {
-            val i_4 = embossDepth * TextureRaster.anInt3678 shr 12
+            val i_4 = embossDepth * TextureRaster.scaledWidth shr 12
             val ints_5 = getChildMonochromeOutput(0, i_1 - 1 and TextureRaster.columnEnd)
             val ints_6 = getChildMonochromeOutput(0, i_1)
             val ints_7 = getChildMonochromeOutput(0, i_1 + 1 and TextureRaster.columnEnd)

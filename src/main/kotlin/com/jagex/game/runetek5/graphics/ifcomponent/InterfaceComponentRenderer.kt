@@ -328,7 +328,7 @@ object InterfaceComponentRenderer {
                                         val appearance = if (component.wearCol) PlayerUpdate.MY_PLAYER!!.playerAppearance else null
                                         sprite = TypeLists.OBJ!!.createNativeSprite(Renderers.activeToolkit!!, component.containerItemId, component.itemStackSize, component.borderThickness, 0xffffff.inv() or component.spriteShadow, component.renderStack, appearance)
                                     } else if (component.videoFileId != -1) {
-                                        sprite = VorbisNode.method8858(Renderers.activeToolkit!!, component.videoFileId)
+                                        sprite = VorbisNode.getVideoFrame(Renderers.activeToolkit!!, component.videoFileId)
                                     } else {
                                         sprite = component.draw(Renderers.activeToolkit!!)
                                     }

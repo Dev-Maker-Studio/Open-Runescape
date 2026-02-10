@@ -160,7 +160,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = super.monochromeImageCache.getPalette(i_1)
         if (super.monochromeImageCache.dirty) {
-            val ints_4 = super.monochromeImageCache.method5722()
+            val ints_4 = super.monochromeImageCache.getAllPaletteData()
             var i_5 = 0
             var i_6 = 0
             var i_7 = 0

@@ -289,7 +289,7 @@ object InterfaceRenderer {
 									Client.GAME_SCREEN_INTERFACE = childComponent
 									val environment = Resource.mapRegion?.environmentManager?.environment
 									if (environment?.skybox != null && Resource.mapRegionLoaderTask?.isLoadingRegion() != true) {
-										environment.skybox?.method4217(Renderers.activeToolkit!!, childComponent.height, PreferenceManager.preferences?.skyboxes?.value ?: 0)
+										environment.skybox?.updateForHeight(Renderers.activeToolkit!!, childComponent.height, PreferenceManager.preferences?.skyboxes?.value ?: 0)
 									}
 
 									if (childComponent.contentType == ComponentContentType.GAME_WINDOW && !MiniMenu.isOpen && mouseX >= clipMinX && mouseY >= clipMinY && mouseX < clipMaxX && mouseY < clipMaxY) {
@@ -776,7 +776,7 @@ object InterfaceRenderer {
 						}
 
 						if (childComponent.type == ComponentType.SPRITE && childComponent.skyboxId != -1) {
-							childComponent.calculateLighting(TypeLists.SKYBOX!!, TypeLists.SUN!!)!!.method4217(Renderers.activeToolkit!!, childComponent.height, PreferenceManager.preferences?.skyboxes?.value ?: 0)
+							childComponent.calculateLighting(TypeLists.SKYBOX!!, TypeLists.SUN!!)!!.updateForHeight(Renderers.activeToolkit!!, childComponent.height, PreferenceManager.preferences?.skyboxes?.value ?: 0)
 						}
 
 						Component.drawComponentObjSprite(childComponent)

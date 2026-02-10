@@ -16,17 +16,17 @@ class PcmStreamScheduler : PcmStream() {
     @Suppress("UNCHECKED_CAST")
     fun insertEvent(node: Node<Any?>, event: ScheduledAudioEvent) {
         var currentNode: Node<Any?> = node
-        while (scheduledEvents.tail != currentNode && (currentNode as ScheduledAudioEvent).anInt7676 <= event.anInt7676) {
+        while (scheduledEvents.tail != currentNode && (currentNode as ScheduledAudioEvent).scheduledTime <= event.scheduledTime) {
             currentNode = currentNode.next as Node<Any?>
         }
 
         Node.replace(event, currentNode)
-        nextEventTime = (scheduledEvents.tail.next as ScheduledAudioEvent).anInt7676
+        nextEventTime = (scheduledEvents.tail.next as ScheduledAudioEvent).scheduledTime
     }
 
     @Synchronized
     fun addSubStream(stream: PcmStream) {
-        streamQueue.method8098(stream)
+        streamQueue.addLast(stream)
     }
 
     @Synchronized
@@ -38,7 +38,7 @@ class PcmStreamScheduler : PcmStream() {
         if (currentPosition > 0) {
             var event = scheduledEvents.getFirst() as ScheduledAudioEvent?
             while (event != null) {
-                event.anInt7676 -= currentPosition
+                event.scheduledTime -= currentPosition
                 event = scheduledEvents.next() as ScheduledAudioEvent?
             }
 
@@ -49,12 +49,12 @@ class PcmStreamScheduler : PcmStream() {
 
     fun removeEvent(event: ScheduledAudioEvent) {
         event.unlink()
-        event.method12355()
+        event.onRemove()
         val nextNode = scheduledEvents.tail.next
         if (nextNode === scheduledEvents.tail) {
             nextEventTime = -1
         } else {
-            nextEventTime = (nextNode as ScheduledAudioEvent).anInt7676
+            nextEventTime = (nextNode as ScheduledAudioEvent).scheduledTime
         }
     }
 
@@ -91,12 +91,12 @@ class PcmStreamScheduler : PcmStream() {
 
                 val event = scheduledEvents.getFirst() as ScheduledAudioEvent
                 synchronized(event) {
-                    val result = event.method12354(this)
+                    val result = event.processEvent(this)
                     if (result < 0) {
-                        event.anInt7676 = 0
+                        event.scheduledTime = 0
                         removeEvent(event)
                     } else {
-                        event.anInt7676 = result
+                        event.scheduledTime = result
                         insertEvent(event.next as Node<Any?>, event)
                     }
                 }
@@ -137,12 +137,12 @@ class PcmStreamScheduler : PcmStream() {
 
                 val event = scheduledEvents.getFirst() as ScheduledAudioEvent
                 synchronized(event) {
-                    val result = event.method12354(this)
+                    val result = event.processEvent(this)
                     if (result < 0) {
-                        event.anInt7676 = 0
+                        event.scheduledTime = 0
                         removeEvent(event)
                     } else {
-                        event.anInt7676 = result
+                        event.scheduledTime = result
                         insertEvent(event.next as Node<Any?>, event)
                     }
                 }

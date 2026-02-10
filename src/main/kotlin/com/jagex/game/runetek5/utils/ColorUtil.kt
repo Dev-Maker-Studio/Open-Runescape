@@ -373,7 +373,7 @@ object ColorUtil {
     }
 
     @JvmStatic
-    fun method14677(i_0: Int, i_1: Int): Int {
+    fun repackHslSafe(i_0: Int, i_1: Int): Int {
         var i_11 = i_1
         if (i_0 == -1) {
             return 12345678
@@ -390,7 +390,7 @@ object ColorUtil {
     }
 
     @JvmStatic
-    fun method4162(colorHsl: Int, lightness: Int): Int {
+    fun repackHslWithSentinel(colorHsl: Int, lightness: Int): Int {
         var lightness = lightness
         if (colorHsl == -2) {
             return 12345678

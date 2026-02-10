@@ -195,7 +195,7 @@ open class Sequence protected constructor(tween: Boolean) {
         this.currentLoopCount = 0
     }
 
-    fun method7585(speed: Int): Boolean {
+    fun wouldAdvanceFrame(speed: Int): Boolean {
         var speedMod = speed
         return !((this.type == null) or ((speedMod - this.speed).also { speedMod = it } <= 0)) && (this.type!!.tweened or (this.currentFrameDuration + speedMod > this.type!!.durations!![this.currentFrameId]))
     }

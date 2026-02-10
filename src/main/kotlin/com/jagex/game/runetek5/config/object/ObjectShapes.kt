@@ -36,7 +36,7 @@ enum class ObjectShapes(@JvmField val shape: Int, @JvmField val group: Int) : Id
         @JvmField val OBJECT_CULL_TYPES = intArrayOf(1, 2, 4, 8)
 
         @JvmStatic
-        fun method7853(shape: Int, rotation: Int): Byte {
+        fun getWallInteractByte(shape: Int, rotation: Int): Byte {
             return if (shape != WALL_INTERACT.shape) 0 else if ((rotation and 0x1) == 0) 1 else 2
         }
 

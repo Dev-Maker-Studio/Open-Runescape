@@ -46,19 +46,19 @@ object EntityUpdating {
     var turnDirectionIndex: Int = 0
 
     @JvmStatic
-    fun drawOverheadInterfaces(i_0: Int, startX: Int, startY: Int, endX: Int, endY: Int, drawX: Int, drawY: Int) {
+    fun drawOverheadInterfaces(componentReference: Int, startX: Int, startY: Int, endX: Int, endY: Int, drawX: Int, drawY: Int) {
         if (Client.MAP_LOADING_STAGE == 1) {
             val playerIndiceCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
             val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
             for (index in 0 until playerIndiceCount) {
                 val player = PlayerUpdate.players[playerIndices[index]]
-                player?.drawOverheadInterface(i_0, startX, startY, endX, endY, drawX, drawY)
+                player?.drawOverheadInterface(componentReference, startX, startY, endX, endY, drawX, drawY)
             }
             for (index in 0 until Client.NPC_UPDATE_INDEX) {
                 val npcKey = Client.NPC_UPDATE_INDICES[index]
                 val npcObjectNode = Client.NPC_MAP.get(npcKey.toLong())
                 if (npcObjectNode != null) {
-                    (npcObjectNode.value as PathingEntity).drawOverheadInterface(i_0, startX, startY, endX, endY, drawX, drawY)
+                    (npcObjectNode.value as PathingEntity).drawOverheadInterface(componentReference, startX, startY, endX, endY, drawX, drawY)
                 }
             }
         }
@@ -197,7 +197,7 @@ object EntityUpdating {
 
                 var drawY = (clipTop + Client.HINT_POSITION[1]).toInt()
                 drawY -= FontMetrics.defaultFontMetrics!!.topPadding
-                var bool94 = false
+                var hasDrawnHitbar = false
 
                 if (!pathingEntity.isHidden && !pathingEntity.entityHitbars.isEmpty()) {
                     var entityHitbar = pathingEntity.entityHitbars.getFirst() as EntityHitbar?
@@ -228,14 +228,14 @@ object EntityUpdating {
                                 val i_116: Int
 
                                 if (displayDetails.lifetimeCycles > i_23) {
-                                    val i_25 = if (hitbarType.anInt2442 == 0) 0 else hitbarType.anInt2442 * (i_23 / hitbarType.anInt2442)
+                                    val i_25 = if (hitbarType.animationStepSize == 0) 0 else hitbarType.animationStepSize * (i_23 / hitbarType.animationStepSize)
                                     val drawX = greenBar.getWidth() * displayDetails.fromPercentage / 255
                                     i_116 = i_25 * (i_24 - drawX) / displayDetails.lifetimeCycles + drawX
                                 } else {
                                     i_116 = i_24
-                                    val i_25 = displayDetails.lifetimeCycles + hitbarType.anInt2443 - i_23
-                                    if (hitbarType.anInt2439 >= 0) {
-                                        alpha = (i_25 shl 8) / (hitbarType.anInt2443 - hitbarType.anInt2439)
+                                    val i_25 = displayDetails.lifetimeCycles + hitbarType.fadeOutDuration - i_23
+                                    if (hitbarType.fadeStartOffset >= 0) {
+                                        alpha = (i_25 shl 8) / (hitbarType.fadeOutDuration - hitbarType.fadeStartOffset)
                                     }
                                 }
 
@@ -262,15 +262,15 @@ object EntityUpdating {
 
                                 Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop)
                                 drawY -= 2
-                                bool94 = true
+                                hasDrawnHitbar = true
                             }
                         }
                         entityHitbar = pathingEntity.entityHitbars.getNext() as EntityHitbar?
                     }
                 }
 
-                if (!bool94) {
-                    drawY -= Client.ENTITY_DEFAULTS!!.anInt7028 + 2
+                if (!hasDrawnHitbar) {
+                    drawY -= Client.ENTITY_DEFAULTS!!.defaultHitbarHeight + 2
                 }
 
                 if (!pathingEntity.isHidden) {
@@ -382,10 +382,10 @@ object EntityUpdating {
                                 var i_32 = 0
                                 var i_33 = 0
                                 var i_34 = 0
-                                var nativesprite35: NativeSprite? = null
-                                var nativesprite36: NativeSprite? = null
-                                var nativesprite37: NativeSprite? = null
-                                var nativesprite38: NativeSprite? = null
+                                var soakLeftCapSprite: NativeSprite? = null
+                                var soakMiddleFillSprite: NativeSprite? = null
+                                var soakInnerLeftSprite: NativeSprite? = null
+                                var soakRightCapSprite: NativeSprite? = null
                                 var i_39 = 0
                                 var i_40 = 0
                                 var i_41 = 0
@@ -396,131 +396,131 @@ object EntityUpdating {
                                 var i_46 = 0
                                 var i_47 = 0
 
-                                val nativesprite48 = hitsplatType.method3835(Renderers.activeToolkit!!)
-                                if (nativesprite48 != null) {
-                                    i_27 = nativesprite48.getWidth()
-                                    val i_49 = nativesprite48.getHeight()
+                                val leftCapSprite = hitsplatType.getLeftCapSprite(Renderers.activeToolkit!!)
+                                if (leftCapSprite != null) {
+                                    i_27 = leftCapSprite.getWidth()
+                                    val i_49 = leftCapSprite.getHeight()
                                     if (i_49 > i_47) {
                                         i_47 = i_49
                                     }
-                                    nativesprite48.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    leftCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                     i_31 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
-                                val nativesprite106 = hitsplatType.method3836(Renderers.activeToolkit!!)
-                                if (nativesprite106 != null) {
-                                    i_28 = nativesprite106.getWidth()
-                                    val i_50 = nativesprite106.getHeight()
+                                val middleFillSprite = hitsplatType.getMiddleFillSprite(Renderers.activeToolkit!!)
+                                if (middleFillSprite != null) {
+                                    i_28 = middleFillSprite.getWidth()
+                                    val i_50 = middleFillSprite.getHeight()
                                     if (i_50 > i_47) {
                                         i_47 = i_50
                                     }
-                                    nativesprite106.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    middleFillSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                     i_32 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
-                                val nativesprite107 = hitsplatType.method3832(Renderers.activeToolkit!!)
-                                if (nativesprite107 != null) {
-                                    i_29 = nativesprite107.getWidth()
-                                    val i_51 = nativesprite107.getHeight()
+                                val innerLeftSprite = hitsplatType.getInnerLeftSprite(Renderers.activeToolkit!!)
+                                if (innerLeftSprite != null) {
+                                    i_29 = innerLeftSprite.getWidth()
+                                    val i_51 = innerLeftSprite.getHeight()
                                     if (i_51 > i_47) {
                                         i_47 = i_51
                                     }
-                                    nativesprite107.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    innerLeftSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                     i_33 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
-                                val nativesprite108 = hitsplatType.method3838(Renderers.activeToolkit!!)
+                                val rightCapSprite = hitsplatType.getRightCapSprite(Renderers.activeToolkit!!)
                                 var i_52: Int
-                                if (nativesprite108 != null) {
-                                    i_30 = nativesprite108.getWidth()
-                                    i_52 = nativesprite108.getHeight()
+                                if (rightCapSprite != null) {
+                                    i_30 = rightCapSprite.getWidth()
+                                    i_52 = rightCapSprite.getHeight()
                                     if (i_52 > i_47) {
                                         i_47 = i_52
                                     }
-                                    nativesprite108.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                    rightCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                     i_34 = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 if (soakHitsplat != null) {
-                                    nativesprite35 = soakHitsplat.method3835(Renderers.activeToolkit!!)
-                                    if (nativesprite35 != null) {
-                                        i_39 = nativesprite35.getWidth()
-                                        i_52 = nativesprite35.getHeight()
+                                    soakLeftCapSprite = soakHitsplat.getLeftCapSprite(Renderers.activeToolkit!!)
+                                    if (soakLeftCapSprite != null) {
+                                        i_39 = soakLeftCapSprite.getWidth()
+                                        i_52 = soakLeftCapSprite.getHeight()
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite35.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        soakLeftCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                         i_43 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
-                                    nativesprite36 = soakHitsplat.method3836(Renderers.activeToolkit!!)
-                                    if (nativesprite36 != null) {
-                                        i_40 = nativesprite36.getWidth()
-                                        i_52 = nativesprite36.getHeight()
+                                    soakMiddleFillSprite = soakHitsplat.getMiddleFillSprite(Renderers.activeToolkit!!)
+                                    if (soakMiddleFillSprite != null) {
+                                        i_40 = soakMiddleFillSprite.getWidth()
+                                        i_52 = soakMiddleFillSprite.getHeight()
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite36.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        soakMiddleFillSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                         i_44 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
-                                    nativesprite37 = soakHitsplat.method3832(Renderers.activeToolkit!!)
-                                    if (nativesprite37 != null) {
-                                        i_41 = nativesprite37.getWidth()
-                                        i_52 = nativesprite37.getHeight()
+                                    soakInnerLeftSprite = soakHitsplat.getInnerLeftSprite(Renderers.activeToolkit!!)
+                                    if (soakInnerLeftSprite != null) {
+                                        i_41 = soakInnerLeftSprite.getWidth()
+                                        i_52 = soakInnerLeftSprite.getHeight()
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite37.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        soakInnerLeftSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                         i_45 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
-                                    nativesprite38 = soakHitsplat.method3838(Renderers.activeToolkit!!)
-                                    if (nativesprite38 != null) {
-                                        i_42 = nativesprite38.getWidth()
-                                        i_52 = nativesprite38.getHeight()
+                                    soakRightCapSprite = soakHitsplat.getRightCapSprite(Renderers.activeToolkit!!)
+                                    if (soakRightCapSprite != null) {
+                                        i_42 = soakRightCapSprite.getWidth()
+                                        i_52 = soakRightCapSprite.getHeight()
                                         if (i_52 > i_47) {
                                             i_47 = i_52
                                         }
-                                        nativesprite38.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
+                                        soakRightCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
                                         i_46 = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                 }
 
-                                var fontrenderer109 = Renderers.FONT_RENDERER
+                                var hitsplatFontRenderer = Renderers.FONT_RENDERER
                                 var soakFont = Renderers.FONT_RENDERER
-                                var fontmetrics54 = FontManager.worldMapAreaFont
-                                var fontmetrics55 = FontManager.worldMapAreaFont
+                                var hitsplatFontMetrics = FontManager.worldMapAreaFont
+                                var soakFontMetrics = FontManager.worldMapAreaFont
                                 var fontId = hitsplatType.fontId
-                                var fontrenderer57: AbstractFontRenderer?
-                                var fontmetrics58: FontMetrics?
+                                var resolvedFontRenderer: AbstractFontRenderer?
+                                var resolvedFontMetrics: FontMetrics?
 
                                 if (fontId >= 0) {
-                                    fontrenderer57 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId, true, hitsplatType.hasColor) as AbstractFontRenderer?
-                                    fontmetrics58 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId)
-                                    if (fontrenderer57 != null && fontmetrics58 != null) {
-                                        fontrenderer109 = fontrenderer57
-                                        fontmetrics54 = fontmetrics58
+                                    resolvedFontRenderer = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId, true, hitsplatType.hasColor) as AbstractFontRenderer?
+                                    resolvedFontMetrics = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId)
+                                    if (resolvedFontRenderer != null && resolvedFontMetrics != null) {
+                                        hitsplatFontRenderer = resolvedFontRenderer
+                                        hitsplatFontMetrics = resolvedFontMetrics
                                     }
                                 }
 
                                 if (soakHitsplat != null) {
                                     fontId = soakHitsplat.fontId
                                     if (fontId >= 0) {
-                                        fontrenderer57 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId, true, soakHitsplat.hasColor) as AbstractFontRenderer?
-                                        fontmetrics58 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId)
-                                        if (fontrenderer57 != null && fontmetrics58 != null) {
-                                            soakFont = fontrenderer57
-                                            fontmetrics55 = fontmetrics58
+                                        resolvedFontRenderer = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId, true, soakHitsplat.hasColor) as AbstractFontRenderer?
+                                        resolvedFontMetrics = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, fontId)
+                                        if (resolvedFontRenderer != null && resolvedFontMetrics != null) {
+                                            soakFont = resolvedFontRenderer
+                                            soakFontMetrics = resolvedFontMetrics
                                         }
                                     }
                                 }
 
                                 var soakText: String? = null
                                 val hitsplatText = pathingEntity.hitsplatCustomText[hitsplatIndex] ?: hitsplatType.getCenteredText(pathingEntity.hitsplatText[hitsplatIndex])
-                                val regularWidth = fontmetrics54!!.getWidthNoSprites(hitsplatText)
+                                val regularWidth = hitsplatFontMetrics!!.getWidthNoSprites(hitsplatText)
                                 var soakWidth = 0
 
                                 if (soakHitsplat != null) {
                                     soakText = pathingEntity.soakHitsplatCustomText[hitsplatIndex] ?: soakHitsplat.getCenteredText(pathingEntity.soakHitsplatText[hitsplatIndex])
-                                    soakWidth = fontmetrics55!!.getWidthNoSprites(soakText)
+                                    soakWidth = soakFontMetrics!!.getWidthNoSprites(soakText)
                                 }
 
                                 var i_63 = 0
@@ -593,15 +593,15 @@ object EntityUpdating {
                                 }
 
                                 i_76 = pathingEntity.hitsplatCycles[hitsplatIndex] - Client.cycles
-                                val i_77 = hitsplatType.anInt2846 - i_76 * hitsplatType.anInt2846 / hitsplatType.cyclesVisible
-                                val i_78 = i_76 * hitsplatType.anInt2833 / hitsplatType.cyclesVisible + -hitsplatType.anInt2833
+                                val i_77 = hitsplatType.scrollOffsetX - i_76 * hitsplatType.scrollOffsetX / hitsplatType.cyclesVisible
+                                val i_78 = i_76 * hitsplatType.scrollOffsetY / hitsplatType.cyclesVisible + -hitsplatType.scrollOffsetY
                                 val i_79 = (clipLeft + Client.HINT_POSITION[0] - (i_65 shr 1) + i_77).toInt()
                                 val i_80 = (i_78 + (Client.HINT_POSITION[1] + clipTop - 12.0F)).toInt()
                                 var i_81 = i_80
                                 var i_82 = i_80 + i_47
-                                val i_83 = i_80 + hitsplatType.anInt2832 + 15
-                                val i_84 = i_83 - fontmetrics54!!.topPadding
-                                val i_85 = i_83 + fontmetrics54!!.bottomPadding
+                                val i_83 = i_80 + hitsplatType.textOffsetY + 15
+                                val i_84 = i_83 - hitsplatFontMetrics!!.topPadding
+                                val i_85 = i_83 + hitsplatFontMetrics!!.bottomPadding
 
                                 if (i_84 < i_80) {
                                     i_81 = i_84
@@ -614,9 +614,9 @@ object EntityUpdating {
                                 var i_87: Int
 
                                 if (soakHitsplat != null) {
-                                    i_86 = i_80 + soakHitsplat.anInt2832 + 15
-                                    val i_87_temp = i_86 - fontmetrics55!!.topPadding
-                                    val i_88 = i_86 + fontmetrics55!!.bottomPadding
+                                    i_86 = i_80 + soakHitsplat.textOffsetY + 15
+                                    val i_87_temp = i_86 - soakFontMetrics!!.topPadding
+                                    val i_88 = i_86 + soakFontMetrics!!.bottomPadding
                                     if (i_87_temp < i_81) {
                                         // i_81 = i_87_temp // Dead code in original
                                     }
@@ -626,76 +626,76 @@ object EntityUpdating {
                                 }
 
                                 i_87 = 255
-                                if (hitsplatType.anInt2847 >= 0) {
-                                    i_87 = (i_76 shl 8) / (hitsplatType.cyclesVisible - hitsplatType.anInt2847)
+                                if (hitsplatType.fadeStartCycle >= 0) {
+                                    i_87 = (i_76 shl 8) / (hitsplatType.cyclesVisible - hitsplatType.fadeStartCycle)
                                 }
 
                                 if (i_87 >= 0 && i_87 < 255) {
                                     val alpha = i_87 shl 24
                                     val i_89 = alpha or 0xffffff
-                                    if (nativesprite48 != null) {
-                                        nativesprite48.draw(i_66 + i_79 - i_31, i_80, 0, i_89, 1)
+                                    if (leftCapSprite != null) {
+                                        leftCapSprite.draw(i_66 + i_79 - i_31, i_80, 0, i_89, 1)
                                     }
-                                    if (nativesprite107 != null) {
-                                        nativesprite107.draw(i_67 + i_79 - i_33, i_80, 0, i_89, 1)
+                                    if (innerLeftSprite != null) {
+                                        innerLeftSprite.draw(i_67 + i_79 - i_33, i_80, 0, i_89, 1)
                                     }
                                     var i_90: Int
-                                    if (nativesprite106 != null) {
+                                    if (middleFillSprite != null) {
                                         for (i_90 in 0 until i_63) {
-                                            nativesprite106.draw(i_90 * i_28 + (i_68 + i_79 - i_32), i_80, 0, i_89, 1)
+                                            middleFillSprite.draw(i_90 * i_28 + (i_68 + i_79 - i_32), i_80, 0, i_89, 1)
                                         }
                                     }
-                                    if (nativesprite108 != null) {
-                                        nativesprite108.draw(i_70 + i_79 - i_34, i_80, 0, i_89, 1)
+                                    if (rightCapSprite != null) {
+                                        rightCapSprite.draw(i_70 + i_79 - i_34, i_80, 0, i_89, 1)
                                     }
-                                    fontrenderer109!!.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color or alpha, 0)
+                                    hitsplatFontRenderer!!.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color or alpha, 0)
                                     if (soakHitsplat != null) {
-                                        if (nativesprite35 != null) {
-                                            nativesprite35.draw(i_79 + i_71 - i_43, i_80, 0, i_89, 1)
+                                        if (soakLeftCapSprite != null) {
+                                            soakLeftCapSprite.draw(i_79 + i_71 - i_43, i_80, 0, i_89, 1)
                                         }
-                                        if (nativesprite37 != null) {
-                                            nativesprite37.draw(i_79 + i_72 - i_45, i_80, 0, i_89, 1)
+                                        if (soakInnerLeftSprite != null) {
+                                            soakInnerLeftSprite.draw(i_79 + i_72 - i_45, i_80, 0, i_89, 1)
                                         }
-                                        if (nativesprite36 != null) {
+                                        if (soakMiddleFillSprite != null) {
                                             for (i_90 in 0 until i_64) {
-                                                nativesprite36.draw(i_90 * i_40 + (i_73 + i_79 - i_44), i_80, 0, i_89, 1)
+                                                soakMiddleFillSprite.draw(i_90 * i_40 + (i_73 + i_79 - i_44), i_80, 0, i_89, 1)
                                             }
                                         }
-                                        if (nativesprite38 != null) {
-                                            nativesprite38.draw(i_79 + i_74 - i_46, i_80, 0, i_89, 1)
+                                        if (soakRightCapSprite != null) {
+                                            soakRightCapSprite.draw(i_79 + i_74 - i_46, i_80, 0, i_89, 1)
                                         }
                                         soakFont!!.renderPlain(soakText!!, i_75 + i_79, i_86, soakHitsplat.color or alpha, 0)
                                     }
                                 } else {
-                                    if (nativesprite48 != null) {
-                                        nativesprite48.draw(i_79 + i_66 - i_31, i_80)
+                                    if (leftCapSprite != null) {
+                                        leftCapSprite.draw(i_79 + i_66 - i_31, i_80)
                                     }
-                                    if (nativesprite107 != null) {
-                                        nativesprite107.draw(i_67 + i_79 - i_33, i_80)
+                                    if (innerLeftSprite != null) {
+                                        innerLeftSprite.draw(i_67 + i_79 - i_33, i_80)
                                     }
-                                    if (nativesprite106 != null) {
+                                    if (middleFillSprite != null) {
                                         for (i in 0 until i_63) {
-                                            nativesprite106.draw(i * i_28 + (i_68 + i_79 - i_32), i_80)
+                                            middleFillSprite.draw(i * i_28 + (i_68 + i_79 - i_32), i_80)
                                         }
                                     }
-                                    if (nativesprite108 != null) {
-                                        nativesprite108.draw(i_70 + i_79 - i_34, i_80)
+                                    if (rightCapSprite != null) {
+                                        rightCapSprite.draw(i_70 + i_79 - i_34, i_80)
                                     }
-                                    fontrenderer109!!.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color or 0xFF000000.toInt(), 0)
+                                    hitsplatFontRenderer!!.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color or 0xFF000000.toInt(), 0)
                                     if (soakHitsplat != null) {
-                                        if (nativesprite35 != null) {
-                                            nativesprite35.draw(i_79 + i_71 - i_43, i_80)
+                                        if (soakLeftCapSprite != null) {
+                                            soakLeftCapSprite.draw(i_79 + i_71 - i_43, i_80)
                                         }
-                                        if (nativesprite37 != null) {
-                                            nativesprite37.draw(i_79 + i_72 - i_45, i_80)
+                                        if (soakInnerLeftSprite != null) {
+                                            soakInnerLeftSprite.draw(i_79 + i_72 - i_45, i_80)
                                         }
-                                        if (nativesprite36 != null) {
+                                        if (soakMiddleFillSprite != null) {
                                             for (i in 0 until i_64) {
-                                                nativesprite36.draw(i_40 * i + (i_79 + i_73 - i_44), i_80)
+                                                soakMiddleFillSprite.draw(i_40 * i + (i_79 + i_73 - i_44), i_80)
                                             }
                                         }
-                                        if (nativesprite38 != null) {
-                                            nativesprite38.draw(i_74 + i_79 - i_46, i_80)
+                                        if (soakRightCapSprite != null) {
+                                            soakRightCapSprite.draw(i_74 + i_79 - i_46, i_80)
                                         }
                                         soakFont!!.renderPlain(soakText!!, i_79 + i_75, i_86, soakHitsplat.color or 0xFF000000.toInt(), 0)
                                     }
@@ -887,7 +887,7 @@ object EntityUpdating {
     }
 
     @JvmStatic
-    fun drawOverheadSprite(pathingEntity: PathingEntity, pathingNpc: PathingEntity, i_2: Int, clipLeft: Int, clipTop: Int) {
+    fun drawOverheadSprite(pathingEntity: PathingEntity, pathingNpc: PathingEntity, spriteGridIndex: Int, clipLeft: Int, clipTop: Int) {
         val overheadSpriteId = pathingNpc.getOverheadSprite()
         if (overheadSpriteId != -1) {
             var overheadSprites = Client.OVERHEAD_SPRITES.get(overheadSpriteId.toLong()) as NativeSprite?
@@ -904,21 +904,21 @@ object EntityUpdating {
             HintRenderer.calculateHintArrowPlacement(pathingEntity.plane.toInt(), abs.x.toInt(), abs.z.toInt(), pathingEntity.getSize() * 256, 0, false)
             var drawX = (clipLeft + Client.HINT_POSITION[0] - 18.0F).toInt()
             var drawY = (clipTop + Client.HINT_POSITION[1] - 16.0F - 54.0F).toInt()
-            drawX += i_2 / 4 * 18
-            drawY += i_2 % 4 * 18
+            drawX += spriteGridIndex / 4 * 18
+            drawY += spriteGridIndex % 4 * 18
             overheadSprites.draw(drawX, drawY)
 
             if (pathingNpc == pathingEntity) {
                 Renderers.activeToolkit!!.drawOpaqueRectangle(drawX - 1, drawY - 1, 18, 18, -256)
             }
 
-            val class275Sub215 = createEntityOverhead()
-            class275Sub215.pathingEntity = pathingNpc
-            class275Sub215.startX = drawX
-            class275Sub215.startY = drawY
-            class275Sub215.endX = drawX + 16
-            class275Sub215.endY = drawY + 16
-            Client.ENTITY_OVERHEADS.offer(class275Sub215)
+            val entityOverhead = createEntityOverhead()
+            entityOverhead.pathingEntity = pathingNpc
+            entityOverhead.startX = drawX
+            entityOverhead.startY = drawY
+            entityOverhead.endX = drawX + 16
+            entityOverhead.endY = drawY + 16
+            Client.ENTITY_OVERHEADS.offer(entityOverhead)
         }
     }
 
@@ -933,10 +933,10 @@ object EntityUpdating {
     }
 
     @JvmStatic
-    fun recycleOverhead(class275Sub20: EntityOverhead) {
-        class275Sub20.pathingEntity = null
+    fun recycleOverhead(overhead: EntityOverhead) {
+        overhead.pathingEntity = null
         if (pooledOverheadCount < 20) {
-            entityOverheadPool.offer(class275Sub20)
+            entityOverheadPool.offer(overhead)
             ++pooledOverheadCount
         }
     }

@@ -654,7 +654,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 return
             }
 
-            if (entityHitbar.hitbarType.anInt2446 <= hitbarType.anInt2446) {
+            if (entityHitbar.hitbarType.hitbarAlpha <= hitbarType.hitbarAlpha) {
                 next = entityHitbar
             }
 
@@ -1177,7 +1177,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         @JvmStatic
         fun forceMovementType2(entity: PathingEntity) {
             val sequence = entity.currentSequence
-            if (entity.forceMovementT2Delay == Client.cycles || !sequence.hasType() || sequence.method7585(1)) {
+            if (entity.forceMovementT2Delay == Client.cycles || !sequence.hasType() || sequence.wouldAdvanceFrame(1)) {
                 val duration = entity.forceMovementT2Delay - entity.forceMovementT1Delay
                 val cyclesPassed = Client.cycles - entity.forceMovementT1Delay
                 val x1 = entity.forceMovementT1XOff * 512 + entity.getSize() * 256
@@ -1444,8 +1444,8 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             for (index in pathingEntity.sequences.indices) {
                 val entitySeq = pathingEntity.sequences[index]
                 if (entitySeq != null) {
-                    if (entitySeq.anInt10065 > 0) {
-                        entitySeq.anInt10065--
+                    if (entitySeq.delayTicks > 0) {
+                        entitySeq.delayTicks--
                     } else if (entitySeq.progressCycle(1) && entitySeq.needsReset()) {
                         pathingEntity.sequences[index] = null
                     }

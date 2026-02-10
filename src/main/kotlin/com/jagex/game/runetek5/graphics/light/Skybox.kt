@@ -28,10 +28,10 @@ class Skybox(
     var dstBackgroundColor: Int = 0
     var backgroundSprite: NativeSprite? = null
     var skyboxAlpha: Int = 0
-    var anInt3054: Int = 0
+    var previousAlpha: Int = 0
     var copyAlpha: Boolean = false
     var skybox: Skybox? = null
-    var anInt3032: Int = -1
+    var lastComponentHeight: Int = -1
     var prepareSun: Boolean = true
     var skyModel: Model? = null
     var useSize: Int = 0
@@ -164,30 +164,30 @@ class Skybox(
         }
     }
 
-    fun method4207(i_1: Int, i_2: Int) {
-        skyboxAlpha = (i_2 - anInt3054) * i_1 / 255 + anInt3054
+    fun interpolateAlpha(i_1: Int, i_2: Int) {
+        skyboxAlpha = (i_2 - previousAlpha) * i_1 / 255 + previousAlpha
     }
 
-    fun method4208(class2471: Skybox?) {
+    fun transitionToSkybox(class2471: Skybox?) {
         if (copyAlpha) {
-            anInt3054 = skyboxAlpha
+            previousAlpha = skyboxAlpha
         } else if (class2471 != null && class2471.copyAlpha) {
-            anInt3054 = 255 - class2471.skyboxAlpha
+            previousAlpha = 255 - class2471.skyboxAlpha
         } else {
-            anInt3054 = 0
+            previousAlpha = 0
         }
         copyAlpha = true
         skybox = class2471
         skyboxAlpha = 0
     }
 
-    fun method4209() {
+    fun resetTransition() {
         copyAlpha = false
         skybox = null
         skyboxAlpha = 0
     }
 
-    fun method4210(): Boolean {
+    fun isTransitioning(): Boolean {
         return copyAlpha
     }
 
@@ -233,9 +233,9 @@ class Skybox(
         }
     }
 
-    fun method4217(toolkit: AbstractToolkit, componentHeight: Int, skyboxPreference: Int): Boolean {
-        if (componentHeight != anInt3032) {
-            anInt3032 = componentHeight
+    fun updateForHeight(toolkit: AbstractToolkit, componentHeight: Int, skyboxPreference: Int): Boolean {
+        if (componentHeight != lastComponentHeight) {
+            lastComponentHeight = componentHeight
             var i_5 = MathUtils.furtestBitValue(componentHeight)
             if (i_5 > 512) {
                 i_5 = 512
@@ -252,7 +252,7 @@ class Skybox(
                 val ints_6 = IntArray(initialSuns.size)
                 for (i_7 in initialSuns.indices) {
                     val class3348 = initialSuns[i_7]
-                    if (class3348 != null && class3348.move(positionX, positionY, positionZ, anInt3032)) {
+                    if (class3348 != null && class3348.move(positionX, positionY, positionZ, lastComponentHeight)) {
                         ints_6[availableSunCount] = class3348.sunSize2d
                         availableSuns!![availableSunCount++] = class3348
                     }
@@ -278,8 +278,8 @@ class Skybox(
             skyModel = null
         }
         if (skybox != null && this != skybox) {
-            skybox!!.method4209()
-            ready = ready or skybox!!.method4217(toolkit, componentHeight, skyboxPreference)
+            skybox!!.resetTransition()
+            ready = ready or skybox!!.updateForHeight(toolkit, componentHeight, skyboxPreference)
         }
         return ready
     }

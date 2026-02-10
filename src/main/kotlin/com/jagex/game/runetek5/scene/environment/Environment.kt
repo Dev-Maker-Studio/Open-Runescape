@@ -186,10 +186,10 @@ class Environment {
         if (transparent.skybox != opaque.skybox) {
             if (transparent.skybox == null) {
                 this.skybox = opaque.skybox
-                this.skybox!!.method4207((transparencyPercent * 255.0F).toInt(), 0)
+                this.skybox!!.interpolateAlpha((transparencyPercent * 255.0F).toInt(), 0)
             } else {
                 this.skybox = transparent.skybox
-                this.skybox!!.method4207((transparencyPercent * 255.0F).toInt(), 255)
+                this.skybox!!.interpolateAlpha((transparencyPercent * 255.0F).toInt(), 255)
             }
         }
     }

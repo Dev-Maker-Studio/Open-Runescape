@@ -66,7 +66,7 @@ class SongReference(
     companion object {
         @JvmStatic
         @JvmName("method1966")
-        fun method1966(): Boolean {
+        fun isSongLoading(): Boolean {
             return SoundResourceManager.songLoadState != 0 || SoundResourceManager.midiPcmStream!!.dataLoaded()
         }
 

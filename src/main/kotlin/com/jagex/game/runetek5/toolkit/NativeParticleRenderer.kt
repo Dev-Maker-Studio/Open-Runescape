@@ -14,38 +14,38 @@ import com.jagex.game.runetek5.utils.BufferUtils
  */
 class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
-    var anInt509: Int = 0
-    var anInt497: Int = 64
-    var anInt501: Int = 64
-    var anInt502: Int = 768
-    var anInt503: Int = 1600
-    val anInt504: Int = BufferUtils.ilog(1600)
-    val anIntArray506: IntArray
+    var overflowBucketCount: Int = 0
+    var maxParticlesPerBucket: Int = 64
+    var maxOverflowBuckets: Int = 64
+    var maxOverflowEntitiesPerBucket: Int = 768
+    var maxDepthBuckets: Int = 1600
+    val depthBucketBits: Int = BufferUtils.ilog(1600)
+    val depthValues: IntArray
     val pointEntityIndices: IntArray
-    val anIntArray508: IntArray
-    val aEntityNodeSub1Sub1ArrayArray498: Array<Array<PointEntity?>>
+    val overflowBucketSizes: IntArray
+    val depthBucketEntities: Array<Array<PointEntity?>>
     val pointEntities: Array<Array<PointEntity?>>
-    val aClass70499: VertexDeclaration
-    val anInterface4500: NativeStream
-    val anInterface4510: NativeStream
-    val anInterface32511: NativeToolkitBuffer
+    val vertexDeclaration: VertexDeclaration
+    val dynamicVertexStream: NativeStream
+    val staticNormalStream: NativeStream
+    val indexBuffer: NativeToolkitBuffer
 
     init {
-        anIntArray506 = IntArray(8191)
+        depthValues = IntArray(8191)
         pointEntityIndices = IntArray(1600)
-        anIntArray508 = IntArray(64)
-        aEntityNodeSub1Sub1ArrayArray498 = Array(1600) { arrayOfNulls(64) }
+        overflowBucketSizes = IntArray(64)
+        depthBucketEntities = Array(1600) { arrayOfNulls(64) }
         pointEntities = Array(64) { arrayOfNulls(768) }
-        anInt509 = 0
-        aClass70499 = class505Sub21.createVertexDeclaration(arrayOf(
+        overflowBucketCount = 0
+        vertexDeclaration = class505Sub21.createVertexDeclaration(arrayOf(
             VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.COLOR, VertexDeclarationAction.TEXCOORD)),
             VertexDeclarationComponent(VertexDeclarationAction.NORMAL_POINTER_ACTION)
         ))
-        anInterface4500 = class505Sub21.createStream(true)
-        anInterface4510 = class505Sub21.createStream(false)
-        anInterface4510.create(393168, 12)
-        anInterface32511 = class505Sub21.createIndexBuffer(false)
-        anInterface32511.create(49146)
+        dynamicVertexStream = class505Sub21.createStream(true)
+        staticNormalStream = class505Sub21.createStream(false)
+        staticNormalStream.create(393168, 12)
+        indexBuffer = class505Sub21.createIndexBuffer(false)
+        indexBuffer.create(49146)
         val bytebuffer2 = class505Sub21.directBuffer
         bytebuffer2.clear()
 
@@ -61,7 +61,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
             i_3++
         }
 
-        anInterface32511.upload(0, bytebuffer2.position(), class505Sub21.directBufferAddress)
+        indexBuffer.upload(0, bytebuffer2.position(), class505Sub21.directBufferAddress)
         bytebuffer2.clear()
 
         i_3 = 0
@@ -81,15 +81,15 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
             i_3++
         }
 
-        anInterface4510.upload(0, bytebuffer2.position(), class505Sub21.directBufferAddress)
+        staticNormalStream.upload(0, bytebuffer2.position(), class505Sub21.directBufferAddress)
     }
 
-    fun method1089() {
-        anInterface4500.create(786336, 24)
+    fun resetVertexStream() {
+        dynamicVertexStream.create(786336, 24)
     }
 
     fun deallocate() {
-        anInterface4500.deallocate()
+        dynamicVertexStream.deallocate()
     }
 
     fun render(nativeToolkit: AbstractNativeToolkit, particleWrapper: ParticleWrapper) {
@@ -116,14 +116,14 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
                 i_8 = i_22
             }
 
-            anIntArray506[i_7++] = i_22
+            depthValues[i_7++] = i_22
             particleNode = particleNode.child
         }
 
         var i_20 = i_9 - i_8
         val i_12: Int
         if (i_20 + 2 > 1600) {
-            i_12 = 1 + BufferUtils.ilog(i_20) - anInt504
+            i_12 = 1 + BufferUtils.ilog(i_20) - depthBucketBits
             i_20 = (i_20 shr i_12) + 2
         } else {
             i_12 = 0
@@ -132,7 +132,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
         var child = particleTree.child
         i_7 = 0
-        nativeToolkit.bindIndexBuffer(anInterface32511)
+        nativeToolkit.bindIndexBuffer(indexBuffer)
         val class10314 = nativeToolkit.abstractParticleShader!!
         class10314.setViewProjectionMatrix(AbstractNativeToolkit.WORLD_VIEW_PROJECTION_MATRIX)
         class10314.textureCoordinateMatrix.identity()
@@ -142,7 +142,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
         var hasAdjustments = true
         while (child !== particleTree) {
-            anInt509 = 0
+            overflowBucketCount = 0
 
             var i_18 = 0
             while (i_18 < i_20) {
@@ -152,7 +152,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
 
             i_18 = 0
             while (i_18 < 64) {
-                anIntArray508[i_18] = 0
+                overflowBucketSizes[i_18] = 0
                 i_18++
             }
 
@@ -169,24 +169,24 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
                     break
                 }
 
-                val i_19 = (anIntArray506[i_7++] - i_8) shr i_12
+                val i_19 = (depthValues[i_7++] - i_8) shr i_12
                 if (i_19 < 1600) {
                     if (pointEntityIndices[i_19] < 64) {
-                        aEntityNodeSub1Sub1ArrayArray498[i_19][pointEntityIndices[i_19]++] = pointEntity
+                        depthBucketEntities[i_19][pointEntityIndices[i_19]++] = pointEntity
                     } else {
                         if (pointEntityIndices[i_19] == 64) {
-                            if (anInt509 == 64) {
+                            if (overflowBucketCount == 64) {
                                 child = child.child
                                 continue
                             }
 
-                            pointEntityIndices[i_19] += 1 + anInt509++
+                            pointEntityIndices[i_19] += 1 + overflowBucketCount++
                         }
 
                         val arr_10000 = pointEntities[pointEntityIndices[i_19] - 64 - 1]
                         val i_10002 = pointEntityIndices[i_19] - 64 - 1
-                        val i_10004 = anIntArray508[pointEntityIndices[i_19] - 64 - 1]
-                        anIntArray508[i_10002] = anIntArray508[pointEntityIndices[i_19] - 64 - 1] + 1
+                        val i_10004 = overflowBucketSizes[pointEntityIndices[i_19] - 64 - 1]
+                        overflowBucketSizes[i_10002] = overflowBucketSizes[pointEntityIndices[i_19] - 64 - 1] + 1
                         arr_10000[i_10004] = pointEntity
                     }
                 }
@@ -200,7 +200,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
                 nativeToolkit.updateSun(1.0f)
             }
 
-            method1096(nativeToolkit, i_20)
+            renderBatch(nativeToolkit, i_20)
         }
 
         if (nativeToolkit.lightIntensity != currentLightIntensity) {
@@ -210,7 +210,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
         nativeToolkit.setDepthBuffering(true)
     }
 
-    fun method1096(nativeToolkit: AbstractNativeToolkit, i_2: Int) {
+    fun renderBatch(nativeToolkit: AbstractNativeToolkit, i_2: Int) {
         var i_3 = 0
         val particleMatrix = nativeToolkit.particleMatrix
         val xA = particleMatrix.elements[0]
@@ -236,7 +236,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
             if (i_22 > 0) {
                 var i_23: Int = i_22 - 1
                 while (i_23 >= 0) {
-                    val pointEntity = aEntityNodeSub1Sub1ArrayArray498[i_21][i_23]!!
+                    val pointEntity = depthBucketEntities[i_21][i_23]!!
                     val colorRgba = pointEntity.colorArgb
                     val red = (colorRgba shr 16).toByte()
                     val green = (colorRgba shr 8).toByte()
@@ -321,7 +321,7 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
                 if (pointEntityIndices[i_21] > 64) {
                     i_23 = pointEntityIndices[i_21] - 64 - 1
 
-                    var i_24 = anIntArray508[i_23] - 1
+                    var i_24 = overflowBucketSizes[i_23] - 1
                     while (i_24 >= 0) {
                         val pointEntity = pointEntities[i_23][i_24]!!
                         val color = pointEntity.colorArgb
@@ -408,10 +408,10 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
             }
         }
 
-        anInterface4500.upload(0, directBuffer.position(), nativeToolkit.directBufferAddress)
-        nativeToolkit.setStreamSource(0, anInterface4500)
-        nativeToolkit.setStreamSource(1, anInterface4510)
-        nativeToolkit.setVertexDeclaration(aClass70499)
+        dynamicVertexStream.upload(0, directBuffer.position(), nativeToolkit.directBufferAddress)
+        nativeToolkit.setStreamSource(0, dynamicVertexStream)
+        nativeToolkit.setStreamSource(1, staticNormalStream)
+        nativeToolkit.setVertexDeclaration(vertexDeclaration)
         val particleShader = nativeToolkit.abstractParticleShader!!
         particleShader.drawParticles(i_3)
     }

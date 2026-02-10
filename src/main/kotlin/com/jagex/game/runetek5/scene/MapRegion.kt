@@ -1796,7 +1796,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
 
         // Something with roofs? - TODO: fix the horrible naming in this
-        fun calculateVisibilityAdjustments(regionTiles: Array<Array<Array<Tile>?>?>?, anInt1234: Int, baseX: Int, baseY: Int, hideRoofs: Boolean): Boolean {
+        fun calculateVisibilityAdjustments(regionTiles: Array<Array<Array<Tile>?>?>?, viewIndex: Int, baseX: Int, baseY: Int, hideRoofs: Boolean): Boolean {
             val settingBits = Resource.mapRegion!!.bits
             val setting = if (hideRoofs) 1 else (Client.timesSceneRendered and 0xff).toByte()
             if (settingBits!!!![PlayerUpdate.MY_PLAYER_PLANE]!![baseX]!![baseY] == setting) {
@@ -1884,20 +1884,20 @@ class MapRegion(var asyncMaploading: Boolean) {
                 }
                 if (visibilityUpdate) {
                     val floorHeight = Resource.mapRegion!!.getScene()!!!!.localHeightmap[PlayerUpdate.MY_PLAYER_PLANE + 1]!!.getHeight(tileBaseX, tileBaseY)
-                    if (Client.visibleBelowDrawheight!![anInt1234] < floorHeight) {
-                        Client.visibleBelowDrawheight!![anInt1234] = floorHeight
+                    if (Client.visibleBelowDrawheight!![viewIndex] < floorHeight) {
+                        Client.visibleBelowDrawheight!![viewIndex] = floorHeight
                     }
                     val upscaledX = tileBaseX shl 9
                     val upscaledY = tileBaseY shl 9
-                    if (Client.visibleAboveX!![anInt1234] > upscaledX) {
-                        Client.visibleAboveX!![anInt1234] = upscaledX
-                    } else if (Client.visibleBelowX!![anInt1234] < upscaledX) {
-                        Client.visibleBelowX!![anInt1234] = upscaledX
+                    if (Client.visibleAboveX!![viewIndex] > upscaledX) {
+                        Client.visibleAboveX!![viewIndex] = upscaledX
+                    } else if (Client.visibleBelowX!![viewIndex] < upscaledX) {
+                        Client.visibleBelowX!![viewIndex] = upscaledX
                     }
-                    if (Client.visibleAboveY!![anInt1234] > upscaledY) {
-                        Client.visibleAboveY!![anInt1234] = upscaledY
-                    } else if (Client.visibleBelowY!![anInt1234] < upscaledY) {
-                        Client.visibleBelowY!![anInt1234] = upscaledY
+                    if (Client.visibleAboveY!![viewIndex] > upscaledY) {
+                        Client.visibleAboveY!![viewIndex] = upscaledY
+                    } else if (Client.visibleBelowY!![viewIndex] < upscaledY) {
+                        Client.visibleBelowY!![viewIndex] = upscaledY
                     }
                 }
                 if (!renderOnLowerZ) {
@@ -1956,12 +1956,12 @@ class MapRegion(var asyncMaploading: Boolean) {
                     }
                 }
             }
-            if (Client.visibleBelowDrawheight!![anInt1234] != -1000000) {
-                Client.visibleBelowDrawheight!![anInt1234] += 40
-                Client.visibleAboveX!![anInt1234] -= 512
-                Client.visibleBelowX!![anInt1234] += 512
-                Client.visibleBelowY!![anInt1234] += 512
-                Client.visibleAboveY!![anInt1234] -= 512
+            if (Client.visibleBelowDrawheight!![viewIndex] != -1000000) {
+                Client.visibleBelowDrawheight!![viewIndex] += 40
+                Client.visibleAboveX!![viewIndex] -= 512
+                Client.visibleBelowX!![viewIndex] += 512
+                Client.visibleBelowY!![viewIndex] += 512
+                Client.visibleAboveY!![viewIndex] -= 512
             }
             return true
         }

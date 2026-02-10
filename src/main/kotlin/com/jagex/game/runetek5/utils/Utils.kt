@@ -3,10 +3,10 @@ package com.jagex.game.runetek5.utils
 object Utils {
 
     @JvmField
-    var aLong993: Long = 0
+    var lastSystemTime: Long = 0
 
     @JvmField
-    var aLong994: Long = 0
+    var timeOffset: Long = 0
 
     @JvmStatic
     fun cp1252ToChar(b: Byte): Char {
@@ -85,11 +85,11 @@ object Utils {
     @Synchronized
     fun time(): Long {
         val long_1 = System.currentTimeMillis()
-        if (long_1 < aLong993) {
-            aLong994 += aLong993 - long_1
+        if (long_1 < lastSystemTime) {
+            timeOffset += lastSystemTime - long_1
         }
-        aLong993 = long_1
-        return long_1 + aLong994
+        lastSystemTime = long_1
+        return long_1 + timeOffset
     }
 
     @JvmStatic
@@ -177,7 +177,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun method2565(charsequence_0: CharSequence, var_1: Char): Int {
+    fun countOccurrences(charsequence_0: CharSequence, var_1: Char): Int {
         var i_3 = 0
         val i_4 = charsequence_0.length
         for (i_5 in 0 until i_4) {
@@ -209,7 +209,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun method4841(charsequence_0: CharSequence): Boolean {
+    fun isValidInteger(charsequence_0: CharSequence): Boolean {
         var bool4 = false
         var bool5 = false
         var i_6 = 0
@@ -278,7 +278,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun method7778(var_0: Char): Char {
+    fun getLigatureReplacement(var_0: Char): Char {
         return when (var_0) {
             198.toChar() -> 'E'
             230.toChar() -> 'e'
@@ -322,7 +322,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun method13422(var_0: Char): Int {
+    fun getCollationKey(var_0: Char): Int {
         var i_3 = var_0.code shl 4
         if (Character.isUpperCase(var_0) || Character.isTitleCase(var_0)) {
             val var_4 = Character.toLowerCase(var_0)
@@ -337,7 +337,7 @@ object Utils {
     }
 
     @JvmStatic
-    fun method6398(arr_0: Array<Any?>, i_1: Int, i_2: Int): String {
+    fun joinStrings(arr_0: Array<Any?>, i_1: Int, i_2: Int): String {
         if (i_2 == 0) {
             return ""
         } else if (i_2 == 1) {
@@ -369,7 +369,7 @@ object Utils {
 
     @JvmStatic
     fun split(string_0: String, var_1: Char): Array<String> {
-        val i_3 = method2565(string_0, var_1)
+        val i_3 = countOccurrences(string_0, var_1)
         val arr_4 = Array(i_3 + 1) { "" }
         var i_5 = 0
         var i_6 = 0
@@ -431,13 +431,13 @@ object Utils {
      * @deprecated Use [isWrongJava] instead
      */
     @JvmStatic
-    fun method1950(charsequence_0: CharSequence): Boolean {
+    fun isValidIntegerDeprecated(charsequence_0: CharSequence): Boolean {
         return isWrongJava(charsequence_0)
     }
 
     @JvmStatic
     fun isWrongJava(charsequence_0: CharSequence): Boolean {
-        return method4841(charsequence_0)
+        return isValidInteger(charsequence_0)
     }
 
     @JvmStatic

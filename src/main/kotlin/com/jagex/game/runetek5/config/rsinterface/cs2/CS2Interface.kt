@@ -37,7 +37,7 @@ class CS2Interface {
         this.comp = null
     }
 
-    fun method8772(): Component? {
+    fun getComponentFromInterface(): Component? {
         return this.inter!!.getComponent(this.comp!!.idHash)
     }
 }

@@ -498,22 +498,22 @@ object PacketDecoder {
                 }
             } else if (targetHash shr 28 != 0) {
                 val i_35 = targetHash and 0xffff
-                val player117: PlayerEntity?
+                val targetPlayer: PlayerEntity?
                 if (i_35 == PlayerUpdate.myPlayerIndex) {
-                    player117 = PlayerUpdate.MY_PLAYER!!
+                    targetPlayer = PlayerUpdate.MY_PLAYER!!
                 } else {
-                    player117 = PlayerUpdate.players[i_35]
+                    targetPlayer = PlayerUpdate.players[i_35]
                 }
-                if (player117 != null) {
-                    val class161121 = player117.spotAnimations[idk]
+                if (targetPlayer != null) {
+                    val spotAnimation = targetPlayer.spotAnimations[idk]
                     var bool16 = true
-                    val i_34 = class161121.spotAnimationId
+                    val i_34 = spotAnimation.spotAnimationId
                     if (reqGfxId != -1 && i_34 != -1) {
                         if (i_34 == reqGfxId) {
-                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM!!.list(reqGfxId)
-                            if (spotanimdefinitions125.replay && spotanimdefinitions125.sequenceId != -1) {
-                                val animationdefinitions124 = TypeLists.SEQ!!.list(spotanimdefinitions125.sequenceId)
-                                val i_40 = animationdefinitions124.loopType
+                            val spotAnimType = TypeLists.SPOT_ANIM!!.list(reqGfxId)
+                            if (spotAnimType.replay && spotAnimType.sequenceId != -1) {
+                                val spotAnimSequence = TypeLists.SEQ!!.list(spotAnimType.sequenceId)
+                                val i_40 = spotAnimSequence.loopType
                                 if (i_40 != 0 && i_40 != 2) {
                                     if (i_40 == 1) {
                                     }
@@ -522,31 +522,31 @@ object PacketDecoder {
                                 }
                             }
                         } else {
-                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM!!.list(reqGfxId)
-                            val spotanimdefinitions38 = TypeLists.SPOT_ANIM!!.list(i_34)
-                            if (spotanimdefinitions125.sequenceId != -1 && spotanimdefinitions38.sequenceId != -1) {
-                                val animationdefinitions86 = TypeLists.SEQ!!.list(spotanimdefinitions125.sequenceId)
-                                val animationdefinitions123 = TypeLists.SEQ!!.list(spotanimdefinitions38.sequenceId)
-                                if (animationdefinitions86.priority < animationdefinitions123.priority) {
+                            val spotAnimType = TypeLists.SPOT_ANIM!!.list(reqGfxId)
+                            val existingSpotAnimType = TypeLists.SPOT_ANIM!!.list(i_34)
+                            if (spotAnimType.sequenceId != -1 && existingSpotAnimType.sequenceId != -1) {
+                                val newSequence = TypeLists.SEQ!!.list(spotAnimType.sequenceId)
+                                val existingSequence = TypeLists.SEQ!!.list(existingSpotAnimType.sequenceId)
+                                if (newSequence.priority < existingSequence.priority) {
                                     bool16 = false
                                 }
                             }
                         }
                     }
                     if (bool16) {
-                        class161121.spotAnimationId = reqGfxId
-                        class161121.height = height
-                        class161121.adjustmentType = setting1
-                        class161121.rotation = rotation
+                        spotAnimation.spotAnimationId = reqGfxId
+                        spotAnimation.height = height
+                        spotAnimation.adjustmentType = setting1
+                        spotAnimation.rotation = rotation
                         if (reqGfxId != -1) {
-                            val spotanimdefinitions125 = TypeLists.SPOT_ANIM!!.list(reqGfxId)
-                            var i_83 = if (spotanimdefinitions125.replay) 0 else 2
+                            val spotAnimType = TypeLists.SPOT_ANIM!!.list(reqGfxId)
+                            var i_83 = if (spotAnimType.replay) 0 else 2
                             if (setting2) {
                                 i_83 = 1
                             }
-                            class161121.sequence.animateSequence(spotanimdefinitions125.sequenceId, speed, i_83, false)
+                            spotAnimation.sequence.animateSequence(spotAnimType.sequenceId, speed, i_83, false)
                         } else {
-                            class161121.sequence.update(-1)
+                            spotAnimation.sequence.update(-1)
                         }
                     }
                 }
@@ -563,11 +563,11 @@ object PacketDecoder {
             Camera.lookat(viewX, viewZ, viewY, i_8, i_7)
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.aClass3754368) {
+        } else if (context.currentPacket == ServerProt.VORBIS_PRELOAD_SOUND) {
             val key = buffer.readUByte()
             val flags = buffer.readUShortAdd()
             Client.requestVarVerifyid()
-            VorbisSoundManager.method1575(flags, key, true)
+            VorbisSoundManager.preloadVorbisSound(flags, key, true)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.GAME_MESSAGE) {
@@ -607,12 +607,12 @@ object PacketDecoder {
             val bytes = ByteArray(context.currentPacketSize - 1)
             val bool66 = buffer.readUByte() == 1
             buffer.readBytes(bytes, context.currentPacketSize - 1)
-            val rsbytebuffer127 = Packet(bytes)
-            val url = rsbytebuffer127.readString()
+            val urlPacket = Packet(bytes)
+            val url = urlPacket.readString()
             if (bool66) {
-                var string_137 = rsbytebuffer127.readString()
-                if (string_137.isEmpty()) string_137 = url
-                if (!Client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) Browser.openOpenjs(string_137, true, Client.useBrowserAppletMode)
+                var fallbackUrl = urlPacket.readString()
+                if (fallbackUrl.isEmpty()) fallbackUrl = url
+                if (!Client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) Browser.openOpenjs(fallbackUrl, true, Client.useBrowserAppletMode)
             } else Browser.openOpenjs(url, true, Client.useBrowserAppletMode)
             context.currentPacket = null
             return true
@@ -693,9 +693,9 @@ object PacketDecoder {
                 animationIds[i_6] = buffer.readUIntLittle()
             }
             val speed = buffer.readUByte()
-            val class282Sub47131 = Client.NPC_MAP.get(npcIndex.toLong())
-            if (class282Sub47131 != null) {
-                PlayerUpdate.animate((class282Sub47131.value as PathingEntity?)!!, animationIds, speed, true)
+            val npcObjectNode = Client.NPC_MAP.get(npcIndex.toLong())
+            if (npcObjectNode != null) {
+                PlayerUpdate.animate((npcObjectNode.value as PathingEntity?)!!, animationIds, speed, true)
             }
             context.currentPacket = null
             return true
@@ -940,23 +940,23 @@ object PacketDecoder {
             Client.lastMiscUpdateTick = Client.serverTick
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.aClass3754399) {
+        } else if (context.currentPacket == ServerProt.SET_CAMERA_TARGET) {
             val key = buffer.readUIntLittle()
             Client.requestVarVerifyid()
             if (key == -1) {
                 PingRequester.cameraTargetAbsX = -1
                 StaticMethods.cameraTargetAbsY = -1
             } else {
-                val coordgrid114 = Resource.mapRegion!!.getBaseCoordinates()
+                val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
                 var i_6 = key shr 14 and 0x3fff
                 var i_7 = key and 0x3fff
-                i_6 -= coordgrid114.x
+                i_6 -= baseCoords.x
                 if (i_6 < 0) {
                     i_6 = 0
                 } else if (i_6 >= Resource.mapRegion!!.sceneSizeX) {
                     i_6 = Resource.mapRegion!!.sceneSizeX
                 }
-                i_7 -= coordgrid114.y
+                i_7 -= baseCoords.y
                 if (i_7 < 0) {
                     i_7 = 0
                 } else if (i_7 >= Resource.mapRegion!!.sceneSizeY) {
@@ -989,8 +989,8 @@ object PacketDecoder {
             val i_11 = buffer.readUShort()
             val long_53 = long_51 + (long_49 shl 32)
             var bool14 = false
-            val class282Sub4102 = if (nonGuest) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
-            if (class282Sub4102 == null) {
+            val clanChannel = if (nonGuest) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
+            if (clanChannel == null) {
                 bool14 = true
             } else {
                 for (i_34 in 0..99) {
@@ -1008,12 +1008,12 @@ object PacketDecoder {
                 val messageType = if (nonGuest) ChatMessageType.CLAN_QUICKCHAT else ChatMessageType.GUEST_CLAN_QUICKCHAT
                 if (i_10 != 2 && i_10 != 3) {
                     if (i_10 == 1) {
-                        ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + string_88, string_88, string_17, class282Sub4102!!.clanName, i_11)
+                        ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + string_88, string_88, string_17, clanChannel!!.clanName, i_11)
                     } else {
-                        ChatBox.writeMessage(messageType, 0, string_88, string_88, string_88, string_17, class282Sub4102!!.clanName, i_11)
+                        ChatBox.writeMessage(messageType, 0, string_88, string_88, string_88, string_17, clanChannel!!.clanName, i_11)
                     }
                 } else {
-                    ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + string_88, string_88, string_17, class282Sub4102!!.clanName, i_11)
+                    ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + string_88, string_88, string_17, clanChannel!!.clanName, i_11)
                 }
             }
             context.currentPacket = null
@@ -1170,11 +1170,11 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.REQUEST_FPS) {
             val key = buffer.readInt()
             val flags = buffer.readInt()
-            val tcpmessage111 = PacketEncoder.createPacket(ClientProt.SEND_FPS, context.isaac)
-            tcpmessage111.buffer.writeIntInverseMiddle(key)
-            tcpmessage111.buffer.writeIntMiddle(flags)
-            tcpmessage111.buffer.writeByteSubtract(GameShell.FPS)
-            context.queuePacket(tcpmessage111)
+            val fpsResponse = PacketEncoder.createPacket(ClientProt.SEND_FPS, context.isaac)
+            fpsResponse.buffer.writeIntInverseMiddle(key)
+            fpsResponse.buffer.writeIntMiddle(flags)
+            fpsResponse.buffer.writeByteSubtract(GameShell.FPS)
+            context.queuePacket(fpsResponse)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.OBJ_ANIM) {
@@ -1400,7 +1400,7 @@ object PacketDecoder {
             VarProviders.PLAYER_VAR_PROVIDER.setVarBitValueFromServer(varbitId, variable)
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.aClass3754362) { //request packet 37?
+        } else if (context.currentPacket == ServerProt.STOP_VORBIS_STREAM) { //request packet 37?
             val key = buffer.readUShortAddLittle()
             Client.requestVarVerifyid()
             StaticMethods.stopVorbisStream(key)
@@ -1424,7 +1424,7 @@ object PacketDecoder {
             }
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.aClass3754457) {
+        } else if (context.currentPacket == ServerProt.SET_VORBIS_SOUND) {
             val key = buffer.readUShort()
             Client.requestVarVerifyid()
             StaticMethods.setVorbisSound(key)
@@ -1461,7 +1461,7 @@ object PacketDecoder {
             VarProviders.PLAYER_VAR_PROVIDER.setVarValueFromServer(configIndex, value.toInt())
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.aClass3753828) {
+        } else if (context.currentPacket == ServerProt.PLAY_SONG_AT_POSITION) {
             val near = buffer.readUByteSubtract()
             val volume = buffer.readUByte()
             val far = buffer.readUByteInverse()
@@ -1470,7 +1470,7 @@ object PacketDecoder {
             val plane = i_8 shr 28
             val x = i_8 shr 14 and 0x3fff
             val y = i_8 and 0x3fff
-            SongPlayer.method5731(x, y, near, far, musicArchive, volume)
+            SongPlayer.playSongAtPosition(x, y, near, far, musicArchive, volume)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.TRIGGER_ONDIALOGABORT) {
@@ -1612,9 +1612,9 @@ object PacketDecoder {
             if (subInterface != null) {
                 Interface.closeChildInterface(subInterface, true, false)
             }
-            val comp1187352 = Client.activeDialogueContinue
-            if (comp1187352 != null) {
-                Component.redrawComponent(comp1187352)
+            val dialogueContinue = Client.activeDialogueContinue
+            if (dialogueContinue != null) {
+                Component.redrawComponent(dialogueContinue)
                 Client.activeDialogueContinue = null
             }
             context.currentPacket = null
@@ -1642,7 +1642,7 @@ object PacketDecoder {
             Client.recentSkillUpdates[++Client.skillUpdateCycle - 1 and 0x1f] = skillId
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.aClass3754453) {
+        } else if (context.currentPacket == ServerProt.SET_SONG_VOLUME) {
             val b_100 = buffer.readByte()
             val flags = buffer.readUByteInverse()
             Client.requestVarVerifyid()
@@ -1743,11 +1743,11 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.CREATE_ACCOUNT_REPLY) {
             val key = buffer.readUByte()
-            var class49496 = Identifiable.identify(CreateAccountRequest.getAll(), key) as CreateAccountRequest?
-            if (class49496 == null) {
-                class49496 = CreateAccountRequest.UNKNOWN_ERROR
+            var accountRequest = Identifiable.identify(CreateAccountRequest.getAll(), key) as CreateAccountRequest?
+            if (accountRequest == null) {
+                accountRequest = CreateAccountRequest.UNKNOWN_ERROR
             }
-            AccountCreationStage.setCurrentRequest(class49496)
+            AccountCreationStage.setCurrentRequest(accountRequest)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.PLAYER_OPTION) {
@@ -1966,8 +1966,8 @@ object PacketDecoder {
             val i_10 = buffer.readUByte()
             val long_55 = long_51 + (long_49 shl 32)
             var bool112 = false
-            val class282Sub437 = if (bool91) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
-            if (class282Sub437 == null) {
+            val clanChannel = if (bool91) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
+            if (clanChannel == null) {
                 bool112 = true
             } else {
                 for (i_81 in 0..99) { //TODO validate this logic
@@ -1989,12 +1989,12 @@ object PacketDecoder {
                 val i_34 = if (bool91) ChatMessageType.CLAN_CHAT else ChatMessageType.GUEST_CLAN_CHAT
                 if (i_10 != 2 && i_10 != 3) {
                     if (i_10 == 1) {
-                        ChatBox.writeMessage(i_34, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + string_88, string_88, string_101, class282Sub437!!.clanName, -1)
+                        ChatBox.writeMessage(i_34, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + string_88, string_88, string_101, clanChannel!!.clanName, -1)
                     } else {
-                        ChatBox.writeMessage(i_34, 0, string_88, string_88, string_88, string_101, class282Sub437!!.clanName, -1)
+                        ChatBox.writeMessage(i_34, 0, string_88, string_88, string_88, string_101, clanChannel!!.clanName, -1)
                     }
                 } else {
-                    ChatBox.writeMessage(i_34, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + string_88, string_88, string_101, class282Sub437!!.clanName, -1)
+                    ChatBox.writeMessage(i_34, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + string_88, string_88, string_101, clanChannel!!.clanName, -1)
                 }
             }
             context.currentPacket = null
@@ -2096,21 +2096,21 @@ object PacketDecoder {
                 --flags
                 for (i_6 in 0..<flags) {
                     var bool70 = false
-                    val class6132 = FriendList.FRIENDS[i_6]
-                    val class6134 = FriendList.FRIENDS[i_6 + 1]
-                    if (class6132!!.worldId != LoginManager.GAME_CONNECTION_INFO!!.worldId && class6134!!.worldId == LoginManager.GAME_CONNECTION_INFO!!.worldId) {
+                    val friend = FriendList.FRIENDS[i_6]
+                    val nextFriend = FriendList.FRIENDS[i_6 + 1]
+                    if (friend!!.worldId != LoginManager.GAME_CONNECTION_INFO!!.worldId && nextFriend!!.worldId == LoginManager.GAME_CONNECTION_INFO!!.worldId) {
                         bool70 = true
                     }
-                    if (!bool70 && class6132!!.worldId == 0 && class6134!!.worldId != 0) {
+                    if (!bool70 && friend!!.worldId == 0 && nextFriend!!.worldId != 0) {
                         bool70 = true
                     }
-                    if (!bool70 && !class6132!!.referrer && class6134!!.referrer) {
+                    if (!bool70 && !friend!!.referrer && nextFriend!!.referrer) {
                         bool70 = true
                     }
                     if (bool70) {
-                        val class687 = FriendList.FRIENDS[i_6]
+                        val swapFriend = FriendList.FRIENDS[i_6]
                         FriendList.FRIENDS[i_6] = FriendList.FRIENDS[i_6 + 1]
-                        FriendList.FRIENDS[i_6 + 1] = class687
+                        FriendList.FRIENDS[i_6 + 1] = swapFriend
                         bool91 = false
                     }
                 }
@@ -2317,11 +2317,11 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.UPDATE_IGNORE_LIST) {
             IgnoreList.IGNORE_COUNT = buffer.readUByte()
             for (key in 0..<IgnoreList.IGNORE_COUNT) {
-                val class1089 = Ignore()
-                IgnoreList.IGNORED[key] = class1089
-                class1089.unfilteredUsername = buffer.readString()
-                class1089.displayName = buffer.readString()
-                class1089.temporary = false
+                val ignore = Ignore()
+                IgnoreList.IGNORED[key] = ignore
+                ignore.unfilteredUsername = buffer.readString()
+                ignore.displayName = buffer.readString()
+                ignore.temporary = false
             }
             Client.lastFriendIgnoreUpdateTick = Client.serverTick
             context.currentPacket = null
@@ -2360,7 +2360,7 @@ object PacketDecoder {
             ClanVarTypeList.CLAN_VARS = null
             context.currentPacket = null
             return true
-        } else if (context.currentPacket == ServerProt.aClass3754437) {
+        } else if (context.currentPacket == ServerProt.OPEN_SOCIAL_NETWORK_URL) {
             if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
                 WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
             }
@@ -2393,9 +2393,9 @@ object PacketDecoder {
             }
             arr_26[0] = buffer.readInt()
             Client.requestVarVerifyid()
-            val hookrequest27 = HookRequest()
-            hookrequest27.params = arr_26
-            CS2Executor.executeHookInner(hookrequest27)
+            val hookRequest = HookRequest()
+            hookRequest.params = arr_26
+            CS2Executor.executeHookInner(hookRequest)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.NPC_UPDATE_LARGE) {

@@ -152,11 +152,11 @@ abstract class NativeSprite : Sprite {
                 i_10 = 0
             }
 
-            if (StaticMedia.aNativeSprite5576 == null || StaticMedia.aNativeSprite647 == null) {
+            if (StaticMedia.loadingBarBackgroundSprite == null || StaticMedia.loadingBarEdgeSprite == null) {
                 if (Resource.SPRITES!!.isFileCached(StaticMethods.loadingBarBackgroundSpriteId) && Resource.SPRITES!!.isFileCached(loadingBarTileSpriteId)) {
-                    StaticMedia.aNativeSprite5576 = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES!!, StaticMethods.loadingBarBackgroundSpriteId, 0), true)
+                    StaticMedia.loadingBarBackgroundSprite = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES!!, StaticMethods.loadingBarBackgroundSpriteId, 0), true)
                     val spriteType = SpriteType.listSingle(Resource.SPRITES!!, loadingBarTileSpriteId, 0)
-                    StaticMedia.aNativeSprite647 = toolkit.generateSprite(spriteType, true)
+                    StaticMedia.loadingBarEdgeSprite = toolkit.generateSprite(spriteType, true)
                     spriteType!!.flipHorizontal()
                     StaticMethods.loadingBarTileSprite = toolkit.generateSprite(spriteType, true)
                 } else {
@@ -164,12 +164,12 @@ abstract class NativeSprite : Sprite {
                 }
             }
 
-            if (StaticMedia.aNativeSprite5576 != null && StaticMedia.aNativeSprite647 != null) {
-                val i_11 = (width - StaticMedia.aNativeSprite647!!.getWidth() * 2) / StaticMedia.aNativeSprite5576!!.getWidth()
+            if (StaticMedia.loadingBarBackgroundSprite != null && StaticMedia.loadingBarEdgeSprite != null) {
+                val i_11 = (width - StaticMedia.loadingBarEdgeSprite!!.getWidth() * 2) / StaticMedia.loadingBarBackgroundSprite!!.getWidth()
                 for (i_12 in 0 until i_11) {
-                    StaticMedia.aNativeSprite5576!!.draw(x + StaticMedia.aNativeSprite647!!.getWidth() + i_12 * StaticMedia.aNativeSprite5576!!.getWidth(), y)
+                    StaticMedia.loadingBarBackgroundSprite!!.draw(x + StaticMedia.loadingBarEdgeSprite!!.getWidth() + i_12 * StaticMedia.loadingBarBackgroundSprite!!.getWidth(), y)
                 }
-                StaticMedia.aNativeSprite647!!.draw(x, y)
+                StaticMedia.loadingBarEdgeSprite!!.draw(x, y)
                 StaticMethods.loadingBarTileSprite!!.draw(width + x - StaticMethods.loadingBarTileSprite!!.getWidth(), y)
             }
 

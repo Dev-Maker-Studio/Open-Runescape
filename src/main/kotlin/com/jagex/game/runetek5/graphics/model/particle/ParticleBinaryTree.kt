@@ -21,7 +21,7 @@ class ParticleBinaryTree {
         }
     }
 
-    fun method7734(): ParticleNode? {
+    fun getNextCached(): ParticleNode? {
         val node = aParticleNode
         return if (node == null || node == current) {
             aParticleNode = null

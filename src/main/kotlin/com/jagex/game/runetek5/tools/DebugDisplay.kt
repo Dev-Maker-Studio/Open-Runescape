@@ -18,7 +18,7 @@ import java.io.*
 object DebugDisplay {
 
     @JvmField
-    var anInt3991: Int = 0
+    var worldMapViewLeftTileX: Int = 0
 
     @JvmStatic
     fun applyDebugOpcode(opcode: Int) {

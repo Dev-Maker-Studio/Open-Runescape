@@ -11,7 +11,7 @@ import com.jagex.game.runetek5.utils.Utils
  */
 class VarpType {
     @JvmField var aChar4328: Char = 0.toChar()
-    @JvmField var anInt4327: Int = 0
+    @JvmField var clientCode: Int = 0
 
     fun decode(buffer: Packet) {
         while (true) {
@@ -27,7 +27,7 @@ class VarpType {
         if (opcode == 1) {
             aChar4328 = Utils.cp1252ToChar(buffer.readByte())
         } else if (opcode == 5) {
-            anInt4327 = buffer.readUShort()
+            clientCode = buffer.readUShort()
         }
     }
 }

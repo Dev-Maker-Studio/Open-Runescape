@@ -248,7 +248,7 @@ object ComponentMinimap {
 
                 drawNpcs(toolkit, absX, absY, component, dimension, clipLeft, clipTop)
                 drawPlayers(absX, absY, component, dimension, clipLeft, clipTop)
-                HintRenderer.method3151(absX, absY, component, sprite, clipLeft, clipTop)
+                HintRenderer.drawMinimapHintArrows(absX, absY, component, sprite, clipLeft, clipTop)
                 if (Camera.cameraCalculationType != 4) {
                     if (minimapFlagX != 0) {
                         val sizeX = minimapFlagX * 4 + 2 - absX / 128 + (PlayerUpdate.MY_PLAYER!!.getSize() - 1) * 2
@@ -333,7 +333,7 @@ object ComponentMinimap {
     }
 
     @JvmField
-    var anInt4097 = 0
+    var mapViewportScale = 0
 
     @JvmStatic
     fun reset() {
@@ -342,7 +342,7 @@ object ComponentMinimap {
     }
 
     @JvmField
-    var aNativeSprite5883: NativeSprite? = null
+    var worldMapOverviewSprite: NativeSprite? = null
 
     @JvmStatic
     fun drawCompass(component: Component, clipLeft: Int, clipTop: Int) {
@@ -460,7 +460,7 @@ object ComponentMinimap {
                 if (class11919 != null) {
                     WorldMapRasterManager.fillPolygonMasked(toolkit, ints_10, mecType.lineColor, class11919.rowStartX!!, class11919.rowWidth!!)
                 }
-                if (mecType.anInt2748 > 0) {
+                if (mecType.dashLineSpacing > 0) {
                     var i_15: Int
                     var i_16: Int
                     var i_17: Int
@@ -484,7 +484,7 @@ object ComponentMinimap {
                             i_14_3 = i_16_2
                             i_16_2 = i_17
                         }
-                        toolkit.drawTexturedLine(i_13_3, i_14_3, i_15_2, i_16_2, colors[colorPointers[rotation3].toInt() and 0xff], class4551, clipLeft, clipTop, mecType.anInt2748, mecType.anInt2749, mecType.anInt2756)
+                        toolkit.drawTexturedLine(i_13_3, i_14_3, i_15_2, i_16_2, colors[colorPointers[rotation3].toInt() and 0xff], class4551, clipLeft, clipTop, mecType.dashLineSpacing, mecType.dashLineLength, mecType.dashLineOffset)
                         rotation3++
                     }
                     rotation3 = ints_10[ints_10.size - 2]
@@ -503,7 +503,7 @@ object ComponentMinimap {
                         i_13_4 = i_15
                         i_15 = i_16
                     }
-                    toolkit.drawTexturedLine(rotation3, i_13_4, i_14_4, i_15, colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], class4551, clipLeft, clipTop, mecType.anInt2748, mecType.anInt2749, mecType.anInt2756)
+                    toolkit.drawTexturedLine(rotation3, i_13_4, i_14_4, i_15, colors[colorPointers[colorPointers.size - 1].toInt() and 0xff], class4551, clipLeft, clipTop, mecType.dashLineSpacing, mecType.dashLineLength, mecType.dashLineOffset)
                 } else {
                     val colors = mecType.colors!!
                     val colorPointers = mecType.colorPointers!!

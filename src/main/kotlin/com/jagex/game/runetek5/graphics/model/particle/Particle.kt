@@ -151,7 +151,7 @@ class Particle(
             while (lastRenderedPlane > 0 && posY > grounds[lastRenderedPlane]!!.getHeight(sceneX, sceneY)) {
                 lastRenderedPlane--
             }
-            if (producerType.aBool541 && lastRenderedPlane == 0 && posY > grounds[0]!!.getHeight(sceneX, sceneY)) {
+            if (producerType.killAboveSurface && lastRenderedPlane == 0 && posY > grounds[0]!!.getHeight(sceneX, sceneY)) {
                 kill()
             } else if (lastRenderedPlane == scene.regionSizeZ - 1 && grounds[lastRenderedPlane]!!.getHeight(sceneX, sceneY) - posY > 8 shl scene.tileUnits) {
                 kill()

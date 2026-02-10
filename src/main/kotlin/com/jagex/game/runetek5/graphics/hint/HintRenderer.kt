@@ -112,7 +112,7 @@ object HintRenderer {
     }
 
     @JvmStatic
-    fun method3151(
+    fun drawMinimapHintArrows(
         offsetX: Int,
         offsetY: Int,
         component: Component,

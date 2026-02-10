@@ -46,12 +46,12 @@ object StaticMedia {
     @JvmField var totalChatIcons: Int = 0
     @JvmField var chatScaleHeights: IntArray? = null
     @JvmField var boldFontMetrics: FontMetrics? = null
-    @JvmField var aNativeSprite5576: NativeSprite? = null
+    @JvmField var loadingBarBackgroundSprite: NativeSprite? = null
 
-    @JvmField var aNativeSprite3452: NativeSprite? = null
-    @JvmField var aNativeSprite5339: NativeSprite? = null
+    @JvmField var menuRightSideBorderSprite: NativeSprite? = null
+    @JvmField var menuLeftSideBorderSprite: NativeSprite? = null
 
-    @JvmField var aNativeSprite647: NativeSprite? = null
+    @JvmField var loadingBarEdgeSprite: NativeSprite? = null
 
     @JvmStatic
     fun loadGroupIds(spriteResource: Js5ResourceProvider) {
@@ -202,11 +202,11 @@ object StaticMedia {
 
     @JvmStatic
     fun resetChatMedia() {
-        aNativeSprite647 = null
+        loadingBarEdgeSprite = null
         StaticMethods.loadingBarTileSprite = null
-        aNativeSprite5576 = null
-        aNativeSprite5339 = null
-        aNativeSprite3452 = null
+        loadingBarBackgroundSprite = null
+        menuLeftSideBorderSprite = null
+        menuRightSideBorderSprite = null
         StaticMethods.menuTopBorderSprite = null
         StaticMethods.menuBottomLeftCornerSprite = null
         StaticMethods.menuBottomRightCornerSprite = null

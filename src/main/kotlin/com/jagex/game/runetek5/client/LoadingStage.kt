@@ -15,8 +15,8 @@ class LoadingStage(
     @JvmField val secondaryTextDisplay: LocalizedText,
     @JvmField val primaryCompletionDisplay: Int,
     @JvmField val secondaryCompletionDisplay: Int,
-    @JvmField val aBool4694: Boolean = true,
-    @JvmField val aBool4718: Boolean = false
+    @JvmField val showPercentage: Boolean = true,
+    @JvmField val hasProgressTracking: Boolean = false
 ) {
 
     constructor(number: Int, textDisplay: LocalizedText, completionDisplay: Int) :
@@ -109,10 +109,10 @@ class LoadingStage(
 
             if (loadingStage === LOADING_STAGE) {
                 LOADING_TEXT = LOADING_STAGE!!.primaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!)
-                if (LOADING_STAGE!!.aBool4718) {
+                if (LOADING_STAGE!!.hasProgressTracking) {
                     displayedLoadingPercentage = loadingPercent * (LOADING_STAGE!!.secondaryCompletionDisplay - LOADING_STAGE!!.primaryCompletionDisplay) / 100 + LOADING_STAGE!!.primaryCompletionDisplay
                 }
-                if (LOADING_STAGE!!.aBool4694) {
+                if (LOADING_STAGE!!.showPercentage) {
                     LOADING_TEXT = "$LOADING_TEXT$displayedLoadingPercentage%"
                 }
             } else if (LOADING_STAGE === PREPARE_PLAYER) {
@@ -120,11 +120,11 @@ class LoadingStage(
                 Client.setGameState(GameState.UNK_5)
             } else {
                 LOADING_TEXT = loadingStage!!.secondaryTextDisplay.translate(Client.CURRENT_LANGUAGE!!)
-                if (LOADING_STAGE!!.aBool4694) {
+                if (LOADING_STAGE!!.showPercentage) {
                     LOADING_TEXT = "$LOADING_TEXT${loadingStage.secondaryCompletionDisplay}%"
                 }
                 displayedLoadingPercentage = loadingStage.secondaryCompletionDisplay
-                if (LOADING_STAGE!!.aBool4718 || loadingStage.aBool4718) {
+                if (LOADING_STAGE!!.hasProgressTracking || loadingStage.hasProgressTracking) {
                     LOADING_STAGE_CHANGED = Utils.time()
                 }
             }

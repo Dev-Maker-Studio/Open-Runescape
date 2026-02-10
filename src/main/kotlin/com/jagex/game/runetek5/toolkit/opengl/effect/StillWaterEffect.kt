@@ -20,7 +20,7 @@ import jaggl.OpenGL
 class StillWaterEffect(openglToolkit: OpenGlToolkit) : MaterialEffectGL(openglToolkit) {
     var calculateLights: Boolean = false
     var bound: Boolean = false
-    var aBool9073: Boolean = false
+    var isUsingFallbackTexture: Boolean = false
     val initialized: Boolean
     var waterNodepthColor: ProgramGL? = null
     var waterNodepthReflection: ProgramGL? = null
@@ -326,18 +326,18 @@ END
 
     override fun loadCombiner(texture: OpenGlTexture?, combineMode: Int) {
         if (texture == null) {
-            if (!this.aBool9073) {
+            if (!this.isUsingFallbackTexture) {
                 glToolkit.setActiveTexture(glToolkit.texture2d)
                 glToolkit.loadTextureCombineMode(1)
                 glToolkit.setTexture(0, GL_PREVIOUS, GL_SRC_COLOR)
                 glToolkit.setTextureTransparency(0, GL_PREVIOUS)
-                this.aBool9073 = true
+                this.isUsingFallbackTexture = true
             }
         } else {
-            if (this.aBool9073) {
+            if (this.isUsingFallbackTexture) {
                 glToolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
                 glToolkit.setTextureTransparency(0, GL_TEXTURE)
-                this.aBool9073 = false
+                this.isUsingFallbackTexture = false
             }
             glToolkit.setActiveTexture(texture)
             glToolkit.loadTextureCombineMode(combineMode)
@@ -363,10 +363,10 @@ END
         glToolkit.setTexture(2, GL_CONSTANT, GL_SRC_ALPHA)
         glToolkit.setTextureTransparency(0, GL_TEXTURE)
         glToolkit.activateTexture(0)
-        if (this.aBool9073) {
+        if (this.isUsingFallbackTexture) {
             glToolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
             glToolkit.setTextureTransparency(0, GL_TEXTURE)
-            this.aBool9073 = false
+            this.isUsingFallbackTexture = false
         }
     }
 

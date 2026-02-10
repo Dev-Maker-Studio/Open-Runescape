@@ -18,7 +18,7 @@ class TextureOpRasterizer : TextureOperation(0, true) {
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = monochromeImageCache.getPalette(i_1)
         if (monochromeImageCache.dirty) {
-            rasterizeShapes(monochromeImageCache.method5722())
+            rasterizeShapes(monochromeImageCache.getAllPaletteData())
         }
         return ints_3
     }

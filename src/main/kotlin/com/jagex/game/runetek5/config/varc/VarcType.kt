@@ -11,7 +11,7 @@ import com.jagex.game.runetek5.utils.Utils
 class VarcType {
 
     @JvmField
-    var anInt4983: Int = 1
+    var persistenceType: Int = 1
 
     @JvmField
     var aChar4984: Char = '\u0000'
@@ -30,7 +30,7 @@ class VarcType {
         if (opcode == 1) {
             aChar4984 = Utils.cp1252ToChar(stream.readByte())
         } else if (opcode == 2) {
-            anInt4983 = 0
+            persistenceType = 0
         }
     }
 }

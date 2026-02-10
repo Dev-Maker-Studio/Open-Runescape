@@ -6,7 +6,7 @@ import jaggl.OpenGL
 
 class FrameBufferRectangleTexture(
     @JvmField val mipmapTextureSampler: MipmapRectangleTextureSampler,
-    @JvmField val anInt3667: Int
+    @JvmField val mipmapLevel: Int
 ) : TextureFramebufferGenerator {
 
     override fun getUseWidth(): Int {
@@ -21,6 +21,6 @@ class FrameBufferRectangleTexture(
     }
 
     override fun generateTextureFramebuffer(i_1: Int) {
-        OpenGL.glFramebufferTexture2DEXT(GL_FRAMEBUFFER, i_1, this.mipmapTextureSampler.textureTarget, this.mipmapTextureSampler.texture, this.anInt3667)
+        OpenGL.glFramebufferTexture2DEXT(GL_FRAMEBUFFER, i_1, this.mipmapTextureSampler.textureTarget, this.mipmapTextureSampler.texture, this.mipmapLevel)
     }
 }

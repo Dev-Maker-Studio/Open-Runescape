@@ -21,11 +21,11 @@ class GrandExchangeSlot {
         this.totalPrice = buffer.readInt()
     }
 
-    fun method5908(): Int {
+    fun getSlotState(): Int {
         return progress.toInt() and 0x7
     }
 
-    fun method5909(): Int {
+    fun isBuyOffer(): Int {
         return if ((progress.toInt() and 0x8) == 8) 1 else 0
     }
 }

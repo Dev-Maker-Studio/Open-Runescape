@@ -215,7 +215,7 @@ object PulseEventQueue {
     }
 
     @JvmStatic
-    fun method5581(componentHash: Int) {
+    fun queueT17Event(componentHash: Int) {
         val pulseEvent = PulseEventHandler.createPulseEvent(PulseEventType.T17, componentHash.toLong())
         pulseEvent.queueLowPriority()
     }

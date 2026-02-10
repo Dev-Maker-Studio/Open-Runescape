@@ -50,7 +50,7 @@ open class Culling(
     var oneThirdViewportHeight: Int = -1 //FIXME: naming
 
     @JvmField
-    var anIntArray2565: IntArray? = null
+    var depthBuffer: IntArray? = null
 
     @JvmField
     var tileCullingClusterCount: Int = 0
@@ -198,7 +198,7 @@ open class Culling(
             if (oneThirdViewportWidth != (viewport[0] / 3.0f).toInt() || (viewport[1] / 3.0f).toInt() != oneThirdViewportHeight) {
                 oneThirdViewportWidth = (viewport[0] / 3.0f).toInt()
                 oneThirdViewportHeight = (viewport[1] / 3.0f).toInt()
-                anIntArray2565 = IntArray(oneThirdViewportWidth * oneThirdViewportHeight)
+                depthBuffer = IntArray(oneThirdViewportWidth * oneThirdViewportHeight)
             }
 
             frusumCullingCursorPos = 0
@@ -216,10 +216,10 @@ open class Culling(
 
             frustumCulling!!.depthWriteCount = 0
             if (frusumCullingCursorPos > 0) {
-                val size = anIntArray2565!!.size
+                val size = depthBuffer!!.size
                 var i = 0
                 while (i < size) {
-                    anIntArray2565!![i++] = Int.MAX_VALUE
+                    depthBuffer!![i++] = Int.MAX_VALUE
                 }
                 frustumCulling!!.state = 1
                 for (index in 0 until frusumCullingCursorPos) {

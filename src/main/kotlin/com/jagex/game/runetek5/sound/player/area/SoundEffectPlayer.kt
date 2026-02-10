@@ -366,14 +366,14 @@ object SoundEffectPlayer {
 	fun playSoundJingle(jingleId: Int, volume: Int) {
 	    val adjustedVolume = volume * PreferenceManager.preferences!!.musicVolume!!.getValue() shr 8
 	    if (adjustedVolume != 0 && jingleId != -1) {
-	        if (!soundJinglePlaying && AreaSoundPlayer.currentMusicArchive != -1 && SongReference.method1966() && !StaticMethods.isSongTransitioning()) {
+	        if (!soundJinglePlaying && AreaSoundPlayer.currentMusicArchive != -1 && SongReference.isSongLoading() && !StaticMethods.isSongTransitioning()) {
 	            jingleStream = getCurrentMidiStream()
-	            SongPlayer.method3912()
+	            SongPlayer.clearPrimarySound()
 	            val jingleStreamImpl = getStream(jingleStream)
 	            setJingleStream(jingleStreamImpl)
 	        }
 	        AreaSoundPlayer.playMusic(Resource.JINGLE!!, jingleId, adjustedVolume)
-	        SongPlayer.method2580(-1, 255)
+	        SongPlayer.setChannelVolume(-1, 255)
 	        soundJinglePlaying = true
 	    }
 	}

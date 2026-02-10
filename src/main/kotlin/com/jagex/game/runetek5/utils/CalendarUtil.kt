@@ -76,7 +76,7 @@ object CalendarUtil {
     }
 
     @JvmStatic
-    fun method13045(milliseconds: Long, language: Int): String {
+    fun getLocalDateString(milliseconds: Long, language: Int): String {
         setLocalTime(milliseconds)
         val date = LOCAL_CALENDAR.get(Calendar.DATE)
         val month = LOCAL_CALENDAR.get(Calendar.MONTH)

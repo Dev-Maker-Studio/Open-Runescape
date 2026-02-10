@@ -18,11 +18,11 @@ class OpenGlNativeRenderBuffer(
 ) : TextureFramebufferGenerator, AutoCloseable {
 
     @JvmField var handle: Int
-    @JvmField val aClass1503880: GLFormat = format
-    @JvmField val aClass763878: GLActionFormat = actionFormat
+    @JvmField val glFormat: GLFormat = format
+    @JvmField val glActionFormat: GLActionFormat = actionFormat
     @JvmField val useWidth: Int = width
     @JvmField val useHeight: Int = height
-    @JvmField val aGraphicalRendererSub2Sub13881: OpenGLNativeToolkit = toolkit
+    @JvmField val nativeToolkit: OpenGLNativeToolkit = toolkit
 
     init {
         val bufferHandle = IntArray(1)
@@ -31,14 +31,14 @@ class OpenGlNativeRenderBuffer(
         OpenGL.glBindRenderbufferEXT(36161, this.handle)
         OpenGL.glRenderbufferStorageEXT(
             36161,
-            OpenGLNativeToolkit.texture2dInternalFormat(this.aClass1503880, this.aClass763878),
+            OpenGLNativeToolkit.texture2dInternalFormat(this.glFormat, this.glActionFormat),
             width,
             height
         )
     }
 
     override fun close() {
-        method5931()
+        requestDeletion()
     }
 
     override fun getUseWidth(): Int {
@@ -49,12 +49,12 @@ class OpenGlNativeRenderBuffer(
         return useHeight
     }
 
-    @JvmName("method5931")
-    fun method5931() {
+    @JvmName("requestDeletion")
+    fun requestDeletion() {
         if (handle > 0) {
-            aGraphicalRendererSub2Sub13881.requestRenderBufferDeletion(
+            nativeToolkit.requestRenderBufferDeletion(
                 handle,
-                aClass763878.bytesPerEntry * aClass1503880.bytesPerPixel * useWidth * useHeight
+                glActionFormat.bytesPerEntry * glFormat.bytesPerPixel * useWidth * useHeight
             )
             handle = 0
         }

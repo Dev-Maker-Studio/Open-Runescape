@@ -220,7 +220,7 @@ class LightGL(
             long_7 = (i_10.toLong() and 0xffffL) shl 16 or (i_9.toLong() and 0xffffL)
             val node29 = this.vertexHashTable!!.get(long_7)
             if (node29 != null) {
-                writeIndex((node29 as ShortNode).aShort8067)
+                writeIndex((node29 as ShortNode).value)
                 return
             }
         }

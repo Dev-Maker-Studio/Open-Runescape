@@ -41,7 +41,7 @@ object SongPlayer {
             var adjustedVolume = volume * PreferenceManager.preferences!!.musicVolume!!.getValue() shr 8
             if (musicArchive == -1 && !SoundEffectPlayer.soundJinglePlaying) {
                 SoundResourceManager.discardSongData()
-            } else if (musicArchive != -1 && (musicArchive != AreaSoundPlayer.currentMusicArchive || !SongReference.method1966())
+            } else if (musicArchive != -1 && (musicArchive != AreaSoundPlayer.currentMusicArchive || !SongReference.isSongLoading())
                 && adjustedVolume != 0 && !SoundEffectPlayer.soundJinglePlaying
             ) {
                 transitionToNextSong(i_2, Resource.MUSIC!!, musicArchive, adjustedVolume, SongTransition())
@@ -56,7 +56,7 @@ object SongPlayer {
     }
 
     @JvmStatic
-    fun method5731(x: Int, z: Int, near: Int, far: Int, musicArchive: Int, volume: Int) {
+    fun playSongAtPosition(x: Int, z: Int, near: Int, far: Int, musicArchive: Int, volume: Int) {
         playSong(musicArchive, volume, 100)
         secondarySound = AreaSoundRange(x shl 9, z shl 9, near shl 8, far * 8)
     }
@@ -83,7 +83,7 @@ object SongPlayer {
     }
 
     @JvmStatic
-    fun method3912() {
+    fun clearPrimarySound() {
         if (primarySound != null) {
             primarySound = null
             AreaSoundPlayer.setVolumeMultiplier(256)
@@ -97,13 +97,13 @@ object SongPlayer {
             SoundResourceManager.discardSongData()
         } else {
             playSong(songReference, adjustedVolume)
-            method3912()
+            clearPrimarySound()
         }
     }
 
     @JvmStatic
     fun resetChannelVolumes() {
-        method2580(-1, 255)
+        setChannelVolume(-1, 255)
     }
 
     @JvmStatic
@@ -123,7 +123,7 @@ object SongPlayer {
     }
 
     @JvmStatic
-    fun method2580(i_0: Int, i_1: Int) {
+    fun setChannelVolume(i_0: Int, i_1: Int) {
         if (SoundResourceManager.songLoadState != 0) {
             if (i_0 < 0) {
                 for (i_3 in 0 until 16) {

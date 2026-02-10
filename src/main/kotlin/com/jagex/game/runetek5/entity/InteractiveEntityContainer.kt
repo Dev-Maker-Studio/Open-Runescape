@@ -4,7 +4,7 @@ class InteractiveEntityContainer {
     @JvmField var interactiveObject: AbstractInteractiveEntity? = null
     @JvmField var child: InteractiveEntityContainer? = null
 
-    fun method3560() {
+    fun release() {
         if (activeChildCount < 500) {
             this.interactiveObject = null
             this.child = mainInteractiveWrapper

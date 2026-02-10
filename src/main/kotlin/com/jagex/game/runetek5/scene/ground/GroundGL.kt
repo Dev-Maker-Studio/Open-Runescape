@@ -258,7 +258,7 @@ open class GroundGL(
             activeToolkit.setLightingEnabled((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0)
 
             for (i_16 in goundMaterialNodes!!.indices) {
-                (goundMaterialNodes!![i_16] as GroundMaterialGL).method12085(ints_15, i_14)
+                (goundMaterialNodes!![i_16] as GroundMaterialGL).drawMaterialTriangles(ints_15, i_14)
             }
 
             if (!activeLights.isEmpty()) {
@@ -542,7 +542,7 @@ open class GroundGL(
                                 }
                                 hashTable.put(ShortNode(shorts_74[loop]), uid)
                             } else {
-                                shorts_74[loop] = (blendedTile as ShortNode).aShort8067
+                                shorts_74[loop] = (blendedTile as ShortNode).value
                                 i_84 = shorts_74[loop].toInt() and 0xffff
                                 if (mainColor != -1 && arr_65[loop].pointer < materialsByVertice[i_84]!!.pointer) {
                                     materialsByVertice[i_84] = arr_65[loop]
@@ -550,7 +550,7 @@ open class GroundGL(
                             }
 
                             for (materialIndex in 0 until i_34) {
-                                someMaterialArray[materialIndex]!!.method12083(i_84, directColor, lightStrength, f_50)
+                                someMaterialArray[materialIndex]!!.writeVertexColor(i_84, directColor, lightStrength, f_50)
                             }
 
                             amountOfTexturedFaces++

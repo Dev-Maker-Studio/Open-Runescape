@@ -186,7 +186,7 @@ class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
 
     companion object {
         @JvmStatic
-        fun method15537(toolkit: OpenGlToolkit, i_1: Int, i_2: Int, ints_4: IntArray, i_5: Int, i_6: Int): OpenGl2DTexture_Sub1 {
+        fun createFromPixels(toolkit: OpenGlToolkit, i_1: Int, i_2: Int, ints_4: IntArray, i_5: Int, i_6: Int): OpenGl2DTexture_Sub1 {
             if (!toolkit.framebufferObjectSupported && (!OpenGlTexture.isPowerOfTwo(i_1) || !OpenGlTexture.isPowerOfTwo(i_2))) {
                 if (toolkit.arbRectangleTexturesSupported)
                     return OpenGl2DTexture_Sub1(toolkit, GL_TEXTURE_RECTANGLE, i_1, i_2, ints_4, i_5, i_6)
@@ -199,7 +199,7 @@ class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
         }
 
         @JvmStatic
-        fun method15538(toolkit: OpenGlToolkit, x: Int, y: Int, width: Int, length: Int): OpenGl2DTexture_Sub1 {
+        fun createFromScreenCapture(toolkit: OpenGlToolkit, x: Int, y: Int, width: Int, length: Int): OpenGl2DTexture_Sub1 {
             if (!toolkit.framebufferObjectSupported && (!OpenGlTexture.isPowerOfTwo(width) || !OpenGlTexture.isPowerOfTwo(length))) {
                 if (toolkit.arbRectangleTexturesSupported) {
                     return OpenGl2DTexture_Sub1(toolkit, GL_TEXTURE_RECTANGLE, x, y, width, length)
@@ -237,7 +237,7 @@ class OpenGl2DTexture_Sub1 : OpenGl2DTexture {
         }
 
         @JvmStatic
-        fun method15547(
+        fun createEmpty(
             toolkit: OpenGlToolkit,
             class1501: GLFormat,
             class762: GLActionFormat,

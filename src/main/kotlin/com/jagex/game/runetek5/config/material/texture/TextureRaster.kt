@@ -14,7 +14,7 @@ class TextureRaster {
         @JvmField var horizontalTable: IntArray? = null
         @JvmField var rowEnd: Int = 0
         @JvmField var currentWidth: Int = 0
-        @JvmField var anInt3678: Int = 0
+        @JvmField var scaledWidth: Int = 0
         @JvmField var verticalTable: IntArray? = null
         @JvmField var columnEnd: Int = 0
         @JvmField var currentHeight: Int = 0
@@ -42,7 +42,7 @@ class TextureRaster {
                 }
                 rowEnd = width - 1
                 currentWidth = width
-                anInt3678 = width * 32
+                scaledWidth = width * 32
             }
             if (currentHeight != height) {
                 if (currentWidth != height) {

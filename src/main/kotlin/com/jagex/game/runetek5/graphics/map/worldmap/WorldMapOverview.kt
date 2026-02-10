@@ -47,9 +47,9 @@ object WorldMapOverview {
             adjustedX += (width - scaledWidth) / 2
             adjustedY += (height - scaledHeight) / 2
 
-            if (ComponentMinimap.aNativeSprite5883 == null ||
-                ComponentMinimap.aNativeSprite5883!!.getSpriteWidth() != width ||
-                ComponentMinimap.aNativeSprite5883!!.getSpriteHeight() != height) {
+            if (ComponentMinimap.worldMapOverviewSprite == null ||
+                ComponentMinimap.worldMapOverviewSprite!!.getSpriteWidth() != width ||
+                ComponentMinimap.worldMapOverviewSprite!!.getSpriteHeight() != height) {
                 WorldMap.setViewportBounds(
                     WorldMap.mapSquareAbsX,
                     WorldMap.mapSquareAbsY + WorldMap.mapSizeY,
@@ -61,14 +61,14 @@ object WorldMapOverview {
                     scaledHeight + adjustedY
                 )
                 WorldMap.renderMap(toolkit)
-                ComponentMinimap.aNativeSprite5883 = toolkit.createNativeSprite(adjustedX, adjustedY, scaledWidth, scaledHeight, false)
+                ComponentMinimap.worldMapOverviewSprite = toolkit.createNativeSprite(adjustedX, adjustedY, scaledWidth, scaledHeight, false)
             }
 
-            ComponentMinimap.aNativeSprite5883!!.draw(adjustedX, adjustedY)
+            ComponentMinimap.worldMapOverviewSprite!!.draw(adjustedX, adjustedY)
 
             val backgroundWidth = scaledWidth * StaticMethods.worldMapViewWidth / WorldMap.mapSizeX
-            val backgroundHeight = scaledHeight * ComponentMinimap.anInt4097 / WorldMap.mapSizeY
-            val backgroundX = scaledWidth * DebugDisplay.anInt3991 / WorldMap.mapSizeX + adjustedX
+            val backgroundHeight = scaledHeight * ComponentMinimap.mapViewportScale / WorldMap.mapSizeY
+            val backgroundX = scaledWidth * DebugDisplay.worldMapViewLeftTileX / WorldMap.mapSizeX + adjustedX
             val backgroundY = scaledHeight + adjustedY - scaledHeight * WorldMapSub1.viewBottomTileY / WorldMap.mapSizeY - backgroundHeight
             var backgroundColor = -1996554240
 
@@ -79,7 +79,7 @@ object WorldMapOverview {
             toolkit.drawFilledRectangle(backgroundX, backgroundY, backgroundWidth, backgroundHeight, backgroundColor, 1)
             toolkit.drawRectangleOutline(backgroundX, backgroundY, backgroundWidth, backgroundHeight, backgroundColor, 0)
 
-            if (JSObjectManager.anInt4185 > 0) {
+            if (JSObjectManager.highlightFlashCycles > 0) {
                 val randomizedColor: Int = if (ServerEnvironment.flashCycleCounter > 50) {
                     500 - ServerEnvironment.flashCycleCounter * 5
                 } else {
@@ -94,7 +94,7 @@ object WorldMapOverview {
                             val mecStartX = scaledWidth * mapCategory.absX / WorldMap.mapSizeX + adjustedX
                             val mecStartY = scaledHeight * (WorldMap.mapSizeY - mapCategory.absY) / WorldMap.mapSizeY + adjustedY
                             toolkit.clearPixels(mecStartX - 2, mecStartY - 2, 4, 4, randomizedColor shl 24 or 0xffff00)
-                        } else if (WorldMapSub1.highlightedCategoryId != -1 && mectype!!.anInt2718 == WorldMapSub1.highlightedCategoryId) {
+                        } else if (WorldMapSub1.highlightedCategoryId != -1 && mectype!!.categoryId == WorldMapSub1.highlightedCategoryId) {
                             val mecStartX = scaledWidth * mapCategory.absX / WorldMap.mapSizeX + adjustedX
                             val mecStartY = scaledHeight * (WorldMap.mapSizeY - mapCategory.absY) / WorldMap.mapSizeY + adjustedY
                             toolkit.clearPixels(mecStartX - 2, mecStartY - 2, 4, 4, randomizedColor shl 24 or 0xffff00)

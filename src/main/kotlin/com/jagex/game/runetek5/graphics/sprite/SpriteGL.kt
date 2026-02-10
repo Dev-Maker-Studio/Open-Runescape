@@ -24,17 +24,17 @@ class SpriteGL : NativeSprite {
 
     constructor(class505Sub11: OpenGlToolkit, i_2: Int, i_3: Int, ints_4: IntArray, i_5: Int, i_6: Int) {
         toolkit = class505Sub11
-        texture2d = OpenGl2DTexture_Sub1.method15537(class505Sub11, i_2, i_3, ints_4, i_6, i_5)
+        texture2d = OpenGl2DTexture_Sub1.createFromPixels(class505Sub11, i_2, i_3, ints_4, i_6, i_5)
     }
 
     constructor(class505Sub11: OpenGlToolkit, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
         toolkit = class505Sub11
-        texture2d = OpenGl2DTexture_Sub1.method15538(class505Sub11, i_2, i_3, i_4, i_5)
+        texture2d = OpenGl2DTexture_Sub1.createFromScreenCapture(class505Sub11, i_2, i_3, i_4, i_5)
     }
 
     constructor(class505Sub11: OpenGlToolkit, i_2: Int, i_3: Int, bool4: Boolean) {
         toolkit = class505Sub11
-        texture2d = OpenGl2DTexture_Sub1.method15547(
+        texture2d = OpenGl2DTexture_Sub1.createEmpty(
             class505Sub11,
             if (bool4) GLFormat.HDR else GLFormat.RGB,
             GLActionFormat.PIXEL_FORMAT,
@@ -84,7 +84,7 @@ class SpriteGL : NativeSprite {
         OpenGL.glPixelTransferf(GL_GREEN_BIAS, 0.499f)
         OpenGL.glPixelTransferf(GL_BLUE_SCALE, 0.5f)
         OpenGL.glPixelTransferf(GL_BLUE_BIAS, 0.499f)
-        channelMaskTexture = OpenGl2DTexture_Sub1.method15538(toolkit, 0, 0, texture2d.singleWidth, texture2d.singleLength)
+        channelMaskTexture = OpenGl2DTexture_Sub1.createFromScreenCapture(toolkit, 0, 0, texture2d.singleWidth, texture2d.singleLength)
         channelMaskIndex = 3
         OpenGL.glPixelTransferf(GL_RED_SCALE, 1.0f)
         OpenGL.glPixelTransferf(GL_RED_BIAS, 0.0f)

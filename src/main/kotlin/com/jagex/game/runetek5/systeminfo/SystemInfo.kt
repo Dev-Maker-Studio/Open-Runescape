@@ -23,9 +23,9 @@ class SystemInfo : Node<SystemInfo>() {
     @JvmField
     var ram: Int = 0
     var gpuModel: String? = null
-    var aString8160: String? = null
+    var gpuDriverVersion: String? = null
     var dwDirectxVersion: String? = null
-    var aString8153: String? = null
+    var dxLetterVersion: String? = null
     @JvmField
     val cpuFeatureFlags: IntArray = IntArray(3)
     val operatingSystemType: Int
@@ -231,43 +231,43 @@ class SystemInfo : Node<SystemInfo>() {
         if (gpuModel == null) {
             gpuModel = ""
         }
-        aString8160 = ""
+        gpuDriverVersion = ""
         if (dwDirectxVersion == null) {
             dwDirectxVersion = ""
         }
-        aString8153 = ""
+        dxLetterVersion = ""
         if (cpuType == null) {
             cpuType = ""
         }
         if (cpuData == null) {
             cpuData = ""
         }
-        method13455()
+        truncateStrings()
     }
 
     fun encode(): Int {
         val b_2: Byte = 38
         var i_3 = b_2.toInt() + Utils.stringLengthPlus2(gpuModel)
-        i_3 += Utils.stringLengthPlus2(aString8160)
+        i_3 += Utils.stringLengthPlus2(gpuDriverVersion)
         i_3 += Utils.stringLengthPlus2(dwDirectxVersion)
-        i_3 += Utils.stringLengthPlus2(aString8153)
+        i_3 += Utils.stringLengthPlus2(dxLetterVersion)
         i_3 += Utils.stringLengthPlus2(cpuType)
         i_3 += Utils.stringLengthPlus2(cpuData)
         return i_3
     }
 
-    fun method13455() {
+    fun truncateStrings() {
         if (gpuModel!!.length > 40) {
             gpuModel = gpuModel!!.substring(0, 40)
         }
-        if (aString8160!!.length > 40) {
-            aString8160 = aString8160!!.substring(0, 40)
+        if (gpuDriverVersion!!.length > 40) {
+            gpuDriverVersion = gpuDriverVersion!!.substring(0, 40)
         }
         if (dwDirectxVersion!!.length > 10) {
             dwDirectxVersion = dwDirectxVersion!!.substring(0, 10)
         }
-        if (aString8153!!.length > 10) {
-            aString8153 = aString8153!!.substring(0, 10)
+        if (dxLetterVersion!!.length > 10) {
+            dxLetterVersion = dxLetterVersion!!.substring(0, 10)
         }
     }
 
@@ -286,9 +286,9 @@ class SystemInfo : Node<SystemInfo>() {
         machineInfoBuffer.writeMedium(ram)
         machineInfoBuffer.writeShort(cpuClock)
         machineInfoBuffer.writeJagString(gpuModel ?: "")
-        machineInfoBuffer.writeJagString(aString8160 ?: "")
+        machineInfoBuffer.writeJagString(gpuDriverVersion ?: "")
         machineInfoBuffer.writeJagString(dwDirectxVersion ?: "")
-        machineInfoBuffer.writeJagString(aString8153 ?: "")
+        machineInfoBuffer.writeJagString(dxLetterVersion ?: "")
         machineInfoBuffer.writeByte(dxDriverMonth)
         machineInfoBuffer.writeShort(dxDriverYear)
         machineInfoBuffer.writeJagString(cpuType ?: "")

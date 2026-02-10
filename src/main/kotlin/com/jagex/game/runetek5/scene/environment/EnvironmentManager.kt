@@ -196,7 +196,7 @@ class EnvironmentManager(
             } else {
                 this.environment.copyFrom(this.referenceChunkEnvironment)
                 if (this.environment.skybox != null) {
-                    this.environment.skybox!!.method4209()
+                    this.environment.skybox!!.resetTransition()
                 }
                 this.transitionDurationLeft = -1
             }
@@ -222,12 +222,12 @@ class EnvironmentManager(
             if (this.totalTransitionDuration != 0) {
                 this.referenceSceneEnvironment.copyFrom(this.environment)
                 if (this.environment.skybox != null) {
-                    if (this.environment.skybox!!.method4210()) {
+                    if (this.environment.skybox!!.isTransitioning()) {
                         this.referenceSceneEnvironment.skybox = this.environment.skybox!!.get()
                         this.environment.skybox = this.referenceSceneEnvironment.skybox
                     }
                     if (this.environment.skybox != null && this.environment.skybox != this.referenceChunkEnvironment.skybox) {
-                        this.environment.skybox!!.method4208(this.referenceChunkEnvironment.skybox)
+                        this.environment.skybox!!.transitionToSkybox(this.referenceChunkEnvironment.skybox)
                     }
                 }
             }

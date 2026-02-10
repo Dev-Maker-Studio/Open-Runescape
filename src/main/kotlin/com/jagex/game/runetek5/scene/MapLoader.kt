@@ -49,9 +49,9 @@ open class MapLoader(
     var unblendable: Boolean = false
     var overlayTotalFaces: Int = 0
     var index: Int = 0
-    var anIntArray3857: IntArray? = null
-    var anIntArray3858: IntArray? = null
-    var anIntArray3859: IntArray? = null
+    var shapeVertexA: IntArray? = null
+    var shapeVertexB: IntArray? = null
+    var shapeVertexC: IntArray? = null
     var overlayFaceCounts: IntArray? = null
     var overlayHslColor: Int = 0
     var overlayTextureScale: Int = 0
@@ -893,24 +893,24 @@ open class MapLoader(
 
     fun calculateFaceCounts(overlay: FloType?, underlay: FluType?) {
         if (unblendable) {
-            anIntArray3857 = anIntArrayArray3824[pathShape]
-            anIntArray3858 = anIntArrayArray3860[pathShape]
-            anIntArray3859 = anIntArrayArray3815[pathShape]
+            shapeVertexA = anIntArrayArray3824[pathShape]
+            shapeVertexB = anIntArrayArray3860[pathShape]
+            shapeVertexC = anIntArrayArray3815[pathShape]
             overlayFaceCount = if (overlay != null) OVERLAY_FACE_COUNT[pathShape] else 0
             underlayFaceCount = if (underlay != null) UNDERLAY_FACE_COUNT[pathShape] else 0
         } else if (overlaySupportsBlending) {
-            anIntArray3857 = anIntArrayArray3775[pathShape]
-            anIntArray3858 = anIntArrayArray3821[pathShape]
-            anIntArray3859 = anIntArrayArray3836[pathShape]
+            shapeVertexA = anIntArrayArray3775[pathShape]
+            shapeVertexB = anIntArrayArray3821[pathShape]
+            shapeVertexC = anIntArrayArray3836[pathShape]
             overlayFaceCount = if (overlay != null) OVERLAY_FACE_COUNT_BLENDED[pathShape] else 0
             underlayFaceCount = if (underlay != null) UNDERLAY_FACE_COUNT_BLENDED[pathShape] else 0
             overlayFaceCounts = anIntArrayArray3833[pathShape]
         } else {
-            anIntArray3857 = anIntArrayArray3774[pathShape]
-            anIntArray3858 = anIntArrayArray3830[pathShape]
-            anIntArray3859 = anIntArrayArray3831[pathShape]
-            overlayFaceCount = if (overlay != null) anIntArray3826[pathShape] else 0
-            underlayFaceCount = if (underlay != null) anIntArray3847[pathShape] else 0
+            shapeVertexA = anIntArrayArray3774[pathShape]
+            shapeVertexB = anIntArrayArray3830[pathShape]
+            shapeVertexC = anIntArrayArray3831[pathShape]
+            overlayFaceCount = if (overlay != null) OVERLAY_FACE_COUNTS[pathShape] else 0
+            underlayFaceCount = if (underlay != null) UNDERLAY_FACE_COUNTS[pathShape] else 0
             overlayFaceCounts = anIntArrayArray3828[pathShape]
         }
     }
@@ -927,41 +927,41 @@ open class MapLoader(
             for (overlayFace in 0 until overlayFaceCount) {
                 val b_22: Byte
                 if (bools_6[-tileRotation and 0x3] && overlayTotalFaces == overlayFaceCounts!![0]) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 1
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 1
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_22 = 6
                 } else if (bools_6[2 - tileRotation and 0x3] && overlayFaceCounts!![2] == overlayTotalFaces) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 5
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 5
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_22 = 6
                 } else if (bools_6[1 - tileRotation and 0x3] && overlayFaceCounts!![1] == overlayTotalFaces) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 3
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 3
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_22 = 6
                 } else if (bools_6[3 - tileRotation and 0x3] && overlayFaceCounts!![3] == overlayTotalFaces) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 7
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 7
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_22 = 6
                 } else {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
-                    overlayTileRotations[1] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
+                    overlayTileRotations[1] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     b_22 = 3
                 }
                 for (i_23 in 0 until b_22) {
@@ -1034,7 +1034,7 @@ open class MapLoader(
         } else if (overlaySupportsBlending) {
             overlayTotalFaces += OVERLAY_FACE_COUNT_BLENDED[pathShape]
         } else {
-            overlayTotalFaces += anIntArray3826[pathShape]
+            overlayTotalFaces += OVERLAY_FACE_COUNTS[pathShape]
         }
     }
 
@@ -1059,41 +1059,41 @@ open class MapLoader(
             for (underlayFace in 0 until underlayFaceCount) {
                 val b_32: Byte
                 if (blendable[-tileRotation and 0x3] && overlayTotalFaces == overlayFaceCounts!![0]) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 1
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 1
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_32 = 6
                 } else if (blendable[2 - tileRotation and 0x3] && overlayFaceCounts!![2] == overlayTotalFaces) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 5
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 5
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_32 = 6
                 } else if (blendable[1 - tileRotation and 0x3] && overlayFaceCounts!![1] == overlayTotalFaces) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 3
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 3
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_32 = 6
                 } else if (blendable[3 - tileRotation and 0x3] && overlayFaceCounts!![3] == overlayTotalFaces) {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
                     overlayTileRotations[1] = 7
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     overlayTileRotations[3] = 7
-                    overlayTileRotations[4] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[5] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[4] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[5] = shapeVertexC!![overlayTotalFaces]
                     b_32 = 6
                 } else {
-                    overlayTileRotations[0] = anIntArray3857!![overlayTotalFaces]
-                    overlayTileRotations[1] = anIntArray3858!![overlayTotalFaces]
-                    overlayTileRotations[2] = anIntArray3859!![overlayTotalFaces]
+                    overlayTileRotations[0] = shapeVertexA!![overlayTotalFaces]
+                    overlayTileRotations[1] = shapeVertexB!![overlayTotalFaces]
+                    overlayTileRotations[2] = shapeVertexC!![overlayTotalFaces]
                     b_32 = 3
                 }
                 for (i_33 in 0 until b_32) {
@@ -1415,9 +1415,9 @@ open class MapLoader(
         @JvmField
         val UNDERLAY_FACE_COUNT = intArrayOf(0, 1, 2, 2, 1, 1, 2, 3, 1, 3, 3, 4, 2, 0, 4)
         @JvmField
-        val anIntArray3826 = intArrayOf(4, 2, 1, 1, 2, 2, 3, 1, 3, 3, 3, 2, 0)
+        val OVERLAY_FACE_COUNTS = intArrayOf(4, 2, 1, 1, 2, 2, 3, 1, 3, 3, 3, 2, 0)
         @JvmField
-        val anIntArray3847 = intArrayOf(0, 2, 2, 2, 1, 1, 3, 3, 1, 3, 3, 4, 4)
+        val UNDERLAY_FACE_COUNTS = intArrayOf(0, 2, 2, 2, 1, 1, 3, 3, 1, 3, 3, 4, 4)
         @JvmField
         val OVERLAY_FACE_COUNT_BLENDED = intArrayOf(4, 2, 1, 1, 2, 2, 3, 1, 3, 3, 3, 2, 0)
         @JvmField

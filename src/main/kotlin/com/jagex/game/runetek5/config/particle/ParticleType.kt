@@ -85,7 +85,7 @@ class ParticleType {
         @JvmField val particleCache = LRUCache(64)
 
         @JvmStatic
-        fun method5757() {
+        fun resetCache() {
             particleCache.reset()
         }
     }

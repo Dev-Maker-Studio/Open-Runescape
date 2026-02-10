@@ -12,12 +12,12 @@ class SolidLoadingBar(
 
     override fun drawBackground(x: Int, y: Int) {
         val width = loadPercentDecimalFullout() * super.anchoredElement.width / 10000
-        Renderers.activeToolkit!!.drawFilledRectangle(x, y + 2, width, super.anchoredElement.height - 2, (super.anchoredElement as ColorLoadingBarElement).anInt7813, 0)
+        Renderers.activeToolkit!!.drawFilledRectangle(x, y + 2, width, super.anchoredElement.height - 2, (super.anchoredElement as ColorLoadingBarElement).fillColor, 0)
         Renderers.activeToolkit!!.drawFilledRectangle(width + x, y + 2, super.anchoredElement.width - width, super.anchoredElement.height - 2, 0, 0)
     }
 
     override fun drawOutline(draw: Boolean, x: Int, y: Int) {
-        Renderers.activeToolkit!!.drawRectangleOutline(x - 2, y, super.anchoredElement.width + 4, super.anchoredElement.height + 2, (super.anchoredElement as ColorLoadingBarElement).anInt7814, 0)
+        Renderers.activeToolkit!!.drawRectangleOutline(x - 2, y, super.anchoredElement.width + 4, super.anchoredElement.height + 2, (super.anchoredElement as ColorLoadingBarElement).outlineColor, 0)
         Renderers.activeToolkit!!.drawRectangleOutline(x - 1, y + 1, super.anchoredElement.width + 2, super.anchoredElement.height, 0, 0)
     }
 }

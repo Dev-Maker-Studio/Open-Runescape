@@ -74,7 +74,7 @@ object WorldConnection {
             WORLD_DESCRIPTORS_BYID[size] = pivot
 
             for (i in srcPos until size) {
-                if (WorldDescriptor.method4325(WORLD_DESCRIPTORS_BYID[i]!!, pivot, sortMode, ascending, filterMode, filterEnabled) <= 0) {
+                if (WorldDescriptor.compareWorlds(WORLD_DESCRIPTORS_BYID[i]!!, pivot, sortMode, ascending, filterMode, filterEnabled) <= 0) {
                     val temp = WORLD_DESCRIPTORS_BYID[i]
                     WORLD_DESCRIPTORS_BYID[i] = WORLD_DESCRIPTORS_BYID[currentPosition]
                     WORLD_DESCRIPTORS_BYID[currentPosition++] = temp
@@ -97,7 +97,7 @@ object WorldConnection {
      * @param filterEnabled Whether filtering is enabled
      */
     @JvmStatic
-    fun method6299(sortMode: Int, ascending: Boolean, filterMode: Int, filterEnabled: Boolean) {
+    fun sortAndClearPings(sortMode: Int, ascending: Boolean, filterMode: Int, filterEnabled: Boolean) {
         quicksort(0, WORLD_DESCRIPTORS_BYID.size - 1, sortMode, ascending, filterMode, filterEnabled)
         WORLD_PING_REQUESTS.clear()
     }

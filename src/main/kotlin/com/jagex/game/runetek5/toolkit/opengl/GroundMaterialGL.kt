@@ -54,7 +54,7 @@ class GroundMaterialGL(
         groundFunctionMask[y * ground.width + x] = groundFunctionMask[y * ground.width + x] or (1 shl faceCount)
     }
 
-    fun method12083(i_1: Int, color: Int, lightness: Int, colorMultiplier: Float) {
+    fun writeVertexColor(i_1: Int, color: Int, lightness: Int, colorMultiplier: Float) {
         var color = color
         if (materialId != -1) {
             val material = toolkit.materialProvider!!.getMaterial(materialId)
@@ -124,7 +124,7 @@ class GroundMaterialGL(
         nativeStream!!.putByte(color)
     }
 
-    fun method12085(ints_1: IntArray, i_2: Int) {
+    fun drawMaterialTriangles(ints_1: IntArray, i_2: Int) {
         var addedTextures = 0
         val textureBuffer = toolkit.textureBuffer
         textureBuffer.currentPosition = 0

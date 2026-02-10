@@ -478,7 +478,7 @@ open class OpenGLNativeToolkit(
                 return MipmapRectangleTextureSampler(this, class1501, i_2, i_3, floats_5)
             }
             val sampler2d = MipmapTextureSampler2D(this, class1501, GLActionFormat.FLOAT_32_ARB, MathUtils.nextPowerOfTwo(i_2), MathUtils.nextPowerOfTwo(i_3))
-            sampler2d.method14494(i_2, i_3, floats_5, class1501)
+            sampler2d.updateSubImageFloat(i_2, i_3, floats_5, class1501)
             return sampler2d
         }
         return MipmapTextureSampler2D(this, class1501, i_2, i_3, floats_5)

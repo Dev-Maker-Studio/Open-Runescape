@@ -39,7 +39,7 @@ class TextureOpLineNoise : TextureOperation(0, true) {
         val ints_3 = monochromeImageCache.getPalette(i_1)
         if (monochromeImageCache.dirty) {
             val i_4 = angleSpread shr 1
-            val ints_5 = monochromeImageCache.method5722()
+            val ints_5 = monochromeImageCache.getAllPaletteData()
             val random6 = Random(randomSeed.toLong())
 
             for (i_7 in 0 until lineCount) {

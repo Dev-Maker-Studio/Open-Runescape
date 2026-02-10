@@ -196,7 +196,7 @@ object LoginManager {
                         loginStage = LoginStage.IDLE
                         setLoginResponse(i_10)
                         CURRENT_CONNECTION_CONTEXT!!.closeConnection()
-                        GameState.method6270()
+                        GameState.handleDisconnection()
                         return
                     }
                     loginStage = if (socialNetworkLogin) {
@@ -414,7 +414,7 @@ object LoginManager {
                             loginStage = LoginStage.IDLE
                             setLoginResponse(i_10)
                             CURRENT_CONNECTION_CONTEXT!!.closeConnection()
-                            GameState.method6270()
+                            GameState.handleDisconnection()
                         }
                     }
                     return
@@ -436,7 +436,7 @@ object LoginManager {
                         loginStage = LoginStage.IDLE
                         setLoginResponse(21)
                         CURRENT_CONNECTION_CONTEXT!!.closeConnection()
-                        GameState.method6270()
+                        GameState.handleDisconnection()
                     }
                 } else if (loginStage == LoginStage.AWAITING_TIME_SYNC) {
                     if (CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.available(2)) {
@@ -465,7 +465,7 @@ object LoginManager {
                     loginStage = LoginStage.IDLE
                     setLoginResponse(loginResponseCode)
                     CURRENT_CONNECTION_CONTEXT!!.closeConnection()
-                    GameState.method6270()
+                    GameState.handleDisconnection()
                 } else if (loginStage == LoginStage.READING_PAYLOAD_SIZE) {
                     if (CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.available(1)) {
                         CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, 0, 1)
@@ -640,7 +640,7 @@ object LoginManager {
                 } else {
                     loginStage = LoginStage.IDLE
                     setLoginResponse(-4)
-                    GameState.method6270()
+                    GameState.handleDisconnection()
                 }
             }
         }
@@ -758,7 +758,7 @@ object LoginManager {
         if (loginStage != LoginStage.IDLE) {
             CURRENT_CONNECTION_CONTEXT!!.closeConnection()
             resetLoginState()
-            GameState.method6270()
+            GameState.handleDisconnection()
         }
     }
 
@@ -780,7 +780,7 @@ object LoginManager {
 
     @JvmStatic
     fun switchWorldAndLogin(string_0: String, string_1: String) {
-        if (string_0.length <= 320 && GameState.method6693()) {
+        if (string_0.length <= 320 && GameState.isReadyForLogin()) {
             Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
             resetCredentials()
             StaticMethods.loginUsername = string_0
@@ -798,7 +798,7 @@ object LoginManager {
 
     @JvmStatic
     fun directLogin(string_0: String, string_1: String) {
-        if (string_0.length <= 320 && GameState.method6693()) {
+        if (string_0.length <= 320 && GameState.isReadyForLogin()) {
             resetCredentials()
             StaticMethods.loginUsername = string_0
             StaticMethods.loginPassword = string_1
@@ -808,7 +808,7 @@ object LoginManager {
 
     @JvmStatic
     fun snLogin(i_0: Int) {
-        if (GameState.method6693()) {
+        if (GameState.isReadyForLogin()) {
             if (i_0 != StaticMethods.selectedWorldId) {
                 socialNetworkToken = -1L
             }

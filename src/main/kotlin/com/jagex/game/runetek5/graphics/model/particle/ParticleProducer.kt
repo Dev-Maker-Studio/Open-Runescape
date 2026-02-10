@@ -108,10 +108,10 @@ class ParticleProducer(
             } else {
                 timeAlive %= this.definition.lifetime
             }
-            if (!this.definition.activeFirst && timeAlive < this.definition.anInt537) {
+            if (!this.definition.activeFirst && timeAlive < this.definition.emissionEndTime) {
                 canResize = false
             }
-            if (this.definition.activeFirst && timeAlive >= this.definition.anInt537) {
+            if (this.definition.activeFirst && timeAlive >= this.definition.emissionEndTime) {
                 canResize = false
             }
         }
@@ -316,7 +316,7 @@ class ParticleProducer(
                 if (!isAlive) {
                     particleIt.remove()
                     ParticleSystemManager.particleSystemsAwaitingRemoval!![ParticleSystemManager.awaitingRemovalCursorPosition] = particle
-                    ParticleSystemManager.awaitingRemovalCursorPosition = ParticleSystemManager.awaitingRemovalCursorPosition + 1 and ParticleSystemManager.anIntArray931[ParticleSystemManager.detailsSetting]
+                    ParticleSystemManager.awaitingRemovalCursorPosition = ParticleSystemManager.awaitingRemovalCursorPosition + 1 and ParticleSystemManager.DETAIL_LEVEL_LIMITS[ParticleSystemManager.detailsSetting]
                 }
             }
         }

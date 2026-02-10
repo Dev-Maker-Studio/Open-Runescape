@@ -588,7 +588,7 @@ class Scene(
                             } else {
                                 tile.interactives = interactives.child
                             }
-                            interactives.method3560()
+                            interactives.release()
                             break
                         }
                         child = interactives
@@ -1463,7 +1463,7 @@ class Scene(
                 resetSettingsBits(0.toByte())
                 initializeRoofSettings(512)
                 if (Resource.mapRegion!!.getScene()!! != null) {
-                    method570()
+                    updateTileVisibility()
                 }
             } else {
                 // Selectively
@@ -1475,7 +1475,7 @@ class Scene(
         }
 
         @JvmStatic
-        fun method570() {
+        fun updateTileVisibility() {
             var i_1 = 0
             val scene = Resource.mapRegion!!.getScene()!!
             for (sceneX in 0 until Resource.mapRegion!!.sceneSizeX) {

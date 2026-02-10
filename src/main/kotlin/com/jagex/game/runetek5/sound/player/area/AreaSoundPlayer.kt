@@ -154,7 +154,7 @@ object AreaSoundPlayer {
             }
             soundIndex++
         }
-        if (SoundEffectPlayer.soundJinglePlaying && !SongReference.method1966()) {
+        if (SoundEffectPlayer.soundJinglePlaying && !SongReference.isSongLoading()) {
             if (PreferenceManager.preferences!!.musicVolume!!.getValue() != 0 && currentMusicArchive != -1) {
                 if (SoundEffectPlayer.jingleStream != null) {
                     playMusicWithTransition(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences!!.musicVolume!!.getValue(), SoundEffectPlayer.jingleStream!!)
@@ -164,7 +164,7 @@ object AreaSoundPlayer {
             }
             SoundEffectPlayer.soundJinglePlaying = false
             SoundEffectPlayer.jingleStream = null
-        } else if (PreferenceManager.preferences!!.musicVolume!!.getValue() != 0 && currentMusicArchive != -1 && !SongReference.method1966()) {
+        } else if (PreferenceManager.preferences!!.musicVolume!!.getValue() != 0 && currentMusicArchive != -1 && !SongReference.isSongLoading()) {
             val musicEndedPacket = PacketEncoder.createPacket(ClientProt.SOUND_EFFECT_MUSIC_ENDED, Client.GAME_CONNECTION_CONTEXT.isaac)
             musicEndedPacket.buffer.writeInt(currentMusicArchive)
             Client.GAME_CONNECTION_CONTEXT.queuePacket(musicEndedPacket)

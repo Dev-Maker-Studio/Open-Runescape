@@ -29,11 +29,11 @@ object CalenderUtil {
     fun getLocalTimestring(milliseconds: Long): String = CalendarUtil.getLocalTimestring(milliseconds)
 
     @JvmStatic
-    fun method13045(milliseconds: Long, language: Int): String = CalendarUtil.method13045(milliseconds, language)
+    fun getLocalDateString(milliseconds: Long, language: Int): String = CalendarUtil.getLocalDateString(milliseconds, language)
 
     @JvmStatic
     fun getLanguageTimestring(milliseconds: Long, language: Int): String = CalendarUtil.getLanguageTimestring(milliseconds, language)
 
     @JvmStatic
-    fun method5363(daysSinceEpoch: Int): Long = CalendarUtil.convertDaysToMilliseconds(daysSinceEpoch)
+    fun convertDaysToMilliseconds(daysSinceEpoch: Int): Long = CalendarUtil.convertDaysToMilliseconds(daysSinceEpoch)
 }

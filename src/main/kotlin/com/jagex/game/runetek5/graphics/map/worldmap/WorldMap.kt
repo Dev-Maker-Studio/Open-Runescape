@@ -679,8 +679,8 @@ object WorldMap {
 
     @JvmStatic
     fun positionCategory(class282Sub361: WorldMapCategory, i_2: Int, i_3: Int) {
-        class282Sub361.anInt7990 = (i_2 * (class282Sub361.absX - tileViewStartX) shr 16) + pixelViewStartX
-        class282Sub361.anInt7992 = pixelViewEndY - (i_3 * (class282Sub361.absY - tileViewStartY) shr 16)
+        class282Sub361.screenX = (i_2 * (class282Sub361.absX - tileViewStartX) shr 16) + pixelViewStartX
+        class282Sub361.screenY = pixelViewEndY - (i_3 * (class282Sub361.absY - tileViewStartY) shr 16)
     }
 
     @JvmStatic
@@ -695,7 +695,7 @@ object WorldMap {
             }
 
             WorldMapRasterManager.fillPolygon(toolkit, positioning, mectype.lineColor)
-            if (mectype.anInt2748 > 0) {
+            if (mectype.dashLineSpacing > 0) {
                 for (index in 0 until positioning.size / 2 - 1) {
                     var x = positioning[index * 2]
                     var y = positioning[index * 2 + 1]
@@ -714,7 +714,7 @@ object WorldMap {
                         length = i_9
                     }
 
-                    toolkit.drawLine(x, y, width, length, mectype.colors!![mectype.colorPointers!![index].toInt() and 0xff], mectype.anInt2748, mectype.anInt2749, mectype.anInt2756)
+                    toolkit.drawLine(x, y, width, length, mectype.colors!![mectype.colorPointers!![index].toInt() and 0xff], mectype.dashLineSpacing, mectype.dashLineLength, mectype.dashLineOffset)
                 }
 
                 var i_4 = positioning[positioning.size - 2]
@@ -734,7 +734,7 @@ object WorldMap {
                     i_7 = i_8
                 }
 
-                toolkit.drawLine(i_4, i_5, i_6, i_7, mectype.colors!![mectype.colorPointers!![mectype.colorPointers!!.size - 1].toInt() and 0xff], mectype.anInt2748, mectype.anInt2749, mectype.anInt2756)
+                toolkit.drawLine(i_4, i_5, i_6, i_7, mectype.colors!![mectype.colorPointers!![mectype.colorPointers!!.size - 1].toInt() and 0xff], mectype.dashLineSpacing, mectype.dashLineLength, mectype.dashLineOffset)
             } else {
                 for (index in 0 until positioning.size / 2 - 1) {
                     toolkit.drawOpaqueLine(positioning[index * 2], positioning[index * 2 + 1], positioning[(index + 1) * 2], positioning[(index + 1) * 2 + 1], mectype.colors!![mectype.colorPointers!![index].toInt() and 0xff])
@@ -851,9 +851,9 @@ object WorldMap {
             }
 
             val modifiedHsl = lightness + ((colorHsl + hueRandomisation) and 0xfc00) + (colorHsl and 0x380)
-            finalFloorColor = 0xff000000.toInt() or ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)).toInt() and 0xffff)]
+            finalFloorColor = 0xff000000.toInt() or ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.repackHslWithSentinel(modifiedHsl, 96)).toInt() and 0xffff)]
         } else if (textureId >= 0) {
-            finalFloorColor = 0xff000000.toInt() or ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.method4162(materialProvider.getMaterial(textureId)!!.colorHsl.toInt(), 96)).toInt() and 0xffff)]
+            finalFloorColor = 0xff000000.toInt() or ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.repackHslWithSentinel(materialProvider.getMaterial(textureId)!!.colorHsl.toInt(), 96)).toInt() and 0xffff)]
         } else if (overlay.tileColorHsl == -1) {
             finalFloorColor = 0
         } else {
@@ -866,7 +866,7 @@ object WorldMap {
             }
 
             val modifiedHsl = lightness + ((colorHsl + hueRandomisation) and 0xfc00) + (colorHsl and 0x380)
-            finalFloorColor = 0xff000000.toInt() or ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.method4162(modifiedHsl, 96)).toInt() and 0xffff)]
+            finalFloorColor = 0xff000000.toInt() or ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.repackHslWithSentinel(modifiedHsl, 96)).toInt() and 0xffff)]
         }
 
         return finalFloorColor
@@ -1113,7 +1113,7 @@ object WorldMap {
 
                             val i_23 = clampedLightness + ((i_3 + hsl24) and 0xfc00) + (hsl24 and 0x380)
                             val i_24 = x + y * mapSizeX
-                            val rgb = ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.method14677(i_23, 96)).toInt() and 0xffff)]
+                            val rgb = ColorUtil.hsvToRgbTable!![(ColorUtil.adjustHsv(ColorUtil.repackHslSafe(i_23, 96)).toInt() and 0xffff)]
                             bytes_1[i_24] = ((rgb shr 16) and 0xff).toByte()
                             shorts_2[i_24] = (rgb and 0xffff).toShort()
                         }
@@ -1191,17 +1191,17 @@ object WorldMap {
             val i_8 = (height / mapZoom).toInt() + WorldMapSub1.mapCenterY
             val i_9 = (width / mapZoom).toInt() + WorldMapSub1.mapCenterX
             val i_10 = WorldMapSub1.mapCenterY - (height / mapZoom).toInt()
-            DebugDisplay.anInt3991 = WorldMapSub1.mapCenterX - (width / mapZoom).toInt()
+            DebugDisplay.worldMapViewLeftTileX = WorldMapSub1.mapCenterX - (width / mapZoom).toInt()
             WorldMapSub1.viewBottomTileY = WorldMapSub1.mapCenterY - (height / mapZoom).toInt()
             StaticMethods.worldMapViewWidth = ((width * 2) / mapZoom).toInt()
-            ComponentMinimap.anInt4097 = ((height * 2) / mapZoom).toInt()
+            ComponentMinimap.mapViewportScale = ((height * 2) / mapZoom).toInt()
             setViewportBounds(i_17 + mapSquareAbsX, i_8 + mapSquareAbsY, i_9 + mapSquareAbsX, i_10 + mapSquareAbsY, left, top, left + width, top + height + 1)
             renderMap(toolkit)
             val nodecollection11 = getViewportCategories()
             WorldMapSub1.renderInformation(toolkit, nodecollection11)
-            if (JSObjectManager.anInt4185 > 0) {
+            if (JSObjectManager.highlightFlashCycles > 0) {
                 if (--ServerEnvironment.flashCycleCounter == 0) {
-                    JSObjectManager.anInt4185--
+                    JSObjectManager.highlightFlashCycles--
                     ServerEnvironment.flashCycleCounter = 20
                 }
             }

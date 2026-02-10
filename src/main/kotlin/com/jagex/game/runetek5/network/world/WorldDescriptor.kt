@@ -110,7 +110,7 @@ open class WorldDescriptor : WorldDescriptorFlags() {
         }
 
         @JvmStatic
-        fun method4325(world1: WorldDescriptor, world2: WorldDescriptor, type: Int, bool3: Boolean, i_4: Int, bool5: Boolean): Int {
+        fun compareWorlds(world1: WorldDescriptor, world2: WorldDescriptor, type: Int, bool3: Boolean, i_4: Int, bool5: Boolean): Int {
             val i_7 = worldTypeChanged(world1, world2, type, bool3)
             if (i_7 != 0) {
                 return if (bool3) -i_7 else i_7

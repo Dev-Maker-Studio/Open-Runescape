@@ -6,7 +6,7 @@ import jaggl.OpenGL
 
 class FrameBufferTexture2D(
     @JvmField val mipmapTextureSampler: MipmapTextureSampler2D,
-    @JvmField val anInt3756: Int
+    @JvmField val mipmapLevel: Int
 ) : TextureFramebufferGenerator {
 
     override fun getUseWidth(): Int {
@@ -21,6 +21,6 @@ class FrameBufferTexture2D(
     }
 
     override fun generateTextureFramebuffer(i_1: Int) {
-        OpenGL.glFramebufferTexture2DEXT(GL_FRAMEBUFFER, i_1, this.mipmapTextureSampler.textureTarget, this.mipmapTextureSampler.texture, this.anInt3756)
+        OpenGL.glFramebufferTexture2DEXT(GL_FRAMEBUFFER, i_1, this.mipmapTextureSampler.textureTarget, this.mipmapTextureSampler.texture, this.mipmapLevel)
     }
 }

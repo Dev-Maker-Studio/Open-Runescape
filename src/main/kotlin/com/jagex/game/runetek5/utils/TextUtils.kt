@@ -158,8 +158,8 @@ object TextUtils {
             val var10 = if (var8.code != 0) var8 else str1[index1++]
             val var15 = if (var9.code != 0) var9 else str2[index2++]
 
-            var8 = Utils.method7778(var10)
-            var9 = Utils.method7778(var15)
+            var8 = Utils.getLigatureReplacement(var10)
+            var9 = Utils.getLigatureReplacement(var15)
             val char10 = stripDiacritics(var10, language)
             val char15 = stripDiacritics(var15, language)
 
@@ -167,7 +167,7 @@ object TextUtils {
                 val lower10 = Character.toLowerCase(char10)
                 val lower15 = Character.toLowerCase(char15)
                 if (lower15 != lower10) {
-                    return Utils.method13422(lower10) - Utils.method13422(lower15)
+                    return Utils.getCollationKey(lower10) - Utils.getCollationKey(lower15)
                 }
             }
         }
@@ -189,7 +189,7 @@ object TextUtils {
                 val lower17 = Character.toLowerCase(var17)
                 val lower13 = Character.toLowerCase(var13)
                 if (lower17 != lower13) {
-                    return Utils.method13422(lower17) - Utils.method13422(lower13)
+                    return Utils.getCollationKey(lower17) - Utils.getCollationKey(lower13)
                 }
             }
         }
@@ -202,7 +202,7 @@ object TextUtils {
                 val var13 = str1[i19]
                 val var14 = str2[i19]
                 if (var13 != var14) {
-                    return Utils.method13422(var13) - Utils.method13422(var14)
+                    return Utils.getCollationKey(var13) - Utils.getCollationKey(var14)
                 }
             }
             return 0

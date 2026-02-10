@@ -8,8 +8,8 @@ import com.jagex.game.runetek5.cache.node.NodeCollection
  */
 class ClanSettingsDelta(buffer: Packet) {
 
-    @JvmField var aLong4073: Long = 0
-    @JvmField var anInt4060: Int = -1
+    @JvmField var deltaVersion: Long = 0
+    @JvmField var updateCount: Int = -1
     @JvmField val pendingUpdates = NodeCollection()
 
     init {
@@ -22,8 +22,8 @@ class ClanSettingsDelta(buffer: Packet) {
      * @param buffer The packet buffer to decode from
      */
     fun decode(buffer: Packet) {
-        aLong4073 = buffer.readLong()
-        anInt4060 = buffer.readInt()
+        deltaVersion = buffer.readLong()
+        updateCount = buffer.readInt()
         var opcode = buffer.readUByte()
         while (opcode != 0) {
             val delta: AbstractClanSettingUpdate = when (opcode) {
@@ -55,7 +55,7 @@ class ClanSettingsDelta(buffer: Packet) {
      * @throws RuntimeException if the delta version doesn't match the clan settings
      */
     fun queueUpdates(clanSettings: ClanSettings) {
-        if (clanSettings.aLong631 == aLong4073 && anInt4060 == clanSettings.updateCount) {
+        if (clanSettings.deltaVersion == deltaVersion && updateCount == clanSettings.updateCount) {
             var update = pendingUpdates.getFirst() as AbstractClanSettingUpdate?
             while (update != null) {
                 update.apply(clanSettings)

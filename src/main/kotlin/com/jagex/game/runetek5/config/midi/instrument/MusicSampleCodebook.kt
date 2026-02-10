@@ -16,7 +16,7 @@ class MusicSampleCodebook {
     @JvmField val lengths: IntArray
     @JvmField var mults: IntArray? = null
     @JvmField var multiplicands: Array<FloatArray>? = null
-    @JvmField var anIntArray3151: IntArray? = null
+    @JvmField var huffmanTree: IntArray? = null
 
     init {
         MusicSample.getBits(24)
@@ -101,7 +101,7 @@ class MusicSampleCodebook {
 
     }
 
-    fun method4382(): FloatArray {
+    fun decodeVector(): FloatArray {
         return multiplicands!![decode()]
     }
 
@@ -157,7 +157,7 @@ class MusicSampleCodebook {
             }
         }
 
-        anIntArray3151 = IntArray(8)
+        huffmanTree = IntArray(8)
         i_3 = 0
 
         for (i_4 in 0 until entries) {
@@ -169,27 +169,27 @@ class MusicSampleCodebook {
                 for (i_8 in 0 until i_5) {
                     i_9 = Int.MIN_VALUE ushr i_8
                     if ((i_6 and i_9) != 0) {
-                        if (anIntArray3151!![i_7] == 0) {
-                            anIntArray3151!![i_7] = i_3
+                        if (huffmanTree!![i_7] == 0) {
+                            huffmanTree!![i_7] = i_3
                         }
 
-                        i_7 = anIntArray3151!![i_7]
+                        i_7 = huffmanTree!![i_7]
                     } else {
                         ++i_7
                     }
 
-                    if (i_7 >= anIntArray3151!!.size) {
-                        val ints_10 = IntArray(anIntArray3151!!.size * 2)
+                    if (i_7 >= huffmanTree!!.size) {
+                        val ints_10 = IntArray(huffmanTree!!.size * 2)
 
-                        System.arraycopy(anIntArray3151, 0, ints_10, 0, anIntArray3151!!.size)
+                        System.arraycopy(huffmanTree, 0, ints_10, 0, huffmanTree!!.size)
 
-                        anIntArray3151 = ints_10
+                        huffmanTree = ints_10
                     }
 
                     i_9 = i_9 ushr 1
                 }
 
-                anIntArray3151!![i_7] = i_4.inv()
+                huffmanTree!![i_7] = i_4.inv()
                 if (i_7 >= i_3) {
                     i_3 = i_7 + 1
                 }
@@ -200,11 +200,11 @@ class MusicSampleCodebook {
 
     fun decode(): Int {
         var i_1 = 0
-        while (anIntArray3151!![i_1] >= 0) {
-            i_1 = if (MusicSample.getBit() != 0) anIntArray3151!![i_1] else i_1 + 1
+        while (huffmanTree!![i_1] >= 0) {
+            i_1 = if (MusicSample.getBit() != 0) huffmanTree!![i_1] else i_1 + 1
         }
 
-        return anIntArray3151!![i_1].inv()
+        return huffmanTree!![i_1].inv()
     }
 
     companion object {

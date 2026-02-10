@@ -69,9 +69,9 @@ class Projectile(
     val endHeight: Int
     var stepX: Double = 0.0
     var stepZ: Double = 0.0
-    var aDouble10396: Double = 0.0
-    var aDouble10397: Double = 0.0
-    var aDouble10390: Double = 0.0
+    var horizontalSpeed: Double = 0.0
+    var verticalSpeed: Double = 0.0
+    var verticalAcceleration: Double = 0.0
     var hasAlpha: Boolean = false
     var projectileMinY: Int = 0
     var particleSystem: ParticleSystem? = null
@@ -197,14 +197,14 @@ class Projectile(
         val cyclesLeft = cyclesUntilDisappear + 1 - currentCycle.toDouble()
         stepX = (x - absolute.x) / cyclesLeft
         stepZ = (z - absolute.z) / cyclesLeft
-        aDouble10396 = sqrt(stepZ * stepZ + stepX * stepX)
+        horizontalSpeed = sqrt(stepZ * stepZ + stepX * stepX)
         if (angle != -1) {
             if (!animating) {
-                aDouble10397 = -aDouble10396 * tan(0.02454369 * angle)
+                verticalSpeed = -horizontalSpeed * tan(0.02454369 * angle)
             }
-            aDouble10390 = ((y - absolute.y) - aDouble10397 * cyclesLeft) * 2.0 / (cyclesLeft * cyclesLeft)
+            verticalAcceleration = ((y - absolute.y) - verticalSpeed * cyclesLeft) * 2.0 / (cyclesLeft * cyclesLeft)
         } else {
-            aDouble10397 = (y - absolute.y) / cyclesLeft
+            verticalSpeed = (y - absolute.y) / cyclesLeft
         }
         absolute.pushVectorStack()
     }
@@ -296,13 +296,13 @@ class Projectile(
         if (adjustToTerrain) {
             abs.coords.y = (MapRegion.tileheightForAbsolutePosition(abs.coords.x.toInt(), abs.coords.z.toInt(), plane.toInt()) - startHeight).toFloat()
         } else if (angle != -1) {
-            abs.coords.y = (abs.coords.y + aDouble10397 * step + step.toDouble() * step * 0.5 * aDouble10390).toFloat()
-            aDouble10397 += step * aDouble10390
+            abs.coords.y = (abs.coords.y + verticalSpeed * step + step.toDouble() * step * 0.5 * verticalAcceleration).toFloat()
+            verticalSpeed += step * verticalAcceleration
         } else {
-            abs.coords.y = (abs.coords.y + aDouble10397 * step).toFloat()
+            abs.coords.y = (abs.coords.y + verticalSpeed * step).toFloat()
         }
 
-        abs.quaternion.rotate(1.0f, 0.0f, 0.0f, atan2(aDouble10397, aDouble10396).toFloat())
+        abs.quaternion.rotate(1.0f, 0.0f, 0.0f, atan2(verticalSpeed, horizontalSpeed).toFloat())
         val quaternion = QuaternionPool.newQuaternion()
         quaternion.rotate(0.0f, 1.0f, 0.0f, atan2(stepX, stepZ).toFloat() - 3.1415927f)
         abs.quaternion.multiply(quaternion)

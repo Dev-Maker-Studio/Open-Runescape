@@ -23,7 +23,7 @@ class CS2Executor {
     var longLocals: LongArray? = null
 
     @JvmField
-    var anInt7004: Int = 0
+    var playerIndex: Int = 0
 
     @JvmField
     var operations: Array<ClientScriptOpCode>? = null
@@ -59,7 +59,7 @@ class CS2Executor {
     var current: CS2Script? = null
 
     @JvmField
-    var aBool7022: Boolean = false
+    var hasIntOperand: Boolean = false
 
     @JvmField
     val globalArrayLengths: IntArray = IntArray(5)
@@ -114,19 +114,19 @@ class CS2Executor {
         val CS2_EXECUTORS: ArrayList<CS2Executor> = ArrayList()
 
         @JvmField
-        var anInt5904: Int = 0
+        var instructionCount: Int = 0
 
         @JvmField
-        var aString5897: String? = null
+        var debugFilterScript: String? = null
 
         @JvmField
-        var aBool5898: Boolean = false
+        var isDebugTracing: Boolean = false
 
         @JvmField
-        val anIntArray5900: IntArray = IntArray(3)
+        val coordConversionBuffer: IntArray = IntArray(3)
 
         @JvmField
-        var anInt5906: Int = 0
+        var nextUniqueId: Int = 0
 
         @JvmStatic
         fun logError(errorString: String) {
@@ -143,7 +143,7 @@ class CS2Executor {
                 cs2executor3.objectLocals = arrayOfNulls(cs2script5.stringLocalsCount)
                 if (cs2script5.triggerType != ClientTriggerType.MEC_MOUSE_ENTER && cs2script5.triggerType != ClientTriggerType.MEC_MOUSE_OVER && cs2script5.triggerType != ClientTriggerType.MEC_MOUSE_LEAVE) {
                     if (cs2script5.triggerType == ClientTriggerType.IF_PLAYER_CYCLE) {
-                        cs2executor3.intLocals!![0] = cs2executor3.anInt7004
+                        cs2executor3.intLocals!![0] = cs2executor3.playerIndex
                     }
                 } else {
                     var i_6 = 0
@@ -171,17 +171,17 @@ class CS2Executor {
             cs2executor2.returnValuesPtr = 0
             try {
                 try {
-                    anInt5904 = 0
+                    instructionCount = 0
                     while (true) {
-                        ++anInt5904
-                        if (anInt5904 > stackLimit) {
+                        ++instructionCount
+                        if (instructionCount > stackLimit) {
                             throw RuntimeException("")
                         }
                         cs2opinfo4 = cs2executor2.operations!![++cs2executor2.instrPtr]
-                        if (aBool5898 && (aString5897 == null || cs2executor2.current!!.scriptName != null && cs2executor2.current!!.scriptName!!.indexOf(aString5897!!) != -1)) {
+                        if (isDebugTracing && (debugFilterScript == null || cs2executor2.current!!.scriptName != null && cs2executor2.current!!.scriptName!!.indexOf(debugFilterScript!!) != -1)) {
                             println(cs2executor2.current!!.scriptName + ": " + cs2opinfo4)
                         }
-                        cs2executor2.aBool7022 = cs2executor2.intOpValues!![cs2executor2.instrPtr] == 1
+                        cs2executor2.hasIntOperand = cs2executor2.intOpValues!![cs2executor2.instrPtr] == 1
                         if (cs2opinfo4 == ClientScriptOpCode.RETURN && cs2executor2.returnValuesPtr == 0) {
                             decrementCS2ExecIdx()
                             break
@@ -192,7 +192,7 @@ class CS2Executor {
                     val stringbuilder6 = StringBuilder(30)
                     stringbuilder6.append(cs2executor2.current!!.pointer).append(" ")
                     for (i_7 in cs2executor2.returnValuesPtr - 1 downTo 0) {
-                        stringbuilder6.append(cs2executor2.returnValues[i_7]!!.aCacheableNodeSub55869!!.pointer).append(" ")
+                        stringbuilder6.append(cs2executor2.returnValues[i_7]!!.savedScript!!.pointer).append(" ")
                     }
                     assert(cs2opinfo4 != null)
                     stringbuilder6.append(cs2opinfo4!!.opcode)
@@ -312,18 +312,18 @@ class CS2Executor {
         }
 
         @JvmStatic
-        fun method1480(): Long {
-            return (++anInt5906 - 1).toLong() shl 32 or 0xffffffffL
+        fun generateUniqueId(): Long {
+            return (++nextUniqueId - 1).toLong() shl 32 or 0xffffffffL
         }
 
         @JvmStatic
         fun executeIfTrigger(class3970: ClientTriggerType, i_1: Int, animable3: PathingEntity, i_4: Int) {
             val cs2executor6 = getNextScriptExecutor()
             cs2executor6.currentEntity = animable3
-            cs2executor6.anInt7004 = i_4
+            cs2executor6.playerIndex = i_4
             execute_trigger(class3970, i_1, -1, cs2executor6)
             cs2executor6.currentEntity = null
-            cs2executor6.anInt7004 = -1
+            cs2executor6.playerIndex = -1
         }
 
         @JvmStatic

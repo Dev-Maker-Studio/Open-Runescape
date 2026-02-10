@@ -111,7 +111,7 @@ class Matrix43 {
         this.xA = 1.0f
     }
 
-    fun method5213(rotation: Int, i_2: Int, i_3: Int, translateX: Float, translateY: Float, translateZ: Float) {
+    fun setTextureCoordTransform(rotation: Int, i_2: Int, i_3: Int, translateX: Float, translateY: Float, translateZ: Float) {
         if (rotation != 0) {
             val f_7 = MatrixRotations.COS[rotation and 0x3fff]
             val f_8 = MatrixRotations.SIN[rotation and 0x3fff]
@@ -142,7 +142,7 @@ class Matrix43 {
         this.zD = translateZ
     }
 
-    fun method5214() {
+    fun setSwapYZ() {
         this.xA = 1.0f
         this.xB = 0.0f
         this.xC = 0.0f
@@ -290,7 +290,7 @@ class Matrix43 {
         eyePosition[2] = (this.xC * x + this.yC * y + this.zC * z).toInt().toFloat()
     }
 
-    fun method5230(floats_1: FloatArray) {
+    fun transformDirection(floats_1: FloatArray) {
         val f_2 = floats_1[0]
         val f_3 = floats_1[1]
         val f_4 = floats_1[2]
@@ -334,7 +334,7 @@ class Matrix43 {
         this.xD = 0.0f
     }
 
-    fun method5243(floats_1: FloatArray) {
+    fun transformPointToInteger(floats_1: FloatArray) {
         val f_2 = floats_1[0] - this.xD
         val f_3 = floats_1[1] - this.yD
         val f_4 = floats_1[2] - this.zD
@@ -419,6 +419,6 @@ class Matrix43 {
 
     companion object {
         @JvmField
-        val aClass2943518 = Matrix43()
+        val TEMP = Matrix43()
     }
 }

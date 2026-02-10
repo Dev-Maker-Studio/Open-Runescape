@@ -59,7 +59,7 @@ class MECType {
     var colors: IntArray? = null
 
     @JvmField
-    var anInt2718: Int = -1
+    var categoryId: Int = -1
 
     @JvmField
     var colorPointers: ByteArray? = null
@@ -71,19 +71,19 @@ class MECType {
     var backgroundColor: Int = 0
 
     @JvmField
-    var anInt2748: Int = -1
+    var dashLineSpacing: Int = -1
 
     @JvmField
-    var anInt2749: Int = -1
+    var dashLineLength: Int = -1
 
     @JvmField
-    var anInt2756: Int = -1
+    var dashLineOffset: Int = -1
 
     @JvmField
-    var anInt2750: Int = 0
+    var labelOffsetX: Int = 0
 
     @JvmField
-    var anInt2752: Int = 0
+    var labelOffsetY: Int = 0
 
     @JvmField
     var minOffsetX: Int = Int.MAX_VALUE
@@ -194,7 +194,7 @@ class MECType {
             16 -> visible = false
             17 -> minimenuName = buffer.readString()
             18 -> spriteId = buffer.readBigSmart()
-            19 -> anInt2718 = buffer.readUShort()
+            19 -> categoryId = buffer.readUShort()
             20 -> {
                 secondaryVarpbit = buffer.readUShort()
                 if (secondaryVarpbit == 65535) {
@@ -210,13 +210,13 @@ class MECType {
             21 -> outlineColor = buffer.readInt()
             22 -> backgroundColor = buffer.readInt()
             23 -> {
-                anInt2748 = buffer.readUByte()
-                anInt2749 = buffer.readUByte()
-                anInt2756 = buffer.readUByte()
+                dashLineSpacing = buffer.readUByte()
+                dashLineLength = buffer.readUByte()
+                dashLineOffset = buffer.readUByte()
             }
             24 -> {
-                anInt2750 = buffer.readShort()
-                anInt2752 = buffer.readShort()
+                labelOffsetX = buffer.readShort()
+                labelOffsetY = buffer.readShort()
             }
             249 -> {
                 val numParameters = buffer.readUByte()

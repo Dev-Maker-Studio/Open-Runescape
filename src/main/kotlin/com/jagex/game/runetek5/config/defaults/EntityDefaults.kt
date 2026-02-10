@@ -9,11 +9,11 @@ class EntityDefaults(index1: Js5ResourceProvider) {
     @JvmField var maximumHits = 4
     @JvmField var hitOffsetsX: IntArray? = null
     @JvmField var hitOffsetsY: IntArray? = null
-    @JvmField var anInt7030 = 4
+    @JvmField var maxVisibleHitbars = 4
     @JvmField var maxHitbars = 4
-    @JvmField var anInt7028 = 7
+    @JvmField var defaultHitbarHeight = 7
     @JvmField var profilingMesh = -1
-    @JvmField var aBool7044 = true
+    @JvmField var alwaysShowContextMenu = true
     @JvmField var npcMessagesEnabled = true
     @JvmField var npcMessageDuration = 2
     @JvmField var enablePlayerMessages = true
@@ -66,7 +66,7 @@ class EntityDefaults(index1: Js5ResourceProvider) {
                     hitOffsetsX = IntArray(maximumHits)
                     hitOffsetsY = IntArray(maximumHits)
                 }
-                4 -> aBool7044 = false
+                4 -> alwaysShowContextMenu = false
                 5 -> loginInterfaceId = buffer.readUMedium()
                 6 -> lobbyWindow = buffer.readUMedium()
                 7 -> {
@@ -100,8 +100,8 @@ class EntityDefaults(index1: Js5ResourceProvider) {
                     gameHeightDefault = buffer.readUShort()
                 }
                 13 -> maxHitbars = buffer.readUByte()
-                14 -> anInt7030 = buffer.readUByte()
-                15 -> anInt7028 = buffer.readUByte()
+                14 -> maxVisibleHitbars = buffer.readUByte()
+                15 -> defaultHitbarHeight = buffer.readUByte()
             }
         }
     }

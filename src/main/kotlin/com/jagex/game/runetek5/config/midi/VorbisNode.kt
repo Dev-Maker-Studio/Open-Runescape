@@ -18,13 +18,13 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 class VorbisNode(
     @JvmField val fileId: Int,
     @JvmField val vfReference: VorbisFileReference,
-    @JvmField val anInt7997: Int,
+    @JvmField val volume: Int,
     @JvmField val sendPacket: Boolean
 ) : Node<VorbisNode>() {
 
-    @JvmField var aBool7995: Boolean = false
-    @JvmField var aBool7996: Boolean = false
-    @JvmField var aBool8000: Boolean = false
+    @JvmField var isPaused: Boolean = false
+    @JvmField var isReferencedThisCycle: Boolean = false
+    @JvmField var isStreamActive: Boolean = false
 
     companion object {
         @JvmField val SPRITE_GENERATOR = NativeSpriteGenerator()
@@ -33,10 +33,10 @@ class VorbisNode(
         fun cleanupStaleStreams() {
             var node = StaticMethods.INDEX36_FILE_CACHE.first()
             while (node != null) {
-                if (!node.aBool7996) {
+                if (!node.isReferencedThisCycle) {
                     StaticMethods.stopVorbisStream(node.fileId)
                 } else {
-                    node.aBool7996 = false
+                    node.isReferencedThisCycle = false
                 }
                 node = StaticMethods.INDEX36_FILE_CACHE.next()
             }
@@ -58,14 +58,14 @@ class VorbisNode(
                         StaticMethods.stopVorbisStream(node.fileId)
                     }
 
-                    if (!node.aBool8000 && !node.aBool7995) {
+                    if (!node.isStreamActive && !node.isPaused) {
                         val vorbisNode = node.vfReference.getVorbisDecoder()
                         if (vorbisNode != null) {
                             val audioStream = vorbisNode.getPcmStream()
                             if (audioStream != null) {
-                                audioStream.setVolume(node.anInt7997)
+                                audioStream.setVolume(node.volume)
                                 AmbientSound.gameSounds?.addSubStream(audioStream)
-                                node.aBool8000 = true
+                                node.isStreamActive = true
                             }
                         }
                     }
@@ -75,11 +75,11 @@ class VorbisNode(
         }
 
         @JvmStatic
-        fun method8858(toolkit: AbstractToolkit, fileId: Int): NativeSprite? {
+        fun getVideoFrame(toolkit: AbstractToolkit, fileId: Int): NativeSprite? {
             val vorbisNode = StaticMethods.INDEX36_FILE_CACHE.get(fileId.toLong())
             if (vorbisNode != null) {
                 val jagTheoraNode = vorbisNode.vfReference.getTheoraDecoder()
-                vorbisNode.aBool7996 = true
+                vorbisNode.isReferencedThisCycle = true
                 if (jagTheoraNode != null) {
                     SPRITE_GENERATOR.toolkit = toolkit
                     return jagTheoraNode.getFrameSprite(SPRITE_GENERATOR)

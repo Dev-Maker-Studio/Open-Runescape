@@ -19,7 +19,7 @@ class FontRendererGL(
     bool4: Boolean
 ) : AbstractFontRenderer(toolkit, fontmetrics2) {
     @JvmField val texture: OpenGl2DTexture_Sub1
-    @JvmField val aBool9326: Boolean
+    @JvmField val isAlphaOnlyTexture: Boolean
     @JvmField val listUtils: GlListUtils
 
     init {
@@ -73,7 +73,7 @@ class FontRendererGL(
             }
 
             this.texture = OpenGl2DTexture_Sub1.createSurface(toolkit, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, size, size, pixels, GLFormat.RGBA)
-            this.aBool9326 = true
+            this.isAlphaOnlyTexture = true
         } else {
             val pixels = IntArray(size * size)
 
@@ -112,8 +112,8 @@ class FontRendererGL(
                 }
             }
 
-            this.texture = OpenGl2DTexture_Sub1.method15537(toolkit, size, size, pixels, 0, 0)
-            this.aBool9326 = false
+            this.texture = OpenGl2DTexture_Sub1.createFromPixels(toolkit, size, size, pixels, 0, 0)
+            this.isAlphaOnlyTexture = false
         }
 
         this.texture.setLinearTextureFilter(false)
@@ -154,7 +154,7 @@ class FontRendererGL(
         val class137Sub1Sub110 = spriteSurface.surface
         this.toolkit.setupTextRendering()
         this.toolkit.setActiveTexture(this.texture)
-        if (!this.aBool9326 && !bool5) {
+        if (!this.isAlphaOnlyTexture && !bool5) {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_REPLACE)
         } else {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
@@ -183,7 +183,7 @@ class FontRendererGL(
         this.toolkit.loadTextureCombineMode(GL_MODULATE, GL_MODULATE)
         this.toolkit.setActiveTexture(null)
         this.toolkit.activateTexture(0)
-        if (this.aBool9326 || bool5) {
+        if (this.isAlphaOnlyTexture || bool5) {
             this.toolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
         }
     }
@@ -191,7 +191,7 @@ class FontRendererGL(
     override fun drawChar(character: Int, translateX: Int, translateY: Int, colorArgb: Int, bool5: Boolean) {
         this.toolkit.setupTextRendering()
         this.toolkit.setActiveTexture(this.texture)
-        if (!this.aBool9326 && !bool5) {
+        if (!this.isAlphaOnlyTexture && !bool5) {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_REPLACE)
         } else {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
@@ -202,7 +202,7 @@ class FontRendererGL(
         OpenGL.glTranslatef(translateX.toFloat(), translateY.toFloat(), 0.0F)
         this.listUtils.callList(character)
         OpenGL.glLoadIdentity()
-        if (this.aBool9326 || bool5) {
+        if (this.isAlphaOnlyTexture || bool5) {
             this.toolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
         }
     }

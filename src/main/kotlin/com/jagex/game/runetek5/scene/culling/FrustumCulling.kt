@@ -36,17 +36,17 @@ open class FrustumCulling(
 
         if (this.state == 2) {
             var i_10 = this.culling.oneThirdViewportWidth * yA + xA
-            if (i_10 >= 0 && i_10 < this.culling.anIntArray2565!!.size && (zA shl 8) - 39168 < this.culling.anIntArray2565!![i_10]) {
+            if (i_10 >= 0 && i_10 < this.culling.depthBuffer!!.size && (zA shl 8) - 39168 < this.culling.depthBuffer!![i_10]) {
                 return false
             }
 
             i_10 = xB + this.culling.oneThirdViewportWidth * yB
-            if (i_10 >= 0 && i_10 < this.culling.anIntArray2565!!.size && (zB shl 8) - 39168 < this.culling.anIntArray2565!![i_10]) {
+            if (i_10 >= 0 && i_10 < this.culling.depthBuffer!!.size && (zB shl 8) - 39168 < this.culling.depthBuffer!![i_10]) {
                 return false
             }
 
             i_10 = yC * this.culling.oneThirdViewportWidth + xC
-            if (i_10 >= 0 && i_10 < this.culling.anIntArray2565!!.size && (zC shl 8) - 39168 < this.culling.anIntArray2565!![i_10]) {
+            if (i_10 >= 0 && i_10 < this.culling.depthBuffer!!.size && (zC shl 8) - 39168 < this.culling.depthBuffer!![i_10]) {
                 return false
             }
         }
@@ -140,7 +140,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xC shr 12) - 1, (xB shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xB shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -151,7 +151,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -172,7 +172,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xB shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xB shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -183,7 +183,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -220,7 +220,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xC shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -231,7 +231,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xB shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xB shr 12) - 1, (xA shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -252,7 +252,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xC shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -263,7 +263,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yA, (xA shr 12) - 1, (xB shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yA, (xA shr 12) - 1, (xB shr 12) + 1, zA, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -314,7 +314,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xA shr 12) - 1, (xC shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xC shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -325,7 +325,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -346,7 +346,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xC shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xC shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -357,7 +357,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -394,7 +394,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xA shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -405,7 +405,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xC shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xC shr 12) - 1, (xB shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -426,7 +426,7 @@ open class FrustumCulling(
                                     return true
                                 }
 
-                                if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                                if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xA shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                                     return false
                                 }
 
@@ -437,7 +437,7 @@ open class FrustumCulling(
                             }
                         }
 
-                        if (!processDepthScanline(this.culling.anIntArray2565!!, yB, (xB shr 12) - 1, (xC shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
+                        if (!processDepthScanline(this.culling.depthBuffer!!, yB, (xB shr 12) - 1, (xC shr 12) + 1, zB, i_20, this.culling.oneThirdViewportWidth)) {
                             return false
                         }
 
@@ -487,7 +487,7 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xB shr 12) - 1, (xA shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xA shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
@@ -498,7 +498,7 @@ open class FrustumCulling(
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 
@@ -519,7 +519,7 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xA shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xA shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
@@ -530,7 +530,7 @@ open class FrustumCulling(
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 
@@ -567,7 +567,7 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xB shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
@@ -578,7 +578,7 @@ open class FrustumCulling(
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xA shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xA shr 12) - 1, (xC shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 
@@ -599,7 +599,7 @@ open class FrustumCulling(
                                 return true
                             }
 
-                            if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                            if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xB shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                                 return false
                             }
 
@@ -610,7 +610,7 @@ open class FrustumCulling(
                         }
                     }
 
-                    if (!processDepthScanline(this.culling.anIntArray2565!!, yC, (xC shr 12) - 1, (xA shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
+                    if (!processDepthScanline(this.culling.depthBuffer!!, yC, (xC shr 12) - 1, (xA shr 12) + 1, zC, i_20, this.culling.oneThirdViewportWidth)) {
                         return false
                     }
 

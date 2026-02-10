@@ -60,7 +60,7 @@ class ShadowMapperGL(
                                     OpenGL.glScalef(f_6, f_6, 1.0f)
                                     OpenGL.glTranslatef((-i_10) / f_6, (-i_7) / f_6, 1.0f)
                                     OpenGL.glMatrixMode(5888)
-                                    shadowTiles!![i_10][i_7]!!.method2155()
+                                    shadowTiles!![i_10][i_7]!!.drawShadow()
                                     continue@label136
                                 }
                             }
@@ -120,7 +120,7 @@ class ShadowMapperGL(
                         OpenGL.glScalef(f_6, f_6, 1.0f)
                         OpenGL.glTranslatef((-i_10) / f_6, (-i_7) / f_6, 1.0f)
                         OpenGL.glMatrixMode(5888)
-                        shadowTiles!![i_10][i_7]!!.method2156(class282Sub35Sub114.buffer, i_11)
+                        shadowTiles!![i_10][i_7]!!.drawShadowWithIndices(class282Sub35Sub114.buffer, i_11)
                     }
                 }
                 i_7++

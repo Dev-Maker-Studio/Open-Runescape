@@ -25,12 +25,12 @@ class ClanSettings(buffer: Packet) {
     @JvmField var kickRank: Byte = 0
     @JvmField var lootshareRank: Byte = 0
     @JvmField var coinShare: Byte = 0
-    @JvmField var aLong631: Long = 0
+    @JvmField var deltaVersion: Long = 0
     @JvmField var bannedUserHashes: LongArray? = null
     @JvmField var variables: IterableNodeMap<Node<*>>? = null
     @JvmField var sortedAffinedSlots: IntArray? = null
     @JvmField var updateCount = 0
-    @JvmField var anInt623 = 0
+    @JvmField var creationDay = 0
     @JvmField var memberHashes: LongArray? = null
     @JvmField var clanFlags: IntArray? = null
     @JvmField var useHashes = false
@@ -52,7 +52,7 @@ class ClanSettings(buffer: Packet) {
     }
 
     // varbit
-    fun method1198(i1: Int, i2: Int, shift: Int): Int {
+    fun getClanFlagBitfield(i1: Int, i2: Int, shift: Int): Int {
         val mask = if (shift == 31) -1 else (1 shl (shift + 1)) - 1
         return (clanFlags!![i1] and mask) ushr i2
     }
@@ -336,7 +336,7 @@ class ClanSettings(buffer: Packet) {
         return true
     }
 
-    fun method1225(i1: Int, i2: Int, i3: Int): Int? {
+    fun getVariableBitfield(i1: Int, i2: Int, i3: Int): Int? {
         if (variables == null) {
             return null
         }
@@ -440,9 +440,9 @@ class ClanSettings(buffer: Packet) {
                 bannedUserNames = null
             }
             updateCount = buffer.readInt()
-            anInt623 = buffer.readInt()
-            if (version <= 3 && anInt623 != 0) {
-                anInt623 += 16912800
+            creationDay = buffer.readInt()
+            if (version <= 3 && creationDay != 0) {
+                creationDay += 16912800
             }
             memberCount = buffer.readUShort()
             banCount = buffer.readUByte()

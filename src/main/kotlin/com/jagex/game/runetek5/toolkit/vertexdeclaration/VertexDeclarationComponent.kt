@@ -21,10 +21,10 @@ class VertexDeclarationComponent {
     }
 
     fun getAction(i_1: Int): VertexDeclarationAction {
-        return VertexDeclarationAction.forType(method1299(i_1))!!
+        return VertexDeclarationAction.forType(getSlotIndex(i_1))!!
     }
 
-    fun method1299(i_1: Int): Int {
+    fun getSlotIndex(i_1: Int): Int {
         return ((this.bitpacked shr (VertexDeclarationAction.BITS_PER_SLOT * i_1)) and 0xf).toInt()
     }
 

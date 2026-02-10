@@ -54,10 +54,10 @@ class NodeCollection {
     }
 
     fun first(): Node<*>? {
-        return method8066()
+        return getLast()
     }
 
-    fun method8066(): Node<*>? {
+    fun getLast(): Node<*>? {
         val node3 = tail.previous
         return if (node3 == tail) {
             current = null
@@ -105,7 +105,7 @@ class NodeCollection {
         return true
     }
 
-    fun method8070(): Array<Node<*>?> {
+    fun toNodeArray(): Array<Node<*>?> {
         val arr_2 = arrayOfNulls<Node<*>>(size())
         var i_3 = 0
         var node4 = tail.next
@@ -129,7 +129,7 @@ class NodeCollection {
     }
 
     fun toArray(): Array<Any> {
-        return method8070() as Array<Any>
+        return toNodeArray() as Array<Any>
     }
 
     fun <T> toArray(arr_1: Array<T>): Array<T> {
@@ -166,7 +166,7 @@ class NodeCollection {
         return super.hashCode()
     }
 
-    fun method8076(): Node<*>? {
+    fun getFirstNode(): Node<*>? {
         val node3 = tail.next
         return if (node3 == tail) {
             current = null
@@ -182,10 +182,10 @@ class NodeCollection {
     }
 
     fun getFirst(): Node<*>? {
-        return method8076()
+        return getFirstNode()
     }
 
-    fun method8098(node1: Node<*>) {
+    fun addLast(node1: Node<*>) {
         if (node1.previous != null) {
             node1.unlink()
         }

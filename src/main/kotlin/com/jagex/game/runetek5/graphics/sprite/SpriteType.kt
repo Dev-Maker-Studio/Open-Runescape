@@ -32,7 +32,7 @@ class SpriteType {
         return height + minY + borderY
     }
 
-    fun method1523() {
+    fun expandToFullSize() {
         val w = widthSum()
         val h = heightSum()
         if (w != width || h != height) {

@@ -145,7 +145,7 @@ class HelveticaFont(toolkit: AbstractToolkit, fontSize: Int, component: Componen
         nativeSprites[cacheIndex] = toolkit.createNativeSprite(pixels, width, width, height)
     }
 
-    fun method3186(): Int {
+    fun getHeight(): Int {
         return sizeY
     }
 
