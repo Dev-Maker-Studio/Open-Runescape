@@ -1070,9 +1070,9 @@ open class OpenGLNativeToolkit(
         return true
     }
 
-    override fun setMatrixTransform(matrix441: Matrix44, matrix442: Matrix44, matrix443: Matrix44) {
+    override fun setMatrixTransform(matrix441: Matrix44, matrix: Matrix44, matrix443: Matrix44) {
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        perspectiveMatrix.setProduct(matrix441, matrix442)
+        perspectiveMatrix.setProduct(matrix441, matrix)
         OpenGL.glLoadMatrixf(perspectiveMatrix.elements, 0)
         OpenGL.glMatrixMode(5889)
         OpenGL.glLoadMatrixf(matrix443.elements, 0)

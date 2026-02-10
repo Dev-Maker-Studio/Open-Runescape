@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.graphics.shader
 
 import com.jagex.game.runetek5.toolkit.opengl.effect.ProgramAttribute
 
-abstract class ShaderAttribute protected constructor(class1221: ShaderVariableDecoder) : ProgramAttribute() {
+abstract class ShaderAttribute protected constructor(decoder: ShaderVariableDecoder) : ProgramAttribute() {
 
     @JvmField val variableType: ShaderVariableType
     @JvmField val primaryShaderAttributeName: String
@@ -11,11 +11,11 @@ abstract class ShaderAttribute protected constructor(class1221: ShaderVariableDe
     @JvmField val elementType: ShaderVariableType
 
     init {
-        this.variableType = class1221.variableType!!
-        this.primaryShaderAttributeName = class1221.primaryShaderAttributeName!!
-        this.secondaryShaderAttributeName = class1221.secondaryShaderAttributeName
-        this.arraySize = class1221.arraySize
-        this.elementType = class1221.elementType!!
+        this.variableType = decoder.variableType!!
+        this.primaryShaderAttributeName = decoder.primaryShaderAttributeName!!
+        this.secondaryShaderAttributeName = decoder.secondaryShaderAttributeName
+        this.arraySize = decoder.arraySize
+        this.elementType = decoder.elementType!!
     }
 
     protected fun getPrimaryShaderAttributeName(): String {
@@ -31,7 +31,7 @@ abstract class ShaderAttribute protected constructor(class1221: ShaderVariableDe
     }
 
     fun getArraySize(): Int {
-        if (this.variableType != ShaderVariableType.aClass1111109) {
+        if (this.variableType != ShaderVariableType.ARRAY) {
             throw IllegalShaderArgumentException()
         } else {
             return this.arraySize

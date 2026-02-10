@@ -15,22 +15,22 @@ class OpenGl3DTexture : OpenGlTexture {
     @JvmField val height: Int
     @JvmField val depth: Int
 
-    constructor(class505Sub11: OpenGlToolkit, class1502: GLFormat, class763: GLActionFormat) : super(class505Sub11, GL_TEXTURE_3D, class1502, class763, 262144, false) {
+    constructor(toolkit: OpenGlToolkit, internalFormat: GLFormat, actionFormat: GLActionFormat) : super(toolkit, GL_TEXTURE_3D, internalFormat, actionFormat, 262144, false) {
         this.width = 128
         this.height = 128
         this.depth = 16
         this.activeToolkit.setActiveTexture(this)
-        OpenGL.glTexImage3Dub(this.textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(this.aClass1501650, this.aClass761651), this.width, this.height, this.depth, 0, OpenGlToolkit.format(this.aClass1501650), GL_UNSIGNED_BYTE, null, 0)
+        OpenGL.glTexImage3Dub(this.textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(this.internalFormat, this.actionFormat), this.width, this.height, this.depth, 0, OpenGlToolkit.format(this.internalFormat), GL_UNSIGNED_BYTE, null, 0)
         setLinearTextureFilter(true)
     }
 
-    constructor(class505Sub11: OpenGlToolkit, class1502: GLFormat, class763: GLActionFormat, bytes_7: ByteArray, class1508: GLFormat) : super(class505Sub11, GL_TEXTURE_3D, class1502, class763, GL_TEXTURE_BIT, false) {
+    constructor(toolkit: OpenGlToolkit, internalFormat: GLFormat, actionFormat: GLActionFormat, data: ByteArray, pixelFormat: GLFormat) : super(toolkit, GL_TEXTURE_3D, internalFormat, actionFormat, GL_TEXTURE_BIT, false) {
         this.width = 128
         this.height = 128
         this.depth = 16
         this.activeToolkit.setActiveTexture(this)
         OpenGL.glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
-        OpenGL.glTexImage3Dub(this.textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(this.aClass1501650, this.aClass761651), this.width, this.height, this.depth, 0, OpenGlToolkit.format(class1508), GL_UNSIGNED_BYTE, bytes_7, 0)
+        OpenGL.glTexImage3Dub(this.textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(this.internalFormat, this.actionFormat), this.width, this.height, this.depth, 0, OpenGlToolkit.format(pixelFormat), GL_UNSIGNED_BYTE, data, 0)
         OpenGL.glPixelStorei(GL_UNPACK_ALIGNMENT, 4)
         setLinearTextureFilter(true)
     }

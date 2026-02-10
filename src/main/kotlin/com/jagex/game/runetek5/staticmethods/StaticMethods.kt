@@ -535,7 +535,7 @@ object StaticMethods {
         }
         val string_13 = MiniMenu.formatTag(class282Sub50Sub157)
         @Suppress("UNCHECKED_CAST")
-        fontrenderer8.method386(string_13, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
+        fontrenderer8.renderAntiMacroText(string_13, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
     }
 
     @JvmStatic

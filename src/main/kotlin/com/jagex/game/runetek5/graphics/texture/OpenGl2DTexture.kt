@@ -48,11 +48,11 @@ open class OpenGl2DTexture : OpenGlTexture {
 
         activeToolkit.setActiveTexture(this)
         if (textureTarget != GL_TEXTURE_RECTANGLE && mipmapping && rowLength == 0 && size == 0) {
-            createMipmappedCubeTexture(textureTarget, OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651), width, height, activeToolkit.pixelType, pixelsToUse)
+            createMipmappedCubeTexture(textureTarget, OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat), width, height, activeToolkit.pixelType, pixelsToUse)
             setMipmapping(true)
         } else {
             OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, rowLength)
-            OpenGL.glTexImage2Di(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651), width, height, 0, GL_BGRA, activeToolkit.pixelType, pixelsToUse, size * 4)
+            OpenGL.glTexImage2Di(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat), width, height, 0, GL_BGRA, activeToolkit.pixelType, pixelsToUse, size * 4)
             OpenGL.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0)
             setMipmapping(false)
         }
@@ -62,16 +62,16 @@ open class OpenGl2DTexture : OpenGlTexture {
 
     constructor(
         toolkit: OpenGlToolkit,
-        tt: Int,
-        class1503: GLFormat,
-        class764: GLActionFormat,
+        textureTarget: Int,
+        internalFormat: GLFormat,
+        actionFormat: GLActionFormat,
         width: Int,
         height: Int,
         mipmapping: Boolean,
         pixels: ByteArray,
-        class1509: GLFormat,
+        pixelFormat: GLFormat,
         flipVertical: Boolean
-    ) : super(toolkit, tt, class1503, class764, width * height, mipmapping) {
+    ) : super(toolkit, textureTarget, internalFormat, actionFormat, width * height, mipmapping) {
         this.width = width
         this.length = height
         var pixelsToUse = pixels
@@ -89,10 +89,10 @@ open class OpenGl2DTexture : OpenGlTexture {
         activeToolkit.setActiveTexture(this)
         OpenGL.glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         if (mipmapping && textureTarget != GL_TEXTURE_RECTANGLE) {
-            method2359(tt, OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651), width, height, class1509, pixelsToUse)
+            uploadMipmappedByteTexture(textureTarget, OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat), width, height, pixelFormat, pixelsToUse)
             setMipmapping(true)
         } else {
-            OpenGL.glTexImage2Dub(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651), width, height, 0, OpenGlToolkit.format(class1509), GL_UNSIGNED_BYTE, pixelsToUse, 0)
+            OpenGL.glTexImage2Dub(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat), width, height, 0, OpenGlToolkit.format(pixelFormat), GL_UNSIGNED_BYTE, pixelsToUse, 0)
             setMipmapping(false)
         }
 
@@ -102,19 +102,19 @@ open class OpenGl2DTexture : OpenGlTexture {
 
     constructor(
         toolkit: OpenGlToolkit,
-        tt: Int,
+        textureTarget: Int,
         x: Int,
         y: Int,
         width: Int,
         length: Int
-    ) : super(toolkit, tt, GLFormat.RGB, GLActionFormat.PIXEL_FORMAT, width * length, false) {
+    ) : super(toolkit, textureTarget, GLFormat.RGB, GLActionFormat.PIXEL_FORMAT, width * length, false) {
         this.width = width
         this.length = length
         activeToolkit.setActiveTexture(this)
         val display = activeToolkit.getDisplay()
         if (display != null) {
             val adjustedY = display.getHeight() - (y + length)
-            val internalFormat = OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651)
+            val internalFormat = OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat)
             OpenGL.glCopyTexImage2D(textureTarget, 0, internalFormat, x, adjustedY, width, length, 0)
         }
 
@@ -123,22 +123,22 @@ open class OpenGl2DTexture : OpenGlTexture {
 
     constructor(
         toolkit: OpenGlToolkit,
-        class1503: GLFormat,
-        class764: GLActionFormat,
+        internalFormat: GLFormat,
+        actionFormat: GLActionFormat,
         width: Int,
         height: Int,
         mipmapping: Boolean,
         pixels: FloatArray,
-        class1509: GLFormat
-    ) : super(toolkit, GL_TEXTURE_2D, class1503, class764, width * height, mipmapping) {
+        pixelFormat: GLFormat
+    ) : super(toolkit, GL_TEXTURE_2D, internalFormat, actionFormat, width * height, mipmapping) {
         this.width = width
         this.length = height
         activeToolkit.setActiveTexture(this)
         if (mipmapping && textureTarget != GL_TEXTURE_RECTANGLE) {
-            generateMipmaps(OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651), width, height, class1509, pixels)
+            generateMipmaps(OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat), width, height, pixelFormat, pixels)
             setMipmapping(true)
         } else {
-            OpenGL.glTexImage2Df(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651), width, height, 0, OpenGlToolkit.format(class1509), 5126, pixels, 0)
+            OpenGL.glTexImage2Df(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat), width, height, 0, OpenGlToolkit.format(pixelFormat), 5126, pixels, 0)
             setMipmapping(false)
         }
         setLinearTextureFilter(true)
@@ -155,7 +155,7 @@ open class OpenGl2DTexture : OpenGlTexture {
         this.width = width
         this.length = length
         activeToolkit.setActiveTexture(this)
-        OpenGL.glTexImage2Dub(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651), width, length, 0, OpenGlToolkit.format(aClass1501650), GL_UNSIGNED_BYTE, null, 0)
+        OpenGL.glTexImage2Dub(textureTarget, 0, OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat), width, length, 0, OpenGlToolkit.format(internalFormat), GL_UNSIGNED_BYTE, null, 0)
         setLinearTextureFilter(true)
     }
 

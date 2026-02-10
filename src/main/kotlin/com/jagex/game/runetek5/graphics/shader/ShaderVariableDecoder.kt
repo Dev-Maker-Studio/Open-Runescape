@@ -97,7 +97,7 @@ class ShaderVariableDecoder {
     fun decode(shaderBuffer: ShaderBuffer) {
         val mainEntryCount = shaderBuffer.getEntryCount()
         variableType = ShaderVariableType.getAll()[mainEntryCount]
-        if (variableType == ShaderVariableType.aClass1111109) {
+        if (variableType == ShaderVariableType.ARRAY) {
             val i_4 = shaderBuffer.getEntryCount()
             elementType = ShaderVariableType.getAll()[i_4]
             arraySize = shaderBuffer.getEntryCount()

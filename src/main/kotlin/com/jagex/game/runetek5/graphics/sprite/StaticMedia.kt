@@ -45,7 +45,7 @@ object StaticMedia {
     @JvmField var chatIcons: Array<NativeSprite?>? = null
     @JvmField var totalChatIcons: Int = 0
     @JvmField var chatScaleHeights: IntArray? = null
-    @JvmField var aClass4142200: FontMetrics? = null
+    @JvmField var boldFontMetrics: FontMetrics? = null
     @JvmField var aNativeSprite5576: NativeSprite? = null
 
     @JvmField var aNativeSprite3452: NativeSprite? = null
@@ -210,8 +210,8 @@ object StaticMedia {
         StaticMethods.menuTopBorderSprite = null
         StaticMethods.menuBottomLeftCornerSprite = null
         StaticMethods.menuBottomRightCornerSprite = null
-        FontMetrics.aFontRenderer2348 = null
-        aClass4142200 = null
+        FontMetrics.boldFontRenderer = null
+        boldFontMetrics = null
     }
 
     @JvmStatic

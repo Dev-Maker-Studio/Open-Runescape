@@ -10,7 +10,7 @@ abstract class ShaderMapping : Binding {
     @JvmField var fragmentShaderName: String? = null
     @JvmField var shaderName: String? = null
 
-    abstract fun uniform4fv(var1: ShaderAttribute, var2: Matrix44)
+    abstract fun uniform4fv(attribute: ShaderAttribute, matrix: Matrix44)
 
     fun getShaderName(): String? {
         return this.shaderName
@@ -18,11 +18,11 @@ abstract class ShaderMapping : Binding {
 
     abstract fun addPositionAttribute3f(variableProgramAndIndex: Int, x: Float, y: Float, z: Float)
 
-    abstract fun uniform1f(var1: ShaderAttribute, var2: Float)
+    abstract fun uniform1f(attribute: ShaderAttribute, value: Float)
 
     abstract fun addPositionAttribute4f(variableProgramAndIndex: Int, x: Float, y: Float, z: Float, w: Float)
 
-    abstract fun loadTextureSampler(var1: ShaderAttribute, var2: Int, var3: TextureSampler)
+    abstract fun loadTextureSampler(attribute: ShaderAttribute, slot: Int, sampler: TextureSampler)
 
     abstract fun addPreloadedPositionAttribute(attribute: ShaderAttribute, x: Float, y: Float, z: Float, w: Float)
 
@@ -30,19 +30,19 @@ abstract class ShaderMapping : Binding {
 
     abstract fun uniform3fSavedSize16(slotAndCopyDest: Int, matrix: Matrix44)
 
-    abstract fun uniform4fv(var1: ShaderAttribute, var2: FloatArray, var3: Int)
+    abstract fun uniform4fv(attribute: ShaderAttribute, values: FloatArray, count: Int)
 
-    abstract fun addPositionAttributeDynamic(var1: Int, var2: FloatArray, var3: Int)
+    abstract fun addPositionAttributeDynamic(location: Int, values: FloatArray, count: Int)
 
     abstract fun uniform3fSavedSize12(slotAndCopyDest: Int, matrix: Matrix44)
 
     abstract fun uniform3fSavedSize8(slotAndCopyDest: Int, matrix: Matrix44)
 
-    abstract fun initializeTextureSampler(var1: Int, slot: Int, var3: TextureSampler)
+    abstract fun initializeTextureSampler(location: Int, slot: Int, sampler: TextureSampler)
 
-    abstract fun unform2f(var1: ShaderAttribute, var2: Float, var3: Float)
+    abstract fun unform2f(attribute: ShaderAttribute, x: Float, y: Float)
 
-    abstract fun uniform2fv(var1: ShaderAttribute, var2: Matrix44)
+    abstract fun uniform2fv(attribute: ShaderAttribute, matrix: Matrix44)
 
-    abstract fun uniform3f(var1: ShaderAttribute, var2: Float, var3: Float, var4: Float)
+    abstract fun uniform3f(attribute: ShaderAttribute, x: Float, y: Float, z: Float)
 }

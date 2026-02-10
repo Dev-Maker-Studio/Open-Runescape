@@ -69,7 +69,7 @@ abstract class LBC(
         if (Utils.time() - lastLoadPercentChange > 10000L) {
             loadingText = loadingText + " (" + LoadingStage.plainLoginScreenRenderer!!.getLoadingStage()!!.number + ")"
         }
-        fontRenderer!!.renderCentered(loadingText, anchoredElement.width / 2 + x, anchoredElement.height / 2 + anchoredElement.anInt4092 + y + 4, anchoredElement.anInt4091, -1)
+        fontRenderer!!.renderCentered(loadingText, anchoredElement.width / 2 + x, anchoredElement.height / 2 + anchoredElement.textOffsetY + y + 4, anchoredElement.textColor, -1)
     }
 
     abstract fun drawOutline(draw: Boolean, x: Int, y: Int)

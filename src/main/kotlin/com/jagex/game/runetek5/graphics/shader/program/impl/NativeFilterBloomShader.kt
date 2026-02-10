@@ -103,7 +103,7 @@ class NativeFilterBloomShader(
         floats_10[5] = (floats_10[5] - 1.0f) * f_16 + 1.0f
         floats_10[10] *= f_17
         floats_10[7] *= f_18
-        filterBloomShader!!.method1688(posAndTexCoords!!, floats_10)
+        filterBloomShader!!.uploadUniform4fv(posAndTexCoords!!, floats_10)
         filterBloomShader!!.loadTextureSampler(sceneTex!!, 0, sampler)
         filterBloomShader!!.loadRgbaColorAttribute(params!!, red, green, blue, 0.0f)
         filterBloomShader!!.loadRgbaColorAttribute(

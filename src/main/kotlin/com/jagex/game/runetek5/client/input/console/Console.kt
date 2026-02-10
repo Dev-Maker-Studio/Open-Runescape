@@ -79,7 +79,7 @@ object Console {
 
     @JvmStatic
     fun initialize() {
-        inputLineHeight = FontMetrics.aClass4143438!!.topPadding + FontMetrics.aClass4143438!!.bottomPadding + 2
+        inputLineHeight = FontMetrics.defaultFontMetrics!!.topPadding + FontMetrics.defaultFontMetrics!!.bottomPadding + 2
         outputLineHeight = FontManager.messageboxFont!!.topPadding + FontManager.messageboxFont!!.bottomPadding + 2
         displayedOutput = Array(500) { "" }
         writeLine(LocalizedText.DEVELOPER_CONSOLE_INTRO.translate(Client.CURRENT_LANGUAGE!!)!!)
@@ -305,13 +305,13 @@ object Console {
         Renderers.FONT_RENDERER!!.renderLeftAligned("727 1", GameShell.screenCanvasWidth - 25, 330, -1, 0xffffff.inv())
         toolkit.setClipping(0, 0, GameShell.screenCanvasWidth, 350)
         toolkit.drawOpaqueHorizontalLine(0, 350 - inputLineHeight, GameShell.screenCanvasWidth, -1)
-        MiniMenu.minimenuHeader!!.renderPlain("--> ${formatCommand(commandString)}", 10, 350 - FontMetrics.aClass4143438!!.bottomPadding - 1, -1, 0xffffff.inv())
+        MiniMenu.minimenuHeader!!.renderPlain("--> ${formatCommand(commandString)}", 10, 350 - FontMetrics.defaultFontMetrics!!.bottomPadding - 1, -1, 0xffffff.inv())
         if (GameShell.appletHasFocus) {
             var lineColor = -1
             if (Client.cycles % 30 > 15) {
                 lineColor = 16777215
             }
-            toolkit.drawOpaqueVerticalLine(10 + FontMetrics.aClass4143438!!.getWidthNoSprites("--> ${formatCommand(commandString).substring(0, commandLength)}"), 350 - FontMetrics.aClass4143438!!.bottomPadding - 11, 12, lineColor)
+            toolkit.drawOpaqueVerticalLine(10 + FontMetrics.defaultFontMetrics!!.getWidthNoSprites("--> ${formatCommand(commandString).substring(0, commandLength)}"), 350 - FontMetrics.defaultFontMetrics!!.bottomPadding - 11, 12, lineColor)
         }
         toolkit.resetClipping()
     }

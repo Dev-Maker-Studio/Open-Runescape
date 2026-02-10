@@ -521,7 +521,7 @@ object MiniMenu {
             while (class282Sub50Sub76Temp != null) {
                 class282Sub50Sub76 = class282Sub50Sub76Temp
                 i_7 = (entryCount - 1 - i_5) * entryRowHeight + StaticMethods.menuOpenY + 31
-                drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                 ++i_5
                 class282Sub50Sub76Temp = entryList.next() as? MiniMenuEntry
             }
@@ -531,9 +531,9 @@ object MiniMenu {
             while (class282Sub50Sub158 != null) {
                 i_7 = i_5 * entryRowHeight + StaticMethods.menuOpenY + 31
                 if (class282Sub50Sub158.queueSize == 1) {
-                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, (class282Sub50Sub158.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, (class282Sub50Sub158.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                 } else {
-                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub158, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub158, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                 }
                 ++i_5
                 class282Sub50Sub158 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
@@ -545,7 +545,7 @@ object MiniMenu {
                 class282Sub50Sub76 = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (class282Sub50Sub76 != null) {
                     i_7 = i_5 * entryRowHeight + submenuY + 31
-                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                     ++i_5
                     class282Sub50Sub76 = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
@@ -737,10 +737,10 @@ object MiniMenu {
         val i_4 = menuWidth
         val i_5 = menuHeight - 3
         val b_6 = 20
-        if (FontMetrics.aFontRenderer2348 == null || StaticMedia.aClass4142200 == null) {
-            FontMetrics.aFontRenderer2348 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex, true, true) as? AbstractFontRenderer
-            StaticMedia.aClass4142200 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex)
-            if (FontMetrics.aFontRenderer2348 != null && StaticMedia.aClass4142200 != null) {
+        if (FontMetrics.boldFontRenderer == null || StaticMedia.boldFontMetrics == null) {
+            FontMetrics.boldFontRenderer = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex, true, true) as? AbstractFontRenderer
+            StaticMedia.boldFontMetrics = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex)
+            if (FontMetrics.boldFontRenderer != null && StaticMedia.boldFontMetrics != null) {
                 close()
                 var i_15 = i_4 / 2 + i_2
                 if (i_15 + i_4 > GameShell.screenCanvasWidth) {
@@ -754,8 +754,8 @@ object MiniMenu {
             }
         }
         val fontrenderer7: AbstractFontRenderer?
-        if (FontMetrics.aFontRenderer2348 != null && StaticMedia.aClass4142200 != null) {
-            fontrenderer7 = FontMetrics.aFontRenderer2348
+        if (FontMetrics.boldFontRenderer != null && StaticMedia.boldFontMetrics != null) {
+            fontrenderer7 = FontMetrics.boldFontRenderer
         } else {
             fontrenderer7 = minimenuHeader
         }
@@ -910,7 +910,7 @@ object MiniMenu {
             text += ChatBox.addQuestChatIcons(questIds)
         }
         @Suppress("UNCHECKED_CAST")
-        fontRenderer?.method386(text, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+        fontRenderer?.renderAntiMacroText(text, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
         if (entry.showOtherLevelIcon) {
             StaticMedia.otherLevelSprite!!.draw(5 + i_2 + fontmetrics9.getWidthNoSprites(text), i_6 - fontmetrics9.topPadding)
         }

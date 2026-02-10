@@ -28,13 +28,13 @@ abstract class AbstractFontRenderer(
         @JvmStatic
         var argbColorEffect: Int = 0
         @JvmStatic
-        var anInt65: Int = 0
+        var originalShadowColor: Int = 0
         @JvmStatic
         var shadingEffect: Int = 0
         @JvmStatic
-        var anInt67: Int = 0
+        var justifiedSpaceWidth: Int = 0
         @JvmStatic
-        var anInt68: Int = 0
+        var justifiedSpaceAccumulator: Int = 0
         @JvmField
         val LINE_BUFFER: Array<String?> = arrayOfNulls(100)
     }
@@ -66,12 +66,12 @@ abstract class AbstractFontRenderer(
         underlineEffect = -1
         colorArgb = textColor
         argbColorEffect = textColor
-        anInt67 = 0
-        anInt68 = 0
+        justifiedSpaceWidth = 0
+        justifiedSpaceAccumulator = 0
         if (shadeEff == -1) {
             shadeEff = 0
         }
-        anInt65 = shadeEff
+        originalShadowColor = shadeEff
         Companion.shadingEffect = shadeEff
     }
 
@@ -109,7 +109,7 @@ abstract class AbstractFontRenderer(
             plainWidth = this.fontMetrics.getWidthNoSprites(chatText) + textWidth
             drawX = x + (maxWidth - plainWidth)
         }
-        method372(chatText, drawX, drawY, chatIcons, chatScaleHeights, glyphWidths, null)
+        renderLineWithOffsets(chatText, drawX, drawY, chatIcons, chatScaleHeights, glyphWidths, null)
         if (dimensions != null) {
             if (plainWidth == -1) {
                 plainWidth = this.fontMetrics.getWidthNoSprites(chatText) + textWidth
@@ -152,16 +152,16 @@ abstract class AbstractFontRenderer(
             } else if ("shad" == effectString) {
                 Companion.shadingEffect = argbColorEffect and 0xffffff.inv()
             } else if ("/shad" == effectString) {
-                Companion.shadingEffect = anInt65
+                Companion.shadingEffect = originalShadowColor
             } else if ("br" == effectString) {
-                calibrate(colorArgb, anInt65)
+                calibrate(colorArgb, originalShadowColor)
             }
         } catch (exception: Exception) {
             // NOOP
         }
     }
 
-    fun method370(string_1: String, i_2: Int) {
+    fun calculateJustifiedSpacing(string_1: String, i_2: Int) {
         var i_4 = 0
         var bool5 = false
         for (i_6 in 0 until string_1.length) {
@@ -175,7 +175,7 @@ abstract class AbstractFontRenderer(
             }
         }
         if (i_4 > 0) {
-            anInt67 = (i_2 - this.fontMetrics.getWidthNoSprites(string_1) shl 8) / i_4
+            justifiedSpaceWidth = (i_2 - this.fontMetrics.getWidthNoSprites(string_1) shl 8) / i_4
         }
     }
 
@@ -247,10 +247,10 @@ abstract class AbstractFontRenderer(
                             }
                             drawChar(ch.code, currentX, currentY, argbColorEffect, false, dimensions, shadingEffect, colorEffect)
                         }
-                    } else if (anInt67 > 0) {
-                        anInt68 += anInt67
-                        currentX += anInt68 shr 8
-                        anInt68 = anInt68 and 0xff
+                    } else if (justifiedSpaceWidth > 0) {
+                        justifiedSpaceAccumulator += justifiedSpaceWidth
+                        currentX += justifiedSpaceAccumulator shr 8
+                        justifiedSpaceAccumulator = justifiedSpaceAccumulator and 0xff
                     }
                     val glyphWidth = this.fontMetrics.getGlyphWidth(ch.code)
                     if (strikeThroughEffect != -1) {
@@ -266,7 +266,7 @@ abstract class AbstractFontRenderer(
         }
     }
 
-    fun method372(chatText: String, drawX: Int, drawY: Int, chatIcons: Array<NativeSprite>?, chatScaleHeights: IntArray?, widths: IntArray?, heights: IntArray?) {
+    fun renderLineWithOffsets(chatText: String, drawX: Int, drawY: Int, chatIcons: Array<NativeSprite>?, chatScaleHeights: IntArray?, widths: IntArray?, heights: IntArray?) {
         var currentX = drawX
         var currentY = drawY - this.fontMetrics.verticalSpacing
         var beginIndex = -1
@@ -351,10 +351,10 @@ abstract class AbstractFontRenderer(
                             drawChar(reference.code, w + currentX + 1, currentY + h + 1, shadingEffect, true)
                         }
                         drawChar(reference.code, w + currentX, currentY + h, argbColorEffect, false)
-                    } else if (anInt67 > 0) {
-                        anInt68 += anInt67
-                        currentX += anInt68 shr 8
-                        anInt68 = anInt68 and 0xff
+                    } else if (justifiedSpaceWidth > 0) {
+                        justifiedSpaceAccumulator += justifiedSpaceWidth
+                        currentX += justifiedSpaceAccumulator shr 8
+                        justifiedSpaceAccumulator = justifiedSpaceAccumulator and 0xff
                     }
                     val glyphWidth = this.fontMetrics.getGlyphWidth(reference.code)
                     if (strikeThroughEffect != -1) {
@@ -429,9 +429,9 @@ abstract class AbstractFontRenderer(
             } else if (i == numLines - 1) {
                 renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteIndices, dimensions, leftPadding, topPadding)
             } else {
-                method370(LINE_BUFFER[i]!!, width)
+                calculateJustifiedSpacing(LINE_BUFFER[i]!!, width)
                 renderLine(LINE_BUFFER[i]!!, x, renderY, sprites, spriteIndices, dimensions, leftPadding, topPadding)
-                anInt67 = 0
+                justifiedSpaceWidth = 0
             }
             renderY += currentLineSpacing
         }
@@ -456,11 +456,11 @@ abstract class AbstractFontRenderer(
             for (i in 0 until length) {
                 shakeOffsetsY[i] = (Math.sin(i_6 + i / 1.5) * step).toInt()
             }
-            method372(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, shakeOffsetsY)
+            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, shakeOffsetsY)
         }
     }
 
-    fun method386(text: String?, x: Int, y: Int, i_4: Int, random: Random, randomSeed: Int, sprites: Array<NativeSprite>?, scaleHeights: IntArray?): Int {
+    fun renderAntiMacroText(text: String?, x: Int, y: Int, i_4: Int, random: Random, randomSeed: Int, sprites: Array<NativeSprite>?, scaleHeights: IntArray?): Int {
         if (text == null) {
             return 0
         }
@@ -476,7 +476,7 @@ abstract class AbstractFontRenderer(
                 height++
             }
         }
-        method372(text, x, y, sprites, scaleHeights, heights, null)
+        renderLineWithOffsets(text, x, y, sprites, scaleHeights, heights, null)
         return height
     }
 
@@ -489,7 +489,7 @@ abstract class AbstractFontRenderer(
             for (i in 0 until length) {
                 waveOffsetsY[i] = (Math.sin(waveSeed / 5.0 + i / 2.0) * 5.0).toInt()
             }
-            method372(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, waveOffsetsY)
+            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, null, waveOffsetsY)
         }
     }
 
@@ -504,7 +504,7 @@ abstract class AbstractFontRenderer(
                 waveOffsetsX[i] = (Math.sin(waveSeed / 5.0 + i / 5.0) * 5.0).toInt()
                 waveOffsetsY[i] = (Math.sin(waveSeed / 5.0 + i / 3.0) * 5.0).toInt()
             }
-            method372(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, waveOffsetsX, waveOffsetsY)
+            renderLineWithOffsets(text, x - this.fontMetrics.getWidthNoSprites(text) / 2, y, null, null, waveOffsetsX, waveOffsetsY)
         }
     }
 }

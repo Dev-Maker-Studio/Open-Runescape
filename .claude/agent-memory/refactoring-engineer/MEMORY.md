@@ -25,6 +25,8 @@
 | `aClass149NNNN` | TextureShapeRasterizer |
 | `aClass111NNNN` | ShaderVariableType |
 | `aClass166NNNN` | ModelNormalsGL |
+| `aClass150NNNN` | GLFormat |
+| `aClass76NNNN` | GLActionFormat |
 
 ## Key Deobfuscation Patterns
 
@@ -46,14 +48,15 @@
 - **ModelGL (COMPLETE)**: model-gl.md -- ALL own identifiers deobfuscated (6 fields, 7 methods, ~200 locals)
 - **ModelFunctionMaskGL (COMPLETE)**: 12 methods + all params deobfuscated
 - **Sound/Graphics**: sound-package.md
-- **Shader system**: shader-deobfuscation.md (THIS SESSION + previous)
-  - ShaderAttribute, ShaderVariableDecoder, ShaderMappingGL (all fields/methods)
-  - AbstractEnvironmentShader (8 fields), AbstractSpriteShader (7 fields)
-  - AbstractParticleShader (3 methods), AbstractBloomShader (5 methods)
-  - AbstractWaterShader (10 methods), NativeWaterShader (5 methods)
-  - NativeEvtWaterMapper (5 fields + 2 methods), NativeWaterfall (9 fields + 2 methods)
-  - NativeParticleShaderLd (1 method), all impl files clean
+- **Shader system**: shader-deobfuscation.md
+  - ShaderAttribute, ShaderVariableDecoder, ShaderMappingGL (all fields/methods/params COMPLETE)
+  - ShaderMapping: all abstract method params renamed (attribute, value, x/y/z/w, matrix, location, slot, sampler)
+  - Shader.kt: 3 methods renamed (uploadDynamicUniform4fv, setWorldMatrix, uploadUniform4fv), all params cleaned, attributeHandler companion
+  - ShaderVariableType: 8 constants identified (ARRAY, FLOAT, BOOL, VEC2, VEC3, VEC4, MAT4X2, MAT4X4); 117 remain unidentified (no usage evidence)
+  - AbstractEnvironmentShader (8 fields), AbstractSpriteShader (7 fields), AbstractParticleShader (3 methods), AbstractBloomShader (5 methods)
+  - AbstractWaterShader (10 methods), NativeWaterShader (5 methods), NativeEvtWaterMapper (5 fields + 2 methods), NativeWaterfall (9 fields + 2 methods)
 - **Scene/World**: GameState, Matrix44/43, Skybox, FramebufferCompositor
+- **OpenGlTexture hierarchy (COMPLETE)**: internalFormat (was aClass1501650), actionFormat (was aClass761651), uploadMipmappedByteTexture (was method2359), all constructor params + locals in 5 texture files
 - **GL Support Classes (COMPLETE)**:
   - GLFormat: RGB, LUMINANCE, LUMINANCE_ALPHA, DEPTH, COMPRESSED_DXT1, COMPRESSED_DXT5 (NOTE: existing "RGBA" is actually ALPHA, "HDR" is RGBA -- previous misrenames)
   - GLActionFormat: BYTE, SHORT, INT, UNSIGNED_INT + renamed anInt757 to dataTypeId
@@ -63,7 +66,8 @@
 - **Sprites**: SpriteGL (4 fields + 3 methods), NativeSprite (3 companion + 12 methods)
 - **Lighting**: LightGL (18 fields + 3 methods)
 - **Class renames**: 8 Node_Sub, 6 unidentified package migrations, 18 Class renames
-- **Loading bar**: TipRenderDetails constants, decoder functions
+- **Loading bar**: TipRenderDetails constants, decoder functions, LoadingBar sprites, AnchoredElement fields
+- **Font System (COMPLETE)**: font-loading-bar.md -- TransparentFontRendererSM (8), FontMetrics (6), AbstractFontRenderer (6), FontRendererSM (8), OpaqueFontRendererSM (4), ComponentDimensionSM (2), StaticMedia.boldFontMetrics
 - **CreateAccountRequest + AccountCreationStage**: fields, methods, enum constants
 - **Shadow/WorldMap/UI/Fonts/StaticMethods/ArrayUtils/Utils/PacketEncoder**: ~75 methods + 30 fields + Phase 5C additions
 - **Texture Operations (COMPLETE)**: All fields + methods in `config/material/texture/operation/` deobfuscated

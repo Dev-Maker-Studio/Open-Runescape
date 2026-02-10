@@ -1571,7 +1571,7 @@ class ModelGL : Model {
 
         if (billboardEffectsLocal != null && billboardSurfacesLocal != null &&
             verticesXLocal != null && verticesYLocal != null && verticesZLocal != null && elements != null) {
-            val matrix442 = this.toolkit.billboardMatrix
+            val matrix = this.toolkit.billboardMatrix
             this.toolkit.pushMatrix()
             this.toolkit.setDepthBuffering(!this.hasAlphaTransition)
             this.toolkit.setLightingEnabled(false)
@@ -1588,8 +1588,8 @@ class ModelGL : Model {
                     val eyeY = elements[1] * centerX + elements[5] * centerY + elements[9] * centerZ + elements[13]
                     val eyeZ = elements[2] * centerX + elements[6] * centerY + elements[10] * centerZ + elements[14]
                     val distanceScale = (1.0 / sqrt((eyeX * eyeX + eyeY * eyeY + eyeZ * eyeZ).toDouble())).toFloat() * effect.distance
-                    matrix442.setRotatedTranslation(surface.rotation, (surface.scaleX * effect.sizeX) shr 7, (surface.scaleY * effect.sizeY) shr 7, eyeX + surface.offsetX - eyeX * distanceScale, eyeY + surface.offsetY - eyeY * distanceScale, eyeZ - eyeZ * distanceScale)
-                    this.toolkit.loadMatrix(matrix442)
+                    matrix.setRotatedTranslation(surface.rotation, (surface.scaleX * effect.sizeX) shr 7, (surface.scaleY * effect.sizeY) shr 7, eyeX + surface.offsetX - eyeX * distanceScale, eyeY + surface.offsetY - eyeY * distanceScale, eyeZ - eyeZ * distanceScale)
+                    this.toolkit.loadMatrix(matrix)
                     val diffuseColor = surface.diffuseColor
                     OpenGL.glColor4ub((diffuseColor shr 16).toByte(), (diffuseColor shr 8).toByte(), diffuseColor.toByte(), (diffuseColor shr 24).toByte())
                     this.toolkit.renderTexture(effect.materialId.toInt())
@@ -2752,22 +2752,22 @@ class ModelGL : Model {
     }
 
     override fun updateParticlePosition(projectionMatrix: Matrix43) {
-        val matrix442 = this.toolkit.tempModelMatrix
-        matrix442.fromMatrix(projectionMatrix)
+        val matrix = this.toolkit.tempModelMatrix
+        matrix.fromMatrix(projectionMatrix)
         if (this.emissiveTriangles != null) {
             for (idx in this.emissiveTriangles!!.indices) {
                 val emitter = this.emissiveTriangles!![idx]
                 val activeEmitter = if (emitter.child != null) emitter.child!! else emitter
 
-                activeEmitter.verticeXA = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![emitter.faceA] + matrix442.elements!![4] * this.verticesY!![emitter.faceA] + matrix442.elements!![8] * this.verticesZ!![emitter.faceA]).toInt()
-                activeEmitter.verticeYA = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![emitter.faceA] + matrix442.elements!![5] * this.verticesY!![emitter.faceA] + matrix442.elements!![9] * this.verticesZ!![emitter.faceA]).toInt()
-                activeEmitter.verticeZA = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![emitter.faceA] + matrix442.elements!![6] * this.verticesY!![emitter.faceA] + matrix442.elements!![10] * this.verticesZ!![emitter.faceA]).toInt()
-                activeEmitter.verticeXB = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![emitter.faceB] + matrix442.elements!![4] * this.verticesY!![emitter.faceB] + matrix442.elements!![8] * this.verticesZ!![emitter.faceB]).toInt()
-                activeEmitter.verticeYB = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![emitter.faceB] + matrix442.elements!![5] * this.verticesY!![emitter.faceB] + matrix442.elements!![9] * this.verticesZ!![emitter.faceB]).toInt()
-                activeEmitter.verticeZB = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![emitter.faceB] + matrix442.elements!![6] * this.verticesY!![emitter.faceB] + matrix442.elements!![10] * this.verticesZ!![emitter.faceB]).toInt()
-                activeEmitter.verticeXC = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![emitter.faceC] + matrix442.elements!![4] * this.verticesY!![emitter.faceC] + matrix442.elements!![8] * this.verticesZ!![emitter.faceC]).toInt()
-                activeEmitter.verticeYC = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![emitter.faceC] + matrix442.elements!![5] * this.verticesY!![emitter.faceC] + matrix442.elements!![9] * this.verticesZ!![emitter.faceC]).toInt()
-                activeEmitter.verticeZC = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![emitter.faceC] + matrix442.elements!![6] * this.verticesY!![emitter.faceC] + matrix442.elements!![10] * this.verticesZ!![emitter.faceC]).toInt()
+                activeEmitter.verticeXA = (matrix.elements!![12] + matrix.elements!![0] * this.verticesX!![emitter.faceA] + matrix.elements!![4] * this.verticesY!![emitter.faceA] + matrix.elements!![8] * this.verticesZ!![emitter.faceA]).toInt()
+                activeEmitter.verticeYA = (matrix.elements!![13] + matrix.elements!![1] * this.verticesX!![emitter.faceA] + matrix.elements!![5] * this.verticesY!![emitter.faceA] + matrix.elements!![9] * this.verticesZ!![emitter.faceA]).toInt()
+                activeEmitter.verticeZA = (matrix.elements!![14] + matrix.elements!![2] * this.verticesX!![emitter.faceA] + matrix.elements!![6] * this.verticesY!![emitter.faceA] + matrix.elements!![10] * this.verticesZ!![emitter.faceA]).toInt()
+                activeEmitter.verticeXB = (matrix.elements!![12] + matrix.elements!![0] * this.verticesX!![emitter.faceB] + matrix.elements!![4] * this.verticesY!![emitter.faceB] + matrix.elements!![8] * this.verticesZ!![emitter.faceB]).toInt()
+                activeEmitter.verticeYB = (matrix.elements!![13] + matrix.elements!![1] * this.verticesX!![emitter.faceB] + matrix.elements!![5] * this.verticesY!![emitter.faceB] + matrix.elements!![9] * this.verticesZ!![emitter.faceB]).toInt()
+                activeEmitter.verticeZB = (matrix.elements!![14] + matrix.elements!![2] * this.verticesX!![emitter.faceB] + matrix.elements!![6] * this.verticesY!![emitter.faceB] + matrix.elements!![10] * this.verticesZ!![emitter.faceB]).toInt()
+                activeEmitter.verticeXC = (matrix.elements!![12] + matrix.elements!![0] * this.verticesX!![emitter.faceC] + matrix.elements!![4] * this.verticesY!![emitter.faceC] + matrix.elements!![8] * this.verticesZ!![emitter.faceC]).toInt()
+                activeEmitter.verticeYC = (matrix.elements!![13] + matrix.elements!![1] * this.verticesX!![emitter.faceC] + matrix.elements!![5] * this.verticesY!![emitter.faceC] + matrix.elements!![9] * this.verticesZ!![emitter.faceC]).toInt()
+                activeEmitter.verticeZC = (matrix.elements!![14] + matrix.elements!![2] * this.verticesX!![emitter.faceC] + matrix.elements!![6] * this.verticesY!![emitter.faceC] + matrix.elements!![10] * this.verticesZ!![emitter.faceC]).toInt()
             }
         }
 
@@ -2777,14 +2777,14 @@ class ModelGL : Model {
                 val activeEffector = if (effector.child != null) effector.child!! else effector
 
                 if (effector.matrix != null) {
-                    effector.matrix!!.copyFrom(matrix442)
+                    effector.matrix!!.copyFrom(matrix)
                 } else {
-                    effector.matrix = Matrix44(matrix442)
+                    effector.matrix = Matrix44(matrix)
                 }
 
-                activeEffector.verticeX = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![effector.appliesOnVertex] + matrix442.elements!![4] * this.verticesY!![effector.appliesOnVertex] + matrix442.elements!![8] * this.verticesZ!![effector.appliesOnVertex]).toInt()
-                activeEffector.verticeY = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![effector.appliesOnVertex] + matrix442.elements!![5] * this.verticesY!![effector.appliesOnVertex] + matrix442.elements!![9] * this.verticesZ!![effector.appliesOnVertex]).toInt()
-                activeEffector.verticeZ = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![effector.appliesOnVertex] + matrix442.elements!![6] * this.verticesY!![effector.appliesOnVertex] + matrix442.elements!![10] * this.verticesZ!![effector.appliesOnVertex]).toInt()
+                activeEffector.verticeX = (matrix.elements!![12] + matrix.elements!![0] * this.verticesX!![effector.appliesOnVertex] + matrix.elements!![4] * this.verticesY!![effector.appliesOnVertex] + matrix.elements!![8] * this.verticesZ!![effector.appliesOnVertex]).toInt()
+                activeEffector.verticeY = (matrix.elements!![13] + matrix.elements!![1] * this.verticesX!![effector.appliesOnVertex] + matrix.elements!![5] * this.verticesY!![effector.appliesOnVertex] + matrix.elements!![9] * this.verticesZ!![effector.appliesOnVertex]).toInt()
+                activeEffector.verticeZ = (matrix.elements!![14] + matrix.elements!![2] * this.verticesX!![effector.appliesOnVertex] + matrix.elements!![6] * this.verticesY!![effector.appliesOnVertex] + matrix.elements!![10] * this.verticesZ!![effector.appliesOnVertex]).toInt()
             }
         }
     }

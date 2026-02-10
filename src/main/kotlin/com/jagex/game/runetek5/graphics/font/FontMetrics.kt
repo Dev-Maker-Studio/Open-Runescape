@@ -160,8 +160,8 @@ class FontMetrics(bytes: ByteArray) {
         return width
     }
 
-    fun method6949(text: String, width: Int, sprites: Array<Sprite>?): Int {
-        return splitLinesToBuffer(text, intArrayOf(width), aStringArray4980, sprites)
+    fun getLineCount(text: String, width: Int, sprites: Array<Sprite>?): Int {
+        return splitLinesToBuffer(text, intArrayOf(width), lineBuffer, sprites)
     }
 
     fun splitLinesToBuffer(
@@ -345,11 +345,11 @@ class FontMetrics(bytes: ByteArray) {
     }
 
     fun getTextWidthMultiline(text: String, width: Int, sprites: Array<Sprite>?): Int {
-        val lineCount = splitLinesToBuffer(text, intArrayOf(width), aStringArray4980, sprites)
+        val lineCount = splitLinesToBuffer(text, intArrayOf(width), lineBuffer, sprites)
         var maxWidth = 0
 
         for (i in 0 until lineCount) {
-            val lineWidth = getTextWidth(aStringArray4980[i], sprites)
+            val lineWidth = getTextWidth(lineBuffer[i], sprites)
             if (lineWidth > maxWidth) {
                 maxWidth = lineWidth
             }
@@ -358,7 +358,7 @@ class FontMetrics(bytes: ByteArray) {
         return maxWidth
     }
 
-    fun method6954(text: String, width: Int, height: Int, index: Int, sprites: Array<Sprite>?): Point? {
+    fun getPositionAtIndex(text: String, width: Int, height: Int, index: Int, sprites: Array<Sprite>?): Point? {
         var adjustedIndex = index
         var adjustedHeight = height
 
@@ -374,11 +374,11 @@ class FontMetrics(bytes: ByteArray) {
             adjustedHeight = verticalSpacing
         }
 
-        val lineCount = splitLinesToBuffer(text, intArrayOf(width), aStringArray4980, sprites, false)
+        val lineCount = splitLinesToBuffer(text, intArrayOf(width), lineBuffer, sprites, false)
         var charCount = 0
 
         for (i in 0 until lineCount) {
-            val lineLength = aStringArray4980[i]!!.length
+            val lineLength = lineBuffer[i]!!.length
             if (charCount + lineLength > adjustedIndex || i == lineCount - 1 && adjustedIndex == text.length) {
                 var substring = text.substring(charCount, adjustedIndex)
                 if (substring.endsWith("<br>")) {
@@ -396,7 +396,7 @@ class FontMetrics(bytes: ByteArray) {
         return null
     }
 
-    fun method6956(text: String, width: Int, lineHeight: Int, x: Int, y: Int, sprites: Array<Sprite>?): Int {
+    fun getIndexAtPosition(text: String, width: Int, lineHeight: Int, x: Int, y: Int, sprites: Array<Sprite>?): Int {
         var adjustedLineHeight = lineHeight
         var adjustedY = y
 
@@ -404,7 +404,7 @@ class FontMetrics(bytes: ByteArray) {
             adjustedLineHeight = verticalSpacing
         }
 
-        val lineCount = splitLinesToBuffer(text, intArrayOf(width), aStringArray4980, sprites)
+        val lineCount = splitLinesToBuffer(text, intArrayOf(width), lineBuffer, sprites)
         if (lineCount == 0) {
             return 0
         }
@@ -418,7 +418,7 @@ class FontMetrics(bytes: ByteArray) {
             adjustedY = lineCount - 1
         }
 
-        val line = aStringArray4980[adjustedY]!!
+        val line = lineBuffer[adjustedY]!!
         var charIndex = 0
         var prevWidth = 0
 
@@ -439,7 +439,7 @@ class FontMetrics(bytes: ByteArray) {
         }
 
         for (i in 0 until adjustedY) {
-            charIndex += aStringArray4980[i]!!.length
+            charIndex += lineBuffer[i]!!.length
         }
 
         return charIndex
@@ -523,7 +523,7 @@ class FontMetrics(bytes: ByteArray) {
             adjustedLineHeight = verticalSpacing
         }
 
-        val lineCount = splitLinesToBuffer(text, intArrayOf(width), aStringArray4980, sprites)
+        val lineCount = splitLinesToBuffer(text, intArrayOf(width), lineBuffer, sprites)
         val height = adjustedLineHeight * (lineCount - 1)
         return height + bottomPadding + topPadding
     }
@@ -534,16 +534,16 @@ class FontMetrics(bytes: ByteArray) {
 
     companion object {
         @JvmField
-        val aStringArray4980 = arrayOfNulls<String>(100)
+        val lineBuffer = arrayOfNulls<String>(100)
 
         @JvmField
-        var aClass4143438: FontMetrics? = null
+        var defaultFontMetrics: FontMetrics? = null
 
         @JvmField
         var useBoldFont: Boolean = false
 
         @JvmField
-        var aFontRenderer2348: AbstractFontRenderer? = null
+        var boldFontRenderer: AbstractFontRenderer? = null
 
         @JvmStatic
         fun getFontMetrics(index0: Js5ResourceProvider?, fileId: Int): FontMetrics? {
@@ -560,13 +560,13 @@ class FontMetrics(bytes: ByteArray) {
         @JvmStatic
         fun getForMinimenu(): FontMetrics {
             val fontmetrics = if (useBoldFont) {
-                if (aFontRenderer2348 != null && StaticMedia.aClass4142200 != null) {
-                    StaticMedia.aClass4142200
+                if (boldFontRenderer != null && StaticMedia.boldFontMetrics != null) {
+                    StaticMedia.boldFontMetrics
                 } else {
-                    aClass4143438
+                    defaultFontMetrics
                 }
             } else {
-                aClass4143438
+                defaultFontMetrics
             }
             MiniMenu.entryRowHeight = fontmetrics!!.bottomPadding + fontmetrics.topPadding
             return fontmetrics

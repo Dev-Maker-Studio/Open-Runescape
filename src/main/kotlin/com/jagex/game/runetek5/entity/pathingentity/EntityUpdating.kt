@@ -187,7 +187,7 @@ object EntityUpdating {
                 if (pathingEntity.privateMessagesEnabled()) {
                     val details = pathingEntity.getHintDetails()
                     if (details != null && Client.currentHintPtr < Client.MAX_HINTS) {
-                        Client.HINT_WIDTH[Client.currentHintPtr] = FontMetrics.aClass4143438!!.getWidthNoSprites(details.getText()!!) / 2
+                        Client.HINT_WIDTH[Client.currentHintPtr] = FontMetrics.defaultFontMetrics!!.getWidthNoSprites(details.getText()!!) / 2
                         Client.HINT_X[Client.currentHintPtr] = Client.HINT_POSITION[0].toInt()
                         Client.HINT_Y[Client.currentHintPtr] = Client.HINT_POSITION[1].toInt()
                         Client.HINT_DETAILS[Client.currentHintPtr] = details
@@ -196,7 +196,7 @@ object EntityUpdating {
                 }
 
                 var drawY = (clipTop + Client.HINT_POSITION[1]).toInt()
-                drawY -= FontMetrics.aClass4143438!!.topPadding
+                drawY -= FontMetrics.defaultFontMetrics!!.topPadding
                 var bool94 = false
 
                 if (!pathingEntity.isHidden && !pathingEntity.entityHitbars.isEmpty()) {
@@ -723,7 +723,7 @@ object EntityUpdating {
             drawOverheadSprite(entity as PathingEntity, obj14 as PathingEntity, --((entity as PathingEntity).overheadSpriteCount), clipLeft, clipTop)
         }
 
-        val padding = FontMetrics.aClass4143438!!.bottomPadding + FontMetrics.aClass4143438!!.topPadding + 2
+        val padding = FontMetrics.defaultFontMetrics!!.bottomPadding + FontMetrics.defaultFontMetrics!!.topPadding + 2
         for (hintIndex in 0 until Client.currentHintPtr) {
             val hintX = Client.HINT_X[hintIndex]
             var hintY = Client.HINT_Y[hintIndex]
@@ -813,7 +813,7 @@ object EntityUpdating {
                 if (drawType == 4) {
                     // Scroll effect (scroll:texthere)
                     val i_21 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    val i_116 = i_21 * (FontMetrics.aClass4143438!!.getWidthNoSprites(drawnText!!) + 100) / 150
+                    val i_116 = i_21 * (FontMetrics.defaultFontMetrics!!.getWidthNoSprites(drawnText!!) + 100) / 150
                     Renderers.activeToolkit!!.expandClipping(clipLeft + hintX - 50, clipTop, clipLeft + hintX + 50, height + clipTop)
                     MiniMenu.minimenuHeader!!.renderPlain(drawnText, clipLeft + hintX + 50 - i_116, hintY + clipTop, drawColor, 0xFF000000.toInt())
                     Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop)
@@ -827,7 +827,7 @@ object EntityUpdating {
                     } else if (i_21 > 125) {
                         i_116 = i_21 - 125
                     }
-                    val paddingY = FontMetrics.aClass4143438!!.topPadding + FontMetrics.aClass4143438!!.bottomPadding
+                    val paddingY = FontMetrics.defaultFontMetrics!!.topPadding + FontMetrics.defaultFontMetrics!!.bottomPadding
                     Renderers.activeToolkit!!.expandClipping(clipLeft, hintY + clipTop - paddingY - 1, clipLeft + width, hintY + clipTop + 5)
                     MiniMenu.minimenuHeader!!.renderCentered(drawnText, clipLeft + hintX, i_116 + hintY + clipTop, drawColor, 0xFF000000.toInt())
                     Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop)

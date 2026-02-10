@@ -301,7 +301,7 @@ abstract class SpriteSM(
         }
         if (computeAffineTransform(f_1, f_2, f_3, f_4, f_5, f_6)) {
             val packetsdecoder11 = class4558 as ComponentDimensionSM
-            drawMasked(packetsdecoder11.anIntArray9077, packetsdecoder11.anIntArray9078, drawMinX - i_9, -i_10 - (drawHeight - drawMinY))
+            drawMasked(packetsdecoder11.rowStartX, packetsdecoder11.rowWidth, drawMinX - i_9, -i_10 - (drawHeight - drawMinY))
         }
     }
 

@@ -12,9 +12,9 @@ open class AnchoredElement internal constructor(
     @JvmField val offsetY: Int,
     @JvmField val width: Int,
     @JvmField val height: Int,
-    @JvmField val anInt4092: Int,
+    @JvmField val textOffsetY: Int,
     @JvmField val fileId: Int,
-    @JvmField val anInt4091: Int
+    @JvmField val textColor: Int
 ) : ITipDetails {
 
     override fun getRenderDetails(): TipRenderDetails {

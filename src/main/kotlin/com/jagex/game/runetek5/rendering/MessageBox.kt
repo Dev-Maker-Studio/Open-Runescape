@@ -145,7 +145,7 @@ object MessageBox {
                 InterfaceComponentRenderer.inboundsComponentToTop(drawX, drawY, textW, textH)
             } else {
                 val i_7 = boxMetrics.getTextWidthMultiline(text, 250, null)
-                val i_8 = boxMetrics.method6949(text, 250, null) * 13
+                val i_8 = boxMetrics.getLineCount(text, 250, null) * 13
                 val b_9: Byte = 4
                 val i_10 = b_9 + 6
                 val i_11 = b_9 + 6

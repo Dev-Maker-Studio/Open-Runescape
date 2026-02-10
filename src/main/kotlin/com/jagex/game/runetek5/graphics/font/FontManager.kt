@@ -36,6 +36,6 @@ object FontManager {
         debugOverlayFont = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, p12FullIndex, true, true) as AbstractFontRenderer
         messageboxFont = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, p12FullIndex)
         MiniMenu.minimenuHeader = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, b12FullIndex, true, true) as AbstractFontRenderer
-        FontMetrics.aClass4143438 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, b12FullIndex)
+        FontMetrics.defaultFontMetrics = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, b12FullIndex)
     }
 }

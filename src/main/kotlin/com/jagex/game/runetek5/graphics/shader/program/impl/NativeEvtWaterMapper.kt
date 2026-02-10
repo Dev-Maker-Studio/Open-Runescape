@@ -74,10 +74,10 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
     }
 
     override fun loadTextureMatrix(matrix441: Matrix44) {
-        val matrix442 = Matrix44()
-        matrix442.setDiagonal(textureScale, textureScale, 1.0f, 1.0f)
-        matrix442.setProduct(matrix441, matrix442)
-        super.loadTextureMatrix(matrix442)
+        val matrix = Matrix44()
+        matrix.setDiagonal(textureScale, textureScale, 1.0f, 1.0f)
+        matrix.setProduct(matrix441, matrix)
+        super.loadTextureMatrix(matrix)
     }
 
     override fun loadLights(dummy: Boolean) {

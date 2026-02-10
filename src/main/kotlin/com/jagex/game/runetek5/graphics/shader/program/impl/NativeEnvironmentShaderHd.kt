@@ -83,8 +83,8 @@ class NativeEnvironmentShaderHd(
         modelShader!!.loadVector3f(activeUniformLocation!![13], antiSunColor)
         modelShader!!.loadVector3f(activeUniformLocation!![14], lightColor)
         if (unit > 0) {
-            modelShader!!.method1673(activeUniformLocation!![1], pointLightsPosAndRadiusSq, unit * 4)
-            modelShader!!.method1673(activeUniformLocation!![0], pointLightsDiffuseColor, unit * 4)
+            modelShader!!.uploadDynamicUniform4fv(activeUniformLocation!![1], pointLightsPosAndRadiusSq, unit * 4)
+            modelShader!!.uploadDynamicUniform4fv(activeUniformLocation!![0], pointLightsDiffuseColor, unit * 4)
         }
 
         activeToolkit.drawIndexedPrimitive(PrimitiveDrawMode.TRIANGLES, startVertex, vertexCount, startIndex, primitiveCount)
@@ -110,7 +110,7 @@ class NativeEnvironmentShaderHd(
         modelShader!!.loadProgram(mappings[unit + 12]!!)
         activeUniformLocation = uniformLocations[modelShader!!.getOccupyingSlot()]
         modelShader!!.setActiveMapping()
-        modelShader!!.method1674(activeUniformLocation!![15], worldMatrix)
+        modelShader!!.setWorldMatrix(activeUniformLocation!![15], worldMatrix)
         modelShader!!.load3f(activeUniformLocation!![6], eyePos.x, eyePos.y, eyePos.z)
         modelShader!!.setDiffuseSampler(activeUniformLocation!![3], 1, environmentSampler!!)
         loadUnit(unit)

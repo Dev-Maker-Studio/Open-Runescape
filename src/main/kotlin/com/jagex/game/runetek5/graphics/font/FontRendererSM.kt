@@ -25,35 +25,35 @@ class FontRendererSM(
     val charHeights: IntArray = ints_5
 
     @JvmField
-    val aByteArrayArray8967: Array<ByteArray?>
+    val glyphPixelData: Array<ByteArray?>
 
     @JvmField
-    val anIntArray8972: IntArray
+    val glyphOffsetY: IntArray
 
     @JvmField
-    val anIntArray8973: IntArray
+    val glyphOffsetX: IntArray
 
     @JvmField
-    val anIntArray8970: IntArray?
+    val glyphPalette: IntArray?
 
     init {
-        aByteArrayArray8967 = Array(arr_3.size) { null }
-        anIntArray8972 = IntArray(arr_3.size)
-        anIntArray8973 = IntArray(arr_3.size)
+        glyphPixelData = Array(arr_3.size) { null }
+        glyphOffsetY = IntArray(arr_3.size)
+        glyphOffsetX = IntArray(arr_3.size)
         for (i_6 in arr_3.indices) {
-            aByteArrayArray8967[i_6] = arr_3[i_6].pixels
-            anIntArray8972[i_6] = arr_3[i_6].minY
-            anIntArray8973[i_6] = arr_3[i_6].minX
+            glyphPixelData[i_6] = arr_3[i_6].pixels
+            glyphOffsetY[i_6] = arr_3[i_6].minY
+            glyphOffsetX[i_6] = arr_3[i_6].minX
         }
-        anIntArray8970 = arr_3[0].pallete
+        glyphPalette = arr_3[0].pallete
     }
 
     override fun drawChar(ch: Int, x: Int, y: Int, color: Int, useAlpha: Boolean) {
         var drawY = y
         var drawX = x
         if (toolkit.colourBuffer != null) {
-            drawX += anIntArray8973[ch]
-            drawY += anIntArray8972[ch]
+            drawX += glyphOffsetX[ch]
+            drawY += glyphOffsetY[ch]
             var charWidth = charWidths[ch]
             var charHeight = charHeights[ch]
             val viewportWidth = toolkit.viewportWidth
@@ -89,15 +89,15 @@ class FontRendererSM(
             }
             if (charWidth > 0 && charHeight > 0) {
                 if (useAlpha) {
-                    method14325(aByteArrayArray8967[ch]!!, toolkit.colourBuffer!!, color, rowOffset, pixelIndex, charWidth, charHeight, rowPadding, i_11)
+                    drawGlyphOpaque(glyphPixelData[ch]!!, toolkit.colourBuffer!!, color, rowOffset, pixelIndex, charWidth, charHeight, rowPadding, i_11)
                 } else {
-                    method14334(aByteArrayArray8967[ch]!!, toolkit.colourBuffer!!, anIntArray8970!!, rowOffset, pixelIndex, charWidth, charHeight, rowPadding, i_11)
+                    drawGlyphPaletted(glyphPixelData[ch]!!, toolkit.colourBuffer!!, glyphPalette!!, rowOffset, pixelIndex, charWidth, charHeight, rowPadding, i_11)
                 }
             }
         }
     }
 
-    fun method14325(bytes_1: ByteArray, pixels: IntArray, color: Int, x: Int, y: Int, width: Int, height: Int, scanWidth: Int, padding: Int) {
+    fun drawGlyphOpaque(bytes_1: ByteArray, pixels: IntArray, color: Int, x: Int, y: Int, width: Int, height: Int, scanWidth: Int, padding: Int) {
         var x = x
         var y = y
         val dw = -(width shr 2)
@@ -144,8 +144,8 @@ class FontRendererSM(
             if (dimension == null) {
                 drawChar(var_1, i_21, i_31, i_4, bool5)
             } else {
-                i_21 += anIntArray8973[var_1]
-                i_31 += anIntArray8972[var_1]
+                i_21 += glyphOffsetX[var_1]
+                i_31 += glyphOffsetY[var_1]
                 var i_9 = charWidths[var_1]
                 var i_10 = charHeights[var_1]
                 val i_11 = toolkit.viewportWidth
@@ -181,19 +181,19 @@ class FontRendererSM(
                 }
                 if (i_9 > 0 && i_10 > 0) {
                     if (bool5) {
-                        method14327(aByteArrayArray8967[var_1]!!, toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], dimension, i_7, i_8)
+                        drawGlyphOpaqueMasked(glyphPixelData[var_1]!!, toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], dimension, i_7, i_8)
                     } else {
-                        method14326(aByteArrayArray8967[var_1]!!, toolkit.colourBuffer!!, anIntArray8970!!, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], dimension, i_7, i_8)
+                        drawGlyphPalettedMasked(glyphPixelData[var_1]!!, toolkit.colourBuffer!!, glyphPalette!!, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, charWidths[var_1], dimension, i_7, i_8)
                     }
                 }
             }
         }
     }
 
-    fun method14326(bytes_1: ByteArray, ints_2: IntArray, ints_3: IntArray, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, i_13: Int, dimension: ComponentSurface, i_15: Int, i_16: Int) {
+    fun drawGlyphPalettedMasked(bytes_1: ByteArray, ints_2: IntArray, ints_3: IntArray, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, i_13: Int, dimension: ComponentSurface, i_15: Int, i_16: Int) {
         val packetsdecoder17 = dimension as ComponentDimensionSM
-        val ints_18 = packetsdecoder17.anIntArray9077
-        val ints_19 = packetsdecoder17.anIntArray9078
+        val ints_18 = packetsdecoder17.rowStartX
+        val ints_19 = packetsdecoder17.rowWidth
         val i_20 = i_11 - toolkit.clipLeft
         var i_21 = i_12
         var i_5 = i_5
@@ -247,10 +247,10 @@ class FontRendererSM(
         }
     }
 
-    fun method14327(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, class45513: ComponentSurface, i_14: Int, i_15: Int) {
+    fun drawGlyphOpaqueMasked(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, class45513: ComponentSurface, i_14: Int, i_15: Int) {
         val packetsdecoder16 = class45513 as ComponentDimensionSM
-        val ints_17 = packetsdecoder16.anIntArray9077
-        val ints_18 = packetsdecoder16.anIntArray9078
+        val ints_17 = packetsdecoder16.rowStartX
+        val ints_18 = packetsdecoder16.rowWidth
         val i_19 = i_10 - toolkit.clipLeft
         var i_20 = i_11
         var i_4 = i_4
@@ -303,7 +303,7 @@ class FontRendererSM(
         }
     }
 
-    fun method14334(bytes_1: ByteArray, ints_2: IntArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
+    fun drawGlyphPaletted(bytes_1: ByteArray, ints_2: IntArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
         var i_4 = i_4
         var i_5 = i_5
         val i_10 = -(i_6 shr 2)

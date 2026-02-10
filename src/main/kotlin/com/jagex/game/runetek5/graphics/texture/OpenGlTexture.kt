@@ -9,8 +9,8 @@ import jaggl.OpenGL
 abstract class OpenGlTexture(
     @JvmField val activeToolkit: OpenGlToolkit,
     @JvmField val textureTarget: Int,
-    @JvmField val aClass1501650: GLFormat,
-    @JvmField val aClass761651: GLActionFormat,
+    @JvmField val internalFormat: GLFormat,
+    @JvmField val actionFormat: GLActionFormat,
     @JvmField val pixelCount: Int,
     mipmapping: Boolean
 ) : AutoCloseable {
@@ -86,7 +86,7 @@ abstract class OpenGlTexture(
     }
 
     fun getBufferSizeRequirement(): Int {
-        val size = this.aClass1501650.bytesPerPixel * this.aClass761651.bytesPerEntry * this.pixelCount
+        val size = this.internalFormat.bytesPerPixel * this.actionFormat.bytesPerEntry * this.pixelCount
         return if (this.mipmappingEnabled) size * 4 / 3 else size
     }
 
@@ -106,69 +106,69 @@ abstract class OpenGlTexture(
         val HANDLE_ALLOCATE = IntArray(1)
 
         @JvmStatic
-        fun isPowerOfTwo(i_0: Int): Boolean {
-            return i_0 == (i_0 and -i_0)
+        fun isPowerOfTwo(value: Int): Boolean {
+            return value == (value and -value)
         }
 
         @JvmStatic
-        fun method2359(i_0: Int, i_1: Int, i_2: Int, i_3: Int, class1504: GLFormat, bytes_5: ByteArray) {
-            var i_21 = i_2
-            var i_31 = i_3
-            if (i_21 > 0 && !isPowerOfTwo(i_21)) {
+        fun uploadMipmappedByteTexture(target: Int, glInternalFormat: Int, width: Int, height: Int, pixelFormat: GLFormat, data: ByteArray) {
+            var currentWidth = width
+            var currentHeight = height
+            if (currentWidth > 0 && !isPowerOfTwo(currentWidth)) {
                 throw IllegalArgumentException("")
             }
-            if (i_31 > 0 && !isPowerOfTwo(i_31)) {
+            if (currentHeight > 0 && !isPowerOfTwo(currentHeight)) {
                 throw IllegalArgumentException("")
             }
-            val i_6 = class1504.bytesPerPixel
-            var i_7 = 0
-            var i_8 = Math.min(i_21, i_31)
-            var i_9 = i_21 shr 1
-            var i_10 = i_31 shr 1
-            var bytes_11 = bytes_5
-            var bytes_12 = ByteArray(i_9 * i_10 * i_6)
+            val bytesPerPixel = pixelFormat.bytesPerPixel
+            var mipmapLevel = 0
+            var minDimension = Math.min(currentWidth, currentHeight)
+            var halfWidth = currentWidth shr 1
+            var halfHeight = currentHeight shr 1
+            var sourceData = data
+            var destData = ByteArray(halfWidth * halfHeight * bytesPerPixel)
 
             while (true) {
-                OpenGL.glTexImage2Dub(i_0, i_7, i_1, i_21, i_31, 0, OpenGlToolkit.format(class1504), 5121, bytes_11, 0)
-                if (i_8 <= 1) {
+                OpenGL.glTexImage2Dub(target, mipmapLevel, glInternalFormat, currentWidth, currentHeight, 0, OpenGlToolkit.format(pixelFormat), 5121, sourceData, 0)
+                if (minDimension <= 1) {
                     return
                 }
 
-                val i_13 = i_6 * i_21
+                val rowBytes = bytesPerPixel * currentWidth
 
-                for (i_14 in 0 until i_6) {
-                    var i_15 = i_14
-                    var i_16 = i_14
-                    var i_17 = i_14 + i_13
+                for (channel in 0 until bytesPerPixel) {
+                    var destIndex = channel
+                    var srcTopIndex = channel
+                    var srcBottomIndex = channel + rowBytes
 
-                    for (i_18 in 0 until i_10) {
-                        for (i_19 in 0 until i_9) {
-                            val b_20 = bytes_11[i_16]
-                            i_16 += i_6
-                            var i_22 = bytes_11[i_16] + b_20
-                            i_16 += i_6
-                            i_22 += bytes_11[i_17]
-                            i_17 += i_6
-                            i_22 += bytes_11[i_17]
-                            i_17 += i_6
-                            bytes_12[i_15] = (i_22 shr 2).toByte()
-                            i_15 += i_6
+                    for (row in 0 until halfHeight) {
+                        for (col in 0 until halfWidth) {
+                            val topLeftSample = sourceData[srcTopIndex]
+                            srcTopIndex += bytesPerPixel
+                            var sampleSum = sourceData[srcTopIndex] + topLeftSample
+                            srcTopIndex += bytesPerPixel
+                            sampleSum += sourceData[srcBottomIndex]
+                            srcBottomIndex += bytesPerPixel
+                            sampleSum += sourceData[srcBottomIndex]
+                            srcBottomIndex += bytesPerPixel
+                            destData[destIndex] = (sampleSum shr 2).toByte()
+                            destIndex += bytesPerPixel
                         }
 
-                        i_16 += i_13
-                        i_17 += i_13
+                        srcTopIndex += rowBytes
+                        srcBottomIndex += rowBytes
                     }
                 }
 
-                val bytes_21 = bytes_12
-                bytes_12 = bytes_11
-                bytes_11 = bytes_21
-                i_21 = i_9
-                i_31 = i_10
-                i_9 = i_9 shr 1
-                i_10 = i_10 shr 1
-                i_8 = i_8 shr 1
-                ++i_7
+                val swapTemp = destData
+                destData = sourceData
+                sourceData = swapTemp
+                currentWidth = halfWidth
+                currentHeight = halfHeight
+                halfWidth = halfWidth shr 1
+                halfHeight = halfHeight shr 1
+                minDimension = minDimension shr 1
+                ++mipmapLevel
             }
         }
 
@@ -187,7 +187,7 @@ abstract class OpenGlTexture(
             var minDimension = Math.min(widthMod, heightMod)
             var halfWidth = widthMod shr 1
             var halfHeight = heightMod shr 1
-            var floats_12 = FloatArray(halfWidth * halfHeight * bytesPerPixel)
+            var destData = FloatArray(halfWidth * halfHeight * bytesPerPixel)
             var dataMod = data
             while (true) {
                 OpenGL.glTexImage2Df(GL_TEXTURE_2D, level, internalFormat, widthMod, heightMod, 0, OpenGlToolkit.format(format), GL_FLOAT, dataMod, 0)
@@ -195,30 +195,30 @@ abstract class OpenGlTexture(
                     return
                 }
                 val rowBytes = bytesPerPixel * widthMod
-                for (i_14 in 0 until bytesPerPixel) {
-                    var i_15 = i_14
-                    var i_16 = i_14
-                    var i_17 = i_14 + rowBytes
+                for (channel in 0 until bytesPerPixel) {
+                    var destIndex = channel
+                    var srcTopIndex = channel
+                    var srcBottomIndex = channel + rowBytes
                     for (y in 0 until halfHeight) {
                         for (x in 0 until halfWidth) {
-                            var f_20 = dataMod[i_16]
-                            i_16 += bytesPerPixel
-                            f_20 += dataMod[i_16]
-                            i_16 += bytesPerPixel
-                            f_20 += dataMod[i_17]
-                            i_17 += bytesPerPixel
-                            f_20 += dataMod[i_17]
-                            i_17 += bytesPerPixel
-                            floats_12[i_15] = f_20 * 0.25F
-                            i_15 += bytesPerPixel
+                            var sampleSum = dataMod[srcTopIndex]
+                            srcTopIndex += bytesPerPixel
+                            sampleSum += dataMod[srcTopIndex]
+                            srcTopIndex += bytesPerPixel
+                            sampleSum += dataMod[srcBottomIndex]
+                            srcBottomIndex += bytesPerPixel
+                            sampleSum += dataMod[srcBottomIndex]
+                            srcBottomIndex += bytesPerPixel
+                            destData[destIndex] = sampleSum * 0.25F
+                            destIndex += bytesPerPixel
                         }
-                        i_16 += rowBytes
-                        i_17 += rowBytes
+                        srcTopIndex += rowBytes
+                        srcBottomIndex += rowBytes
                     }
                 }
-                val floats_21 = floats_12
-                floats_12 = dataMod
-                dataMod = floats_21
+                val swapTemp = destData
+                destData = dataMod
+                dataMod = swapTemp
                 widthMod = halfWidth
                 heightMod = halfHeight
                 halfWidth = halfWidth shr 1
@@ -229,31 +229,31 @@ abstract class OpenGlTexture(
         }
 
         @JvmStatic
-        fun createMipmappedCubeTexture(target: Int, i_1: Int, i_2: Int, i_3: Int, i_5: Int, ints_6: IntArray) {
-            var step = i_2
-            var i_31 = i_3
+        fun createMipmappedCubeTexture(target: Int, glInternalFormat: Int, width: Int, height: Int, pixelType: Int, pixels: IntArray) {
+            var step = width
+            var currentHeight = height
             if (step > 0 && !isPowerOfTwo(step)) {
                 throw IllegalArgumentException("")
             }
-            if (i_31 > 0 && !isPowerOfTwo(i_31)) {
+            if (currentHeight > 0 && !isPowerOfTwo(currentHeight)) {
                 throw IllegalArgumentException("")
             }
-            var i_7 = 0
-            var i_8 = Math.min(step, i_31)
-            var i_9 = step shr 1
-            var i_10 = i_31 shr 1
-            var argbPixels = ints_6
-            var replacementPixels = IntArray(i_9 * i_10)
+            var mipmapLevel = 0
+            var minDimension = Math.min(step, currentHeight)
+            var halfWidth = step shr 1
+            var halfHeight = currentHeight shr 1
+            var argbPixels = pixels
+            var replacementPixels = IntArray(halfWidth * halfHeight)
             while (true) {
-                OpenGL.glTexImage2Di(target, i_7, i_1, step, i_31, 0, GL_BGRA, i_5, argbPixels, 0)
-                if (i_8 <= 1) {
+                OpenGL.glTexImage2Di(target, mipmapLevel, glInternalFormat, step, currentHeight, 0, GL_BGRA, pixelType, argbPixels, 0)
+                if (minDimension <= 1) {
                     return
                 }
                 var dstPixelIndex = 0
                 var srcPixelIndex = 0
                 var srcPixelIndexOffset = srcPixelIndex + step
-                for (i_16 in 0 until i_10) {
-                    for (i_17 in 0 until i_9) {
+                for (row in 0 until halfHeight) {
+                    for (col in 0 until halfWidth) {
                         val colorArgbA = argbPixels[srcPixelIndex++]
                         val colorArgbB = argbPixels[srcPixelIndex++]
                         val colorArgbC = argbPixels[srcPixelIndexOffset++]
@@ -279,15 +279,15 @@ abstract class OpenGlTexture(
                     srcPixelIndex += step
                     srcPixelIndexOffset += step
                 }
-                val ints_26 = replacementPixels
+                val swapTemp = replacementPixels
                 replacementPixels = argbPixels
-                argbPixels = ints_26
-                step = i_9
-                i_31 = i_10
-                i_9 = i_9 shr 1
-                i_10 = i_10 shr 1
-                i_8 = i_8 shr 1
-                ++i_7
+                argbPixels = swapTemp
+                step = halfWidth
+                currentHeight = halfHeight
+                halfWidth = halfWidth shr 1
+                halfHeight = halfHeight shr 1
+                minDimension = minDimension shr 1
+                ++mipmapLevel
             }
         }
     }

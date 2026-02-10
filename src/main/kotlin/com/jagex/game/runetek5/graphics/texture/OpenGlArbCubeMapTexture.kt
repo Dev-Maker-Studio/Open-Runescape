@@ -34,11 +34,11 @@ class OpenGlArbCubeMapTexture : OpenGlTexture {
             OpenGL.glTexImage2Dub(
                 index + GL_TEXTURE_CUBE_MAP_POSITIVE_X,
                 0,
-                OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651),
+                OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat),
                 largestMaterialSize,
                 largestMaterialSize,
                 0,
-                OpenGlToolkit.format(aClass1501650),
+                OpenGlToolkit.format(internalFormat),
                 GL_UNSIGNED_BYTE,
                 null,
                 0
@@ -69,7 +69,7 @@ class OpenGlArbCubeMapTexture : OpenGlTexture {
             for (index in 0 until 6) {
                 createMipmappedCubeTexture(
                     index + GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                    OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651),
+                    OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat),
                     largestMaterialSize,
                     largestMaterialSize,
                     activeToolkit.pixelType,
@@ -81,7 +81,7 @@ class OpenGlArbCubeMapTexture : OpenGlTexture {
                 OpenGL.glTexImage2Di(
                     index + GL_TEXTURE_CUBE_MAP_POSITIVE_X,
                     0,
-                    OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651),
+                    OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat),
                     largestMaterialSize,
                     largestMaterialSize,
                     0,
@@ -110,7 +110,7 @@ class OpenGlArbCubeMapTexture : OpenGlTexture {
             OpenGL.glTexImage2Dub(
                 index + GL_TEXTURE_CUBE_MAP_POSITIVE_X,
                 0,
-                OpenGlToolkit.getInternalTextureFormat(aClass1501650, aClass761651),
+                OpenGlToolkit.getInternalTextureFormat(internalFormat, actionFormat),
                 64,
                 64,
                 0,

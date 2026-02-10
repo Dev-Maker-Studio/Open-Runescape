@@ -1292,8 +1292,8 @@ open class SafeModeToolkit : AbstractToolkit {
         var i_5 = i_5
         if (this.colourBuffer != null) {
             val packetsdecoder10 = class4557 as ComponentDimensionSM
-            val ints_11 = packetsdecoder10.anIntArray9077
-            val ints_12 = packetsdecoder10.anIntArray9078
+            val ints_11 = packetsdecoder10.rowStartX
+            val ints_12 = packetsdecoder10.rowWidth
             val i_13 = maxOf(this.clipTop, i_9)
             val i_14 = minOf(this.clipBottom, ints_11!!.size + i_9)
             i_31 -= i_11
@@ -1428,8 +1428,8 @@ open class SafeModeToolkit : AbstractToolkit {
         var i_12 = i_12
         if (this.colourBuffer != null) {
             val packetsdecoder13 = class4557 as ComponentDimensionSM
-            val ints_14 = packetsdecoder13.anIntArray9077
-            val ints_15 = packetsdecoder13.anIntArray9078
+            val ints_14 = packetsdecoder13.rowStartX
+            val ints_15 = packetsdecoder13.rowWidth
             val i_16 = maxOf(this.clipTop, i_9)
             val i_17 = minOf(this.clipBottom, ints_14!!.size + i_9)
             i_12 = i_12 shl 8
@@ -2180,8 +2180,8 @@ open class SafeModeToolkit : AbstractToolkit {
         var i_41 = i_4
         if (this.colourBuffer != null) {
             val packetsdecoder5 = class4552 as ComponentDimensionSM
-            val ints_6 = packetsdecoder5.anIntArray9077
-            val ints_7 = packetsdecoder5.anIntArray9078
+            val ints_6 = packetsdecoder5.rowStartX
+            val ints_7 = packetsdecoder5.rowWidth
             var i_8: Int
             if (this.clipBottom < ints_6!!.size + i_41) {
                 i_8 = this.clipBottom - i_41

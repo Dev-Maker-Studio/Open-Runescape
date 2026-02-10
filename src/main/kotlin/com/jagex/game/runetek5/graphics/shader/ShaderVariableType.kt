@@ -3,14 +3,14 @@ package com.jagex.game.runetek5.graphics.shader
 class ShaderVariableType(@JvmField val id: Int) {
 
     companion object {
-        @JvmField val aClass1111109 = ShaderVariableType(109)
-        @JvmField val aClass1111219 = ShaderVariableType(81)
-        @JvmField val aClass1111132 = ShaderVariableType(10)
-        @JvmField val aClass1111133 = ShaderVariableType(54)
-        @JvmField val aClass1111134 = ShaderVariableType(95)
-        @JvmField val aClass1111168 = ShaderVariableType(94)
-        @JvmField val aClass1111150 = ShaderVariableType(16)
-        @JvmField val aClass1111182 = ShaderVariableType(8)
+        @JvmField val ARRAY = ShaderVariableType(109)
+        @JvmField val FLOAT = ShaderVariableType(81)
+        @JvmField val VEC2 = ShaderVariableType(10)
+        @JvmField val VEC3 = ShaderVariableType(54)
+        @JvmField val VEC4 = ShaderVariableType(95)
+        @JvmField val MAT4X2 = ShaderVariableType(94)
+        @JvmField val MAT4X4 = ShaderVariableType(16)
+        @JvmField val BOOL = ShaderVariableType(8)
         @JvmField val aClass1111222 = ShaderVariableType(29)
         @JvmField val aClass1111108 = ShaderVariableType(63)
         @JvmField val aClass1111110 = ShaderVariableType(89)
@@ -132,14 +132,14 @@ class ShaderVariableType(@JvmField val id: Int) {
         @JvmStatic
         fun getAll(): Array<ShaderVariableType> {
             return arrayOf(
-                aClass1111222, aClass1111108, aClass1111109, aClass1111110, aClass1111111, aClass1111112, aClass1111113, aClass1111204, aClass1111199, aClass1111131,
+                aClass1111222, aClass1111108, ARRAY, aClass1111110, aClass1111111, aClass1111112, aClass1111113, aClass1111204, aClass1111199, aClass1111131,
                 aClass1111117, aClass1111114, aClass1111200, aClass1111120, aClass1111121, aClass1111122, aClass1111123, aClass1111124, aClass1111125, aClass1111126,
-                aClass1111127, aClass1111164, aClass1111175, aClass1111129, aClass1111219, aClass1111132, aClass1111133, aClass1111134, aClass1111205, aClass1111177,
+                aClass1111127, aClass1111164, aClass1111175, aClass1111129, FLOAT, VEC2, VEC3, VEC4, aClass1111205, aClass1111177,
                 aClass1111137, aClass1111138, aClass1111173, aClass1111189, aClass1111141, aClass1111142, aClass1111115, aClass1111144, aClass1111145, aClass1111146,
-                aClass1111196, aClass1111168, aClass1111149, aClass1111150, aClass1111176, aClass1111152, aClass1111153, aClass1111184, aClass1111155, aClass1111156,
+                aClass1111196, MAT4X2, aClass1111149, MAT4X4, aClass1111176, aClass1111152, aClass1111153, aClass1111184, aClass1111155, aClass1111156,
                 aClass1111143, aClass1111158, aClass1111159, aClass1111160, aClass1111161, aClass1111157, aClass1111107, aClass1111194, aClass1111229, aClass1111166,
                 aClass1111167, aClass1111135, aClass1111140, aClass1111170, aClass1111171, aClass1111172, aClass1111147, aClass1111174, aClass1111139, aClass1111220,
-                aClass1111182, aClass1111178, aClass1111179, aClass1111148, aClass1111181, aClass1111180, aClass1111183, aClass1111207, aClass1111185, aClass1111186,
+                BOOL, aClass1111178, aClass1111179, aClass1111148, aClass1111181, aClass1111180, aClass1111183, aClass1111207, aClass1111185, aClass1111186,
                 aClass1111187, aClass1111119, aClass1111209, aClass1111190, aClass1111191, aClass1111192, aClass1111193, aClass1111162, aClass1111198, aClass1111151,
                 aClass1111197, aClass1111188, aClass1111154, aClass1111128, aClass1111201, aClass1111202, aClass1111203, aClass1111165, aClass1111163, aClass1111206,
                 aClass1111116, aClass1111208, aClass1111169, aClass1111210, aClass1111211, aClass1111212, aClass1111213, aClass1111214, aClass1111215, aClass1111216,

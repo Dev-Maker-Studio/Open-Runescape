@@ -7205,7 +7205,7 @@ object CS2Interpreter {
         var i_4 = executor.intStack[executor.intStackPtr + 1]
         var fontmetrics5: FontMetrics? = FontMetrics.getFontMetrics(Resource.FONT_METRICS, i_4)
         assert(fontmetrics5 != null)
-        executor.intStack[++executor.intStackPtr - 1] = fontmetrics5!!.method6949(string_2!!, i_3, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        executor.intStack[++executor.intStackPtr - 1] = fontmetrics5!!.getLineCount(string_2!!, i_3, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
     }
 
     @JvmStatic
@@ -10679,7 +10679,7 @@ object CS2Interpreter {
         var fontmetrics3: FontMetrics? = icomponentdefinitions0!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
         var i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr]
         var i_5 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        var i_6 = fontmetrics3!!.method6956(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.lineSpacing, i_5, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        var i_6 = fontmetrics3!!.getIndexAtPosition(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.lineSpacing, i_5, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = i_6
     }
 
@@ -10896,7 +10896,7 @@ object CS2Interpreter {
     fun method5001(icomponentdefinitions0: Component, cs2executor1: CS2Executor) {
         var fontmetrics3: FontMetrics? = icomponentdefinitions0!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
         var i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        var point5: Point? = fontmetrics3!!.method6954(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.lineSpacing, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        var point5: Point? = fontmetrics3!!.getPositionAtIndex(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.lineSpacing, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = point5!!.x
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = point5!!.y
     }

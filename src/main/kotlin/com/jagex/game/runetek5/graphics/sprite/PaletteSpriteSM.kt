@@ -1640,8 +1640,8 @@ class PaletteSpriteSM(
 
         if (i_9 > 0 && i_10 > 0) {
             val packetsdecoder26 = class4553 as ComponentDimensionSM
-            val ints_15 = packetsdecoder26.anIntArray9077
-            val ints_16 = packetsdecoder26.anIntArray9078
+            val ints_15 = packetsdecoder26.rowStartX
+            val ints_16 = packetsdecoder26.rowWidth
             var i_17 = i_25
             if (i_5 > i_25) {
                 i_17 = i_5

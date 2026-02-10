@@ -235,25 +235,25 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
     }
 
     fun loadModelMatrix(matrix44var1: Matrix43) {
-        val matrix442 = toolkit.perspectiveMatrix
-        matrix442.fromMatrix(matrix44var1)
+        val matrix = toolkit.perspectiveMatrix
+        matrix.fromMatrix(matrix44var1)
         val slot = activeShader!!.getOccupyingSlot()
         val flags = mappedWaterFlags
         if (flags == null) return
 
         if (modelMatrix != null) {
-            activeShader!!.loadMatrix(modelMatrix!!, matrix442)
+            activeShader!!.loadMatrix(modelMatrix!!, matrix)
             flags[slot] = flags[slot] and -2
         }
 
         if (modelViewMatrixAttribute != null) {
-            VIEW_PROJECTION_MATRIX.setProduct(matrix442, toolkit.getViewMatrix())
+            VIEW_PROJECTION_MATRIX.setProduct(matrix, toolkit.getViewMatrix())
             activeShader!!.loadMatrix(modelViewMatrixAttribute!!, VIEW_PROJECTION_MATRIX)
             flags[slot] = flags[slot] and -17
         }
 
         if (modelViewProjectionMatrixAttribute != null) {
-            VIEW_PROJECTION_MATRIX.setProduct(matrix442, toolkit.getFrustumClipMatrix())
+            VIEW_PROJECTION_MATRIX.setProduct(matrix, toolkit.getFrustumClipMatrix())
             activeShader!!.loadMatrix(modelViewProjectionMatrixAttribute!!, VIEW_PROJECTION_MATRIX)
             flags[slot] = flags[slot] and -33
         }

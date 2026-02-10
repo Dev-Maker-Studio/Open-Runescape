@@ -26,12 +26,12 @@ abstract class Shader protected constructor(toolkit: AbstractNativeToolkit, shad
     init {
         this.shaderName = shaderloader.name!!
         this.primaryShaderVariableCount = shaderloader.primaryShaderVariables!!.size
-        this.primaryShaderBuilder = ProgramBuilder(this.primaryShaderVariableCount, anInterface111012)
+        this.primaryShaderBuilder = ProgramBuilder(this.primaryShaderVariableCount, attributeHandler)
         for (index in 0 until this.primaryShaderVariableCount) {
             this.primaryShaderBuilder.addAttribute(index, shaderloader.primaryShaderVariables!![index].primaryShaderAttributeName!!, decode(shaderloader.primaryShaderVariables!![index]))
         }
         this.secondaryShaderVariableCount = shaderloader.secondaryShaderVariables!!.size
-        this.secondaryShaderBuilder = ProgramBuilder(this.secondaryShaderVariableCount, anInterface111012)
+        this.secondaryShaderBuilder = ProgramBuilder(this.secondaryShaderVariableCount, attributeHandler)
         for (index in 0 until this.secondaryShaderVariableCount) {
             this.secondaryShaderBuilder.addAttribute(index, shaderloader.secondaryShaderVariables!![index].primaryShaderAttributeName!!, decode(shaderloader.secondaryShaderVariables!![index]))
         }
@@ -117,44 +117,44 @@ abstract class Shader protected constructor(toolkit: AbstractNativeToolkit, shad
         this.shaderMapping[this.occupyingSlot].uniform3f(attribute, vector.x, vector.y, vector.z)
     }
 
-    fun loadTextureMatrix(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        this.shaderMapping[this.occupyingSlot].uniform2fv(class282Sub21Sub11, matrix442)
+    fun loadTextureMatrix(attribute: ShaderAttribute, matrix: Matrix44) {
+        this.shaderMapping[this.occupyingSlot].uniform2fv(attribute, matrix)
     }
 
-    fun loadMatrix(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        this.shaderMapping[this.occupyingSlot].uniform4fv(class282Sub21Sub11, matrix442)
+    fun loadMatrix(attribute: ShaderAttribute, matrix: Matrix44) {
+        this.shaderMapping[this.occupyingSlot].uniform4fv(attribute, matrix)
     }
 
-    fun load3f(i_1: Int, f_2: Float, f_3: Float, f_4: Float) {
-        this.shaderMapping[this.occupyingSlot].addPositionAttribute3f(i_1, f_2, f_3, f_4)
+    fun load3f(location: Int, x: Float, y: Float, z: Float) {
+        this.shaderMapping[this.occupyingSlot].addPositionAttribute3f(location, x, y, z)
     }
 
-    fun loadTextureSampler(attribute: ShaderAttribute, i_2: Int, sampler: TextureSampler) {
-        this.shaderMapping[this.occupyingSlot].loadTextureSampler(attribute, i_2, sampler)
+    fun loadTextureSampler(attribute: ShaderAttribute, slot: Int, sampler: TextureSampler) {
+        this.shaderMapping[this.occupyingSlot].loadTextureSampler(attribute, slot, sampler)
     }
 
-    fun loadVector3f(i_1: Int, vector32: Vector3) {
-        this.shaderMapping[this.occupyingSlot].addPositionAttribute3f(i_1, vector32.x, vector32.y, vector32.z)
+    fun loadVector3f(location: Int, vector: Vector3) {
+        this.shaderMapping[this.occupyingSlot].addPositionAttribute3f(location, vector.x, vector.y, vector.z)
     }
 
-    fun method1673(i_1: Int, floats_2: FloatArray, i_3: Int) {
-        this.shaderMapping[this.occupyingSlot].addPositionAttributeDynamic(i_1, floats_2, i_3)
+    fun uploadDynamicUniform4fv(location: Int, values: FloatArray, count: Int) {
+        this.shaderMapping[this.occupyingSlot].addPositionAttributeDynamic(location, values, count)
     }
 
-    fun method1674(i_1: Int, matrix442: Matrix44) {
-        this.shaderMapping[this.occupyingSlot].uniform3fSavedSize12(i_1, matrix442)
+    fun setWorldMatrix(location: Int, matrix: Matrix44) {
+        this.shaderMapping[this.occupyingSlot].uniform3fSavedSize12(location, matrix)
     }
 
-    fun setTextureCoordinateMatrix(i_1: Int, matrix442: Matrix44) {
-        this.shaderMapping[this.occupyingSlot].uniform3fSavedSize8(i_1, matrix442)
+    fun setTextureCoordinateMatrix(location: Int, matrix: Matrix44) {
+        this.shaderMapping[this.occupyingSlot].uniform3fSavedSize8(location, matrix)
     }
 
-    fun setWorldViewProjectionMatrix(i_1: Int, matrix442: Matrix44) {
-        this.shaderMapping[this.occupyingSlot].uniform3fSavedSize16(i_1, matrix442)
+    fun setWorldViewProjectionMatrix(location: Int, matrix: Matrix44) {
+        this.shaderMapping[this.occupyingSlot].uniform3fSavedSize16(location, matrix)
     }
 
-    fun setDiffuseSampler(i_1: Int, slot: Int, interface303: TextureSampler) {
-        this.shaderMapping[this.occupyingSlot].initializeTextureSampler(i_1, slot, interface303)
+    fun setDiffuseSampler(location: Int, slot: Int, sampler: TextureSampler) {
+        this.shaderMapping[this.occupyingSlot].initializeTextureSampler(location, slot, sampler)
     }
 
     fun getSecondaryShaderVariableCount(): Int {
@@ -172,8 +172,8 @@ abstract class Shader protected constructor(toolkit: AbstractNativeToolkit, shad
     open fun dispose() {
     }
 
-    fun method1688(class282Sub21Sub11: ShaderAttribute, floats_2: FloatArray) {
-        this.shaderMapping[this.occupyingSlot].uniform4fv(class282Sub21Sub11, floats_2, floats_2.size)
+    fun uploadUniform4fv(attribute: ShaderAttribute, values: FloatArray) {
+        this.shaderMapping[this.occupyingSlot].uniform4fv(attribute, values, values.size)
     }
 
     fun insertAttribute(attribute: ShaderAttribute, vector4: Vector4) {
@@ -215,13 +215,13 @@ abstract class Shader protected constructor(toolkit: AbstractNativeToolkit, shad
 
     abstract fun loadMapping(toolkit: AbstractNativeToolkit, mapping: NativeShaderMapping): ShaderMapping
 
-    fun load4f(i_1: Int, f_2: Float, f_3: Float, f_4: Float, f_5: Float) {
-        this.shaderMapping[this.occupyingSlot].addPositionAttribute4f(i_1, f_2, f_3, f_4, f_5)
+    fun load4f(location: Int, x: Float, y: Float, z: Float, w: Float) {
+        this.shaderMapping[this.occupyingSlot].addPositionAttribute4f(location, x, y, z, w)
     }
 
     abstract fun decode(decoder: ShaderVariableDecoder): ShaderAttribute
 
     companion object {
-        @JvmField val anInterface111012: IProgramAttributeHandler = ProgramAttributeHandler()
+        @JvmField val attributeHandler: IProgramAttributeHandler = ProgramAttributeHandler()
     }
 }

@@ -9,8 +9,8 @@ class OpaqueFontRendererSM(
     override val toolkit: SafeModeToolkit,
     fontMetrics: FontMetrics,
     sprites: Array<SpriteType>,
-    val anIntArray8511: IntArray,
-    val anIntArray8512: IntArray
+    val glyphWidths: IntArray,
+    val glyphHeights: IntArray
 ) : AbstractFontRenderer(toolkit, fontMetrics) {
     val spritePixels: Array<ByteArray?>
     val spriteMinY: IntArray
@@ -34,8 +34,8 @@ class OpaqueFontRendererSM(
         if (this.toolkit.colourBuffer != null) {
             x += this.spriteMinX[var_1]
             y += this.spriteMinY[var_1]
-            var i_6 = this.anIntArray8511[var_1]
-            var i_7 = this.anIntArray8512[var_1]
+            var i_6 = this.glyphWidths[var_1]
+            var i_7 = this.glyphHeights[var_1]
             val i_8 = this.toolkit.viewportWidth
             var i_9 = y * i_8 + x
             var i_10 = i_8 - i_6
@@ -73,7 +73,7 @@ class OpaqueFontRendererSM(
 
             if (i_6 > 0 && i_7 > 0) {
                 if ((i_4 and 0xffffff.inv()) == 0xffffff.inv()) {
-                    method13771(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
+                    drawGlyphOpaque(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
                 } else if ((i_4 and 0xffffff.inv()) != 0) {
                     blendImage(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
                 }
@@ -90,8 +90,8 @@ class OpaqueFontRendererSM(
             } else {
                 i_21 += this.spriteMinX[var_1]
                 i_31 += this.spriteMinY[var_1]
-                var i_9 = this.anIntArray8511[var_1]
-                var i_10 = this.anIntArray8512[var_1]
+                var i_9 = this.glyphWidths[var_1]
+                var i_10 = this.glyphHeights[var_1]
                 val i_11 = this.toolkit.viewportWidth
                 var i_12 = i_31 * i_11 + i_21
                 var i_13 = i_11 - i_9
@@ -129,16 +129,16 @@ class OpaqueFontRendererSM(
 
                 if (i_9 > 0 && i_10 > 0) {
                     if ((i_4 and 0xffffff.inv()) == 0xffffff.inv()) {
-                        drawImage(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], dimension, i_7, i_8)
+                        drawImage(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.glyphWidths[var_1], dimension, i_7, i_8)
                     } else {
-                        method13774(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.anIntArray8511[var_1], dimension, i_7, i_8)
+                        drawGlyphBlendedMasked(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.glyphWidths[var_1], dimension, i_7, i_8)
                     }
                 }
             }
         }
     }
 
-    fun method13771(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
+    fun drawGlyphOpaque(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
         var dstPos = i_4
         var srcPos = i_5
         val i_10 = -(i_6 shr 2)
@@ -218,8 +218,8 @@ class OpaqueFontRendererSM(
         var dstPos = i_4
         var srcPos = i_5
         val packetsdecoder16 = class45513 as ComponentDimensionSM
-        val offsetsX = packetsdecoder16.anIntArray9077
-        val offsetsY = packetsdecoder16.anIntArray9078
+        val offsetsX = packetsdecoder16.rowStartX
+        val offsetsY = packetsdecoder16.rowWidth
         var i_19 = i_11
         if (i_15 > i_11) {
             i_19 = i_15
@@ -277,12 +277,12 @@ class OpaqueFontRendererSM(
         }
     }
 
-    fun method13774(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, class45513: ComponentSurface, i_14: Int, i_15: Int) {
+    fun drawGlyphBlendedMasked(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, class45513: ComponentSurface, i_14: Int, i_15: Int) {
         var dstPos = i_4
         var srcPos = i_5
         val packetsdecoder16 = class45513 as ComponentDimensionSM
-        val ints_17 = packetsdecoder16.anIntArray9077
-        val ints_18 = packetsdecoder16.anIntArray9078
+        val ints_17 = packetsdecoder16.rowStartX
+        val ints_18 = packetsdecoder16.rowWidth
         val i_19 = i_10 - this.toolkit.clipLeft
         var i_20 = i_11
         if (i_15 > i_11) {

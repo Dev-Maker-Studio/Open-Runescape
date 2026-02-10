@@ -10,9 +10,9 @@ class LoadingBarSub1(
     class350Sub3Sub13: AnimatedLoadingBarElement
 ) : LoadingBar(index1, index2, class350Sub3Sub13) {
 
-    override fun method14498(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        val i_6 = super.aNativeSprite9162!!.getSpriteWidth()
-        val i_7 = (anchoredElement as AnimatedLoadingBarElement).anInt10160 * LegacyAssetLoadingScreen.method8740() / 10 % i_6
-        super.aNativeSprite9162!!.drawTiled(i_7 + (i_1 - i_6), i_2, i_3 + i_6 - i_7, i_4)
+    override fun drawFillArea(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+        val i_6 = super.fillSprite!!.getSpriteWidth()
+        val i_7 = (anchoredElement as AnimatedLoadingBarElement).scrollSpeed * LegacyAssetLoadingScreen.method8740() / 10 % i_6
+        super.fillSprite!!.drawTiled(i_7 + (i_1 - i_6), i_2, i_3 + i_6 - i_7, i_4)
     }
 }

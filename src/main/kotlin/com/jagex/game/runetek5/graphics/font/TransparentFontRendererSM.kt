@@ -15,97 +15,97 @@ class TransparentFontRendererSM(
 ) : AbstractFontRenderer(hardwarerenderer1, fontmetrics2) {
 
     @JvmField
-    var aGraphicalRendererSub38889: SafeModeToolkit = hardwarerenderer1
+    var safeModeToolkit: SafeModeToolkit = hardwarerenderer1
 
     @JvmField
-    val anIntArray8886: IntArray = ints_4
+    val glyphWidths: IntArray = ints_4
 
     @JvmField
-    val anIntArray8888: IntArray = ints_5
+    val glyphHeights: IntArray = ints_5
 
     @JvmField
-    val aByteArrayArray8887: Array<ByteArray?>
+    val glyphAlphaData: Array<ByteArray?>
 
     @JvmField
-    val anIntArray8890: IntArray
+    val glyphOffsetY: IntArray
 
     @JvmField
-    val anIntArray8891: IntArray
+    val glyphOffsetX: IntArray
 
     init {
-        aByteArrayArray8887 = arrayOfNulls(arr_3.size)
-        anIntArray8890 = IntArray(arr_3.size)
-        anIntArray8891 = IntArray(arr_3.size)
+        glyphAlphaData = arrayOfNulls(arr_3.size)
+        glyphOffsetY = IntArray(arr_3.size)
+        glyphOffsetX = IntArray(arr_3.size)
 
         for (i_6 in arr_3.indices) {
             val class917 = arr_3[i_6]
             if (class917.alpha != null) {
-                aByteArrayArray8887[i_6] = class917.alpha
+                glyphAlphaData[i_6] = class917.alpha
             } else {
                 val bytes_8 = class917.pixels
                 val bytes_9 = ByteArray(bytes_8.size)
-                aByteArrayArray8887[i_6] = bytes_9
+                glyphAlphaData[i_6] = bytes_9
 
                 for (i_10 in bytes_8.indices) {
                     bytes_9[i_10] = if (bytes_8[i_10].toInt() == 0) 0 else -1
                 }
             }
 
-            anIntArray8890[i_6] = class917.minY
-            anIntArray8891[i_6] = class917.minX
+            glyphOffsetY[i_6] = class917.minY
+            glyphOffsetX[i_6] = class917.minX
         }
     }
 
     override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean) {
         val i_31 = i_3
         var i_21 = i_2
-        if (aGraphicalRendererSub38889.colourBuffer != null) {
-            i_21 += anIntArray8891[var_1]
-            var i_31_mod = i_31 + anIntArray8890[var_1]
-            var i_6 = anIntArray8886[var_1]
-            var i_7 = anIntArray8888[var_1]
-            val i_8 = aGraphicalRendererSub38889.viewportWidth
+        if (safeModeToolkit.colourBuffer != null) {
+            i_21 += glyphOffsetX[var_1]
+            var i_31_mod = i_31 + glyphOffsetY[var_1]
+            var i_6 = glyphWidths[var_1]
+            var i_7 = glyphHeights[var_1]
+            val i_8 = safeModeToolkit.viewportWidth
             var i_9 = i_21 + i_31_mod * i_8
             var i_10 = i_8 - i_6
             var i_11 = 0
             var i_12 = 0
             var i_13: Int
-            if (i_31_mod < aGraphicalRendererSub38889.clipTop) {
-                i_13 = aGraphicalRendererSub38889.clipTop - i_31_mod
+            if (i_31_mod < safeModeToolkit.clipTop) {
+                i_13 = safeModeToolkit.clipTop - i_31_mod
                 i_7 -= i_13
-                i_31_mod = aGraphicalRendererSub38889.clipTop
+                i_31_mod = safeModeToolkit.clipTop
                 i_12 += i_6 * i_13
                 i_9 += i_8 * i_13
             }
 
-            if (i_31_mod + i_7 > aGraphicalRendererSub38889.clipBottom) {
-                i_7 -= i_31_mod + i_7 - aGraphicalRendererSub38889.clipBottom
+            if (i_31_mod + i_7 > safeModeToolkit.clipBottom) {
+                i_7 -= i_31_mod + i_7 - safeModeToolkit.clipBottom
             }
 
-            if (i_21 < aGraphicalRendererSub38889.clipLeft) {
-                i_13 = aGraphicalRendererSub38889.clipLeft - i_21
+            if (i_21 < safeModeToolkit.clipLeft) {
+                i_13 = safeModeToolkit.clipLeft - i_21
                 i_6 -= i_13
-                i_21 = aGraphicalRendererSub38889.clipLeft
+                i_21 = safeModeToolkit.clipLeft
                 i_12 += i_13
                 i_9 += i_13
                 i_11 += i_13
                 i_10 += i_13
             }
 
-            if (i_6 + i_21 > aGraphicalRendererSub38889.clipRight) {
-                i_13 = i_6 + i_21 - aGraphicalRendererSub38889.clipRight
+            if (i_6 + i_21 > safeModeToolkit.clipRight) {
+                i_13 = i_6 + i_21 - safeModeToolkit.clipRight
                 i_6 -= i_13
                 i_11 += i_13
                 i_10 += i_13
             }
 
             if (i_6 > 0 && i_7 > 0) {
-                method14257(aByteArrayArray8887[var_1]!!, aGraphicalRendererSub38889.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
+                blendGlyphPixels(glyphAlphaData[var_1]!!, safeModeToolkit.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
             }
         }
     }
 
-    fun method14257(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
+    fun blendGlyphPixels(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
         var i_4_mod = i_4
         var i_5_mod = i_5
         for (i_10 in -i_7 until 0) {
@@ -126,7 +126,7 @@ class TransparentFontRendererSM(
         }
     }
 
-    fun method14258(
+    fun blendGlyphPixelsMasked(
         bytes_1: ByteArray,
         ints_2: IntArray,
         i_3: Int,
@@ -144,13 +144,13 @@ class TransparentFontRendererSM(
         i_15: Int
     ) {
         val packetsdecoder16 = class45513 as ComponentDimensionSM
-        val ints_17 = packetsdecoder16.anIntArray9077
-        val ints_18 = packetsdecoder16.anIntArray9078
-        val i_19 = i_10 - aGraphicalRendererSub38889.clipLeft
+        val ints_17 = packetsdecoder16.rowStartX
+        val ints_18 = packetsdecoder16.rowWidth
+        val i_19 = i_10 - safeModeToolkit.clipLeft
         var i_20 = i_11
         if (i_15 > i_11) {
             i_20 = i_15
-            var i_5_mod = i_5 + aGraphicalRendererSub38889.viewportWidth * (i_15 - i_11)
+            var i_5_mod = i_5 + safeModeToolkit.viewportWidth * (i_15 - i_11)
             var i_4_mod = i_4 + (i_15 - i_11) * i_12
         }
 
@@ -222,53 +222,53 @@ class TransparentFontRendererSM(
     ) {
         val i_31 = i_3
         var i_21 = i_2
-        if (aGraphicalRendererSub38889.colourBuffer != null) {
+        if (safeModeToolkit.colourBuffer != null) {
             if (dimension == null) {
                 drawChar(var_1, i_21, i_31, i_4, bool5)
             } else {
-                i_21 += anIntArray8891[var_1]
-                var i_31_mod = i_31 + anIntArray8890[var_1]
-                var i_9 = anIntArray8886[var_1]
-                var i_10 = anIntArray8888[var_1]
-                val i_11 = aGraphicalRendererSub38889.viewportWidth
+                i_21 += glyphOffsetX[var_1]
+                var i_31_mod = i_31 + glyphOffsetY[var_1]
+                var i_9 = glyphWidths[var_1]
+                var i_10 = glyphHeights[var_1]
+                val i_11 = safeModeToolkit.viewportWidth
                 var i_12 = i_21 + i_31_mod * i_11
                 var i_13 = i_11 - i_9
                 var i_14 = 0
                 var i_15 = 0
                 var i_16: Int
-                if (i_31_mod < aGraphicalRendererSub38889.clipTop) {
-                    i_16 = aGraphicalRendererSub38889.clipTop - i_31_mod
+                if (i_31_mod < safeModeToolkit.clipTop) {
+                    i_16 = safeModeToolkit.clipTop - i_31_mod
                     i_10 -= i_16
-                    i_31_mod = aGraphicalRendererSub38889.clipTop
+                    i_31_mod = safeModeToolkit.clipTop
                     i_15 += i_16 * i_9
                     i_12 += i_16 * i_11
                 }
 
-                if (i_31_mod + i_10 > aGraphicalRendererSub38889.clipBottom) {
-                    i_10 -= i_31_mod + i_10 - aGraphicalRendererSub38889.clipBottom
+                if (i_31_mod + i_10 > safeModeToolkit.clipBottom) {
+                    i_10 -= i_31_mod + i_10 - safeModeToolkit.clipBottom
                 }
 
-                if (i_21 < aGraphicalRendererSub38889.clipLeft) {
-                    i_16 = aGraphicalRendererSub38889.clipLeft - i_21
+                if (i_21 < safeModeToolkit.clipLeft) {
+                    i_16 = safeModeToolkit.clipLeft - i_21
                     i_9 -= i_16
-                    i_21 = aGraphicalRendererSub38889.clipLeft
+                    i_21 = safeModeToolkit.clipLeft
                     i_15 += i_16
                     i_12 += i_16
                     i_14 += i_16
                     i_13 += i_16
                 }
 
-                if (i_9 + i_21 > aGraphicalRendererSub38889.clipRight) {
-                    i_16 = i_9 + i_21 - aGraphicalRendererSub38889.clipRight
+                if (i_9 + i_21 > safeModeToolkit.clipRight) {
+                    i_16 = i_9 + i_21 - safeModeToolkit.clipRight
                     i_9 -= i_16
                     i_14 += i_16
                     i_13 += i_16
                 }
 
                 if (i_9 > 0 && i_10 > 0) {
-                    method14258(
-                        aByteArrayArray8887[var_1]!!,
-                        aGraphicalRendererSub38889.colourBuffer!!,
+                    blendGlyphPixelsMasked(
+                        glyphAlphaData[var_1]!!,
+                        safeModeToolkit.colourBuffer!!,
                         i_4,
                         i_15,
                         i_12,
@@ -278,7 +278,7 @@ class TransparentFontRendererSM(
                         i_14,
                         i_21,
                         i_31_mod,
-                        anIntArray8886[var_1],
+                        glyphWidths[var_1],
                         dimension,
                         i_7,
                         i_8

@@ -62,147 +62,147 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
         this.toolkit = toolkit
     }
 
-    fun compileShader(i_1: Int, string_2: String?): Int {
-        if (string_2 == null) {
+    fun compileShader(shaderType: Int, source: String?): Int {
+        if (source == null) {
             return 0
         } else {
-            var i_4 = OpenGL.glCreateShader(i_1)
-            OpenGL.glShaderSource(i_4, string_2)
-            OpenGL.glCompileShader(i_4)
-            OpenGL.glGetShaderiv(i_4, GL_COMPILE_STATUS, Companion.STATUS_BUFFER, 0)
+            var handle = OpenGL.glCreateShader(shaderType)
+            OpenGL.glShaderSource(handle, source)
+            OpenGL.glCompileShader(handle)
+            OpenGL.glGetShaderiv(handle, GL_COMPILE_STATUS, Companion.STATUS_BUFFER, 0)
             if (Companion.STATUS_BUFFER[0] == 0) {
-                OpenGL.glDeleteShader(i_4)
-                i_4 = 0
+                OpenGL.glDeleteShader(handle)
+                handle = 0
             }
 
-            return i_4
+            return handle
         }
     }
 
-    override fun uniform1f(class282Sub21Sub11: ShaderAttribute, f_2: Float) {
-        val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_3 != -1 && uniformCacheX!![i_3] != f_2) {
-            uniformCacheX!![i_3] = f_2
-            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111219 && class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111182) {
+    override fun uniform1f(attribute: ShaderAttribute, value: Float) {
+        val location = (attribute as ShaderAttributeGL).getActiveUniformLocation()
+        if (location != -1 && uniformCacheX!![location] != value) {
+            uniformCacheX!![location] = value
+            if (attribute.getVariableType() != ShaderVariableType.FLOAT && attribute.getVariableType() != ShaderVariableType.BOOL) {
                 throw IllegalShaderArgumentException()
             }
 
-            OpenGL.glUniform1f(i_3, f_2)
+            OpenGL.glUniform1f(location, value)
         }
     }
 
-    override fun unform2f(class282Sub21Sub11: ShaderAttribute, f_2: Float, f_3: Float) {
-        val i_4 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_4 != -1 && (uniformCacheX!![i_4] != f_2 || uniformCacheY!![i_4] != f_3)) {
-            uniformCacheX!![i_4] = f_2
-            uniformCacheY!![i_4] = f_3
-            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111132) {
+    override fun unform2f(attribute: ShaderAttribute, x: Float, y: Float) {
+        val location = (attribute as ShaderAttributeGL).getActiveUniformLocation()
+        if (location != -1 && (uniformCacheX!![location] != x || uniformCacheY!![location] != y)) {
+            uniformCacheX!![location] = x
+            uniformCacheY!![location] = y
+            if (attribute.getVariableType() != ShaderVariableType.VEC2) {
                 throw IllegalShaderArgumentException()
             }
 
-            OpenGL.glUniform2f(i_4, f_2, f_3)
+            OpenGL.glUniform2f(location, x, y)
         }
     }
 
-    override fun uniform3f(class282Sub21Sub11: ShaderAttribute, f_2: Float, f_3: Float, f_4: Float) {
-        val i_5 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_5 != -1 && (uniformCacheX!![i_5] != f_2 || uniformCacheY!![i_5] != f_3 || uniformCacheZ!![i_5] != f_4)) {
-            uniformCacheX!![i_5] = f_2
-            uniformCacheY!![i_5] = f_3
-            uniformCacheZ!![i_5] = f_4
-            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111133) {
+    override fun uniform3f(attribute: ShaderAttribute, x: Float, y: Float, z: Float) {
+        val location = (attribute as ShaderAttributeGL).getActiveUniformLocation()
+        if (location != -1 && (uniformCacheX!![location] != x || uniformCacheY!![location] != y || uniformCacheZ!![location] != z)) {
+            uniformCacheX!![location] = x
+            uniformCacheY!![location] = y
+            uniformCacheZ!![location] = z
+            if (attribute.getVariableType() != ShaderVariableType.VEC3) {
                 throw IllegalShaderArgumentException()
             }
 
-            OpenGL.glUniform3f(i_5, f_2, f_3, f_4)
+            OpenGL.glUniform3f(location, x, y, z)
         }
     }
 
-    override fun uniform4fv(class282Sub21Sub11: ShaderAttribute, floats_2: FloatArray, i_3: Int) {
-        val i_4 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_4 != -1) {
-            OpenGL.glUniform4fv(i_4, i_3, floats_2, 0)
+    override fun uniform4fv(attribute: ShaderAttribute, values: FloatArray, count: Int) {
+        val location = (attribute as ShaderAttributeGL).getActiveUniformLocation()
+        if (location != -1) {
+            OpenGL.glUniform4fv(location, count, values, 0)
         }
     }
 
-    override fun uniform2fv(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111168) {
+    override fun uniform2fv(attribute: ShaderAttribute, matrix: Matrix44) {
+        if (!Companion.`$assertionsDisabled` && attribute.getVariableType() != ShaderVariableType.MAT4X2) {
             throw AssertionError()
         }
 
-        val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_3 != -1) {
-            OpenGL.glUniform2fv(i_3, 4, matrix442.getComponentsXY(Companion.matrixBuffer), 0)
+        val location = (attribute as ShaderAttributeGL).getActiveUniformLocation()
+        if (location != -1) {
+            OpenGL.glUniform2fv(location, 4, matrix.getComponentsXY(Companion.matrixBuffer), 0)
         }
     }
 
-    override fun uniform4fv(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111150) {
+    override fun uniform4fv(attribute: ShaderAttribute, matrix: Matrix44) {
+        if (!Companion.`$assertionsDisabled` && attribute.getVariableType() != ShaderVariableType.MAT4X4) {
             throw AssertionError()
         }
 
-        val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_3 != -1) {
-            OpenGL.glUniform4fv(i_3, 4, matrix442.copyInto(Companion.matrixBuffer), 0)
+        val location = (attribute as ShaderAttributeGL).getActiveUniformLocation()
+        if (location != -1) {
+            OpenGL.glUniform4fv(location, 4, matrix.copyInto(Companion.matrixBuffer), 0)
         }
     }
 
-    override fun loadTextureSampler(var1: ShaderAttribute, var2: Int, var3: TextureSampler) {
-        var sampler: TextureSampler? = var3
-        val index = (var1 as ShaderAttributeGL).getActiveUniformLocation()
+    override fun loadTextureSampler(attribute: ShaderAttribute, slot: Int, defaultSampler: TextureSampler) {
+        var sampler: TextureSampler? = defaultSampler
+        val index = (attribute as ShaderAttributeGL).getActiveUniformLocation()
         if (index != -1) {
             if (sampler == null) {
                 sampler = toolkit!!.activeTextureSampler
             }
 
-            if (var2 < toolkit!!.maxConcurrentTextures) {
-                toolkit!!.setTextureSlot(var2)
+            if (slot < toolkit!!.maxConcurrentTextures) {
+                toolkit!!.setTextureSlot(slot)
                 toolkit!!.setTextureSampler(sampler)
             } else {
-                OpenGL.glActiveTexture(var2 + 33984)
+                OpenGL.glActiveTexture(slot + 33984)
                 OpenGL.glBindTexture((sampler as MipmapTextureSampler).textureTarget, sampler.texture)
             }
 
-            if (var2 != textureSlots!![index]) {
-                textureSlots!![index] = var2
-                OpenGL.glUniform1i(index, var2)
+            if (slot != textureSlots!![index]) {
+                textureSlots!![index] = slot
+                OpenGL.glUniform1i(index, slot)
             }
         }
     }
 
-    override fun addPositionAttribute3f(i_1: Int, f_2: Float, f_3: Float, f_4: Float) {
-        OpenGL.glUniform3f(i_1, f_2, f_3, f_4)
+    override fun addPositionAttribute3f(location: Int, x: Float, y: Float, z: Float) {
+        OpenGL.glUniform3f(location, x, y, z)
     }
 
-    override fun addPositionAttribute4f(i_1: Int, f_2: Float, f_3: Float, f_4: Float, f_5: Float) {
-        OpenGL.glUniform4f(i_1, f_2, f_3, f_4, f_5)
+    override fun addPositionAttribute4f(location: Int, x: Float, y: Float, z: Float, w: Float) {
+        OpenGL.glUniform4f(location, x, y, z, w)
     }
 
-    override fun addPreloadedPositionAttribute(class282Sub21Sub11: ShaderAttribute, f_2: Float, f_3: Float, f_4: Float, f_5: Float) {
-        val i_6 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
-        if (i_6 != -1 && (uniformCacheX!![i_6] != f_2 || uniformCacheY!![i_6] != f_3 || uniformCacheZ!![i_6] != f_4 || uniformCacheW!![i_6] != f_5)) {
-            uniformCacheX!![i_6] = f_2
-            uniformCacheY!![i_6] = f_3
-            uniformCacheZ!![i_6] = f_4
-            uniformCacheW!![i_6] = f_5
-            if (class282Sub21Sub11.getVariableType() != ShaderVariableType.aClass1111134) {
+    override fun addPreloadedPositionAttribute(attribute: ShaderAttribute, x: Float, y: Float, z: Float, w: Float) {
+        val location = (attribute as ShaderAttributeGL).getActiveUniformLocation()
+        if (location != -1 && (uniformCacheX!![location] != x || uniformCacheY!![location] != y || uniformCacheZ!![location] != z || uniformCacheW!![location] != w)) {
+            uniformCacheX!![location] = x
+            uniformCacheY!![location] = y
+            uniformCacheZ!![location] = z
+            uniformCacheW!![location] = w
+            if (attribute.getVariableType() != ShaderVariableType.VEC4) {
                 throw IllegalShaderArgumentException()
             }
 
-            OpenGL.glUniform4f(i_6, f_2, f_3, f_4, f_5)
+            OpenGL.glUniform4f(location, x, y, z, w)
         }
     }
 
-    override fun uniform3fSavedSize12(i_1: Int, matrix442: Matrix44) {
-        OpenGL.glUniform3fv(i_1, 3, matrix442.copy3x3NearMatrixInto(Companion.matrixBuffer), 0)
+    override fun uniform3fSavedSize12(location: Int, matrix: Matrix44) {
+        OpenGL.glUniform3fv(location, 3, matrix.copy3x3NearMatrixInto(Companion.matrixBuffer), 0)
     }
 
-    override fun uniform3fSavedSize8(i_1: Int, matrix442: Matrix44) {
-        OpenGL.glUniform2fv(i_1, 4, matrix442.getComponentsXY(Companion.matrixBuffer), 0)
+    override fun uniform3fSavedSize8(location: Int, matrix: Matrix44) {
+        OpenGL.glUniform2fv(location, 4, matrix.getComponentsXY(Companion.matrixBuffer), 0)
     }
 
-    override fun uniform3fSavedSize16(location: Int, matrix4x4: Matrix44) {
-        OpenGL.glUniform4fv(location, 4, matrix4x4.copyInto(Companion.matrixBuffer), 0)
+    override fun uniform3fSavedSize16(location: Int, matrix: Matrix44) {
+        OpenGL.glUniform4fv(location, 4, matrix.copyInto(Companion.matrixBuffer), 0)
     }
 
     override fun close() {
@@ -277,18 +277,18 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                     return false
                 } else {
                     var slot = 0
-                    var i_3 = 0
-                    var class1116: ShaderVariableType
+                    var maxTextureSlotLocation = 0
+                    var variableType: ShaderVariableType
                     for (variableIndex in 0 until openglShader!!.getPrimaryShaderVariableCount()) {
                         val shaderAttribute = openglShader!!.getShaderAttribute(variableIndex)
                         if (shaderAttribute != null) {
                             shaderAttribute.loadUniformLocation(activeInSlot)
-                            class1116 = shaderAttribute.getVariableType()
-                            val i_7 = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
-                            if (class1116 != ShaderVariableType.aClass1111219 && class1116 != ShaderVariableType.aClass1111182 && class1116 != ShaderVariableType.aClass1111132 && class1116 != ShaderVariableType.aClass1111133 && class1116 != ShaderVariableType.aClass1111134) {
-                                i_3 = Math.max(i_7, i_3)
+                            variableType = shaderAttribute.getVariableType()
+                            val uniformLocation = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
+                            if (variableType != ShaderVariableType.FLOAT && variableType != ShaderVariableType.BOOL && variableType != ShaderVariableType.VEC2 && variableType != ShaderVariableType.VEC3 && variableType != ShaderVariableType.VEC4) {
+                                maxTextureSlotLocation = Math.max(uniformLocation, maxTextureSlotLocation)
                             } else {
-                                slot = Math.max(i_7, slot)
+                                slot = Math.max(uniformLocation, slot)
                             }
                         }
                     }
@@ -297,12 +297,12 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                         val shaderAttribute = openglShader!!.getSecondaryAttribute(variableIndex)
                         if (shaderAttribute != null) {
                             shaderAttribute.loadUniformLocation(activeInSlot)
-                            class1116 = shaderAttribute.getVariableType()
-                            val i_7 = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
-                            if (class1116 != ShaderVariableType.aClass1111219 && class1116 != ShaderVariableType.aClass1111182 && class1116 != ShaderVariableType.aClass1111132 && class1116 != ShaderVariableType.aClass1111133 && class1116 != ShaderVariableType.aClass1111134) {
-                                i_3 = Math.max(i_7, i_3)
+                            variableType = shaderAttribute.getVariableType()
+                            val uniformLocation = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
+                            if (variableType != ShaderVariableType.FLOAT && variableType != ShaderVariableType.BOOL && variableType != ShaderVariableType.VEC2 && variableType != ShaderVariableType.VEC3 && variableType != ShaderVariableType.VEC4) {
+                                maxTextureSlotLocation = Math.max(uniformLocation, maxTextureSlotLocation)
                             } else {
-                                slot = Math.max(i_7, slot)
+                                slot = Math.max(uniformLocation, slot)
                             }
                         }
                     }
@@ -311,7 +311,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                     uniformCacheY = FloatArray(slot + 1)
                     uniformCacheZ = FloatArray(slot + 1)
                     uniformCacheW = FloatArray(slot + 1)
-                    textureSlots = IntArray(i_3 + 1)
+                    textureSlots = IntArray(maxTextureSlotLocation + 1)
 
                     for (index in textureSlots!!.indices) {
                         textureSlots!![index] = -1
