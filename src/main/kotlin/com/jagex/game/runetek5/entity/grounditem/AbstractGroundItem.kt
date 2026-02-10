@@ -36,7 +36,7 @@ abstract class AbstractGroundItem(
         return false
     }
 
-    override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 

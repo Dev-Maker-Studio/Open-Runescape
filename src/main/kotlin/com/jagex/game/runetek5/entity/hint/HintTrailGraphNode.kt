@@ -24,7 +24,7 @@ class HintTrailGraphNode(
 
     @JvmField var model: Model? = null
 
-    override fun calculateProjection(graphicalrenderer1: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
+    override fun calculateProjection(graphicalrenderer1: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
         return false
     }
 
@@ -40,7 +40,7 @@ class HintTrailGraphNode(
         return model != null && model!!.accountForLayers()
     }
 
-    override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
     }
 
     override fun removeTileShadow() {
@@ -52,19 +52,19 @@ class HintTrailGraphNode(
         }
 
         if (model != null) {
-            val matrix44var3 = toolkit.getRenderingMatrix()
-            val matrix44var4 = getProjectionMatrix()
+            val renderingMatrix = toolkit.getRenderingMatrix()
+            val projectionMatrix = getProjectionMatrix()
             val abs = getAbsolutePosition()
-            matrix44var3.copyFrom(matrix44var4)
+            renderingMatrix.copyFrom(projectionMatrix)
             val tile = scene!!.tiles[plane.toInt()][abs.coords.x.toInt() shr 9][abs.coords.z.toInt() shr 9]
             if (tile != null) {
                 val decoration = tile.groundDecoration
                 if (decoration != null) {
-                    matrix44var3.translate(0.0f, -decoration.floorOffsetY.toFloat(), 0.0f)
+                    renderingMatrix.translate(0.0f, -decoration.floorOffsetY.toFloat(), 0.0f)
                 }
             }
 
-            model!!.drawMatrixThreaded(matrix44var3, null, ModelFunctionMaskGL.EMPTY)
+            model!!.drawMatrixThreaded(renderingMatrix, null, ModelFunctionMaskGL.EMPTY)
         }
 
         return null

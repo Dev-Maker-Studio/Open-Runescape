@@ -282,20 +282,20 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
     abstract fun getCS2Index(): Int
 
-    fun updateInterfaceDisplay(i_1: Int, i_2: Int, bool3: Boolean) {
+    fun updateInterfaceDisplay(componentWidth: Int, componentHeight: Int, forceResize: Boolean) {
         if (initInterface()) {
-            InterfaceRenderer.updateInterfaceDimensions(this.inter!!.components, -1, i_1, i_2, bool3)
+            InterfaceRenderer.updateInterfaceDimensions(this.inter!!.components, -1, componentWidth, componentHeight, forceResize)
         }
     }
 
     fun setFacingGradual(): Int { // J
         val renderAnimation = getBastype()
         val currentRotation = this.yaw.rotation
-        val bool4: Boolean
+        val isTurning: Boolean
         if (renderAnimation.yawAcceleration != 0) {
-            bool4 = this.yaw.calculateRotation(this.lastYawRotation, renderAnimation.yawAcceleration, renderAnimation.yawMaxVelocity)
+            isTurning = this.yaw.calculateRotation(this.lastYawRotation, renderAnimation.yawAcceleration, renderAnimation.yawMaxVelocity)
         } else {
-            bool4 = this.yaw.calculateRotation(this.lastYawRotation, this.turnDirection, this.turnDirection)
+            isTurning = this.yaw.calculateRotation(this.lastYawRotation, this.turnDirection, this.turnDirection)
         }
 
         val rotation = this.yaw.rotation - currentRotation
@@ -306,7 +306,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             this.yaw.setRotation(this.lastYawRotation)
         }
 
-        if (bool4) {
+        if (isTurning) {
             if (renderAnimation.rollAcceleration != 0) {
                 if (rotation > 0) {
                     this.roll.calculateRotation(renderAnimation.rollTargetAngle, renderAnimation.rollAcceleration, renderAnimation.rollMaxVelocity)
@@ -335,10 +335,10 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         return rotation
     }
 
-    fun setEquipmentOverrides(ints_1: IntArray?, ints_2: IntArray?) {
-        if (this.equipmentUpdateDetails == null && ints_1 != null) {
+    fun setEquipmentOverrides(targets: IntArray?, slotMasks: IntArray?) {
+        if (this.equipmentUpdateDetails == null && targets != null) {
             this.equipmentUpdateDetails = IntArray(TypeLists.EQUIPMENT_DEFAULTS!!.customizableObjSlots!!.size)
-        } else if (ints_1 == null) {
+        } else if (targets == null) {
             this.equipmentUpdateDetails = null
             return
         }
@@ -347,15 +347,15 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             this.equipmentUpdateDetails!![index] = -1
         }
 
-        for (index in ints_1!!.indices) {
-            var flags = ints_2!![index]
+        for (index in targets!!.indices) {
+            var flags = slotMasks!![index]
 
-            var i_6 = 0
-            while (i_6 < this.equipmentUpdateDetails!!.size) {
+            var slotIndex = 0
+            while (slotIndex < this.equipmentUpdateDetails!!.size) {
                 if ((flags and 0x1) != 0) {
-                    this.equipmentUpdateDetails!![i_6] = ints_1[index]
+                    this.equipmentUpdateDetails!![slotIndex] = targets[index]
                 }
-                ++i_6
+                ++slotIndex
                 flags = flags shr 1
             }
         }
@@ -733,12 +733,12 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         }
     }
 
-    fun setOverheadInterfaceId(i_1: Int) {
+    fun setOverheadInterfaceId(interfaceId: Int) {
         if (this.interfaceIdToLoad != this.loadedInterfaceId) {
             clearOverheadInterface()
         }
 
-        this.interfaceIdToLoad = i_1
+        this.interfaceIdToLoad = interfaceId
     }
 
     fun initInterface(requestedInterface: Int): Boolean {
@@ -762,17 +762,17 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         }
     }
 
-    fun drawOverheadInterface(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
+    fun drawOverheadInterface(componentReference: Int, startX: Int, startY: Int, endX: Int, endY: Int, drawX: Int, drawY: Int) {
         if (!initInterface()) {
-            if (i_1 != -1) {
-                Client.IS_COMPONENT_ON_TOP[i_1] = true
+            if (componentReference != -1) {
+                Client.IS_COMPONENT_ON_TOP[componentReference] = true
             } else {
-                for (i_9 in 0..106) {
-                    Client.IS_COMPONENT_ON_TOP[i_9] = true
+                for (componentIndex in 0..106) {
+                    Client.IS_COMPONENT_ON_TOP[componentIndex] = true
                 }
             }
         } else {
-            InterfaceComponentRenderer.drawComponents(this.inter!!.getComponents(), -1, i_2, i_3, i_4, i_5, i_6, i_7, i_1, false)
+            InterfaceComponentRenderer.drawComponents(this.inter!!.getComponents(), -1, startX, startY, endX, endY, drawX, drawY, componentReference, false)
         }
     }
 
@@ -931,72 +931,72 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         this.hintDetails!!.ticksVisible = duration
     }
 
-    fun processOverheadInterfaceCycle(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
+    fun processOverheadInterfaceCycle(clipMinX: Int, clipMinY: Int, clipMaxX: Int, clipMaxY: Int, drawX: Int, drawY: Int, mouseX: Int, mouseY: Int) {
         if (initInterface()) {
-            InterfaceRenderer.processInterfaceCycle(this.inter!!, this.inter!!.getComponents(), -1, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
+            InterfaceRenderer.processInterfaceCycle(this.inter!!, this.inter!!.getComponents(), -1, clipMinX, clipMinY, clipMaxX, clipMaxY, drawX, drawY, mouseX, mouseY)
         }
     }
 
     abstract fun privateMessagesEnabled(): Boolean
 
-    protected fun hillChange(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
+    protected fun hillChange(rotation: Int, sizeX: Int, sizeZ: Int, maxRotateX: Int, maxRotateZ: Int) {
         val vector37 = getAbsolutePosition().coords
-        val i_8 = super.startX + super.endX shr 1
-        val i_9 = super.endZ + super.startZ shr 1
-        val i_10 = MathUtils.SINE[i_1]
-        val i_11 = MathUtils.COSINE[i_1]
-        val i_12 = -i_2 / 2
-        val i_13 = -i_3 / 2
-        val i_14 = i_11 * i_12 + i_10 * i_13 shr 14
-        val i_15 = i_13 * i_11 - i_10 * i_12 shr 14
-        val i_16 = calculateAvgHeightInclRoofs(i_14 + vector37.x.toInt(), i_15 + vector37.z.toInt(), i_8.toInt(), i_9.toInt(), super.plane.toInt())
-        val i_17 = i_2 / 2
-        val i_18 = -i_3 / 2
-        val i_19 = i_17 * i_11 + i_10 * i_18 shr 14
-        val i_20 = i_11 * i_18 - i_17 * i_10 shr 14
-        val i_21 = calculateAvgHeightInclRoofs(i_19 + vector37.x.toInt(), i_20 + vector37.z.toInt(), i_8.toInt(), i_9.toInt(), super.plane.toInt())
-        val i_22 = -i_2 / 2
-        val i_23 = i_3 / 2
-        val i_24 = i_11 * i_22 + i_10 * i_23 shr 14
-        val i_25 = i_23 * i_11 - i_10 * i_22 shr 14
-        val i_26 = calculateAvgHeightInclRoofs(i_24 + vector37.x.toInt(), i_25 + vector37.z.toInt(), i_8.toInt(), i_9.toInt(), super.plane.toInt())
-        val i_27 = i_2 / 2
-        val i_28 = i_3 / 2
-        val i_29 = i_11 * i_27 + i_28 * i_10 shr 14
-        val i_30 = i_28 * i_11 - i_10 * i_27 shr 14
-        val i_31 = calculateAvgHeightInclRoofs(i_29 + vector37.x.toInt(), i_30 + vector37.z.toInt(), i_8.toInt(), i_9.toInt(), super.plane.toInt())
-        val i_32 = kotlin.math.min(i_16, i_21)
-        val i_33 = kotlin.math.min(i_26, i_31)
-        val i_34 = kotlin.math.min(i_21, i_31)
-        val i_35 = kotlin.math.min(i_16, i_26)
-        this.rotateX = (atan2((i_32 - i_33).toDouble(), i_3.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-        this.rotateZ = (atan2((i_35 - i_34).toDouble(), i_2.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-        var i_36: Int
-        if (this.rotateX != 0 && i_4 != 0) {
-            i_36 = 16384 - i_4
+        val centerX = super.startX + super.endX shr 1
+        val centerZ = super.endZ + super.startZ shr 1
+        val sinRotation = MathUtils.SINE[rotation]
+        val cosRotation = MathUtils.COSINE[rotation]
+        val nwLocalX = -sizeX / 2
+        val nwLocalZ = -sizeZ / 2
+        val nwRotatedX = cosRotation * nwLocalX + sinRotation * nwLocalZ shr 14
+        val nwRotatedZ = nwLocalZ * cosRotation - sinRotation * nwLocalX shr 14
+        val nwHeight = calculateAvgHeightInclRoofs(nwRotatedX + vector37.x.toInt(), nwRotatedZ + vector37.z.toInt(), centerX.toInt(), centerZ.toInt(), super.plane.toInt())
+        val neLocalX = sizeX / 2
+        val neLocalZ = -sizeZ / 2
+        val neRotatedX = neLocalX * cosRotation + sinRotation * neLocalZ shr 14
+        val neRotatedZ = cosRotation * neLocalZ - neLocalX * sinRotation shr 14
+        val neHeight = calculateAvgHeightInclRoofs(neRotatedX + vector37.x.toInt(), neRotatedZ + vector37.z.toInt(), centerX.toInt(), centerZ.toInt(), super.plane.toInt())
+        val swLocalX = -sizeX / 2
+        val swLocalZ = sizeZ / 2
+        val swRotatedX = cosRotation * swLocalX + sinRotation * swLocalZ shr 14
+        val swRotatedZ = swLocalZ * cosRotation - sinRotation * swLocalX shr 14
+        val swHeight = calculateAvgHeightInclRoofs(swRotatedX + vector37.x.toInt(), swRotatedZ + vector37.z.toInt(), centerX.toInt(), centerZ.toInt(), super.plane.toInt())
+        val seLocalX = sizeX / 2
+        val seLocalZ = sizeZ / 2
+        val seRotatedX = cosRotation * seLocalX + seLocalZ * sinRotation shr 14
+        val seRotatedZ = seLocalZ * cosRotation - sinRotation * seLocalX shr 14
+        val seHeight = calculateAvgHeightInclRoofs(seRotatedX + vector37.x.toInt(), seRotatedZ + vector37.z.toInt(), centerX.toInt(), centerZ.toInt(), super.plane.toInt())
+        val minNorthHeight = kotlin.math.min(nwHeight, neHeight)
+        val minSouthHeight = kotlin.math.min(swHeight, seHeight)
+        val minEastHeight = kotlin.math.min(neHeight, seHeight)
+        val minWestHeight = kotlin.math.min(nwHeight, swHeight)
+        this.rotateX = (atan2((minNorthHeight - minSouthHeight).toDouble(), sizeZ.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+        this.rotateZ = (atan2((minWestHeight - minEastHeight).toDouble(), sizeX.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+        var clampLimit: Int
+        if (this.rotateX != 0 && maxRotateX != 0) {
+            clampLimit = 16384 - maxRotateX
             if (this.rotateX > 8192) {
-                if (this.rotateX < i_36) {
-                    this.rotateX = i_36
+                if (this.rotateX < clampLimit) {
+                    this.rotateX = clampLimit
                 }
-            } else if (this.rotateX > i_4) {
-                this.rotateX = i_4
+            } else if (this.rotateX > maxRotateX) {
+                this.rotateX = maxRotateX
             }
         }
 
-        if (this.rotateZ != 0 && i_5 != 0) {
-            i_36 = 16384 - i_5
+        if (this.rotateZ != 0 && maxRotateZ != 0) {
+            clampLimit = 16384 - maxRotateZ
             if (this.rotateZ > 8192) {
-                if (this.rotateZ < i_36) {
-                    this.rotateZ = i_36
+                if (this.rotateZ < clampLimit) {
+                    this.rotateZ = clampLimit
                 }
-            } else if (this.rotateZ > i_5) {
-                this.rotateZ = i_5
+            } else if (this.rotateZ > maxRotateZ) {
+                this.rotateZ = maxRotateZ
             }
         }
 
-        this.translateY = i_31 + i_16
-        if (i_21 + i_26 < this.translateY) {
-            this.translateY = i_26 + i_21
+        this.translateY = seHeight + nwHeight
+        if (neHeight + swHeight < this.translateY) {
+            this.translateY = swHeight + neHeight
         }
 
         this.translateY = (this.translateY shr 1) - vector37.y.toInt()
@@ -1162,13 +1162,13 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         @JvmStatic
         fun forceMovementType1(entity: PathingEntity) {
             val cyclesLeft = entity.forceMovementT1Delay - Client.cycles
-            val i_3 = entity.forceMovementT1XOff * 512 + entity.getSize() * 256
-            val i_4 = entity.forceMovementT1YOff * 512 + entity.getSize() * 256
+            val targetX = entity.forceMovementT1XOff * 512 + entity.getSize() * 256
+            val targetZ = entity.forceMovementT1YOff * 512 + entity.getSize() * 256
             val abs = entity.getAbsolutePosition().coords
             entity.setBasePosition(
-                (abs.x.toInt() + (i_3 - abs.x.toInt()) / cyclesLeft).toFloat(),
+                (abs.x.toInt() + (targetX - abs.x.toInt()) / cyclesLeft).toFloat(),
                 (abs.y.toInt()).toFloat(),
-                (abs.z.toInt() + (i_4 - abs.z.toInt()) / cyclesLeft).toFloat()
+                (abs.z.toInt() + (targetZ - abs.z.toInt()) / cyclesLeft).toFloat()
             )
             entity.stalledStepCount = 0
             entity.turn(entity.forceMoveDirection)
@@ -1237,19 +1237,19 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 if (nextAbsX >= 0 && nextAbsZ >= 0 && nextAbsX <= Resource.mapRegion!!.sceneSizeX - 1 && nextAbsZ <= Resource.mapRegion!!.sceneSizeY - 1) {
                     if (sceneX >= 1 && sceneZ >= 1 && sceneX <= Resource.mapRegion!!.sceneSizeX - 1 && sceneZ <= Resource.mapRegion!!.sceneSizeY - 1) {
                         var toggleRoofs = ((settingsBits.tileFunctionMasks[1][absX shr 9][absZ shr 9].toInt()) and 0x2) != 0
-                        var bool10: Boolean
-                        var bool11: Boolean
+                        var prevTileHasRoof: Boolean
+                        var currTileHasRoof: Boolean
                         if ((absX and 0x1ff) == 0) {
-                            bool10 = ((settingsBits.tileFunctionMasks[1][sceneX - 1][absZ shr 9].toInt()) and 0x2) != 0
-                            bool11 = ((settingsBits.tileFunctionMasks[1][sceneX][absZ shr 9].toInt()) and 0x2) != 0
-                            if (bool11 != bool10) {
+                            prevTileHasRoof = ((settingsBits.tileFunctionMasks[1][sceneX - 1][absZ shr 9].toInt()) and 0x2) != 0
+                            currTileHasRoof = ((settingsBits.tileFunctionMasks[1][sceneX][absZ shr 9].toInt()) and 0x2) != 0
+                            if (currTileHasRoof != prevTileHasRoof) {
                                 toggleRoofs = ((settingsBits.tileFunctionMasks[1][nextAbsX][nextAbsZ].toInt()) and 0x2) != 0
                             }
                         }
                         if ((absZ and 0x1ff) == 0) {
-                            bool10 = ((settingsBits.tileFunctionMasks[1][absX shr 9][sceneZ - 1].toInt()) and 0x2) != 0
-                            bool11 = ((settingsBits.tileFunctionMasks[1][absX shr 9][sceneZ].toInt()) and 0x2) != 0
-                            if (bool10 != bool11) {
+                            prevTileHasRoof = ((settingsBits.tileFunctionMasks[1][absX shr 9][sceneZ - 1].toInt()) and 0x2) != 0
+                            currTileHasRoof = ((settingsBits.tileFunctionMasks[1][absX shr 9][sceneZ].toInt()) and 0x2) != 0
+                            if (prevTileHasRoof != currTileHasRoof) {
                                 toggleRoofs = ((settingsBits.tileFunctionMasks[1][nextAbsX][nextAbsZ].toInt()) and 0x2) != 0
                             }
                         }

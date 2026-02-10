@@ -28,15 +28,15 @@ class StationaryGroundDecoration(
     toolkit: AbstractToolkit,
     @JvmField val locTypeLst: ObjectTypeList,
     loctype: ObjectType,
-    i_5: Int,
-    i_6: Int,
-    i_7: Int,
-    i_8: Int,
-    i_9: Int,
+    plane: Int,
+    collisionPlane: Int,
+    x: Int,
+    y: Int,
+    z: Int,
     @JvmField val underwater: Boolean,
     rotation: Int,
     hasShadow: Boolean
-) : AbstractGroundDecoration(scene, i_7, i_8, i_9, i_5, i_6, loctype.groundDecorationHeight), GameObject {
+) : AbstractGroundDecoration(scene, x, y, z, plane, collisionPlane, loctype.groundDecorationHeight), GameObject {
 
     @JvmField var primaryShadow: Shadow? = null
     @JvmField var axisAlignedBoundingBox: Silhouette? = null
@@ -147,10 +147,10 @@ class StationaryGroundDecoration(
         }
     }
 
-    override fun castShadow(renderedGraphNode: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(renderedGraphNode: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         if (renderedGraphNode is StationaryGroundDecoration) {
             if (this.model != null && renderedGraphNode.model != null) {
-                this.model!!.applyShading(renderedGraphNode.model!!, i_3, i_4, i_5, bool6)
+                this.model!!.applyShading(renderedGraphNode.model!!, x, y, z, renderTypeAdjustment)
             }
         }
     }
@@ -196,11 +196,11 @@ class StationaryGroundDecoration(
         return this.model != null && this.model!!.accountForLayers()
     }
 
-    override fun calculateProjection(toolkit: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
         val model = adjustToFunctionmask(toolkit, 131072)
         if (model != null) {
             val projectionMatrix = getProjectionMatrix()
-            return model.calculateProjection(i_2, i_3, projectionMatrix, false, 0)
+            return model.calculateProjection(mouseX, mouseY, projectionMatrix, false, 0)
         }
         return false
     }

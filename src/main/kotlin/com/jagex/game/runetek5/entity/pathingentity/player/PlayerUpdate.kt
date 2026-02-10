@@ -125,8 +125,8 @@ object PlayerUpdate {
             throw RuntimeException()
         }
         bitBuffer.initBitAccess()
-        for (i_3 in 0 until numInactivePlayerIndices) {
-            val playerPtr = INACTIVE_PLAYER_INDICES[i_3]
+        for (index in 0 until numInactivePlayerIndices) {
+            val playerPtr = INACTIVE_PLAYER_INDICES[index]
             if ((OUT_PLAYER_UPDATE_STATE[playerPtr].toInt() and 0x1) == 0) {
                 if (skipCount > 0) {
                     --skipCount
@@ -161,8 +161,8 @@ object PlayerUpdate {
 
     @JvmStatic
     fun decodeUpdateMasks(buffer: Packet.Bit) {
-        for (i_2 in 0 until numUpdateMaskPlayers) {
-            val playerPtr = UPDATE_MASK_PLAYER_INDICES[i_2]
+        for (index in 0 until numUpdateMaskPlayers) {
+            val playerPtr = UPDATE_MASK_PLAYER_INDICES[index]
             val player = players[playerPtr]
             var updateMasks = buffer.readUByte()
             if ((updateMasks and 0x8) != 0) {
@@ -199,20 +199,20 @@ object PlayerUpdate {
 
         if ((flags and 0x200) != 0) {
             var gfxId = stream.readUShort()
-            val i_7 = stream.readUIntInverseMiddle()
+            val bitpackedSpeedHeight = stream.readUIntInverseMiddle()
             if (gfxId == 65535) {
                 gfxId = -1
             }
 
-            val i_8 = stream.readUByteSubtract()
-            val i_9 = i_8 and 0x7
-            var i_10 = i_8 shr 3 and 0xf
-            if (i_10 == 15) {
-                i_10 = -1
+            val spotAnimFlags = stream.readUByteSubtract()
+            val spotAnimRotation = spotAnimFlags and 0x7
+            var adjustmentType = spotAnimFlags shr 3 and 0xf
+            if (adjustmentType == 15) {
+                adjustmentType = -1
             }
 
-            val bool11 = (i_8 shr 7 and 0x1) == 1
-            player.playSpotAnimation(gfxId, i_7, i_9, i_10, bool11, 1)
+            val adjustReplaymode = (spotAnimFlags shr 7 and 0x1) == 1
+            player.playSpotAnimation(gfxId, bitpackedSpeedHeight, spotAnimRotation, adjustmentType, adjustReplaymode, 1)
         }
 
         if ((flags and 0x20) != 0) {
@@ -225,12 +225,12 @@ object PlayerUpdate {
 
         if ((flags and 0x800000) != 0) {
             player.playerConfigs.clear()
-            val i_6 = stream.buffer[++stream.currentPosition - 1].toInt() and 0xff
+            val configCount = stream.buffer[++stream.currentPosition - 1].toInt() and 0xff
 
-            for (i_7 in 0 until i_6) {
-                val i_8 = stream.readUShortLittle()
-                val i_9 = stream.readInt()
-                player.playerConfigs.put(i_8, i_9)
+            for (configIndex in 0 until configCount) {
+                val configKey = stream.readUShortLittle()
+                val configValue = stream.readInt()
+                player.playerConfigs.put(configKey, configValue)
             }
         }
 
@@ -240,22 +240,22 @@ object PlayerUpdate {
 
         if ((flags and 0x100000) != 0) {
             val size = stream.readUByteSubtract()
-            val ints_14 = IntArray(size)
-            val ints_15 = IntArray(size)
+            val equipTargets = IntArray(size)
+            val equipSlotMasks = IntArray(size)
 
-            for (i_9 in 0 until size) {
-                var i_10 = stream.readUShortAdd()
-                if ((i_10 and 0xc000) == 49152) {
-                    val i_19 = stream.readUShortAdd()
-                    ints_14[i_9] = i_10 shl 16 or i_19
+            for (index in 0 until size) {
+                var targetValue = stream.readUShortAdd()
+                if ((targetValue and 0xc000) == 49152) {
+                    val extendedTarget = stream.readUShortAdd()
+                    equipTargets[index] = targetValue shl 16 or extendedTarget
                 } else {
-                    ints_14[i_9] = i_10
+                    equipTargets[index] = targetValue
                 }
 
-                ints_15[i_9] = stream.readUShort()
+                equipSlotMasks[index] = stream.readUShort()
             }
 
-            player.setEquipmentOverrides(ints_14, ints_15)
+            player.setEquipmentOverrides(equipTargets, equipSlotMasks)
         }
 
         if ((flags and 0x4000) != 0) {
@@ -279,20 +279,20 @@ object PlayerUpdate {
 
         if ((flags and 0x40000) != 0) {
             var gfxId = stream.readUShortAddLittle()
-            val i_7 = stream.readUIntInverseMiddle()
+            val bitpackedSpeedHeight = stream.readUIntInverseMiddle()
             if (gfxId == 65535) {
                 gfxId = -1
             }
 
-            val i_8 = stream.readUByteAdd()
-            val i_9 = i_8 and 0x7
-            var i_10 = i_8 shr 3 and 0xf
-            if (i_10 == 15) {
-                i_10 = -1
+            val spotAnimFlags = stream.readUByteAdd()
+            val spotAnimRotation = spotAnimFlags and 0x7
+            var adjustmentType = spotAnimFlags shr 3 and 0xf
+            if (adjustmentType == 15) {
+                adjustmentType = -1
             }
 
-            val bool11 = (i_8 shr 7 and 0x1) == 1
-            player.playSpotAnimation(gfxId, i_7, i_9, i_10, bool11, 2)
+            val adjustReplaymode = (spotAnimFlags shr 7 and 0x1) == 1
+            player.playSpotAnimation(gfxId, bitpackedSpeedHeight, spotAnimRotation, adjustmentType, adjustReplaymode, 2)
         }
 
         if ((flags and 0x8000) != 0) {
@@ -302,7 +302,7 @@ object PlayerUpdate {
         if ((flags and 0x40) != 0) {
             val numHits = stream.readUByteSubtract()
             if (numHits > 0) {
-                for (i_7 in 0 until numHits) {
+                for (hitIndex in 0 until numHits) {
                     var soakHitsplatId = -1
                     var soakText = -1
                     var hitText = -1
@@ -389,18 +389,18 @@ object PlayerUpdate {
         }
 
         if ((flags and 0x2000) != 0) {
-            val i_6 = stream.readUByteSubtract()
-            val animationIds = IntArray(i_6)
-            val ints_15 = IntArray(i_6)
-            val ints_17 = IntArray(i_6)
+            val numAnimations = stream.readUByteSubtract()
+            val animationIds = IntArray(numAnimations)
+            val speeds = IntArray(numAnimations)
+            val slotMasks = IntArray(numAnimations)
 
-            for (i_10 in 0 until i_6) {
-                animationIds[i_10] = stream.readBigSmart()
-                ints_15[i_10] = stream.readUByteInverse()
-                ints_17[i_10] = stream.readUShortAddLittle()
+            for (animIndex in 0 until numAnimations) {
+                animationIds[animIndex] = stream.readBigSmart()
+                speeds[animIndex] = stream.readUByteInverse()
+                slotMasks[animIndex] = stream.readUShortAddLittle()
             }
 
-            animate(player, animationIds, ints_15, ints_17)
+            animate(player, animationIds, speeds, slotMasks)
         }
 
         if ((flags and 0x4) != 0) {
@@ -408,21 +408,21 @@ object PlayerUpdate {
         }
 
         if ((flags and 0x200000) != 0) {
-            var i_6 = stream.readUShortLittle()
-            val i_7 = stream.readUIntLittle()
-            if (i_6 == 65535) {
-                i_6 = -1
+            var spotAnimId = stream.readUShortLittle()
+            val bitpackedSpeedHeight = stream.readUIntLittle()
+            if (spotAnimId == 65535) {
+                spotAnimId = -1
             }
 
-            val i_8 = stream.readUByteSubtract()
-            val i_9 = i_8 and 0x7
-            var i_10 = i_8 shr 3 and 0xf
-            if (i_10 == 15) {
-                i_10 = -1
+            val spotAnimFlags = stream.readUByteSubtract()
+            val spotAnimRotation = spotAnimFlags and 0x7
+            var adjustmentType = spotAnimFlags shr 3 and 0xf
+            if (adjustmentType == 15) {
+                adjustmentType = -1
             }
 
-            val bool11 = (i_8 shr 7 and 0x1) == 1
-            player.playSpotAnimation(i_6, i_7, i_9, i_10, bool11, 3)
+            val adjustReplaymode = (spotAnimFlags shr 7 and 0x1) == 1
+            player.playSpotAnimation(spotAnimId, bitpackedSpeedHeight, spotAnimRotation, adjustmentType, adjustReplaymode, 3)
         }
 
         if ((flags and 0x800) != 0) {
@@ -459,13 +459,13 @@ object PlayerUpdate {
 
             val flags2 = stream.readUByteAdd()
             val rotation = flags2 and 0x7
-            var i_10 = flags2 shr 3 and 0xf
-            if (i_10 == 15) {
-                i_10 = -1
+            var adjustmentType = flags2 shr 3 and 0xf
+            if (adjustmentType == 15) {
+                adjustmentType = -1
             }
 
-            val bool11 = (flags2 shr 7 and 0x1) == 1
-            player.playSpotAnimation(spotAnimId, flags1, rotation, i_10, bool11, 0)
+            val adjustReplaymode = (flags2 shr 7 and 0x1) == 1
+            player.playSpotAnimation(spotAnimId, flags1, rotation, adjustmentType, adjustReplaymode, 0)
         }
 
         if (player.hasPendingPositionUpdate) {
@@ -489,14 +489,14 @@ object PlayerUpdate {
     @JvmStatic
     fun decodePositionUpdate(bitBuffer: Packet.Bit, updateIndex: Int) {
         val baseCoordinates = Resource.mapRegion!!.getBaseCoordinates()
-        val bool4 = bitBuffer.readBits(1) == 1
-        if (bool4) {
+        val hasUpdateMask = bitBuffer.readBits(1) == 1
+        if (hasUpdateMask) {
             UPDATE_MASK_PLAYER_INDICES[++numUpdateMaskPlayers - 1] = updateIndex
         }
         val size = bitBuffer.readBits(2)
         val player = players[updateIndex]!!
         if (size == 0) {
-            if (bool4) {
+            if (hasUpdateMask) {
                 player.hasPendingPositionUpdate = false
             } else {
                 if (myPlayerIndex == updateIndex) {
@@ -549,7 +549,7 @@ object PlayerUpdate {
                         y++
                     }
                 }
-                if (bool4) {
+                if (hasUpdateMask) {
                     player.basePositionX = x
                     player.basePositionY = y
                     player.hasPendingPositionUpdate = true
@@ -614,7 +614,7 @@ object PlayerUpdate {
                         y += 2
                     }
                 }
-                if (bool4) {
+                if (hasUpdateMask) {
                     player.basePositionX = x
                     player.basePositionY = y
                     player.hasPendingPositionUpdate = true
@@ -624,26 +624,26 @@ object PlayerUpdate {
             } else {
                 val direction = bitBuffer.readBits(1)
                 if (direction == 0) {
-                    val i_8 = bitBuffer.readBits(12)
-                    val i_9 = i_8 shr 10
-                    var i_10 = i_8 shr 5 and 0x1f
-                    if (i_10 > 15) {
-                        i_10 -= 32
+                    val positionData = bitBuffer.readBits(12)
+                    val planeOffset = positionData shr 10
+                    var deltaX = positionData shr 5 and 0x1f
+                    if (deltaX > 15) {
+                        deltaX -= 32
                     }
-                    var i_11 = i_8 and 0x1f
-                    if (i_11 > 15) {
-                        i_11 -= 32
+                    var deltaY = positionData and 0x1f
+                    if (deltaY > 15) {
+                        deltaY -= 32
                     }
-                    val baseX = i_10 + player.movementBaseX[0]
-                    val baseY = i_11 + player.movementBaseY[0]
-                    if (bool4) {
+                    val baseX = deltaX + player.movementBaseX[0]
+                    val baseY = deltaY + player.movementBaseY[0]
+                    if (hasUpdateMask) {
                         player.basePositionX = baseX
                         player.basePositionY = baseY
                         player.hasPendingPositionUpdate = true
                     } else {
                         player.move(baseX, baseY, PLAYER_MOVEMENT_TYPES[updateIndex])
                     }
-                    player.plane = ((i_9 + player.plane) and 0x3).toByte()
+                    player.plane = ((planeOffset + player.plane) and 0x3).toByte()
                     player.collisionPlane = player.plane
                     if (Resource.mapRegion!!.settingsBits.areRoofsHidden(baseX, baseY)) {
                         player.collisionPlane = (player.collisionPlane.toInt() + 1).toByte()
@@ -658,7 +658,7 @@ object PlayerUpdate {
                     val playerY = coordinates and 0x3fff
                     val baseX = (playerX + baseCoordinates.x + player.movementBaseX[0] and 0x3fff) - baseCoordinates.x
                     val baseY = (playerY + baseCoordinates.y + player.movementBaseY[0] and 0x3fff) - baseCoordinates.y
-                    if (bool4) {
+                    if (hasUpdateMask) {
                         player.basePositionX = baseX
                         player.basePositionY = baseY
                         player.hasPendingPositionUpdate = true
@@ -700,8 +700,8 @@ object PlayerUpdate {
             }
             val xInRegion = bitBuffer.readBits(6)
             val yInRegion = bitBuffer.readBits(6)
-            val bool18 = bitBuffer.readBits(1) == 1
-            if (bool18) {
+            val hasFurtherUpdates = bitBuffer.readBits(1) == 1
+            if (hasFurtherUpdates) {
                 UPDATE_MASK_PLAYER_INDICES[++numUpdateMaskPlayers - 1] = playerPtr
             }
             if (players[playerPtr] != null) {
@@ -785,7 +785,7 @@ object PlayerUpdate {
     }
 
     @JvmStatic
-    fun animate(animable: PathingEntity, animationIds: IntArray, speed: Int, bool3: Boolean) {
+    fun animate(animable: PathingEntity, animationIds: IntArray, speed: Int, storeSteps: Boolean) {
         if (animable.currentAnimations != null) {
             var sameSequence = true
             for (index in animable.currentAnimations!!.indices) {
@@ -815,7 +815,7 @@ object PlayerUpdate {
                     || TypeLists.SEQ!!.list(animationIds[index])!!.priority >= TypeLists.SEQ!!.list(animable.currentAnimations!![index])!!.priority) {
                 animable.currentAnimations = animationIds
                 animable.currentSequence.setSpeed(speed)
-                if (bool3) {
+                if (storeSteps) {
                     animable.previousMovementStepsLeft = animable.movementStepsLeft
                 }
             }
@@ -823,7 +823,7 @@ object PlayerUpdate {
         if (isDefault) {
             animable.currentAnimations = animationIds
             animable.currentSequence.setSpeed(speed)
-            if (bool3) {
+            if (storeSteps) {
                 animable.previousMovementStepsLeft = animable.movementStepsLeft
             }
         }
@@ -843,11 +843,11 @@ object PlayerUpdate {
     }
 
     @JvmStatic
-    fun animate(animable: PathingEntity, animations: IntArray, ints_2: IntArray, animationFlags: IntArray) {
+    fun animate(animable: PathingEntity, animations: IntArray, speeds: IntArray, animationFlags: IntArray) {
         for (index in animations.indices) {
             val seqId = animations[index]
             var flags = animationFlags[index]
-            val i_8 = ints_2[index]
+            val delayTicks = speeds[index]
             var seq = 0
             while (flags != 0 && seq < animable.sequences.size) {
                 if ((flags and 0x1) != 0) {
@@ -866,7 +866,7 @@ object PlayerUpdate {
                                     }
                                     1 -> {
                                         entitySequence.reset()
-                                        entitySequence.delayTicks = i_8
+                                        entitySequence.delayTicks = delayTicks
                                     }
                                     2 -> entitySequence.resetLoops()
                                 }
@@ -878,7 +878,7 @@ object PlayerUpdate {
                         if (entitySequence == null || !entitySequence.hasType()) {
                             entitySequence = PathingEntitySequence(animable).also { animable.sequences[seq] = it }
                             entitySequence.update(seqId)
-                            entitySequence.delayTicks = i_8
+                            entitySequence.delayTicks = delayTicks
                         }
                     }
                 }
@@ -961,49 +961,49 @@ object PlayerUpdate {
 
     @JvmStatic
     fun updateHintDetailsOnTick() {
-        val ints_1 = OUT_PLAYER_INDICES
-        var i_2: Int
-        i_2 = 0
-        while (i_2 < NUM_OUT_PLAYER_INDICES) {
-            val player3 = players[ints_1[i_2]]
-            if (player3 != null) {
-                player3.updateHintdetailsOntick()
+        val playerIndices = OUT_PLAYER_INDICES
+        var index: Int
+        index = 0
+        while (index < NUM_OUT_PLAYER_INDICES) {
+            val player = players[playerIndices[index]]
+            if (player != null) {
+                player.updateHintdetailsOntick()
             }
-            i_2++
+            index++
         }
-        i_2 = 0
-        while (i_2 < Client.NPC_UPDATE_INDEX) {
-            val long_6 = Client.NPC_UPDATE_INDICES[i_2].toLong()
-            val class282Sub475 = Client.NPC_MAP[long_6]
-            if (class282Sub475 != null) {
-                (class282Sub475.value as PathingEntity).updateHintdetailsOntick()
+        index = 0
+        while (index < Client.NPC_UPDATE_INDEX) {
+            val npcKey = Client.NPC_UPDATE_INDICES[index].toLong()
+            val npcNode = Client.NPC_MAP[npcKey]
+            if (npcNode != null) {
+                (npcNode.value as PathingEntity).updateHintdetailsOntick()
             }
-            i_2++
+            index++
         }
         if (Client.MAP_LOADING_STAGE == 4) {
-            i_2 = 0
-            while (i_2 < CutsceneTypeList.CUTSCENE_ENTITIES!!.size) {
-                val class758 = CutsceneTypeList.CUTSCENE_ENTITIES!![i_2]
-                if (class758.initialized) {
-                    class758.getEntity().updateHintdetailsOntick()
+            index = 0
+            while (index < CutsceneTypeList.CUTSCENE_ENTITIES!!.size) {
+                val cutsceneEntity = CutsceneTypeList.CUTSCENE_ENTITIES!![index]
+                if (cutsceneEntity.initialized) {
+                    cutsceneEntity.getEntity().updateHintdetailsOntick()
                 }
-                i_2++
+                index++
             }
         }
     }
 
     @JvmStatic
-    fun onVarChange(i_0: Int) {
+    fun onVarChange(varId: Int) {
         AmbientSound.update()
-        val i_2 = TypeLists.VAR!!.list(i_0)!!.clientCode
-        if (i_2 != 0) {
-            val i_3 = VarProviders.PLAYER_VAR_PROVIDER.activeVars[i_0]
-            if (i_2 == 5) {
-                Client.menuOpenMode = i_3
+        val clientCode = TypeLists.VAR!!.list(varId)!!.clientCode
+        if (clientCode != 0) {
+            val varValue = VarProviders.PLAYER_VAR_PROVIDER.activeVars[varId]
+            if (clientCode == 5) {
+                Client.menuOpenMode = varValue
             }
 
-            if (i_2 == 6) {
-                Client.overheadChatFilter = i_3
+            if (clientCode == 6) {
+                Client.overheadChatFilter = varValue
             }
         }
 
@@ -1014,9 +1014,9 @@ object PlayerUpdate {
         val rbx = player.movementBaseX[0]
         val rby = player.movementBaseY[0]
         if (rbx >= 0 && rbx < Resource.mapRegion!!.sceneSizeX && rby >= 0 && rby < Resource.mapRegion!!.sceneSizeY && destX >= 0 && destX < Resource.mapRegion!!.sceneSizeX && destY >= 0 && destY < Resource.mapRegion!!.sceneSizeY) {
-            val i_7 = RouteFinder.findRoute(rbx, rby, player.getSize(), RouteStrategies.forFixedTile(destX, destY), Resource.mapRegion!!.getCollisionMap(player.plane.toInt()), true, Client.WALKING_STEPS_X, Client.WALKING_STEPS_Y)
-            if (i_7 in 1..3) {
-                for (index in 0 until i_7 - 1) {
+            val stepsFound = RouteFinder.findRoute(rbx, rby, player.getSize(), RouteStrategies.forFixedTile(destX, destY), Resource.mapRegion!!.getCollisionMap(player.plane.toInt()), true, Client.WALKING_STEPS_X, Client.WALKING_STEPS_Y)
+            if (stepsFound in 1..3) {
+                for (index in 0 until stepsFound - 1) {
                     player.addMovementStep(Client.WALKING_STEPS_X[index], Client.WALKING_STEPS_Y[index], moveType)
                 }
             }
@@ -1037,36 +1037,36 @@ object PlayerUpdate {
         val idleAnimationsSetting = PreferenceManager.preferences!!.idleAnimations!!.getValue()
         val animate = idleAnimationsSetting == 1 && count > 200 || idleAnimationsSetting == 0 && count > 50
 
-        for (i_4 in 0 until count) {
-            val player5 = players[playerIndices[i_4]]!!
-            if (!player5.hasAppearance()) {
-                player5.worldPriority = -1
-            } else if (player5.hidden) {
-                player5.worldPriority = -1
+        for (index in 0 until count) {
+            val player = players[playerIndices[index]]!!
+            if (!player.hasAppearance()) {
+                player.worldPriority = -1
+            } else if (player.hidden) {
+                player.worldPriority = -1
             } else {
-                player5.calculatePosition()
-                if (player5.startX >= 0 && player5.startZ >= 0 && player5.endX < Resource.mapRegion!!.sceneSizeX && player5.endZ < Resource.mapRegion!!.sceneSizeY) {
-                    player5.shouldSuppressMovingAnimation = player5.movingSequence.hasType && animate
-                    if (player5 == MY_PLAYER) {
-                        player5.worldPriority = Integer.MAX_VALUE
+                player.calculatePosition()
+                if (player.startX >= 0 && player.startZ >= 0 && player.endX < Resource.mapRegion!!.sceneSizeX && player.endZ < Resource.mapRegion!!.sceneSizeY) {
+                    player.shouldSuppressMovingAnimation = player.movingSequence.hasType && animate
+                    if (player == MY_PLAYER) {
+                        player.worldPriority = Integer.MAX_VALUE
                     } else {
                         var priority = 0
 
-                        priority += if (player5.isHidden) 0 else 1
-                        priority += if (player5.entityHitbars.isEmpty()) 0 else 2
-                        priority += (5 - player5.getSize()) shl 2
+                        priority += if (player.isHidden) 0 else 1
+                        priority += if (player.entityHitbars.isEmpty()) 0 else 2
+                        priority += (5 - player.getSize()) shl 2
 
-                        if (player5.pMapdot || player5.reduceAttackPriority) {
+                        if (player.pMapdot || player.reduceAttackPriority) {
                             priority += 512
                         } else {
                             priority += if (Client.prioritizePlayerDraw) 128 else 32
                             priority += 256
                         }
 
-                        player5.worldPriority = priority + 1
+                        player.worldPriority = priority + 1
                     }
                 } else {
-                    player5.worldPriority = -1
+                    player.worldPriority = -1
                 }
             }
         }

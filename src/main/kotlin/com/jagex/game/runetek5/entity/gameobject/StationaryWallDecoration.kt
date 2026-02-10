@@ -27,17 +27,17 @@ class StationaryWallDecoration(
     toolkit: AbstractToolkit,
     val locTypeList: ObjectTypeList,
     locType: ObjectType,
-    i_5: Int,
-    i_6: Int,
-    i_7: Int,
-    i_8: Int,
-    i_9: Int,
+    plane: Int,
+    collisionPlane: Int,
+    x: Int,
+    y: Int,
+    z: Int,
     belowWater: Boolean,
-    i_11: Int,
-    i_12: Int,
+    positionX: Int,
+    positionY: Int,
     type: Int,
     rotation: Int
-) : AbstractWallDecoration(scene, i_7, i_8, i_9, i_5, i_6, i_11, i_12), GameObject {
+) : AbstractWallDecoration(scene, x, y, z, plane, collisionPlane, positionX, positionY), GameObject {
 
     override val id: Int = locType.id
     @JvmField val underwater: Boolean = belowWater
@@ -152,11 +152,11 @@ class StationaryWallDecoration(
     override fun particleCycle(graphicalrenderer1: AbstractToolkit) {
     }
 
-    override fun calculateProjection(toolkit: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
         val adjustedModel = getAdjustedModel(toolkit, 131072)
         if (adjustedModel != null) {
             val matrix: Matrix43 = getProjectionMatrix()
-            return adjustedModel.calculateProjection(i_2, i_3, matrix, false, 0)
+            return adjustedModel.calculateProjection(mouseX, mouseY, matrix, false, 0)
         }
         return false
     }

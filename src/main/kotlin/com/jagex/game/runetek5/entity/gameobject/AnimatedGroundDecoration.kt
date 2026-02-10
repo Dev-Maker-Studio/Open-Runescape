@@ -25,13 +25,13 @@ class AnimatedGroundDecoration(
     loctype: ObjectType,
     logicHeight: Int,
     plane: Int,
-    i_7: Int,
-    i_8: Int,
-    i_9: Int,
+    x: Int,
+    y: Int,
+    z: Int,
     overlayHidden: Boolean,
     objRotation: Int,
     sequenceId: Int
-) : AbstractGroundDecoration(scene, i_7, i_8, i_9, logicHeight, plane, loctype.groundDecorationHeight), GameObject {
+) : AbstractGroundDecoration(scene, x, y, z, logicHeight, plane, loctype.groundDecorationHeight), GameObject {
 
     @JvmField val gameObject: AnimatedGameObject = AnimatedGameObject(
         renderer, loctypelist, loctype, ObjectShapes.GROUND_DECORATION.shape, objRotation, logicHeight, plane, this, overlayHidden, sequenceId
@@ -124,7 +124,7 @@ class AnimatedGroundDecoration(
         return false
     }
 
-    override fun castShadow(entity: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 

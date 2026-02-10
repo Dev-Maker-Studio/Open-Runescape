@@ -54,7 +54,7 @@ abstract class AbstractWallDecoration protected constructor(
         return scene!!.adjacent_tile_on_screen[tileX][tileZ]
     }
 
-    override fun castShadow(node: SceneGraphEntity, width: Int, length: Int, height: Int, bool6: Boolean) {
+    override fun castShadow(node: SceneGraphEntity, width: Int, length: Int, height: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 

@@ -145,7 +145,7 @@ class AnimatedWall(
         return model != null && model.calculateProjection(cameraX, cameraY, getProjectionMatrix(), false, 0)
     }
 
-    override fun castShadow(entity: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 }

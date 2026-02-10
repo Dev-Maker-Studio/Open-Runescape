@@ -143,11 +143,11 @@ class SpotAnimation(
         particleSystem?.setIsNewCycle()
     }
 
-    override fun calculateProjection(toolkit: AbstractToolkit, p2: Int, p3: Int): Boolean = false
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean = false
 
     override fun hasTileShadow(): Boolean = false
 
-    override fun castShadow(entity: SceneGraphEntity, p3: Int, p4: Int, p5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 

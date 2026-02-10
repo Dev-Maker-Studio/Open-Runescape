@@ -107,24 +107,24 @@ class GroundItem(
         return false
     }
 
-    override fun calculateProjection(toolkit: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
-        val matrix44var5 = toolkit.getRenderingMatrix()
-        matrix44var5.translateFromCoordspace(getAbsolutePosition())
-        matrix44var5.translate(0.0f, -10.0f, 0.0f)
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
+        val renderingMatrix = toolkit.getRenderingMatrix()
+        renderingMatrix.translateFromCoordspace(getAbsolutePosition())
+        renderingMatrix.translate(0.0f, -10.0f, 0.0f)
         var model = TypeLists.OBJ!!.list(nodeId).getAnimatedModel(toolkit, PROJECTION, nodeAmount, null, null, 0, 0, 0, 0)
-        if (model != null && model.calculateProjection(i_2, i_3, matrix44var5, true, 0)) {
+        if (model != null && model.calculateProjection(mouseX, mouseY, renderingMatrix, true, 0)) {
             return true
         }
         if (lastId != -1) {
             model = TypeLists.OBJ!!.list(lastId).getAnimatedModel(toolkit, PROJECTION, lastAmount, null, null, 0, 0, 0, 0)
-            if (model != null && model.calculateProjection(i_2, i_3, matrix44var5, true, 0)) {
+            if (model != null && model.calculateProjection(mouseX, mouseY, renderingMatrix, true, 0)) {
                 return true
             }
         }
 
         if (itemId != -1) {
             model = TypeLists.OBJ!!.list(itemId).getAnimatedModel(toolkit, PROJECTION, amount, null, null, 0, 0, 0, 0)
-            return model != null && model.calculateProjection(i_2, i_3, matrix44var5, true, 0)
+            return model != null && model.calculateProjection(mouseX, mouseY, renderingMatrix, true, 0)
         }
 
         return false
@@ -172,47 +172,47 @@ class GroundItem(
         val renderingMatrix = toolkit.getRenderingMatrix()
         renderingMatrix.reset()
         if (tileHeightOffset == 0) {
-            val class39011 = scene!!.localHeightmap!![collisionPlane.toInt()]!!
-            val i_12 = size3d shl 1
-            val i_14 = -i_12 / 2
-            val i_15 = -i_12 / 2
-            val i_16 = class39011!!.getAverageHeight(i_14 + vector33.x.toInt(), i_15 + vector33.z.toInt())
-            val i_17 = i_12 / 2
-            val i_18 = -i_12 / 2
-            val i_19 = class39011!!.getAverageHeight(i_17 + vector33.x.toInt(), i_18 + vector33.z.toInt())
-            val i_20 = -i_12 / 2
-            val i_21 = i_12 / 2
-            val i_22 = class39011!!.getAverageHeight(i_20 + vector33.x.toInt(), i_21 + vector33.z.toInt())
-            val i_23 = i_12 / 2
-            val i_24 = i_12 / 2
-            val i_25 = class39011!!.getAverageHeight(i_23 + vector33.x.toInt(), i_24 + vector33.z.toInt())
-            val i_26 = min(i_16, i_19)
-            val i_27 = min(i_22, i_25)
-            val i_28 = min(i_19, i_25)
-            val i_29 = min(i_16, i_22)
-            var i_30: Int
-            if (i_12 != 0) {
-                i_30 = (atan2((i_26 - i_27).toDouble(), i_12.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-                if (i_30 != 0) {
-                    renderingMatrix.rotate(1.0f, 0.0f, 0.0f, MathUtils.getTheta(i_30))
+            val heightmap = scene!!.localHeightmap!![collisionPlane.toInt()]!!
+            val sampleSize = size3d shl 1
+            val nwOffsetX = -sampleSize / 2
+            val nwOffsetZ = -sampleSize / 2
+            val nwHeight = heightmap!!.getAverageHeight(nwOffsetX + vector33.x.toInt(), nwOffsetZ + vector33.z.toInt())
+            val neOffsetX = sampleSize / 2
+            val neOffsetZ = -sampleSize / 2
+            val neHeight = heightmap!!.getAverageHeight(neOffsetX + vector33.x.toInt(), neOffsetZ + vector33.z.toInt())
+            val swOffsetX = -sampleSize / 2
+            val swOffsetZ = sampleSize / 2
+            val swHeight = heightmap!!.getAverageHeight(swOffsetX + vector33.x.toInt(), swOffsetZ + vector33.z.toInt())
+            val seOffsetX = sampleSize / 2
+            val seOffsetZ = sampleSize / 2
+            val seHeight = heightmap!!.getAverageHeight(seOffsetX + vector33.x.toInt(), seOffsetZ + vector33.z.toInt())
+            val minNorthHeight = min(nwHeight, neHeight)
+            val minSouthHeight = min(swHeight, seHeight)
+            val minEastHeight = min(neHeight, seHeight)
+            val minWestHeight = min(nwHeight, swHeight)
+            var contourAngle: Int
+            if (sampleSize != 0) {
+                contourAngle = (atan2((minNorthHeight - minSouthHeight).toDouble(), sampleSize.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+                if (contourAngle != 0) {
+                    renderingMatrix.rotate(1.0f, 0.0f, 0.0f, MathUtils.getTheta(contourAngle))
                 }
             }
 
-            if (i_12 != 0) {
-                i_30 = (atan2((i_29 - i_28).toDouble(), i_12.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
-                if (i_30 != 0) {
-                    renderingMatrix.rotate(0.0f, 0.0f, 1.0f, MathUtils.getTheta(-i_30))
+            if (sampleSize != 0) {
+                contourAngle = (atan2((minWestHeight - minEastHeight).toDouble(), sampleSize.toDouble()) * 2607.5945876176133).toInt() and 0x3fff
+                if (contourAngle != 0) {
+                    renderingMatrix.rotate(0.0f, 0.0f, 1.0f, MathUtils.getTheta(-contourAngle))
                 }
             }
 
-            i_30 = i_16 + i_25
-            if (i_19 + i_22 < i_30) {
-                i_30 = i_19 + i_22
+            contourAngle = nwHeight + seHeight
+            if (neHeight + swHeight < contourAngle) {
+                contourAngle = neHeight + swHeight
             }
 
-            i_30 = (i_30 shr 1) - vector33.y.toInt()
-            if (i_30 != 0) {
-                renderingMatrix.translate(0.0f, i_30.toFloat(), 0.0f)
+            contourAngle = (contourAngle shr 1) - vector33.y.toInt()
+            if (contourAngle != 0) {
+                renderingMatrix.translate(0.0f, contourAngle.toFloat(), 0.0f)
             }
         }
 

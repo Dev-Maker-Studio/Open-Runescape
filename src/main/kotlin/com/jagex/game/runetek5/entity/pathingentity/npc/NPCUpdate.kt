@@ -48,19 +48,19 @@ object NPCUpdate {
         }
 
         if (isUnlinked) {
-            val i_3 = Client.npcCount
+            val previousNpcCount = Client.npcCount
             Client.npcCount = Client.NPC_MAP?.size() ?: 0
-            var i_4 = 0
+            var npcArrayIndex = 0
 
             val iterator = Client.NPC_MAP?.iterator()
             if (iterator != null) {
                 while (iterator.hasNext()) {
                     val node = iterator.next() as ObjectNode
-                    Client.NPC_ARRAY[i_4++] = node
+                    Client.NPC_ARRAY[npcArrayIndex++] = node
                 }
             }
 
-            for (npcIndex in Client.npcCount until i_3) {
+            for (npcIndex in Client.npcCount until previousNpcCount) {
                 Client.NPC_ARRAY[npcIndex] = null
             }
         }
@@ -125,8 +125,8 @@ object NPCUpdate {
                         npc.lastUpdate = Client.npcUpdateCycle
                         val movementDirection = Identifiable.identify(NPCDirection.values(), buffer.readBits(3)) as NPCDirection
                         npc.move(movementDirection, MovementType.WALKING.id.toInt())
-                        val i_9 = buffer.readBits(1)
-                        if (i_9 == 1) {
+                        val hasUpdateMask = buffer.readBits(1)
+                        if (hasUpdateMask == 1) {
                             Client.NPC_INDICES[++Client.npcListSize - 1] = updateIndice
                         }
                     }
@@ -143,8 +143,8 @@ object NPCUpdate {
                             val movementDirection = Identifiable.identify(NPCDirection.values(), buffer.readBits(3)) as NPCDirection
                             npc.move(movementDirection, MovementType.HALF_WALK.id.toInt())
                         }
-                        val i_11 = buffer.readBits(1)
-                        if (i_11 == 1) {
+                        val hasUpdateMask = buffer.readBits(1)
+                        if (hasUpdateMask == 1) {
                             Client.NPC_INDICES[++Client.npcListSize - 1] = updateIndice
                         }
                     }
@@ -213,8 +213,8 @@ object NPCUpdate {
                 if (raw > 15) raw - 32 else raw
             }
 
-            val i_11 = bitBuffer.readBits(1)
-            val i_12 = bitBuffer.readBits(2)
+            val isStationary = bitBuffer.readBits(1)
+            val npcPlane = bitBuffer.readBits(2)
 
             npcEntity.setSize(npcEntity.definitions?.size ?: 1)
             npcEntity.turnDirection = (npcEntity.definitions?.turnDirection ?: 0) shl 3
@@ -224,10 +224,10 @@ object NPCUpdate {
             }
 
             npcEntity.move(
-                i_12,
+                npcPlane,
                 PlayerUpdate.MY_PLAYER!!.movementBaseX[0] + offX,
                 PlayerUpdate.MY_PLAYER!!.movementBaseY[0] + offY,
-                i_11 == 1,
+                isStationary == 1,
                 npcEntity.getSize()
             )
 
@@ -352,17 +352,17 @@ object NPCUpdate {
 
             // Play GFX
             if ((updateFlag and UpdateFlag.PLAY_GFX) != 0) {
-                var i_14 = buffer.readUShortAdd()
-                val i_6 = buffer.readUIntInverseMiddle()
-                if (i_14 == 0xffff) {
-                    i_14 = -1
+                var spotAnimId = buffer.readUShortAdd()
+                val bitpackedSpeedHeight = buffer.readUIntInverseMiddle()
+                if (spotAnimId == 0xffff) {
+                    spotAnimId = -1
                 }
-                val i_7 = buffer.readUByteAdd()
-                val i_8 = i_7 and 0x7
-                val i_9 = (i_7 shr 3) and 0xf
-                val slotId = if (i_9 == 15) -1 else i_9
-                val bool24 = ((i_7 shr 7) and 0x1) == 1
-                npc.playSpotAnimation(i_14, i_6, i_8, slotId, bool24, 3)
+                val spotAnimFlags = buffer.readUByteAdd()
+                val spotAnimRotation = spotAnimFlags and 0x7
+                val spotAnimSlot = (spotAnimFlags shr 3) and 0xf
+                val slotId = if (spotAnimSlot == 15) -1 else spotAnimSlot
+                val adjustReplaymode = ((spotAnimFlags shr 7) and 0x1) == 1
+                npc.playSpotAnimation(spotAnimId, bitpackedSpeedHeight, spotAnimRotation, slotId, adjustReplaymode, 3)
             }
 
             // Face entity
@@ -377,29 +377,29 @@ object NPCUpdate {
             if ((updateFlag and UpdateFlag.ANIMATE) != 0) {
                 val count = buffer.readUByteInverse()
                 val sequences = IntArray(count)
-                val ints_16 = IntArray(count)
-                val ints_17 = IntArray(count)
+                val speeds = IntArray(count)
+                val slotMasks = IntArray(count)
                 for (index in 0 until count) {
                     sequences[index] = buffer.readBigSmart()
-                    ints_16[index] = buffer.readUByte()
-                    ints_17[index] = buffer.readUShortLittle()
+                    speeds[index] = buffer.readUByte()
+                    slotMasks[index] = buffer.readUShortLittle()
                 }
-                PlayerUpdate.animate(npc, sequences, ints_16, ints_17)
+                PlayerUpdate.animate(npc, sequences, speeds, slotMasks)
             }
 
             // Spot anim (0x800)
             if ((updateFlag and 0x800) != 0) {
                 var gfxId = buffer.readUShortLittle()
-                val i_6 = buffer.readInt()
+                val bitpackedSpeedHeight = buffer.readInt()
                 if (gfxId == 0xffff) {
                     gfxId = -1
                 }
-                val i_7 = buffer.readUByteAdd()
-                val i_8 = i_7 and 0x7
-                val i_9 = (i_7 shr 3) and 0xf
-                val slotId = if (i_9 == 15) -1 else i_9
-                val bool24 = ((i_7 shr 7) and 0x1) == 1
-                npc.playSpotAnimation(gfxId, i_6, i_8, slotId, bool24, 1)
+                val spotAnimFlags = buffer.readUByteAdd()
+                val spotAnimRotation = spotAnimFlags and 0x7
+                val spotAnimSlot = (spotAnimFlags shr 3) and 0xf
+                val slotId = if (spotAnimSlot == 15) -1 else spotAnimSlot
+                val adjustReplaymode = ((spotAnimFlags shr 7) and 0x1) == 1
+                npc.playSpotAnimation(gfxId, bitpackedSpeedHeight, spotAnimRotation, slotId, adjustReplaymode, 1)
             }
 
             // Add hitsplat
@@ -482,16 +482,16 @@ object NPCUpdate {
                 }
                 val bitpacked = buffer.readUByte()
                 val rotation = bitpacked and 0x7
-                val i_9 = (bitpacked shr 3) and 0xf
-                val slotId = if (i_9 == 15) -1 else i_9
-                val bool24 = ((bitpacked shr 7) and 0x1) == 1
-                npc.playSpotAnimation(spotanimId, flags, rotation, slotId, bool24, 2)
+                val spotAnimSlot = (bitpacked shr 3) and 0xf
+                val slotId = if (spotAnimSlot == 15) -1 else spotAnimSlot
+                val adjustReplaymode = ((bitpacked shr 7) and 0x1) == 1
+                npc.playSpotAnimation(spotanimId, flags, rotation, slotId, adjustReplaymode, 2)
             }
 
             // Update stats
             if ((updateFlag and UpdateFlag.UPDATE_STATS) != 0) {
-                val i_14 = buffer.buffer[++buffer.currentPosition - 1].toInt() and 0xff
-                for (index in 0 until i_14) {
+                val configCount = buffer.buffer[++buffer.currentPosition - 1].toInt() and 0xff
+                for (index in 0 until configCount) {
                     val statIndex = buffer.readUByteAdd()
                     val max = buffer.readInt()
                     val current = buffer.readUMediumAlternateOrder()
@@ -545,11 +545,11 @@ object NPCUpdate {
             // Clear varns (0x400000)
             if ((updateFlag and 0x400000) != 0) {
                 npc.varns.clear()
-                val i_14 = buffer.buffer[++buffer.currentPosition - 1].toInt() and 0xff
-                for (i_6 in 0 until i_14) {
-                    val i_7 = buffer.readUShort()
-                    val i_8 = buffer.readUIntMiddle()
-                    npc.varns.setVarn(i_7, i_8)
+                val varnCount = buffer.buffer[++buffer.currentPosition - 1].toInt() and 0xff
+                for (varnIndex in 0 until varnCount) {
+                    val varnId = buffer.readUShort()
+                    val varnValue = buffer.readUIntMiddle()
+                    npc.varns.setVarn(varnId, varnValue)
                 }
             }
 
@@ -585,35 +585,35 @@ object NPCUpdate {
 
             // Unknown (0x4000)
             if ((updateFlag and 0x4000) != 0) {
-                val i_14 = buffer.readUByteSubtract()
-                val ints_15 = IntArray(i_14)
-                val ints_16 = IntArray(i_14)
-                for (i_8 in 0 until i_14) {
-                    val i_9 = buffer.readUShortAddLittle()
-                    ints_15[i_8] = if ((i_9 and 0xc000) == 49152) {
-                        val i_10 = buffer.readUShort()
-                        (i_9 shl 16) or i_10
+                val equipCount = buffer.readUByteSubtract()
+                val equipTargets = IntArray(equipCount)
+                val equipSlotMasks = IntArray(equipCount)
+                for (index in 0 until equipCount) {
+                    val targetValue = buffer.readUShortAddLittle()
+                    equipTargets[index] = if ((targetValue and 0xc000) == 49152) {
+                        val extendedTarget = buffer.readUShort()
+                        (targetValue shl 16) or extendedTarget
                     } else {
-                        i_9
+                        targetValue
                     }
-                    ints_16[i_8] = buffer.readUShortAddLittle()
+                    equipSlotMasks[index] = buffer.readUShortAddLittle()
                 }
-                npc.setEquipmentOverrides(ints_15, ints_16)
+                npc.setEquipmentOverrides(equipTargets, equipSlotMasks)
             }
 
             // Spot anim (0x20)
             if ((updateFlag and 0x20) != 0) {
-                var i_14 = buffer.readUShort()
-                val i_6 = buffer.readUIntInverseMiddle()
-                if (i_14 == 65535) {
-                    i_14 = -1
+                var spotAnimId = buffer.readUShort()
+                val bitpackedSpeedHeight = buffer.readUIntInverseMiddle()
+                if (spotAnimId == 65535) {
+                    spotAnimId = -1
                 }
-                val i_7 = buffer.readUByteInverse()
-                val i_8 = i_7 and 0x7
-                val i_9 = (i_7 shr 3) and 0xf
-                val slotId = if (i_9 == 15) -1 else i_9
-                val bool24 = ((i_7 shr 7) and 0x1) == 1
-                npc.playSpotAnimation(i_14, i_6, i_8, slotId, bool24, 0)
+                val spotAnimFlags = buffer.readUByteInverse()
+                val spotAnimRotation = spotAnimFlags and 0x7
+                val spotAnimSlot = (spotAnimFlags shr 3) and 0xf
+                val slotId = if (spotAnimSlot == 15) -1 else spotAnimSlot
+                val adjustReplaymode = ((spotAnimFlags shr 7) and 0x1) == 1
+                npc.playSpotAnimation(spotAnimId, bitpackedSpeedHeight, spotAnimRotation, slotId, adjustReplaymode, 0)
             }
         }
     }

@@ -26,32 +26,32 @@ class StationaryInteractiveObject(
     toolkit: AbstractToolkit,
     locTypeList: ObjectTypeList,
     objectdefinitions4: ObjectType,
-    i_5: Int,
-    i_6: Int,
-    i_7: Int,
-    i_8: Int,
-    i_9: Int,
-    bool10: Boolean,
-    i_11: Int,
-    i_12: Int,
-    i_13: Int,
-    i_14: Int,
-    i_15: Int,
-    i_16: Int,
-    bool17: Boolean
+    plane: Int,
+    collisionPlane: Int,
+    x: Int,
+    y: Int,
+    z: Int,
+    overlayHidden: Boolean,
+    startX: Int,
+    endX: Int,
+    startY: Int,
+    endY: Int,
+    shape: Int,
+    rotation: Int,
+    hasTileShadow: Boolean
 ) : AbstractInteractiveEntity(
     scene,
-    i_5,
-    i_6,
-    i_7,
-    i_8,
-    i_9,
-    i_11,
-    i_12,
-    i_13,
-    i_14,
+    plane,
+    collisionPlane,
+    x,
+    y,
+    z,
+    startX,
+    endX,
+    startY,
+    endY,
     objectdefinitions4.supportsItems == 1,
-    ObjectShapes.getWallInteractByte(i_15, i_16)
+    ObjectShapes.getWallInteractByte(shape, rotation)
 ), GameObject {
 
     @JvmField
@@ -63,21 +63,21 @@ class StationaryInteractiveObject(
     override val id: Int = objectdefinitions4.id
 
     @JvmField
-    val overlayHidden: Boolean = bool10
+    val overlayHidden: Boolean = overlayHidden
 
-    override val shape: Int = i_15
-
-    @JvmField
-    val shapeAsByte: Byte = i_15.toByte()
+    override val shape: Int = shape
 
     @JvmField
-    val rotationAsByte: Byte = i_16.toByte()
+    val shapeAsByte: Byte = shape.toByte()
 
     @JvmField
-    val interactive: Boolean = objectdefinitions4.hasActions != 0 && !bool10
+    val rotationAsByte: Byte = rotation.toByte()
 
     @JvmField
-    var hasTileShadow: Boolean = bool17
+    val interactive: Boolean = objectdefinitions4.hasActions != 0 && !overlayHidden
+
+    @JvmField
+    var hasTileShadow: Boolean = hasTileShadow
 
     @JvmField
     val hasDynamicShadow: Boolean = toolkit.hasShadows() && objectdefinitions4.dynamicShadow && !overlayHidden && PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0
@@ -89,20 +89,20 @@ class StationaryInteractiveObject(
     var currentShadow: Shadow? = null
 
     init {
-        collisionPlane = i_6.toByte()
-        var i_18 = 2048
+        this.collisionPlane = collisionPlane.toByte()
+        var functionMask = 2048
         if (hasTileShadow) {
-            i_18 = i_18 or 0x10000
+            functionMask = functionMask or 0x10000
         }
         if (objectdefinitions4.dynamicTint) {
-            i_18 = i_18 or 0x80000
+            functionMask = functionMask or 0x80000
         }
-        val class45219 = getTypeResult(toolkit, i_18, hasDynamicShadow)
-        if (class45219 != null) {
-            interactiveModel = class45219.mainObject as Model?
-            currentShadow = class45219.companionObject as Shadow?
+        val typeResult = getTypeResult(toolkit, functionMask, hasDynamicShadow)
+        if (typeResult != null) {
+            interactiveModel = typeResult.mainObject as Model?
+            currentShadow = typeResult.companionObject as Shadow?
             if (hasTileShadow || objectdefinitions4.dynamicTint) {
-                interactiveModel = interactiveModel!!.copy(0.toByte(), i_18, false)
+                interactiveModel = interactiveModel!!.copy(0.toByte(), functionMask, false)
                 if (objectdefinitions4.dynamicTint) {
                     val class34120 = Resource.mapRegion!!.dynamicTint
                     interactiveModel!!.tint(class34120.hue, class34120.saturation, class34120.lightness, class34120.opacity)
@@ -143,16 +143,16 @@ class StationaryInteractiveObject(
         return if (typeResult != null) typeResult.mainObject as Model? else null
     }
 
-    fun getTypeResult(graphicalrenderer1: AbstractToolkit, i_2: Int, bool3: Boolean): TypeResult? {
+    fun getTypeResult(graphicalrenderer1: AbstractToolkit, functionMask: Int, includeShadow: Boolean): TypeResult? {
         val objectdefinitions5 = locTypeList.list(id)
-        val class3906: Ground
-        val class3907: Ground?
+        val heightmap: Ground
+        val roofHeightmap: Ground?
         if (overlayHidden) {
-            class3906 = scene!!.underwaterHeightmap!![collisionPlane.toInt()]!!
-            class3907 = scene!!.surfaceHeightmap[0]
+            heightmap = scene!!.underwaterHeightmap!![collisionPlane.toInt()]!!
+            roofHeightmap = scene!!.surfaceHeightmap[0]
         } else {
-            class3906 = scene!!.surfaceHeightmap!![collisionPlane.toInt()]!!
-            class3907 = if (collisionPlane < 3) {
+            heightmap = scene!!.surfaceHeightmap!![collisionPlane.toInt()]!!
+            roofHeightmap = if (collisionPlane < 3) {
                 scene!!.surfaceHeightmap[collisionPlane + 1]
             } else {
                 null
@@ -161,15 +161,15 @@ class StationaryInteractiveObject(
         val vector38 = getAbsolutePosition().coords
         return objectdefinitions5.getPair(
             graphicalrenderer1,
-            i_2,
+            functionMask,
             if (shapeAsByte != ObjectShapes.GROUND_INTERACT.shape.toByte()) shapeAsByte.toInt() else ObjectShapes.SCENERY_INTERACT.shape,
             if (ObjectShapes.GROUND_INTERACT.shape.toByte() == shapeAsByte) rotationAsByte + 4 else rotationAsByte.toInt(),
-            class3906,
-            class3907,
+            heightmap,
+            roofHeightmap,
             vector38.x.toInt(),
             vector38.y.toInt(),
             vector38.z.toInt(),
-            bool3,
+            includeShadow,
             null
         )
     }
@@ -191,14 +191,14 @@ class StationaryInteractiveObject(
         return hasTileShadow
     }
 
-    override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
-        if (class521Sub12 is StationaryWall) {
-            if (interactiveModel != null && class521Sub12.model != null) {
-                interactiveModel!!.applyShading(class521Sub12.model!!, i_3, i_4, i_5, bool6)
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
+        if (entity is StationaryWall) {
+            if (interactiveModel != null && entity.model != null) {
+                interactiveModel!!.applyShading(entity.model!!, x, y, z, renderTypeAdjustment)
             }
-        } else if (class521Sub12 is StationaryInteractiveObject) {
-            if (interactiveModel != null && class521Sub12.interactiveModel != null) {
-                interactiveModel!!.applyShading(class521Sub12.interactiveModel!!, i_3, i_4, i_5, bool6)
+        } else if (entity is StationaryInteractiveObject) {
+            if (interactiveModel != null && entity.interactiveModel != null) {
+                interactiveModel!!.applyShading(entity.interactiveModel!!, x, y, z, renderTypeAdjustment)
             }
         }
     }
@@ -214,10 +214,10 @@ class StationaryInteractiveObject(
         if (interactiveModel == null) {
             return null
         }
-        val matrix44var3 = getProjectionMatrix()
-        val class2854 = RenderedEntityCache.generate(interactive)
-        interactiveModel!!.drawMatrixThreaded(matrix44var3, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
-        return class2854
+        val projectionMatrix = getProjectionMatrix()
+        val renderedEntity = RenderedEntityCache.generate(interactive)
+        interactiveModel!!.drawMatrixThreaded(projectionMatrix, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
+        return renderedEntity
     }
 
     override fun getRotation(): Int {

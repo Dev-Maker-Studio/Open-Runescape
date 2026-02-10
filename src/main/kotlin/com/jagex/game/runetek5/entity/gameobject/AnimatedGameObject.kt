@@ -166,7 +166,7 @@ class AnimatedGameObject(
         }
     }
 
-    fun getAnimatedModel(renderer: AbstractToolkit, functionMask: Int, bool3: Boolean, hasShadow: Boolean): Model? {
+    fun getAnimatedModel(renderer: AbstractToolkit, functionMask: Int, shadowUpdateOnly: Boolean, hasShadow: Boolean): Model? {
         var functionMask = functionMask
         var hasShadow = hasShadow
         var loctype: ObjectType? = loctypelist.list(locId)
@@ -188,7 +188,7 @@ class AnimatedGameObject(
         if (hasShadow) {
             hasShadow = hasShadow && renderShadow && !isShadowCurrent && (PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0)
         }
-        if (bool3 && !hasShadow) {
+        if (shadowUpdateOnly && !hasShadow) {
             gameobjectId = loctype.id
             return null
         }

@@ -244,14 +244,14 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         return -1
     }
 
-    override fun calculateProjection(toolkit: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
         if (playerAppearance != null && getAnimatedBodyModel(toolkit, 131072)) {
             val projectionMatrix = getProjectionMatrix()
-            var bool6 = false
+            var hasProjection = false
 
             for (index in models.indices) {
-                if (models[index] != null && models[index]!!.calculateProjection(i_2, i_3, projectionMatrix, true, 0)) {
-                    bool6 = true
+                if (models[index] != null && models[index]!!.calculateProjection(mouseX, mouseY, projectionMatrix, true, 0)) {
+                    hasProjection = true
                     break
                 }
             }
@@ -260,13 +260,13 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
                 models[index] = null
             }
 
-            return bool6
+            return hasProjection
         } else {
             return false
         }
     }
 
-    override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 
@@ -370,8 +370,8 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         return true
     }
 
-    fun sendChat(string_1: String, i_2: Int, i_3: Int) {
-        setHintDetails(string_1, i_2, i_3, GameShell.gameCyclesPerSecond() * Client.ENTITY_DEFAULTS!!.playerMessageDuration)
+    fun sendChat(text: String, colorType: Int, drawType: Int) {
+        setHintDetails(text, colorType, drawType, GameShell.gameCyclesPerSecond() * Client.ENTITY_DEFAULTS!!.playerMessageDuration)
     }
 
     override fun getCS2Index(): Int {
@@ -434,12 +434,12 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
 
         for (slot in TypeLists.EQUIPMENT_DEFAULTS!!.customizableObjSlots!!.indices) {
             if (TypeLists.EQUIPMENT_DEFAULTS!!.customizableObjSlots!![slot] != 1) {
-                val i_15 = buffer.readUByte()
-                if (i_15 == 0) {
+                val equipmentHigh = buffer.readUByte()
+                if (equipmentHigh == 0) {
                     bodyAppearances[slot] = 0
                 } else {
-                    val i_16 = buffer.readUByte()
-                    var itemId = i_16 + (i_15 shl 8)
+                    val equipmentLow = buffer.readUByte()
+                    var itemId = equipmentLow + (equipmentHigh shl 8)
                     if (slot == 0 && itemId == 65535) {
                         currentMorphId = buffer.readBigSmart()
                         teamId = buffer.readUByte()
@@ -508,7 +508,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             }
         }
 
-        val i_15 = isNpc
+        val previousIsNpc = isNpc
         isNpc = buffer.readUByte()
         if (isNpc != 0) {
             val walk = walkingSoundEffectId
@@ -521,7 +521,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             defaultSoundEffectId = buffer.readUShort()
             runningSoundEffectId = buffer.readUShort()
             ambientSoundVolume = buffer.readUByte()
-            if (volumeUnadaptableBefore != instrumentSoundEffect || i_15 != isNpc || walk != walkingSoundEffectId || teleport != teleportingSoundEffectId || def != defaultSoundEffectId || run != runningSoundEffectId || ambient != ambientSoundVolume) {
+            if (volumeUnadaptableBefore != instrumentSoundEffect || previousIsNpc != isNpc || walk != walkingSoundEffectId || teleport != teleportingSoundEffectId || def != defaultSoundEffectId || run != runningSoundEffectId || ambient != ambientSoundVolume) {
                 createPlayerAmbientSound(this)
             }
         } else {
@@ -579,8 +579,8 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             val occupiedTile = scene!!.tiles[plane.toInt()][absolute.coords.x.toInt() shr 9][absolute.coords.z.toInt() shr 9]
             if (occupiedTile != null && occupiedTile.groundDecoration != null) {
                 val groundDec = occupiedTile.groundDecoration!!
-                val i_8 = groundContouredOffsetY - groundDec.floorOffsetY
-                groundContouredOffsetY = (groundContouredOffsetY - i_8 / 10.0f).toInt()
+                val offsetDelta = groundContouredOffsetY - groundDec.floorOffsetY
+                groundContouredOffsetY = (groundContouredOffsetY - offsetDelta / 10.0f).toInt()
             } else {
                 groundContouredOffsetY = (groundContouredOffsetY - groundContouredOffsetY / 10.0f).toInt()
             }

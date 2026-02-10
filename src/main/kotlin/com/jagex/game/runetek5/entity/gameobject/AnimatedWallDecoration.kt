@@ -80,18 +80,18 @@ class AnimatedWallDecoration(
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
         val model = wallDecoration.getAnimatedModel(toolkit, 2048, false, true)
             ?: return null
-        val matrix44var4 = toolkit.getRenderingMatrix()
-        matrix44var4.copyFrom(getProjectionMatrix())
-        matrix44var4.translate(positionX.toFloat(), 0.0f, positionY.toFloat())
+        val renderingMatrix = toolkit.getRenderingMatrix()
+        renderingMatrix.copyFrom(getProjectionMatrix())
+        renderingMatrix.translate(positionX.toFloat(), 0.0f, positionY.toFloat())
         val abs = getAbsolutePosition()
         val renderedEntity = RenderedEntityCache.generate(interactive)
-        val i_7 = (abs.coords.x.toInt() shr 9)
-        val i_8 = (abs.coords.z.toInt() shr 9)
-        wallDecoration.animateParticles(toolkit, model, matrix44var4, true)
-        model.drawMatrixThreaded(matrix44var4, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
+        val tileX = (abs.coords.x.toInt() shr 9)
+        val tileZ = (abs.coords.z.toInt() shr 9)
+        wallDecoration.animateParticles(toolkit, model, renderingMatrix, true)
+        model.drawMatrixThreaded(renderingMatrix, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
         if (wallDecoration.particleSystem != null) {
-            val class1519 = wallDecoration.particleSystem!!.getAllParticles()
-            toolkit.renderParticles(class1519)
+            val particles = wallDecoration.particleSystem!!.getAllParticles()
+            toolkit.renderParticles(particles)
         }
         hasTransparency = model.accountForLayers() || wallDecoration.particleSystem != null
         val currentBoundingBox = axisAlignedBoundingBox
@@ -106,17 +106,17 @@ class AnimatedWallDecoration(
     override fun particleCycle(graphicalrenderer1: AbstractToolkit) {
         val meshrasterizer3 = wallDecoration.getAnimatedModel(graphicalrenderer1, 262144, false, true)
         if (meshrasterizer3 != null) {
-            val matrix44var4 = getProjectionMatrix()
-            val class3055 = getAbsolutePosition()
-            val i_6 = (class3055.coords.x.toInt() shr 9)
-            val i_7 = (class3055.coords.z.toInt() shr 9)
-            wallDecoration.animateParticles(graphicalrenderer1, meshrasterizer3, matrix44var4, false)
+            val projectionMatrix = getProjectionMatrix()
+            val absPosition = getAbsolutePosition()
+            val tileX = (absPosition.coords.x.toInt() shr 9)
+            val tileZ = (absPosition.coords.z.toInt() shr 9)
+            wallDecoration.animateParticles(graphicalrenderer1, meshrasterizer3, projectionMatrix, false)
         }
     }
 
-    override fun calculateProjection(toolkit: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
+    override fun calculateProjection(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int): Boolean {
         val model = wallDecoration.getAnimatedModel(toolkit, 131072, false, false)
-        return model != null && model.calculateProjection(i_2, i_3, getProjectionMatrix(), false, 0)
+        return model != null && model.calculateProjection(mouseX, mouseY, getProjectionMatrix(), false, 0)
     }
 
     override fun getMinY(): Int {

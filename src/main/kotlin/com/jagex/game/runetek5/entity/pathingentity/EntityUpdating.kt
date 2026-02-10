@@ -223,40 +223,40 @@ object EntityUpdating {
 
                             if (redBar != null && greenBar != null) {
                                 var alpha = 255
-                                val i_23 = Client.cycles - displayDetails.discardAtCycle
-                                val i_24 = greenBar.getWidth() * displayDetails.toPercentage / 255
-                                val i_116: Int
+                                val elapsedCycles = Client.cycles - displayDetails.discardAtCycle
+                                val targetFillWidth = greenBar.getWidth() * displayDetails.toPercentage / 255
+                                val currentFillWidth: Int
 
-                                if (displayDetails.lifetimeCycles > i_23) {
-                                    val i_25 = if (hitbarType.animationStepSize == 0) 0 else hitbarType.animationStepSize * (i_23 / hitbarType.animationStepSize)
+                                if (displayDetails.lifetimeCycles > elapsedCycles) {
+                                    val steppedCycles = if (hitbarType.animationStepSize == 0) 0 else hitbarType.animationStepSize * (elapsedCycles / hitbarType.animationStepSize)
                                     val drawX = greenBar.getWidth() * displayDetails.fromPercentage / 255
-                                    i_116 = i_25 * (i_24 - drawX) / displayDetails.lifetimeCycles + drawX
+                                    currentFillWidth = steppedCycles * (targetFillWidth - drawX) / displayDetails.lifetimeCycles + drawX
                                 } else {
-                                    i_116 = i_24
-                                    val i_25 = displayDetails.lifetimeCycles + hitbarType.fadeOutDuration - i_23
+                                    currentFillWidth = targetFillWidth
+                                    val remainingFadeCycles = displayDetails.lifetimeCycles + hitbarType.fadeOutDuration - elapsedCycles
                                     if (hitbarType.fadeStartOffset >= 0) {
-                                        alpha = (i_25 shl 8) / (hitbarType.fadeOutDuration - hitbarType.fadeStartOffset)
+                                        alpha = (remainingFadeCycles shl 8) / (hitbarType.fadeOutDuration - hitbarType.fadeStartOffset)
                                     }
                                 }
 
-                                var finalI_116 = i_116
-                                if (displayDetails.toPercentage > 0 && finalI_116 < 2) {
-                                    finalI_116 = 2
+                                var clampedFillWidth = currentFillWidth
+                                if (displayDetails.toPercentage > 0 && clampedFillWidth < 2) {
+                                    clampedFillWidth = 2
                                 }
 
-                                val i_25 = redBar.getHeight()
+                                val barHeight = redBar.getHeight()
                                 val drawX = (Client.HINT_POSITION[0] + clipLeft - (redBar.getWidth() shr 1)).toInt()
-                                drawY -= i_25
+                                drawY -= barHeight
 
                                 if (alpha >= 0 && alpha < 255) {
                                     val packedAlpha = alpha shl 24
                                     val colorArgb = packedAlpha or 0xffffff
                                     redBar.draw(drawX, drawY, 0, colorArgb, 1)
-                                    Renderers.activeToolkit!!.expandClipping(drawX, drawY, drawX + finalI_116, drawY + i_25)
+                                    Renderers.activeToolkit!!.expandClipping(drawX, drawY, drawX + clampedFillWidth, drawY + barHeight)
                                     greenBar.draw(drawX, drawY, 0, colorArgb, 1)
                                 } else {
                                     redBar.draw(drawX, drawY)
-                                    Renderers.activeToolkit!!.expandClipping(drawX, drawY, finalI_116 + drawX, drawY + i_25)
+                                    Renderers.activeToolkit!!.expandClipping(drawX, drawY, clampedFillWidth + drawX, drawY + barHeight)
                                     greenBar.draw(drawX, drawY)
                                 }
 
@@ -289,54 +289,54 @@ object EntityUpdating {
                             drawY -= 2
                         }
                     } else if (npctype.headIcons >= 0 && npctype.headIcons < StaticMedia.headiconPrayerSprites!!.size) {
-                        val nativesprite120 = StaticMedia.headiconPrayerSprites!![npctype.headIcons]
-                        drawY -= nativesprite120.getHeight()
-                        nativesprite120.draw((clipLeft + Client.HINT_POSITION[0] - (nativesprite120.getWidth() shr 1)).toInt(), drawY)
+                        val npcHeadIcon = StaticMedia.headiconPrayerSprites!![npctype.headIcons]
+                        drawY -= npcHeadIcon.getHeight()
+                        npcHeadIcon.draw((clipLeft + Client.HINT_POSITION[0] - (npcHeadIcon.getWidth() shr 1)).toInt(), drawY)
                         drawY -= 2
                     }
                 }
 
                 if (entity is PlayerEntity) {
                     if (id >= 0) {
-                        var i_15 = 0
+                        var maxArrowHeight = 0
                         for (index in PlayerUpdate.HINT_ARROWS.indices) {
                             val arrow = PlayerUpdate.HINT_ARROWS[index]
                             if (arrow != null && arrow.targetType == 10 && arrow.targetIndex == playerIndices[id]) {
                                 val playerArrow = StaticMedia.hintHeadiconSprites!![arrow.arrowSprite]
-                                if (playerArrow.getHeight() > i_15) {
-                                    i_15 = playerArrow.getHeight()
+                                if (playerArrow.getHeight() > maxArrowHeight) {
+                                    maxArrowHeight = playerArrow.getHeight()
                                 }
                                 playerArrow.draw((clipLeft + Client.HINT_POSITION[0] - 12.0F).toInt(), drawY - playerArrow.getHeight())
                             }
                         }
-                        if (i_15 > 0) {
+                        if (maxArrowHeight > 0) {
                             @Suppress("UNUSED_VALUE")
-                            val i_10000 = drawY - (i_15 + 2)
+                            val unused = drawY - (maxArrowHeight + 2)
                         }
                     }
                 } else {
-                    var i_15 = 0
+                    var maxArrowHeight = 0
                     for (index in PlayerUpdate.HINT_ARROWS.indices) {
                         val arrow = PlayerUpdate.HINT_ARROWS[index]
                         if (arrow != null && arrow.targetType == 1 && Client.NPC_UPDATE_INDICES[id - playerIndiceCount] == arrow.targetIndex) {
                             val npcArrow = StaticMedia.hintHeadiconSprites!![arrow.arrowSprite]
-                            if (npcArrow.getHeight() > i_15) {
-                                i_15 = npcArrow.getHeight()
+                            if (npcArrow.getHeight() > maxArrowHeight) {
+                                maxArrowHeight = npcArrow.getHeight()
                             }
                             val shouldDraw: Boolean = if (arrow.denominator == 0) {
                                 true
                             } else {
-                                val i_21 = GameShell.gameCyclesPerSecond() * 1000 / arrow.denominator / 2
-                                Client.cycles % (i_21 * 2) < i_21
+                                val flashHalfPeriod = GameShell.gameCyclesPerSecond() * 1000 / arrow.denominator / 2
+                                Client.cycles % (flashHalfPeriod * 2) < flashHalfPeriod
                             }
                             if (shouldDraw) {
                                 npcArrow.draw((clipLeft + Client.HINT_POSITION[0] - 12.0F).toInt(), drawY - npcArrow.getHeight())
                             }
                         }
                     }
-                    if (i_15 > 0) {
+                    if (maxArrowHeight > 0) {
                         @Suppress("UNUSED_VALUE")
-                        val i_10000 = drawY - (i_15 + 2)
+                        val unused = drawY - (maxArrowHeight + 2)
                     }
                 }
 
@@ -367,120 +367,120 @@ object EntityUpdating {
                         if (hitsplatType == null) {
                             pathingEntity.hitsplatCycles[hitsplatIndex] = -1
                         } else {
-                            val i_116 = pathingEntity.getIconHeight() / 2
-                            HintRenderer.calculateHintForSceneobject(pathingEntity as SceneGraphEntity, i_116)
+                            val halfIconHeight = pathingEntity.getIconHeight() / 2
+                            HintRenderer.calculateHintForSceneobject(pathingEntity as SceneGraphEntity, halfIconHeight)
 
                             if (Client.HINT_POSITION[0] > -1.0f) {
                                 Client.HINT_POSITION[0] += Client.ENTITY_DEFAULTS!!.hitOffsetsX!![hitsplatIndex]
                                 Client.HINT_POSITION[1] += Client.ENTITY_DEFAULTS!!.hitOffsetsY!![hitsplatIndex]
 
-                                var i_27 = 0
-                                var i_28 = 0
-                                var i_29 = 0
-                                var i_30 = 0
-                                var i_31 = 0
-                                var i_32 = 0
-                                var i_33 = 0
-                                var i_34 = 0
+                                var leftCapWidth = 0
+                                var middleFillWidth = 0
+                                var innerLeftWidth = 0
+                                var rightCapWidth = 0
+                                var leftCapOffsetX = 0
+                                var middleFillOffsetX = 0
+                                var innerLeftOffsetX = 0
+                                var rightCapOffsetX = 0
                                 var soakLeftCapSprite: NativeSprite? = null
                                 var soakMiddleFillSprite: NativeSprite? = null
                                 var soakInnerLeftSprite: NativeSprite? = null
                                 var soakRightCapSprite: NativeSprite? = null
-                                var i_39 = 0
-                                var i_40 = 0
-                                var i_41 = 0
-                                var i_42 = 0
-                                var i_43 = 0
-                                var i_44 = 0
-                                var i_45 = 0
-                                var i_46 = 0
-                                var i_47 = 0
+                                var soakLeftCapWidth = 0
+                                var soakMiddleFillWidth = 0
+                                var soakInnerLeftWidth = 0
+                                var soakRightCapWidth = 0
+                                var soakLeftCapOffsetX = 0
+                                var soakMiddleFillOffsetX = 0
+                                var soakInnerLeftOffsetX = 0
+                                var soakRightCapOffsetX = 0
+                                var maxSpriteHeight = 0
 
                                 val leftCapSprite = hitsplatType.getLeftCapSprite(Renderers.activeToolkit!!)
                                 if (leftCapSprite != null) {
-                                    i_27 = leftCapSprite.getWidth()
-                                    val i_49 = leftCapSprite.getHeight()
-                                    if (i_49 > i_47) {
-                                        i_47 = i_49
+                                    leftCapWidth = leftCapSprite.getWidth()
+                                    val leftCapHeight = leftCapSprite.getHeight()
+                                    if (leftCapHeight > maxSpriteHeight) {
+                                        maxSpriteHeight = leftCapHeight
                                     }
                                     leftCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                    i_31 = Client.HITSPLAT_SIZE_CACHE[0]
+                                    leftCapOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 val middleFillSprite = hitsplatType.getMiddleFillSprite(Renderers.activeToolkit!!)
                                 if (middleFillSprite != null) {
-                                    i_28 = middleFillSprite.getWidth()
-                                    val i_50 = middleFillSprite.getHeight()
-                                    if (i_50 > i_47) {
-                                        i_47 = i_50
+                                    middleFillWidth = middleFillSprite.getWidth()
+                                    val middleFillHeight = middleFillSprite.getHeight()
+                                    if (middleFillHeight > maxSpriteHeight) {
+                                        maxSpriteHeight = middleFillHeight
                                     }
                                     middleFillSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                    i_32 = Client.HITSPLAT_SIZE_CACHE[0]
+                                    middleFillOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 val innerLeftSprite = hitsplatType.getInnerLeftSprite(Renderers.activeToolkit!!)
                                 if (innerLeftSprite != null) {
-                                    i_29 = innerLeftSprite.getWidth()
-                                    val i_51 = innerLeftSprite.getHeight()
-                                    if (i_51 > i_47) {
-                                        i_47 = i_51
+                                    innerLeftWidth = innerLeftSprite.getWidth()
+                                    val innerLeftHeight = innerLeftSprite.getHeight()
+                                    if (innerLeftHeight > maxSpriteHeight) {
+                                        maxSpriteHeight = innerLeftHeight
                                     }
                                     innerLeftSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                    i_33 = Client.HITSPLAT_SIZE_CACHE[0]
+                                    innerLeftOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 val rightCapSprite = hitsplatType.getRightCapSprite(Renderers.activeToolkit!!)
-                                var i_52: Int
+                                var spriteHeight: Int
                                 if (rightCapSprite != null) {
-                                    i_30 = rightCapSprite.getWidth()
-                                    i_52 = rightCapSprite.getHeight()
-                                    if (i_52 > i_47) {
-                                        i_47 = i_52
+                                    rightCapWidth = rightCapSprite.getWidth()
+                                    spriteHeight = rightCapSprite.getHeight()
+                                    if (spriteHeight > maxSpriteHeight) {
+                                        maxSpriteHeight = spriteHeight
                                     }
                                     rightCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                    i_34 = Client.HITSPLAT_SIZE_CACHE[0]
+                                    rightCapOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                 }
 
                                 if (soakHitsplat != null) {
                                     soakLeftCapSprite = soakHitsplat.getLeftCapSprite(Renderers.activeToolkit!!)
                                     if (soakLeftCapSprite != null) {
-                                        i_39 = soakLeftCapSprite.getWidth()
-                                        i_52 = soakLeftCapSprite.getHeight()
-                                        if (i_52 > i_47) {
-                                            i_47 = i_52
+                                        soakLeftCapWidth = soakLeftCapSprite.getWidth()
+                                        spriteHeight = soakLeftCapSprite.getHeight()
+                                        if (spriteHeight > maxSpriteHeight) {
+                                            maxSpriteHeight = spriteHeight
                                         }
                                         soakLeftCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                        i_43 = Client.HITSPLAT_SIZE_CACHE[0]
+                                        soakLeftCapOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                     soakMiddleFillSprite = soakHitsplat.getMiddleFillSprite(Renderers.activeToolkit!!)
                                     if (soakMiddleFillSprite != null) {
-                                        i_40 = soakMiddleFillSprite.getWidth()
-                                        i_52 = soakMiddleFillSprite.getHeight()
-                                        if (i_52 > i_47) {
-                                            i_47 = i_52
+                                        soakMiddleFillWidth = soakMiddleFillSprite.getWidth()
+                                        spriteHeight = soakMiddleFillSprite.getHeight()
+                                        if (spriteHeight > maxSpriteHeight) {
+                                            maxSpriteHeight = spriteHeight
                                         }
                                         soakMiddleFillSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                        i_44 = Client.HITSPLAT_SIZE_CACHE[0]
+                                        soakMiddleFillOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                     soakInnerLeftSprite = soakHitsplat.getInnerLeftSprite(Renderers.activeToolkit!!)
                                     if (soakInnerLeftSprite != null) {
-                                        i_41 = soakInnerLeftSprite.getWidth()
-                                        i_52 = soakInnerLeftSprite.getHeight()
-                                        if (i_52 > i_47) {
-                                            i_47 = i_52
+                                        soakInnerLeftWidth = soakInnerLeftSprite.getWidth()
+                                        spriteHeight = soakInnerLeftSprite.getHeight()
+                                        if (spriteHeight > maxSpriteHeight) {
+                                            maxSpriteHeight = spriteHeight
                                         }
                                         soakInnerLeftSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                        i_45 = Client.HITSPLAT_SIZE_CACHE[0]
+                                        soakInnerLeftOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                     soakRightCapSprite = soakHitsplat.getRightCapSprite(Renderers.activeToolkit!!)
                                     if (soakRightCapSprite != null) {
-                                        i_42 = soakRightCapSprite.getWidth()
-                                        i_52 = soakRightCapSprite.getHeight()
-                                        if (i_52 > i_47) {
-                                            i_47 = i_52
+                                        soakRightCapWidth = soakRightCapSprite.getWidth()
+                                        spriteHeight = soakRightCapSprite.getHeight()
+                                        if (spriteHeight > maxSpriteHeight) {
+                                            maxSpriteHeight = spriteHeight
                                         }
                                         soakRightCapSprite.cacheSizeInto(Client.HITSPLAT_SIZE_CACHE)
-                                        i_46 = Client.HITSPLAT_SIZE_CACHE[0]
+                                        soakRightCapOffsetX = Client.HITSPLAT_SIZE_CACHE[0]
                                     }
                                 }
 
@@ -523,181 +523,181 @@ object EntityUpdating {
                                     soakWidth = soakFontMetrics!!.getWidthNoSprites(soakText)
                                 }
 
-                                var i_63 = 0
-                                var i_64 = 0
-                                if (i_28 > 0) {
-                                    i_63 = regularWidth / i_28 + 1
+                                var regularTileCount = 0
+                                var soakTileCount = 0
+                                if (middleFillWidth > 0) {
+                                    regularTileCount = regularWidth / middleFillWidth + 1
                                 }
-                                if (soakHitsplat != null && i_40 > 0) {
-                                    i_64 = soakWidth / i_40 + 1
+                                if (soakHitsplat != null && soakMiddleFillWidth > 0) {
+                                    soakTileCount = soakWidth / soakMiddleFillWidth + 1
                                 }
 
-                                var i_65 = 0
-                                val i_66 = i_65
-                                if (i_27 > 0) {
-                                    i_65 += i_27
+                                var totalWidth = 0
+                                val leftCapStartX = totalWidth
+                                if (leftCapWidth > 0) {
+                                    totalWidth += leftCapWidth
                                 }
-                                i_65 += 2
-                                val i_67 = i_65
-                                if (i_29 > 0) {
-                                    i_65 += i_29
+                                totalWidth += 2
+                                val innerLeftStartX = totalWidth
+                                if (innerLeftWidth > 0) {
+                                    totalWidth += innerLeftWidth
                                 }
-                                val i_68 = i_65
-                                val i_69 = i_65
-                                var i_70: Int
-                                if (i_28 > 0) {
-                                    i_70 = i_28 * i_63
-                                    i_65 += i_70
+                                val middleFillStartX = totalWidth
+                                val textStartX = totalWidth
+                                var rightCapStartX: Int
+                                if (middleFillWidth > 0) {
+                                    rightCapStartX = middleFillWidth * regularTileCount
+                                    totalWidth += rightCapStartX
                                     @Suppress("UNUSED_VALUE")
-                                    val temp = (i_70 - regularWidth) / 2
+                                    val temp = (rightCapStartX - regularWidth) / 2
                                 } else {
-                                    i_65 += regularWidth
+                                    totalWidth += regularWidth
                                 }
-                                i_70 = i_65
-                                if (i_30 > 0) {
-                                    i_65 += i_30
+                                rightCapStartX = totalWidth
+                                if (rightCapWidth > 0) {
+                                    totalWidth += rightCapWidth
                                 }
 
-                                var i_71 = 0
-                                var i_72 = 0
-                                var i_73 = 0
-                                var i_74 = 0
-                                var i_75 = 0
-                                var i_76: Int
+                                var soakLeftCapStartX = 0
+                                var soakInnerLeftStartX = 0
+                                var soakMiddleFillStartX = 0
+                                var soakRightCapStartX = 0
+                                var soakTextStartX = 0
+                                var remainingCycles: Int
 
                                 if (soakHitsplat != null) {
-                                    i_65 += 2
-                                    i_71 = i_65
-                                    if (i_39 > 0) {
-                                        i_65 += i_39
+                                    totalWidth += 2
+                                    soakLeftCapStartX = totalWidth
+                                    if (soakLeftCapWidth > 0) {
+                                        totalWidth += soakLeftCapWidth
                                     }
-                                    i_65 += 2
-                                    i_72 = i_65
-                                    if (i_41 > 0) {
-                                        i_65 += i_41
+                                    totalWidth += 2
+                                    soakInnerLeftStartX = totalWidth
+                                    if (soakInnerLeftWidth > 0) {
+                                        totalWidth += soakInnerLeftWidth
                                     }
-                                    i_73 = i_65
-                                    i_75 = i_65
-                                    if (i_40 > 0) {
-                                        i_76 = i_64 * i_40
-                                        i_65 += i_76
+                                    soakMiddleFillStartX = totalWidth
+                                    soakTextStartX = totalWidth
+                                    if (soakMiddleFillWidth > 0) {
+                                        remainingCycles = soakTileCount * soakMiddleFillWidth
+                                        totalWidth += remainingCycles
                                         @Suppress("UNUSED_VALUE")
-                                        val temp = (i_76 - soakWidth) / 2
+                                        val temp = (remainingCycles - soakWidth) / 2
                                     } else {
-                                        i_65 += soakWidth
+                                        totalWidth += soakWidth
                                     }
-                                    i_74 = i_65
-                                    if (i_42 > 0) {
-                                        i_65 += i_42
+                                    soakRightCapStartX = totalWidth
+                                    if (soakRightCapWidth > 0) {
+                                        totalWidth += soakRightCapWidth
                                     }
                                 }
 
-                                i_76 = pathingEntity.hitsplatCycles[hitsplatIndex] - Client.cycles
-                                val i_77 = hitsplatType.scrollOffsetX - i_76 * hitsplatType.scrollOffsetX / hitsplatType.cyclesVisible
-                                val i_78 = i_76 * hitsplatType.scrollOffsetY / hitsplatType.cyclesVisible + -hitsplatType.scrollOffsetY
-                                val i_79 = (clipLeft + Client.HINT_POSITION[0] - (i_65 shr 1) + i_77).toInt()
-                                val i_80 = (i_78 + (Client.HINT_POSITION[1] + clipTop - 12.0F)).toInt()
-                                var i_81 = i_80
-                                var i_82 = i_80 + i_47
-                                val i_83 = i_80 + hitsplatType.textOffsetY + 15
-                                val i_84 = i_83 - hitsplatFontMetrics!!.topPadding
-                                val i_85 = i_83 + hitsplatFontMetrics!!.bottomPadding
+                                remainingCycles = pathingEntity.hitsplatCycles[hitsplatIndex] - Client.cycles
+                                val scrollX = hitsplatType.scrollOffsetX - remainingCycles * hitsplatType.scrollOffsetX / hitsplatType.cyclesVisible
+                                val scrollY = remainingCycles * hitsplatType.scrollOffsetY / hitsplatType.cyclesVisible + -hitsplatType.scrollOffsetY
+                                val drawX = (clipLeft + Client.HINT_POSITION[0] - (totalWidth shr 1) + scrollX).toInt()
+                                val drawY = (scrollY + (Client.HINT_POSITION[1] + clipTop - 12.0F)).toInt()
+                                var clipMinY = drawY
+                                var clipMaxY = drawY + maxSpriteHeight
+                                val textDrawY = drawY + hitsplatType.textOffsetY + 15
+                                val textTopY = textDrawY - hitsplatFontMetrics!!.topPadding
+                                val textBottomY = textDrawY + hitsplatFontMetrics!!.bottomPadding
 
-                                if (i_84 < i_80) {
-                                    i_81 = i_84
+                                if (textTopY < drawY) {
+                                    clipMinY = textTopY
                                 }
-                                if (i_85 > i_82) {
-                                    i_82 = i_85
+                                if (textBottomY > clipMaxY) {
+                                    clipMaxY = textBottomY
                                 }
 
-                                var i_86 = 0
-                                var i_87: Int
+                                var soakTextDrawY = 0
+                                var fadeAlpha: Int
 
                                 if (soakHitsplat != null) {
-                                    i_86 = i_80 + soakHitsplat.textOffsetY + 15
-                                    val i_87_temp = i_86 - soakFontMetrics!!.topPadding
-                                    val i_88 = i_86 + soakFontMetrics!!.bottomPadding
-                                    if (i_87_temp < i_81) {
-                                        // i_81 = i_87_temp // Dead code in original
+                                    soakTextDrawY = drawY + soakHitsplat.textOffsetY + 15
+                                    val soakTextTopY = soakTextDrawY - soakFontMetrics!!.topPadding
+                                    val soakTextBottomY = soakTextDrawY + soakFontMetrics!!.bottomPadding
+                                    if (soakTextTopY < clipMinY) {
+                                        // clipMinY = soakTextTopY // Dead code in original
                                     }
-                                    if (i_88 > i_82) {
-                                        // i_82 = i_88 // Dead code in original
+                                    if (soakTextBottomY > clipMaxY) {
+                                        // clipMaxY = soakTextBottomY // Dead code in original
                                     }
                                 }
 
-                                i_87 = 255
+                                fadeAlpha = 255
                                 if (hitsplatType.fadeStartCycle >= 0) {
-                                    i_87 = (i_76 shl 8) / (hitsplatType.cyclesVisible - hitsplatType.fadeStartCycle)
+                                    fadeAlpha = (remainingCycles shl 8) / (hitsplatType.cyclesVisible - hitsplatType.fadeStartCycle)
                                 }
 
-                                if (i_87 >= 0 && i_87 < 255) {
-                                    val alpha = i_87 shl 24
-                                    val i_89 = alpha or 0xffffff
+                                if (fadeAlpha >= 0 && fadeAlpha < 255) {
+                                    val alpha = fadeAlpha shl 24
+                                    val alphaMask = alpha or 0xffffff
                                     if (leftCapSprite != null) {
-                                        leftCapSprite.draw(i_66 + i_79 - i_31, i_80, 0, i_89, 1)
+                                        leftCapSprite.draw(leftCapStartX + drawX - leftCapOffsetX, drawY, 0, alphaMask, 1)
                                     }
                                     if (innerLeftSprite != null) {
-                                        innerLeftSprite.draw(i_67 + i_79 - i_33, i_80, 0, i_89, 1)
+                                        innerLeftSprite.draw(innerLeftStartX + drawX - innerLeftOffsetX, drawY, 0, alphaMask, 1)
                                     }
-                                    var i_90: Int
+                                    var tileIndex: Int
                                     if (middleFillSprite != null) {
-                                        for (i_90 in 0 until i_63) {
-                                            middleFillSprite.draw(i_90 * i_28 + (i_68 + i_79 - i_32), i_80, 0, i_89, 1)
+                                        for (tileIndex in 0 until regularTileCount) {
+                                            middleFillSprite.draw(tileIndex * middleFillWidth + (middleFillStartX + drawX - middleFillOffsetX), drawY, 0, alphaMask, 1)
                                         }
                                     }
                                     if (rightCapSprite != null) {
-                                        rightCapSprite.draw(i_70 + i_79 - i_34, i_80, 0, i_89, 1)
+                                        rightCapSprite.draw(rightCapStartX + drawX - rightCapOffsetX, drawY, 0, alphaMask, 1)
                                     }
-                                    hitsplatFontRenderer!!.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color or alpha, 0)
+                                    hitsplatFontRenderer!!.renderPlain(hitsplatText, drawX + textStartX, textDrawY, hitsplatType.color or alpha, 0)
                                     if (soakHitsplat != null) {
                                         if (soakLeftCapSprite != null) {
-                                            soakLeftCapSprite.draw(i_79 + i_71 - i_43, i_80, 0, i_89, 1)
+                                            soakLeftCapSprite.draw(drawX + soakLeftCapStartX - soakLeftCapOffsetX, drawY, 0, alphaMask, 1)
                                         }
                                         if (soakInnerLeftSprite != null) {
-                                            soakInnerLeftSprite.draw(i_79 + i_72 - i_45, i_80, 0, i_89, 1)
+                                            soakInnerLeftSprite.draw(drawX + soakInnerLeftStartX - soakInnerLeftOffsetX, drawY, 0, alphaMask, 1)
                                         }
                                         if (soakMiddleFillSprite != null) {
-                                            for (i_90 in 0 until i_64) {
-                                                soakMiddleFillSprite.draw(i_90 * i_40 + (i_73 + i_79 - i_44), i_80, 0, i_89, 1)
+                                            for (tileIndex in 0 until soakTileCount) {
+                                                soakMiddleFillSprite.draw(tileIndex * soakMiddleFillWidth + (soakMiddleFillStartX + drawX - soakMiddleFillOffsetX), drawY, 0, alphaMask, 1)
                                             }
                                         }
                                         if (soakRightCapSprite != null) {
-                                            soakRightCapSprite.draw(i_79 + i_74 - i_46, i_80, 0, i_89, 1)
+                                            soakRightCapSprite.draw(drawX + soakRightCapStartX - soakRightCapOffsetX, drawY, 0, alphaMask, 1)
                                         }
-                                        soakFont!!.renderPlain(soakText!!, i_75 + i_79, i_86, soakHitsplat.color or alpha, 0)
+                                        soakFont!!.renderPlain(soakText!!, soakTextStartX + drawX, soakTextDrawY, soakHitsplat.color or alpha, 0)
                                     }
                                 } else {
                                     if (leftCapSprite != null) {
-                                        leftCapSprite.draw(i_79 + i_66 - i_31, i_80)
+                                        leftCapSprite.draw(drawX + leftCapStartX - leftCapOffsetX, drawY)
                                     }
                                     if (innerLeftSprite != null) {
-                                        innerLeftSprite.draw(i_67 + i_79 - i_33, i_80)
+                                        innerLeftSprite.draw(innerLeftStartX + drawX - innerLeftOffsetX, drawY)
                                     }
                                     if (middleFillSprite != null) {
-                                        for (i in 0 until i_63) {
-                                            middleFillSprite.draw(i * i_28 + (i_68 + i_79 - i_32), i_80)
+                                        for (i in 0 until regularTileCount) {
+                                            middleFillSprite.draw(i * middleFillWidth + (middleFillStartX + drawX - middleFillOffsetX), drawY)
                                         }
                                     }
                                     if (rightCapSprite != null) {
-                                        rightCapSprite.draw(i_70 + i_79 - i_34, i_80)
+                                        rightCapSprite.draw(rightCapStartX + drawX - rightCapOffsetX, drawY)
                                     }
-                                    hitsplatFontRenderer!!.renderPlain(hitsplatText, i_79 + i_69, i_83, hitsplatType.color or 0xFF000000.toInt(), 0)
+                                    hitsplatFontRenderer!!.renderPlain(hitsplatText, drawX + textStartX, textDrawY, hitsplatType.color or 0xFF000000.toInt(), 0)
                                     if (soakHitsplat != null) {
                                         if (soakLeftCapSprite != null) {
-                                            soakLeftCapSprite.draw(i_79 + i_71 - i_43, i_80)
+                                            soakLeftCapSprite.draw(drawX + soakLeftCapStartX - soakLeftCapOffsetX, drawY)
                                         }
                                         if (soakInnerLeftSprite != null) {
-                                            soakInnerLeftSprite.draw(i_79 + i_72 - i_45, i_80)
+                                            soakInnerLeftSprite.draw(drawX + soakInnerLeftStartX - soakInnerLeftOffsetX, drawY)
                                         }
                                         if (soakMiddleFillSprite != null) {
-                                            for (i in 0 until i_64) {
-                                                soakMiddleFillSprite.draw(i_40 * i + (i_79 + i_73 - i_44), i_80)
+                                            for (i in 0 until soakTileCount) {
+                                                soakMiddleFillSprite.draw(soakMiddleFillWidth * i + (drawX + soakMiddleFillStartX - soakMiddleFillOffsetX), drawY)
                                             }
                                         }
                                         if (soakRightCapSprite != null) {
-                                            soakRightCapSprite.draw(i_74 + i_79 - i_46, i_80)
+                                            soakRightCapSprite.draw(soakRightCapStartX + drawX - soakRightCapOffsetX, drawY)
                                         }
-                                        soakFont!!.renderPlain(soakText!!, i_79 + i_75, i_86, soakHitsplat.color or 0xFF000000.toInt(), 0)
+                                        soakFont!!.renderPlain(soakText!!, drawX + soakTextStartX, soakTextDrawY, soakHitsplat.color or 0xFF000000.toInt(), 0)
                                     }
                                 }
                             }
@@ -714,13 +714,13 @@ object EntityUpdating {
             } else {
                 (Client.NPC_MAP.get((ptr - 2048).toLong()) as ObjectNode).value
             }
-            val i_92 = Client.NPC_INDEX_REFERENCES[index]
-            val obj14: Any? = if (i_92 < 2048) {
-                PlayerUpdate.players[i_92]
+            val targetEntityIndex = Client.NPC_INDEX_REFERENCES[index]
+            val targetEntity: Any? = if (targetEntityIndex < 2048) {
+                PlayerUpdate.players[targetEntityIndex]
             } else {
-                (Client.NPC_MAP.get((i_92 - 2048).toLong()) as ObjectNode).value
+                (Client.NPC_MAP.get((targetEntityIndex - 2048).toLong()) as ObjectNode).value
             }
-            drawOverheadSprite(entity as PathingEntity, obj14 as PathingEntity, --((entity as PathingEntity).overheadSpriteCount), clipLeft, clipTop)
+            drawOverheadSprite(entity as PathingEntity, targetEntity as PathingEntity, --((entity as PathingEntity).overheadSpriteCount), clipLeft, clipTop)
         }
 
         val padding = FontMetrics.defaultFontMetrics!!.bottomPadding + FontMetrics.defaultFontMetrics!!.topPadding + 2
@@ -745,48 +745,48 @@ object EntityUpdating {
 
             if (Client.overheadChatFilter == 0) {
                 var color = 16776960
-                val i_18 = Client.HINT_DETAILS[hintIndex]!!.getColorType()
+                val colorType = Client.HINT_DETAILS[hintIndex]!!.getColorType()
 
-                if (i_18 < 6) {
-                    color = Client.OVERHEAD_TEXT_COLORS[i_18]
+                if (colorType < 6) {
+                    color = Client.OVERHEAD_TEXT_COLORS[colorType]
                 }
-                if (i_18 == 6) {
+                if (colorType == 6) {
                     color = if (Client.timesSceneRendered % 20 < 10) 16711680 else 16776960
                 }
-                if (i_18 == 7) {
+                if (colorType == 7) {
                     color = if (Client.timesSceneRendered % 20 < 10) 255 else 65535
                 }
-                if (i_18 == 8) {
+                if (colorType == 8) {
                     color = if (Client.timesSceneRendered % 20 < 10) 45056 else 8454016
                 }
-                if (i_18 == 9) {
-                    val i_19 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    if (i_19 < 50) {
-                        color = i_19 * 1280 + 16711680
-                    } else if (i_19 < 100) {
-                        color = 16776960 - (i_19 - 50) * 327680
-                    } else if (i_19 < 150) {
-                        color = (i_19 - 100) * 5 + 65280
+                if (colorType == 9) {
+                    val colorProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    if (colorProgress < 50) {
+                        color = colorProgress * 1280 + 16711680
+                    } else if (colorProgress < 100) {
+                        color = 16776960 - (colorProgress - 50) * 327680
+                    } else if (colorProgress < 150) {
+                        color = (colorProgress - 100) * 5 + 65280
                     }
                 }
-                if (i_18 == 10) {
-                    val i_19 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    if (i_19 < 50) {
-                        color = i_19 * 5 + 16711680
-                    } else if (i_19 < 100) {
-                        color = 16711935 - (i_19 - 50) * 327680
-                    } else if (i_19 < 150) {
-                        color = (i_19 - 100) * 327680 + 255 - (i_19 - 100) * 5
+                if (colorType == 10) {
+                    val colorProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    if (colorProgress < 50) {
+                        color = colorProgress * 5 + 16711680
+                    } else if (colorProgress < 100) {
+                        color = 16711935 - (colorProgress - 50) * 327680
+                    } else if (colorProgress < 150) {
+                        color = (colorProgress - 100) * 327680 + 255 - (colorProgress - 100) * 5
                     }
                 }
-                if (i_18 == 11) {
-                    val i_19 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    if (i_19 < 50) {
-                        color = 16777215 - i_19 * 327685
-                    } else if (i_19 < 100) {
-                        color = (i_19 - 50) * 327685 + 65280
-                    } else if (i_19 < 150) {
-                        color = 16777215 - (i_19 - 100) * 327680
+                if (colorType == 11) {
+                    val colorProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    if (colorProgress < 50) {
+                        color = 16777215 - colorProgress * 327685
+                    } else if (colorProgress < 100) {
+                        color = (colorProgress - 50) * 327685 + 65280
+                    } else if (colorProgress < 150) {
+                        color = 16777215 - (colorProgress - 100) * 327680
                     }
                 }
 
@@ -807,29 +807,29 @@ object EntityUpdating {
                 }
                 if (drawType == 3) {
                     // Shake effect (shake:texthere)
-                    val i_21 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered, i_21)
+                    val effectProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered, effectProgress)
                 }
                 if (drawType == 4) {
                     // Scroll effect (scroll:texthere)
-                    val i_21 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    val i_116 = i_21 * (FontMetrics.defaultFontMetrics!!.getWidthNoSprites(drawnText!!) + 100) / 150
+                    val effectProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    val scrollOffset = effectProgress * (FontMetrics.defaultFontMetrics!!.getWidthNoSprites(drawnText!!) + 100) / 150
                     Renderers.activeToolkit!!.expandClipping(clipLeft + hintX - 50, clipTop, clipLeft + hintX + 50, height + clipTop)
-                    MiniMenu.minimenuHeader!!.renderPlain(drawnText, clipLeft + hintX + 50 - i_116, hintY + clipTop, drawColor, 0xFF000000.toInt())
+                    MiniMenu.minimenuHeader!!.renderPlain(drawnText, clipLeft + hintX + 50 - scrollOffset, hintY + clipTop, drawColor, 0xFF000000.toInt())
                     Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop)
                 }
                 if (drawType == 5) {
                     // Slide effect (slide:texthere)
-                    val i_21 = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    var i_116 = 0
-                    if (i_21 < 25) {
-                        i_116 = i_21 - 25
-                    } else if (i_21 > 125) {
-                        i_116 = i_21 - 125
+                    val effectProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
+                    var scrollOffset = 0
+                    if (effectProgress < 25) {
+                        scrollOffset = effectProgress - 25
+                    } else if (effectProgress > 125) {
+                        scrollOffset = effectProgress - 125
                     }
                     val paddingY = FontMetrics.defaultFontMetrics!!.topPadding + FontMetrics.defaultFontMetrics!!.bottomPadding
                     Renderers.activeToolkit!!.expandClipping(clipLeft, hintY + clipTop - paddingY - 1, clipLeft + width, hintY + clipTop + 5)
-                    MiniMenu.minimenuHeader!!.renderCentered(drawnText, clipLeft + hintX, i_116 + hintY + clipTop, drawColor, 0xFF000000.toInt())
+                    MiniMenu.minimenuHeader!!.renderCentered(drawnText, clipLeft + hintX, scrollOffset + hintY + clipTop, drawColor, 0xFF000000.toInt())
                     Renderers.activeToolkit!!.setClipping(clipLeft, clipTop, clipLeft + width, height + clipTop)
                 }
             } else {
@@ -979,14 +979,14 @@ object EntityUpdating {
             turnDirectionIndex = 0
         } else {
             if (entity.currentSequence.hasType() && !entity.currentSequence.hasSpeed()) {
-                val animationdefinitions4 = entity.currentSequence.getType()
-                if (entity.previousMovementStepsLeft > 0 && animationdefinitions4!!.interruptType == 0) {
+                val currentSeqType = entity.currentSequence.getType()
+                if (entity.previousMovementStepsLeft > 0 && currentSeqType!!.interruptType == 0) {
                     ++entity.stalledStepCount
                     currentMovementType = MovementType.STATIONARY.id.toInt()
                     turnDirectionIndex = 0
                     return
                 }
-                if (entity.previousMovementStepsLeft <= 0 && animationdefinitions4!!.moveType == 0) {
+                if (entity.previousMovementStepsLeft <= 0 && currentSeqType!!.moveType == 0) {
                     ++entity.stalledStepCount
                     currentMovementType = MovementType.STATIONARY.id.toInt()
                     turnDirectionIndex = 0
@@ -1088,14 +1088,14 @@ object EntityUpdating {
                 if (bas.unused != -1) {
                     positionDelta = positionDelta shl 9
                     if (entity.movementStepsLeft == 1) {
-                        val i_15 = entity.walkSpeedAccumulator * entity.walkSpeedAccumulator
+                        val speedSquared = entity.walkSpeedAccumulator * entity.walkSpeedAccumulator
                         val sizeX = (if (abs.x.toInt() > endX) abs.x.toInt() - endX else endX - abs.x.toInt()) shl 9
                         val sizeZ = (if (abs.z.toInt() > endZ) abs.z.toInt() - endZ else endZ - abs.z.toInt()) shl 9
                         val maxSize = Math.max(sizeX, sizeZ)
-                        val i_16 = maxSize * bas.unused * 2
-                        if (i_15 > i_16) {
+                        val decelerationThreshold = maxSize * bas.unused * 2
+                        if (speedSquared > decelerationThreshold) {
                             entity.walkSpeedAccumulator /= 2
-                        } else if (i_15 / 2 > maxSize) {
+                        } else if (speedSquared / 2 > maxSize) {
                             entity.walkSpeedAccumulator -= bas.unused
                             if (entity.walkSpeedAccumulator < 0) {
                                 entity.walkSpeedAccumulator = 0

@@ -286,7 +286,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         return false
     }
 
-    override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 
@@ -320,9 +320,9 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         return false
     }
 
-    fun setOverheadText(string_1: String) {
-        val i_5 = GameShell.gameCyclesPerSecond() * Client.ENTITY_DEFAULTS!!.npcMessageDuration
-        setHintDetails(string_1, 0, 0, i_5)
+    fun setOverheadText(text: String) {
+        val duration = GameShell.gameCyclesPerSecond() * Client.ENTITY_DEFAULTS!!.npcMessageDuration
+        setHintDetails(text, 0, 0, duration)
     }
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
@@ -330,12 +330,12 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             val projectionMatrix = getProjectionMatrix()
             val absPos = getAbsolutePosition()
             val renderingMatrix = toolkit.getRenderingMatrix()
-            val i_6 = super.yaw.getRotation()
+            val yawRotation = super.yaw.getRotation()
             val class2937 = super.scene!!.tiles[super.plane.toInt()][(absPos.coords.x.toInt() shr 9)][(absPos.coords.z.toInt() shr 9)]
             if (class2937 != null && class2937.groundDecoration != null) {
                 val groundDecoration = class2937.groundDecoration as? AbstractGroundDecoration
-                val i_8 = super.groundContouredOffsetY - (groundDecoration?.floorOffsetY?.toInt() ?: 0)
-                super.groundContouredOffsetY = (super.groundContouredOffsetY - i_8 / 10.0F).toInt()
+                val offsetDelta = super.groundContouredOffsetY - (groundDecoration?.floorOffsetY?.toInt() ?: 0)
+                super.groundContouredOffsetY = (super.groundContouredOffsetY - offsetDelta / 10.0F).toInt()
             } else {
                 super.groundContouredOffsetY = (super.groundContouredOffsetY - super.groundContouredOffsetY / 10.0F).toInt()
             }

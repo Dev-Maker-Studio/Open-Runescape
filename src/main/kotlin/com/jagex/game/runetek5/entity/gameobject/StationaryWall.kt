@@ -31,7 +31,7 @@ class StationaryWall(
     x: Int,
     y: Int,
     z: Int,
-    bool10: Boolean,
+    overlayHidden: Boolean,
     shape: Int,
     rotation: Int,
     delayShading: Boolean
@@ -55,7 +55,7 @@ class StationaryWall(
     val locId: Int = locType.id
 
     @JvmField
-    val overlayHidden: Boolean = bool10
+    val overlayHidden: Boolean = overlayHidden
 
     override val shape: Int = shape
 
@@ -66,7 +66,7 @@ class StationaryWall(
     val rotation: Byte = rotation.toByte()
 
     @JvmField
-    val interactive: Boolean = locType.hasActions != 0 && !bool10
+    val interactive: Boolean = locType.hasActions != 0 && !overlayHidden
 
     @JvmField
     val hasDynamicShadow: Boolean = toolkit.hasShadows() && locType.dynamicShadow && !overlayHidden && PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0
@@ -75,21 +75,21 @@ class StationaryWall(
     var model: Model? = null
 
     init {
-        var i_14 = 2048
+        var functionMask = 2048
         if (shadowed) {
-            i_14 = i_14 or 0x10000
+            functionMask = functionMask or 0x10000
         }
 
         if (locType.dynamicTint) {
-            i_14 = i_14 or 0x80000
+            functionMask = functionMask or 0x80000
         }
 
-        val typeResult = getTypeResult(toolkit, i_14, hasDynamicShadow)
+        val typeResult = getTypeResult(toolkit, functionMask, hasDynamicShadow)
         if (typeResult != null) {
             model = typeResult.mainObject as Model?
             cachedShadow = typeResult.companionObject as Shadow?
             if (shadowed || locType.dynamicTint) {
-                model = model!!.copy(0.toByte(), i_14, false)
+                model = model!!.copy(0.toByte(), functionMask, false)
                 if (locType.dynamicTint) {
                     val tint = Resource.mapRegion!!.dynamicTint
                     model!!.tint(tint.hue, tint.saturation, tint.lightness, tint.opacity)

@@ -23,7 +23,7 @@ class AnimatedInteractiveObject(
     toolkit: AbstractToolkit,
     loctypeList: ObjectTypeList,
     loctype: ObjectType,
-    i_5: Int,
+    plane: Int,
     collisionPlane: Int,
     x: Int,
     y: Int,
@@ -38,7 +38,7 @@ class AnimatedInteractiveObject(
     sequenceId: Int
 ) : AbstractInteractiveEntity(
     scene,
-    i_5,
+    plane,
     collisionPlane,
     x,
     y,
@@ -152,7 +152,7 @@ class AnimatedInteractiveObject(
         return hasParticles
     }
 
-    override fun castShadow(entity: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
+    override fun castShadow(entity: SceneGraphEntity, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
         throw IllegalStateException()
     }
 
