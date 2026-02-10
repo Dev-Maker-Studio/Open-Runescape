@@ -66,7 +66,7 @@ class PcmStreamScheduler : PcmStream() {
         }
     }
 
-    override fun method12228(): Int = 0
+    override fun getActiveVoiceCount(): Int = 0
 
     @Synchronized
     override fun fill(buffer: IntArray, offset: Int, length: Int) {

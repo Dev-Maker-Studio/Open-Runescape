@@ -332,7 +332,7 @@ class MusicTrack(rsbytebuffer1: Packet) : Node<MusicTrack>() {
         }
     }
 
-    fun method12165() {
+    fun buildPatchTable() {
         if (this.table == null) {
             this.table = IterableNodeMap(16)
             val ints_1 = IntArray(16)

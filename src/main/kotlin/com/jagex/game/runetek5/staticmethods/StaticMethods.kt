@@ -437,42 +437,42 @@ object StaticMethods {
     @JvmStatic
     fun method15420() {
         try {
-            if (SoundResourceManager.anInt1730 == 1) {
-                var volume = SoundResourceManager.aNodeSub15Sub21735!!.getMusicVolume()
-                if (volume > 0 && SoundResourceManager.aNodeSub15Sub21735!!.dataLoaded()) {
+            if (SoundResourceManager.songLoadState == 1) {
+                var volume = SoundResourceManager.midiPcmStream!!.getMusicVolume()
+                if (volume > 0 && SoundResourceManager.midiPcmStream!!.dataLoaded()) {
                     volume -= CutsceneBasicMovement.anInt9440
                     if (volume < 0) {
                         volume = 0
                     }
-                    SoundResourceManager.aNodeSub15Sub21735!!.setMusicVolume(volume)
+                    SoundResourceManager.midiPcmStream!!.setMusicVolume(volume)
                     return
                 }
-                SoundResourceManager.aNodeSub15Sub21735!!.turnOffSound()
-                SoundResourceManager.aNodeSub15Sub21735!!.unlinkMusicPatches()
+                SoundResourceManager.midiPcmStream!!.turnOffSound()
+                SoundResourceManager.midiPcmStream!!.unlinkMusicPatches()
                 if (AreaSoundPlayer.MUSIC_RESOURCE != null) {
-                    SoundResourceManager.anInt1730 = 2
+                    SoundResourceManager.songLoadState = 2
                 } else {
-                    SoundResourceManager.anInt1730 = 0
+                    SoundResourceManager.songLoadState = 0
                 }
                 aNodeSub79563 = null
                 aClass2505450 = null
             }
-            if (SoundResourceManager.anInt1730 == 3) {
-                var volume = SoundResourceManager.aNodeSub15Sub21735!!.getMusicVolume()
-                if (volume < AreaSoundPlayer.SOUND_LEVEL && SoundResourceManager.aNodeSub15Sub21735!!.dataLoaded()) {
+            if (SoundResourceManager.songLoadState == 3) {
+                var volume = SoundResourceManager.midiPcmStream!!.getMusicVolume()
+                if (volume < AreaSoundPlayer.SOUND_LEVEL && SoundResourceManager.midiPcmStream!!.dataLoaded()) {
                     volume += anInt4664
                     if (volume > AreaSoundPlayer.SOUND_LEVEL) {
                         volume = AreaSoundPlayer.SOUND_LEVEL
                     }
-                    SoundResourceManager.aNodeSub15Sub21735!!.setMusicVolume(volume)
+                    SoundResourceManager.midiPcmStream!!.setMusicVolume(volume)
                 } else {
                     anInt4664 = 0
-                    SoundResourceManager.anInt1730 = 0
+                    SoundResourceManager.songLoadState = 0
                 }
             }
         } catch (exception3: Exception) {
             exception3.printStackTrace()
-            SoundResourceManager.aNodeSub15Sub21735!!.turnOffSound()
+            SoundResourceManager.midiPcmStream!!.turnOffSound()
             SongReference.reset()
         }
     }
@@ -499,7 +499,7 @@ object StaticMethods {
 
     @JvmStatic
     fun method6140(): Boolean {
-        return SoundResourceManager.anInt1730 != 0
+        return SoundResourceManager.songLoadState != 0
     }
 
     @JvmStatic
@@ -636,7 +636,7 @@ object StaticMethods {
         val vorbis = INDEX36_FILE_CACHE.get(fileId.toLong())
         if (vorbis != null) {
             vorbis.aBool7995 = !vorbis.aBool7995
-            vorbis.vfReference!!.method4924(vorbis.aBool7995)
+            vorbis.vfReference!!.togglePause(vorbis.aBool7995)
         }
     }
 
@@ -644,7 +644,7 @@ object StaticMethods {
     fun method1563(fileId: Int) {
         val varbisNode = INDEX36_FILE_CACHE.get(fileId.toLong())
         if (varbisNode != null) {
-            varbisNode.vfReference!!.method4947()
+            varbisNode.vfReference!!.shutdown()
             SoundTrigger.playVorbis(varbisNode.fileId, varbisNode.sendPacket)
             varbisNode.unlink()
         }

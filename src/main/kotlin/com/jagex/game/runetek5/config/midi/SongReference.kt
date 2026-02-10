@@ -67,16 +67,16 @@ class SongReference(
         @JvmStatic
         @JvmName("method1966")
         fun method1966(): Boolean {
-            return SoundResourceManager.anInt1730 != 0 || SoundResourceManager.aNodeSub15Sub21735!!.dataLoaded()
+            return SoundResourceManager.songLoadState != 0 || SoundResourceManager.midiPcmStream!!.dataLoaded()
         }
 
         @JvmStatic
         fun reset() {
-            SoundResourceManager.anInt1730 = 0
+            SoundResourceManager.songLoadState = 0
             StaticMethods.aNodeSub79563 = null
             StaticMethods.aClass2505450 = null
             AreaSoundPlayer.MUSIC_RESOURCE = null
-            SoundResourceManager.aNodeSub15Sub27836 = null
+            SoundResourceManager.pendingMidiStream = null
         }
     }
 }

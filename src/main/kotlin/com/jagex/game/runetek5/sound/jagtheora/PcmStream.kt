@@ -17,7 +17,7 @@ abstract class PcmStream : Node<PcmStream>() {
 
     abstract fun getFirstStream(): PcmStream?
 
-    abstract fun method12228(): Int
+    abstract fun getActiveVoiceCount(): Int
 
     abstract fun fill(buffer: IntArray, offset: Int, length: Int)
 

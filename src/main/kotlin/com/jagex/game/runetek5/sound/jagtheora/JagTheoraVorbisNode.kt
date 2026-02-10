@@ -11,88 +11,88 @@ import jagtheora.vorbis.VorbisInfo
 
 class JagTheoraVorbisNode(oggStreamState: OggStreamState) : OggStreamDecoder(oggStreamState) {
 
-    @JvmField val aVorbisInfo9605 = VorbisInfo()
-    @JvmField val aVorbisComment9599 = VorbisComment()
-    @JvmField var aDouble9604: Double = 0.0
-    @JvmField var anInt9602: Int = 0
-    @JvmField var aDSPState9600: DSPState? = null
-    @JvmField var aVorbisBlock9601: VorbisBlock? = null
-    @JvmField var aClass3449598: Resampler? = null
-    @JvmField var aNodeSub15Sub19603: VorbisPcmStream? = null
+    @JvmField val vorbisInfo = VorbisInfo()
+    @JvmField val vorbisComment = VorbisComment()
+    @JvmField var granuleTime: Double = 0.0
+    @JvmField var totalSamplesRead: Int = 0
+    @JvmField var dspState: DSPState? = null
+    @JvmField var vorbisBlock: VorbisBlock? = null
+    @JvmField var resampler: Resampler? = null
+    @JvmField var pcmStream: VorbisPcmStream? = null
 
     override fun decode(oggPacket: OggPacket) {
-        if (anInt8031 < 3) {
-            val result = aVorbisInfo9605.headerIn(aVorbisComment9599, oggPacket)
+        if (packetCount < 3) {
+            val result = vorbisInfo.headerIn(vorbisComment, oggPacket)
             if (result < 0) {
                 throw IllegalStateException("$result")
             }
-            if (anInt8031 == 2) {
-                if (aVorbisInfo9605.channels > 2 || aVorbisInfo9605.channels < 1) {
-                    throw RuntimeException("${aVorbisInfo9605.channels}")
+            if (packetCount == 2) {
+                if (vorbisInfo.channels > 2 || vorbisInfo.channels < 1) {
+                    throw RuntimeException("${vorbisInfo.channels}")
                 }
-                val dspState = DSPState(aVorbisInfo9605)
-                aDSPState9600 = dspState
-                aVorbisBlock9601 = VorbisBlock(dspState)
-                aClass3449598 = Resampler(aVorbisInfo9605.rate, PcmPlayerManager.sampleRate)
-                aNodeSub15Sub19603 = VorbisPcmStream(aVorbisInfo9605.channels)
+                val newDspState = DSPState(vorbisInfo)
+                dspState = newDspState
+                vorbisBlock = VorbisBlock(newDspState)
+                resampler = Resampler(vorbisInfo.rate, PcmPlayerManager.sampleRate)
+                pcmStream = VorbisPcmStream(vorbisInfo.channels)
             }
         } else {
-            val vorbisBlock = aVorbisBlock9601!!
+            val vorbisBlock = vorbisBlock!!
             if (vorbisBlock.synthesis(oggPacket) == 0) {
-                aDSPState9600!!.blockIn(vorbisBlock)
+                dspState!!.blockIn(vorbisBlock)
             }
-            val pcmData = aDSPState9600!!.pcmOut(aVorbisInfo9605.channels)!!
-            aDouble9604 = aDSPState9600!!.granuleTime()
-            if (aDouble9604 == -1.0) {
-                aDouble9604 = anInt9602.toFloat() / aVorbisInfo9605.rate.toDouble()
+            val pcmData = dspState!!.pcmOut(vorbisInfo.channels)!!
+            granuleTime = dspState!!.granuleTime()
+            if (granuleTime == -1.0) {
+                granuleTime = totalSamplesRead.toFloat() / vorbisInfo.rate.toDouble()
             }
-            aDSPState9600!!.read(pcmData[0].size)
-            anInt9602 += pcmData[0].size
-            val monoStereoData = aNodeSub15Sub19603!!.method14814(pcmData[0].size, aDouble9604)
-            method12805(pcmData, monoStereoData.aShortArrayArray8003)
-            for (channel in 0 until aVorbisInfo9605.channels) {
-                monoStereoData.aShortArrayArray8003[channel] = aClass3449598!!.resample(monoStereoData.aShortArrayArray8003[channel])
+            dspState!!.read(pcmData[0].size)
+            totalSamplesRead += pcmData[0].size
+            val monoStereoData = pcmStream!!.allocateSampleData(pcmData[0].size, granuleTime)
+            convertFloatToPcm16(pcmData, monoStereoData.samples)
+            for (channel in 0 until vorbisInfo.channels) {
+                monoStereoData.samples[channel] = resampler!!.resample(monoStereoData.samples[channel])
             }
-            aNodeSub15Sub19603!!.method14815(monoStereoData)
+            pcmStream!!.enqueueSampleData(monoStereoData)
         }
     }
 
-    fun method14845(): VorbisPcmStream? {
-        return aNodeSub15Sub19603
+    fun getPcmStream(): VorbisPcmStream? {
+        return pcmStream
     }
 
-    fun method14847(): Int {
-        return aNodeSub15Sub19603?.method14811() ?: 0
+    fun getBufferedSampleCount(): Int {
+        return pcmStream?.getBufferedCount() ?: 0
     }
 
-    fun method14848(): Double {
-        var time = aDouble9604
-        if (aNodeSub15Sub19603 != null) {
-            time = aNodeSub15Sub19603!!.method14819()
+    fun getCurrentPlaybackTime(): Double {
+        var time = granuleTime
+        if (pcmStream != null) {
+            time = pcmStream!!.getPlaybackTime()
             if (time < 0.0) {
-                time = aDouble9604
+                time = granuleTime
             }
         }
         return time - (256.0f / PcmPlayerManager.sampleRate)
     }
 
     override fun reset() {
-        if (aVorbisBlock9601 != null) {
-            aVorbisBlock9601!!.resetPeer()
+        if (vorbisBlock != null) {
+            vorbisBlock!!.resetPeer()
         }
-        if (aDSPState9600 != null) {
-            aDSPState9600!!.resetPeer()
+        if (dspState != null) {
+            dspState!!.resetPeer()
         }
-        aVorbisComment9599.resetPeer()
-        aVorbisInfo9605.resetPeer()
-        if (aNodeSub15Sub19603 != null) {
-            aNodeSub15Sub19603!!.method14808()
+        vorbisComment.resetPeer()
+        vorbisInfo.resetPeer()
+        if (pcmStream != null) {
+            pcmStream!!.stop()
         }
     }
 
     companion object {
         @JvmStatic
-        fun method12805(floatData: Array<FloatArray>, shortData: Array<ShortArray>): Array<ShortArray> {
+        fun convertFloatToPcm16(floatData: Array<FloatArray>, shortData: Array<ShortArray>): Array<ShortArray> {
             for (channel in floatData.indices) {
                 for (sample in shortData[channel].indices) {
                     shortData[channel][sample] = (16383.0f * floatData[channel][sample]).toInt().toShort()

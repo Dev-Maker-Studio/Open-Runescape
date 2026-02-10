@@ -24,8 +24,8 @@ object SongPlayer {
     @JvmField var currentSong: SongReference? = null
     @JvmField var secondarySound: AreaSoundRange? = null
     @JvmField var primarySound: AreaSoundRange? = null
-    @JvmField var anIntArray5449: IntArray? = null
-    @JvmField var aClass2535830: PcmPlayer? = null
+    @JvmField var channelVolumes: IntArray? = null
+    @JvmField var pcmPlayer: PcmPlayer? = null
 
     @JvmStatic
     fun playSong(musicArchive: Int, volume: Int, i_2: Int) {
@@ -64,14 +64,14 @@ object SongPlayer {
     @JvmStatic
     fun transitionToNextSong(i_0: Int, musicResource: Js5ResourceProvider, musicArchive: Int, soundLevel: Int, transition: AbstractSongTransition) {
         if (i_0 > 0) {
-            SoundResourceManager.anInt1730 = 1
+            SoundResourceManager.songLoadState = 1
             AreaSoundPlayer.MUSIC_RESOURCE = musicResource
             musicArchiveId = musicArchive
             SoundResourceManager.musicFileId = 0
-            SoundResourceManager.aNodeSub15Sub27836 = null
+            SoundResourceManager.pendingMidiStream = null
             AreaSoundPlayer.SOUND_LEVEL = soundLevel
             StaticMethods.aBool1962 = false
-            CutsceneBasicMovement.anInt9440 = SoundResourceManager.aNodeSub15Sub21735!!.getMusicVolume() / i_0
+            CutsceneBasicMovement.anInt9440 = SoundResourceManager.midiPcmStream!!.getMusicVolume() / i_0
             if (CutsceneBasicMovement.anInt9440 < 1) {
                 CutsceneBasicMovement.anInt9440 = 1
             }
@@ -108,15 +108,15 @@ object SongPlayer {
 
     @JvmStatic
     fun playSong(song: SongReference, volume: Int) {
-        SoundResourceManager.aNodeSub15Sub21735!!.turnOffSound()
+        SoundResourceManager.midiPcmStream!!.turnOffSound()
         val stream = song.getStream()
         if (stream != null) {
-            aClass2535830!!.start()
-            SoundResourceManager.aNodeSub15Sub21735 = stream
-            SoundResourceManager.aNodeSub15Sub21735!!.setMusicTrack(song.getMusicTrack()!!, false)
-            SoundResourceManager.aNodeSub15Sub21735!!.setMusicVolume(volume)
-            if (aClass2535830 != null) {
-                aClass2535830!!.currentPcmStream = SoundResourceManager.aNodeSub15Sub21735
+            pcmPlayer!!.start()
+            SoundResourceManager.midiPcmStream = stream
+            SoundResourceManager.midiPcmStream!!.setMusicTrack(song.getMusicTrack()!!, false)
+            SoundResourceManager.midiPcmStream!!.setMusicVolume(volume)
+            if (pcmPlayer != null) {
+                pcmPlayer!!.currentPcmStream = SoundResourceManager.midiPcmStream
             }
             SongReference.reset()
         }
@@ -124,15 +124,15 @@ object SongPlayer {
 
     @JvmStatic
     fun method2580(i_0: Int, i_1: Int) {
-        if (SoundResourceManager.anInt1730 != 0) {
+        if (SoundResourceManager.songLoadState != 0) {
             if (i_0 < 0) {
                 for (i_3 in 0 until 16) {
-                    anIntArray5449!![i_3] = i_1
+                    channelVolumes!![i_3] = i_1
                 }
             } else {
-                anIntArray5449!![i_0] = i_1
+                channelVolumes!![i_0] = i_1
             }
         }
-        SoundResourceManager.aNodeSub15Sub21735!!.method15095(i_0, i_1)
+        SoundResourceManager.midiPcmStream!!.setChannelVolume(i_0, i_1)
     }
 }

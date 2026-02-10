@@ -174,11 +174,11 @@ object AreaSoundPlayer {
 
     @JvmStatic
     fun musicSourceUpdate(musicResource: Js5ResourceProvider, musicArchiveId: Int, soundLevel: Int) {
-        SoundResourceManager.anInt1730 = 1
+        SoundResourceManager.songLoadState = 1
         MUSIC_RESOURCE = musicResource
         SongPlayer.musicArchiveId = musicArchiveId
         SoundResourceManager.musicFileId = 0
-        SoundResourceManager.aNodeSub15Sub27836 = null
+        SoundResourceManager.pendingMidiStream = null
         SOUND_LEVEL = soundLevel
         StaticMethods.aBool1962 = false
         CutsceneBasicMovement.anInt9440 = 2
@@ -187,7 +187,7 @@ object AreaSoundPlayer {
 
     @JvmStatic
     fun setVolumeMultiplier(volume: Int) {
-        SoundResourceManager.aNodeSub15Sub21735!!.setVolumeMultiplier(volume shr 8)
+        SoundResourceManager.midiPcmStream!!.setVolumeMultiplier(volume shr 8)
     }
 
     /**
@@ -266,7 +266,7 @@ object AreaSoundPlayer {
     @JvmStatic
     fun method3690(musicResource: Js5ResourceProvider, archive: Int, volume: Int, class282Sub15Sub25: MidiPcmStream) {
         method13400(musicResource, archive, volume)
-        SoundResourceManager.aNodeSub15Sub27836 = class282Sub15Sub25
+        SoundResourceManager.pendingMidiStream = class282Sub15Sub25
     }
 
     @JvmStatic
@@ -281,15 +281,15 @@ object AreaSoundPlayer {
 
     @JvmStatic
     fun method1859(musicResource: Js5ResourceProvider, musicArchive: Int, musicFile: Int, soundLevel: Int, bool4: Boolean) {
-        SoundResourceManager.anInt1730 = 1
+        SoundResourceManager.songLoadState = 1
         MUSIC_RESOURCE = musicResource
         SongPlayer.musicArchiveId = musicArchive
         SoundResourceManager.musicFileId = musicFile
-        SoundResourceManager.aNodeSub15Sub27836 = null
+        SoundResourceManager.pendingMidiStream = null
         SOUND_LEVEL = soundLevel
         StaticMethods.aBool1962 = bool4
         CutsceneBasicMovement.anInt9440 = 10000
-        SoundResourceManager.aLong1740 = 0
+        SoundResourceManager.songStartPosition = 0
         StaticMethods.anInt4664 = 0
     }
 

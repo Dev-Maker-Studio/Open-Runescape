@@ -13,13 +13,13 @@ class MidiFileReader {
     var division: Int = 0
 
     @JvmField
-    var anInt790: Int = 0
+    var microsecondsPerBeat: Int = 0
 
     @JvmField
     var trackStarts: IntArray? = null
 
     @JvmField
-    var aLong786: Long = 0
+    var tempoTimeOffset: Long = 0
 
     @JvmField
     var startPositionTrackBuffer: IntArray? = null
@@ -28,7 +28,7 @@ class MidiFileReader {
     var trackLengths: IntArray? = null
 
     @JvmField
-    var anIntArray796: IntArray? = null
+    var runningStatus: IntArray? = null
 
     @JvmField
     val buffer = Packet()
@@ -64,7 +64,7 @@ class MidiFileReader {
         buffer.currentPosition = 10
         val count = buffer.readUShort()
         division = buffer.readUShort()
-        anInt790 = 500000
+        microsecondsPerBeat = 500000
         trackStarts = IntArray(count)
 
         var index = 0
@@ -77,13 +77,13 @@ class MidiFileReader {
             buffer.currentPosition += offset
         }
 
-        aLong786 = 0L
+        tempoTimeOffset = 0L
         startPositionTrackBuffer = IntArray(count)
 
         System.arraycopy(trackStarts, 0, startPositionTrackBuffer, 0, count)
 
         trackLengths = IntArray(count)
-        anIntArray796 = IntArray(count)
+        runningStatus = IntArray(count)
     }
 
     fun clear() {
@@ -91,7 +91,7 @@ class MidiFileReader {
         trackStarts = null
         startPositionTrackBuffer = null
         trackLengths = null
-        anIntArray796 = null
+        runningStatus = null
     }
 
     fun getTrackCount(): Int = startPositionTrackBuffer!!.size
@@ -108,8 +108,8 @@ class MidiFileReader {
         return decodeTrackFlags(track)
     }
 
-    fun method1403(i_1: Int): Long {
-        return aLong786 + i_1.toLong() * anInt790
+    fun getTickTimestamp(i_1: Int): Long {
+        return tempoTimeOffset + i_1.toLong() * microsecondsPerBeat
     }
 
     fun markTracePosition(i_1: Int) {
@@ -128,13 +128,13 @@ class MidiFileReader {
         return true
     }
 
-    fun method1406(long_1: Long) {
-        aLong786 = long_1
+    fun resetTracksFromTimestamp(long_1: Long) {
+        tempoTimeOffset = long_1
         val i_3 = startPositionTrackBuffer!!.size
 
         for (i_4 in 0 until i_3) {
             trackLengths!![i_4] = 0
-            anIntArray796!![i_4] = 0
+            runningStatus!![i_4] = 0
             buffer.currentPosition = trackStarts!![i_4]
             getTrackLength(i_4)
             startPositionTrackBuffer!![i_4] = buffer.currentPosition
@@ -154,8 +154,8 @@ class MidiFileReader {
                 val i_5 = buffer.readUMedium()
                 offset -= 3
                 val length = trackLengths!![track]
-                aLong786 += length.toLong() * (anInt790 - i_5)
-                anInt790 = i_5
+                tempoTimeOffset += length.toLong() * (microsecondsPerBeat - i_5)
+                microsecondsPerBeat = i_5
                 buffer.currentPosition += offset
                 return 2
             } else {
@@ -164,7 +164,7 @@ class MidiFileReader {
             }
         }
 
-        val b_3 = aByteArray784[initialFlags - 128]
+        val b_3 = messageDataByteCount[initialFlags - 128]
         var flags = initialFlags
 
         if (b_3 >= 1) {
@@ -184,10 +184,10 @@ class MidiFileReader {
 
         if (b_2 < 0) {
             i_5 = b_2.toInt() and 0xff
-            anIntArray796!![track] = i_5
+            runningStatus!![track] = i_5
             buffer.currentPosition++
         } else {
-            i_5 = anIntArray796!![track]
+            i_5 = runningStatus!![track]
         }
 
         if (i_5 != 240 && i_5 != 247) {
@@ -199,7 +199,7 @@ class MidiFileReader {
             val flags = buffer.buffer[buffer.currentPosition].toInt() and 0xff
             if (flags in 241..243 || flags == 246 || flags == 248 || flags in 250..252 || flags == 254) {
                 buffer.currentPosition++
-                anIntArray796!![track] = flags
+                runningStatus!![track] = flags
                 return decodeTrackFlags(track, flags)
             }
         }
@@ -210,7 +210,7 @@ class MidiFileReader {
 
     companion object {
         @JvmField
-        val aByteArray784 = byteArrayOf(
+        val messageDataByteCount = byteArrayOf(
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,

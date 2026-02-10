@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.sound.jagtheora
 
 class MusicPatchNode2 {
     @JvmField
-    var aByteArray1094: ByteArray? = null
+    var releaseEnvelopeData: ByteArray? = null
 
     @JvmField
     var volumeEnvelopeSustain: Int = 0
@@ -11,7 +11,7 @@ class MusicPatchNode2 {
     var volumeEnvelopeDecay: Int = 0
 
     @JvmField
-    var aByteArray1097: ByteArray? = null
+    var volumeEnvelopeData: ByteArray? = null
 
     @JvmField
     var vibratoLfoDelay: Int = 0
@@ -26,5 +26,5 @@ class MusicPatchNode2 {
     var volumeEnvelopeRelease: Int = 0
 
     @JvmField
-    var anInt1102: Int = 0
+    var vibratoDelay: Int = 0
 }

@@ -301,7 +301,7 @@ object InterfaceComponentRenderer {
                                         }
                                     }
                                     if (component.videoFileId != -1) {
-                                        itemDisplayText = SoundResourceManager.method2550(component.videoFileId)!!
+                                        itemDisplayText = SoundResourceManager.getVideoSubtitleText(component.videoFileId)!!
                                     }
                                     if (component === Client.activeDialogueContinue) {
                                         itemDisplayText = LocalizedText.PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!)

@@ -18,27 +18,27 @@ object SoundResourceManager {
 
     @JvmField var SOUND_EFFECT_PROVIDER: Js5ResourceProvider? = null
 
-    @JvmField var aNodeSub15Sub21735: MidiPcmStream? = null
+    @JvmField var midiPcmStream: MidiPcmStream? = null
 
     @JvmField var SOUND_MIDI_PROVIDER: Js5ResourceProvider? = null
 
     @JvmField var musicFileId = 0
 
-    @JvmField var aLong1740 = 0L
+    @JvmField var songStartPosition = 0L
 
-    @JvmField var anInt1730 = 0
+    @JvmField var songLoadState = 0
 
-    @JvmField var aNodeSub15Sub27836: MidiPcmStream? = null
+    @JvmField var pendingMidiStream: MidiPcmStream? = null
 
     @JvmStatic
-    fun method2550(i_0: Int): String? {
+    fun getVideoSubtitleText(i_0: Int): String? {
         val vorbis = StaticMethods.INDEX36_FILE_CACHE.get(i_0.toLong())
         if (vorbis != null) {
-            val class282Sub41Sub23 = vorbis.vfReference.method4935()
+            val class282Sub41Sub23 = vorbis.vfReference.getKateDecoder()
             if (class282Sub41Sub23 != null) {
-                val d_4 = vorbis.vfReference.method4923()
-                if (class282Sub41Sub23.method14702() <= d_4 && class282Sub41Sub23.method14705() >= d_4) {
-                    return class282Sub41Sub23.method14704()
+                val d_4 = vorbis.vfReference.getPlaybackTime()
+                if (class282Sub41Sub23.getStartTime() <= d_4 && class282Sub41Sub23.getEndTime() >= d_4) {
+                    return class282Sub41Sub23.getSubtitleText()
                 }
             }
         }
@@ -47,10 +47,10 @@ object SoundResourceManager {
 
     @JvmStatic
     fun discardSongData() {
-        aNodeSub15Sub21735!!.turnOffSound()
-        anInt1730 = 1
+        midiPcmStream!!.turnOffSound()
+        songLoadState = 1
         AreaSoundPlayer.MUSIC_RESOURCE = null
-        aNodeSub15Sub27836 = null
+        pendingMidiStream = null
     }
 
     @JvmStatic
@@ -58,19 +58,19 @@ object SoundResourceManager {
         SOUND_MIDI_PROVIDER = index0
         MIDI_INSTRUMENT_PROVIDER = index1
         SOUND_EFFECT_PROVIDER = index2
-        aNodeSub15Sub21735 = class282Sub15Sub23
-        SongPlayer.aClass2535830 = class2534
-        SongPlayer.anIntArray5449 = IntArray(16)
+        midiPcmStream = class282Sub15Sub23
+        SongPlayer.pcmPlayer = class2534
+        SongPlayer.channelVolumes = IntArray(16)
         for (i_6 in 0..15) {
-            SongPlayer.anIntArray5449!![i_6] = 255
+            SongPlayer.channelVolumes!![i_6] = 255
         }
         return true
     }
 
     @JvmStatic
-    fun method7730(): Boolean {
+    fun loadPendingSong(): Boolean {
         try {
-            if (anInt1730 == 2) {
+            if (songLoadState == 2) {
                 if (StaticMethods.aNodeSub79563 == null) {
                     StaticMethods.aNodeSub79563 = MusicTrack.loadMusictrack(AreaSoundPlayer.MUSIC_RESOURCE!!, SongPlayer.musicArchiveId, musicFileId)
                     if (StaticMethods.aNodeSub79563 == null) {
@@ -80,54 +80,54 @@ object SoundResourceManager {
                 if (StaticMethods.aClass2505450 == null) {
                     StaticMethods.aClass2505450 = SoundBankCache(SOUND_EFFECT_PROVIDER!!, MIDI_INSTRUMENT_PROVIDER!!)
                 }
-                var class282Sub15Sub22 = aNodeSub15Sub21735
-                if (aNodeSub15Sub27836 != null) {
-                    class282Sub15Sub22 = aNodeSub15Sub27836
+                var class282Sub15Sub22 = midiPcmStream
+                if (pendingMidiStream != null) {
+                    class282Sub15Sub22 = pendingMidiStream
                 }
                 val aNodeSub79563 = StaticMethods.aNodeSub79563!!
                 if (class282Sub15Sub22!!.ready(aNodeSub79563, SOUND_MIDI_PROVIDER!!, StaticMethods.aClass2505450!!)) {
-                    aNodeSub15Sub21735 = class282Sub15Sub22
-                    aNodeSub15Sub21735!!.method15096()
+                    midiPcmStream = class282Sub15Sub22
+                    midiPcmStream!!.resetMusicPatches()
                     if (StaticMethods.anInt4664 > 0) {
-                        anInt1730 = 3
-                        aNodeSub15Sub21735!!.setMusicVolume(Math.min(StaticMethods.anInt4664, AreaSoundPlayer.SOUND_LEVEL))
-                        for (i_3 in SongPlayer.anIntArray5449!!.indices) {
-                            aNodeSub15Sub21735!!.method15095(i_3, SongPlayer.anIntArray5449!![i_3])
-                            SongPlayer.anIntArray5449!![i_3] = 255
+                        songLoadState = 3
+                        midiPcmStream!!.setMusicVolume(Math.min(StaticMethods.anInt4664, AreaSoundPlayer.SOUND_LEVEL))
+                        for (i_3 in SongPlayer.channelVolumes!!.indices) {
+                            midiPcmStream!!.setChannelVolume(i_3, SongPlayer.channelVolumes!![i_3])
+                            SongPlayer.channelVolumes!![i_3] = 255
                         }
                     } else {
-                        anInt1730 = 0
-                        aNodeSub15Sub21735!!.setMusicVolume(AreaSoundPlayer.SOUND_LEVEL)
-                        for (i_3 in SongPlayer.anIntArray5449!!.indices) {
-                            aNodeSub15Sub21735!!.method15095(i_3, SongPlayer.anIntArray5449!![i_3])
-                            SongPlayer.anIntArray5449!![i_3] = 255
+                        songLoadState = 0
+                        midiPcmStream!!.setMusicVolume(AreaSoundPlayer.SOUND_LEVEL)
+                        for (i_3 in SongPlayer.channelVolumes!!.indices) {
+                            midiPcmStream!!.setChannelVolume(i_3, SongPlayer.channelVolumes!![i_3])
+                            SongPlayer.channelVolumes!![i_3] = 255
                         }
                     }
-                    if (aNodeSub15Sub27836 == null) {
-                        if (aLong1740 > 0L) {
-                            aNodeSub15Sub21735!!.method15100(aNodeSub79563, StaticMethods.aBool1962, aLong1740)
+                    if (pendingMidiStream == null) {
+                        if (songStartPosition > 0L) {
+                            midiPcmStream!!.setMusicTrackAtPosition(aNodeSub79563, StaticMethods.aBool1962, songStartPosition)
                         } else {
-                            aNodeSub15Sub21735!!.setMusicTrack(aNodeSub79563, StaticMethods.aBool1962)
+                            midiPcmStream!!.setMusicTrack(aNodeSub79563, StaticMethods.aBool1962)
                         }
                         if (SongPlayer.songTransition != null) {
                             SongPlayer.songTransition!!.transition()
                         }
                     }
-                    if (SongPlayer.aClass2535830 != null) {
-                        SongPlayer.aClass2535830!!.currentPcmStream = aNodeSub15Sub21735
+                    if (SongPlayer.pcmPlayer != null) {
+                        SongPlayer.pcmPlayer!!.currentPcmStream = midiPcmStream
                     }
                     StaticMethods.aNodeSub79563 = null
                     StaticMethods.aClass2505450 = null
                     AreaSoundPlayer.MUSIC_RESOURCE = null
-                    aLong1740 = 0L
-                    aNodeSub15Sub27836 = null
+                    songStartPosition = 0L
+                    pendingMidiStream = null
                     SongPlayer.songTransition = null
                     return true
                 }
             }
         } catch (exception4: Exception) {
             exception4.printStackTrace()
-            aNodeSub15Sub21735!!.turnOffSound()
+            midiPcmStream!!.turnOffSound()
             SongReference.reset()
         }
         return false

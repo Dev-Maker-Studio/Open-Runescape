@@ -211,7 +211,7 @@ open class PcmPlayer {
                                     activeStream = activeStream.nextStream
                                 } else {
                                     activeStream.fill = true
-                                    val i_13 = activeStream.method12228()
+                                    val i_13 = activeStream.getActiveVoiceCount()
                                     i_4 += i_13
                                     if (class282Sub2612 != null) {
                                         class282Sub2612.anInt7690 += i_13

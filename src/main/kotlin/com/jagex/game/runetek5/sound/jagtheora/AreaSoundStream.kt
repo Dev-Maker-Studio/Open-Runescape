@@ -8,20 +8,20 @@ abstract class AreaSoundStream : PcmStream() {
     @JvmField var end: Int = 0
     @JvmField var enableLoop: Boolean = false
     @JvmField var sampleRate: Int = 0
-    @JvmField var anInt9848: Int = 0
-    @JvmField var anInt9845: Int = 0
-    @JvmField var anInt9850: Int = 0
-    @JvmField var anInt9858: Int = 0
-    @JvmField var anInt9854: Int = 0
-    @JvmField var volume: Int = 0
-    @JvmField var anInt9853: Int = 0
-    @JvmField var anInt9847: Int = 0
-    @JvmField var anInt9849: Int = 0
-    @JvmField var anInt9852: Int = 0
-    @JvmField var anInt9851: Int = 0
+    @JvmField var currentVolume: Int = 0
+    @JvmField var leftChannelVolume: Int = 0
+    @JvmField var rightChannelVolume: Int = 0
+    @JvmField var fadeSamplesRemaining: Int = 0
+    @JvmField var loopsRemaining: Int = 0
+    @JvmField var targetVolume: Int = 0
+    @JvmField var playbackPosition: Int = 0
+    @JvmField var panPosition: Int = 0
+    @JvmField var volumeFadeDelta: Int = 0
+    @JvmField var leftVolumeFadeDelta: Int = 0
+    @JvmField var rightVolumeFadeDelta: Int = 0
 
     @Synchronized
-    fun method15308(i_1: Int) {
+    fun setPlaybackRate(i_1: Int) {
         if (this.sampleRate < 0) {
             this.sampleRate = -i_1
         } else {
@@ -30,34 +30,34 @@ abstract class AreaSoundStream : PcmStream() {
     }
 
     @Synchronized
-    fun method15311(): Boolean {
-        return this.anInt9858 != 0
+    fun isFading(): Boolean {
+        return this.fadeSamplesRemaining != 0
     }
 
     @Synchronized
     @JvmName("setVolumeWithShift")
     fun setVolume(volume: Int) {
-        method15364(volume shl 6, method15316())
+        setVolumeAndPan(volume shl 6, getPanPosition())
     }
 
     @Synchronized
-    fun method15313() {
+    fun reversePlaybackDirection() {
         this.sampleRate = (this.sampleRate xor (this.sampleRate shr 31)) + (this.sampleRate ushr 31)
         this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
     }
 
     @Synchronized
-    fun method15315(): Int {
-        return if (this.volume == Int.MIN_VALUE) 0 else this.volume
+    fun getTargetVolume(): Int {
+        return if (this.targetVolume == Int.MIN_VALUE) 0 else this.targetVolume
     }
 
     @Synchronized
-    fun method15316(): Int {
-        return if (this.anInt9847 < 0) -1 else this.anInt9847
+    fun getPanPosition(): Int {
+        return if (this.panPosition < 0) -1 else this.panPosition
     }
 
     @Synchronized
-    fun method15317(i_1: Int) {
+    fun setPlaybackPosition(i_1: Int) {
         var i_11 = i_1
         val i_3 = ((super.buffer as AbstractAudioFile).getTotalSamples() shl 8)
         if (i_11 < -1) {
@@ -68,121 +68,121 @@ abstract class AreaSoundStream : PcmStream() {
             i_11 = i_3
         }
 
-        this.anInt9853 = i_11
+        this.playbackPosition = i_11
     }
 
     @Synchronized
-    fun method15319(): Boolean {
-        return this.anInt9853 < 0 || this.anInt9853 >= ((super.buffer as AbstractAudioFile).getTotalSamples() shl 8)
+    fun isFinished(): Boolean {
+        return this.playbackPosition < 0 || this.playbackPosition >= ((super.buffer as AbstractAudioFile).getTotalSamples() shl 8)
     }
 
     @Synchronized
-    fun method15320(i_1: Int, i_2: Int) {
-        method15321(i_1, i_2, method15316())
+    fun fadeToVolume(i_1: Int, i_2: Int) {
+        fadeToVolumeAndPan(i_1, i_2, getPanPosition())
     }
 
     @Synchronized
-    fun method15321(i_1: Int, i_2: Int, i_3: Int) {
+    fun fadeToVolumeAndPan(i_1: Int, i_2: Int, i_3: Int) {
         var i_11 = i_1
         if (i_11 == 0) {
-            method15364(i_2, i_3)
+            setVolumeAndPan(i_2, i_3)
         } else {
             val i_5 = StaticMethods.method488(i_2, i_3)
             val i_6 = StaticMethods.method15390(i_2, i_3)
-            if (i_5 == this.anInt9845 && i_6 == this.anInt9850) {
-                this.anInt9858 = 0
+            if (i_5 == this.leftChannelVolume && i_6 == this.rightChannelVolume) {
+                this.fadeSamplesRemaining = 0
             } else {
-                var i_7 = i_2 - this.anInt9848
-                if (this.anInt9848 - i_2 > i_7) {
-                    i_7 = this.anInt9848 - i_2
+                var i_7 = i_2 - this.currentVolume
+                if (this.currentVolume - i_2 > i_7) {
+                    i_7 = this.currentVolume - i_2
                 }
 
-                if (i_5 - this.anInt9845 > i_7) {
-                    i_7 = i_5 - this.anInt9845
+                if (i_5 - this.leftChannelVolume > i_7) {
+                    i_7 = i_5 - this.leftChannelVolume
                 }
 
-                if (this.anInt9845 - i_5 > i_7) {
-                    i_7 = this.anInt9845 - i_5
+                if (this.leftChannelVolume - i_5 > i_7) {
+                    i_7 = this.leftChannelVolume - i_5
                 }
 
-                if (i_6 - this.anInt9850 > i_7) {
-                    i_7 = i_6 - this.anInt9850
+                if (i_6 - this.rightChannelVolume > i_7) {
+                    i_7 = i_6 - this.rightChannelVolume
                 }
 
-                if (this.anInt9850 - i_6 > i_7) {
-                    i_7 = this.anInt9850 - i_6
+                if (this.rightChannelVolume - i_6 > i_7) {
+                    i_7 = this.rightChannelVolume - i_6
                 }
 
                 if (i_11 > i_7) {
                     i_11 = i_7
                 }
 
-                this.anInt9858 = i_11
-                this.volume = i_2
-                this.anInt9847 = i_3
-                this.anInt9849 = (i_2 - this.anInt9848) / i_11
-                this.anInt9852 = (i_5 - this.anInt9845) / i_11
-                this.anInt9851 = (i_6 - this.anInt9850) / i_11
+                this.fadeSamplesRemaining = i_11
+                this.targetVolume = i_2
+                this.panPosition = i_3
+                this.volumeFadeDelta = (i_2 - this.currentVolume) / i_11
+                this.leftVolumeFadeDelta = (i_5 - this.leftChannelVolume) / i_11
+                this.rightVolumeFadeDelta = (i_6 - this.rightChannelVolume) / i_11
             }
         }
     }
 
     @Synchronized
-    fun method15322(i_1: Int) {
+    fun fadeOutAndStop(i_1: Int) {
         var i_11 = i_1
         if (i_11 == 0) {
-            method15326()
+            muteVolume()
             unlink()
-        } else if (this.anInt9845 == 0 && this.anInt9850 == 0) {
-            this.anInt9858 = 0
-            this.volume = 0
-            this.anInt9848 = 0
+        } else if (this.leftChannelVolume == 0 && this.rightChannelVolume == 0) {
+            this.fadeSamplesRemaining = 0
+            this.targetVolume = 0
+            this.currentVolume = 0
             unlink()
         } else {
-            var i_3 = -this.anInt9848
-            if (this.anInt9848 > i_3) {
-                i_3 = this.anInt9848
+            var i_3 = -this.currentVolume
+            if (this.currentVolume > i_3) {
+                i_3 = this.currentVolume
             }
 
-            if (-this.anInt9845 > i_3) {
-                i_3 = -this.anInt9845
+            if (-this.leftChannelVolume > i_3) {
+                i_3 = -this.leftChannelVolume
             }
 
-            if (this.anInt9845 > i_3) {
-                i_3 = this.anInt9845
+            if (this.leftChannelVolume > i_3) {
+                i_3 = this.leftChannelVolume
             }
 
-            if (-this.anInt9850 > i_3) {
-                i_3 = -this.anInt9850
+            if (-this.rightChannelVolume > i_3) {
+                i_3 = -this.rightChannelVolume
             }
 
-            if (this.anInt9850 > i_3) {
-                i_3 = this.anInt9850
+            if (this.rightChannelVolume > i_3) {
+                i_3 = this.rightChannelVolume
             }
 
             if (i_11 > i_3) {
                 i_11 = i_3
             }
 
-            this.anInt9858 = i_11
-            this.volume = Int.MIN_VALUE
-            this.anInt9849 = -this.anInt9848 / i_11
-            this.anInt9852 = -this.anInt9845 / i_11
-            this.anInt9851 = -this.anInt9850 / i_11
+            this.fadeSamplesRemaining = i_11
+            this.targetVolume = Int.MIN_VALUE
+            this.volumeFadeDelta = -this.currentVolume / i_11
+            this.leftVolumeFadeDelta = -this.leftChannelVolume / i_11
+            this.rightVolumeFadeDelta = -this.rightChannelVolume / i_11
         }
     }
 
     @Synchronized
-    fun method15323(): Int {
+    fun getAbsolutePlaybackRate(): Int {
         return if (this.sampleRate < 0) -this.sampleRate else this.sampleRate
     }
 
-    override fun method12228(): Int {
-        return if (this.volume == 0 && this.anInt9858 == 0) 0 else 1
+    override fun getActiveVoiceCount(): Int {
+        return if (this.targetVolume == 0 && this.fadeSamplesRemaining == 0) 0 else 1
     }
 
-    fun method15324(): Boolean {
-        var i_2 = this.volume
+    fun updateFadeState(): Boolean {
+        var i_2 = this.targetVolume
         val i_3: Int
         val i_4: Int
         if (i_2 == Int.MIN_VALUE) {
@@ -190,59 +190,59 @@ abstract class AreaSoundStream : PcmStream() {
             i_3 = 0
             i_2 = 0
         } else {
-            i_3 = StaticMethods.method488(i_2, this.anInt9847)
-            i_4 = StaticMethods.method15390(i_2, this.anInt9847)
+            i_3 = StaticMethods.method488(i_2, this.panPosition)
+            i_4 = StaticMethods.method15390(i_2, this.panPosition)
         }
 
-        if (i_2 == this.anInt9848 && i_3 == this.anInt9845 && i_4 == this.anInt9850) {
-            if (this.volume == Int.MIN_VALUE) {
-                this.volume = 0
-                this.anInt9850 = 0
-                this.anInt9845 = 0
-                this.anInt9848 = 0
+        if (i_2 == this.currentVolume && i_3 == this.leftChannelVolume && i_4 == this.rightChannelVolume) {
+            if (this.targetVolume == Int.MIN_VALUE) {
+                this.targetVolume = 0
+                this.rightChannelVolume = 0
+                this.leftChannelVolume = 0
+                this.currentVolume = 0
                 unlink()
                 return true
             } else {
-                method15332()
+                recalculateChannelVolumes()
                 return false
             }
         } else {
-            if (this.anInt9848 < i_2) {
-                this.anInt9849 = 1
-                this.anInt9858 = i_2 - this.anInt9848
-            } else if (this.anInt9848 > i_2) {
-                this.anInt9849 = -1
-                this.anInt9858 = this.anInt9848 - i_2
+            if (this.currentVolume < i_2) {
+                this.volumeFadeDelta = 1
+                this.fadeSamplesRemaining = i_2 - this.currentVolume
+            } else if (this.currentVolume > i_2) {
+                this.volumeFadeDelta = -1
+                this.fadeSamplesRemaining = this.currentVolume - i_2
             } else {
-                this.anInt9849 = 0
+                this.volumeFadeDelta = 0
             }
 
-            if (this.anInt9845 < i_3) {
-                this.anInt9852 = 1
-                if (this.anInt9858 == 0 || this.anInt9858 > i_3 - this.anInt9845) {
-                    this.anInt9858 = i_3 - this.anInt9845
+            if (this.leftChannelVolume < i_3) {
+                this.leftVolumeFadeDelta = 1
+                if (this.fadeSamplesRemaining == 0 || this.fadeSamplesRemaining > i_3 - this.leftChannelVolume) {
+                    this.fadeSamplesRemaining = i_3 - this.leftChannelVolume
                 }
-            } else if (this.anInt9845 > i_3) {
-                this.anInt9852 = -1
-                if (this.anInt9858 == 0 || this.anInt9858 > this.anInt9845 - i_3) {
-                    this.anInt9858 = this.anInt9845 - i_3
+            } else if (this.leftChannelVolume > i_3) {
+                this.leftVolumeFadeDelta = -1
+                if (this.fadeSamplesRemaining == 0 || this.fadeSamplesRemaining > this.leftChannelVolume - i_3) {
+                    this.fadeSamplesRemaining = this.leftChannelVolume - i_3
                 }
             } else {
-                this.anInt9852 = 0
+                this.leftVolumeFadeDelta = 0
             }
 
-            if (this.anInt9850 < i_4) {
-                this.anInt9851 = 1
-                if (this.anInt9858 == 0 || this.anInt9858 > i_4 - this.anInt9850) {
-                    this.anInt9858 = i_4 - this.anInt9850
+            if (this.rightChannelVolume < i_4) {
+                this.rightVolumeFadeDelta = 1
+                if (this.fadeSamplesRemaining == 0 || this.fadeSamplesRemaining > i_4 - this.rightChannelVolume) {
+                    this.fadeSamplesRemaining = i_4 - this.rightChannelVolume
                 }
-            } else if (this.anInt9850 > i_4) {
-                this.anInt9851 = -1
-                if (this.anInt9858 == 0 || this.anInt9858 > this.anInt9850 - i_4) {
-                    this.anInt9858 = this.anInt9850 - i_4
+            } else if (this.rightChannelVolume > i_4) {
+                this.rightVolumeFadeDelta = -1
+                if (this.fadeSamplesRemaining == 0 || this.fadeSamplesRemaining > this.rightChannelVolume - i_4) {
+                    this.fadeSamplesRemaining = this.rightChannelVolume - i_4
                 }
             } else {
-                this.anInt9851 = 0
+                this.rightVolumeFadeDelta = 0
             }
 
             return false
@@ -252,24 +252,24 @@ abstract class AreaSoundStream : PcmStream() {
     @Synchronized
     override fun skip(i_1: Int) {
         var i_11 = i_1
-        if (this.anInt9858 > 0) {
-            if (i_11 >= this.anInt9858) {
-                if (this.volume == Int.MIN_VALUE) {
-                    this.volume = 0
-                    this.anInt9850 = 0
-                    this.anInt9845 = 0
-                    this.anInt9848 = 0
+        if (this.fadeSamplesRemaining > 0) {
+            if (i_11 >= this.fadeSamplesRemaining) {
+                if (this.targetVolume == Int.MIN_VALUE) {
+                    this.targetVolume = 0
+                    this.rightChannelVolume = 0
+                    this.leftChannelVolume = 0
+                    this.currentVolume = 0
                     unlink()
-                    i_11 = this.anInt9858
+                    i_11 = this.fadeSamplesRemaining
                 }
 
-                this.anInt9858 = 0
-                method15332()
+                this.fadeSamplesRemaining = 0
+                recalculateChannelVolumes()
             } else {
-                this.anInt9848 += i_11 * this.anInt9849
-                this.anInt9845 += this.anInt9852 * i_11
-                this.anInt9850 += this.anInt9851 * i_11
-                this.anInt9858 -= i_11
+                this.currentVolume += i_11 * this.volumeFadeDelta
+                this.leftChannelVolume += this.leftVolumeFadeDelta * i_11
+                this.rightChannelVolume += this.rightVolumeFadeDelta * i_11
+                this.fadeSamplesRemaining -= i_11
             }
         }
 
@@ -278,135 +278,135 @@ abstract class AreaSoundStream : PcmStream() {
         val i_4 = ((super.buffer as AbstractAudioFile).getTotalSamples() shl 8)
         val i_5 = i_3 - i_2
         if (i_5 <= 0) {
-            this.anInt9854 = 0
+            this.loopsRemaining = 0
         }
 
-        if (this.anInt9853 < 0) {
+        if (this.playbackPosition < 0) {
             if (this.sampleRate <= 0) {
-                method15354()
+                cancelFade()
                 unlink()
                 return
             }
 
-            this.anInt9853 = 0
+            this.playbackPosition = 0
         }
 
-        if (this.anInt9853 >= i_4) {
+        if (this.playbackPosition >= i_4) {
             if (this.sampleRate >= 0) {
-                method15354()
+                cancelFade()
                 unlink()
                 return
             }
 
-            this.anInt9853 = i_4 - 1
+            this.playbackPosition = i_4 - 1
         }
 
-        this.anInt9853 += this.sampleRate * i_11
-        if (this.anInt9854 < 0) {
+        this.playbackPosition += this.sampleRate * i_11
+        if (this.loopsRemaining < 0) {
             if (this.enableLoop) {
                 if (this.sampleRate < 0) {
-                    if (this.anInt9853 >= i_2) {
+                    if (this.playbackPosition >= i_2) {
                         return
                     }
 
-                    this.anInt9853 = i_2 + i_2 - 1 - this.anInt9853
+                    this.playbackPosition = i_2 + i_2 - 1 - this.playbackPosition
                     this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
                 }
 
-                while (this.anInt9853 >= i_3) {
-                    this.anInt9853 = i_3 + i_3 - 1 - this.anInt9853
+                while (this.playbackPosition >= i_3) {
+                    this.playbackPosition = i_3 + i_3 - 1 - this.playbackPosition
                     this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
-                    if (this.anInt9853 >= i_2) {
+                    if (this.playbackPosition >= i_2) {
                         break
                     }
 
-                    this.anInt9853 = i_2 + i_2 - 1 - this.anInt9853
+                    this.playbackPosition = i_2 + i_2 - 1 - this.playbackPosition
                     this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
                 }
             } else if (this.sampleRate < 0) {
-                if (this.anInt9853 < i_2) {
-                    this.anInt9853 = i_3 - 1 - (i_3 - 1 - this.anInt9853) % i_5
+                if (this.playbackPosition < i_2) {
+                    this.playbackPosition = i_3 - 1 - (i_3 - 1 - this.playbackPosition) % i_5
                 }
-            } else if (this.anInt9853 >= i_3) {
-                this.anInt9853 = i_2 + (this.anInt9853 - i_2) % i_5
+            } else if (this.playbackPosition >= i_3) {
+                this.playbackPosition = i_2 + (this.playbackPosition - i_2) % i_5
             }
         } else {
-            if (this.anInt9854 > 0) {
+            if (this.loopsRemaining > 0) {
                 if (this.enableLoop) {
                     label123@ {
                         if (this.sampleRate < 0) {
-                            if (this.anInt9853 >= i_2) {
+                            if (this.playbackPosition >= i_2) {
                                 return@label123
                             }
 
-                            this.anInt9853 = i_2 + i_2 - 1 - this.anInt9853
+                            this.playbackPosition = i_2 + i_2 - 1 - this.playbackPosition
                             this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
-                            if (--this.anInt9854 == 0) {
+                            if (--this.loopsRemaining == 0) {
                                 return@label123
                             }
                         }
 
                         do {
-                            if (this.anInt9853 < i_3) {
+                            if (this.playbackPosition < i_3) {
                                 return@label123
                             }
 
-                            this.anInt9853 = i_3 + i_3 - 1 - this.anInt9853
+                            this.playbackPosition = i_3 + i_3 - 1 - this.playbackPosition
                             this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
-                            if (--this.anInt9854 == 0) {
+                            if (--this.loopsRemaining == 0) {
                                 break
                             }
 
-                            if (this.anInt9853 >= i_2) {
+                            if (this.playbackPosition >= i_2) {
                                 return@label123
                             }
 
-                            this.anInt9853 = i_2 + i_2 - 1 - this.anInt9853
+                            this.playbackPosition = i_2 + i_2 - 1 - this.playbackPosition
                             this.sampleRate = -(this.sampleRate * 1927994969) * -177305111
-                        } while (--this.anInt9854 != 0)
+                        } while (--this.loopsRemaining != 0)
                     }
                 } else {
                     var i_6: Int
                     if (this.sampleRate < 0) {
-                        if (this.anInt9853 >= i_2) {
+                        if (this.playbackPosition >= i_2) {
                             return
                         }
 
-                        i_6 = (i_3 - 1 - this.anInt9853) / i_5
-                        if (i_6 < this.anInt9854) {
-                            this.anInt9853 += i_5 * i_6
-                            this.anInt9854 -= i_6
+                        i_6 = (i_3 - 1 - this.playbackPosition) / i_5
+                        if (i_6 < this.loopsRemaining) {
+                            this.playbackPosition += i_5 * i_6
+                            this.loopsRemaining -= i_6
                             return
                         }
 
-                        this.anInt9853 += this.anInt9854 * i_5
+                        this.playbackPosition += this.loopsRemaining * i_5
                     } else {
-                        if (this.anInt9853 < i_3) {
+                        if (this.playbackPosition < i_3) {
                             return
                         }
 
-                        i_6 = (this.anInt9853 - i_2) / i_5
-                        if (i_6 < this.anInt9854) {
-                            this.anInt9853 -= i_5 * i_6
-                            this.anInt9854 -= i_6
+                        i_6 = (this.playbackPosition - i_2) / i_5
+                        if (i_6 < this.loopsRemaining) {
+                            this.playbackPosition -= i_5 * i_6
+                            this.loopsRemaining -= i_6
                             return
                         }
 
-                        this.anInt9853 -= i_5 * this.anInt9854
+                        this.playbackPosition -= i_5 * this.loopsRemaining
                     }
-                    this.anInt9854 = 0
+                    this.loopsRemaining = 0
                 }
             }
 
             if (this.sampleRate < 0) {
-                if (this.anInt9853 < 0) {
-                    this.anInt9853 = -1
-                    method15354()
+                if (this.playbackPosition < 0) {
+                    this.playbackPosition = -1
+                    cancelFade()
                     unlink()
                 }
-            } else if (this.anInt9853 >= i_4) {
-                this.anInt9853 = i_4
-                method15354()
+            } else if (this.playbackPosition >= i_4) {
+                this.playbackPosition = i_4
+                cancelFade()
                 unlink()
             }
         }
@@ -418,26 +418,26 @@ abstract class AreaSoundStream : PcmStream() {
 
     @Synchronized
     fun setNumLoops(i_1: Int) {
-        this.anInt9854 = i_1
+        this.loopsRemaining = i_1
     }
 
     @Synchronized
-    fun method15326() {
-        method15364(0, method15316())
+    fun muteVolume() {
+        setVolumeAndPan(0, getPanPosition())
     }
 
-    fun method15332() {
-        this.anInt9848 = this.volume
-        this.anInt9845 = StaticMethods.method488(this.volume, this.anInt9847)
-        this.anInt9850 = StaticMethods.method15390(this.volume, this.anInt9847)
+    fun recalculateChannelVolumes() {
+        this.currentVolume = this.targetVolume
+        this.leftChannelVolume = StaticMethods.method488(this.targetVolume, this.panPosition)
+        this.rightChannelVolume = StaticMethods.method15390(this.targetVolume, this.panPosition)
     }
 
     override fun getPriority(): Int {
-        var i_1 = this.anInt9848 * 3 shr 6
+        var i_1 = this.currentVolume * 3 shr 6
         i_1 = (i_1 xor (i_1 shr 31)) + (i_1 ushr 31)
-        if (this.anInt9854 == 0) {
-            i_1 -= i_1 * this.anInt9853 / (((super.buffer as AbstractAudioFile).getTotalSamples() shl 8))
-        } else if (this.anInt9854 >= 0) {
+        if (this.loopsRemaining == 0) {
+            i_1 -= i_1 * this.playbackPosition / (((super.buffer as AbstractAudioFile).getTotalSamples() shl 8))
+        } else if (this.loopsRemaining >= 0) {
             i_1 -= i_1 * this.start / ((super.buffer as AbstractAudioFile).getTotalSamples())
         }
 
@@ -445,8 +445,8 @@ abstract class AreaSoundStream : PcmStream() {
     }
 
     @Synchronized
-    fun method15340(i_1: Int) {
-        method15364(method15315(), i_1)
+    fun setPanPosition(i_1: Int) {
+        setVolumeAndPan(getTargetVolume(), i_1)
     }
 
     override abstract fun fill(var1: IntArray, var2: Int, var3: Int)
@@ -455,22 +455,22 @@ abstract class AreaSoundStream : PcmStream() {
         return null
     }
 
-    fun method15354() {
-        if (this.anInt9858 != 0) {
-            if (this.volume == Int.MIN_VALUE) {
-                this.volume = 0
+    fun cancelFade() {
+        if (this.fadeSamplesRemaining != 0) {
+            if (this.targetVolume == Int.MIN_VALUE) {
+                this.targetVolume = 0
             }
 
-            this.anInt9858 = 0
-            method15332()
+            this.fadeSamplesRemaining = 0
+            recalculateChannelVolumes()
         }
     }
 
     @Synchronized
-    fun method15364(i_1: Int, i_2: Int) {
-        this.volume = i_1
-        this.anInt9847 = i_2
-        this.anInt9858 = 0
-        method15332()
+    fun setVolumeAndPan(i_1: Int, i_2: Int) {
+        this.targetVolume = i_1
+        this.panPosition = i_2
+        this.fadeSamplesRemaining = 0
+        recalculateChannelVolumes()
     }
 }

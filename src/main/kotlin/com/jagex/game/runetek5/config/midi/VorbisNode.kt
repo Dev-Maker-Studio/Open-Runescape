@@ -46,24 +46,24 @@ class VorbisNode(
         fun method15536() {
             var node = StaticMethods.INDEX36_FILE_CACHE.first()
             while (node != null) {
-                if (node.vfReference.method4921()) {
+                if (node.vfReference.isPlaybackComplete()) {
                     StaticMethods.method1563(node.fileId)
                 } else {
-                    node.vfReference.method13447()
+                    node.vfReference.prefetchChunks()
 
                     try {
-                        node.vfReference.method4932()
+                        node.vfReference.processStreams()
                     } catch (exception: Exception) {
                         PacketEncoder.sendErrorToServer("" + node.fileId, exception)
                         StaticMethods.method1563(node.fileId)
                     }
 
                     if (!node.aBool8000 && !node.aBool7995) {
-                        val vorbisNode = node.vfReference.method4914()
+                        val vorbisNode = node.vfReference.getVorbisDecoder()
                         if (vorbisNode != null) {
-                            val audioStream = vorbisNode.method14845()
+                            val audioStream = vorbisNode.getPcmStream()
                             if (audioStream != null) {
-                                audioStream.method14820(node.anInt7997)
+                                audioStream.setVolume(node.anInt7997)
                                 AmbientSound.gameSounds?.addSubStream(audioStream)
                                 node.aBool8000 = true
                             }
@@ -78,7 +78,7 @@ class VorbisNode(
         fun method8858(toolkit: AbstractToolkit, fileId: Int): NativeSprite? {
             val vorbisNode = StaticMethods.INDEX36_FILE_CACHE.get(fileId.toLong())
             if (vorbisNode != null) {
-                val jagTheoraNode = vorbisNode.vfReference.method4918()
+                val jagTheoraNode = vorbisNode.vfReference.getTheoraDecoder()
                 vorbisNode.aBool7996 = true
                 if (jagTheoraNode != null) {
                     SPRITE_GENERATOR.toolkit = toolkit

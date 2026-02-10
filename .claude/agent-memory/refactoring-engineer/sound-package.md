@@ -1,24 +1,24 @@
 # Sound Package Deobfuscation Notes
 
-## AreaSoundStream.kt (parent class for all audio streams)
-### Fields (10 renamed)
-- `anInt9848` -> `monoVolume`, `anInt9845` -> `leftVolume`, `anInt9850` -> `rightVolume`
-- `anInt9847` -> `panPosition`, `anInt9858` -> `volumeRampRemaining`
-- `anInt9849` -> `monoVolumeStep`, `anInt9852` -> `leftVolumeStep`, `anInt9851` -> `rightVolumeStep`
-- `anInt9854` -> `loopCount`, `anInt9853` -> `samplePosition`
+## AreaSoundStream.kt (parent class for all audio streams) -- APPLIED
+### Fields (11 renamed)
+- `anInt9848` -> `currentVolume`, `anInt9845` -> `leftChannelVolume`, `anInt9850` -> `rightChannelVolume`
+- `anInt9847` -> `panPosition`, `anInt9858` -> `fadeSamplesRemaining`
+- `anInt9849` -> `volumeFadeDelta`, `anInt9852` -> `leftVolumeFadeDelta`, `anInt9851` -> `rightVolumeFadeDelta`
+- `anInt9854` -> `loopsRemaining`, `anInt9853` -> `playbackPosition`, `volume` -> `targetVolume`
 
-### Methods (17 renamed)
-- `method15308` -> `setSampleRate`, `method15311` -> `isVolumeRamping`
-- `method15313` -> `reversePlaybackDirection`, `method15315` -> `getEffectiveVolume`
-- `method15316` -> `getEffectivePan`, `method15317` -> `setSamplePosition`
-- `method15319` -> `isPlaybackComplete`, `method15320` -> `rampToVolume`
-- `method15321` -> `rampToVolumeAndPan`, `method15322` -> `fadeOutAndStop`
-- `method15323` -> `getAbsoluteSampleRate`, `method15324` -> `updateVolumeRamp`
-- `method15326` -> `muteVolume`, `method15332` -> `computeChannelVolumes`
-- `method15340` -> `setPan`, `method15354` -> `cancelVolumeRamp`
-- `method15364` -> `setVolumeAndPan`
+### Methods (18 renamed)
+- `method15308` -> `setPlaybackRate`, `method15311` -> `isFading`
+- `method15313` -> `reversePlaybackDirection`, `method15315` -> `getTargetVolume`
+- `method15316` -> `getPanPosition`, `method15317` -> `setPlaybackPosition`
+- `method15319` -> `isFinished`, `method15320` -> `fadeToVolume`
+- `method15321` -> `fadeToVolumeAndPan`, `method15322` -> `fadeOutAndStop`
+- `method15323` -> `getAbsolutePlaybackRate`, `method15324` -> `updateFadeState`
+- `method15326` -> `muteVolume`, `method15332` -> `recalculateChannelVolumes`
+- `method15340` -> `setPanPosition`, `method15354` -> `cancelFade`
+- `method15364` -> `setVolumeAndPan`, `method12228` -> `getActiveVoiceCount`
 
-## MidiPcmStream.kt (MIDI-to-PCM converter)
+## MidiPcmStream.kt (MIDI-to-PCM converter) -- APPLIED
 ### Fields (12 renamed)
 - `anInt9719` -> `queuedTrackTick`, `aBool9724` -> `queuedAllSoundOff`
 - `anIntArray9702` -> `channelVolume`, `anIntArray9698` -> `defaultProgram`
@@ -37,7 +37,7 @@
 - `method15128` -> `updatePatchNode`, `method15131` -> `loadAndPlayTrack`
 - `method15188` -> `setKeyPressure`
 
-## MusicPatchNode.kt (per-note state)
+## MusicPatchNode.kt (per-note state) -- APPLIED
 ### Fields (11 renamed)
 - `anInt7571` -> `vibratoPhase`, `anInt7574` -> `portamentoPitchOffset`
 - `anInt7575` -> `portamentoFactor`, `anInt7576` -> `volumeEnvelopeTime`
@@ -46,10 +46,10 @@
 - `anInt7581` -> `tickCounter`, `anInt7583` -> `retriggerPhase`
 - `anInt7584` -> `tickSampleLength`
 
-## MusicPatchPcmStream.kt
+## MusicPatchPcmStream.kt -- APPLIED
 - `aNodeSub15Sub29753` -> `midiPcmStream`, `aNodeSub15Sub49755` -> `fadeOutScheduler`
 
-## MusicPatchNode2.kt
+## MusicPatchNode2.kt -- APPLIED
 - `aByteArray1097` -> `volumeEnvelopeData`, `aByteArray1094` -> `releaseEnvelopeData`
 - `anInt1102` -> `vibratoDelay`
 
@@ -65,13 +65,16 @@
 - `method488` -> `computeLeftChannelGain`, `method15390` -> `computeRightChannelGain`
 - `method6140` -> `isMusicLoading`
 
-## MidiFileReader.kt
+## MidiFileReader.kt -- APPLIED
 - `anInt790` -> `microsecondsPerBeat`, `aLong786` -> `tempoTimeOffset`
 - `anIntArray796` -> `runningStatus`, `aByteArray784` -> `messageDataByteCount`
 - `method1403` -> `getTickTimestamp`, `method1406` -> `resetTracksFromTimestamp`
 
-## MusicTrack.kt
+## MusicTrack.kt -- APPLIED
 - `method12165` -> `buildPatchTable`
+
+## MusicPatch.kt -- APPLIED
+- `method6349` -> `divideRounded`
 
 ## AmbientSound.kt
 - `aNodeSub26Sub1Sub18082` -> `soundEffectAudioBuffer` (AudioBuffer for looping sound)

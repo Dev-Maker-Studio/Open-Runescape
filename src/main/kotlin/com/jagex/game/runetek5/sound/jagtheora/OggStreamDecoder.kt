@@ -6,17 +6,17 @@ import jagtheora.ogg.OggStreamState
 
 @Suppress("UNCHECKED_CAST")
 abstract class OggStreamDecoder(
-    @JvmField val anOggStreamState8032: OggStreamState
+    @JvmField val streamState: OggStreamState
 ) : Node<Any?>() {
 
     @JvmField
-    var anInt8031: Int = 0
+    var packetCount: Int = 0
 
     abstract fun reset()
 
-    fun method13361(oggpacket1: OggPacket) {
+    fun processPacket(oggpacket1: OggPacket) {
         decode(oggpacket1)
-        ++anInt8031
+        ++packetCount
     }
 
     abstract fun decode(var1: OggPacket)

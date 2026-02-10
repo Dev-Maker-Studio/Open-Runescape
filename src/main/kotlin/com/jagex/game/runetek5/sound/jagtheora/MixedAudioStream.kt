@@ -14,15 +14,15 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
             this.enableLoop = buffer.enableLoop
         }
         this.sampleRate = sampleRate
-        this.volume = volume
-        this.anInt9847 = i_4
-        this.anInt9853 = 0
-        method15332()
+        this.targetVolume = volume
+        this.panPosition = i_4
+        this.playbackPosition = 0
+        recalculateChannelVolumes()
     }
 
     @Synchronized
     override fun fill(ints_1: IntArray, i_2: Int, i_3: Int) {
-        if (super.volume == 0 && super.anInt9858 == 0) {
+        if (super.targetVolume == 0 && super.fadeSamplesRemaining == 0) {
             skip(i_3)
         } else {
             val i_4 = super.start shl 8
@@ -30,168 +30,168 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
             val i_6 = ((buffer as MixedAudioBuffer).samples.size shl 8)
             val i_7 = i_5 - i_4
             if (i_7 <= 0) {
-                super.anInt9854 = 0
+                super.loopsRemaining = 0
             }
 
             var i_8 = i_2
             val i_3_end = i_3 + i_2
-            if (super.anInt9853 < 0) {
+            if (super.playbackPosition < 0) {
                 if (super.sampleRate <= 0) {
-                    method15354()
+                    cancelFade()
                     unlink()
                     return
                 }
 
-                super.anInt9853 = 0
+                super.playbackPosition = 0
             }
 
-            if (super.anInt9853 >= i_6) {
+            if (super.playbackPosition >= i_6) {
                 if (super.sampleRate >= 0) {
-                    method15354()
+                    cancelFade()
                     unlink()
                     return
                 }
 
-                super.anInt9853 = i_6 - 1
+                super.playbackPosition = i_6 - 1
             }
 
-            if (super.anInt9854 < 0) {
+            if (super.loopsRemaining < 0) {
                 if (super.enableLoop) {
                     if (super.sampleRate < 0) {
-                        i_8 = method16018(ints_1, i_2, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
-                        if (super.anInt9853 >= i_4) {
+                        i_8 = mixSamplesBackward(ints_1, i_2, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
+                        if (super.playbackPosition >= i_4) {
                             return
                         }
 
-                        super.anInt9853 = i_4 + i_4 - 1 - super.anInt9853
+                        super.playbackPosition = i_4 + i_4 - 1 - super.playbackPosition
                         super.sampleRate = -(super.sampleRate * 1927994969) * -177305111
                     }
 
                     while (true) {
-                        i_8 = method15990(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
-                        if (super.anInt9853 < i_5) {
+                        i_8 = mixSamplesForward(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
+                        if (super.playbackPosition < i_5) {
                             break
                         }
 
-                        super.anInt9853 = i_5 + i_5 - 1 - super.anInt9853
+                        super.playbackPosition = i_5 + i_5 - 1 - super.playbackPosition
                         super.sampleRate = -(super.sampleRate * 1927994969) * -177305111
-                        i_8 = method16018(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
-                        if (super.anInt9853 >= i_4) {
+                        i_8 = mixSamplesBackward(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
+                        if (super.playbackPosition >= i_4) {
                             break
                         }
 
-                        super.anInt9853 = i_4 + i_4 - 1 - super.anInt9853
+                        super.playbackPosition = i_4 + i_4 - 1 - super.playbackPosition
                         super.sampleRate = -(super.sampleRate * 1927994969) * -177305111
                     }
                 } else if (super.sampleRate < 0) {
                     while (true) {
-                        i_8 = method16018(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
-                        if (super.anInt9853 >= i_4) {
+                        i_8 = mixSamplesBackward(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
+                        if (super.playbackPosition >= i_4) {
                             break
                         }
 
-                        super.anInt9853 = i_5 - 1 - (i_5 - 1 - super.anInt9853) % i_7
+                        super.playbackPosition = i_5 - 1 - (i_5 - 1 - super.playbackPosition) % i_7
                     }
                 } else {
                     while (true) {
-                        i_8 = method15990(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
-                        if (super.anInt9853 < i_5) {
+                        i_8 = mixSamplesForward(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
+                        if (super.playbackPosition < i_5) {
                             break
                         }
 
-                        super.anInt9853 = i_4 + (super.anInt9853 - i_4) % i_7
+                        super.playbackPosition = i_4 + (super.playbackPosition - i_4) % i_7
                     }
                 }
             } else {
-                if (super.anInt9854 > 0) {
+                if (super.loopsRemaining > 0) {
                     if (super.enableLoop) {
                         run loop@ {
                             if (super.sampleRate < 0) {
-                                i_8 = method16018(ints_1, i_2, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
-                                if (super.anInt9853 >= i_4) {
+                                i_8 = mixSamplesBackward(ints_1, i_2, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
+                                if (super.playbackPosition >= i_4) {
                                     return@fill
                                 }
 
-                                super.anInt9853 = i_4 + i_4 - 1 - super.anInt9853
+                                super.playbackPosition = i_4 + i_4 - 1 - super.playbackPosition
                                 super.sampleRate = -(super.sampleRate * 1927994969) * -177305111
-                                if (--super.anInt9854 == 0) {
+                                if (--super.loopsRemaining == 0) {
                                     return@loop
                                 }
                             }
 
                             do {
-                                i_8 = method15990(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
-                                if (super.anInt9853 < i_5) {
+                                i_8 = mixSamplesForward(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
+                                if (super.playbackPosition < i_5) {
                                     return@fill
                                 }
 
-                                super.anInt9853 = i_5 + i_5 - 1 - super.anInt9853
+                                super.playbackPosition = i_5 + i_5 - 1 - super.playbackPosition
                                 super.sampleRate = -(super.sampleRate * 1927994969) * -177305111
-                                if (--super.anInt9854 == 0) {
+                                if (--super.loopsRemaining == 0) {
                                     break
                                 }
 
-                                i_8 = method16018(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
-                                if (super.anInt9853 >= i_4) {
+                                i_8 = mixSamplesBackward(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
+                                if (super.playbackPosition >= i_4) {
                                     return@fill
                                 }
 
-                                super.anInt9853 = i_4 + i_4 - 1 - super.anInt9853
+                                super.playbackPosition = i_4 + i_4 - 1 - super.playbackPosition
                                 super.sampleRate = -(super.sampleRate * 1927994969) * -177305111
-                            } while (--super.anInt9854 != 0)
+                            } while (--super.loopsRemaining != 0)
                         }
                     } else {
                         var i_9: Int
                         if (super.sampleRate < 0) {
                             while (true) {
-                                i_8 = method16018(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
-                                if (super.anInt9853 >= i_4) {
+                                i_8 = mixSamplesBackward(ints_1, i_8, i_4, i_3_end, ((buffer as MixedAudioBuffer).samples[super.end - 1]).toInt())
+                                if (super.playbackPosition >= i_4) {
                                     return
                                 }
 
-                                i_9 = (i_5 - 1 - super.anInt9853) / i_7
-                                if (i_9 >= super.anInt9854) {
-                                    super.anInt9853 += i_7 * super.anInt9854
-                                    super.anInt9854 = 0
+                                i_9 = (i_5 - 1 - super.playbackPosition) / i_7
+                                if (i_9 >= super.loopsRemaining) {
+                                    super.playbackPosition += i_7 * super.loopsRemaining
+                                    super.loopsRemaining = 0
                                     break
                                 }
 
-                                super.anInt9853 += i_7 * i_9
-                                super.anInt9854 -= i_9
+                                super.playbackPosition += i_7 * i_9
+                                super.loopsRemaining -= i_9
                             }
                         } else {
                             while (true) {
-                                i_8 = method15990(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
-                                if (super.anInt9853 < i_5) {
+                                i_8 = mixSamplesForward(ints_1, i_8, i_5, i_3_end, ((buffer as MixedAudioBuffer).samples[super.start]).toInt())
+                                if (super.playbackPosition < i_5) {
                                     return
                                 }
 
-                                i_9 = (super.anInt9853 - i_4) / i_7
-                                if (i_9 >= super.anInt9854) {
-                                    super.anInt9853 -= i_7 * super.anInt9854
-                                    super.anInt9854 = 0
+                                i_9 = (super.playbackPosition - i_4) / i_7
+                                if (i_9 >= super.loopsRemaining) {
+                                    super.playbackPosition -= i_7 * super.loopsRemaining
+                                    super.loopsRemaining = 0
                                     break
                                 }
 
-                                super.anInt9853 -= i_7 * i_9
-                                super.anInt9854 -= i_9
+                                super.playbackPosition -= i_7 * i_9
+                                super.loopsRemaining -= i_9
                             }
                         }
                     }
                 }
 
                 if (super.sampleRate < 0) {
-                    method16018(ints_1, i_8, 0, i_3_end, 0)
-                    if (super.anInt9853 < 0) {
-                        super.anInt9853 = -1
-                        method15354()
+                    mixSamplesBackward(ints_1, i_8, 0, i_3_end, 0)
+                    if (super.playbackPosition < 0) {
+                        super.playbackPosition = -1
+                        cancelFade()
                         unlink()
                     }
                 } else {
-                    method15990(ints_1, i_8, i_6, i_3_end, 0)
-                    if (super.anInt9853 >= i_6) {
-                        super.anInt9853 = i_6
-                        method15354()
+                    mixSamplesForward(ints_1, i_8, i_6, i_3_end, 0)
+                    if (super.playbackPosition >= i_6) {
+                        super.playbackPosition = i_6
+                        cancelFade()
                         unlink()
                     }
                 }
@@ -200,101 +200,101 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
 
     }
 
-    fun method15990(ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Int {
+    fun mixSamplesForward(ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Int {
         var i_2_var = i_2
         do {
-            if (super.anInt9858 <= 0) {
-                if (super.sampleRate == 256 && (super.anInt9853 and 0xff) == 0) {
+            if (super.fadeSamplesRemaining <= 0) {
+                if (super.sampleRate == 256 && (super.playbackPosition and 0xff) == 0) {
                     if (PcmPlayerManager.stereo) {
-                        return method16031((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, i_4, i_3, this)
+                        return mixForwardStereoConstant((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, i_4, i_3, this)
                     }
 
-                    return method15992((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, i_4, i_3, this)
+                    return mixForwardMonoConstant((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, i_4, i_3, this)
                 }
 
                 if (PcmPlayerManager.stereo) {
-                    return method16019((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, i_4, i_3, this, super.sampleRate, i_5)
+                    return mixForwardStereoInterpolated((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, i_4, i_3, this, super.sampleRate, i_5)
                 }
 
-                return method15996((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, i_4, i_3, this, super.sampleRate, i_5)
+                return mixForwardMonoInterpolated((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, i_4, i_3, this, super.sampleRate, i_5)
             }
 
-            var i_6 = i_2_var + super.anInt9858
+            var i_6 = i_2_var + super.fadeSamplesRemaining
             if (i_6 > i_4) {
                 i_6 = i_4
             }
 
-            super.anInt9858 += i_2_var
-            if (super.sampleRate == 256 && (super.anInt9853 and 0xff) == 0) {
+            super.fadeSamplesRemaining += i_2_var
+            if (super.sampleRate == 256 && (super.playbackPosition and 0xff) == 0) {
                 if (PcmPlayerManager.stereo) {
-                    i_2_var = method16001((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this)
+                    i_2_var = mixForwardStereoConstantFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, super.leftVolumeFadeDelta, super.rightVolumeFadeDelta, i_6, i_3, this)
                 } else {
-                    i_2_var = method16000((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, super.anInt9849, i_6, i_3, this)
+                    i_2_var = mixForwardMonoConstantFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, super.volumeFadeDelta, i_6, i_3, this)
                 }
             } else if (PcmPlayerManager.stereo) {
-                i_2_var = method16005((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this, super.sampleRate, i_5)
+                i_2_var = mixForwardStereoInterpolatedFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, super.leftVolumeFadeDelta, super.rightVolumeFadeDelta, i_6, i_3, this, super.sampleRate, i_5)
             } else {
-                i_2_var = method16004((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, super.anInt9849, i_6, i_3, this, super.sampleRate, i_5)
+                i_2_var = mixForwardMonoInterpolatedFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, super.volumeFadeDelta, i_6, i_3, this, super.sampleRate, i_5)
             }
 
-            super.anInt9858 -= i_2_var
-            if (super.anInt9858 != 0) {
+            super.fadeSamplesRemaining -= i_2_var
+            if (super.fadeSamplesRemaining != 0) {
                 return i_2_var
             }
-        } while (!method15324())
+        } while (!updateFadeState())
 
         return i_4
     }
 
-    fun method16018(ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Int {
+    fun mixSamplesBackward(ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Int {
         var i_2_var = i_2
         do {
-            if (super.anInt9858 <= 0) {
-                if (super.sampleRate == -256 && (super.anInt9853 and 0xff) == 0) {
+            if (super.fadeSamplesRemaining <= 0) {
+                if (super.sampleRate == -256 && (super.playbackPosition and 0xff) == 0) {
                     if (PcmPlayerManager.stereo) {
-                        return method15995((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, i_4, i_3, this)
+                        return mixBackwardStereoConstant((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, i_4, i_3, this)
                     }
 
-                    return method15991((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, i_4, i_3, this)
+                    return mixBackwardMonoConstant((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, i_4, i_3, this)
                 }
 
                 if (PcmPlayerManager.stereo) {
-                    return method15999((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, i_4, i_3, this, super.sampleRate, i_5)
+                    return mixBackwardStereoInterpolated((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, i_4, i_3, this, super.sampleRate, i_5)
                 }
 
-                return method15998((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, i_4, i_3, this, super.sampleRate, i_5)
+                return mixBackwardMonoInterpolated((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, i_4, i_3, this, super.sampleRate, i_5)
             }
 
-            var i_6 = i_2_var + super.anInt9858
+            var i_6 = i_2_var + super.fadeSamplesRemaining
             if (i_6 > i_4) {
                 i_6 = i_4
             }
 
-            super.anInt9858 += i_2_var
-            if (super.sampleRate == -256 && (super.anInt9853 and 0xff) == 0) {
+            super.fadeSamplesRemaining += i_2_var
+            if (super.sampleRate == -256 && (super.playbackPosition and 0xff) == 0) {
                 if (PcmPlayerManager.stereo) {
-                    i_2_var = method16003((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this)
+                    i_2_var = mixBackwardStereoConstantFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, super.leftVolumeFadeDelta, super.rightVolumeFadeDelta, i_6, i_3, this)
                 } else {
-                    i_2_var = method16002((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, super.anInt9849, i_6, i_3, this)
+                    i_2_var = mixBackwardMonoConstantFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, super.volumeFadeDelta, i_6, i_3, this)
                 }
             } else if (PcmPlayerManager.stereo) {
-                i_2_var = method16007((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9845, super.anInt9850, super.anInt9852, super.anInt9851, i_6, i_3, this, super.sampleRate, i_5)
+                i_2_var = mixBackwardStereoInterpolatedFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.leftChannelVolume, super.rightChannelVolume, super.leftVolumeFadeDelta, super.rightVolumeFadeDelta, i_6, i_3, this, super.sampleRate, i_5)
             } else {
-                i_2_var = method16006((buffer as MixedAudioBuffer).samples, ints_1, super.anInt9853, i_2_var, super.anInt9848, super.anInt9849, i_6, i_3, this, super.sampleRate, i_5)
+                i_2_var = mixBackwardMonoInterpolatedFading((buffer as MixedAudioBuffer).samples, ints_1, super.playbackPosition, i_2_var, super.currentVolume, super.volumeFadeDelta, i_6, i_3, this, super.sampleRate, i_5)
             }
 
-            super.anInt9858 -= i_2_var
-            if (super.anInt9858 != 0) {
+            super.fadeSamplesRemaining -= i_2_var
+            if (super.fadeSamplesRemaining != 0) {
                 return i_2_var
             }
-        } while (!method15324())
+        } while (!updateFadeState())
 
         return i_4
     }
 
     companion object {
         @JvmStatic
-        fun method15991(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_6: Int, i_7: Int, class282Sub15Sub5Sub28: MixedAudioStream): Int {
+        fun mixBackwardMonoConstant(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_6: Int, i_7: Int, class282Sub15Sub5Sub28: MixedAudioStream): Int {
             var i_51 = 0
             var i_2_var = i_2 shr 8
             var i_3_var = i_3
@@ -317,12 +317,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_1[i_3_var++] += bytes_0[i_2_var--] * i_4_var
             }
 
-            class282Sub15Sub5Sub28.anInt9853 = i_2_var shl 8
+            class282Sub15Sub5Sub28.playbackPosition = i_2_var shl 8
             return i_3_var
         }
 
         @JvmStatic
-        fun method15992(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_6: Int, i_7: Int, class282Sub15Sub5Sub28: MixedAudioStream): Int {
+        fun mixForwardMonoConstant(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_6: Int, i_7: Int, class282Sub15Sub5Sub28: MixedAudioStream): Int {
             var i_51 = 0
             var i_2_var = i_2 shr 8
             var i_3_var = i_3
@@ -345,12 +345,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_1[i_3_var++] += bytes_0[i_2_var++] * i_4_var
             }
 
-            class282Sub15Sub5Sub28.anInt9853 = i_2_var shl 8
+            class282Sub15Sub5Sub28.playbackPosition = i_2_var shl 8
             return i_3_var
         }
 
         @JvmStatic
-        fun method15995(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream): Int {
+        fun mixBackwardStereoConstant(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream): Int {
             var i_71 = 0
             var i_3_var = i_3 shr 8
             var i_4_var = i_4
@@ -387,12 +387,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_2[i_4_var++] += b_11 * i_6_var
             }
 
-            class282Sub15Sub5Sub210.anInt9853 = i_3_var shl 8
+            class282Sub15Sub5Sub210.playbackPosition = i_3_var shl 8
             return i_4_var shr 1
         }
 
         @JvmStatic
-        fun method15996(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream, i_11: Int, i_12: Int): Int {
+        fun mixForwardMonoInterpolated(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream, i_11: Int, i_12: Int): Int {
             var i_71 = 0
             var i_13 = 0
             var i_4_var = i_4
@@ -417,12 +417,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_3[i_5_var++] += ((b_13.toInt() shl 8) + (i_13 - b_13) * (i_4_var and 0xff)) * i_6 shr 6
             }
 
-            class282Sub15Sub5Sub210.anInt9853 = i_4_var
+            class282Sub15Sub5Sub210.playbackPosition = i_4_var
             return i_5_var
         }
 
         @JvmStatic
-        fun method15998(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream, i_11: Int, i_12: Int): Int {
+        fun mixBackwardMonoInterpolated(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream, i_11: Int, i_12: Int): Int {
             var i_71 = 0
             var i_13 = 0
             var i_4_var = i_4
@@ -448,12 +448,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_3[i_5_var++] += ((i_01.toInt() shl 8) + (bytes_2[i_4_var shr 8] - i_01) * (i_4_var and 0xff)) * i_6 shr 6
             }
 
-            class282Sub15Sub5Sub210.anInt9853 = i_4_var
+            class282Sub15Sub5Sub210.playbackPosition = i_4_var
             return i_5_var
         }
 
         @JvmStatic
-        fun method15999(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
+        fun mixBackwardStereoInterpolated(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
             var i_81 = 0
             var i_11 = 0
             var i_01 = 0
@@ -485,12 +485,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_3[i_5_var++] += i_01 * i_7 shr 6
             }
 
-            class282Sub15Sub5Sub211.anInt9853 = i_4_var
+            class282Sub15Sub5Sub211.playbackPosition = i_4_var
             return i_5_var shr 1
         }
 
         @JvmStatic
-        fun method16000(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_7: Int, i_8: Int, class282Sub15Sub5Sub29: MixedAudioStream): Int {
+        fun mixForwardMonoConstantFading(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_7: Int, i_8: Int, class282Sub15Sub5Sub29: MixedAudioStream): Int {
             var i_61 = 0
             var i_2_var = i_2 shr 8
             var i_3_var = i_3
@@ -501,8 +501,8 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 i_61 = i_7
             }
 
-            class282Sub15Sub5Sub29.anInt9845 += class282Sub15Sub5Sub29.anInt9852 * (i_61 - i_3_var)
-            class282Sub15Sub5Sub29.anInt9850 += class282Sub15Sub5Sub29.anInt9851 * (i_61 - i_3_var)
+            class282Sub15Sub5Sub29.leftChannelVolume += class282Sub15Sub5Sub29.leftVolumeFadeDelta * (i_61 - i_3_var)
+            class282Sub15Sub5Sub29.rightChannelVolume += class282Sub15Sub5Sub29.rightVolumeFadeDelta * (i_61 - i_3_var)
 
             i_61 -= 3; while (i_3_var < i_61) { i_4_var += i_5_var;
                 ints_1[i_3_var++] += bytes_0[i_2_var++] * i_4_var
@@ -518,13 +518,13 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_1[i_3_var++] += bytes_0[i_2_var++] * i_4_var
             }
 
-            class282Sub15Sub5Sub29.anInt9848 = i_4_var shr 2
-            class282Sub15Sub5Sub29.anInt9853 = i_2_var shl 8
+            class282Sub15Sub5Sub29.currentVolume = i_4_var shr 2
+            class282Sub15Sub5Sub29.playbackPosition = i_2_var shl 8
             return i_3_var
         }
 
         @JvmStatic
-        fun method16001(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_10: Int, i_11: Int, class282Sub15Sub5Sub212: MixedAudioStream): Int {
+        fun mixForwardStereoConstantFading(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_10: Int, i_11: Int, class282Sub15Sub5Sub212: MixedAudioStream): Int {
             var i_91 = 0
             var i_3_var = i_3 shr 8
             var i_4_var = i_4
@@ -537,7 +537,7 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 i_91 = i_10
             }
 
-            class282Sub15Sub5Sub212.anInt9848 += class282Sub15Sub5Sub212.anInt9849 * (i_91 - i_4_var)
+            class282Sub15Sub5Sub212.currentVolume += class282Sub15Sub5Sub212.volumeFadeDelta * (i_91 - i_4_var)
             i_4_var = i_4_var shl 1
             i_91 = i_91 shl 1
 
@@ -570,14 +570,14 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_2[i_4_var++] += b_13 * i_6_var
             }
 
-            class282Sub15Sub5Sub212.anInt9845 = i_5_var shr 2
-            class282Sub15Sub5Sub212.anInt9850 = i_6_var shr 2
-            class282Sub15Sub5Sub212.anInt9853 = i_3_var shl 8
+            class282Sub15Sub5Sub212.leftChannelVolume = i_5_var shr 2
+            class282Sub15Sub5Sub212.rightChannelVolume = i_6_var shr 2
+            class282Sub15Sub5Sub212.playbackPosition = i_3_var shl 8
             return i_4_var shr 1
         }
 
         @JvmStatic
-        fun method16002(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_7: Int, i_8: Int, class282Sub15Sub5Sub29: MixedAudioStream): Int {
+        fun mixBackwardMonoConstantFading(bytes_0: ByteArray, ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_7: Int, i_8: Int, class282Sub15Sub5Sub29: MixedAudioStream): Int {
             var i_61 = 0
             var i_2_var = i_2 shr 8
             var i_3_var = i_3
@@ -588,8 +588,8 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 i_61 = i_7
             }
 
-            class282Sub15Sub5Sub29.anInt9845 += class282Sub15Sub5Sub29.anInt9852 * (i_61 - i_3_var)
-            class282Sub15Sub5Sub29.anInt9850 += class282Sub15Sub5Sub29.anInt9851 * (i_61 - i_3_var)
+            class282Sub15Sub5Sub29.leftChannelVolume += class282Sub15Sub5Sub29.leftVolumeFadeDelta * (i_61 - i_3_var)
+            class282Sub15Sub5Sub29.rightChannelVolume += class282Sub15Sub5Sub29.rightVolumeFadeDelta * (i_61 - i_3_var)
 
             i_61 -= 3; while (i_3_var < i_61) { i_4_var += i_5_var;
                 ints_1[i_3_var++] += bytes_0[i_2_var--] * i_4_var
@@ -605,13 +605,13 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_1[i_3_var++] += bytes_0[i_2_var--] * i_4_var
             }
 
-            class282Sub15Sub5Sub29.anInt9848 = i_4_var shr 2
-            class282Sub15Sub5Sub29.anInt9853 = i_2_var shl 8
+            class282Sub15Sub5Sub29.currentVolume = i_4_var shr 2
+            class282Sub15Sub5Sub29.playbackPosition = i_2_var shl 8
             return i_3_var
         }
 
         @JvmStatic
-        fun method16003(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_10: Int, i_11: Int, class282Sub15Sub5Sub212: MixedAudioStream): Int {
+        fun mixBackwardStereoConstantFading(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_10: Int, i_11: Int, class282Sub15Sub5Sub212: MixedAudioStream): Int {
             var i_91 = 0
             var i_3_var = i_3 shr 8
             var i_4_var = i_4
@@ -624,7 +624,7 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 i_91 = i_10
             }
 
-            class282Sub15Sub5Sub212.anInt9848 += class282Sub15Sub5Sub212.anInt9849 * (i_91 - i_4_var)
+            class282Sub15Sub5Sub212.currentVolume += class282Sub15Sub5Sub212.volumeFadeDelta * (i_91 - i_4_var)
             i_4_var = i_4_var shl 1
             i_91 = i_91 shl 1
 
@@ -657,21 +657,21 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_2[i_4_var++] += b_13 * i_6_var
             }
 
-            class282Sub15Sub5Sub212.anInt9845 = i_5_var shr 2
-            class282Sub15Sub5Sub212.anInt9850 = i_6_var shr 2
-            class282Sub15Sub5Sub212.anInt9853 = i_3_var shl 8
+            class282Sub15Sub5Sub212.leftChannelVolume = i_5_var shr 2
+            class282Sub15Sub5Sub212.rightChannelVolume = i_6_var shr 2
+            class282Sub15Sub5Sub212.playbackPosition = i_3_var shl 8
             return i_4_var shr 1
         }
 
         @JvmStatic
-        fun method16004(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
+        fun mixForwardMonoInterpolatedFading(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
             var i_81 = 0
             var i_11 = 0
             var i_4_var = i_4
             var i_5_var = i_5
             var i_6_var = i_6
-            class282Sub15Sub5Sub211.anInt9845 -= class282Sub15Sub5Sub211.anInt9852 * i_5_var
-            class282Sub15Sub5Sub211.anInt9850 -= class282Sub15Sub5Sub211.anInt9851 * i_5_var
+            class282Sub15Sub5Sub211.leftChannelVolume -= class282Sub15Sub5Sub211.leftVolumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub211.rightChannelVolume -= class282Sub15Sub5Sub211.rightVolumeFadeDelta * i_5_var
             if (i_12 == 0 || (i_5_var + (i_10 - i_4_var + i_12 - 257) / i_12).also { i_81 = it } > i_9) {
                 i_81 = i_9
             }
@@ -694,15 +694,15 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 i_6_var += i_7
             }
 
-            class282Sub15Sub5Sub211.anInt9845 += class282Sub15Sub5Sub211.anInt9852 * i_5_var
-            class282Sub15Sub5Sub211.anInt9850 += class282Sub15Sub5Sub211.anInt9851 * i_5_var
-            class282Sub15Sub5Sub211.anInt9848 = i_6_var
-            class282Sub15Sub5Sub211.anInt9853 = i_4_var
+            class282Sub15Sub5Sub211.leftChannelVolume += class282Sub15Sub5Sub211.leftVolumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub211.rightChannelVolume += class282Sub15Sub5Sub211.rightVolumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub211.currentVolume = i_6_var
+            class282Sub15Sub5Sub211.playbackPosition = i_4_var
             return i_5_var
         }
 
         @JvmStatic
-        fun method16005(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_11: Int, i_12: Int, class282Sub15Sub5Sub213: MixedAudioStream, i_14: Int, i_15: Int): Int {
+        fun mixForwardStereoInterpolatedFading(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_11: Int, i_12: Int, class282Sub15Sub5Sub213: MixedAudioStream, i_14: Int, i_15: Int): Int {
             var i_101 = 0
             var i_13 = 0
             var i_01 = 0
@@ -710,7 +710,7 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
             var i_5_var = i_5
             var i_6_var = i_6
             var i_7_var = i_7
-            class282Sub15Sub5Sub213.anInt9848 -= i_5_var * class282Sub15Sub5Sub213.anInt9849
+            class282Sub15Sub5Sub213.currentVolume -= i_5_var * class282Sub15Sub5Sub213.volumeFadeDelta
             if (i_14 == 0 || (i_5_var + (i_12 - i_4_var + i_14 - 257) / i_14).also { i_101 = it } > i_11) {
                 i_101 = i_11
             }
@@ -743,22 +743,22 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
             }
 
             i_5_var = i_5_var shr 1
-            class282Sub15Sub5Sub213.anInt9848 += class282Sub15Sub5Sub213.anInt9849 * i_5_var
-            class282Sub15Sub5Sub213.anInt9845 = i_6_var
-            class282Sub15Sub5Sub213.anInt9850 = i_7_var
-            class282Sub15Sub5Sub213.anInt9853 = i_4_var
+            class282Sub15Sub5Sub213.currentVolume += class282Sub15Sub5Sub213.volumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub213.leftChannelVolume = i_6_var
+            class282Sub15Sub5Sub213.rightChannelVolume = i_7_var
+            class282Sub15Sub5Sub213.playbackPosition = i_4_var
             return i_5_var
         }
 
         @JvmStatic
-        fun method16006(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
+        fun mixBackwardMonoInterpolatedFading(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
             var i_81 = 0
             var i_11 = 0
             var i_4_var = i_4
             var i_5_var = i_5
             var i_6_var = i_6
-            class282Sub15Sub5Sub211.anInt9845 -= class282Sub15Sub5Sub211.anInt9852 * i_5_var
-            class282Sub15Sub5Sub211.anInt9850 -= class282Sub15Sub5Sub211.anInt9851 * i_5_var
+            class282Sub15Sub5Sub211.leftChannelVolume -= class282Sub15Sub5Sub211.leftVolumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub211.rightChannelVolume -= class282Sub15Sub5Sub211.rightVolumeFadeDelta * i_5_var
             if (i_12 == 0 || (i_5_var + (i_10 + 256 - i_4_var + i_12) / i_12).also { i_81 = it } > i_9) {
                 i_81 = i_9
             }
@@ -782,15 +782,15 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 i_6_var += i_7
             }
 
-            class282Sub15Sub5Sub211.anInt9845 += class282Sub15Sub5Sub211.anInt9852 * i_5_var
-            class282Sub15Sub5Sub211.anInt9850 += class282Sub15Sub5Sub211.anInt9851 * i_5_var
-            class282Sub15Sub5Sub211.anInt9848 = i_6_var
-            class282Sub15Sub5Sub211.anInt9853 = i_4_var
+            class282Sub15Sub5Sub211.leftChannelVolume += class282Sub15Sub5Sub211.leftVolumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub211.rightChannelVolume += class282Sub15Sub5Sub211.rightVolumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub211.currentVolume = i_6_var
+            class282Sub15Sub5Sub211.playbackPosition = i_4_var
             return i_5_var
         }
 
         @JvmStatic
-        fun method16007(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_11: Int, i_12: Int, class282Sub15Sub5Sub213: MixedAudioStream, i_14: Int, i_15: Int): Int {
+        fun mixBackwardStereoInterpolatedFading(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_11: Int, i_12: Int, class282Sub15Sub5Sub213: MixedAudioStream, i_14: Int, i_15: Int): Int {
             var i_101 = 0
             var i_13 = 0
             var i_01 = 0
@@ -798,7 +798,7 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
             var i_5_var = i_5
             var i_6_var = i_6
             var i_7_var = i_7
-            class282Sub15Sub5Sub213.anInt9848 -= i_5_var * class282Sub15Sub5Sub213.anInt9849
+            class282Sub15Sub5Sub213.currentVolume -= i_5_var * class282Sub15Sub5Sub213.volumeFadeDelta
             if (i_14 == 0 || (i_5_var + (i_12 + 256 - i_4_var + i_14) / i_14).also { i_101 = it } > i_11) {
                 i_101 = i_11
             }
@@ -830,15 +830,15 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
             }
 
             i_5_var = i_5_var shr 1
-            class282Sub15Sub5Sub213.anInt9848 += class282Sub15Sub5Sub213.anInt9849 * i_5_var
-            class282Sub15Sub5Sub213.anInt9845 = i_6_var
-            class282Sub15Sub5Sub213.anInt9850 = i_7_var
-            class282Sub15Sub5Sub213.anInt9853 = i_4_var
+            class282Sub15Sub5Sub213.currentVolume += class282Sub15Sub5Sub213.volumeFadeDelta * i_5_var
+            class282Sub15Sub5Sub213.leftChannelVolume = i_6_var
+            class282Sub15Sub5Sub213.rightChannelVolume = i_7_var
+            class282Sub15Sub5Sub213.playbackPosition = i_4_var
             return i_5_var
         }
 
         @JvmStatic
-        fun method16019(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
+        fun mixForwardStereoInterpolated(bytes_2: ByteArray, ints_3: IntArray, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_9: Int, i_10: Int, class282Sub15Sub5Sub211: MixedAudioStream, i_12: Int, i_13: Int): Int {
             var i_81 = 0
             var i_11 = 0
             var i_01 = 0
@@ -871,12 +871,12 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_3[i_5_var++] += i_01 * i_7 shr 6
             }
 
-            class282Sub15Sub5Sub211.anInt9853 = i_4_var
+            class282Sub15Sub5Sub211.playbackPosition = i_4_var
             return i_5_var shr 1
         }
 
         @JvmStatic
-        fun method16031(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream): Int {
+        fun mixForwardStereoConstant(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_8: Int, i_9: Int, class282Sub15Sub5Sub210: MixedAudioStream): Int {
             var i_71 = 0
             var i_3_var = i_3 shr 8
             var i_4_var = i_4
@@ -913,7 +913,7 @@ open class MixedAudioStream(buffer: MixedAudioBuffer, sampleRate: Int, volume: I
                 ints_2[i_4_var++] += b_11 * i_6_var
             }
 
-            class282Sub15Sub5Sub210.anInt9853 = i_3_var shl 8
+            class282Sub15Sub5Sub210.playbackPosition = i_3_var shl 8
             return i_4_var shr 1
         }
     }

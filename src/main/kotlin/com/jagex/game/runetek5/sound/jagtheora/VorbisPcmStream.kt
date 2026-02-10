@@ -4,28 +4,28 @@ import com.jagex.game.runetek5.cache.node.NodeCollection
 import com.jagex.game.runetek5.sound.player.PcmPlayerManager
 
 class VorbisPcmStream(
-    @JvmField val anInt9567: Int
+    @JvmField val channelCount: Int
 ) : PcmStream() {
 
-    @JvmField var aBool9571: Boolean = false
-    @JvmField var anInt9570: Int = 0
+    @JvmField var isStopping: Boolean = false
+    @JvmField var sampleOffset: Int = 0
     @JvmField var capacityUsed: Int = 0
     @JvmField val nodeCollection: NodeCollection = NodeCollection()
-    @JvmField var anInt9565: Int = 256
-    @JvmField var anInt9572: Int = 256
-    @JvmField var aBool9574: Boolean = false
+    @JvmField var leftVolume: Int = 256
+    @JvmField var rightVolume: Int = 256
+    @JvmField var isMuted: Boolean = false
 
     @Synchronized
-    fun method14808() {
-        aBool9571 = true
+    fun stop() {
+        isStopping = true
     }
 
     @Synchronized
     override fun fill(ints_1: IntArray, i_2: Int, i_3: Int) {
         var i_2_var = i_2
-        if (!aBool9574) {
+        if (!isMuted) {
             if (getFirst() == null) {
-                if (aBool9571) {
+                if (isStopping) {
                     unlink()
                     TIMED_CACHE.clear()
                 }
@@ -35,24 +35,24 @@ class VorbisPcmStream(
                     i_4 = i_4 shl 1
                 }
                 val b_5: Byte = 0
-                val b_6: Byte = if (anInt9567 == 2) 1 else 0
+                val b_6: Byte = if (channelCount == 2) 1 else 0
 
                 while (i_2_var < i_4) {
                     val class282Sub397 = getFirst() ?: break
-                    val shorts_8 = class282Sub397.aShortArrayArray8003
+                    val shorts_8 = class282Sub397.samples
 
-                    while (i_2_var < i_4 && anInt9570 < shorts_8[0].size) {
+                    while (i_2_var < i_4 && sampleOffset < shorts_8[0].size) {
                         if (PcmPlayerManager.stereo) {
-                            ints_1[i_2_var++] = shorts_8[b_5.toInt()][anInt9570] * anInt9565
-                            ints_1[i_2_var++] = shorts_8[b_6.toInt()][anInt9570] * anInt9572
+                            ints_1[i_2_var++] = shorts_8[b_5.toInt()][sampleOffset] * leftVolume
+                            ints_1[i_2_var++] = shorts_8[b_6.toInt()][sampleOffset] * rightVolume
                         } else {
-                            ints_1[i_2_var++] += shorts_8[b_6.toInt()][anInt9570] * anInt9572 + shorts_8[b_5.toInt()][anInt9570] * anInt9565
+                            ints_1[i_2_var++] += shorts_8[b_6.toInt()][sampleOffset] * rightVolume + shorts_8[b_5.toInt()][sampleOffset] * leftVolume
                         }
-                        anInt9570++
+                        sampleOffset++
                     }
 
-                    if (anInt9570 >= shorts_8[0].size) {
-                        method14813()
+                    if (sampleOffset >= shorts_8[0].size) {
+                        advanceBuffer()
                     }
                 }
             }
@@ -60,7 +60,7 @@ class VorbisPcmStream(
     }
 
     @Synchronized
-    fun method14811(): Int {
+    fun getBufferedCount(): Int {
         return capacityUsed
     }
 
@@ -70,30 +70,30 @@ class VorbisPcmStream(
     }
 
     @Synchronized
-    fun method14813() {
+    fun advanceBuffer() {
         val class282Sub392 = getFirst()
         if (class282Sub392 != null) {
             class282Sub392.unlink()
-            anInt9570 = 0
+            sampleOffset = 0
             capacityUsed--
-            TIMED_CACHE.put(class282Sub392.method13294(), class282Sub392)
+            TIMED_CACHE.put(class282Sub392.getCacheKey(), class282Sub392)
         }
     }
 
-    fun method14814(i_1: Int, d_2: Double): MonoSterioData {
-        val long_4 = anInt9567.toLong() or i_1.toLong()
+    fun allocateSampleData(i_1: Int, d_2: Double): MonoSterioData {
+        val long_4 = channelCount.toLong() or i_1.toLong()
         var class282Sub396 = TIMED_CACHE.get(long_4)
         if (class282Sub396 != null) {
-            class282Sub396.aDouble8004 = d_2
+            class282Sub396.timestamp = d_2
             TIMED_CACHE.pop(long_4)
         } else {
-            class282Sub396 = MonoSterioData(Array(anInt9567) { ShortArray(i_1) }, d_2)
+            class282Sub396 = MonoSterioData(Array(channelCount) { ShortArray(i_1) }, d_2)
         }
         return class282Sub396
     }
 
     @Synchronized
-    fun method14815(class282Sub391: MonoSterioData) {
+    fun enqueueSampleData(class282Sub391: MonoSterioData) {
         while (capacityUsed >= 100) {
             nodeCollection.popHead()
             capacityUsed--
@@ -103,39 +103,39 @@ class VorbisPcmStream(
     }
 
     @Synchronized
-    fun method14816(bool1: Boolean) {
-        aBool9574 = bool1
+    fun setMuted(bool1: Boolean) {
+        isMuted = bool1
     }
 
-    override fun method12228(): Int {
+    override fun getActiveVoiceCount(): Int {
         return 1
     }
 
     @Synchronized
     override fun skip(i_1: Int) {
         var i_1_var = i_1
-        if (!aBool9574) {
+        if (!isMuted) {
             while (true) {
                 val class282Sub392 = getFirst()
                 if (class282Sub392 == null) {
-                    if (aBool9571) {
+                    if (isStopping) {
                         unlink()
                         TIMED_CACHE.clear()
                     }
                     break
                 }
-                if (class282Sub392.aShortArrayArray8003[0].size - anInt9570 > i_1_var) {
-                    anInt9570 += i_1_var
+                if (class282Sub392.samples[0].size - sampleOffset > i_1_var) {
+                    sampleOffset += i_1_var
                     break
                 }
-                i_1_var -= class282Sub392.aShortArrayArray8003[0].size - anInt9570
-                method14813()
+                i_1_var -= class282Sub392.samples[0].size - sampleOffset
+                advanceBuffer()
             }
         }
     }
 
     @Synchronized
-    fun method14819(): Double {
+    fun getPlaybackTime(): Double {
         if (capacityUsed < 1) {
             return -1.0
         }
@@ -143,13 +143,13 @@ class VorbisPcmStream(
         return if (class282Sub392 == null) {
             -1.0
         } else {
-            class282Sub392.aDouble8004 - (class282Sub392.aShortArrayArray8003[0].size.toFloat() / PcmPlayerManager.sampleRate)
+            class282Sub392.timestamp - (class282Sub392.samples[0].size.toFloat() / PcmPlayerManager.sampleRate)
         }
     }
 
-    fun method14820(i_1: Int) {
-        anInt9565 = i_1
-        anInt9572 = i_1
+    fun setVolume(i_1: Int) {
+        leftVolume = i_1
+        rightVolume = i_1
     }
 
     override fun getNextStream(): PcmStream? {

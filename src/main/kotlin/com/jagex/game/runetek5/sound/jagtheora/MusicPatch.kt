@@ -109,13 +109,13 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
             arr37[i14] = class11015
             var i40 = patchBuffer.readUByte()
             if (i40 > 0) {
-                class11015.aByteArray1097 = ByteArray(i40 * 2)
+                class11015.volumeEnvelopeData = ByteArray(i40 * 2)
             }
 
             i40 = patchBuffer.readUByte()
             if (i40 > 0) {
-                class11015.aByteArray1094 = ByteArray(i40 * 2 + 2)
-                class11015.aByteArray1094!![1] = 64
+                class11015.releaseEnvelopeData = ByteArray(i40 * 2 + 2)
+                class11015.releaseEnvelopeData!![1] = 64
             }
         }
 
@@ -275,18 +275,18 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         for (i27Tmp in 0 until i12) {
             i27 = i27Tmp
             class11042 = arr37[i27]
-            if (class11042?.aByteArray1097 != null) {
+            if (class11042?.volumeEnvelopeData != null) {
                 i29 = 1
-                while (i29 < class11042.aByteArray1097!!.size) {
-                    class11042.aByteArray1097!![i29] = patchBuffer.readByte()
+                while (i29 < class11042.volumeEnvelopeData!!.size) {
+                    class11042.volumeEnvelopeData!![i29] = patchBuffer.readByte()
                     i29 += 2
                 }
             }
 
-            if (class11042?.aByteArray1094 != null) {
+            if (class11042?.releaseEnvelopeData != null) {
                 i29 = 3
-                while (i29 < class11042.aByteArray1094!!.size - 2) {
-                    class11042.aByteArray1094!![i29] = patchBuffer.readByte()
+                while (i29 < class11042.releaseEnvelopeData!!.size - 2) {
+                    class11042.releaseEnvelopeData!![i29] = patchBuffer.readByte()
                     i29 += 2
                 }
             }
@@ -317,13 +317,13 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         for (i27Tmp in 0 until i12) {
             i27 = i27Tmp
             class11042 = arr37[i27]
-            if (class11042?.aByteArray1094 != null) {
+            if (class11042?.releaseEnvelopeData != null) {
                 i19 = 0
 
                 i29 = 2
-                while (i29 < class11042.aByteArray1094!!.size) {
+                while (i29 < class11042.releaseEnvelopeData!!.size) {
                     i19 = 1 + i19 + patchBuffer.readUByte()
-                    class11042.aByteArray1094!![i29] = i19.toByte()
+                    class11042.releaseEnvelopeData!![i29] = i19.toByte()
                     i29 += 2
                 }
             }
@@ -332,13 +332,13 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         for (i27Tmp in 0 until i12) {
             i27 = i27Tmp
             class11042 = arr37[i27]
-            if (class11042?.aByteArray1097 != null) {
+            if (class11042?.volumeEnvelopeData != null) {
                 i19 = 0
 
                 i29 = 2
-                while (i29 < class11042.aByteArray1097!!.size) {
+                while (i29 < class11042.volumeEnvelopeData!!.size) {
                     i19 += 1 + patchBuffer.readUByte()
-                    class11042.aByteArray1097!![i29] = i19.toByte()
+                    class11042.volumeEnvelopeData!![i29] = i19.toByte()
                     i29 += 2
                 }
             }
@@ -376,7 +376,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
                     i32 = b28.toInt() * (b30.toInt() - b47.toInt()) + (b30.toInt() - b47.toInt()) / 2
 
                     for (i33 in b47.toInt() until b30.toInt()) {
-                        i34 = method6349(i32, b30.toInt() - b47.toInt())
+                        i34 = divideRounded(i32, b30.toInt() - b47.toInt())
                         this.volumeOffset[i33] = (i34 * this.volumeOffset[i33] + 32 shr 6).toByte()
                         i32 += b31.toInt() - b28.toInt()
                     }
@@ -427,7 +427,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
                     i32 = i44 * (b30.toInt() - b47.toInt()) + (b30.toInt() - b47.toInt()) / 2
 
                     for (i33 in b47.toInt() until b30.toInt()) {
-                        i34 = method6349(i32, b30.toInt() - b47.toInt())
+                        i34 = divideRounded(i32, b30.toInt() - b47.toInt())
                         var i35 = i34 + (this.panOffset[i33].toInt() and 0xff)
                         if (i35 < 0) {
                             i35 = 0
@@ -468,11 +468,11 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
         for (i27Tmp in 0 until i12) {
             i27 = i27Tmp
             class11042 = arr37[i27]
-            if (class11042?.aByteArray1097 != null) {
+            if (class11042?.volumeEnvelopeData != null) {
                 class11042.volumeEnvelopeSustain = patchBuffer.readUByte()
             }
 
-            if (class11042?.aByteArray1094 != null) {
+            if (class11042?.releaseEnvelopeData != null) {
                 class11042.vibratoLfoDelay = patchBuffer.readUByte()
             }
 
@@ -498,7 +498,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
             i27 = i27Tmp
             class11042 = arr37[i27]
             if (class11042?.vibratoLfoPitch ?: 0 > 0) {
-                class11042?.let { it.anInt1102 = patchBuffer.readUByte() }
+                class11042?.let { it.vibratoDelay = patchBuffer.readUByte() }
             }
         }
     }
@@ -543,7 +543,7 @@ class MusicPatch(fileData: ByteArray) : Node<Any?>() {
 
     companion object {
         @JvmStatic
-        fun method6349(i0: Int, i1: Int): Int {
+        fun divideRounded(i0: Int, i1: Int): Int {
             val i3 = i0 ushr 31
             return (i0 + i3) / i1 - i3
         }

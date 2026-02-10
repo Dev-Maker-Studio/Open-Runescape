@@ -426,7 +426,7 @@ class Client : GameShell() {
         if (gameState != GameState.UNK_16) {
             val long_2: Long = currentCycle / 1000000L - lastRedrawTimeMillis
             lastRedrawTimeMillis = currentCycle / 1000000L
-            val bool4 = SoundResourceManager.method7730()
+            val bool4 = SoundResourceManager.loadPendingSong()
             if (bool4 && SoundEffectPlayer.soundJinglePlaying && SoundEffectPlayer.jinglePlayer != null) {
                 SoundEffectPlayer.jinglePlayer!!.start()
             }
@@ -1876,11 +1876,11 @@ class Client : GameShell() {
         }
 
         fun disableTitlescreenMusic() {
-            SoundResourceManager.anInt1730 = 1
+            SoundResourceManager.songLoadState = 1
             AreaSoundPlayer.MUSIC_RESOURCE = null
             SongPlayer.musicArchiveId = -1
             SoundResourceManager.musicFileId = -1
-            SoundResourceManager.aNodeSub15Sub27836 = null
+            SoundResourceManager.pendingMidiStream = null
             AreaSoundPlayer.SOUND_LEVEL = 0
             StaticMethods.aBool1962 = false
             CutsceneBasicMovement.anInt9440 = 2

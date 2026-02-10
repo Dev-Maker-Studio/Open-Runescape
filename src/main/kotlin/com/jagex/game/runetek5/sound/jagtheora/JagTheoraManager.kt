@@ -12,25 +12,25 @@ import java.io.IOException
 abstract class JagTheoraManager {
 
     @JvmField
-    var aBool3361: Boolean = false
+    var isEndOfStream: Boolean = false
 
     @JvmField
-    var aNodeSub41Sub33363: JagTheoraTheoraNode? = null
+    var theoraDecoder: JagTheoraTheoraNode? = null
 
     @JvmField
-    var aNodeSub41Sub43366: JagTheoraVorbisNode? = null
+    var vorbisDecoder: JagTheoraVorbisNode? = null
 
     @JvmField
     var languageAbbreviation: String? = null
 
     @JvmField
-    var aNodeSub41Sub23364: OggKateDecoder? = null
+    var kateDecoder: OggKateDecoder? = null
 
     @JvmField
-    var aBool3353: Boolean = false
+    var isPaused: Boolean = false
 
     @JvmField
-    var aBool3359: Boolean = false
+    var hasBufferedPage: Boolean = false
 
     @JvmField
     var buffer: ByteArray
@@ -48,7 +48,7 @@ abstract class JagTheoraManager {
     var cache: IterableNodeMap<OggStreamDecoder>
 
     @JvmField
-    var aBool3360: Boolean = false
+    var isShutdown: Boolean = false
 
     init {
         if (!AbstractToolkit.getNativeLibraryLoader().loadIntoMemory("jagtheora")) {
@@ -62,27 +62,27 @@ abstract class JagTheoraManager {
         }
     }
 
-    fun method4910(): Boolean {
-        return if (this.aNodeSub41Sub43366 != null) {
-            !this.aNodeSub41Sub33363!!.isHeaderDecoded() || method4923() > this.aNodeSub41Sub33363!!.granuleTime
+    fun shouldDecodeVideoFrame(): Boolean {
+        return if (this.vorbisDecoder != null) {
+            !this.theoraDecoder!!.isHeaderDecoded() || getPlaybackTime() > this.theoraDecoder!!.granuleTime
         } else {
-            val d_2 = this.aNodeSub41Sub33363!!.getFps()
-            d_2 == 0.0f || Utils.time() >= this.aNodeSub41Sub33363!!.packetDecodeTime + 1000.0 / d_2
+            val d_2 = this.theoraDecoder!!.getFps()
+            d_2 == 0.0f || Utils.time() >= this.theoraDecoder!!.packetDecodeTime + 1000.0 / d_2
         }
     }
 
     @Throws(IOException::class)
-    fun method4911(): OggStreamDecoder? {
-        if (this.aBool3360) {
+    fun readNextPage(): OggStreamDecoder? {
+        if (this.isShutdown) {
             throw IllegalStateException()
-        } else if (this.aBool3361) {
+        } else if (this.isEndOfStream) {
             return null
         } else {
             var i_2: Int
             while (this.syncState.pageOut(this.page) <= 0) {
                 i_2 = decode(this.buffer)
                 if (i_2 == -1) {
-                    this.aBool3361 = true
+                    this.isEndOfStream = true
                     return null
                 }
                 if (i_2 == 0) {
@@ -95,7 +95,7 @@ abstract class JagTheoraManager {
             i_2 = this.page.getSerialNumber()
             if (!this.page.isBOS()) {
                 val class282Sub419 = this.cache.get(i_2.toLong()) as OggStreamDecoder
-                if (!class282Sub419.anOggStreamState8032.pageIn(this.page)) {
+                if (!class282Sub419.streamState.pageIn(this.page)) {
                     throw IllegalStateException()
                 } else {
                     return class282Sub419
@@ -108,12 +108,12 @@ abstract class JagTheoraManager {
                     throw IllegalStateException()
                 } else {
                     val obj4: OggStreamDecoder
-                    if (this.aNodeSub41Sub33363 == null && this.packet.isTheora()) {
-                        this.aNodeSub41Sub33363 = JagTheoraTheoraNode(state)
-                        obj4 = this.aNodeSub41Sub33363!!
-                    } else if (this.aNodeSub41Sub43366 == null && this.packet.isVorbis()) {
-                        this.aNodeSub41Sub43366 = JagTheoraVorbisNode(state)
-                        obj4 = this.aNodeSub41Sub43366!!
+                    if (this.theoraDecoder == null && this.packet.isTheora()) {
+                        this.theoraDecoder = JagTheoraTheoraNode(state)
+                        obj4 = this.theoraDecoder!!
+                    } else if (this.vorbisDecoder == null && this.packet.isVorbis()) {
+                        this.vorbisDecoder = JagTheoraVorbisNode(state)
+                        obj4 = this.vorbisDecoder!!
                     } else {
                         val bytes_5 = this.packet.getData()
                         val stringbuilder6 = StringBuilder()
@@ -137,41 +137,41 @@ abstract class JagTheoraManager {
     }
 
     @Throws(IOException::class)
-    fun method4913() {
-        while (this.aNodeSub41Sub33363!!.anOggStreamState8032.packetOut(this.packet) != 1) {
-            val class282Sub412 = method4911()
+    fun decodeTheoraPacket() {
+        while (this.theoraDecoder!!.streamState.packetOut(this.packet) != 1) {
+            val class282Sub412 = readNextPage()
             if (class282Sub412 == null) {
-                if (this.aBool3361) {
-                    method4916()
+                if (this.isEndOfStream) {
+                    drainAllStreams()
                 }
                 return
             }
-            if (class282Sub412 == this.aNodeSub41Sub23364) {
-                method4942()
+            if (class282Sub412 == this.kateDecoder) {
+                processKateSubtitles()
             }
         }
-        this.aNodeSub41Sub33363!!.method13361(this.packet)
+        this.theoraDecoder!!.processPacket(this.packet)
     }
 
-    fun method4914(): JagTheoraVorbisNode? {
-        return this.aNodeSub41Sub43366
+    fun getVorbisDecoder(): JagTheoraVorbisNode? {
+        return this.vorbisDecoder
     }
 
     fun setLanguage(languageAbbreviation: String?) {
         this.languageAbbreviation = languageAbbreviation
         if (this.languageAbbreviation == null) {
-            this.aNodeSub41Sub23364 = null
+            this.kateDecoder = null
         } else {
-            if (this.aNodeSub41Sub23364 != null && this.languageAbbreviation != this.aNodeSub41Sub23364!!.getLanguageAbbreviation()) {
-                this.aNodeSub41Sub23364 = null
+            if (this.kateDecoder != null && this.languageAbbreviation != this.kateDecoder!!.getLanguageAbbreviation()) {
+                this.kateDecoder = null
             }
-            if (this.aNodeSub41Sub23364 == null) {
+            if (this.kateDecoder == null) {
                 var class282Sub413 = this.cache.first() as OggStreamDecoder?
                 while (class282Sub413 != null) {
                     if (class282Sub413 is OggKateDecoder) {
                         val class282Sub41Sub24 = class282Sub413
                         if (this.languageAbbreviation == class282Sub41Sub24.getLanguageAbbreviation()) {
-                            this.aNodeSub41Sub23364 = class282Sub41Sub24
+                            this.kateDecoder = class282Sub41Sub24
                             break
                         }
                     }
@@ -181,126 +181,126 @@ abstract class JagTheoraManager {
         }
     }
 
-    fun method4916() {
+    fun drainAllStreams() {
         var class282Sub412 = this.cache.first() as OggStreamDecoder?
         while (class282Sub412 != null) {
-            if (class282Sub412 != this.aNodeSub41Sub33363) {
-                while (class282Sub412.anOggStreamState8032.packetOut() == 1) {
-                    class282Sub412.method13361(this.packet)
+            if (class282Sub412 != this.theoraDecoder) {
+                while (class282Sub412.streamState.packetOut() == 1) {
+                    class282Sub412.processPacket(this.packet)
                 }
             }
             class282Sub412 = this.cache.next() as OggStreamDecoder?
         }
-        if (this.aNodeSub41Sub33363 != null) {
+        if (this.theoraDecoder != null) {
             var i_3 = 0
-            while (i_3 < 10 && method4910()) {
-                if (this.aNodeSub41Sub33363!!.anOggStreamState8032.packetOut() != 1) {
-                    method4947()
+            while (i_3 < 10 && shouldDecodeVideoFrame()) {
+                if (this.theoraDecoder!!.streamState.packetOut() != 1) {
+                    shutdown()
                     break
                 }
-                this.aNodeSub41Sub33363!!.method13361(this.packet)
+                this.theoraDecoder!!.processPacket(this.packet)
                 i_3++
             }
         }
     }
 
-    fun method4918(): JagTheoraTheoraNode? {
-        return this.aNodeSub41Sub33363
+    fun getTheoraDecoder(): JagTheoraTheoraNode? {
+        return this.theoraDecoder
     }
 
-    fun method4921(): Boolean {
-        return (this.aBool3360 || this.aBool3361) && (this.aNodeSub41Sub43366 == null || this.aNodeSub41Sub43366!!.method14847() <= 0)
+    fun isPlaybackComplete(): Boolean {
+        return (this.isShutdown || this.isEndOfStream) && (this.vorbisDecoder == null || this.vorbisDecoder!!.getBufferedSampleCount() <= 0)
     }
 
-    fun method4923(): Double {
-        return if (this.aNodeSub41Sub43366 != null) this.aNodeSub41Sub43366!!.method14848() else if (this.aNodeSub41Sub33363 != null) this.aNodeSub41Sub33363!!.granuleTime else 0.0
+    fun getPlaybackTime(): Double {
+        return if (this.vorbisDecoder != null) this.vorbisDecoder!!.getCurrentPlaybackTime() else if (this.theoraDecoder != null) this.theoraDecoder!!.granuleTime else 0.0
     }
 
-    fun method4924(bool1: Boolean) {
-        if (this.aNodeSub41Sub43366 != null) {
-            val class282Sub15Sub13 = this.aNodeSub41Sub43366!!.method14845()
+    fun togglePause(bool1: Boolean) {
+        if (this.vorbisDecoder != null) {
+            val class282Sub15Sub13 = this.vorbisDecoder!!.getPcmStream()
             if (class282Sub15Sub13 != null) {
-                class282Sub15Sub13.method14816(bool1)
+                class282Sub15Sub13.setMuted(bool1)
             }
         }
-        this.aBool3353 = !this.aBool3353
+        this.isPaused = !this.isPaused
     }
 
     @Throws(IOException::class)
-    fun method4932() {
-        if (!this.aBool3353) {
-            while (!this.aBool3360) {
+    fun processStreams() {
+        if (!this.isPaused) {
+            while (!this.isShutdown) {
                 val class282Sub412: OggStreamDecoder?
-                if (!this.aBool3359) {
-                    class282Sub412 = method4911()
+                if (!this.hasBufferedPage) {
+                    class282Sub412 = readNextPage()
                     if (class282Sub412 == null) {
-                        if (this.aBool3361) {
-                            method4916()
+                        if (this.isEndOfStream) {
+                            drainAllStreams()
                         }
                         break
                     }
-                    this.aBool3359 = true
+                    this.hasBufferedPage = true
                 } else {
                     class282Sub412 = this.cache.get(this.page.getSerialNumber().toLong()) as OggStreamDecoder?
                 }
-                if (class282Sub412 == this.aNodeSub41Sub43366) {
-                    if (this.aNodeSub41Sub43366!!.method14847() >= 50) {
+                if (class282Sub412 == this.vorbisDecoder) {
+                    if (this.vorbisDecoder!!.getBufferedSampleCount() >= 50) {
                         break
                     }
-                    while (this.aNodeSub41Sub43366!!.anOggStreamState8032.packetOut(this.packet) == 1) {
-                        this.aNodeSub41Sub43366!!.method13361(this.packet)
-                        method4942()
-                        if (this.aNodeSub41Sub33363 != null) {
-                            val d_3 = this.aNodeSub41Sub33363!!.granuleTime
+                    while (this.vorbisDecoder!!.streamState.packetOut(this.packet) == 1) {
+                        this.vorbisDecoder!!.processPacket(this.packet)
+                        processKateSubtitles()
+                        if (this.theoraDecoder != null) {
+                            val d_3 = this.theoraDecoder!!.granuleTime
                             var i_5 = 0
-                            while (i_5 < 10 && method4910()) {
-                                method4913()
-                                if (this.aBool3360) {
+                            while (i_5 < 10 && shouldDecodeVideoFrame()) {
+                                decodeTheoraPacket()
+                                if (this.isShutdown) {
                                     return
                                 }
                                 i_5++
                             }
-                            if (d_3 < this.aNodeSub41Sub33363!!.granuleTime) {
+                            if (d_3 < this.theoraDecoder!!.granuleTime) {
                                 return
                             }
                         }
-                        if (this.aNodeSub41Sub43366!!.method14847() >= 50) {
+                        if (this.vorbisDecoder!!.getBufferedSampleCount() >= 50) {
                             return
                         }
                     }
                 } else if (class282Sub412 is OggKateDecoder) {
-                    method4942()
-                } else if (class282Sub412 != this.aNodeSub41Sub33363) {
-                    while (class282Sub412!!.anOggStreamState8032.packetOut(this.packet) == 1) {
-                        class282Sub412.method13361(this.packet)
+                    processKateSubtitles()
+                } else if (class282Sub412 != this.theoraDecoder) {
+                    while (class282Sub412!!.streamState.packetOut(this.packet) == 1) {
+                        class282Sub412.processPacket(this.packet)
                     }
-                } else if (this.aNodeSub41Sub43366 == null && !this.aBool3353) {
+                } else if (this.vorbisDecoder == null && !this.isPaused) {
                     var i_6 = 0
-                    while (i_6 < 10 && method4910()) {
-                        method4913()
-                        if (this.aBool3360) {
+                    while (i_6 < 10 && shouldDecodeVideoFrame()) {
+                        decodeTheoraPacket()
+                        if (this.isShutdown) {
                             return
                         }
                         i_6++
                     }
                     return
                 }
-                this.aBool3359 = false
+                this.hasBufferedPage = false
             }
         }
     }
 
-    fun method4935(): OggKateDecoder? {
-        return this.aNodeSub41Sub23364
+    fun getKateDecoder(): OggKateDecoder? {
+        return this.kateDecoder
     }
 
-    fun method4942() {
+    fun processKateSubtitles() {
         var class282Sub412 = this.cache.first() as OggStreamDecoder?
         while (class282Sub412 != null) {
             if (class282Sub412 is OggKateDecoder) {
                 val class282Sub41Sub23 = class282Sub412
-                while ((class282Sub41Sub23.anInt8031 <= 8 || method4923() > class282Sub41Sub23.method14705()) && class282Sub41Sub23.anOggStreamState8032.packetOut(this.packet) == 1) {
-                    class282Sub41Sub23.method13361(this.packet)
+                while ((class282Sub41Sub23.packetCount <= 8 || getPlaybackTime() > class282Sub41Sub23.getEndTime()) && class282Sub41Sub23.streamState.packetOut(this.packet) == 1) {
+                    class282Sub41Sub23.processPacket(this.packet)
                 }
             }
             class282Sub412 = this.cache.next() as OggStreamDecoder?
@@ -308,18 +308,18 @@ abstract class JagTheoraManager {
         setLanguage(this.languageAbbreviation)
     }
 
-    fun method4947() {
-        if (!this.aBool3360) {
+    fun shutdown() {
+        if (!this.isShutdown) {
             var class282Sub412 = this.cache.first() as OggStreamDecoder?
             while (class282Sub412 != null) {
                 class282Sub412.reset()
-                class282Sub412.anOggStreamState8032.resetPeer()
+                class282Sub412.streamState.resetPeer()
                 class282Sub412 = this.cache.next() as OggStreamDecoder?
             }
             this.packet.resetPeer()
             this.page.resetPeer()
             this.syncState.resetPeer()
-            this.aBool3360 = true
+            this.isShutdown = true
         }
     }
 

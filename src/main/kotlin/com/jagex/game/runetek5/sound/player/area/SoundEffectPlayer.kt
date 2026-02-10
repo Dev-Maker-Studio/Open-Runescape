@@ -33,10 +33,10 @@ object SoundEffectPlayer {
 
 	@JvmStatic
 	fun method1491(i_0: Int) {
-	    if (SoundResourceManager.anInt1730 != 0) {
+	    if (SoundResourceManager.songLoadState != 0) {
 	        AreaSoundPlayer.SOUND_LEVEL = i_0
 	    } else {
-	        SoundResourceManager.aNodeSub15Sub21735!!.setMusicVolume(i_0)
+	        SoundResourceManager.midiPcmStream!!.setMusicVolume(i_0)
 	    }
 	}
 
@@ -256,7 +256,7 @@ object SoundEffectPlayer {
 	                }
 	            } else {
 	                ambientSound.soundEffect!!.setVolume(volume)
-	                ambientSound.soundEffect!!.method15340(i_11)
+	                ambientSound.soundEffect!!.setPanPosition(i_11)
 	            }
 	            if (ambientSound.aNodeSub15Sub58096 == null) {
 	                if (ambientSound.ambientSoundGroupIds != null && run { ambientSound.step -= step; ambientSound.step <= 0 }) {
@@ -294,7 +294,7 @@ object SoundEffectPlayer {
 	                }
 	            } else {
 	                ambientSound.aNodeSub15Sub58096!!.setVolume(volume)
-	                ambientSound.aNodeSub15Sub58096!!.method15340(i_11)
+	                ambientSound.aNodeSub15Sub58096!!.setPanPosition(i_11)
 	                if (!ambientSound.aNodeSub15Sub58096!!.linked()) {
 	                    ambientSound.aNodeSub15Sub58096 = null
 	                    ambientSound.aNodeSub188087 = null
@@ -442,6 +442,6 @@ object SoundEffectPlayer {
 
 	@JvmStatic
 	fun method7272(): MidiPcmStream {
-	    return SoundResourceManager.aNodeSub15Sub21735!!
+	    return SoundResourceManager.midiPcmStream!!
 	}
 }

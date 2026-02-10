@@ -91,6 +91,26 @@
   - Component.kt: 35 fields (event hooks, params, tick trackers, drag settings, video ID), 7 methods, 1 enum
   - InterfaceRenderer.kt: 3 fields (worldMapDragStartY, dragTickCount, translatedUptext), 1 method (startDragging)
   - InterfaceComponentRenderer.kt: 6 fields (deferredDrag*, chatDisplay*), 2 methods (setChatDisplay, drawMinimapText)
+- **Sound/Video Codec (COMPLETE own fields)**:
+  - OggStreamDecoder: streamState, packetCount, processPacket (3 renames)
+  - OggKateDecoder: granuleRateNumerator/Denominator, category, startTime, endTime, subtitleText, getStartTime/getEndTime/getSubtitleText (9 renames)
+  - JagTheoraManager: theoraDecoder, vorbisDecoder, kateDecoder, isEndOfStream, isPaused, hasBufferedPage, isShutdown + 13 methods (shouldDecodeVideoFrame, readNextPage, decodeTheoraPacket, getVorbisDecoder, drainAllStreams, getTheoraDecoder, isPlaybackComplete, getPlaybackTime, togglePause, processStreams, getKateDecoder, processKateSubtitles, shutdown) (20 renames)
+  - SoundResourceManager: midiPcmStream, pendingMidiStream, songLoadState, songStartPosition, getVideoSubtitleText, loadPendingSong (6 renames)
+  - SongPlayer: channelVolumes, pcmPlayer (2 renames)
+  - JagTheoraVorbisNode: vorbisInfo, vorbisComment, granuleTime, totalSamplesRead, dspState, vorbisBlock, resampler, pcmStream, getPcmStream, getBufferedSampleCount, getCurrentPlaybackTime, convertFloatToPcm16 (12 renames)
+  - VorbisPcmStream: channelCount, isStopping, sampleOffset, leftVolume, rightVolume, isMuted, stop, getBufferedCount, advanceBuffer, allocateSampleData, enqueueSampleData, setMuted, getPlaybackTime, setVolume (14 renames)
+  - MonoSterioData: samples, timestamp, getCacheKey (3 renames)
+  - VorbisFileReference: currentChunkIndex, chunkBuffers, currentChunkPacket, prefetchChunks (4 renames)
+- **AreaSoundStream (COMPLETE)**: 11 fields + 18 methods renamed
+  - Fields: currentVolume, leftChannelVolume, rightChannelVolume, fadeSamplesRemaining, loopsRemaining, targetVolume, playbackPosition, panPosition, volumeFadeDelta, leftVolumeFadeDelta, rightVolumeFadeDelta
+  - Methods: setPlaybackRate, isFading, reversePlaybackDirection, getTargetVolume, getPanPosition, setPlaybackPosition, isFinished, fadeToVolume, fadeToVolumeAndPan, fadeOutAndStop, getAbsolutePlaybackRate, getActiveVoiceCount, updateFadeState, muteVolume, recalculateChannelVolumes, setPanPosition, cancelFade, setVolumeAndPan
+- **AudioBufferStream (COMPLETE)**: 2 own methods + 16 companion static methods renamed
+  - Own: mixSamplesBackward, mixSamplesForward
+  - Companion: mixForward/BackwardStereo/MonoConstant/Interpolated[Fading] (16 variants)
+- **MixedAudioStream (COMPLETE)**: 2 own methods + 16 companion static methods renamed
+  - Own: mixSamplesForward, mixSamplesBackward
+  - Companion: mixForward/BackwardStereo/MonoConstant/Interpolated[Fading] (16 variants)
+- **PcmStream**: method12228 -> getActiveVoiceCount (abstract, updated in all 6 overrides)
 
 ## Lessons Learned
 
@@ -110,6 +130,9 @@
 - **ShaderAttribute init block** reads from decoder: renaming decoder fields requires updating init block references.
 - **Edit tool replace_all does substring match**: `UnkSetting1` replace matched `anUnkSetting11` producing `anDragType1`. Always verify composite identifiers after bulk replace.
 - **Companion static fields may be cross-referenced from unrelated classes**: anInt9792 in TextureOpIrregularBricks was used by CS2Interpreter and NativeSprite as a backgroundColor. Always grep the ENTIRE codebase for companion field references before assuming "unused".
+- **Linter applies renames from sound-package.md**: The linter reads agent memory files (e.g. sound-package.md) and applies method renames (method15095->setChannelVolume etc.) that haven't actually been applied to the declaration file. Always verify linter edits with grep before building.
+- **Use sed -i for ALL renames**: The Write tool triggers the linter which can revert ALL changes. Always use sed -i via Bash for field/method renames, never the Write tool for files with many renames.
+- **Pre-existing build errors**: AreaSoundStream, AudioBufferStream, MixedAudioStream, MusicPatchPcmStream have pre-existing errors from previous rename sessions where MusicPatchNode fields and AbstractAudioFile methods were renamed but not all cross-references were updated.
 
 ## Remaining Uncertain Fields (deliberately left obfuscated)
 
