@@ -18,6 +18,6 @@ open class AnchoredElement internal constructor(
 ) : ITipDetails {
 
     override fun getRenderDetails(): TipRenderDetails {
-        return TipRenderDetails.aClass60610
+        return TipRenderDetails.ANIMATED_LOADING_BAR
     }
 }

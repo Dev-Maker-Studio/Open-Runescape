@@ -16,7 +16,7 @@ import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.cutscene.*
 import com.jagex.game.runetek5.config.cutscene.action.CutsceneBasicMovement
-import com.jagex.game.runetek5.config.material.texture.operation.Class149
+import com.jagex.game.runetek5.config.material.texture.operation.TextureShapeRasterizer
 import com.jagex.game.runetek5.config.material.texture.operation.TextureOpRasterizer
 import com.jagex.game.runetek5.config.midi.SoundBankCache
 import com.jagex.game.runetek5.config.midi.SongReference
@@ -115,7 +115,7 @@ object StaticMethods {
         var i_6 = i_2
         var i_7 = -i_2
         var i_8 = -1
-        ArrayUtils.setArrayValuesTo(Class149.anIntArrayArray7072!![i_1], i_0 - i_2, i_0 + i_2, i_3)
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_1], i_0 - i_2, i_0 + i_2, i_3)
         while (i_6 > i_5) {
             i_8 += 2
             i_7 += i_8
@@ -123,8 +123,8 @@ object StaticMethods {
             if (i_7 >= 0) {
                 --i_6
                 i_7 -= i_6 shl 1
-                val ints_9 = Class149.anIntArrayArray7072!![i_6 + i_1]
-                val ints_10 = Class149.anIntArrayArray7072!![i_1 - i_6]
+                val ints_9 = TextureShapeRasterizer.anIntArrayArray7072!![i_6 + i_1]
+                val ints_10 = TextureShapeRasterizer.anIntArrayArray7072!![i_1 - i_6]
                 val i_11 = i_0 + i_5
                 val i_12 = i_0 - i_5
                 ArrayUtils.setArrayValuesTo(ints_9, i_12, i_11, i_3)
@@ -132,8 +132,8 @@ object StaticMethods {
             }
             val i_13 = i_0 + i_6
             val i_14 = i_0 - i_6
-            val ints_15 = Class149.anIntArrayArray7072!![i_5 + i_1]
-            val ints_16 = Class149.anIntArrayArray7072!![i_1 - i_5]
+            val ints_15 = TextureShapeRasterizer.anIntArrayArray7072!![i_5 + i_1]
+            val ints_16 = TextureShapeRasterizer.anIntArrayArray7072!![i_1 - i_5]
             ArrayUtils.setArrayValuesTo(ints_15, i_14, i_13, i_3)
             ArrayUtils.setArrayValuesTo(ints_16, i_14, i_13, i_3)
         }
@@ -164,7 +164,7 @@ object StaticMethods {
 
     @JvmStatic
     fun method3936(ints_0: Array<IntArray>?) {
-        Class149.anIntArrayArray7072 = ints_0
+        TextureShapeRasterizer.anIntArrayArray7072 = ints_0
     }
 
     @JvmStatic
@@ -311,12 +311,12 @@ object StaticMethods {
     fun method14572(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         var i_2Var = i_2
         var i_3Var = i_3
-        ArrayUtils.setArrayValuesTo(Class149.anIntArrayArray7072!![i_2Var++], i_0, i_1, i_4)
-        ArrayUtils.setArrayValuesTo(Class149.anIntArrayArray7072!![i_3Var--], i_0, i_1, i_4)
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_2Var++], i_0, i_1, i_4)
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_3Var--], i_0, i_1, i_4)
 
         var i_6 = i_2Var
         while (i_6 <= i_3Var) {
-            val ints_7 = Class149.anIntArrayArray7072!![i_6]
+            val ints_7 = TextureShapeRasterizer.anIntArrayArray7072!![i_6]
             ints_7[i_0] = i_4
             ints_7[i_1] = i_4
             i_6++
@@ -341,7 +341,7 @@ object StaticMethods {
     @JvmStatic
     fun method1564(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         for (i_6 in i_2..i_3) {
-            ArrayUtils.setArrayValuesTo(Class149.anIntArrayArray7072!![i_6], i_0, i_1, i_4)
+            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_6], i_0, i_1, i_4)
         }
     }
 

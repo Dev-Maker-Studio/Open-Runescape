@@ -68,13 +68,13 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
         @JvmStatic
         fun method2348(openglToolkit: OpenGlToolkit) {
             if (anObject1637 == null) {
-                val generator = Class370_Sub1_Sub2()
+                val generator = GLWaveTextureData()
                 val buffer = generator.method15614()
                 anObject1637 = DataBuffer.createDataBuffer(buffer)
             }
 
             if (anObject1627 == null) {
-                val generator = Class370_Sub2_Sub2()
+                val generator = GLBillowTextureData()
                 val buffer = generator.getData()
                 anObject1627 = DataBuffer.createDataBuffer(buffer)
             }

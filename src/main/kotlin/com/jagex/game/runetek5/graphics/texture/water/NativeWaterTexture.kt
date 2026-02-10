@@ -124,13 +124,13 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
         @JvmStatic
         fun initializeWaterData() {
             if (anObject482 == null) {
-                val generator1 = Class370_Sub1_Sub1()
+                val generator1 = NativeWaveTextureData()
                 val data = generator1.getData()
                 anObject482 = DataBuffer.createDataBuffer(data)
             }
 
             if (anObject477 == null) {
-                val generator2 = Class370_Sub2_Sub1()
+                val generator2 = NativeBillowTextureData()
                 val data = generator2.getData()
                 anObject477 = DataBuffer.createDataBuffer(data)
             }

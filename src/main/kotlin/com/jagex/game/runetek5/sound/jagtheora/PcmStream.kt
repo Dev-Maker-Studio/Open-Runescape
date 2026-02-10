@@ -1,13 +1,13 @@
 package com.jagex.game.runetek5.sound.jagtheora
 
 import com.jagex.game.runetek5.cache.node.Node
-import com.jagex.game.runetek5.cache.node.impl.Node_Sub26
+import com.jagex.game.runetek5.cache.node.impl.AudioNode
 
 abstract class PcmStream : Node<PcmStream>() {
 
     @JvmField var nextStream: PcmStream? = null
     @JvmField var streamPriority: Int = 0
-    @JvmField var buffer: Node_Sub26? = null
+    @JvmField var buffer: AudioNode? = null
     @Volatile
     @JvmField var fill: Boolean = true
 

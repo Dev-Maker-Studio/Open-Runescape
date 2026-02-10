@@ -4,7 +4,7 @@ import java.util.Random
 
 import com.jagex.game.runetek5.cache.node.CacheableNodeQueue
 import com.jagex.game.runetek5.cache.node.lru.CacheableNodeByteArray
-import com.jagex.game.runetek5.config.material.texture.operation.Class149
+import com.jagex.game.runetek5.config.material.texture.operation.TextureShapeRasterizer
 import com.jagex.game.runetek5.config.material.texture.operation.TextureOpRasterizer
 import com.jagex.game.runetek5.staticmethods.StaticMethods
 
@@ -561,7 +561,7 @@ object ArrayUtils {
 		var i_12 = -i_8
 		var i_13 = -1
 		var i_14 = -1
-		val ints_15 = Class149.anIntArrayArray7072!![i_1]
+		val ints_15 = TextureShapeRasterizer.anIntArrayArray7072!![i_1]
 		val i_16 = i_0 - i_8
 		val i_17 = i_0 + i_8
 		setArrayValuesTo(ints_15, i_0 - i_2, i_16, i_4)
@@ -589,15 +589,15 @@ object ArrayUtils {
 				--i_9
 				i_10 -= i_9 shl 1
 				if (i_9 >= i_8) {
-					ints_18 = Class149.anIntArrayArray7072!![i_9 + i_1]
-					ints_19 = Class149.anIntArrayArray7072!![i_1 - i_9]
+					ints_18 = TextureShapeRasterizer.anIntArrayArray7072!![i_9 + i_1]
+					ints_19 = TextureShapeRasterizer.anIntArrayArray7072!![i_1 - i_9]
 					i_20 = i_0 + i_7
 					i_21 = i_0 - i_7
 					setArrayValuesTo(ints_18, i_21, i_20, i_4)
 					setArrayValuesTo(ints_19, i_21, i_20, i_4)
 				} else {
-					ints_18 = Class149.anIntArrayArray7072!![i_9 + i_1]
-					ints_19 = Class149.anIntArrayArray7072!![i_1 - i_9]
+					ints_18 = TextureShapeRasterizer.anIntArrayArray7072!![i_9 + i_1]
+					ints_19 = TextureShapeRasterizer.anIntArrayArray7072!![i_1 - i_9]
 					i_20 = StaticMethods.anIntArray36!![i_9]
 					i_21 = i_0 + i_7
 					i_22 = i_0 - i_7
@@ -611,8 +611,8 @@ object ArrayUtils {
 					setArrayValuesTo(ints_19, i_23, i_21, i_4)
 				}
 			}
-			ints_18 = Class149.anIntArrayArray7072!![i_7 + i_1]
-			ints_19 = Class149.anIntArrayArray7072!![i_1 - i_7]
+			ints_18 = TextureShapeRasterizer.anIntArrayArray7072!![i_7 + i_1]
+			ints_19 = TextureShapeRasterizer.anIntArrayArray7072!![i_1 - i_7]
 			i_20 = i_0 + i_9
 			i_21 = i_0 - i_9
 			if (i_7 < i_8) {
@@ -643,18 +643,18 @@ object ArrayUtils {
 		var i_13: Int
 		i_13 = i_7
 		while (i_13 < i_11) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_13], i_9, i_10, i_4)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_13], i_9, i_10, i_4)
 			i_13++
 		}
 		i_13 = i_8
 		while (i_13 > i_12) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_13], i_9, i_10, i_4)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_13], i_9, i_10, i_4)
 			--i_13
 		}
 		i_13 = method4890(i_5 + i_0, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 		val i_14 = method4890(i_1 - i_5, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 		for (i_15 in i_11..i_12) {
-			val ints_16 = Class149.anIntArrayArray7072!![i_15]
+			val ints_16 = TextureShapeRasterizer.anIntArrayArray7072!![i_15]
 			setArrayValuesTo(ints_16, i_9, i_13, i_4)
 			setArrayValuesTo(ints_16, i_14, i_10, i_4)
 		}
@@ -679,7 +679,7 @@ object ArrayUtils {
 		var i_18: Int
 		var i_19: Int
 		if (i_1 >= TextureOpRasterizer.anInt7070 && i_1 <= TextureOpRasterizer.anInt7068) {
-			val ints_15 = Class149.anIntArrayArray7072!![i_1]
+			val ints_15 = TextureShapeRasterizer.anIntArrayArray7072!![i_1]
 			i_16 = method4890(i_0 - i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 			i_17 = method4890(i_0 + i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 			i_18 = method4890(i_0 - i_8, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
@@ -713,10 +713,10 @@ object ArrayUtils {
 						i_17 = method4890(i_0 + i_7, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 						i_18 = method4890(i_0 - i_7, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 						if (i_16 <= TextureOpRasterizer.anInt7068) {
-							setArrayValuesTo(Class149.anIntArrayArray7072!![i_16], i_18, i_17, i_4)
+							setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_16], i_18, i_17, i_4)
 						}
 						if (i_23 >= TextureOpRasterizer.anInt7070) {
-							setArrayValuesTo(Class149.anIntArrayArray7072!![i_23], i_18, i_17, i_4)
+							setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_23], i_18, i_17, i_4)
 						}
 					} else {
 						i_17 = StaticMethods.anIntArray36!![i_9]
@@ -725,13 +725,13 @@ object ArrayUtils {
 						i_20 = method4890(i_0 + i_17, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 						i_21 = method4890(i_0 - i_17, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 						if (i_16 <= TextureOpRasterizer.anInt7068) {
-							ints_22 = Class149.anIntArrayArray7072!![i_16]
+							ints_22 = TextureShapeRasterizer.anIntArrayArray7072!![i_16]
 							setArrayValuesTo(ints_22, i_19, i_21, i_4)
 							setArrayValuesTo(ints_22, i_21, i_20, i_3)
 							setArrayValuesTo(ints_22, i_20, i_18, i_4)
 						}
 						if (i_23 >= TextureOpRasterizer.anInt7070) {
-							ints_22 = Class149.anIntArrayArray7072!![i_23]
+							ints_22 = TextureShapeRasterizer.anIntArrayArray7072!![i_23]
 							setArrayValuesTo(ints_22, i_19, i_21, i_4)
 							setArrayValuesTo(ints_22, i_21, i_20, i_3)
 							setArrayValuesTo(ints_22, i_20, i_18, i_4)
@@ -752,23 +752,23 @@ object ArrayUtils {
 						i_20 = method4890(i_0 + i_19, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 						i_21 = method4890(i_0 - i_19, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 						if (i_16 <= TextureOpRasterizer.anInt7068) {
-							ints_22 = Class149.anIntArrayArray7072!![i_16]
+							ints_22 = TextureShapeRasterizer.anIntArrayArray7072!![i_16]
 							setArrayValuesTo(ints_22, i_18, i_21, i_4)
 							setArrayValuesTo(ints_22, i_21, i_20, i_3)
 							setArrayValuesTo(ints_22, i_20, i_17, i_4)
 						}
 						if (i_23 >= TextureOpRasterizer.anInt7070) {
-							ints_22 = Class149.anIntArrayArray7072!![i_23]
+							ints_22 = TextureShapeRasterizer.anIntArrayArray7072!![i_23]
 							setArrayValuesTo(ints_22, i_18, i_21, i_4)
 							setArrayValuesTo(ints_22, i_21, i_20, i_3)
 							setArrayValuesTo(ints_22, i_20, i_17, i_4)
 						}
 					} else {
 						if (i_16 <= TextureOpRasterizer.anInt7068) {
-							setArrayValuesTo(Class149.anIntArrayArray7072!![i_16], i_18, i_17, i_4)
+							setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_16], i_18, i_17, i_4)
 						}
 						if (i_23 >= TextureOpRasterizer.anInt7070) {
-							setArrayValuesTo(Class149.anIntArrayArray7072!![i_23], i_18, i_17, i_4)
+							setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_23], i_18, i_17, i_4)
 						}
 					}
 				}
@@ -798,7 +798,7 @@ object ArrayUtils {
 		if (i_1 >= TextureOpRasterizer.anInt7070 && i_1 <= TextureOpRasterizer.anInt7068) {
 			i_21 = method4890(i_0 + i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 			i_22 = method4890(i_0 - i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_1], i_22, i_21, i_4)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_1], i_22, i_21, i_4)
 		}
 		while (i_7 > 0) {
 			if (i_13 < 0) {
@@ -828,10 +828,10 @@ object ArrayUtils {
 				val i_23 = method4890(i_0 + i_6, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 				val i_24 = method4890(i_0 - i_6, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 				if (i_21 >= TextureOpRasterizer.anInt7070) {
-					setArrayValuesTo(Class149.anIntArrayArray7072!![i_21], i_24, i_23, i_4)
+					setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_21], i_24, i_23, i_4)
 				}
 				if (i_22 <= TextureOpRasterizer.anInt7068) {
-					setArrayValuesTo(Class149.anIntArrayArray7072!![i_22], i_24, i_23, i_4)
+					setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_22], i_24, i_23, i_4)
 				}
 			}
 		}
@@ -845,7 +845,7 @@ object ArrayUtils {
 		var i_8 = -1
 		val i_9 = method4890(i_0 + i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 		val i_10 = method4890(i_0 - i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
-		setArrayValuesTo(Class149.anIntArrayArray7072!![i_1], i_10, i_9, i_3)
+		setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_1], i_10, i_9, i_3)
 		while (i_6 > i_5) {
 			i_8 += 2
 			i_7 += i_8
@@ -862,10 +862,10 @@ object ArrayUtils {
 					i_13 = method4890(i_0 + i_5, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 					i_14 = method4890(i_0 - i_5, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 					if (i_12 <= TextureOpRasterizer.anInt7068) {
-						setArrayValuesTo(Class149.anIntArrayArray7072!![i_12], i_14, i_13, i_3)
+						setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_12], i_14, i_13, i_3)
 					}
 					if (i_11 >= TextureOpRasterizer.anInt7070) {
-						setArrayValuesTo(Class149.anIntArrayArray7072!![i_11], i_14, i_13, i_3)
+						setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_11], i_14, i_13, i_3)
 					}
 				}
 			}
@@ -876,10 +876,10 @@ object ArrayUtils {
 				i_13 = method4890(i_0 + i_6, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 				i_14 = method4890(i_0 - i_6, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 				if (i_12 <= TextureOpRasterizer.anInt7068) {
-					setArrayValuesTo(Class149.anIntArrayArray7072!![i_12], i_14, i_13, i_3)
+					setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_12], i_14, i_13, i_3)
 				}
 				if (i_11 >= TextureOpRasterizer.anInt7070) {
-					setArrayValuesTo(Class149.anIntArrayArray7072!![i_11], i_14, i_13, i_3)
+					setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_11], i_14, i_13, i_3)
 				}
 			}
 		}
@@ -896,18 +896,18 @@ object ArrayUtils {
 		var i_14: Int
 		i_14 = i_8
 		while (i_14 < i_12) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_14], i_10, i_11, i_5)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_14], i_10, i_11, i_5)
 			i_14++
 		}
 		i_14 = i_9
 		while (i_14 > i_13) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_14], i_10, i_11, i_5)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_14], i_10, i_11, i_5)
 			--i_14
 		}
 		i_14 = method4890(i_0 + i_6, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 		val i_15 = method4890(i_1 - i_6, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 		for (i_16 in i_12..i_13) {
-			val ints_17 = Class149.anIntArrayArray7072!![i_16]
+			val ints_17 = TextureShapeRasterizer.anIntArrayArray7072!![i_16]
 			setArrayValuesTo(ints_17, i_10, i_14, i_5)
 			setArrayValuesTo(ints_17, i_14, i_15, i_4)
 			setArrayValuesTo(ints_17, i_15, i_11, i_5)
@@ -921,7 +921,7 @@ object ArrayUtils {
 		val i_8 = method4890(i_0, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 		val i_9 = method4890(i_1, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
 		for (i_10 in i_6..i_7) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_10], i_8, i_9, i_4)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_10], i_8, i_9, i_4)
 		}
 	}
 
@@ -933,9 +933,9 @@ object ArrayUtils {
 	@JvmStatic
 	fun method568(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
 		if (i_0 > i_1) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_2], i_1, i_0, i_3)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_2], i_1, i_0, i_3)
 		} else {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_2], i_0, i_1, i_3)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_2], i_0, i_1, i_3)
 		}
 	}
 
@@ -1084,7 +1084,7 @@ object ArrayUtils {
 		var i_18 = ((i_3 shl 1) - 3) * i_11
 		var i_19 = i_16 * (i_6 + 1)
 		var i_20 = i_15 * (i_3 - 1)
-		setArrayValuesTo(Class149.anIntArrayArray7072!![i_1], i_0 - i_2, i_0 + i_2, i_4)
+		setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_1], i_0 - i_2, i_0 + i_2, i_4)
 		while (i_7 > 0) {
 			if (i_13 < 0) {
 				while (i_13 < 0) {
@@ -1111,8 +1111,8 @@ object ArrayUtils {
 			val i_22 = i_7 + i_1
 			val i_23 = i_0 + i_6
 			val i_24 = i_0 - i_6
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_21], i_24, i_23, i_4)
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_22], i_24, i_23, i_4)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_21], i_24, i_23, i_4)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_22], i_24, i_23, i_4)
 		}
 	}
 
@@ -1147,18 +1147,18 @@ object ArrayUtils {
 		var i_10: Int
 		i_10 = i_2
 		while (i_10 < i_8) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_10], i_0, i_1, i_5)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_10], i_0, i_1, i_5)
 			i_10++
 		}
 		i_10 = i_3
 		while (i_10 > i_9) {
-			setArrayValuesTo(Class149.anIntArrayArray7072!![i_10], i_0, i_1, i_5)
+			setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_10], i_0, i_1, i_5)
 			--i_10
 		}
 		i_10 = i_0 + i_6
 		val i_11 = i_1 - i_6
 		for (i_12 in i_8..i_9) {
-			val ints_13 = Class149.anIntArrayArray7072!![i_12]
+			val ints_13 = TextureShapeRasterizer.anIntArrayArray7072!![i_12]
 			setArrayValuesTo(ints_13, i_0, i_10, i_5)
 			setArrayValuesTo(ints_13, i_10, i_11, i_4)
 			setArrayValuesTo(ints_13, i_11, i_1, i_5)

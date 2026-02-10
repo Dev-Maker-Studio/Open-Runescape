@@ -1,8 +1,8 @@
 package com.jagex.game.runetek5.sound.jagtheora
 
-import com.jagex.game.runetek5.cache.node.impl.Node_Sub26
+import com.jagex.game.runetek5.cache.node.impl.AudioNode
 
-abstract class AbstractAudioFile : Node_Sub26() {
+abstract class AbstractAudioFile : AudioNode() {
     @JvmField
     var start: Int = 0
 

@@ -8,7 +8,7 @@ import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 import com.jagex.game.runetek5.toolkit.opengl.GlListUtils
-import com.jagex.game.runetek5.unidentified.SpriteSurfaceGL
+import com.jagex.game.runetek5.toolkit.SpriteSurfaceGL
 
 import jaggl.OpenGL
 

@@ -44,7 +44,6 @@ import com.jagex.game.runetek5.scene.ground.GroundSM
 import com.jagex.game.runetek5.scene.tile.WaterTile
 import com.jagex.game.runetek5.toolkit.safemode.RasterizerSM
 import com.jagex.game.runetek5.toolkit.safemode.ThreadResourceSM
-import com.jagex.game.runetek5.unidentified.*
 import com.jagex.game.runetek5.utils.ColorUtil
 import com.jagex.game.runetek5.utils.Utils
 

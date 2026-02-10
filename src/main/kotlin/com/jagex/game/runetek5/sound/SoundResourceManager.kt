@@ -6,7 +6,7 @@ import com.jagex.game.runetek5.config.midi.VorbisNode
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.sound.jagtheora.MidiPcmStream
 import com.jagex.game.runetek5.sound.jagtheora.MusicTrack
-import com.jagex.game.runetek5.sound.jagtheora.Node_Sub41_Sub2
+import com.jagex.game.runetek5.sound.jagtheora.OggKateDecoder
 import com.jagex.game.runetek5.sound.player.PcmPlayer
 import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 import com.jagex.game.runetek5.sound.player.song.SongPlayer

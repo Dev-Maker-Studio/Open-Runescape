@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.graphics.loginscreen.component
 
-import com.jagex.game.runetek5.config.gametip.component.Class350_Sub3
+import com.jagex.game.runetek5.config.gametip.component.MultiSpriteLoadingBarElement
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 import com.jagex.game.runetek5.rendering.Renderers
@@ -8,7 +8,7 @@ import com.jagex.game.runetek5.rendering.Renderers
 open class LoadingBar(
     index1: Js5ResourceProvider,
     index2: Js5ResourceProvider,
-    class350Sub33: Class350_Sub3
+    class350Sub33: MultiSpriteLoadingBarElement
 ) : LBC(index1, index2, class350Sub33) {
 
     @JvmField var aNativeSprite9162: NativeSprite? = null
@@ -20,7 +20,7 @@ open class LoadingBar(
 
     override fun initialize() {
         super.initialize()
-        val class350Sub32 = anchoredElement as Class350_Sub3
+        val class350Sub32 = anchoredElement as MultiSpriteLoadingBarElement
         aNativeSprite9162 = NativeSprite.fromJs5(spriteResource, class350Sub32.spriteA)
         aNativeSprite9161 = NativeSprite.fromJs5(spriteResource, class350Sub32.spriteB)
         aNativeSprite9160 = NativeSprite.fromJs5(spriteResource, class350Sub32.spriteC)
@@ -74,7 +74,7 @@ open class LoadingBar(
         if (!super.isCached()) {
             return false
         } else {
-            val class350Sub32 = anchoredElement as Class350_Sub3
+            val class350Sub32 = anchoredElement as MultiSpriteLoadingBarElement
             return spriteResource.isFileCached(class350Sub32.spriteA) &&
                     spriteResource.isFileCached(class350Sub32.spriteB) &&
                     spriteResource.isFileCached(class350Sub32.spriteC) &&

@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.graphics.font
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.toolkit.SafeModeToolkit
-import com.jagex.game.runetek5.unidentified.ComponentDimensionSM
+import com.jagex.game.runetek5.toolkit.ComponentDimensionSM
 import kotlin.math.min
 
 class TransparentFontRendererSM(

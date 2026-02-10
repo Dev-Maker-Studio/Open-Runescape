@@ -9,7 +9,7 @@ import jagtheora.vorbis.VorbisBlock
 import jagtheora.vorbis.VorbisComment
 import jagtheora.vorbis.VorbisInfo
 
-class JagTheoraVorbisNode(oggStreamState: OggStreamState) : Node_Sub41(oggStreamState) {
+class JagTheoraVorbisNode(oggStreamState: OggStreamState) : OggStreamDecoder(oggStreamState) {
 
     @JvmField val aVorbisInfo9605 = VorbisInfo()
     @JvmField val aVorbisComment9599 = VorbisComment()
@@ -18,7 +18,7 @@ class JagTheoraVorbisNode(oggStreamState: OggStreamState) : Node_Sub41(oggStream
     @JvmField var aDSPState9600: DSPState? = null
     @JvmField var aVorbisBlock9601: VorbisBlock? = null
     @JvmField var aClass3449598: Resampler? = null
-    @JvmField var aNodeSub15Sub19603: Node_Sub15_Sub1? = null
+    @JvmField var aNodeSub15Sub19603: VorbisPcmStream? = null
 
     override fun decode(oggPacket: OggPacket) {
         if (anInt8031 < 3) {
@@ -34,7 +34,7 @@ class JagTheoraVorbisNode(oggStreamState: OggStreamState) : Node_Sub41(oggStream
                 aDSPState9600 = dspState
                 aVorbisBlock9601 = VorbisBlock(dspState)
                 aClass3449598 = Resampler(aVorbisInfo9605.rate, PcmPlayerManager.sampleRate)
-                aNodeSub15Sub19603 = Node_Sub15_Sub1(aVorbisInfo9605.channels)
+                aNodeSub15Sub19603 = VorbisPcmStream(aVorbisInfo9605.channels)
             }
         } else {
             val vorbisBlock = aVorbisBlock9601!!
@@ -57,7 +57,7 @@ class JagTheoraVorbisNode(oggStreamState: OggStreamState) : Node_Sub41(oggStream
         }
     }
 
-    fun method14845(): Node_Sub15_Sub1? {
+    fun method14845(): VorbisPcmStream? {
         return aNodeSub15Sub19603
     }
 

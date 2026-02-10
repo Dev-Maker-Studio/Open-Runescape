@@ -13,7 +13,7 @@ import com.jagex.game.runetek5.staticmethods.StaticMethods
  */
 class TextureOpRasterizer : TextureOperation(0, true) {
 
-    @JvmField var aClass149Array9862: Array<Class149?>? = null
+    @JvmField var shapes: Array<TextureShapeRasterizer?>? = null
 
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = monochromeImageCache.getPalette(i_1)
@@ -55,9 +55,9 @@ class TextureOpRasterizer : TextureOperation(0, true) {
         @Suppress("UNCHECKED_CAST")
         StaticMethods.method3936(ints_1 as Array<IntArray>?)
         method16086(TextureRaster.rowEnd, TextureRaster.columnEnd)
-        if (aClass149Array9862 != null) {
-            for (i_5 in aClass149Array9862!!.indices) {
-                val class1496 = aClass149Array9862!![i_5] ?: continue
+        if (shapes != null) {
+            for (i_5 in shapes!!.indices) {
+                val class1496 = shapes!![i_5] ?: continue
                 val i_7 = class1496.anInt1743
                 val i_8 = class1496.anInt1741
                 if (i_7 >= 0) {
@@ -77,14 +77,14 @@ class TextureOpRasterizer : TextureOperation(0, true) {
         when (i_1) {
             0 -> {
                 val count = rsbytebuffer2.readUByte()
-                aClass149Array9862 = arrayOfNulls<Class149>(count)
+                shapes = arrayOfNulls<TextureShapeRasterizer>(count)
                 for (i_4 in 0 until count) {
                     val i_5 = rsbytebuffer2.readUByte()
-                    aClass149Array9862!![i_4] = when (i_5) {
-                        0 -> Class149_Sub3.decode(rsbytebuffer2)
-                        1 -> Class149_Sub2.decode(rsbytebuffer2)
-                        2 -> Class149_Sub4.decode(rsbytebuffer2)
-                        3 -> Class149_Sub1.decode(rsbytebuffer2)
+                    shapes!![i_4] = when (i_5) {
+                        0 -> LineRasterizer.decode(rsbytebuffer2)
+                        1 -> BezierCurveRasterizer.decode(rsbytebuffer2)
+                        2 -> RectangleRasterizer.decode(rsbytebuffer2)
+                        3 -> EllipseRasterizer.decode(rsbytebuffer2)
                         else -> null
                     }
                 }

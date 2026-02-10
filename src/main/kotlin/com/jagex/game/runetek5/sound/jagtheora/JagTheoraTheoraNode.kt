@@ -12,7 +12,7 @@ import jagtheora.theora.*
  *
  * @author Brainpower - 12/01/2022
  */
-class JagTheoraTheoraNode(streamState: OggStreamState) : Node_Sub41(streamState) {
+class JagTheoraTheoraNode(streamState: OggStreamState) : OggStreamDecoder(streamState) {
 
     var unusedBooleanV2: Boolean = false
     var packetDecodeTime: Long = 0

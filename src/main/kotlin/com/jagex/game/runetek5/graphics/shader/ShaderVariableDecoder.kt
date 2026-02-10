@@ -1,7 +1,5 @@
 package com.jagex.game.runetek5.graphics.shader
 
-import com.jagex.game.runetek5.unidentified.Class111
-
 /**
  *
  * @author Brainpower
@@ -82,8 +80,8 @@ class ShaderVariableDecoder {
 
     @JvmField var anIntArray1531: IntArray? = null
     @JvmField var anIntArray1534: IntArray? = null
-    @JvmField var aClass1111529: Class111? = null
-    @JvmField var aClass1111533: Class111? = null
+    @JvmField var aClass1111529: ShaderVariableType? = null
+    @JvmField var aClass1111533: ShaderVariableType? = null
     @JvmField var anInt1528 = -1
 
     /**
@@ -98,10 +96,10 @@ class ShaderVariableDecoder {
 
     fun decode(shaderBuffer: ShaderBuffer) {
         val mainEntryCount = shaderBuffer.getEntryCount()
-        aClass1111529 = Class111.getAll()[mainEntryCount]
-        if (aClass1111529 == Class111.aClass1111109) {
+        aClass1111529 = ShaderVariableType.getAll()[mainEntryCount]
+        if (aClass1111529 == ShaderVariableType.aClass1111109) {
             val i_4 = shaderBuffer.getEntryCount()
-            aClass1111533 = Class111.getAll()[i_4]
+            aClass1111533 = ShaderVariableType.getAll()[i_4]
             anInt1528 = shaderBuffer.getEntryCount()
         }
         primaryShaderAttributeName = shaderBuffer.readString()

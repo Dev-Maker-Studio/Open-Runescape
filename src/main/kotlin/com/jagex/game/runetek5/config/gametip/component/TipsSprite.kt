@@ -9,7 +9,7 @@ class TipsSprite internal constructor(
 ) : ITipDetails {
 
     override fun getRenderDetails(): TipRenderDetails {
-        return TipRenderDetails.aClass60601
+        return TipRenderDetails.TIPS_SPRITE
     }
 
     companion object {

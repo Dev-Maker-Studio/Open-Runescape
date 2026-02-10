@@ -4,7 +4,7 @@ import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
-import com.jagex.game.runetek5.unidentified.SpriteSurfaceGL
+import com.jagex.game.runetek5.toolkit.SpriteSurfaceGL
 import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.framebuffer.FrameBuffer

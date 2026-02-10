@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.toolkit
 
-import com.jagex.game.runetek5.unidentified.*
+import com.jagex.game.runetek5.graphics.FramebufferCompositor
 import com.jagex.game.runetek5.utils.ColorUtil
 import com.jagex.game.runetek5.utils.MathUtils
 
@@ -174,7 +174,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     @JvmField var arbTextureFloat: Boolean = false
     @JvmField var textureCache: OpenGLTextureCache? = null
     @JvmField var aClass1648363: Texture3DShaderGL? = null
-    @JvmField var aClass1708357: Class170? = null
+    @JvmField var aClass1708357: FramebufferCompositor? = null
     @JvmField var arbRectangleTexturesSupported: Boolean = false
     @JvmField var shouldUseArbVbo: Boolean = false
     @JvmField var radeonGpu: Boolean = false
@@ -329,7 +329,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             this.textureCache = OpenGLTextureCache(this, materialProvider)
             buildTables()
             this.aClass1648363 = Texture3DShaderGL(this)
-            this.aClass1708357 = Class170(this)
+            this.aClass1708357 = FramebufferCompositor(this)
             if (this.aClass1708357!!.method2896()) {
                 this.rectangularTexture = RectangularTextureGL(this)
                 if (!this.rectangularTexture!!.rectangularTextureSupport()) {

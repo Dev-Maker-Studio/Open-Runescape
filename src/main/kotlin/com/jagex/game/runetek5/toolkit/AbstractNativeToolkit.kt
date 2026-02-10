@@ -44,8 +44,7 @@ import com.jagex.game.runetek5.toolkit.opengl.GLFormat
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclaration
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclarationAction
 import com.jagex.game.runetek5.toolkit.vertexdeclaration.VertexDeclarationComponent
-import com.jagex.game.runetek5.unidentified.Class455_Sub1
-import com.jagex.game.runetek5.unidentified.NativeBloomRenderer
+import com.jagex.game.runetek5.graphics.NativeBloomRenderer
 import com.jagex.game.runetek5.utils.ColorUtil
 import jaclib.memory.DirectBufferHelper
 import jaclib.memory.Stream
@@ -636,7 +635,7 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun createComponentSurface(i_1: Int, i_2: Int, ints_3: IntArray, ints_4: IntArray): ComponentSurface {
-        return Class455_Sub1.createFromRowMask(this, i_1, i_2, ints_3, ints_4)
+        return MaskedTextureSurface.createFromRowMask(this, i_1, i_2, ints_3, ints_4)
     }
 
     internal abstract fun toggleBlending()

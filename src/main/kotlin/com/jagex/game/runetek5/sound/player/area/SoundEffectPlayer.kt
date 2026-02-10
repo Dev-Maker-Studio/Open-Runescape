@@ -20,7 +20,7 @@ import com.jagex.game.runetek5.sound.SoundResourceManager
 import com.jagex.game.runetek5.sound.jagtheora.AudioBufferStream
 import com.jagex.game.runetek5.sound.jagtheora.MidiPcmStream
 import com.jagex.game.runetek5.sound.jagtheora.MixedAudioStream
-import com.jagex.game.runetek5.sound.jagtheora.Node_Sub15_Sub4
+import com.jagex.game.runetek5.sound.jagtheora.PcmStreamScheduler
 import com.jagex.game.runetek5.sound.jagtheora.PcmStream
 import com.jagex.game.runetek5.sound.player.PcmPlayer
 import com.jagex.game.runetek5.sound.player.PcmPlayerManager
@@ -427,7 +427,7 @@ object SoundEffectPlayer {
 	    jinglePlayer = PcmPlayerManager.start(0, 22050)
 	    setJingleStream(getStream(null))
 	    soundEffectPlayer = PcmPlayerManager.start(1, 2048)
-	    AmbientSound.gameSounds = Node_Sub15_Sub4()
+	    AmbientSound.gameSounds = PcmStreamScheduler()
 	    soundEffectPlayer!!.currentPcmStream = AmbientSound.gameSounds
 	    resampler = Resampler(22050, PcmPlayerManager.sampleRate)
 	    SongPlayer.method12658()

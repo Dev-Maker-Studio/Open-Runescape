@@ -6,7 +6,6 @@ import com.jagex.game.runetek5.graphics.texture.sampler.TextureSampler
 import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
 import com.jagex.game.runetek5.toolkit.opengl.*
-import com.jagex.game.runetek5.unidentified.Class111
 import com.jagex.game.runetek5.utils.ArrayUtils
 import jaggl.OpenGL
 
@@ -84,7 +83,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
         val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
         if (i_3 != -1 && aFloatArray9429!![i_3] != f_2) {
             aFloatArray9429!![i_3] = f_2
-            if (class282Sub21Sub11.method15457() != Class111.aClass1111219 && class282Sub21Sub11.method15457() != Class111.aClass1111182) {
+            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111219 && class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111182) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -97,7 +96,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
         if (i_4 != -1 && (aFloatArray9429!![i_4] != f_2 || aFloatArray9422!![i_4] != f_3)) {
             aFloatArray9429!![i_4] = f_2
             aFloatArray9422!![i_4] = f_3
-            if (class282Sub21Sub11.method15457() != Class111.aClass1111132) {
+            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111132) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -111,7 +110,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
             aFloatArray9429!![i_5] = f_2
             aFloatArray9422!![i_5] = f_3
             aFloatArray9431!![i_5] = f_4
-            if (class282Sub21Sub11.method15457() != Class111.aClass1111133) {
+            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111133) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -127,7 +126,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     }
 
     override fun uniform2fv(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.method15457() != Class111.aClass1111168) {
+        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111168) {
             throw AssertionError()
         }
 
@@ -138,7 +137,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     }
 
     override fun uniform4fv(class282Sub21Sub11: ShaderAttribute, matrix442: Matrix44) {
-        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.method15457() != Class111.aClass1111150) {
+        if (!Companion.`$assertionsDisabled` && class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111150) {
             throw AssertionError()
         }
 
@@ -186,7 +185,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
             aFloatArray9422!![i_6] = f_3
             aFloatArray9431!![i_6] = f_4
             aFloatArray9432!![i_6] = f_5
-            if (class282Sub21Sub11.method15457() != Class111.aClass1111134) {
+            if (class282Sub21Sub11.method15457() != ShaderVariableType.aClass1111134) {
                 throw IllegalShaderArgumentException()
             }
 
@@ -279,14 +278,14 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                 } else {
                     var slot = 0
                     var i_3 = 0
-                    var class1116: Class111
+                    var class1116: ShaderVariableType
                     for (variableIndex in 0 until openglShader!!.getPrimaryShaderVariableCount()) {
                         val shaderAttribute = openglShader!!.getShaderAttribute(variableIndex)
                         if (shaderAttribute != null) {
                             shaderAttribute.loadUniformLocation(activeInSlot)
                             class1116 = shaderAttribute.method15457()
                             val i_7 = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
-                            if (class1116 != Class111.aClass1111219 && class1116 != Class111.aClass1111182 && class1116 != Class111.aClass1111132 && class1116 != Class111.aClass1111133 && class1116 != Class111.aClass1111134) {
+                            if (class1116 != ShaderVariableType.aClass1111219 && class1116 != ShaderVariableType.aClass1111182 && class1116 != ShaderVariableType.aClass1111132 && class1116 != ShaderVariableType.aClass1111133 && class1116 != ShaderVariableType.aClass1111134) {
                                 i_3 = Math.max(i_7, i_3)
                             } else {
                                 slot = Math.max(i_7, slot)
@@ -300,7 +299,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
                             shaderAttribute.loadUniformLocation(activeInSlot)
                             class1116 = shaderAttribute.method15457()
                             val i_7 = (shaderAttribute as ShaderAttributeGL).uniformLocations!![activeInSlot]
-                            if (class1116 != Class111.aClass1111219 && class1116 != Class111.aClass1111182 && class1116 != Class111.aClass1111132 && class1116 != Class111.aClass1111133 && class1116 != Class111.aClass1111134) {
+                            if (class1116 != ShaderVariableType.aClass1111219 && class1116 != ShaderVariableType.aClass1111182 && class1116 != ShaderVariableType.aClass1111132 && class1116 != ShaderVariableType.aClass1111133 && class1116 != ShaderVariableType.aClass1111134) {
                                 i_3 = Math.max(i_7, i_3)
                             } else {
                                 slot = Math.max(i_7, slot)

@@ -7,10 +7,10 @@ import com.jagex.game.runetek5.config.gametip.component.RotatableSpritePositioni
 import com.jagex.game.runetek5.config.gametip.component.SpritePositioning
 import com.jagex.game.runetek5.config.gametip.component.TipsBackground
 import com.jagex.game.runetek5.config.gametip.component.TipsSprite
-import com.jagex.game.runetek5.config.gametip.component.decodeSub1
-import com.jagex.game.runetek5.config.gametip.component.decodeSub2
-import com.jagex.game.runetek5.config.gametip.component.decodeSub3
-import com.jagex.game.runetek5.config.gametip.component.decodeSub3Sub1
+import com.jagex.game.runetek5.config.gametip.component.decodeSpriteLoadingBar
+import com.jagex.game.runetek5.config.gametip.component.decodeColorLoadingBar
+import com.jagex.game.runetek5.config.gametip.component.decodeMultiSpriteLoadingBar
+import com.jagex.game.runetek5.config.gametip.component.decodeAnimatedLoadingBar
 
 class GameTipType {
 
@@ -27,15 +27,15 @@ class GameTipType {
     fun decode(buffer: Packet, details: TipRenderDetails): ITipDetails? {
         return when (details) {
             TipRenderDetails.BACKGROUND -> TipsBackground.decode(buffer)
-            TipRenderDetails.aClass60602 -> decodeSub2(buffer)
+            TipRenderDetails.COLOR_LOADING_BAR -> decodeColorLoadingBar(buffer)
             TipRenderDetails.OUTLINED -> OutlinedNewsItem.decode(buffer)
             TipRenderDetails.ROTATED_SPRITE -> RotatableSpritePositioning.decode(buffer)
             TipRenderDetails.SPRITE -> SpritePositioning.decode(buffer)
-            TipRenderDetails.aClass60603 -> decodeSub1(buffer)
-            TipRenderDetails.aClass60608 -> decodeSub3(buffer)
+            TipRenderDetails.SPRITE_LOADING_BAR -> decodeSpriteLoadingBar(buffer)
+            TipRenderDetails.MULTI_SPRITE_LOADING_BAR -> decodeMultiSpriteLoadingBar(buffer)
             TipRenderDetails.ANCHORED_TEXT -> AnchoredTextMeta.decode(buffer)
-            TipRenderDetails.aClass60601 -> TipsSprite.decode(buffer)
-            TipRenderDetails.aClass60610 -> decodeSub3Sub1(buffer)
+            TipRenderDetails.TIPS_SPRITE -> TipsSprite.decode(buffer)
+            TipRenderDetails.ANIMATED_LOADING_BAR -> decodeAnimatedLoadingBar(buffer)
             else -> null
         }
     }

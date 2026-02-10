@@ -1,6 +1,6 @@
 package com.jagex.game.runetek5.sound.player
 
-import com.jagex.game.runetek5.cache.node.impl.Node_Sub26
+import com.jagex.game.runetek5.cache.node.impl.AudioNode
 import com.jagex.game.runetek5.sound.jagtheora.PcmStream
 import com.jagex.game.runetek5.tools.TimeTools
 import com.jagex.game.runetek5.utils.Utils

@@ -1,15 +1,14 @@
 package com.jagex.game.runetek5.graphics.shader
 
 import com.jagex.game.runetek5.toolkit.opengl.effect.ProgramAttribute
-import com.jagex.game.runetek5.unidentified.Class111
 
 abstract class ShaderAttribute protected constructor(class1221: ShaderVariableDecoder) : ProgramAttribute() {
 
-    @JvmField val aClass11110058: Class111
+    @JvmField val aClass11110058: ShaderVariableType
     @JvmField val primaryShaderAttributeName: String
     @JvmField val secondaryShaderAttributeName: String?
     @JvmField val anInt10059: Int
-    @JvmField val aClass11110060: Class111
+    @JvmField val aClass11110060: ShaderVariableType
 
     init {
         this.aClass11110058 = class1221.aClass1111529!!
@@ -23,16 +22,16 @@ abstract class ShaderAttribute protected constructor(class1221: ShaderVariableDe
         return this.primaryShaderAttributeName
     }
 
-    fun method15457(): Class111 {
+    fun method15457(): ShaderVariableType {
         return this.aClass11110058
     }
 
-    fun method15458(): Class111 {
+    fun method15458(): ShaderVariableType {
         return this.aClass11110060
     }
 
     fun method15459(): Int {
-        if (this.aClass11110058 != Class111.aClass1111109) {
+        if (this.aClass11110058 != ShaderVariableType.aClass1111109) {
             throw IllegalShaderArgumentException()
         } else {
             return this.anInt10059

@@ -15,7 +15,7 @@ import jaggl.OpenGL
  * @author Brainpower - 22/04/2022
  *
  */
-class RectangularTextureGL(toolkit: OpenGlToolkit) : Node_Sub5(toolkit) {
+class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) {
 
     var display: IntegratedGraphicsDisplayGL? = null
     var aClass137Sub110038: OpenGl2DTexture? = null

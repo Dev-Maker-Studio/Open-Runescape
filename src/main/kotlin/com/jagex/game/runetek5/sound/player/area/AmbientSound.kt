@@ -8,7 +8,7 @@ import com.jagex.game.runetek5.config.`object`.ObjectType
 import com.jagex.game.runetek5.config.midi.instrument.MusicSample
 import com.jagex.game.runetek5.entity.pathingentity.npc.NpcEntity
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerEntity
-import com.jagex.game.runetek5.sound.jagtheora.Node_Sub15_Sub4
+import com.jagex.game.runetek5.sound.jagtheora.PcmStreamScheduler
 import com.jagex.game.runetek5.vardomain.VarProviders
 import com.jagex.game.runetek5.sound.jagtheora.AreaSoundStream
 import com.jagex.game.runetek5.sound.jagtheora.AudioBuffer
@@ -185,7 +185,7 @@ class AmbientSound : Node<AmbientSound>() {
         val PLAYER_AMBIENT_SOUNDS: IterableNodeMap<AmbientSound> = IterableNodeMap(16)
 
         @JvmField
-        var gameSounds: Node_Sub15_Sub4? = null
+        var gameSounds: PcmStreamScheduler? = null
 
         @JvmStatic
         fun update() {

@@ -2,7 +2,7 @@ package com.jagex.game.runetek5.graphics.sprite
 
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.toolkit.SafeModeToolkit
-import com.jagex.game.runetek5.unidentified.ComponentDimensionSM
+import com.jagex.game.runetek5.toolkit.ComponentDimensionSM
 
 abstract class SpriteSM(
     @JvmField val toolkit: SafeModeToolkit,

@@ -6,7 +6,7 @@ import com.jagex.game.runetek5.graphics.sprite.NativeSpriteGenerator
 import com.jagex.game.runetek5.network.packet.PacketEncoder
 import com.jagex.game.runetek5.sound.jagtheora.JagTheoraTheoraNode
 import com.jagex.game.runetek5.sound.jagtheora.JagTheoraVorbisNode
-import com.jagex.game.runetek5.sound.jagtheora.Node_Sub15_Sub1
+import com.jagex.game.runetek5.sound.jagtheora.VorbisPcmStream
 import com.jagex.game.runetek5.sound.jagtheora.VorbisFileReference
 import com.jagex.game.runetek5.sound.player.area.AmbientSound
 import com.jagex.game.runetek5.staticmethods.StaticMethods

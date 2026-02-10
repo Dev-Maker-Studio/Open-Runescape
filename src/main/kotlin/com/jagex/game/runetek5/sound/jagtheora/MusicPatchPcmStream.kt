@@ -9,7 +9,7 @@ import com.jagex.game.runetek5.sound.player.PcmPlayerManager
 class MusicPatchPcmStream(@JvmField val aNodeSub15Sub29753: MidiPcmStream) : PcmStream() {
 
     @JvmField val queue: NodeCollection = NodeCollection()
-    @JvmField val aNodeSub15Sub49755: Node_Sub15_Sub4 = Node_Sub15_Sub4()
+    @JvmField val aNodeSub15Sub49755: PcmStreamScheduler = PcmStreamScheduler()
 
     override fun getFirstStream(): PcmStream? {
         val musicPatch = queue.getFirst() as? MusicPatchNode ?: return null

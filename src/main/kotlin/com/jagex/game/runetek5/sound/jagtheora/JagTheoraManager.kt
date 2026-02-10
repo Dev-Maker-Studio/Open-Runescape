@@ -24,7 +24,7 @@ abstract class JagTheoraManager {
     var languageAbbreviation: String? = null
 
     @JvmField
-    var aNodeSub41Sub23364: Node_Sub41_Sub2? = null
+    var aNodeSub41Sub23364: OggKateDecoder? = null
 
     @JvmField
     var aBool3353: Boolean = false
@@ -45,7 +45,7 @@ abstract class JagTheoraManager {
     var packet: OggPacket
 
     @JvmField
-    var cache: IterableNodeMap<Node_Sub41>
+    var cache: IterableNodeMap<OggStreamDecoder>
 
     @JvmField
     var aBool3360: Boolean = false
@@ -72,7 +72,7 @@ abstract class JagTheoraManager {
     }
 
     @Throws(IOException::class)
-    fun method4911(): Node_Sub41? {
+    fun method4911(): OggStreamDecoder? {
         if (this.aBool3360) {
             throw IllegalStateException()
         } else if (this.aBool3361) {
@@ -94,7 +94,7 @@ abstract class JagTheoraManager {
             }
             i_2 = this.page.getSerialNumber()
             if (!this.page.isBOS()) {
-                val class282Sub419 = this.cache.get(i_2.toLong()) as Node_Sub41
+                val class282Sub419 = this.cache.get(i_2.toLong()) as OggStreamDecoder
                 if (!class282Sub419.anOggStreamState8032.pageIn(this.page)) {
                     throw IllegalStateException()
                 } else {
@@ -107,7 +107,7 @@ abstract class JagTheoraManager {
                 } else if (state.packetPeek(this.packet) != 1) {
                     throw IllegalStateException()
                 } else {
-                    val obj4: Node_Sub41
+                    val obj4: OggStreamDecoder
                     if (this.aNodeSub41Sub33363 == null && this.packet.isTheora()) {
                         this.aNodeSub41Sub33363 = JagTheoraTheoraNode(state)
                         obj4 = this.aNodeSub41Sub33363!!
@@ -124,9 +124,9 @@ abstract class JagTheoraManager {
                         }
                         val string_8 = stringbuilder6.toString()
                         obj4 = if ("kate" == string_8) {
-                            Node_Sub41_Sub2(state)
+                            OggKateDecoder(state)
                         } else {
-                            Node_Sub41_Sub1(state)
+                            NullOggStreamDecoder(state)
                         }
                     }
                     this.cache.put(obj4, i_2.toLong())
@@ -166,30 +166,30 @@ abstract class JagTheoraManager {
                 this.aNodeSub41Sub23364 = null
             }
             if (this.aNodeSub41Sub23364 == null) {
-                var class282Sub413 = this.cache.first() as Node_Sub41?
+                var class282Sub413 = this.cache.first() as OggStreamDecoder?
                 while (class282Sub413 != null) {
-                    if (class282Sub413 is Node_Sub41_Sub2) {
+                    if (class282Sub413 is OggKateDecoder) {
                         val class282Sub41Sub24 = class282Sub413
                         if (this.languageAbbreviation == class282Sub41Sub24.getLanguageAbbreviation()) {
                             this.aNodeSub41Sub23364 = class282Sub41Sub24
                             break
                         }
                     }
-                    class282Sub413 = this.cache.next() as Node_Sub41?
+                    class282Sub413 = this.cache.next() as OggStreamDecoder?
                 }
             }
         }
     }
 
     fun method4916() {
-        var class282Sub412 = this.cache.first() as Node_Sub41?
+        var class282Sub412 = this.cache.first() as OggStreamDecoder?
         while (class282Sub412 != null) {
             if (class282Sub412 != this.aNodeSub41Sub33363) {
                 while (class282Sub412.anOggStreamState8032.packetOut() == 1) {
                     class282Sub412.method13361(this.packet)
                 }
             }
-            class282Sub412 = this.cache.next() as Node_Sub41?
+            class282Sub412 = this.cache.next() as OggStreamDecoder?
         }
         if (this.aNodeSub41Sub33363 != null) {
             var i_3 = 0
@@ -230,7 +230,7 @@ abstract class JagTheoraManager {
     fun method4932() {
         if (!this.aBool3353) {
             while (!this.aBool3360) {
-                val class282Sub412: Node_Sub41?
+                val class282Sub412: OggStreamDecoder?
                 if (!this.aBool3359) {
                     class282Sub412 = method4911()
                     if (class282Sub412 == null) {
@@ -241,7 +241,7 @@ abstract class JagTheoraManager {
                     }
                     this.aBool3359 = true
                 } else {
-                    class282Sub412 = this.cache.get(this.page.getSerialNumber().toLong()) as Node_Sub41?
+                    class282Sub412 = this.cache.get(this.page.getSerialNumber().toLong()) as OggStreamDecoder?
                 }
                 if (class282Sub412 == this.aNodeSub41Sub43366) {
                     if (this.aNodeSub41Sub43366!!.method14847() >= 50) {
@@ -268,7 +268,7 @@ abstract class JagTheoraManager {
                             return
                         }
                     }
-                } else if (class282Sub412 is Node_Sub41_Sub2) {
+                } else if (class282Sub412 is OggKateDecoder) {
                     method4942()
                 } else if (class282Sub412 != this.aNodeSub41Sub33363) {
                     while (class282Sub412!!.anOggStreamState8032.packetOut(this.packet) == 1) {
@@ -290,31 +290,31 @@ abstract class JagTheoraManager {
         }
     }
 
-    fun method4935(): Node_Sub41_Sub2? {
+    fun method4935(): OggKateDecoder? {
         return this.aNodeSub41Sub23364
     }
 
     fun method4942() {
-        var class282Sub412 = this.cache.first() as Node_Sub41?
+        var class282Sub412 = this.cache.first() as OggStreamDecoder?
         while (class282Sub412 != null) {
-            if (class282Sub412 is Node_Sub41_Sub2) {
+            if (class282Sub412 is OggKateDecoder) {
                 val class282Sub41Sub23 = class282Sub412
                 while ((class282Sub41Sub23.anInt8031 <= 8 || method4923() > class282Sub41Sub23.method14705()) && class282Sub41Sub23.anOggStreamState8032.packetOut(this.packet) == 1) {
                     class282Sub41Sub23.method13361(this.packet)
                 }
             }
-            class282Sub412 = this.cache.next() as Node_Sub41?
+            class282Sub412 = this.cache.next() as OggStreamDecoder?
         }
         setLanguage(this.languageAbbreviation)
     }
 
     fun method4947() {
         if (!this.aBool3360) {
-            var class282Sub412 = this.cache.first() as Node_Sub41?
+            var class282Sub412 = this.cache.first() as OggStreamDecoder?
             while (class282Sub412 != null) {
                 class282Sub412.reset()
                 class282Sub412.anOggStreamState8032.resetPeer()
-                class282Sub412 = this.cache.next() as Node_Sub41?
+                class282Sub412 = this.cache.next() as OggStreamDecoder?
             }
             this.packet.resetPeer()
             this.page.resetPeer()
