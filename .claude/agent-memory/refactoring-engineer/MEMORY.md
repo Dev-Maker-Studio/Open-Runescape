@@ -79,7 +79,8 @@
 - **Unreferenced** (8): Scene.kt 5 fields, WaterTile.anInt948, ParticleProducerType.aBool572, MaterialType.aBool2087
 - **Comments-only** (3): Bot.kt method1150, Shader.kt anInt8820, CommandExecutor.kt anInt2826
 - **Insufficient evidence** (3): FileOnDisk.anInt5357, LoginManager.anInt5357
-- **Excluded by scope**: CS2Interpreter.java (809 opcode handlers), TransparentSpriteSM/OpaqueSpriteSM/PaletteSpriteSM, ShaderVariableType (117 constants)
+- **Excluded by scope**: CS2Interpreter.java (809 opcode handlers), TransparentSpriteSM/OpaqueSpriteSM/PaletteSpriteSM
+- **ShaderVariableType**: All 117 obfuscated constants renamed (14 MATRxC + 93 TYPE_XX placeholders). No external refs existed.
 
 ## Lessons Learned
 - **replace_all is dangerous**: `Class111` matches `aClass1111109`. Use `\b` word boundaries.
