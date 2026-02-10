@@ -921,7 +921,7 @@ class Client : GameShell() {
         MouseActionServer.refreshCache()
         animatingStep++
         MiniMenu.method6451(-1, -1)
-        InterfaceComponentRenderer.method544(null, -1, -1)
+        InterfaceComponentRenderer.setChatDisplay(null, -1, -1)
         Interface.ifHover()
         serverTick++
 
@@ -1712,17 +1712,17 @@ class Client : GameShell() {
                             indexReference += 2048
                         }
 
-                        if (pathing.anInt10319 == 0 && pathing.getOverheadSprite() != -1) {
+                        if (pathing.overheadSpriteCount == 0 && pathing.getOverheadSprite() != -1) {
                             ENTITY_INDEX_REFERENCES[overlappingEntityCount] = indexReference
                             NPC_INDEX_REFERENCES[overlappingEntityCount] = indexReference
                             overlappingEntityCount++
-                            pathing.anInt10319++
+                            pathing.overheadSpriteCount++
                         }
 
                         ENTITY_INDEX_REFERENCES[overlappingEntityCount] = indexReference
                         NPC_INDEX_REFERENCES[overlappingEntityCount] = npc.playerIndex + 2048
                         overlappingEntityCount++
-                        pathing.anInt10319++
+                        pathing.overheadSpriteCount++
                     }
                 }
             }
@@ -1854,8 +1854,8 @@ class Client : GameShell() {
             get() = cycleManager!!.getCurrentCycle()
 
         fun clearWorldMapCaches() {
-            WorldMapSub1.aClass4658025.clear()
-            WorldMapSub1.aClass4658029.clear()
+            WorldMapSub1.hiddenMecIds.clear()
+            WorldMapSub1.hiddenCategoryIds.clear()
         }
 
         @JvmStatic
@@ -1998,7 +1998,7 @@ class Client : GameShell() {
                                     }
                                 }
                             }
-                            PlayerUpdate.method6233()
+                            PlayerUpdate.updateHintDetailsOnTick()
                             MapRegion.cycleGfx()
                             PulseEventHandler.processPulseEvents()
                             ++animatingStep
@@ -2019,7 +2019,7 @@ class Client : GameShell() {
                             isDraggingComponent = false
                             isComponentSelected = false
                             WorldMap.worldmapComponent = null
-                            InterfaceComponentRenderer.method544(null, -1, -1)
+                            InterfaceComponentRenderer.setChatDisplay(null, -1, -1)
                             if (!interfaceSelectionActive) {
                                 defaultMenuCursor = -1
                             }
@@ -2462,7 +2462,7 @@ class Client : GameShell() {
 
         fun processDrag() {
             Component.redrawComponent(draggingComponent!!)
-            ++InterfaceRenderer.anInt8308
+            ++InterfaceRenderer.dragTickCount
             if (isDraggingComponent && isComponentSelected) {
                 var i_1 = MouseRecord.recorder!!.getMouseX()
                 var i_2 = MouseRecord.recorder!!.getMouseY()
@@ -2493,13 +2493,13 @@ class Client : GameShell() {
                 if (!MouseRecord.recorder!!.isMouseButtonPressed()) {
                     if (isDragThresholdMet) {
                         InterfaceComponentRenderer.cancelInterfaceSelection()
-                        if (draggingComponent!!.anObjectArray1394 != null) {
+                        if (draggingComponent!!.onDragComplete != null) {
                             hookrequest5 = HookRequest()
                             hookrequest5.source = draggingComponent
                             hookrequest5.mouseX = i_3
                             hookrequest5.mouseY = i_4
                             hookrequest5.aClass1188057 = hoveredComponent
-                            hookrequest5.params = draggingComponent!!.anObjectArray1394
+                            hookrequest5.params = draggingComponent!!.onDragComplete
                             CS2Executor.executeHookInner(hookrequest5)
                         }
                         if (hoveredComponent != null && getDragTarget(draggingComponent) != null) {
@@ -2513,23 +2513,23 @@ class Client : GameShell() {
                     draggingComponent = null
                     selectedComponent = null
                 } else {
-                    if (InterfaceRenderer.anInt8308 > draggingComponent!!.anInt1381) {
+                    if (InterfaceRenderer.dragTickCount > draggingComponent!!.dragDeadTime) {
                         val i_7: Int = i_1 - dragStartX
                         val i_6: Int = i_2 - dragStartY
-                        if (i_7 > draggingComponent!!.anInt1380 || i_7 < -draggingComponent!!.anInt1380 || i_6 > draggingComponent!!.anInt1380 || i_6 < -draggingComponent!!.anInt1380) {
+                        if (i_7 > draggingComponent!!.dragDeadzone || i_7 < -draggingComponent!!.dragDeadzone || i_6 > draggingComponent!!.dragDeadzone || i_6 < -draggingComponent!!.dragDeadzone) {
                             isDragThresholdMet = true
                         }
                     }
-                    if (draggingComponent!!.anObjectArray1451 != null && isDragThresholdMet) {
+                    if (draggingComponent!!.onDrag != null && isDragThresholdMet) {
                         hookrequest5 = HookRequest()
                         hookrequest5.source = draggingComponent
                         hookrequest5.mouseX = i_3
                         hookrequest5.mouseY = i_4
-                        hookrequest5.params = draggingComponent!!.anObjectArray1451
+                        hookrequest5.params = draggingComponent!!.onDrag
                         CS2Executor.executeHookInner(hookrequest5)
                     }
                 }
-            } else if (InterfaceRenderer.anInt8308 > 1) {
+            } else if (InterfaceRenderer.dragTickCount > 1) {
                 draggingComponent = null
                 selectedComponent = null
             }

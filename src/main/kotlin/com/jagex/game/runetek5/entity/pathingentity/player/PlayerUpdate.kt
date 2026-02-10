@@ -33,21 +33,21 @@ object PlayerUpdate {
     @JvmField val OUT_PLAYER_UPDATE_STATE: ByteArray = ByteArray(2048)
     @JvmField val PLAYER_MOVEMENT_TYPES: ByteArray = ByteArray(2048)
     @JvmField val APPEARANCE_BUFFERS: Array<Packet?> = arrayOfNulls(2048)
-    @JvmField val anIntArray2426: IntArray = IntArray(2048)
-    @JvmField val anIntArray2435: IntArray = IntArray(2048)
+    @JvmField val INACTIVE_PLAYER_INDICES: IntArray = IntArray(2048)
+    @JvmField val UPDATE_MASK_PLAYER_INDICES: IntArray = IntArray(2048)
     @JvmField val PLAYER_UPDATES: Array<PlayerUpdateEntry?> = arrayOfNulls(2048)
     @JvmField var MY_PLAYER: PlayerEntity? = null
     @JvmField var MY_PLAYER_PLANE: Int = 0
     @JvmField var players: Array<PlayerEntity?> = arrayOfNulls(2048)
     @JvmField var NUM_OUT_PLAYER_INDICES: Int = 0
     @JvmField var myPlayerIndex: Int = 0
-    @JvmField var anInt2431: Int = 0
-    @JvmField var anInt2434: Int = 0
+    @JvmField var numInactivePlayerIndices: Int = 0
+    @JvmField var numUpdateMaskPlayers: Int = 0
     @JvmField var MY_PLAYER_USERNAME: String? = null
 
     @JvmStatic
     fun decode(buffer: Packet.Bit, size: Int) {
-        anInt2434 = 0
+        numUpdateMaskPlayers = 0
         decodeUpdate(buffer)
         decodeUpdateMasks(buffer)
         if (buffer.currentPosition != size) {
@@ -103,8 +103,8 @@ object PlayerUpdate {
             throw RuntimeException()
         }
         bitBuffer.initBitAccess()
-        for (index in 0 until anInt2431) {
-            val playerPtr = anIntArray2426[index]
+        for (index in 0 until numInactivePlayerIndices) {
+            val playerPtr = INACTIVE_PLAYER_INDICES[index]
             if ((OUT_PLAYER_UPDATE_STATE[playerPtr].toInt() and 0x1) != 0) {
                 if (skipCount > 0) {
                     skipCount--
@@ -125,8 +125,8 @@ object PlayerUpdate {
             throw RuntimeException()
         }
         bitBuffer.initBitAccess()
-        for (i_3 in 0 until anInt2431) {
-            val playerPtr = anIntArray2426[i_3]
+        for (i_3 in 0 until numInactivePlayerIndices) {
+            val playerPtr = INACTIVE_PLAYER_INDICES[i_3]
             if ((OUT_PLAYER_UPDATE_STATE[playerPtr].toInt() and 0x1) == 0) {
                 if (skipCount > 0) {
                     --skipCount
@@ -147,22 +147,22 @@ object PlayerUpdate {
             throw RuntimeException()
         }
         NUM_OUT_PLAYER_INDICES = 0
-        anInt2431 = 0
+        numInactivePlayerIndices = 0
         for (index in 1 until 2048) {
             OUT_PLAYER_UPDATE_STATE[index] = (OUT_PLAYER_UPDATE_STATE[index].toInt() shr 1).toByte()
             val player = players[index]
             if (player != null) {
                 OUT_PLAYER_INDICES[++NUM_OUT_PLAYER_INDICES - 1] = index
             } else {
-                anIntArray2426[++anInt2431 - 1] = index
+                INACTIVE_PLAYER_INDICES[++numInactivePlayerIndices - 1] = index
             }
         }
     }
 
     @JvmStatic
     fun decodeUpdateMasks(buffer: Packet.Bit) {
-        for (i_2 in 0 until anInt2434) {
-            val playerPtr = anIntArray2435[i_2]
+        for (i_2 in 0 until numUpdateMaskPlayers) {
+            val playerPtr = UPDATE_MASK_PLAYER_INDICES[i_2]
             val player = players[playerPtr]
             var updateMasks = buffer.readUByte()
             if ((updateMasks and 0x8) != 0) {
@@ -255,7 +255,7 @@ object PlayerUpdate {
                 ints_15[i_9] = stream.readUShort()
             }
 
-            player.method15797(ints_14, ints_15)
+            player.setEquipmentOverrides(ints_14, ints_15)
         }
 
         if ((flags and 0x4000) != 0) {
@@ -433,7 +433,7 @@ object PlayerUpdate {
             player.forceMovementT1Delay = stream.readUShortAddLittle() + Client.cycles
             player.forceMovementT2Delay = stream.readUShortLittle() + Client.cycles
             player.forceMoveDirection = stream.readUShortAdd()
-            if (player.aBool10568) {
+            if (player.hasPendingPositionUpdate) {
                 player.forceMovementT1XOff = player.forceMovementT1XOff + player.basePositionX
                 player.forceMovementT1YOff = player.forceMovementT1YOff + player.basePositionY
                 player.forceMovementT2XOff = player.forceMovementT2XOff + player.basePositionX
@@ -468,7 +468,7 @@ object PlayerUpdate {
             player.playSpotAnimation(spotAnimId, flags1, rotation, i_10, bool11, 0)
         }
 
-        if (player.aBool10568) {
+        if (player.hasPendingPositionUpdate) {
             if (defaultMovespeed == 127.toByte()) {
                 player.move(player.basePositionX, player.basePositionY)
             } else {
@@ -491,13 +491,13 @@ object PlayerUpdate {
         val baseCoordinates = Resource.mapRegion!!.getBaseCoordinates()
         val bool4 = bitBuffer.readBits(1) == 1
         if (bool4) {
-            anIntArray2435[++anInt2434 - 1] = updateIndex
+            UPDATE_MASK_PLAYER_INDICES[++numUpdateMaskPlayers - 1] = updateIndex
         }
         val size = bitBuffer.readBits(2)
         val player = players[updateIndex]!!
         if (size == 0) {
             if (bool4) {
-                player.aBool10568 = false
+                player.hasPendingPositionUpdate = false
             } else {
                 if (myPlayerIndex == updateIndex) {
                     throw RuntimeException()
@@ -552,7 +552,7 @@ object PlayerUpdate {
                 if (bool4) {
                     player.basePositionX = x
                     player.basePositionY = y
-                    player.aBool10568 = true
+                    player.hasPendingPositionUpdate = true
                 } else {
                     player.move(x, y, PLAYER_MOVEMENT_TYPES[updateIndex])
                 }
@@ -617,7 +617,7 @@ object PlayerUpdate {
                 if (bool4) {
                     player.basePositionX = x
                     player.basePositionY = y
-                    player.aBool10568 = true
+                    player.hasPendingPositionUpdate = true
                 } else {
                     player.move(x, y, PLAYER_MOVEMENT_TYPES[updateIndex])
                 }
@@ -639,7 +639,7 @@ object PlayerUpdate {
                     if (bool4) {
                         player.basePositionX = baseX
                         player.basePositionY = baseY
-                        player.aBool10568 = true
+                        player.hasPendingPositionUpdate = true
                     } else {
                         player.move(baseX, baseY, PLAYER_MOVEMENT_TYPES[updateIndex])
                     }
@@ -661,7 +661,7 @@ object PlayerUpdate {
                     if (bool4) {
                         player.basePositionX = baseX
                         player.basePositionY = baseY
-                        player.aBool10568 = true
+                        player.hasPendingPositionUpdate = true
                     } else {
                         player.move(baseX, baseY, PLAYER_MOVEMENT_TYPES[updateIndex])
                     }
@@ -702,7 +702,7 @@ object PlayerUpdate {
             val yInRegion = bitBuffer.readBits(6)
             val bool18 = bitBuffer.readBits(1) == 1
             if (bool18) {
-                anIntArray2435[++anInt2434 - 1] = playerPtr
+                UPDATE_MASK_PLAYER_INDICES[++numUpdateMaskPlayers - 1] = playerPtr
             }
             if (players[playerPtr] != null) {
                 throw RuntimeException()
@@ -731,7 +731,7 @@ object PlayerUpdate {
                 player.collisionPlane = (player.collisionPlane.toInt() + 1).toByte()
             }
             player.move(baseX, baseY)
-            player.aBool10568 = false
+            player.hasPendingPositionUpdate = false
             PLAYER_UPDATES[playerPtr] = null
             return true
         } else if (updateType == 1) {
@@ -939,7 +939,7 @@ object PlayerUpdate {
         NUM_OUT_PLAYER_INDICES = 0
         OUT_PLAYER_INDICES[++NUM_OUT_PLAYER_INDICES - 1] = myPlayer
         OUT_PLAYER_UPDATE_STATE[myPlayer] = 0
-        anInt2431 = 0
+        numInactivePlayerIndices = 0
         for (updateIndex in 1 until 2048) {
             if (myPlayer != updateIndex) {
                 val otherCoordinates = packet.readBits(18)
@@ -952,7 +952,7 @@ object PlayerUpdate {
                 update.faceEntity = -1
                 update.pMapdot = false
                 update.reduceAttackPriority = false
-                anIntArray2426[++anInt2431 - 1] = updateIndex
+                INACTIVE_PLAYER_INDICES[++numInactivePlayerIndices - 1] = updateIndex
                 OUT_PLAYER_UPDATE_STATE[updateIndex] = 0
             }
         }
@@ -960,7 +960,7 @@ object PlayerUpdate {
     }
 
     @JvmStatic
-    fun method6233() {
+    fun updateHintDetailsOnTick() {
         val ints_1 = OUT_PLAYER_INDICES
         var i_2: Int
         i_2 = 0
@@ -993,7 +993,7 @@ object PlayerUpdate {
     }
 
     @JvmStatic
-    fun method8333(i_0: Int) {
+    fun onVarChange(i_0: Int) {
         AmbientSound.update()
         val i_2 = TypeLists.VAR!!.list(i_0)!!.anInt4327
         if (i_2 != 0) {
@@ -1031,7 +1031,7 @@ object PlayerUpdate {
     }
 
     @JvmStatic
-    fun method11626() {
+    fun calculateEntityPriorities() {
         val count = NUM_OUT_PLAYER_INDICES
         val playerIndices = OUT_PLAYER_INDICES
         val idleAnimationsSetting = PreferenceManager.preferences!!.idleAnimations!!.getValue()
@@ -1046,7 +1046,7 @@ object PlayerUpdate {
             } else {
                 player5.calculatePosition()
                 if (player5.startX >= 0 && player5.startZ >= 0 && player5.endX < Resource.mapRegion!!.sceneSizeX && player5.endZ < Resource.mapRegion!!.sceneSizeY) {
-                    player5.aBool10573 = player5.movingSequence.hasType && animate
+                    player5.shouldSuppressMovingAnimation = player5.movingSequence.hasType && animate
                     if (player5 == MY_PLAYER) {
                         player5.worldPriority = Integer.MAX_VALUE
                     } else {
@@ -1204,7 +1204,7 @@ object PlayerUpdate {
     }
 
     @JvmStatic
-    fun method11629(plane: Int) {
+    fun positionEntitiesOnPlane(plane: Int) {
         val numPlayerIndices = NUM_OUT_PLAYER_INDICES
         val playerIndices = OUT_PLAYER_INDICES
         val drawPriority = Resource.mapRegion!!.drawPriority
@@ -1242,7 +1242,7 @@ object PlayerUpdate {
                 }
             }
 
-            entity.anInt10319 = 0
+            entity.overheadSpriteCount = 0
             val size = entity.getSize()
             val abs = entity.getAbsolutePosition().coords
             if ((size and 0x1) == 0) {
@@ -1310,7 +1310,7 @@ object PlayerUpdate {
     }
 
     @JvmStatic
-    fun method11619() {
+    fun positionMisalignedEntities() {
         val numIndices = NUM_OUT_PLAYER_INDICES
         val indices = OUT_PLAYER_INDICES
         val entities: Int

@@ -17,41 +17,41 @@ import kotlin.math.sqrt
  */
 class TextureOpVoronoiNoise : TextureOperation(0, true) {
 
-    @JvmField var aByteArray9965: ByteArray = ByteArray(512)
-    @JvmField var aShortArray9966: ShortArray = ShortArray(512)
+    @JvmField var permutationTable: ByteArray = ByteArray(512)
+    @JvmField var pointPositions: ShortArray = ShortArray(512)
     @JvmField var randomSeed: Int = 0
-    @JvmField var anInt9960: Int = 2048
-    @JvmField var anInt9961: Int = 5
-    @JvmField var anInt9962: Int = 5
-    @JvmField var anInt9963: Int = 2
-    @JvmField var anInt9949: Int = 1
+    @JvmField var pointJitter: Int = 2048
+    @JvmField var cellCountX: Int = 5
+    @JvmField var cellCountY: Int = 5
+    @JvmField var distanceOutputMode: Int = 2
+    @JvmField var distanceMetric: Int = 1
 
     override fun getMonochromeOutput(index: Int): IntArray {
         val output = monochromeImageCache.getPalette(index)!!
         if (monochromeImageCache.dirty) {
-            val verticalPos = TextureRaster.verticalTable!![index] * anInt9962 + 2048
+            val verticalPos = TextureRaster.verticalTable!![index] * cellCountY + 2048
             val verticalCell = verticalPos shr 12
             val verticalCellNext = verticalCell + 1
 
             for (x in 0 until TextureRaster.currentWidth) {
-                anInt10003 = Int.MAX_VALUE
-                anInt4777 = Int.MAX_VALUE
+                fourthNearestDistance = Int.MAX_VALUE
+                thirdNearestDistance = Int.MAX_VALUE
                 StaticMethods.anInt118 = Int.MAX_VALUE
-                anInt4266 = Int.MAX_VALUE
+                nearestDistance = Int.MAX_VALUE
 
-                val horizontalPos = TextureRaster.horizontalTable!![x] * anInt9961 + 2048
+                val horizontalPos = TextureRaster.horizontalTable!![x] * cellCountX + 2048
                 val horizontalCell = horizontalPos shr 12
                 val horizontalCellNext = horizontalCell + 1
 
                 for (cellY in (verticalCell - 1)..verticalCellNext) {
-                    val yIndex = aByteArray9965[(if (cellY >= anInt9962) cellY - anInt9962 else cellY) and 0xff].toInt() and 0xff
+                    val yIndex = permutationTable[(if (cellY >= cellCountY) cellY - cellCountY else cellY) and 0xff].toInt() and 0xff
 
                     for (cellX in (horizontalCell - 1)..horizontalCellNext) {
-                        val pointIndex = 2 * (aByteArray9965[yIndex + (if (cellX >= anInt9961) cellX - anInt9961 else cellX) and 0xff].toInt() and 0xff)
-                        var deltaX = horizontalPos - (aShortArray9966[pointIndex].toInt() + (cellX shl 12))
-                        var deltaY = verticalPos - (aShortArray9966[pointIndex + 1].toInt() + (cellY shl 12))
+                        val pointIndex = 2 * (permutationTable[yIndex + (if (cellX >= cellCountX) cellX - cellCountX else cellX) and 0xff].toInt() and 0xff)
+                        var deltaX = horizontalPos - (pointPositions[pointIndex].toInt() + (cellX shl 12))
+                        var deltaY = verticalPos - (pointPositions[pointIndex + 1].toInt() + (cellY shl 12))
 
-                        val distance = when (anInt9949) {
+                        val distance = when (distanceMetric) {
                             1 -> (deltaY * deltaY + deltaX * deltaX) shr 12
                             2 -> (if (deltaX < 0) -deltaX else deltaX) + (if (deltaY < 0) -deltaY else deltaY)
                             3 -> {
@@ -75,30 +75,30 @@ class TextureOpVoronoiNoise : TextureOperation(0, true) {
                             }
                         }
 
-                        if (distance < anInt4266) {
-                            anInt10003 = anInt4777
-                            anInt4777 = StaticMethods.anInt118
-                            StaticMethods.anInt118 = anInt4266
-                            anInt4266 = distance
+                        if (distance < nearestDistance) {
+                            fourthNearestDistance = thirdNearestDistance
+                            thirdNearestDistance = StaticMethods.anInt118
+                            StaticMethods.anInt118 = nearestDistance
+                            nearestDistance = distance
                         } else if (distance < StaticMethods.anInt118) {
-                            anInt10003 = anInt4777
-                            anInt4777 = StaticMethods.anInt118
+                            fourthNearestDistance = thirdNearestDistance
+                            thirdNearestDistance = StaticMethods.anInt118
                             StaticMethods.anInt118 = distance
-                        } else if (distance < anInt4777) {
-                            anInt10003 = anInt4777
-                            anInt4777 = distance
-                        } else if (distance < anInt10003) {
-                            anInt10003 = distance
+                        } else if (distance < thirdNearestDistance) {
+                            fourthNearestDistance = thirdNearestDistance
+                            thirdNearestDistance = distance
+                        } else if (distance < fourthNearestDistance) {
+                            fourthNearestDistance = distance
                         }
                     }
                 }
 
-                output[x] = when (anInt9963) {
-                    0 -> anInt4266
+                output[x] = when (distanceOutputMode) {
+                    0 -> nearestDistance
                     1 -> StaticMethods.anInt118
-                    2 -> StaticMethods.anInt118 - anInt4266
-                    3 -> anInt4777
-                    4 -> anInt10003
+                    2 -> StaticMethods.anInt118 - nearestDistance
+                    3 -> thirdNearestDistance
+                    4 -> fourthNearestDistance
                     else -> 0
                 }
             }
@@ -107,16 +107,16 @@ class TextureOpVoronoiNoise : TextureOperation(0, true) {
     }
 
     override fun postDecode() {
-        aByteArray9965 = ArrayUtils.generateRandomlySeededBytearray(randomSeed)
+        permutationTable = ArrayUtils.generateRandomlySeededBytearray(randomSeed)
         initializePointPositions()
     }
 
     fun initializePointPositions() {
         val random = Random(randomSeed.toLong())
-        aShortArray9966 = ShortArray(512)
-        if (anInt9960 > 0) {
+        pointPositions = ShortArray(512)
+        if (pointJitter > 0) {
             for (i in 0 until 512) {
-                aShortArray9966[i] = StaticMethods.method7931(random, anInt9960).toShort()
+                pointPositions[i] = StaticMethods.method7931(random, pointJitter).toShort()
             }
         }
     }
@@ -124,26 +124,26 @@ class TextureOpVoronoiNoise : TextureOperation(0, true) {
     override fun decodeOpcode(opcode: Int, buffer: Packet) {
         when (opcode) {
             0 -> {
-                anInt9961 = buffer.readUByte()
-                anInt9962 = anInt9961
+                cellCountX = buffer.readUByte()
+                cellCountY = cellCountX
             }
             1 -> randomSeed = buffer.readUByte()
-            2 -> anInt9960 = buffer.readUShort()
-            3 -> anInt9963 = buffer.readUByte()
-            4 -> anInt9949 = buffer.readUByte()
-            5 -> anInt9961 = buffer.readUByte()
-            6 -> anInt9962 = buffer.readUByte()
+            2 -> pointJitter = buffer.readUShort()
+            3 -> distanceOutputMode = buffer.readUByte()
+            4 -> distanceMetric = buffer.readUByte()
+            5 -> cellCountX = buffer.readUByte()
+            6 -> cellCountY = buffer.readUByte()
         }
     }
 
     companion object {
         @JvmStatic
-        var anInt4266: Int = 0
+        var nearestDistance: Int = 0
 
         @JvmStatic
-        var anInt4777: Int = 0
+        var thirdNearestDistance: Int = 0
 
         @JvmStatic
-        var anInt10003: Int = 0
+        var fourthNearestDistance: Int = 0
     }
 }

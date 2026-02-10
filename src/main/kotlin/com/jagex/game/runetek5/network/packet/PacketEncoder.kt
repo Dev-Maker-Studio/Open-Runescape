@@ -135,13 +135,13 @@ object PacketEncoder {
     @JvmStatic
     fun method2590(icomponentdefinitions0: Component?) {
         if (Client.interfaceSelectionActive) {
-            if (icomponentdefinitions0!!.anObjectArray1393 != null) {
+            if (icomponentdefinitions0!!.onTargetLeave != null) {
                 val icomponentdefinitions2 = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
                 if (icomponentdefinitions2 != null) {
                     val hookrequest3 = HookRequest()
                     hookrequest3.source = icomponentdefinitions0
                     hookrequest3.aClass1188057 = icomponentdefinitions2
-                    hookrequest3.params = icomponentdefinitions0.anObjectArray1393
+                    hookrequest3.params = icomponentdefinitions0.onTargetLeave
                     CS2Executor.executeHookInner(hookrequest3)
                 }
             }

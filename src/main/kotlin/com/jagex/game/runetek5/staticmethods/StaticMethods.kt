@@ -115,7 +115,7 @@ object StaticMethods {
         var i_6 = i_2
         var i_7 = -i_2
         var i_8 = -1
-        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_1], i_0 - i_2, i_0 + i_2, i_3)
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_1], i_0 - i_2, i_0 + i_2, i_3)
         while (i_6 > i_5) {
             i_8 += 2
             i_7 += i_8
@@ -123,8 +123,8 @@ object StaticMethods {
             if (i_7 >= 0) {
                 --i_6
                 i_7 -= i_6 shl 1
-                val ints_9 = TextureShapeRasterizer.anIntArrayArray7072!![i_6 + i_1]
-                val ints_10 = TextureShapeRasterizer.anIntArrayArray7072!![i_1 - i_6]
+                val ints_9 = TextureShapeRasterizer.pixelBuffer!![i_6 + i_1]
+                val ints_10 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_6]
                 val i_11 = i_0 + i_5
                 val i_12 = i_0 - i_5
                 ArrayUtils.setArrayValuesTo(ints_9, i_12, i_11, i_3)
@@ -132,8 +132,8 @@ object StaticMethods {
             }
             val i_13 = i_0 + i_6
             val i_14 = i_0 - i_6
-            val ints_15 = TextureShapeRasterizer.anIntArrayArray7072!![i_5 + i_1]
-            val ints_16 = TextureShapeRasterizer.anIntArrayArray7072!![i_1 - i_5]
+            val ints_15 = TextureShapeRasterizer.pixelBuffer!![i_5 + i_1]
+            val ints_16 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_5]
             ArrayUtils.setArrayValuesTo(ints_15, i_14, i_13, i_3)
             ArrayUtils.setArrayValuesTo(ints_16, i_14, i_13, i_3)
         }
@@ -155,7 +155,7 @@ object StaticMethods {
 
     @JvmStatic
     fun method6731(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-        if (i_0 >= TextureOpRasterizer.anInt7071 && i_1 <= TextureOpRasterizer.anInt7069 && i_2 >= TextureOpRasterizer.anInt7070 && i_3 <= TextureOpRasterizer.anInt7068) {
+        if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
             ArrayUtils.method3230(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
         } else {
             ArrayUtils.method4034(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
@@ -164,7 +164,7 @@ object StaticMethods {
 
     @JvmStatic
     fun method3936(ints_0: Array<IntArray>?) {
-        TextureShapeRasterizer.anIntArrayArray7072 = ints_0
+        TextureShapeRasterizer.pixelBuffer = ints_0
     }
 
     @JvmStatic
@@ -174,17 +174,17 @@ object StaticMethods {
 
     @JvmStatic
     fun method7039() {
-        InterfaceComponentRenderer.aClass118Array3772 = null
-        Component.method3629(Client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
-        if (InterfaceComponentRenderer.aClass118Array3772 != null) {
-            val arr_1 = InterfaceComponentRenderer.aClass118Array3772
+        InterfaceComponentRenderer.deferredDragComponents = null
+        Component.drawInterface(Client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
+        if (InterfaceComponentRenderer.deferredDragComponents != null) {
+            val arr_1 = InterfaceComponentRenderer.deferredDragComponents
             val i_2 = -1412584499
             val b_3: Int = 0
             val b_4: Int = 0
             val i_5 = GameShell.screenCanvasWidth
             val i_6 = GameShell.screenCanvasHeight * -969250379
-            val i_7 = InterfaceComponentRenderer.anInt4822
-            val i_8 = InterfaceComponentRenderer.anInt5157
+            val i_7 = InterfaceComponentRenderer.deferredDragOffsetX
+            val i_8 = InterfaceComponentRenderer.deferredDragOffsetY
             val i_9: Int = if (Client.selectedComponent == Client.frameComponent) {
                 -1
             } else {
@@ -192,7 +192,7 @@ object StaticMethods {
             }
 
             InterfaceComponentRenderer.drawComponents(arr_1!!, i_2, b_3, b_4, i_5, i_6, i_7, i_8, i_9, true)
-            InterfaceComponentRenderer.aClass118Array3772 = null
+            InterfaceComponentRenderer.deferredDragComponents = null
         }
     }
 
@@ -269,7 +269,7 @@ object StaticMethods {
 
     @JvmStatic
     fun method6772(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        if (i_0 >= TextureOpRasterizer.anInt7071 && i_1 <= TextureOpRasterizer.anInt7069 && i_2 >= TextureOpRasterizer.anInt7070 && i_3 <= TextureOpRasterizer.anInt7068) {
+        if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
             method1564(i_0, i_1, i_2, i_3, i_4)
         } else {
             ArrayUtils.method7728(i_0, i_1, i_2, i_3, i_4)
@@ -311,12 +311,12 @@ object StaticMethods {
     fun method14572(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         var i_2Var = i_2
         var i_3Var = i_3
-        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_2Var++], i_0, i_1, i_4)
-        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_3Var--], i_0, i_1, i_4)
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_2Var++], i_0, i_1, i_4)
+        ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_3Var--], i_0, i_1, i_4)
 
         var i_6 = i_2Var
         while (i_6 <= i_3Var) {
-            val ints_7 = TextureShapeRasterizer.anIntArrayArray7072!![i_6]
+            val ints_7 = TextureShapeRasterizer.pixelBuffer!![i_6]
             ints_7[i_0] = i_4
             ints_7[i_1] = i_4
             i_6++
@@ -341,7 +341,7 @@ object StaticMethods {
     @JvmStatic
     fun method1564(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         for (i_6 in i_2..i_3) {
-            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_6], i_0, i_1, i_4)
+            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_6], i_0, i_1, i_4)
         }
     }
 
@@ -365,7 +365,7 @@ object StaticMethods {
     @JvmStatic
     fun method458(i_0: Int) {
         WorldMapSub1.someMecId = i_0
-        WorldMapSub1.anInt8026 = -1
+        WorldMapSub1.highlightedCategoryId = -1
         JSObjectManager.anInt4185 = 3
         ServerEnvironment.anInt9282 = 100
     }
@@ -416,7 +416,7 @@ object StaticMethods {
 
     @JvmStatic
     fun method6292(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
-        if (i_0 - i_2 >= TextureOpRasterizer.anInt7071 && i_0 + i_2 <= TextureOpRasterizer.anInt7069 && i_1 - i_2 >= TextureOpRasterizer.anInt7070 && i_2 + i_1 <= TextureOpRasterizer.anInt7068) {
+        if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_2 >= TextureOpRasterizer.clipMinY && i_2 + i_1 <= TextureOpRasterizer.clipMaxY) {
             method813(i_0, i_1, i_2, i_3)
         } else {
             ArrayUtils.method4866(i_0, i_1, i_2, i_3)
@@ -425,8 +425,8 @@ object StaticMethods {
 
     @JvmStatic
     fun method14263(i_0: Int, i_1: Int) {
-        WorldMapSub1.anInt8014 = i_0 - WorldMap.mapSquareAbsX
-        WorldMapSub1.anInt8016 = i_1 - WorldMap.mapSquareAbsY
+        WorldMapSub1.scrollTargetX = i_0 - WorldMap.mapSquareAbsX
+        WorldMapSub1.scrollTargetY = i_1 - WorldMap.mapSquareAbsY
     }
 
     @JvmStatic

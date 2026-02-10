@@ -172,14 +172,14 @@ object MiniMenu {
             if (entryCount > 2) {
                 menuText = menuText + TextUtils.setTextColor(16777215) + " / " + (entryCount - 2) + LocalizedText.MORE_OPTIONS.translate(Client.CURRENT_LANGUAGE!!)
             }
-            val comp = InterfaceComponentRenderer.aClass118183
+            val comp = InterfaceComponentRenderer.chatDisplayComponent
             if (comp != null) {
                 var fontRenderer = comp.getFontRenderer(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
                 if (fontRenderer == null) {
                     fontRenderer = minimenuHeader
                 }
                 @Suppress("UNCHECKED_CAST")
-                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.anInt195, InterfaceComponentRenderer.anInt179, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.chatDisplayX, InterfaceComponentRenderer.chatDisplayY, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
                 InterfaceComponentRenderer.inboundsComponentToTop(Client.ANTI_MACRO_TEXT_BOUNDS[0], Client.ANTI_MACRO_TEXT_BOUNDS[1], Client.ANTI_MACRO_TEXT_BOUNDS[2], Client.ANTI_MACRO_TEXT_BOUNDS[3])
             }
         }

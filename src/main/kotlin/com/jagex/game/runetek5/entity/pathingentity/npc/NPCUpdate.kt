@@ -598,7 +598,7 @@ object NPCUpdate {
                     }
                     ints_16[i_8] = buffer.readUShortAddLittle()
                 }
-                npc.method15797(ints_15, ints_16)
+                npc.setEquipmentOverrides(ints_15, ints_16)
             }
 
             // Spot anim (0x20)

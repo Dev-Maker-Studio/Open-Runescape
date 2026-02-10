@@ -612,7 +612,7 @@ fun interfaceComponentHovered(component: Component) {
 
         if (Client.getComponentSettings(component)!!.isTargetableByUse() &&
             (USE_OPTIONS_FLAGS and 0x20) != 0 &&
-            (param == null || component.method1997(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
+            (param == null || component.getIntParam(MiniMenu.USE_INTERFACE_ID, param.defaultInt) != param.defaultInt)) {
             MiniMenu.addEntry(
                 Client.useOnType!!,
                 "${Client.useOnTarget} -> ${component.opBase}",

@@ -15,11 +15,11 @@ import com.jagex.game.runetek5.staticmethods.StaticMethods
  */
 class TextureOpLineNoise : TextureOperation(0, true) {
 
-    @JvmField var anInt10009 = 0
-    @JvmField var anInt10013 = 2000
-    @JvmField var anInt10010 = 16
-    @JvmField var anInt10004 = 0
-    @JvmField var anInt10011 = 4096
+    @JvmField var randomSeed = 0
+    @JvmField var lineCount = 2000
+    @JvmField var lineLength = 16
+    @JvmField var angleOffset = 0
+    @JvmField var angleSpread = 4096
 
     override fun postDecode() {
         TextureRaster.caculateTable()
@@ -27,28 +27,28 @@ class TextureOpLineNoise : TextureOperation(0, true) {
 
     override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
         when (i_1) {
-            0 -> anInt10009 = rsbytebuffer2.readUByte()
-            1 -> anInt10013 = rsbytebuffer2.readUShort()
-            2 -> anInt10010 = rsbytebuffer2.readUByte()
-            3 -> anInt10004 = rsbytebuffer2.readUShort()
-            4 -> anInt10011 = rsbytebuffer2.readUShort()
+            0 -> randomSeed = rsbytebuffer2.readUByte()
+            1 -> lineCount = rsbytebuffer2.readUShort()
+            2 -> lineLength = rsbytebuffer2.readUByte()
+            3 -> angleOffset = rsbytebuffer2.readUShort()
+            4 -> angleSpread = rsbytebuffer2.readUShort()
         }
     }
 
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = monochromeImageCache.getPalette(i_1)
         if (monochromeImageCache.dirty) {
-            val i_4 = anInt10011 shr 1
+            val i_4 = angleSpread shr 1
             val ints_5 = monochromeImageCache.method5722()
-            val random6 = Random(anInt10009.toLong())
+            val random6 = Random(randomSeed.toLong())
 
-            for (i_7 in 0 until anInt10013) {
-                var i_8 = if (anInt10011 > 0) anInt10004 + (StaticMethods.method7931(random6, anInt10011) - i_4) else anInt10004
+            for (i_7 in 0 until lineCount) {
+                var i_8 = if (angleSpread > 0) angleOffset + (StaticMethods.method7931(random6, angleSpread) - i_4) else angleOffset
                 i_8 = i_8 shr 4 and 0xff
                 val i_9 = StaticMethods.method7931(random6, TextureRaster.currentWidth)
                 val i_10 = StaticMethods.method7931(random6, TextureRaster.currentHeight)
-                val i_11 = i_9 + (TextureRaster.PALETTE_COS!![i_8] * anInt10010 shr 12)
-                val i_12 = i_10 + (TextureRaster.PALETTE_SIN!![i_8] * anInt10010 shr 12)
+                val i_11 = i_9 + (TextureRaster.PALETTE_COS!![i_8] * lineLength shr 12)
+                val i_12 = i_10 + (TextureRaster.PALETTE_SIN!![i_8] * lineLength shr 12)
                 val i_13 = i_12 - i_10
                 val i_14 = i_11 - i_9
                 if (i_14 != 0 || i_13 != 0) {

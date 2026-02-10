@@ -78,9 +78,9 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         val bastype = getBastype()
         val seq = if (super.currentSequence.hasType() && !super.currentSequence.hasSpeed()) super.currentSequence else null
         val moveAnimation = if (super.movingSequence.hasType() && (!super.movingSequence.hasType || seq == null)) super.movingSequence else null
-        val x = bastype.anInt2786
-        val z = bastype.anInt2829
-        if (x != 0 || z != 0 || bastype.anInt2824 != 0 || bastype.anInt2827 != 0) {
+        val x = bastype.modelWidth
+        val z = bastype.modelLength
+        if (x != 0 || z != 0 || bastype.rollTargetAngle != 0 || bastype.pitchTargetAngle != 0) {
             functionMask = functionMask or (ModelFunctionMask.DISPLACE_X or ModelFunctionMask.DISPLACE_Y or ModelFunctionMask.DISPLACE_Z)
         }
 
@@ -101,7 +101,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         if (x == 0 && z == 0) {
             hillChange(rotation, getSize() shl 9, getSize() shl 9, 0, 0)
         } else {
-            hillChange(rotation, x, z, bastype.anInt2813, bastype.anInt2790)
+            hillChange(rotation, x, z, bastype.hillRotateX, bastype.hillRotateZ)
             if (super.rotateX != 0) {
                 super.models[0]!!.xaxisRotateWithoutNormals(super.rotateX)
             }
@@ -181,7 +181,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
 
         super.movementStepsLeft = 0
         super.previousMovementStepsLeft = 0
-        super.anInt10366 = 0
+        super.stalledStepCount = 0
         super.movementBaseX[0] = baseX
         super.movementBaseY[0] = baseY
         val abs = Vector3Pool.vector3From(getAbsolutePosition().coords)
@@ -334,14 +334,14 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
             val class2937 = super.scene!!.tiles[super.plane.toInt()][(absPos.coords.x.toInt() shr 9)][(absPos.coords.z.toInt() shr 9)]
             if (class2937 != null && class2937.groundDecoration != null) {
                 val groundDecoration = class2937.groundDecoration as? AbstractGroundDecoration
-                val i_8 = super.anInt10325 - (groundDecoration?.floorOffsetY?.toInt() ?: 0)
-                super.anInt10325 = (super.anInt10325 - i_8 / 10.0F).toInt()
+                val i_8 = super.groundContouredOffsetY - (groundDecoration?.floorOffsetY?.toInt() ?: 0)
+                super.groundContouredOffsetY = (super.groundContouredOffsetY - i_8 / 10.0F).toInt()
             } else {
-                super.anInt10325 = (super.anInt10325 - super.anInt10325 / 10.0F).toInt()
+                super.groundContouredOffsetY = (super.groundContouredOffsetY - super.groundContouredOffsetY / 10.0F).toInt()
             }
 
             renderingMatrix.copyFrom(projectionMatrix)
-            renderingMatrix.translate(0.0F, (-20 - super.anInt10325).toFloat(), 0.0F)
+            renderingMatrix.translate(0.0F, (-20 - super.groundContouredOffsetY).toFloat(), 0.0F)
             val bastype = getBastype()
             val npctype = if (this.definitions!!.alternativeIds != null) this.definitions!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) else this.definitions
             super.hasPreferedPriorities = false

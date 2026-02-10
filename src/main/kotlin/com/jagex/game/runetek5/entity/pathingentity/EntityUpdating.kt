@@ -52,13 +52,13 @@ object EntityUpdating {
             val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
             for (index in 0 until playerIndiceCount) {
                 val player = PlayerUpdate.players[playerIndices[index]]
-                player?.method15818(i_0, startX, startY, endX, endY, drawX, drawY)
+                player?.drawOverheadInterface(i_0, startX, startY, endX, endY, drawX, drawY)
             }
             for (index in 0 until Client.NPC_UPDATE_INDEX) {
                 val npcKey = Client.NPC_UPDATE_INDICES[index]
                 val npcObjectNode = Client.NPC_MAP.get(npcKey.toLong())
                 if (npcObjectNode != null) {
-                    (npcObjectNode.value as PathingEntity).method15818(i_0, startX, startY, endX, endY, drawX, drawY)
+                    (npcObjectNode.value as PathingEntity).drawOverheadInterface(i_0, startX, startY, endX, endY, drawX, drawY)
                 }
             }
         }
@@ -720,7 +720,7 @@ object EntityUpdating {
             } else {
                 (Client.NPC_MAP.get((i_92 - 2048).toLong()) as ObjectNode).value
             }
-            method7140(entity as PathingEntity, obj14 as PathingEntity, --((entity as PathingEntity).anInt10319), clipLeft, clipTop)
+            method7140(entity as PathingEntity, obj14 as PathingEntity, --((entity as PathingEntity).overheadSpriteCount), clipLeft, clipTop)
         }
 
         val padding = FontMetrics.aClass4143438!!.bottomPadding + FontMetrics.aClass4143438!!.topPadding + 2
@@ -866,12 +866,12 @@ object EntityUpdating {
         }
 
         if (current is PlayerEntity) {
-            if (current.faceDirection != -1 && (current.movementStepsLeft == 0 || current.anInt10366 > 0)) {
+            if (current.faceDirection != -1 && (current.movementStepsLeft == 0 || current.stalledStepCount > 0)) {
                 current.turn(current.faceDirection)
                 current.faceDirection = -1
             }
         } else if (current is NpcEntity) {
-            if (current.faceX != -1 && (current.movementStepsLeft == 0 || current.anInt10366 > 0)) {
+            if (current.faceX != -1 && (current.movementStepsLeft == 0 || current.stalledStepCount > 0)) {
                 val abs = current.getAbsolutePosition().coords
                 val base = Resource.mapRegion!!.getBaseCoordinates()
                 val deltaX = abs.x.toInt() - (current.faceX * 256 - base.x * 256 - base.x * 256)
@@ -955,18 +955,18 @@ object EntityUpdating {
 
         if (Client.MAP_LOADING_STAGE == 4) {
             for (plane in fromPlane.toInt()..toPlane.toInt()) {
-                PlayerUpdate.method11629(plane)
+                PlayerUpdate.positionEntitiesOnPlane(plane)
             }
         } else {
-            PlayerUpdate.method11626()
+            PlayerUpdate.calculateEntityPriorities()
             for (plane in fromPlane.toInt()..toPlane.toInt()) {
                 MapRegion.resetDrawPriorities()
                 PlayerUpdate.updateDrawPriority(plane)
-                PlayerUpdate.method11629(plane)
+                PlayerUpdate.positionEntitiesOnPlane(plane)
             }
             Client.buildOverlappingEntityList()
         }
-        PlayerUpdate.method11619()
+        PlayerUpdate.positionMisalignedEntities()
     }
 
     @JvmStatic
@@ -974,20 +974,20 @@ object EntityUpdating {
         val bas = entity.getBastype()
 
         if (entity.movementStepsLeft == 0) {
-            entity.anInt10366 = 0
+            entity.stalledStepCount = 0
             currentMovementType = MovementType.STATIONARY.id.toInt()
             turnDirectionIndex = 0
         } else {
             if (entity.currentSequence.hasType() && !entity.currentSequence.hasSpeed()) {
                 val animationdefinitions4 = entity.currentSequence.getType()
                 if (entity.previousMovementStepsLeft > 0 && animationdefinitions4!!.interruptType == 0) {
-                    ++entity.anInt10366
+                    ++entity.stalledStepCount
                     currentMovementType = MovementType.STATIONARY.id.toInt()
                     turnDirectionIndex = 0
                     return
                 }
                 if (entity.previousMovementStepsLeft <= 0 && animationdefinitions4!!.moveType == 0) {
-                    ++entity.anInt10366
+                    ++entity.stalledStepCount
                     currentMovementType = MovementType.STATIONARY.id.toInt()
                     turnDirectionIndex = 0
                     return
@@ -1000,13 +1000,13 @@ object EntityUpdating {
                     if (spotanimtype.replay && spotanimtype.sequenceId != -1) {
                         val seqtype = TypeLists.SEQ!!.list(spotanimtype.sequenceId)
                         if (entity.previousMovementStepsLeft > 0 && seqtype!!.interruptType == 0) {
-                            entity.anInt10366++
+                            entity.stalledStepCount++
                             currentMovementType = MovementType.STATIONARY.id.toInt()
                             turnDirectionIndex = 0
                             return
                         }
                         if (entity.previousMovementStepsLeft <= 0 && seqtype!!.moveType == 0) {
-                            entity.anInt10366++
+                            entity.stalledStepCount++
                             currentMovementType = MovementType.STATIONARY.id.toInt()
                             turnDirectionIndex = 0
                             return
@@ -1073,9 +1073,9 @@ object EntityUpdating {
                     }
                 }
 
-                if (entity.anInt10366 > 0 && entity.movementStepsLeft > 1) {
+                if (entity.stalledStepCount > 0 && entity.movementStepsLeft > 1) {
                     positionDelta = 32
-                    entity.anInt10366--
+                    entity.stalledStepCount--
                 }
 
                 if (moveType == MovementType.RUNNING.id) {
@@ -1088,36 +1088,36 @@ object EntityUpdating {
                 if (bas.unused != -1) {
                     positionDelta = positionDelta shl 9
                     if (entity.movementStepsLeft == 1) {
-                        val i_15 = entity.anInt10368 * entity.anInt10368
+                        val i_15 = entity.walkSpeedAccumulator * entity.walkSpeedAccumulator
                         val sizeX = (if (abs.x.toInt() > endX) abs.x.toInt() - endX else endX - abs.x.toInt()) shl 9
                         val sizeZ = (if (abs.z.toInt() > endZ) abs.z.toInt() - endZ else endZ - abs.z.toInt()) shl 9
                         val maxSize = Math.max(sizeX, sizeZ)
                         val i_16 = maxSize * bas.unused * 2
                         if (i_15 > i_16) {
-                            entity.anInt10368 /= 2
+                            entity.walkSpeedAccumulator /= 2
                         } else if (i_15 / 2 > maxSize) {
-                            entity.anInt10368 -= bas.unused
-                            if (entity.anInt10368 < 0) {
-                                entity.anInt10368 = 0
+                            entity.walkSpeedAccumulator -= bas.unused
+                            if (entity.walkSpeedAccumulator < 0) {
+                                entity.walkSpeedAccumulator = 0
                             }
-                        } else if (entity.anInt10368 < positionDelta) {
-                            entity.anInt10368 += bas.unused
-                            if (entity.anInt10368 > positionDelta) {
-                                entity.anInt10368 = positionDelta
+                        } else if (entity.walkSpeedAccumulator < positionDelta) {
+                            entity.walkSpeedAccumulator += bas.unused
+                            if (entity.walkSpeedAccumulator > positionDelta) {
+                                entity.walkSpeedAccumulator = positionDelta
                             }
                         }
-                    } else if (entity.anInt10368 < positionDelta) {
-                        entity.anInt10368 += bas.unused
-                        if (entity.anInt10368 > positionDelta) {
-                            entity.anInt10368 = positionDelta
+                    } else if (entity.walkSpeedAccumulator < positionDelta) {
+                        entity.walkSpeedAccumulator += bas.unused
+                        if (entity.walkSpeedAccumulator > positionDelta) {
+                            entity.walkSpeedAccumulator = positionDelta
                         }
                     } else {
-                        entity.anInt10368 -= bas.unused
-                        if (entity.anInt10368 < 0) {
-                            entity.anInt10368 = 0
+                        entity.walkSpeedAccumulator -= bas.unused
+                        if (entity.walkSpeedAccumulator < 0) {
+                            entity.walkSpeedAccumulator = 0
                         }
                     }
-                    positionDelta = entity.anInt10368 shr 9
+                    positionDelta = entity.walkSpeedAccumulator shr 9
                     if (positionDelta < 1) {
                         positionDelta = 1
                     }

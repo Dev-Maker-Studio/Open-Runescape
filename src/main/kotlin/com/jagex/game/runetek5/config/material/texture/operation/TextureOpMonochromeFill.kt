@@ -13,19 +13,19 @@ import com.jagex.game.runetek5.utils.ArrayUtils
  */
 class TextureOpMonochromeFill : TextureOperation(0, true) {
 
-    @JvmField var anInt9860: Int = 4096
+    @JvmField var fillValue: Int = 4096
 
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = super.monochromeImageCache.getPalette(i_1)
         if (super.monochromeImageCache.dirty) {
-            ArrayUtils.setVariables(ints_3, 0, TextureRaster.currentWidth, this.anInt9860)
+            ArrayUtils.setVariables(ints_3, 0, TextureRaster.currentWidth, this.fillValue)
         }
         return ints_3
     }
 
     override fun decodeOpcode(opcode: Int, stream: Packet) {
         when (opcode) {
-            0 -> this.anInt9860 = (stream.readUByte() shl 12) / 255
+            0 -> this.fillValue = (stream.readUByte() shl 12) / 255
         }
     }
 }

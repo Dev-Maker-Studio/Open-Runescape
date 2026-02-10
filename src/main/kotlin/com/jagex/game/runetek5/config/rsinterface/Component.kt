@@ -58,14 +58,14 @@ class Component {
         WHEN_MULTIPLE
     }
 
-    enum class UnkSetting1(@JvmField val value: Int) {
+    enum class DragType(@JvmField val value: Int) {
         UNK_0(0),
         UNK_1(1),
         UNK_2(2);
 
         companion object {
             @JvmStatic
-            fun forId(id: Int): UnkSetting1? {
+            fun forId(id: Int): DragType? {
                 return values().firstOrNull { it.value == id }
             }
         }
@@ -250,7 +250,7 @@ class Component {
         }
 
         @JvmStatic
-        fun method3629(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
+        fun drawInterface(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
             if (!Interface.interfaceLoaded(i_0, null)) {
                 if (i_7 != -1) {
                     Client.IS_COMPONENT_ON_TOP[i_7] = true
@@ -265,7 +265,7 @@ class Component {
         }
 
         @JvmStatic
-        fun method483(interface0: Interface, icomponentdefinitions1: Component, bool2: Boolean) {
+        fun updateEntityLayout(interface0: Interface, icomponentdefinitions1: Component, bool2: Boolean) {
             InterfaceComponentRenderer.updateEntityOnInterface(interface0.components!!, icomponentdefinitions1, bool2)
         }
 
@@ -312,16 +312,16 @@ class Component {
     var modelTintScalar: Int = 0
 
     @JvmField
-    var anObjectArray1407: Array<Any?>? = null
+    var onClanVarTransmit: Array<Any?>? = null
 
     @JvmField
-    var anIntArray1408: IntArray? = null
+    var clanVarFilter: IntArray? = null
 
     @JvmField
     var serverTriggers: Int = 0
 
     @JvmField
-    var anObjectArray1418: Array<Any?>? = null
+    var onClanChannelTransmit: Array<Any?>? = null
 
     @JvmField
     var cycles: IntArray? = null
@@ -435,7 +435,7 @@ class Component {
     var spriteShadow: Int = 0
 
     @JvmField
-    var anInt1358: Int = 0
+    var lineSpacing: Int = 0
 
     @JvmField
     var textHorizontalAli: Int = 0
@@ -465,7 +465,7 @@ class Component {
     var cycleSteps: IntArray? = null
 
     @JvmField
-    var anIntArray1267: IntArray? = null
+    var keyCharCodes: IntArray? = null
 
     @JvmField
     var opBase: String? = null
@@ -504,13 +504,13 @@ class Component {
     var hasInteraction: Boolean = false
 
     @JvmField
-    var anInt1380: Int = 0
+    var dragDeadzone: Int = 0
 
     @JvmField
-    var anInt1381: Int = 0
+    var dragDeadTime: Int = 0
 
     @JvmField
-    var anUnkSetting11: UnkSetting1? = null
+    var dragType: DragType? = null
 
     @JvmField
     var targetVerb: String? = null
@@ -570,19 +570,19 @@ class Component {
     var hookParams: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1400: Array<Any?>? = null
+    var onTargetEnter: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1397: Array<Any?>? = null
+    var onVarpTransmit: Array<Any?>? = null
 
     @JvmField
     var mouseLeaveScript: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1387: Array<Any?>? = null
+    var onStatTransmit: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1409: Array<Any?>? = null
+    var onTimer: Array<Any?>? = null
 
     @JvmField
     var params: Array<Any?>? = null
@@ -591,7 +591,7 @@ class Component {
     var aspectHeight: Int = 0
 
     @JvmField
-    var anObjectArray1393: Array<Any?>? = null
+    var onTargetLeave: Array<Any?>? = null
 
     @JvmField
     var popupScript: Array<Any?>? = null
@@ -600,7 +600,7 @@ class Component {
     var onClick: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1319: Array<Any?>? = null
+    var onClickRepeat: Array<Any?>? = null
 
     @JvmField
     var onRelease: Array<Any?>? = null
@@ -609,10 +609,10 @@ class Component {
     var onHold: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1451: Array<Any?>? = null
+    var onDrag: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1394: Array<Any?>? = null
+    var onDragComplete: Array<Any?>? = null
 
     @JvmField
     var onMouseMove: Array<Any?>? = null
@@ -630,7 +630,7 @@ class Component {
     var mouseLeaveArrayParams: IntArray? = null
 
     @JvmField
-    var anIntArray1402: IntArray? = null
+    var statTransmitFilter: IntArray? = null
 
     @JvmField
     var keyPressArray: IntArray? = null
@@ -639,37 +639,37 @@ class Component {
     var mouseWheelArray: IntArray? = null
 
     @JvmField
-    var anObjectArray1413: Array<Any?>? = null
+    var onChatTransmit: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1292: Array<Any?>? = null
+    var onKeyType: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1415: Array<Any?>? = null
+    var onFriendTransmit: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1416: Array<Any?>? = null
+    var onFriendsChatTransmit: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1383: Array<Any?>? = null
+    var onClanSettingsTransmit: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1419: Array<Any?>? = null
+    var onMiscTransmit: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1361: Array<Any?>? = null
+    var onStockTransmit: Array<Any?>? = null
 
     @JvmField
-    var hookrequestType0Params: Array<Any?>? = null
+    var onSubClose: Array<Any?>? = null
 
     @JvmField
-    var hookrequestType1Params: Array<Any?>? = null
+    var onSubChange: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1353: Array<Any?>? = null
+    var onCamFinished: Array<Any?>? = null
 
     @JvmField
-    var anObjectArray1271: Array<Any?>? = null
+    var onResize: Array<Any?>? = null
 
     @JvmField
     var hasScript: Boolean = false
@@ -741,7 +741,7 @@ class Component {
     var skyboxId: Int = 0
 
     @JvmField
-    var anInt1435: Int = 0
+    var videoFileId: Int = 0
 
     @JvmField
     var isHooked: Boolean = false
@@ -750,16 +750,16 @@ class Component {
     var isPressed: Boolean = false
 
     @JvmField
-    var anInt1442: Int = 0
+    var lastServerTick: Int = 0
 
     @JvmField
-    var anInt1443: Int = 0
+    var lastVarpTransmitCycle: Int = 0
 
     @JvmField
-    var anInt1444: Int = 0
+    var lastContainerTransmitCycle: Int = 0
 
     @JvmField
-    var anInt1445: Int = 0
+    var lastStatTransmitCycle: Int = 0
 
     @JvmField
     var lastKeyCycle: Int = 0
@@ -768,7 +768,7 @@ class Component {
     var lastMouseWheelCycle: Int = 0
 
     @JvmField
-    var anInt1448: Int = 0
+    var lastClanVarTransmitCycle: Int = 0
 
     @JvmField
     var cacheReference: Int = 0
@@ -777,7 +777,7 @@ class Component {
     var lastRenderedCycle: Int = 0
 
     @JvmField
-    var aClass4651365: IterableNodeMap<Node<*>>? = null
+    var clientParams: IterableNodeMap<Node<*>>? = null
 
     @JvmField
     var recolorSrc: ShortArray? = null
@@ -797,26 +797,26 @@ class Component {
         this.opBase = ""
         this.targetOpCursor = -1
         this.depthChildOverride = null
-        this.anInt1380 = 0
-        this.anInt1381 = 0
-        this.anUnkSetting11 = UnkSetting1.UNK_0
+        this.dragDeadzone = 0
+        this.dragDeadTime = 0
+        this.dragType = DragType.UNK_0
         this.targetVerb = ""
         this.hasScript = false
         this.containerItemId = -1
         this.itemStackSize = 0
         this.wearCol = false
         this.skyboxId = -1
-        this.anInt1435 = -1
+        this.videoFileId = -1
         this.animation = -1
         this.isHooked = false
         this.isPressed = false
-        this.anInt1442 = -1
-        this.anInt1443 = 0
-        this.anInt1444 = 0
-        this.anInt1445 = 0
+        this.lastServerTick = -1
+        this.lastVarpTransmitCycle = 0
+        this.lastContainerTransmitCycle = 0
+        this.lastStatTransmitCycle = 0
         this.lastKeyCycle = 0
         this.lastMouseWheelCycle = 0
-        this.anInt1448 = 0
+        this.lastClanVarTransmitCycle = 0
         this.cacheReference = -1
         this.lastRenderedCycle = -1
     }
@@ -1104,7 +1104,7 @@ class Component {
                 this.text = this.text.replace("RuneScape", "Darkan", true)
                 this.text = this.text.replace("Runescape", "Darkan", true)
             }
-            this.anInt1358 = buffer.readUByte()
+            this.lineSpacing = buffer.readUByte()
             this.textHorizontalAli = buffer.readUByte()
             this.textVerticalAli = buffer.readUByte()
             this.shadow = buffer.readUByte() == 1
@@ -1131,7 +1131,7 @@ class Component {
             this.keyTriggeringAction = Array(11) { ByteArray(0) }
             this.keyTriggerParams = Array(11) { ByteArray(0) }
             this.cycleSteps = IntArray(11)
-            this.anIntArray1267 = IntArray(11)
+            this.keyCharCodes = IntArray(11)
             while (i_16 != 0) {
                 i_7 = (i_16 shr 4) - 1
                 i_16 = i_16 shl 8 or buffer.readUByte()
@@ -1186,9 +1186,9 @@ class Component {
         if (this.resumeText!!.isEmpty()) {
             this.resumeText = null
         }
-        this.anInt1380 = buffer.readUByte()
-        this.anInt1381 = buffer.readUByte()
-        this.anUnkSetting11 = UnkSetting1.forId(buffer.readUByte())
+        this.dragDeadzone = buffer.readUByte()
+        this.dragDeadTime = buffer.readUByte()
+        this.dragType = DragType.forId(buffer.readUByte())
         this.targetVerb = buffer.readString()
         if (Loader.DEBUG_IF_OPS)
             this.targetVerb += "(targetVerb)"
@@ -1223,7 +1223,7 @@ class Component {
             while (i_12 < i_11) {
                 i_13 = buffer.readUMedium()
                 i_14 = buffer.readInt()
-                this.aClass4651365!!.put(IntNode(i_14), i_13.toLong())
+                this.clientParams!!.put(IntNode(i_14), i_13.toLong())
                 i_12++
             }
             i_12 = buffer.readUByte()
@@ -1231,7 +1231,7 @@ class Component {
             while (i_13 < i_12) {
                 i_14 = buffer.readUMedium()
                 val string_15 = buffer.readJagString()
-                this.aClass4651365!!.put(ObjectNode(string_15), i_14.toLong())
+                this.clientParams!!.put(ObjectNode(string_15), i_14.toLong())
                 i_13++
             }
         }
@@ -1239,28 +1239,28 @@ class Component {
         this.onMouseOver = decodeScript(buffer)
         this.onMouseLeaveScript = decodeScript(buffer)
         this.hookParams = decodeScript(buffer)
-        this.anObjectArray1400 = decodeScript(buffer)
-        this.anObjectArray1397 = decodeScript(buffer)
+        this.onTargetEnter = decodeScript(buffer)
+        this.onVarpTransmit = decodeScript(buffer)
         this.mouseLeaveScript = decodeScript(buffer)
-        this.anObjectArray1387 = decodeScript(buffer)
-        this.anObjectArray1409 = decodeScript(buffer)
+        this.onStatTransmit = decodeScript(buffer)
+        this.onTimer = decodeScript(buffer)
         this.params = decodeScript(buffer)
         if (i_3 >= 0) {
-            this.anObjectArray1393 = decodeScript(buffer)
+            this.onTargetLeave = decodeScript(buffer)
         }
         this.popupScript = decodeScript(buffer)
         this.onClick = decodeScript(buffer)
-        this.anObjectArray1319 = decodeScript(buffer)
+        this.onClickRepeat = decodeScript(buffer)
         this.onRelease = decodeScript(buffer)
         this.onHold = decodeScript(buffer)
-        this.anObjectArray1451 = decodeScript(buffer)
-        this.anObjectArray1394 = decodeScript(buffer)
+        this.onDrag = decodeScript(buffer)
+        this.onDragComplete = decodeScript(buffer)
         this.onMouseMove = decodeScript(buffer)
         this.onKey = decodeScript(buffer)
         this.onScrollWheel = decodeScript(buffer)
         this.varps = decodeScript3(buffer)
         this.mouseLeaveArrayParams = decodeScript3(buffer)
-        this.anIntArray1402 = decodeScript3(buffer)
+        this.statTransmitFilter = decodeScript3(buffer)
         this.keyPressArray = decodeScript3(buffer)
         this.mouseWheelArray = decodeScript3(buffer)
     }
@@ -1268,41 +1268,41 @@ class Component {
     fun reset() {
         this.onLoadScript = null
         this.onClick = null
-        this.anObjectArray1319 = null
+        this.onClickRepeat = null
         this.onRelease = null
         this.onHold = null
         this.onMouseOver = null
         this.popupScript = null
         this.onMouseLeaveScript = null
-        this.anObjectArray1451 = null
-        this.anObjectArray1394 = null
-        this.anObjectArray1400 = null
+        this.onDrag = null
+        this.onDragComplete = null
+        this.onTargetEnter = null
         this.hookParams = null
-        this.anObjectArray1397 = null
+        this.onVarpTransmit = null
         this.varps = null
         this.mouseLeaveScript = null
         this.mouseLeaveArrayParams = null
-        this.anObjectArray1387 = null
-        this.anIntArray1402 = null
+        this.onStatTransmit = null
+        this.statTransmitFilter = null
         this.onKey = null
         this.keyPressArray = null
         this.onScrollWheel = null
         this.mouseWheelArray = null
-        this.anObjectArray1409 = null
+        this.onTimer = null
         this.params = null
-        this.anObjectArray1393 = null
+        this.onTargetLeave = null
         this.onMouseMove = null
-        this.anObjectArray1413 = null
-        this.anObjectArray1292 = null
-        this.anObjectArray1415 = null
-        this.anObjectArray1416 = null
-        this.anObjectArray1383 = null
-        this.anObjectArray1419 = null
-        this.anObjectArray1361 = null
-        this.hookrequestType0Params = null
-        this.hookrequestType1Params = null
-        this.anObjectArray1353 = null
-        this.anObjectArray1271 = null
+        this.onChatTransmit = null
+        this.onKeyType = null
+        this.onFriendTransmit = null
+        this.onFriendsChatTransmit = null
+        this.onClanSettingsTransmit = null
+        this.onMiscTransmit = null
+        this.onStockTransmit = null
+        this.onSubClose = null
+        this.onSubChange = null
+        this.onCamFinished = null
+        this.onResize = null
     }
 
     fun getFontRenderer(fontCombo: FontCombo, fontProvider: FontProvider): AbstractFontRenderer? {
@@ -1370,54 +1370,54 @@ class Component {
         this.options!![index] = optionName
     }
 
-    fun method1995(i_1: Int) {
-        if (this.aClass4651365 != null) {
-            val node3 = this.aClass4651365!!.get(i_1.toLong())
+    fun removeParam(i_1: Int) {
+        if (this.clientParams != null) {
+            val node3 = this.clientParams!!.get(i_1.toLong())
             node3?.unlink()
         }
     }
 
-    fun method1997(i_1: Int, i_2: Int): Int {
-        return if (this.aClass4651365 == null) {
+    fun getIntParam(i_1: Int, i_2: Int): Int {
+        return if (this.clientParams == null) {
             i_2
         } else {
-            val class282Sub384 = this.aClass4651365!!.get(i_1.toLong()) as? IntNode
+            val class282Sub384 = this.clientParams!!.get(i_1.toLong()) as? IntNode
             if (class282Sub384 == null) i_2 else class282Sub384.value
         }
     }
 
-    fun method1998(i_1: Int, string_2: String): String {
-        if (this.aClass4651365 == null) {
+    fun getStringParam(i_1: Int, string_2: String): String {
+        if (this.clientParams == null) {
             return string_2
         }
-        val class282Sub474 = this.aClass4651365!!.get(i_1.toLong()) as? ObjectNode
+        val class282Sub474 = this.clientParams!!.get(i_1.toLong()) as? ObjectNode
         return if (class282Sub474 == null) string_2 else class282Sub474.value as String
     }
 
-    fun method1999(i_1: Int, i_2: Int) {
-        if (this.aClass4651365 == null) {
-            this.aClass4651365 = IterableNodeMap(16)
-            this.aClass4651365!!.put(IntNode(i_2), i_1.toLong())
+    fun setIntParam(i_1: Int, i_2: Int) {
+        if (this.clientParams == null) {
+            this.clientParams = IterableNodeMap(16)
+            this.clientParams!!.put(IntNode(i_2), i_1.toLong())
         } else {
-            val class282Sub384 = this.aClass4651365!!.get(i_1.toLong()) as? IntNode
+            val class282Sub384 = this.clientParams!!.get(i_1.toLong()) as? IntNode
             if (class282Sub384 == null) {
-                this.aClass4651365!!.put(IntNode(i_2), i_1.toLong())
+                this.clientParams!!.put(IntNode(i_2), i_1.toLong())
             } else {
                 class282Sub384.value = i_2
             }
         }
     }
 
-    fun method2000(i_1: Int, string_2: String) {
-        if (this.aClass4651365 == null) {
-            this.aClass4651365 = IterableNodeMap(16)
+    fun setStringParam(i_1: Int, string_2: String) {
+        if (this.clientParams == null) {
+            this.clientParams = IterableNodeMap(16)
         } else {
-            val class282Sub474 = this.aClass4651365!!.get(i_1.toLong()) as? ObjectNode
+            val class282Sub474 = this.clientParams!!.get(i_1.toLong()) as? ObjectNode
             if (class282Sub474 != null) {
                 class282Sub474.unlink()
             }
         }
-        this.aClass4651365!!.put(ObjectNode(string_2), i_1.toLong())
+        this.clientParams!!.put(ObjectNode(string_2), i_1.toLong())
     }
 
     fun calculateLighting(skyboxtypelist: SkyboxTypeList, suntypelist: SunTypeList): Skybox? {

@@ -20,6 +20,6 @@ object WorldMapInteraction {
         } else if (i_0 == 200) {
             WorldMap.requestedMapZoom = 16.0f
         }
-        WorldMapSub1.anInt8016 = -1
+        WorldMapSub1.scrollTargetY = -1
     }
 }

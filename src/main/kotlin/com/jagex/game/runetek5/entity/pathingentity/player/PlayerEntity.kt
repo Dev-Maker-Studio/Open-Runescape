@@ -71,7 +71,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     var faceDirection: Int = -1
 
     @JvmField
-    var aBool10573: Boolean = false
+    var shouldSuppressMovingAnimation: Boolean = false
 
     @JvmField
     var teamId: Int = 0
@@ -98,7 +98,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     var ambientSoundVolume: Int = 255
 
     @JvmField
-    var aBool10568: Boolean = false
+    var hasPendingPositionUpdate: Boolean = false
 
     /**
      * Instead of a dot a 'P' is drawn
@@ -207,7 +207,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     fun move(baseX: Int, baseY: Int) {
         movementStepsLeft = 0
         previousMovementStepsLeft = 0
-        anInt10366 = 0
+        stalledStepCount = 0
         movementBaseX[0] = baseX
         movementBaseY[0] = baseY
         val size = getSize()
@@ -294,10 +294,10 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         var functionMask = initialFunctionMask
         val bastype = getBastype()
         val currSeq = if (currentSequence.hasType() && !currentSequence.hasSpeed()) currentSequence else null
-        val moveAnimation = if (!movingSequence.hasType() || aBool10573 || movingSequence.hasType && currSeq != null) null else movingSequence
-        val x = getBastype().anInt2786
-        val z = getBastype().anInt2829
-        if (x != 0 || z != 0 || getBastype().anInt2824 != 0 || getBastype().anInt2827 != 0) {
+        val moveAnimation = if (!movingSequence.hasType() || shouldSuppressMovingAnimation || movingSequence.hasType && currSeq != null) null else movingSequence
+        val x = getBastype().modelWidth
+        val z = getBastype().modelLength
+        if (x != 0 || z != 0 || getBastype().rollTargetAngle != 0 || getBastype().pitchTargetAngle != 0) {
             functionMask = functionMask or DISPLACE_X or DISPLACE_Y or DISPLACE_Z
         }
 
@@ -345,7 +345,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         if (x == 0 && z == 0) {
             hillChange(rotation, getSize() shl 9, getSize() shl 9, 0, 0)
         } else {
-            hillChange(rotation, x, z, getBastype().anInt2813, getBastype().anInt2790)
+            hillChange(rotation, x, z, getBastype().hillRotateX, getBastype().hillRotateZ)
             if (rotateX != 0) {
                 model.xaxisRotateWithoutNormals(rotateX)
             }
@@ -363,7 +363,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             model.tint(hue.toInt(), saturation.toInt(), lightness.toInt(), opacity.toInt() and 0xff)
         }
 
-        if (!aBool10573) {
+        if (!shouldSuppressMovingAnimation) {
             displace(toolkit, getBastype(), functionMask, x, z, rotation)
         }
 
@@ -579,14 +579,14 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             val occupiedTile = scene!!.tiles[plane.toInt()][absolute.coords.x.toInt() shr 9][absolute.coords.z.toInt() shr 9]
             if (occupiedTile != null && occupiedTile.groundDecoration != null) {
                 val groundDec = occupiedTile.groundDecoration!!
-                val i_8 = anInt10325 - groundDec.floorOffsetY
-                anInt10325 = (anInt10325 - i_8 / 10.0f).toInt()
+                val i_8 = groundContouredOffsetY - groundDec.floorOffsetY
+                groundContouredOffsetY = (groundContouredOffsetY - i_8 / 10.0f).toInt()
             } else {
-                anInt10325 = (anInt10325 - anInt10325 / 10.0f).toInt()
+                groundContouredOffsetY = (groundContouredOffsetY - groundContouredOffsetY / 10.0f).toInt()
             }
 
             renderingMatrix.copyFrom(projectionMatrix)
-            renderingMatrix.translate(0.0f, (-20 - anInt10325).toFloat(), 0.0f)
+            renderingMatrix.translate(0.0f, (-20 - groundContouredOffsetY).toFloat(), 0.0f)
             var renderedEntity: RenderedEntity? = null
             hasPreferedPriorities = false
             if (PreferenceManager.preferences!!.characterShadows!!.getValue() == 1) {
@@ -647,7 +647,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
             }
 
             renderingMatrix.copyFrom(projectionMatrix)
-            renderingMatrix.translate(0.0f, (-5 - anInt10325).toFloat(), 0.0f)
+            renderingMatrix.translate(0.0f, (-5 - groundContouredOffsetY).toFloat(), 0.0f)
             if (boundingBoxPolygons == null || boundingBoxPolygons!!.size < models.size) {
                 setupBoundingBox(models.size)
             }

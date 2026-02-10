@@ -13,7 +13,7 @@ import kotlin.math.sqrt
  */
 class TextureOpMonochromeEdgeDetector : TextureOperation(1, true) {
 
-    @JvmField var anInt9886: Int = 4096
+    @JvmField var strength: Int = 4096
 
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = super.monochromeImageCache.getPalette(i_1)
@@ -23,8 +23,8 @@ class TextureOpMonochromeEdgeDetector : TextureOperation(1, true) {
             val ints_6 = getChildMonochromeOutput(0, i_1 + 1 and TextureRaster.columnEnd)
 
             for (i_7 in 0 until TextureRaster.currentWidth) {
-                val i_8 = (ints_6[i_7] - ints_4[i_7]) * this.anInt9886
-                val i_9 = (ints_5[i_7 + 1 and TextureRaster.rowEnd] - ints_5[i_7 - 1 and TextureRaster.rowEnd]) * this.anInt9886
+                val i_8 = (ints_6[i_7] - ints_4[i_7]) * this.strength
+                val i_9 = (ints_5[i_7 + 1 and TextureRaster.rowEnd] - ints_5[i_7 - 1 and TextureRaster.rowEnd]) * this.strength
                 val i_10 = i_9 shr 12
                 val i_11 = i_8 shr 12
                 val i_12 = i_10 * i_10 shr 12
@@ -40,7 +40,7 @@ class TextureOpMonochromeEdgeDetector : TextureOperation(1, true) {
 
     override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
         if (i_1 == 0) {
-            this.anInt9886 = rsbytebuffer2.readUShort()
+            this.strength = rsbytebuffer2.readUShort()
         }
     }
 }

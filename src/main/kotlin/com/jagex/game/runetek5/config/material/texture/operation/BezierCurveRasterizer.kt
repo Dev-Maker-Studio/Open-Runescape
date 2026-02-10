@@ -7,39 +7,39 @@ import com.jagex.game.runetek5.utils.ArrayUtils
  * Texture operation bezier curve rendering class.
  */
 class BezierCurveRasterizer(
-    @JvmField val anInt9306: Int,
-    @JvmField val anInt9307: Int,
-    @JvmField val anInt9305: Int,
-    @JvmField val anInt9309: Int,
-    @JvmField val anInt9308: Int,
-    @JvmField val anInt9311: Int,
-    @JvmField val anInt9312: Int,
-    @JvmField val anInt9313: Int,
+    @JvmField val controlX0: Int,
+    @JvmField val controlY0: Int,
+    @JvmField val controlX1: Int,
+    @JvmField val controlY1: Int,
+    @JvmField val controlX2: Int,
+    @JvmField val controlY2: Int,
+    @JvmField val controlX3: Int,
+    @JvmField val controlY3: Int,
     i_9: Int,
     i_10: Int
 ) : TextureShapeRasterizer(-1, i_9, i_10) {
 
-    override fun method2556(var1: Int, var2: Int) {
+    override fun drawFilled(var1: Int, var2: Int) {
     }
 
-    override fun method2557(var1: Int, var2: Int) {
+    override fun drawFilledAndStroked(var1: Int, var2: Int) {
     }
 
-    override fun method2561(var1: Int, var2: Int) {
-        val i_4 = anInt9306 * var1 shr 12
-        val i_5 = var2 * anInt9307 shr 12
-        val i_6 = anInt9305 * var1 shr 12
-        val i_7 = var2 * anInt9309 shr 12
-        val i_8 = anInt9308 * var1 shr 12
-        val i_9 = var2 * anInt9311 shr 12
-        val i_10 = anInt9312 * var1 shr 12
-        val i_11 = var2 * anInt9313 shr 12
-        method12399(i_4, i_5, i_6, i_7, i_8, i_9, i_10, i_11, anInt1741)
+    override fun drawStroked(var1: Int, var2: Int) {
+        val i_4 = controlX0 * var1 shr 12
+        val i_5 = var2 * controlY0 shr 12
+        val i_6 = controlX1 * var1 shr 12
+        val i_7 = var2 * controlY1 shr 12
+        val i_8 = controlX2 * var1 shr 12
+        val i_9 = var2 * controlY2 shr 12
+        val i_10 = controlX3 * var1 shr 12
+        val i_11 = var2 * controlY3 shr 12
+        drawBezierCurve(i_4, i_5, i_6, i_7, i_8, i_9, i_10, i_11, strokeColor)
     }
 
     companion object {
         @JvmStatic
-        fun method11220(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+        fun drawBresenhamLine(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
             var i_01 = i_0
             var i_21 = i_2
             var i_15 = i_1
@@ -49,7 +49,7 @@ class BezierCurveRasterizer(
 
             if (i_7 == 0) {
                 if (i_6 != 0) {
-                    TextureShapeRasterizer.method13411(i_01, i_15, i_31, i_4)
+                    TextureShapeRasterizer.drawVerticalLine(i_01, i_15, i_31, i_4)
                 }
             } else if (i_6 == 0) {
                 ArrayUtils.method568(i_01, i_21, i_15, i_4)
@@ -90,7 +90,7 @@ class BezierCurveRasterizer(
 
                 if (bool8) {
                     for (i_14 in i_01..i_21) {
-                        TextureShapeRasterizer.anIntArrayArray7072!![i_14][i_9] = i_4
+                        TextureShapeRasterizer.pixelBuffer!![i_14][i_9] = i_4
                         i_12 += i_11
                         if (i_12 > 0) {
                             i_9 += i_13
@@ -99,7 +99,7 @@ class BezierCurveRasterizer(
                     }
                 } else {
                     for (i_14 in i_01..i_21) {
-                        TextureShapeRasterizer.anIntArrayArray7072!![i_9][i_14] = i_4
+                        TextureShapeRasterizer.pixelBuffer!![i_9][i_14] = i_4
                         i_12 += i_11
                         if (i_12 > 0) {
                             i_9 += i_13
@@ -111,9 +111,9 @@ class BezierCurveRasterizer(
         }
 
         @JvmStatic
-        fun method12117(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
+        fun drawUnclippedBezier(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
             if (i_0 == i_2 && i_3 == i_1 && i_4 == i_6 && i_5 == i_7) {
-                method11220(i_0, i_1, i_6, i_7, i_8)
+                drawBresenhamLine(i_0, i_1, i_6, i_7, i_8)
             } else {
                 var i_10 = i_0
                 var i_11 = i_1
@@ -142,7 +142,7 @@ class BezierCurveRasterizer(
                     val i_32 = i_24 * i_23
                     val i_33 = i_0 + (i_29 + i_27 + i_31 shr 12)
                     val i_34 = (i_28 + i_30 + i_32 shr 12) + i_1
-                    method11220(i_10, i_11, i_33, i_34, i_8)
+                    drawBresenhamLine(i_10, i_11, i_33, i_34, i_8)
                     i_10 = i_33
                     i_11 = i_34
                     i_24 += 128
@@ -151,9 +151,9 @@ class BezierCurveRasterizer(
         }
 
         @JvmStatic
-        fun method4779(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
+        fun drawClippedBezier(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
             if (i_0 == i_2 && i_3 == i_1 && i_4 == i_6 && i_5 == i_7) {
-                TextureShapeRasterizer.method6159(i_0, i_1, i_6, i_7, i_8)
+                TextureShapeRasterizer.drawLine(i_0, i_1, i_6, i_7, i_8)
             } else {
                 var i_10 = i_0
                 var i_11 = i_1
@@ -182,7 +182,7 @@ class BezierCurveRasterizer(
                     val i_32 = i_24 * i_23
                     val i_33 = i_0 + (i_29 + i_27 + i_31 shr 12)
                     val i_34 = (i_30 + i_28 + i_32 shr 12) + i_1
-                    TextureShapeRasterizer.method6159(i_10, i_11, i_33, i_34, i_8)
+                    TextureShapeRasterizer.drawLine(i_10, i_11, i_33, i_34, i_8)
                     i_10 = i_33
                     i_11 = i_34
                     i_24 += 128
@@ -207,19 +207,19 @@ class BezierCurveRasterizer(
         }
 
         @JvmStatic
-        fun method12399(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
-            if (i_0 >= TextureOpRasterizer.anInt7071 && i_0 <= TextureOpRasterizer.anInt7069 &&
-                i_2 >= TextureOpRasterizer.anInt7071 && i_2 <= TextureOpRasterizer.anInt7069 &&
-                i_4 >= TextureOpRasterizer.anInt7071 && i_4 <= TextureOpRasterizer.anInt7069 &&
-                i_6 >= TextureOpRasterizer.anInt7071 && i_6 <= TextureOpRasterizer.anInt7069 &&
-                i_1 >= TextureOpRasterizer.anInt7070 && i_1 <= TextureOpRasterizer.anInt7068 &&
-                i_3 >= TextureOpRasterizer.anInt7070 && i_3 <= TextureOpRasterizer.anInt7068 &&
-                i_5 >= TextureOpRasterizer.anInt7070 && i_5 <= TextureOpRasterizer.anInt7068 &&
-                i_7 >= TextureOpRasterizer.anInt7070 && i_7 <= TextureOpRasterizer.anInt7068
+        fun drawBezierCurve(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
+            if (i_0 >= TextureOpRasterizer.clipMinX && i_0 <= TextureOpRasterizer.clipMaxX &&
+                i_2 >= TextureOpRasterizer.clipMinX && i_2 <= TextureOpRasterizer.clipMaxX &&
+                i_4 >= TextureOpRasterizer.clipMinX && i_4 <= TextureOpRasterizer.clipMaxX &&
+                i_6 >= TextureOpRasterizer.clipMinX && i_6 <= TextureOpRasterizer.clipMaxX &&
+                i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY &&
+                i_3 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY &&
+                i_5 >= TextureOpRasterizer.clipMinY && i_5 <= TextureOpRasterizer.clipMaxY &&
+                i_7 >= TextureOpRasterizer.clipMinY && i_7 <= TextureOpRasterizer.clipMaxY
             ) {
-                method12117(i_0, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
+                drawUnclippedBezier(i_0, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
             } else {
-                method4779(i_0, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
+                drawClippedBezier(i_0, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
             }
         }
     }

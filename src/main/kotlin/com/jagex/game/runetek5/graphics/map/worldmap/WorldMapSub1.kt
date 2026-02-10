@@ -33,31 +33,31 @@ import kotlin.math.atan2
 object WorldMapSub1 {
 
     @JvmField
-    var aBool8027 = false
+    var hideIcons = false
 
     @JvmField
-    val aClass4658025 = IterableNodeMap<Node<Any?>>(8)
+    val hiddenMecIds = IterableNodeMap<Node<Any?>>(8)
 
     @JvmField
-    val aClass4658029 = IterableNodeMap<Node<Any?>>(8)
+    val hiddenCategoryIds = IterableNodeMap<Node<Any?>>(8)
 
     @JvmField
-    var anInt8014 = -1
+    var scrollTargetX = -1
 
     @JvmField
-    var anInt8016 = -1
+    var scrollTargetY = -1
 
     @JvmField
     var isInteractive = false
 
     @JvmField
-    var anInt8019 = -1
+    var requestedScrollX = -1
 
     @JvmField
-    var anInt8020 = -1
+    var requestedScrollY = -1
 
     @JvmField
-    var aBool8028 = false
+    var useTargetPosition = false
 
     /**
      * (White) text above worldmap areas
@@ -76,22 +76,22 @@ object WorldMapSub1 {
     var someMecId = -1
 
     @JvmField
-    var anInt8026 = -1
+    var highlightedCategoryId = -1
 
     @JvmField
-    val aClass4608030 = NodeIterator(NodeCollection())
+    val categoryIterator = NodeIterator(NodeCollection())
 
     @JvmField
-    var anInt5123 = 0
+    var mapCenterX = 0
 
     @JvmField
-    var anInt5624 = 0
+    var mapCenterY = 0
 
     @JvmField
-    var anInt5765 = 0
+    var viewBottomTileY = 0
 
     @JvmField
-    var anInt488 = 0
+    var pendingMapElementId = 0
 
     @JvmStatic
     fun reset(i_0: Int, i_1: Int, i_2: Int, bool3: Boolean) {
@@ -101,9 +101,9 @@ object WorldMapSub1 {
         } else {
             GraphicsCache.resetWorldmapCaches(false)
         }
-        anInt8019 = i_1
-        anInt8020 = i_2
-        aBool8028 = bool3
+        requestedScrollX = i_1
+        requestedScrollY = i_2
+        useTargetPosition = bool3
         WorldMap.fetch(i_0)
     }
 
@@ -119,11 +119,11 @@ object WorldMapSub1 {
         }
         val adjustedX = x - (width - offsetX) / 2
         val adjustedY = y - (height - offsetY) / 2
-        anInt5123 = adjustedX * WorldMap.mapSizeX / offsetX
-        anInt5624 = WorldMap.mapSizeY - WorldMap.mapSizeY * adjustedY / offsetY
-        anInt8014 = -1
-        anInt8016 = -1
-        method1502()
+        mapCenterX = adjustedX * WorldMap.mapSizeX / offsetX
+        mapCenterY = WorldMap.mapSizeY - WorldMap.mapSizeY * adjustedY / offsetY
+        scrollTargetX = -1
+        scrollTargetY = -1
+        clampMapCenter()
     }
 
     @JvmStatic
@@ -156,23 +156,23 @@ object WorldMapSub1 {
                     i_5 = placement[2] - WorldMap.mapSquareAbsY
                 }
 
-                if (!aBool8028 && i_4 >= 0 && i_4 < WorldMap.mapSizeX && i_5 >= 0 && i_5 < WorldMap.mapSizeY) {
+                if (!useTargetPosition && i_4 >= 0 && i_4 < WorldMap.mapSizeX && i_5 >= 0 && i_5 < WorldMap.mapSizeY) {
                     i_4 += (Math.random() * 10.0).toInt() - 5
                     i_5 += (Math.random() * 10.0).toInt() - 5
-                    anInt5123 = i_4
-                    anInt5624 = i_5
-                } else if (anInt8019 != -1 && anInt8020 != -1) {
-                    WorldMap.staticElement!!.method14777(anInt8019, anInt8020, placement)
-                    anInt5123 = placement[1] - WorldMap.mapSquareAbsX
-                    anInt5624 = placement[2] - WorldMap.mapSquareAbsY
+                    mapCenterX = i_4
+                    mapCenterY = i_5
+                } else if (requestedScrollX != -1 && requestedScrollY != -1) {
+                    WorldMap.staticElement!!.method14777(requestedScrollX, requestedScrollY, placement)
+                    mapCenterX = placement[1] - WorldMap.mapSquareAbsX
+                    mapCenterY = placement[2] - WorldMap.mapSquareAbsY
 
-                    anInt8020 = -1
-                    anInt8019 = -1
-                    aBool8028 = false
+                    requestedScrollY = -1
+                    requestedScrollX = -1
+                    useTargetPosition = false
                 } else {
                     WorldMap.staticElement!!.method14777(WorldMap.staticElement!!.bitpackedPlacement shr 14 and 0x3fff, WorldMap.staticElement!!.bitpackedPlacement and 0x3fff, placement)
-                    anInt5123 = placement[1] - WorldMap.mapSquareAbsX
-                    anInt5624 = placement[2] - WorldMap.mapSquareAbsY
+                    mapCenterX = placement[1] - WorldMap.mapSquareAbsX
+                    mapCenterY = placement[2] - WorldMap.mapSquareAbsY
                 }
 
                 when (WorldMap.staticElement!!.anInt9542) {
@@ -202,9 +202,9 @@ object WorldMapSub1 {
                     }
                 }
 
-                WorldMap.anInt3469 = WorldMap.mapZoom.toInt() shr 1
-                WorldMap.aByteArrayArrayArray3464 = BufferUtils.generateBytePatterns(WorldMap.anInt3469)
-                method1502()
+                WorldMap.halfZoomLevel = WorldMap.mapZoom.toInt() shr 1
+                WorldMap.tileShapePatterns = BufferUtils.generateBytePatterns(WorldMap.halfZoomLevel)
+                clampMapCenter()
                 WorldMap.initialize()
                 WorldMapInteraction.MEC_CLICKZONES = NodeCollection()
                 WorldMap.hueRandomisation += (Math.random() * 5.0).toInt() - 2
@@ -233,7 +233,7 @@ object WorldMapSub1 {
                 ComponentMinimap.mapAssetLoadingPercentage = 20
             } else if (ComponentMinimap.mapAssetLoadingPercentage == 20) {
                 PingRequester.keepalive(true)
-                WorldMap.method5183(WorldMap.hueRandomisation, WorldMap.lightnessRandomisation)
+                WorldMap.loadMapTileData(WorldMap.hueRandomisation, WorldMap.lightnessRandomisation)
                 ComponentMinimap.mapAssetLoadingPercentage = 60
                 PingRequester.keepalive(true)
                 GameShell.resetDrawCache()
@@ -298,35 +298,35 @@ object WorldMapSub1 {
     }
 
     @JvmStatic
-    fun method1502() {
-        if (anInt5123 < 0) {
-            anInt5123 = 0
-            anInt8014 = -1
-            anInt8016 = -1
+    fun clampMapCenter() {
+        if (mapCenterX < 0) {
+            mapCenterX = 0
+            scrollTargetX = -1
+            scrollTargetY = -1
         }
-        if (anInt5123 > WorldMap.mapSizeX) {
-            anInt5123 = WorldMap.mapSizeX
-            anInt8014 = -1
-            anInt8016 = -1
+        if (mapCenterX > WorldMap.mapSizeX) {
+            mapCenterX = WorldMap.mapSizeX
+            scrollTargetX = -1
+            scrollTargetY = -1
         }
-        if (anInt5624 < 0) {
-            anInt5624 = 0
-            anInt8014 = -1
-            anInt8016 = -1
+        if (mapCenterY < 0) {
+            mapCenterY = 0
+            scrollTargetX = -1
+            scrollTargetY = -1
         }
-        if (anInt5624 > WorldMap.mapSizeY) {
-            anInt5624 = WorldMap.mapSizeY
-            anInt8014 = -1
-            anInt8016 = -1
+        if (mapCenterY > WorldMap.mapSizeY) {
+            mapCenterY = WorldMap.mapSizeY
+            scrollTargetX = -1
+            scrollTargetY = -1
         }
     }
 
     @JvmStatic
-    fun method1503(i_0: Int) {
-        anInt5123 = i_0
-        anInt8014 = -1
-        anInt8016 = -1
-        method1502()
+    fun setMapCenterX(i_0: Int) {
+        mapCenterX = i_0
+        scrollTargetX = -1
+        scrollTargetY = -1
+        clampMapCenter()
     }
 
     @JvmStatic
@@ -335,16 +335,16 @@ object WorldMapSub1 {
     }
 
     @JvmStatic
-    fun method5599(i_0: Int) {
-        anInt5624 = i_0
-        anInt8016 = -1
-        method1502()
+    fun setMapCenterY(i_0: Int) {
+        mapCenterY = i_0
+        scrollTargetY = -1
+        clampMapCenter()
     }
 
     @JvmStatic
-    fun method2094(i_0: Int) {
+    fun highlightCategory(i_0: Int) {
         someMecId = -1
-        anInt8026 = i_0
+        highlightedCategoryId = i_0
         JSObjectManager.anInt4185 = 3
         ServerEnvironment.anInt9282 = 100
     }
@@ -356,10 +356,10 @@ object WorldMapSub1 {
         var i_8 = Int.MAX_VALUE
         var i_9 = Int.MIN_VALUE
         if (mectype.offsets != null) {
-            i_6 = (WorldMap.anInt3476 - WorldMap.anInt3489) * (mectype.minOffsetX + mapCategory.absX - WorldMap.anInt3485) / (WorldMap.anInt3480 - WorldMap.anInt3485) + WorldMap.anInt3489
-            i_7 = WorldMap.anInt3489 + (WorldMap.anInt3476 - WorldMap.anInt3489) * (mectype.maxOffsetX + mapCategory.absX - WorldMap.anInt3485) / (WorldMap.anInt3480 - WorldMap.anInt3485)
-            i_9 = WorldMap.anInt3492 - (WorldMap.anInt3492 - WorldMap.anInt3490) * (mectype.minOffsetY + mapCategory.absY - WorldMap.anInt3465) / (WorldMap.anInt3486 - WorldMap.anInt3465)
-            i_8 = WorldMap.anInt3492 - (WorldMap.anInt3492 - WorldMap.anInt3490) * (mectype.maxOffsetY + mapCategory.absY - WorldMap.anInt3465) / (WorldMap.anInt3486 - WorldMap.anInt3465)
+            i_6 = (WorldMap.pixelViewEndX - WorldMap.pixelViewStartX) * (mectype.minOffsetX + mapCategory.absX - WorldMap.tileViewStartX) / (WorldMap.tileViewEndX - WorldMap.tileViewStartX) + WorldMap.pixelViewStartX
+            i_7 = WorldMap.pixelViewStartX + (WorldMap.pixelViewEndX - WorldMap.pixelViewStartX) * (mectype.maxOffsetX + mapCategory.absX - WorldMap.tileViewStartX) / (WorldMap.tileViewEndX - WorldMap.tileViewStartX)
+            i_9 = WorldMap.pixelViewEndY - (WorldMap.pixelViewEndY - WorldMap.pixelViewStartY) * (mectype.minOffsetY + mapCategory.absY - WorldMap.tileViewStartY) / (WorldMap.tileViewEndY - WorldMap.tileViewStartY)
+            i_8 = WorldMap.pixelViewEndY - (WorldMap.pixelViewEndY - WorldMap.pixelViewStartY) * (mectype.maxOffsetY + mapCategory.absY - WorldMap.tileViewStartY) / (WorldMap.tileViewEndY - WorldMap.tileViewStartY)
         }
         var iconSprite: NativeSprite? = null
         var spriteLeft = 0
@@ -405,8 +405,8 @@ object WorldMapSub1 {
             font = getZoomedHelveticafont(mectype.baseTextzoom)
             if (font != null) {
                 i_16 = FontManager.worldMapAreaFont!!.splitLinesToBuffer(areaName, null, RENDERED_WORLDMAP_AREA_NAMELINES, null)
-                i_17 = (WorldMap.anInt3476 - WorldMap.anInt3489) * mectype.anInt2750 / (WorldMap.anInt3480 - WorldMap.anInt3485) + mapCategory.anInt7990
-                i_18 = mapCategory.anInt7992 - (WorldMap.anInt3492 - WorldMap.anInt3490) * mectype.anInt2752 / (WorldMap.anInt3486 - WorldMap.anInt3465)
+                i_17 = (WorldMap.pixelViewEndX - WorldMap.pixelViewStartX) * mectype.anInt2750 / (WorldMap.tileViewEndX - WorldMap.tileViewStartX) + mapCategory.anInt7990
+                i_18 = mapCategory.anInt7992 - (WorldMap.pixelViewEndY - WorldMap.pixelViewStartY) * mectype.anInt2752 / (WorldMap.tileViewEndY - WorldMap.tileViewStartY)
                 if (iconSprite == null) {
                     i_18 -= font.method3186() * i_16 / 2
                 } else {
@@ -444,10 +444,10 @@ object WorldMapSub1 {
                 }
             }
         }
-        if (i_7 >= WorldMap.anInt3489 && i_6 <= WorldMap.anInt3476 && i_9 >= WorldMap.anInt3490 && i_8 <= WorldMap.anInt3492) {
-            WorldMap.method5147(toolkit, mapCategory, mectype)
+        if (i_7 >= WorldMap.pixelViewStartX && i_6 <= WorldMap.pixelViewEndX && i_9 >= WorldMap.pixelViewStartY && i_8 <= WorldMap.pixelViewEndY) {
+            WorldMap.renderCategoryLines(toolkit, mapCategory, mectype)
             if (iconSprite != null) {
-                if (JSObjectManager.anInt4185 > 0 && (someMecId != -1 && someMecId == mapCategory.mecId || anInt8026 != -1 && mectype.anInt2718 == anInt8026)) {
+                if (JSObjectManager.anInt4185 > 0 && (someMecId != -1 && someMecId == mapCategory.mecId || highlightedCategoryId != -1 && mectype.anInt2718 == highlightedCategoryId)) {
                     val color = if (ServerEnvironment.anInt9282 > 50) {
                         200 - ServerEnvironment.anInt9282 * 2
                     } else {
@@ -531,14 +531,14 @@ object WorldMapSub1 {
     @JvmStatic
     fun renderInformation(toolkit: AbstractToolkit, collection: NodeCollection) {
         WorldMapInteraction.MEC_CLICKZONES!!.remove_all()
-        if (!aBool8027) {
+        if (!hideIcons) {
             var category = collection.getFirst() as? WorldMapCategory
             while (category != null) {
                 val mecType = WorldMap.MECTYPE_LIST!!.list(category.mecId)
                 if (shouldDraw(mecType)) {
                     val bool7 = renderIconsAndNames(toolkit, category, mecType)
                     if (bool7) {
-                        method13297(toolkit, category, mecType)
+                        renderOffscreenIndicator(toolkit, category, mecType)
                     }
                 }
                 category = collection.next() as? WorldMapCategory
@@ -549,11 +549,11 @@ object WorldMapSub1 {
     @JvmStatic
     fun shouldDraw(mecType: MECType?): Boolean {
         return mecType != null && mecType.displayedOnWorldmap && mecType.shouldDraw(WorldMap.PLAYER_VAR_PROVIDER!!) &&
-               aClass4658025.get(mecType.mectypeId.toLong()) == null && aClass4658029.get(mecType.anInt2718.toLong()) == null
+               hiddenMecIds.get(mecType.mectypeId.toLong()) == null && hiddenCategoryIds.get(mecType.anInt2718.toLong()) == null
     }
 
     @JvmStatic
-    fun method13297(toolkit: AbstractToolkit, category: WorldMapCategory, mectype: MECType) {
+    fun renderOffscreenIndicator(toolkit: AbstractToolkit, category: WorldMapCategory, mectype: MECType) {
         val sprite = mectype.getSprite(toolkit) ?: return
 
         var spriteDimension = sprite.getWidth()
@@ -593,20 +593,20 @@ object WorldMapSub1 {
 
         var x = spriteDimension / 2 + category.anInt7990
         var y = category.anInt7992
-        if (spriteCenterX < spriteDimension + WorldMap.anInt3489) {
-            spriteCenterX = WorldMap.anInt3489
-            x = spriteDimension / 2 + i_10 / 2 + b_6 + WorldMap.anInt3489 + 5
-        } else if (spriteCenterX > WorldMap.anInt3476 - spriteDimension) {
-            spriteCenterX = WorldMap.anInt3476 - spriteDimension
-            x = WorldMap.anInt3476 - spriteDimension / 2 - b_6 - i_10 / 2 - 5
+        if (spriteCenterX < spriteDimension + WorldMap.pixelViewStartX) {
+            spriteCenterX = WorldMap.pixelViewStartX
+            x = spriteDimension / 2 + i_10 / 2 + b_6 + WorldMap.pixelViewStartX + 5
+        } else if (spriteCenterX > WorldMap.pixelViewEndX - spriteDimension) {
+            spriteCenterX = WorldMap.pixelViewEndX - spriteDimension
+            x = WorldMap.pixelViewEndX - spriteDimension / 2 - b_6 - i_10 / 2 - 5
         }
 
-        if (spriteCenterY < spriteDimension + WorldMap.anInt3490) {
-            spriteCenterY = WorldMap.anInt3490
-            y = spriteDimension / 2 + b_6 + WorldMap.anInt3490
-        } else if (spriteCenterY > WorldMap.anInt3492 - spriteDimension) {
-            spriteCenterY = WorldMap.anInt3492 - spriteDimension
-            y = WorldMap.anInt3492 - spriteDimension / 2 - b_6 - i_11
+        if (spriteCenterY < spriteDimension + WorldMap.pixelViewStartY) {
+            spriteCenterY = WorldMap.pixelViewStartY
+            y = spriteDimension / 2 + b_6 + WorldMap.pixelViewStartY
+        } else if (spriteCenterY > WorldMap.pixelViewEndY - spriteDimension) {
+            spriteCenterY = WorldMap.pixelViewEndY - spriteDimension
+            y = WorldMap.pixelViewEndY - spriteDimension / 2 - b_6 - i_11
         }
 
         i_14 = (atan2((spriteCenterX - category.anInt7990).toDouble(), (spriteCenterY - category.anInt7992).toDouble()) / Math.PI * 32767.0).toInt() and 0xffff
@@ -659,22 +659,22 @@ object WorldMapSub1 {
     }
 
     @JvmStatic
-    fun method12538(): WorldMapCategory? {
-        aClass4608030.reinitialize(WorldMap.worldMapCategories)
-        val category = aClass4608030.nextAndReset() as? WorldMapCategory ?: return null
+    fun getFirstActiveCategory(): WorldMapCategory? {
+        categoryIterator.reinitialize(WorldMap.worldMapCategories)
+        val category = categoryIterator.nextAndReset() as? WorldMapCategory ?: return null
         val mectype = WorldMap.MECTYPE_LIST!!.list(category.mecId)
         return if (mectype != null && mectype.visible && mectype.shouldDraw(WorldMap.PLAYER_VAR_PROVIDER!!)) {
             category
         } else {
-            WorldMap.method11595()
+            WorldMap.getNextActiveCategory()
         }
     }
 
     @JvmStatic
     fun reset() {
-        if (anInt488 != -1) {
-            reset(anInt488, -1, -1, false)
-            anInt488 = -1
+        if (pendingMapElementId != -1) {
+            reset(pendingMapElementId, -1, -1, false)
+            pendingMapElementId = -1
         }
     }
 }

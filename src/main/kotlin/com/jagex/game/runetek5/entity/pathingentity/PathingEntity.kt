@@ -125,7 +125,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     @JvmField
     var isHidden: Boolean = false
     @JvmField
-    var anInt10319: Int = 0
+    var overheadSpriteCount: Int = 0
     @JvmField
     var clientCycles: Int = 0
     /**
@@ -175,9 +175,9 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     @JvmField
     val pitch: EntityTurnDirection
     @JvmField
-    var anInt10366: Int = 0
+    var stalledStepCount: Int = 0
     @JvmField
-    var anInt10368: Int = 0
+    var walkSpeedAccumulator: Int = 0
     @JvmField
     val movementBaseX: IntArray
     @JvmField
@@ -208,7 +208,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     @JvmField
     protected var modelMinY: Int = 0
     @JvmField
-    var anInt10325: Int = 0
+    var groundContouredOffsetY: Int = 0
     @JvmField
     var hasPreferedPriorities: Boolean = false
     @JvmField
@@ -226,10 +226,10 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         this.sizeInSquares = 1
         this.modelMinY = -32768
         this.isHidden = true
-        this.anInt10319 = 0
+        this.overheadSpriteCount = 0
         this.clientCycles = -1
         this.worldPriority = 0
-        this.anInt10325 = 0
+        this.groundContouredOffsetY = 0
         this.hitCachePtr = 0
         this.activeHitsplatIds = IntArray(Client.ENTITY_DEFAULTS!!.maximumHits)
         this.hitsplatText = IntArray(Client.ENTITY_DEFAULTS!!.maximumHits)
@@ -253,9 +253,9 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         this.roll = EntityTurnDirection()
         this.pitch = EntityTurnDirection()
         this.movementStepsLeft = 0
-        this.anInt10366 = 0
+        this.stalledStepCount = 0
         this.previousMovementStepsLeft = 0
-        this.anInt10368 = 0
+        this.walkSpeedAccumulator = 0
         this.particlesInitialized = false
         this.hasPreferedPriorities = false
         this.loadedInterfaceId = -1
@@ -270,7 +270,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
     fun turn(rotation: Int, force: Boolean) {
         val baseType = getBastype()
-        if (force || baseType.anInt2820 != 0 || this.turnDirection != 0) {
+        if (force || baseType.yawAcceleration != 0 || this.turnDirection != 0) {
             this.lastYawRotation = rotation and 0x3fff
             this.yaw.setRotation(this.lastYawRotation)
         }
@@ -292,8 +292,8 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         val renderAnimation = getBastype()
         val currentRotation = this.yaw.rotation
         val bool4: Boolean
-        if (renderAnimation.anInt2820 != 0) {
-            bool4 = this.yaw.calculateRotation(this.lastYawRotation, renderAnimation.anInt2820, renderAnimation.anInt2804)
+        if (renderAnimation.yawAcceleration != 0) {
+            bool4 = this.yaw.calculateRotation(this.lastYawRotation, renderAnimation.yawAcceleration, renderAnimation.yawMaxVelocity)
         } else {
             bool4 = this.yaw.calculateRotation(this.lastYawRotation, this.turnDirection, this.turnDirection)
         }
@@ -307,26 +307,26 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         }
 
         if (bool4) {
-            if (renderAnimation.anInt2825 != 0) {
+            if (renderAnimation.rollAcceleration != 0) {
                 if (rotation > 0) {
-                    this.roll.calculateRotation(renderAnimation.anInt2824, renderAnimation.anInt2825, renderAnimation.anInt2823)
+                    this.roll.calculateRotation(renderAnimation.rollTargetAngle, renderAnimation.rollAcceleration, renderAnimation.rollMaxVelocity)
                 } else {
-                    this.roll.calculateRotation(-renderAnimation.anInt2824, renderAnimation.anInt2825, renderAnimation.anInt2823)
+                    this.roll.calculateRotation(-renderAnimation.rollTargetAngle, renderAnimation.rollAcceleration, renderAnimation.rollMaxVelocity)
                 }
             }
 
-            if (renderAnimation.anInt2816 != 0) {
-                this.pitch.calculateRotation(renderAnimation.anInt2827, renderAnimation.anInt2816, renderAnimation.anInt2815)
+            if (renderAnimation.pitchAcceleration != 0) {
+                this.pitch.calculateRotation(renderAnimation.pitchTargetAngle, renderAnimation.pitchAcceleration, renderAnimation.pitchMaxVelocity)
             }
         } else {
-            if (renderAnimation.anInt2825 != 0) {
-                this.roll.calculateRotation(0, renderAnimation.anInt2825, renderAnimation.anInt2823)
+            if (renderAnimation.rollAcceleration != 0) {
+                this.roll.calculateRotation(0, renderAnimation.rollAcceleration, renderAnimation.rollMaxVelocity)
             } else {
                 this.roll.setRotation(0)
             }
 
-            if (renderAnimation.anInt2816 != 0) {
-                this.pitch.calculateRotation(0, renderAnimation.anInt2816, renderAnimation.anInt2815)
+            if (renderAnimation.pitchAcceleration != 0) {
+                this.pitch.calculateRotation(0, renderAnimation.pitchAcceleration, renderAnimation.pitchMaxVelocity)
             } else {
                 this.pitch.setRotation(0)
             }
@@ -335,7 +335,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         return rotation
     }
 
-    fun method15797(ints_1: IntArray?, ints_2: IntArray?) {
+    fun setEquipmentOverrides(ints_1: IntArray?, ints_2: IntArray?) {
         if (this.equipmentUpdateDetails == null && ints_1 != null) {
             this.equipmentUpdateDetails = IntArray(TypeLists.EQUIPMENT_DEFAULTS!!.customizableObjSlots!!.size)
         } else if (ints_1 == null) {
@@ -683,8 +683,8 @@ abstract class PathingEntity : AbstractInteractiveEntity {
     override fun getIconHeight(): Int {
         val basType = getBastype()
         val y: Int
-        if (basType.anInt2798 != -1) {
-            y = basType.anInt2798
+        if (basType.iconHeightOverride != -1) {
+            y = basType.iconHeightOverride
         } else if (this.modelMinY == -32768) {
             y = 200
         } else {
@@ -733,9 +733,9 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         }
     }
 
-    fun method15813(i_1: Int) {
+    fun setOverheadInterfaceId(i_1: Int) {
         if (this.interfaceIdToLoad != this.loadedInterfaceId) {
-            method15816()
+            clearOverheadInterface()
         }
 
         this.interfaceIdToLoad = i_1
@@ -754,7 +754,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         return true
     }
 
-    fun method15816() {
+    fun clearOverheadInterface() {
         if (this.loadedInterfaceId != -1) {
             Interface.clearComponents(this.loadedInterfaceId)
             this.inter = null
@@ -762,7 +762,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         }
     }
 
-    fun method15818(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
+    fun drawOverheadInterface(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
         if (!initInterface()) {
             if (i_1 != -1) {
                 Client.IS_COMPONENT_ON_TOP[i_1] = true
@@ -908,7 +908,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
     fun turn(rotation: Int) {
         val renderAnimation = getBastype()
-        if (renderAnimation.anInt2820 != 0 || this.turnDirection != 0) {
+        if (renderAnimation.yawAcceleration != 0 || this.turnDirection != 0) {
             this.yaw.clamp()
             val delta = rotation - this.yaw.rotation and 0x3fff
             if (delta > 8192) {
@@ -931,7 +931,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
         this.hintDetails!!.ticksVisible = duration
     }
 
-    fun method15880(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
+    fun processOverheadInterfaceCycle(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int) {
         if (initInterface()) {
             InterfaceRenderer.processInterfaceCycle(this.inter!!, this.inter!!.getComponents(), -1, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_8)
         }
@@ -1170,7 +1170,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 (abs.y.toInt()).toFloat(),
                 (abs.z.toInt() + (i_4 - abs.z.toInt()) / cyclesLeft).toFloat()
             )
-            entity.anInt10366 = 0
+            entity.stalledStepCount = 0
             entity.turn(entity.forceMoveDirection)
         }
 
@@ -1191,7 +1191,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                     ((cyclesPassed * y2 + y1 * (duration - cyclesPassed)) / duration).toFloat()
                 )
             }
-            entity.anInt10366 = 0
+            entity.stalledStepCount = 0
             entity.turn(entity.forceMoveDirection, false)
         }
 

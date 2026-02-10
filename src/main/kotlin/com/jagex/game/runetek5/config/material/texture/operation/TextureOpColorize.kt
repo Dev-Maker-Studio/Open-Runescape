@@ -12,9 +12,9 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
  */
 class TextureOpColorize : TextureOperation(1, false) {
 
-    @JvmField var anInt9971: Int = 4096
-    @JvmField var anInt9970: Int = 4096
-    @JvmField var anInt9968: Int = 4096
+    @JvmField var redMultiplier: Int = 4096
+    @JvmField var greenMultiplier: Int = 4096
+    @JvmField var blueMultiplier: Int = 4096
 
     override fun getColorOutput(i_1: Int): Array<IntArray> {
         val palette = colorImageCache.getPalette(i_1)
@@ -32,13 +32,13 @@ class TextureOpColorize : TextureOperation(1, false) {
                 val green = inputGreen[i]
                 val blue = inputBlue[i]
                 if (red == green && green == blue) {
-                    outputRed[i] = red * anInt9971 shr 12
-                    outputGreen[i] = green * anInt9970 shr 12
-                    outputBlue[i] = blue * anInt9968 shr 12
+                    outputRed[i] = red * redMultiplier shr 12
+                    outputGreen[i] = green * greenMultiplier shr 12
+                    outputBlue[i] = blue * blueMultiplier shr 12
                 } else {
-                    outputRed[i] = anInt9971
-                    outputGreen[i] = anInt9970
-                    outputBlue[i] = anInt9968
+                    outputRed[i] = redMultiplier
+                    outputGreen[i] = greenMultiplier
+                    outputBlue[i] = blueMultiplier
                 }
             }
         }
@@ -48,9 +48,9 @@ class TextureOpColorize : TextureOperation(1, false) {
 
     override fun decodeOpcode(opcode: Int, buffer: Packet) {
         when (opcode) {
-            0 -> anInt9971 = buffer.readUShort()
-            1 -> anInt9970 = buffer.readUShort()
-            2 -> anInt9968 = buffer.readUShort()
+            0 -> redMultiplier = buffer.readUShort()
+            1 -> greenMultiplier = buffer.readUShort()
+            2 -> blueMultiplier = buffer.readUShort()
         }
     }
 }

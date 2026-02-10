@@ -18,7 +18,7 @@ class TextureOpRasterizer : TextureOperation(0, true) {
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = monochromeImageCache.getPalette(i_1)
         if (monochromeImageCache.dirty) {
-            method15372(monochromeImageCache.method5722())
+            rasterizeShapes(monochromeImageCache.method5722())
         }
         return ints_3
     }
@@ -31,7 +31,7 @@ class TextureOpRasterizer : TextureOperation(0, true) {
             val ints_6 = Array(i_5) { IntArray(i_4) }
             val ints_7 = colorImageCache.method5464()
             @Suppress("UNCHECKED_CAST")
-            method15372(ints_6 as Array<IntArray?>)
+            rasterizeShapes(ints_6 as Array<IntArray?>)
             for (i_8 in 0 until TextureRaster.currentHeight) {
                 val ints_9 = ints_6[i_8]
                 val ints_10 = ints_7[i_8]
@@ -49,25 +49,25 @@ class TextureOpRasterizer : TextureOperation(0, true) {
         return ints_3
     }
 
-    fun method15372(ints_1: Array<IntArray?>) {
+    fun rasterizeShapes(ints_1: Array<IntArray?>) {
         val i_3 = TextureRaster.currentWidth
         val i_4 = TextureRaster.currentHeight
         @Suppress("UNCHECKED_CAST")
         StaticMethods.method3936(ints_1 as Array<IntArray>?)
-        method16086(TextureRaster.rowEnd, TextureRaster.columnEnd)
+        setClipBounds(TextureRaster.rowEnd, TextureRaster.columnEnd)
         if (shapes != null) {
             for (i_5 in shapes!!.indices) {
                 val class1496 = shapes!![i_5] ?: continue
-                val i_7 = class1496.anInt1743
-                val i_8 = class1496.anInt1741
+                val i_7 = class1496.fillColor
+                val i_8 = class1496.strokeColor
                 if (i_7 >= 0) {
                     if (i_8 >= 0) {
-                        class1496.method2557(i_3, i_4)
+                        class1496.drawFilledAndStroked(i_3, i_4)
                     } else {
-                        class1496.method2556(i_3, i_4)
+                        class1496.drawFilled(i_3, i_4)
                     }
                 } else if (i_8 >= 0) {
-                    class1496.method2561(i_3, i_4)
+                    class1496.drawStroked(i_3, i_4)
                 }
             }
         }
@@ -94,17 +94,17 @@ class TextureOpRasterizer : TextureOperation(0, true) {
     }
 
     companion object {
-        @JvmField var anInt7071: Int = 0
-        @JvmField var anInt7069 = 100
-        @JvmField var anInt7070: Int = 0
-        @JvmField var anInt7068 = 100
+        @JvmField var clipMinX: Int = 0
+        @JvmField var clipMaxX = 100
+        @JvmField var clipMinY: Int = 0
+        @JvmField var clipMaxY = 100
 
         @JvmStatic
-        fun method16086(i_2: Int, i_3: Int) {
-            anInt7071 = 0
-            anInt7069 = i_2
-            anInt7070 = 0
-            anInt7068 = i_3
+        fun setClipBounds(i_2: Int, i_3: Int) {
+            clipMinX = 0
+            clipMaxX = i_2
+            clipMinY = 0
+            clipMaxY = i_3
         }
     }
 }

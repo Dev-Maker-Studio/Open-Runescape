@@ -103,7 +103,7 @@ object PulseEventHandler {
     fun processPulseEvents() {
         var configIndex = VarProviders.PLAYER_VAR_PROVIDER.service(true)
         while (configIndex != -1) {
-            PlayerUpdate.method8333(configIndex)
+            PlayerUpdate.onVarChange(configIndex)
             Client.PULSE_EVENT_CONFIGS_CACHE[++Client.pulseEventConfigsPtr - 1 and 0x1f] = configIndex
             configIndex = VarProviders.PLAYER_VAR_PROVIDER.service(false)
         }
@@ -251,7 +251,7 @@ object PulseEventHandler {
                 }
                 T17 -> {
                     val component = Component.fromHash(value.toInt())
-                    component!!.anInt1435 = event.primary
+                    component!!.videoFileId = event.primary
                 }
                 IF_SETRECOL -> {
                     val component = Component.fromHash(value.toInt())

@@ -537,7 +537,7 @@ object ComponentMinimap {
                     fontrenderer20 = MiniMenu.minimenuHeader
                     fontmetrics21 = FontMetrics.aClass4143438
                 }
-                InterfaceComponentRenderer.method4152(component, class4551, clipLeft, clipTop, i_5, i_6, i_11, mecType.areaName, fontrenderer20!!, fontmetrics21!!, mecType.defaultTextColor)
+                InterfaceComponentRenderer.drawMinimapText(component, class4551, clipLeft, clipTop, i_5, i_6, i_11, mecType.areaName, fontrenderer20!!, fontmetrics21!!, mecType.defaultTextColor)
             }
         }
     }

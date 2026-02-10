@@ -47,12 +47,12 @@ import com.jagex.game.runetek5.config.rsinterface.ComponentContentType.*
 
 object InterfaceComponentRenderer {
 
-    @JvmField var aClass118Array3772: Array<Component?>? = null
-    @JvmField var anInt4822: Int = 0
-    @JvmField var aClass118183: Component? = null
-    @JvmField var anInt195: Int = -1
-    @JvmField var anInt179: Int = -1
-    @JvmField var anInt5157: Int = 0
+    @JvmField var deferredDragComponents: Array<Component?>? = null
+    @JvmField var deferredDragOffsetX: Int = 0
+    @JvmField var chatDisplayComponent: Component? = null
+    @JvmField var chatDisplayX: Int = -1
+    @JvmField var chatDisplayY: Int = -1
+    @JvmField var deferredDragOffsetY: Int = 0
     @JvmField var prevCutsceneFadeBlue: Int = 0
     @JvmField var prevCutsceneFadeGreen: Int = 0
     @JvmField var prevCutsceneFadeRed: Int = 0
@@ -120,10 +120,10 @@ object InterfaceComponentRenderer {
                     val startX: Int
                     val startY: Int
                     if (component === Client.draggingComponent) {
-                        if (i_1 != -1412584499 && (component.anUnkSetting11 == Component.UnkSetting1.UNK_2 || component.anUnkSetting11 == Component.UnkSetting1.UNK_0 || Client.getComponentSettings(component)!!.ignoresDepthFlags())) {
-                            aClass118Array3772 = components
-                            anInt4822 = offsetX
-                            anInt5157 = offsetY
+                        if (i_1 != -1412584499 && (component.dragType == Component.DragType.UNK_2 || component.dragType == Component.DragType.UNK_0 || Client.getComponentSettings(component)!!.ignoresDepthFlags())) {
+                            deferredDragComponents = components
+                            deferredDragOffsetX = offsetX
+                            deferredDragOffsetY = offsetY
                             continue
                         }
                         if (Client.isDragThresholdMet && Client.isComponentSelected) {
@@ -152,7 +152,7 @@ object InterfaceComponentRenderer {
                             startX = drawX
                             startY = drawY
                         }
-                        if (component.anUnkSetting11 == Component.UnkSetting1.UNK_0) {
+                        if (component.dragType == Component.DragType.UNK_0) {
                             drawTransparency = 128
                         }
                     } else {
@@ -243,7 +243,7 @@ object InterfaceComponentRenderer {
                             }
                             val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong())
                             if (subInterface != null) {
-                                Component.method3629(subInterface.subInterfaceId, clipStartX, clipStartY, endX, endY, startX, startY, componentReference)
+                                Component.drawInterface(subInterface.subInterfaceId, clipStartX, clipStartY, endX, endY, startX, startY, componentReference)
                             }
                             if (component.contentType == CUTSCENE_FADE) {
                                 if (Renderers.activeToolkit!!.bloomEnabled()) {
@@ -300,8 +300,8 @@ object InterfaceComponentRenderer {
                                             itemDisplayText = TextUtils.setTextColor(16748608) + itemDisplayText + "</col>" + " x" + TextUtils.formatStackSize(component.itemStackSize)
                                         }
                                     }
-                                    if (component.anInt1435 != -1) {
-                                        itemDisplayText = SoundResourceManager.method2550(component.anInt1435)!!
+                                    if (component.videoFileId != -1) {
+                                        itemDisplayText = SoundResourceManager.method2550(component.videoFileId)!!
                                     }
                                     if (component === Client.activeDialogueContinue) {
                                         itemDisplayText = LocalizedText.PLEASE_WAIT.translate(Client.CURRENT_LANGUAGE!!)
@@ -313,7 +313,7 @@ object InterfaceComponentRenderer {
                                     if (component.textAntiMacro) {
                                         fontRenderer.renderTextAntiMacro(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.nameIconSprites, null)
                                     } else {
-                                        fontRenderer.renderText(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, component.anInt1358, component.maxTextLines, StaticMedia.nameIconSprites, null, null, 0, 0)
+                                        fontRenderer.renderText(itemDisplayText!!, startX, startY, component.width, component.height, 255 - (drawTransparency and 0xff) shl 24 or color, if (component.shadow) 255 - (drawTransparency and 0xff) shl 24 else -1, component.textHorizontalAli, component.textVerticalAli, component.lineSpacing, component.maxTextLines, StaticMedia.nameIconSprites, null, null, 0, 0)
                                     }
                                     if (Client.CLIP_INTERFACES) {
                                         Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
@@ -327,8 +327,8 @@ object InterfaceComponentRenderer {
                                     if (component.containerItemId != -1) {
                                         val appearance = if (component.wearCol) PlayerUpdate.MY_PLAYER!!.playerAppearance else null
                                         sprite = TypeLists.OBJ!!.createNativeSprite(Renderers.activeToolkit!!, component.containerItemId, component.itemStackSize, component.borderThickness, 0xffffff.inv() or component.spriteShadow, component.renderStack, appearance)
-                                    } else if (component.anInt1435 != -1) {
-                                        sprite = VorbisNode.method8858(Renderers.activeToolkit!!, component.anInt1435)
+                                    } else if (component.videoFileId != -1) {
+                                        sprite = VorbisNode.method8858(Renderers.activeToolkit!!, component.videoFileId)
                                     } else {
                                         sprite = component.draw(Renderers.activeToolkit!!)
                                     }
@@ -606,7 +606,7 @@ object InterfaceComponentRenderer {
     }
 
     @JvmStatic
-    fun method4152(component: Component, dimension: ComponentSurface?, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, string_7: String?, fontRenderer: AbstractFontRenderer?, fontmetrics9: FontMetrics?, i_10: Int) {
+    fun drawMinimapText(component: Component, dimension: ComponentSurface?, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, string_7: String?, fontRenderer: AbstractFontRenderer?, fontmetrics9: FontMetrics?, i_10: Int) {
         val angle: Int
         if (Camera.cameraCalculationType == 4) {
             angle = Camera.camAngleY.toInt() and 0x3fff
@@ -644,10 +644,10 @@ object InterfaceComponentRenderer {
     }
 
     @JvmStatic
-    fun method544(component: Component?, x: Int, y: Int) {
-        aClass118183 = component
-        anInt195 = x
-        anInt179 = y
+    fun setChatDisplay(component: Component?, x: Int, y: Int) {
+        chatDisplayComponent = component
+        chatDisplayX = x
+        chatDisplayY = y
     }
 
     @JvmStatic

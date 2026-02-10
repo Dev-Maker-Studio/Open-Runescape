@@ -13,11 +13,11 @@ import kotlin.math.abs
  */
 class TextureOpWeave : TextureOperation(0, true) {
 
-    @JvmField var anInt9885: Int = 585
+    @JvmField var threadWidth: Int = 585
 
     override fun decodeOpcode(opcode: Int, buffer: Packet) {
         when (opcode) {
-            0 -> anInt9885 = buffer.readUShort()
+            0 -> threadWidth = buffer.readUShort()
         }
     }
 
@@ -28,27 +28,27 @@ class TextureOpWeave : TextureOperation(0, true) {
             for (i in 0 until TextureRaster.currentWidth) {
                 val horizontalValue = TextureRaster.horizontalTable!![i]
                 val result: Int
-                if (horizontalValue > anInt9885 && horizontalValue < 4096 - anInt9885 &&
-                    verticalValue > 2048 - anInt9885 && verticalValue < anInt9885 + 2048) {
+                if (horizontalValue > threadWidth && horizontalValue < 4096 - threadWidth &&
+                    verticalValue > 2048 - threadWidth && verticalValue < threadWidth + 2048) {
                     result = abs(2048 - horizontalValue)
                     val scaled = result shl 12
-                    output[i] = 4096 - scaled / (2048 - anInt9885)
-                } else if (horizontalValue > 2048 - anInt9885 && horizontalValue < anInt9885 + 2048) {
-                    result = abs(verticalValue - 2048) - anInt9885
+                    output[i] = 4096 - scaled / (2048 - threadWidth)
+                } else if (horizontalValue > 2048 - threadWidth && horizontalValue < threadWidth + 2048) {
+                    result = abs(verticalValue - 2048) - threadWidth
                     val scaled = result shl 12
-                    output[i] = scaled / (2048 - anInt9885)
-                } else if (verticalValue >= anInt9885 && verticalValue <= 4096 - anInt9885) {
-                    if (horizontalValue >= anInt9885 && horizontalValue <= 4096 - anInt9885) {
+                    output[i] = scaled / (2048 - threadWidth)
+                } else if (verticalValue >= threadWidth && verticalValue <= 4096 - threadWidth) {
+                    if (horizontalValue >= threadWidth && horizontalValue <= 4096 - threadWidth) {
                         output[i] = 0
                     } else {
                         result = abs(2048 - verticalValue)
                         val scaled = result shl 12
-                        output[i] = 4096 - scaled / (2048 - anInt9885)
+                        output[i] = 4096 - scaled / (2048 - threadWidth)
                     }
                 } else {
-                    result = abs(horizontalValue - 2048) - anInt9885
+                    result = abs(horizontalValue - 2048) - threadWidth
                     val scaled = result shl 12
-                    output[i] = scaled / (2048 - anInt9885)
+                    output[i] = scaled / (2048 - threadWidth)
                 }
             }
         }

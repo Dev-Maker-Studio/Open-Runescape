@@ -195,7 +195,7 @@ class Interface(
             }
             MiniMenu.method420()
             if (parentComponent != null) {
-                Component.method483(INTERFACES!![parentComponent.idHash ushr 16]!!, parentComponent, !bool3)
+                Component.updateEntityLayout(INTERFACES!![parentComponent.idHash ushr 16]!!, parentComponent, !bool3)
             }
             if (!bool3) {
                 Component.runScriptsIfLoaded(subInterface.subInterfaceId, ints2)
@@ -483,13 +483,13 @@ class Interface(
                             openSub(subInterface.subInterfaceId, i1)
                         }
                     }
-                    if (i1 == 0 && component.hookrequestType0Params != null) {
+                    if (i1 == 0 && component.onSubClose != null) {
                         val hookRequest = HookRequest()
                         hookRequest.source = component
-                        hookRequest.params = component.hookrequestType0Params
+                        hookRequest.params = component.onSubClose
                         CS2Executor.executeHookInner(hookRequest)
                     }
-                    if (i1 == 1 && component.hookrequestType1Params != null) {
+                    if (i1 == 1 && component.onSubChange != null) {
                         if (component.slotId >= 0) {
                             val icomponentdefinitions7 = Component.fromHash(component.idHash)
                             if (icomponentdefinitions7 == null || icomponentdefinitions7.slotChildren == null || component.slotId >= icomponentdefinitions7.slotChildren!!.size || component != icomponentdefinitions7.slotChildren!![component.slotId]) {
@@ -498,7 +498,7 @@ class Interface(
                         }
                         val hookRequest = HookRequest()
                         hookRequest.source = component
-                        hookRequest.params = component.hookrequestType1Params
+                        hookRequest.params = component.onSubChange
                         CS2Executor.executeHookInner(hookRequest)
                     }
                 }

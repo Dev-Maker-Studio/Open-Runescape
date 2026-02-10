@@ -15,27 +15,27 @@ import java.util.Random
  */
 class TextureOpBricks : TextureOperation(0, true) {
 
-    @JvmField var anInt9982: Int = 4
-    @JvmField var anInt9994: Int = 8
-    @JvmField var anInt9986: Int = 0
-    @JvmField var anInt9987: Int = 1024
-    @JvmField var anInt9984: Int = 1024
-    @JvmField var anInt9989: Int = 409
-    @JvmField var anInt9990: Int = 204
-    @JvmField var anInt9991: Int = 81
-    @JvmField var anInt9993: Int = 0
-    @JvmField var anInt9988: Int = 0
-    @JvmField var anInt9995: Int = 0
-    @JvmField var anIntArray9996: IntArray? = null
-    @JvmField var anIntArrayArray9979: Array<IntArray>? = null
-    @JvmField var anIntArrayArray9992: Array<IntArray>? = null
+    @JvmField var columnsPerRow: Int = 4
+    @JvmField var rowCount: Int = 8
+    @JvmField var verticalOffset: Int = 0
+    @JvmField var staggerAmount: Int = 1024
+    @JvmField var brightnessVariation: Int = 1024
+    @JvmField var columnWidthVariation: Int = 409
+    @JvmField var rowHeightVariation: Int = 204
+    @JvmField var mortarThickness: Int = 81
+    @JvmField var halfMortarThickness: Int = 0
+    @JvmField var columnWidth: Int = 0
+    @JvmField var rowHeight: Int = 0
+    @JvmField var rowBoundaries: IntArray? = null
+    @JvmField var columnBoundaries: Array<IntArray>? = null
+    @JvmField var brickBrightness: Array<IntArray>? = null
 
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = monochromeImageCache.getPalette(i_1)
         if (monochromeImageCache.dirty) {
             var i_4 = 0
 
-            var i_5 = TextureRaster.verticalTable!![i_1] + anInt9986
+            var i_5 = TextureRaster.verticalTable!![i_1] + verticalOffset
             while (i_5 < 0) {
                 i_5 += 4096
             }
@@ -44,21 +44,21 @@ class TextureOpBricks : TextureOperation(0, true) {
                 i_5 -= 4096
             }
 
-            while (i_4 < anInt9994 && i_5 >= anIntArray9996!![i_4]) {
+            while (i_4 < rowCount && i_5 >= rowBoundaries!![i_4]) {
                 ++i_4
             }
 
             val i_6 = i_4 - 1
             val bool7 = (i_4 and 0x1) == 0
-            val i_8 = anIntArray9996!![i_4]
-            val i_9 = anIntArray9996!![i_4 - 1]
+            val i_8 = rowBoundaries!![i_4]
+            val i_9 = rowBoundaries!![i_4 - 1]
 
-            if (i_5 > i_9 + anInt9993 && i_5 < i_8 - anInt9993) {
+            if (i_5 > i_9 + halfMortarThickness && i_5 < i_8 - halfMortarThickness) {
                 for (i_10 in 0 until TextureRaster.currentWidth) {
                     var i_11 = 0
-                    val i_12 = if (bool7) anInt9987 else -anInt9987
+                    val i_12 = if (bool7) staggerAmount else -staggerAmount
 
-                    var i_13 = TextureRaster.horizontalTable!![i_10] + (i_12 * anInt9988 shr 12)
+                    var i_13 = TextureRaster.horizontalTable!![i_10] + (i_12 * columnWidth shr 12)
                     while (i_13 < 0) {
                         i_13 += 4096
                     }
@@ -67,16 +67,16 @@ class TextureOpBricks : TextureOperation(0, true) {
                         i_13 -= 4096
                     }
 
-                    while (i_11 < anInt9982 && i_13 >= anIntArrayArray9979!![i_6][i_11]) {
+                    while (i_11 < columnsPerRow && i_13 >= columnBoundaries!![i_6][i_11]) {
                         ++i_11
                     }
 
                     val i_14 = i_11 - 1
-                    val i_15 = anIntArrayArray9979!![i_6][i_14]
-                    val i_16 = anIntArrayArray9979!![i_6][i_11]
+                    val i_15 = columnBoundaries!![i_6][i_14]
+                    val i_16 = columnBoundaries!![i_6][i_11]
 
-                    if (i_13 > i_15 + anInt9993 && i_13 < i_16 - anInt9993) {
-                        ints_3[i_10] = anIntArrayArray9992!![i_6][i_14]
+                    if (i_13 > i_15 + halfMortarThickness && i_13 < i_16 - halfMortarThickness) {
+                        ints_3[i_10] = brickBrightness!![i_6][i_14]
                     } else {
                         ints_3[i_10] = 0
                     }
@@ -91,63 +91,63 @@ class TextureOpBricks : TextureOperation(0, true) {
 
     override fun decodeOpcode(opcode: Int, buffer: Packet) {
         when (opcode) {
-            0 -> anInt9982 = buffer.readUByte()
-            1 -> anInt9994 = buffer.readUByte()
-            2 -> anInt9989 = buffer.readUShort()
-            3 -> anInt9990 = buffer.readUShort()
-            4 -> anInt9987 = buffer.readUShort()
-            5 -> anInt9986 = buffer.readUShort()
-            6 -> anInt9991 = buffer.readUShort()
-            7 -> anInt9984 = buffer.readUShort()
+            0 -> columnsPerRow = buffer.readUByte()
+            1 -> rowCount = buffer.readUByte()
+            2 -> columnWidthVariation = buffer.readUShort()
+            3 -> rowHeightVariation = buffer.readUShort()
+            4 -> staggerAmount = buffer.readUShort()
+            5 -> verticalOffset = buffer.readUShort()
+            6 -> mortarThickness = buffer.readUShort()
+            7 -> brightnessVariation = buffer.readUShort()
         }
     }
 
-    fun method15422() {
-        val random2 = Random(anInt9994.toLong())
-        anInt9993 = anInt9991 / 2
-        anInt9988 = 4096 / anInt9982
-        anInt9995 = 4096 / anInt9994
-        val i_3 = anInt9988 / 2
-        val i_4 = anInt9995 / 2
-        anIntArray9996 = IntArray(anInt9994 + 1)
-        anIntArrayArray9979 = Array(anInt9994) { IntArray(anInt9982 + 1) }
-        anIntArrayArray9992 = Array(anInt9994) { IntArray(anInt9982) }
-        anIntArray9996!![0] = 0
+    fun generateBrickLayout() {
+        val random2 = Random(rowCount.toLong())
+        halfMortarThickness = mortarThickness / 2
+        columnWidth = 4096 / columnsPerRow
+        rowHeight = 4096 / rowCount
+        val i_3 = columnWidth / 2
+        val i_4 = rowHeight / 2
+        rowBoundaries = IntArray(rowCount + 1)
+        columnBoundaries = Array(rowCount) { IntArray(columnsPerRow + 1) }
+        brickBrightness = Array(rowCount) { IntArray(columnsPerRow) }
+        rowBoundaries!![0] = 0
 
-        for (i_5 in 0 until anInt9994) {
+        for (i_5 in 0 until rowCount) {
             var i_6: Int
             var i_7: Int
             if (i_5 > 0) {
-                i_6 = anInt9995
-                i_7 = (StaticMethods.method7931(random2, 4096) - 2048) * anInt9990 shr 12
+                i_6 = rowHeight
+                i_7 = (StaticMethods.method7931(random2, 4096) - 2048) * rowHeightVariation shr 12
                 val adjusted = i_6 + (i_7 * i_4 shr 12)
-                anIntArray9996!![i_5] = adjusted + anIntArray9996!![i_5 - 1]
+                rowBoundaries!![i_5] = adjusted + rowBoundaries!![i_5 - 1]
             }
 
-            anIntArrayArray9979!![i_5][0] = 0
+            columnBoundaries!![i_5][0] = 0
 
-            for (i_6_2 in 0 until anInt9982) {
+            for (i_6_2 in 0 until columnsPerRow) {
                 if (i_6_2 > 0) {
-                    i_7 = anInt9988
-                    val i_8 = (StaticMethods.method7931(random2, 4096) - 2048) * anInt9989 shr 12
+                    i_7 = columnWidth
+                    val i_8 = (StaticMethods.method7931(random2, 4096) - 2048) * columnWidthVariation shr 12
                     val adjusted = i_7 + (i_8 * i_3 shr 12)
-                    anIntArrayArray9979!![i_5][i_6_2] = anIntArrayArray9979!![i_5][i_6_2 - 1] + adjusted
+                    columnBoundaries!![i_5][i_6_2] = columnBoundaries!![i_5][i_6_2 - 1] + adjusted
                 }
 
-                anIntArrayArray9992!![i_5][i_6_2] = if (anInt9984 > 0) {
-                    4096 - StaticMethods.method7931(random2, anInt9984)
+                brickBrightness!![i_5][i_6_2] = if (brightnessVariation > 0) {
+                    4096 - StaticMethods.method7931(random2, brightnessVariation)
                 } else {
                     4096
                 }
             }
 
-            anIntArrayArray9979!![i_5][anInt9982] = 4096
+            columnBoundaries!![i_5][columnsPerRow] = 4096
         }
 
-        anIntArray9996!![anInt9994] = 4096
+        rowBoundaries!![rowCount] = 4096
     }
 
     override fun postDecode() {
-        method15422()
+        generateBrickLayout()
     }
 }

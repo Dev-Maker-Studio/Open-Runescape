@@ -160,7 +160,7 @@ abstract class NativeSprite : Sprite {
                     spriteType!!.flipHorizontal()
                     StaticMethods.aNativeSprite612 = toolkit.generateSprite(spriteType, true)
                 } else {
-                    toolkit.drawFilledRectangle(x, y, width, height, i_10 shl 24 or TextureOpIrregularBricks.anInt9792, 1)
+                    toolkit.drawFilledRectangle(x, y, width, height, i_10 shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
                 }
             }
 
@@ -174,7 +174,7 @@ abstract class NativeSprite : Sprite {
             }
 
             fontrenderer.renderPlain(string_8, x + 3, (20 - fontmetrics.topPadding) / 2 + y + fontmetrics.topPadding, MiniMenu.anInt4722 or 0xffffff.inv(), -1)
-            toolkit.drawFilledRectangle(x, height + y, width, i_4 - height, i_10 shl 24 or TextureOpIrregularBricks.anInt9792, 1)
+            toolkit.drawFilledRectangle(x, height + y, width, i_4 - height, i_10 shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
         }
 
         @JvmStatic

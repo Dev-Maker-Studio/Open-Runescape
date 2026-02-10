@@ -57,9 +57,9 @@ object GraphicsCache {
     @JvmStatic
     fun resetWorldmapCaches(preserveStaticElement: Boolean) {
         if (preserveStaticElement && WorldMap.staticElement != null) {
-            WorldMapSub1.anInt488 = WorldMap.staticElement!!.anInt9536
+            WorldMapSub1.pendingMapElementId = WorldMap.staticElement!!.anInt9536
         } else {
-            WorldMapSub1.anInt488 = -1
+            WorldMapSub1.pendingMapElementId = -1
         }
         WorldMap.staticElement = null
         WorldMapInteraction.MEC_CLICKZONES = null
@@ -69,8 +69,8 @@ object GraphicsCache {
         WorldMap.worldMapCategories.remove_all()
         WorldMap.staticElements = null
         ComponentMinimap.aNativeSprite5883 = null
-        WorldMapSub1.anInt8014 = -1
-        WorldMapSub1.anInt8016 = -1
+        WorldMapSub1.scrollTargetX = -1
+        WorldMapSub1.scrollTargetY = -1
         Resource.helvetica11Font = null
         Resource.helvetica12Font = null
         Resource.helvetica14Font = null

@@ -92,7 +92,7 @@ object GroundItemUpdating {
 
                     val height = MapRegion.tileheightForAbsolutePosition((x shl 9) + 256, (y shl 9) + 256, plane)
                     groundItem.setBasePosition((x shl 9).toFloat(), height.toFloat(), (y shl 9).toFloat())
-                    groundItem.anInt10422 = 0
+                    groundItem.tileHeightOffset = 0
                     groundItem.plane = plane.toByte()
                     groundItem.collisionPlane = plane.toByte()
                     if (Resource.mapRegion!!.settingsBits.areRoofsHidden(x, y)) {

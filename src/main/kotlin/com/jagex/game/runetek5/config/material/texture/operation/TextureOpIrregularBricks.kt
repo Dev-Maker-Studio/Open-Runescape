@@ -15,21 +15,21 @@ import kotlin.math.min
  */
 class TextureOpIrregularBricks : TextureOperation(0, true) {
 
-    var anInt9782: Int = 0
-    var anInt9791: Int = 1024
-    var anInt9784: Int = 2048
-    var anInt9772: Int = 409
-    var anInt9786: Int = 819
-    var anInt9787: Int = 1024
-    var anInt9788: Int = 0
-    var anInt9780: Int = 1024
-    var anInt9790: Int = 1024
-    var anInt9789: Int = 0
+    var randomSeed: Int = 0
+    var minBrickWidth: Int = 1024
+    var maxBrickWidth: Int = 2048
+    var minBrickHeight: Int = 409
+    var maxBrickHeight: Int = 819
+    var offsetVariation: Int = 1024
+    var cornerMode: Int = 0
+    var heightVariationMultiplier: Int = 1024
+    var brightnessVariation: Int = 1024
+    var cornerRadius: Int = 0
 
-    fun method15253(random1: Random, ints_2: Array<IntArray?>, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-        val i_8 = if (anInt9790 > 0) 4096 - StaticMethods.method7931(random1, anInt9790) else 4096
-        val i_9 = anInt9780 * anInt9789 shr 12
-        val i_10 = anInt9789 - if (i_9 > 0) StaticMethods.method7931(random1, i_9) else 0
+    fun drawBrick(random1: Random, ints_2: Array<IntArray?>, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+        val i_8 = if (brightnessVariation > 0) 4096 - StaticMethods.method7931(random1, brightnessVariation) else 4096
+        val i_9 = heightVariationMultiplier * cornerRadius shr 12
+        val i_10 = cornerRadius - if (i_9 > 0) StaticMethods.method7931(random1, i_9) else 0
         var i_3Var = i_3
         if (i_3Var >= TextureRaster.currentWidth) {
             i_3Var -= TextureRaster.currentWidth
@@ -51,7 +51,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                     var i_21: Int
                     if (i_17 < i_14) {
                         i_19 = i_8 * i_17 / i_14
-                        if (anInt9788 == 0) {
+                        if (cornerMode == 0) {
                             i_20 = 0
                             while (i_20 < i_13) {
                                 i_21 = i_8 * i_20 / i_13
@@ -80,7 +80,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                         if (i_19 < i_14) {
                             i_20 = i_8 * i_19 / i_14
                             var i_22: Int
-                            if (anInt9788 == 0) {
+                            if (cornerMode == 0) {
                                 i_21 = 0
                                 while (i_21 < i_13) {
                                     i_22 = i_21 * i_8 / i_13
@@ -142,15 +142,15 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
 
     override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
         when (i_1) {
-            0 -> anInt9782 = rsbytebuffer2.readUByte()
-            1 -> anInt9791 = rsbytebuffer2.readUShort()
-            2 -> anInt9784 = rsbytebuffer2.readUShort()
-            3 -> anInt9772 = rsbytebuffer2.readUShort()
-            4 -> anInt9786 = rsbytebuffer2.readUShort()
-            5 -> anInt9787 = rsbytebuffer2.readUShort()
-            6 -> anInt9788 = rsbytebuffer2.readUByte()
-            7 -> anInt9780 = rsbytebuffer2.readUShort()
-            8 -> anInt9790 = rsbytebuffer2.readUShort()
+            0 -> randomSeed = rsbytebuffer2.readUByte()
+            1 -> minBrickWidth = rsbytebuffer2.readUShort()
+            2 -> maxBrickWidth = rsbytebuffer2.readUShort()
+            3 -> minBrickHeight = rsbytebuffer2.readUShort()
+            4 -> maxBrickHeight = rsbytebuffer2.readUShort()
+            5 -> offsetVariation = rsbytebuffer2.readUShort()
+            6 -> cornerMode = rsbytebuffer2.readUByte()
+            7 -> heightVariationMultiplier = rsbytebuffer2.readUShort()
+            8 -> brightnessVariation = rsbytebuffer2.readUShort()
         }
     }
 
@@ -170,18 +170,18 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
             var bool11 = true
             var i_12 = 0
             var i_13 = 0
-            val i_14 = anInt9791 * TextureRaster.currentWidth shr 12
-            val i_15 = anInt9784 * TextureRaster.currentWidth shr 12
-            val i_16 = anInt9772 * TextureRaster.currentHeight shr 12
-            val i_17 = anInt9786 * TextureRaster.currentHeight shr 12
+            val i_14 = minBrickWidth * TextureRaster.currentWidth shr 12
+            val i_15 = maxBrickWidth * TextureRaster.currentWidth shr 12
+            val i_16 = minBrickHeight * TextureRaster.currentHeight shr 12
+            val i_17 = maxBrickHeight * TextureRaster.currentHeight shr 12
             if (i_17 <= 1) {
                 return ints_4[i_1]!!
             } else {
-                anInt9789 = TextureRaster.currentWidth / 8 * anInt9787 shr 12
+                cornerRadius = TextureRaster.currentWidth / 8 * offsetVariation shr 12
                 val i_18 = TextureRaster.currentWidth / i_14 + 1
                 val ints_19 = Array(i_18) { IntArray(3) }
                 var ints_20 = Array(i_18) { IntArray(3) }
-                val random21 = Random(anInt9782.toLong())
+                val random21 = Random(randomSeed.toLong())
                 while (true) {
                     var i_22 = i_14 + StaticMethods.method7931(random21, i_15 - i_14)
                     var i_23 = i_16 + StaticMethods.method7931(random21, i_17 - i_16)
@@ -244,7 +244,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                                                 i_36 = max(i_38, i_34)
                                                 i_37 = TextureRaster.currentWidth
                                             }
-                                            method15253(random21, ints_4, i_36 + i_7, i_33, i_37 - i_36, i_25 - i_33)
+                                            drawBrick(random21, ints_4, i_36 + i_7, i_33, i_37 - i_36, i_25 - i_33)
                                         }
                                         i_31++
                                     }
@@ -266,7 +266,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                     }
                     val ints_39: IntArray
                     if (i_24 == TextureRaster.currentWidth) {
-                        method15253(random21, ints_4, i_6 + i_8, i_25, i_22, i_23)
+                        drawBrick(random21, ints_4, i_6 + i_8, i_25, i_22, i_23)
                         if (bool10) {
                             return ints_3
                         }
@@ -308,7 +308,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                         ints_39[0] = i_8
                         ints_39[1] = i_24
                         ints_39[2] = i_23 + i_25
-                        method15253(random21, ints_4, i_6 + i_8, i_25, i_22, i_23)
+                        drawBrick(random21, ints_4, i_6 + i_8, i_25, i_22, i_23)
                         i_8 = i_24
                     }
                 }
@@ -320,6 +320,6 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
 
     companion object {
         @JvmField
-        var anInt9792: Int = 0
+        var backgroundColor: Int = 0
     }
 }

@@ -13,28 +13,28 @@ class EllipseRasterizer(
     i_7: Int
 ) : TextureShapeRasterizer(i_5, i_6, i_7) {
 
-    val anInt9274: Int = i_1
-    val anInt9273: Int = i_2
-    val anInt9276: Int = i_3
-    val anInt9275: Int = i_4
+    val centerX: Int = i_1
+    val centerY: Int = i_2
+    val radiusX: Int = i_3
+    val radiusY: Int = i_4
 
-    override fun method2561(i_1: Int, i_2: Int) {
+    override fun drawStroked(i_1: Int, i_2: Int) {
     }
 
-    override fun method2556(i_1: Int, i_2: Int) {
-        val i_4 = anInt9274 * i_1 shr 12
-        val i_5 = anInt9276 * i_1 shr 12
-        val i_6 = i_2 * anInt9273 shr 12
-        val i_7 = i_2 * anInt9275 shr 12
-        ArrayUtils.method14584(i_4, i_6, i_5, i_7, anInt1743)
+    override fun drawFilled(i_1: Int, i_2: Int) {
+        val i_4 = centerX * i_1 shr 12
+        val i_5 = radiusX * i_1 shr 12
+        val i_6 = i_2 * centerY shr 12
+        val i_7 = i_2 * radiusY shr 12
+        ArrayUtils.method14584(i_4, i_6, i_5, i_7, fillColor)
     }
 
-    override fun method2557(i_1: Int, i_2: Int) {
-        val i_4 = anInt9274 * i_1 shr 12
-        val i_5 = anInt9276 * i_1 shr 12
-        val i_6 = i_2 * anInt9273 shr 12
-        val i_7 = i_2 * anInt9275 shr 12
-        method5316(i_4, i_6, i_5, i_7, anInt1743, anInt1741, anInt1742)
+    override fun drawFilledAndStroked(i_1: Int, i_2: Int) {
+        val i_4 = centerX * i_1 shr 12
+        val i_5 = radiusX * i_1 shr 12
+        val i_6 = i_2 * centerY shr 12
+        val i_7 = i_2 * radiusY shr 12
+        drawEllipse(i_4, i_6, i_5, i_7, fillColor, strokeColor, strokeWidth)
     }
 
     companion object {
@@ -52,7 +52,7 @@ class EllipseRasterizer(
         }
 
         @JvmStatic
-        fun method6824(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+        fun drawClippedEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
             var i_8 = 0
             var i_9 = i_3
             var i_10 = 0
@@ -88,12 +88,12 @@ class EllipseRasterizer(
             var i_41: Int
             var i_42: Int
             var i_43: Int
-            if (i_1 >= TextureOpRasterizer.anInt7070 && i_1 <= TextureOpRasterizer.anInt7068) {
-                val ints_39 = TextureShapeRasterizer.anIntArrayArray7072!![i_1]
-                i_40 = ArrayUtils.method4890(i_0 - i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
-                i_41 = ArrayUtils.method4890(i_0 + i_2, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
-                i_42 = ArrayUtils.method4890(i_0 - i_11, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
-                i_43 = ArrayUtils.method4890(i_0 + i_11, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
+            if (i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY) {
+                val ints_39 = TextureShapeRasterizer.pixelBuffer!![i_1]
+                i_40 = ArrayUtils.method4890(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                i_41 = ArrayUtils.method4890(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                i_42 = ArrayUtils.method4890(i_0 - i_11, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                i_43 = ArrayUtils.method4890(i_0 + i_11, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
                 ArrayUtils.setArrayValuesTo(ints_39, i_40, i_42, i_5)
                 ArrayUtils.setArrayValuesTo(ints_39, i_42, i_43, i_4)
                 ArrayUtils.setArrayValuesTo(ints_39, i_43, i_41, i_5)
@@ -151,33 +151,33 @@ class EllipseRasterizer(
                 --i_9
                 i_40 = i_1 - i_9
                 i_41 = i_9 + i_1
-                if (i_41 >= TextureOpRasterizer.anInt7070 && i_40 <= TextureOpRasterizer.anInt7068) {
-                    i_42 = ArrayUtils.method4890(i_0 + i_8, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
-                    i_43 = ArrayUtils.method4890(i_0 - i_8, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
+                if (i_41 >= TextureOpRasterizer.clipMinY && i_40 <= TextureOpRasterizer.clipMaxY) {
+                    i_42 = ArrayUtils.method4890(i_0 + i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                    i_43 = ArrayUtils.method4890(i_0 - i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
                     if (bool47) {
-                        val i_44 = ArrayUtils.method4890(i_0 + i_10, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
-                        val i_45 = ArrayUtils.method4890(i_0 - i_10, TextureOpRasterizer.anInt7071, TextureOpRasterizer.anInt7069)
+                        val i_44 = ArrayUtils.method4890(i_0 + i_10, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                        val i_45 = ArrayUtils.method4890(i_0 - i_10, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
                         var ints_46: IntArray
-                        if (i_40 >= TextureOpRasterizer.anInt7070) {
-                            ints_46 = TextureShapeRasterizer.anIntArrayArray7072!![i_40]
+                        if (i_40 >= TextureOpRasterizer.clipMinY) {
+                            ints_46 = TextureShapeRasterizer.pixelBuffer!![i_40]
                             ArrayUtils.setArrayValuesTo(ints_46, i_43, i_45, i_5)
                             ArrayUtils.setArrayValuesTo(ints_46, i_45, i_44, i_4)
                             ArrayUtils.setArrayValuesTo(ints_46, i_44, i_42, i_5)
                         }
 
-                        if (i_41 <= TextureOpRasterizer.anInt7068) {
-                            ints_46 = TextureShapeRasterizer.anIntArrayArray7072!![i_41]
+                        if (i_41 <= TextureOpRasterizer.clipMaxY) {
+                            ints_46 = TextureShapeRasterizer.pixelBuffer!![i_41]
                             ArrayUtils.setArrayValuesTo(ints_46, i_43, i_45, i_5)
                             ArrayUtils.setArrayValuesTo(ints_46, i_45, i_44, i_4)
                             ArrayUtils.setArrayValuesTo(ints_46, i_44, i_42, i_5)
                         }
                     } else {
-                        if (i_40 >= TextureOpRasterizer.anInt7070) {
-                            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_40], i_43, i_42, i_5)
+                        if (i_40 >= TextureOpRasterizer.clipMinY) {
+                            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_40], i_43, i_42, i_5)
                         }
 
-                        if (i_41 <= TextureOpRasterizer.anInt7068) {
-                            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_41], i_43, i_42, i_5)
+                        if (i_41 <= TextureOpRasterizer.clipMaxY) {
+                            ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_41], i_43, i_42, i_5)
                         }
                     }
                 }
@@ -185,7 +185,7 @@ class EllipseRasterizer(
         }
 
         @JvmStatic
-        fun method15241(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+        fun drawUnclippedEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
             var i_8 = 0
             var i_9 = i_3
             var i_10 = 0
@@ -217,7 +217,7 @@ class EllipseRasterizer(
             var i_36 = (i_3 - 1) * i_27
             var i_37 = i_30
             var i_38 = i_29 * (i_12 - 1)
-            val ints_39 = TextureShapeRasterizer.anIntArrayArray7072!![i_1]
+            val ints_39 = TextureShapeRasterizer.pixelBuffer!![i_1]
             ArrayUtils.setArrayValuesTo(ints_39, i_0 - i_2, i_0 - i_11, i_5)
             ArrayUtils.setArrayValuesTo(ints_39, i_0 - i_11, i_0 + i_11, i_4)
             ArrayUtils.setArrayValuesTo(ints_39, i_0 + i_11, i_0 + i_2, i_5)
@@ -279,22 +279,22 @@ class EllipseRasterizer(
                 if (bool40) {
                     val i_45 = i_0 + i_10
                     val i_46 = i_0 - i_10
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_41], i_44, i_46, i_5)
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_41], i_46, i_45, i_4)
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_41], i_45, i_43, i_5)
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_42], i_44, i_46, i_5)
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_42], i_46, i_45, i_4)
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_42], i_45, i_43, i_5)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_41], i_44, i_46, i_5)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_41], i_46, i_45, i_4)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_41], i_45, i_43, i_5)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_42], i_44, i_46, i_5)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_42], i_46, i_45, i_4)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_42], i_45, i_43, i_5)
                 } else {
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_41], i_44, i_43, i_5)
-                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.anIntArrayArray7072!![i_42], i_44, i_43, i_5)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_41], i_44, i_43, i_5)
+                    ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_42], i_44, i_43, i_5)
                 }
             }
         }
 
         @JvmStatic
-        fun method12838(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-            if (i_0 - i_2 >= TextureOpRasterizer.anInt7071 && i_0 + i_2 <= TextureOpRasterizer.anInt7069 && i_1 - i_2 >= TextureOpRasterizer.anInt7070 && i_2 + i_1 <= TextureOpRasterizer.anInt7068) {
+        fun drawCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
+            if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_2 >= TextureOpRasterizer.clipMinY && i_2 + i_1 <= TextureOpRasterizer.clipMaxY) {
                 ArrayUtils.method2637(i_0, i_1, i_2, i_3, i_4, i_5)
             } else {
                 ArrayUtils.method1174(i_0, i_1, i_2, i_3, i_4, i_5)
@@ -302,13 +302,13 @@ class EllipseRasterizer(
         }
 
         @JvmStatic
-        fun method5316(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+        fun drawEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
             if (i_3 == i_2) {
-                method12838(i_0, i_1, i_2, i_4, i_5, i_6)
-            } else if (i_0 - i_2 >= TextureOpRasterizer.anInt7071 && i_0 + i_2 <= TextureOpRasterizer.anInt7069 && i_1 - i_3 >= TextureOpRasterizer.anInt7070 && i_3 + i_1 <= TextureOpRasterizer.anInt7068) {
-                method15241(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
+                drawCircle(i_0, i_1, i_2, i_4, i_5, i_6)
+            } else if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_3 >= TextureOpRasterizer.clipMinY && i_3 + i_1 <= TextureOpRasterizer.clipMaxY) {
+                drawUnclippedEllipse(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
             } else {
-                method6824(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
+                drawClippedEllipse(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
             }
         }
     }

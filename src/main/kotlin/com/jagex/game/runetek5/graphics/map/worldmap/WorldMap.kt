@@ -47,10 +47,10 @@ object WorldMap {
     var staticElement: WorldMapElement? = null
 
     @JvmField
-    var aByteArrayArrayArray3464: Array<Array<ByteArray?>>? = null
+    var tileShapePatterns: Array<Array<ByteArray?>>? = null
 
     @JvmField
-    var anInt3469 = 0
+    var halfZoomLevel = 0
 
     @JvmField
     var staticElements: StaticElements? = null
@@ -86,28 +86,28 @@ object WorldMap {
     var PLAYER_VAR_PROVIDER: VarDomain? = null
 
     @JvmField
-    var anInt3485 = 0
+    var tileViewStartX = 0
 
     @JvmField
-    var anInt3486 = 0
+    var tileViewEndY = 0
 
     @JvmField
-    var anInt3480 = 0
+    var tileViewEndX = 0
 
     @JvmField
-    var anInt3465 = 0
+    var tileViewStartY = 0
 
     @JvmField
-    var anInt3489 = 0
+    var pixelViewStartX = 0
 
     @JvmField
-    var anInt3490 = 0
+    var pixelViewStartY = 0
 
     @JvmField
-    var anInt3476 = 0
+    var pixelViewEndX = 0
 
     @JvmField
-    var anInt3492 = 0
+    var pixelViewEndY = 0
 
     @JvmField
     val WORLDMAP_DEFS = IterableNodeMap<WorldMapElement>(16)
@@ -131,7 +131,7 @@ object WorldMap {
     var overlayIds: ByteArray? = null
 
     @JvmField
-    var aByteArray3487: ByteArray? = null
+    var tileShapeAndRotations: ByteArray? = null
 
     @JvmField
     var tileDrawInfo: Array<Any?>? = null
@@ -149,7 +149,7 @@ object WorldMap {
     var underlayRgbColors: ByteArray? = null
 
     @JvmField
-    var aShortArray3479: ShortArray? = null
+    var underlayGreenBlue: ShortArray? = null
 
     @JvmField
     var worldmapComponent: Component? = null
@@ -188,7 +188,7 @@ object WorldMap {
     fun initialize() {
         underlayIds = ByteArray(mapSizeX * mapSizeY)
         overlayIds = ByteArray(mapSizeX * mapSizeY)
-        aByteArray3487 = ByteArray(mapSizeX * mapSizeY)
+        tileShapeAndRotations = ByteArray(mapSizeX * mapSizeY)
         tileDrawInfo = arrayOfNulls(mapSizeX * mapSizeY)
         shapesAndRotations = ByteArray(mapSizeX * mapSizeY)
         worldMapTiles = Array(3) { Array(mapSizeX shr 6) { arrayOfNulls<ArrayList<TileOnWorldMap>?>(mapSizeY shr 6) } }
@@ -220,35 +220,35 @@ object WorldMap {
 
     @JvmStatic
     fun renderMap(toolkit: AbstractToolkit, i_1: Int, i_2: Int) {
-        var i_5 = anInt3480 - anInt3485
-        var i_6 = anInt3486 - anInt3465
-        if (anInt3480 < mapSizeX) {
+        var i_5 = tileViewEndX - tileViewStartX
+        var i_6 = tileViewEndY - tileViewStartY
+        if (tileViewEndX < mapSizeX) {
             i_5++
         }
 
-        if (anInt3486 < mapSizeY) {
+        if (tileViewEndY < mapSizeY) {
             i_6++
         }
 
         for (i_7 in 0 until i_5) {
-            val startX = (i_7 * i_1 shr 16) + anInt3489
-            val endX = ((i_7 + 1) * i_1 shr 16) + anInt3489
+            val startX = (i_7 * i_1 shr 16) + pixelViewStartX
+            val endX = ((i_7 + 1) * i_1 shr 16) + pixelViewStartX
             val width = endX - startX
             if (width > 0) {
-                val i_11 = i_7 + anInt3485
+                val i_11 = i_7 + tileViewStartX
                 if (i_11 >= 0 && i_11 < mapSizeX) {
                     for (i_12 in 0 until i_6) {
-                        val startY = anInt3492 - (i_2 * (i_12 + 1) shr 16)
-                        val endY = anInt3492 - (i_12 * i_2 shr 16)
+                        val startY = pixelViewEndY - (i_2 * (i_12 + 1) shr 16)
+                        val endY = pixelViewEndY - (i_12 * i_2 shr 16)
                         val height = endY - startY
                         if (height > 0) {
-                            val i_16 = i_12 + anInt3465
+                            val i_16 = i_12 + tileViewStartY
                             val tileIndex = i_11 + i_16 * mapSizeX
                             var underlayColor = 0
                             var overlayId = 0
                             var drawnTile: Any? = null
                             if (i_16 >= 0 && i_16 < mapSizeY) {
-                                underlayColor = (underlayRgbColors!![tileIndex].toInt() and 0xff shl 16) or (aShortArray3479!![tileIndex].toInt() and 0xffff)
+                                underlayColor = (underlayRgbColors!![tileIndex].toInt() and 0xff shl 16) or (underlayGreenBlue!![tileIndex].toInt() and 0xffff)
                                 if (underlayColor != 0) {
                                     underlayColor = underlayColor or 0xff000000.toInt()
                                 }
@@ -260,7 +260,7 @@ object WorldMap {
                             if (underlayColor == 0 && overlayId == 0 && drawnTile == null) {
                                 underlayColor = if (staticElement!!.color != -1) {
                                     0xff000000.toInt() or staticElement!!.color
-                                } else if (i_7 + anInt3485 and 0x4 != i_12 + anInt3486 and 0x4) {
+                                } else if (i_7 + tileViewStartX and 0x4 != i_12 + tileViewEndY and 0x4) {
                                     -11840664
                                 } else {
                                     overlayFloorColors!![FLOTYPE_LIST!!.lastLoadedOverlayId + 1]
@@ -275,7 +275,7 @@ object WorldMap {
                                 if (drawnTile is LocOnWorldMap) {
                                     renderTile(
                                         toolkit, startX, startY, width, height, underlayColor, overlayId,
-                                        aByteArray3487!![tileIndex].toInt(), drawnTile.locIds, drawnTile.shapeAndRotation, true
+                                        tileShapeAndRotations!![tileIndex].toInt(), drawnTile.locIds, drawnTile.shapeAndRotation, true
                                     )
                                 } else {
                                     val locId = drawnTile as Int
@@ -283,25 +283,25 @@ object WorldMap {
                                     SHAPE_AND_ROTATION_ON_TILE[0] = shapesAndRotations!![tileIndex]
                                     renderTile(
                                         toolkit, startX, startY, width, height, underlayColor, overlayId,
-                                        aByteArray3487!![tileIndex].toInt(), LOC_ON_TILE, SHAPE_AND_ROTATION_ON_TILE, true
+                                        tileShapeAndRotations!![tileIndex].toInt(), LOC_ON_TILE, SHAPE_AND_ROTATION_ON_TILE, true
                                     )
                                 }
                             } else {
                                 renderTile(
                                     toolkit, startX, startY, width, height, underlayColor, overlayId,
-                                    aByteArray3487!![tileIndex].toInt(), null, null, true
+                                    tileShapeAndRotations!![tileIndex].toInt(), null, null, true
                                 )
                             }
                         }
                     }
                 } else {
                     for (i_12 in 0 until i_6) {
-                        val i_13 = anInt3492 - (i_2 * (i_12 + 1) shr 16)
-                        val i_14 = anInt3492 - (i_12 * i_2 shr 16)
+                        val i_13 = pixelViewEndY - (i_2 * (i_12 + 1) shr 16)
+                        val i_14 = pixelViewEndY - (i_12 * i_2 shr 16)
                         val i_15 = i_14 - i_13
                         var overlayFloorColor = if (staticElement!!.color != -1) {
                             0xff000000.toInt() or staticElement!!.color
-                        } else if (i_7 + anInt3485 and 0x4 != i_12 + anInt3486 and 0x4) {
+                        } else if (i_7 + tileViewStartX and 0x4 != i_12 + tileViewEndY and 0x4) {
                             -11840664
                         } else {
                             overlayFloorColors!![FLOTYPE_LIST!!.lastLoadedOverlayId + 1]
@@ -318,18 +318,18 @@ object WorldMap {
         }
 
         for (i_7 in -16 until i_5 + 16) {
-            val i_8 = (i_7 * i_1 shr 16) + anInt3489
-            val i_9 = ((i_7 + 1) * i_1 shr 16) + anInt3489
+            val i_8 = (i_7 * i_1 shr 16) + pixelViewStartX
+            val i_9 = ((i_7 + 1) * i_1 shr 16) + pixelViewStartX
             val i_10 = i_9 - i_8
             if (i_10 > 0) {
-                val i_11 = i_7 + anInt3485
+                val i_11 = i_7 + tileViewStartX
                 if (i_11 >= 0 && i_11 < mapSizeX) {
                     for (i_12 in -16 until i_6 + 16) {
-                        val i_13 = anInt3492 - (i_2 * (i_12 + 1) shr 16)
-                        val i_14 = anInt3492 - (i_12 * i_2 shr 16)
+                        val i_13 = pixelViewEndY - (i_2 * (i_12 + 1) shr 16)
+                        val i_14 = pixelViewEndY - (i_12 * i_2 shr 16)
                         val i_15 = i_14 - i_13
                         if (i_15 > 0) {
-                            val i_16 = i_12 + anInt3465
+                            val i_16 = i_12 + tileViewStartY
                             if (i_16 >= 0 && i_16 < mapSizeY) {
                                 val object26 = tileDrawInfo!![i_11 + i_16 * mapSizeX]
                                 if (object26 != null) {
@@ -351,8 +351,8 @@ object WorldMap {
             }
         }
 
-        var startX = anInt3485 shr 6
-        var startY = anInt3465 shr 6
+        var startX = tileViewStartX shr 6
+        var startY = tileViewStartY shr 6
         if (startX < 0) {
             startX = 0
         }
@@ -361,8 +361,8 @@ object WorldMap {
             startY = 0
         }
 
-        var endX = anInt3480 shr 6
-        var endY = anInt3486 shr 6
+        var endX = tileViewEndX shr 6
+        var endY = tileViewEndY shr 6
         if (endX >= worldMapTiles!![0].size) {
             endX = worldMapTiles!![0].size - 1
         }
@@ -382,12 +382,12 @@ object WorldMap {
 
                         while (tilesIt.hasNext()) {
                             val tile = tilesIt.next()
-                            val i_19 = i_15 + tile.mapsquarePosX - mapSquareAbsX - anInt3485
-                            val i_28 = i_16 + tile.mapsquarePosY - mapSquareAbsY - anInt3465
-                            val i_21 = (i_19 * i_1 shr 16) + anInt3489
-                            val i_22 = ((i_19 + 1) * i_1 shr 16) + anInt3489
-                            val i_23 = anInt3492 - (i_2 * (i_28 + 1) shr 16)
-                            val i_24 = anInt3492 - (i_28 * i_2 shr 16)
+                            val i_19 = i_15 + tile.mapsquarePosX - mapSquareAbsX - tileViewStartX
+                            val i_28 = i_16 + tile.mapsquarePosY - mapSquareAbsY - tileViewStartY
+                            val i_21 = (i_19 * i_1 shr 16) + pixelViewStartX
+                            val i_22 = ((i_19 + 1) * i_1 shr 16) + pixelViewStartX
+                            val i_23 = pixelViewEndY - (i_2 * (i_28 + 1) shr 16)
+                            val i_24 = pixelViewEndY - (i_28 * i_2 shr 16)
                             renderTile(
                                 toolkit, i_21, i_23, i_22 - i_21, i_24 - i_23, tile.underlayIdOrColor, (tile.overlayId.toInt() and 0xff),
                                 tile.tileShapeAndRotation.toInt(), tile.locIds, tile.shapeAndRotations, false
@@ -407,12 +407,12 @@ object WorldMap {
 
                         while (tilesIt.hasNext()) {
                             val class26932 = tilesIt.next()
-                            val i_19 = absX + class26932.mapsquarePosX - mapSquareAbsX - anInt3485
-                            val i_28 = absY + class26932.mapsquarePosY - mapSquareAbsY - anInt3465
-                            val i_21 = (i_19 * i_1 shr 16) + anInt3489
-                            val i_22 = ((i_19 + 1) * i_1 shr 16) + anInt3489
-                            val i_23 = anInt3492 - (i_2 * (i_28 + 1) shr 16)
-                            val i_24 = anInt3492 - (i_28 * i_2 shr 16)
+                            val i_19 = absX + class26932.mapsquarePosX - mapSquareAbsX - tileViewStartX
+                            val i_28 = absY + class26932.mapsquarePosY - mapSquareAbsY - tileViewStartY
+                            val i_21 = (i_19 * i_1 shr 16) + pixelViewStartX
+                            val i_22 = ((i_19 + 1) * i_1 shr 16) + pixelViewStartX
+                            val i_23 = pixelViewEndY - (i_2 * (i_28 + 1) shr 16)
+                            val i_24 = pixelViewEndY - (i_28 * i_2 shr 16)
                             renderObjectSprites(toolkit, i_21, i_23, i_22 - i_21, i_24 - i_23, class26932.locIds, class26932.shapeAndRotations)
                         }
                     }
@@ -429,16 +429,16 @@ object WorldMap {
     }
 
     @JvmStatic
-    fun method5135(): NodeCollection {
-        val i_1 = anInt3480 - anInt3485
-        val i_2 = anInt3486 - anInt3465
-        val i_3 = (anInt3476 - anInt3489 shl 16) / i_1
-        val i_4 = (anInt3492 - anInt3490 shl 16) / i_2
-        return method5179(i_3, i_4)
+    fun getViewportCategories(): NodeCollection {
+        val i_1 = tileViewEndX - tileViewStartX
+        val i_2 = tileViewEndY - tileViewStartY
+        val i_3 = (pixelViewEndX - pixelViewStartX shl 16) / i_1
+        val i_4 = (pixelViewEndY - pixelViewStartY shl 16) / i_2
+        return positionAllCategories(i_3, i_4)
     }
 
     @JvmStatic
-    fun method5136() {
+    fun buildMapCategories() {
         for (x in 0 until mapSizeX) {
             for (y in 0 until mapSizeY) {
                 val drawInfo = tileDrawInfo!![x + y * mapSizeX]
@@ -531,9 +531,9 @@ object WorldMap {
     fun reset() {
         underlayIds = null
         underlayRgbColors = null
-        aShortArray3479 = null
+        underlayGreenBlue = null
         overlayIds = null
-        aByteArray3487 = null
+        tileShapeAndRotations = null
         tileDrawInfo = null
         shapesAndRotations = null
         worldMapTiles = null
@@ -541,15 +541,15 @@ object WorldMap {
     }
 
     @JvmStatic
-    fun method5139(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
-        anInt3485 = i_0 - mapSquareAbsX
-        anInt3486 = i_1 - mapSquareAbsY
-        anInt3480 = i_2 - mapSquareAbsX
-        anInt3465 = i_3 - mapSquareAbsY
-        anInt3489 = i_4
-        anInt3490 = i_5
-        anInt3476 = i_6
-        anInt3492 = i_7
+    fun setViewportBounds(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
+        tileViewStartX = i_0 - mapSquareAbsX
+        tileViewEndY = i_1 - mapSquareAbsY
+        tileViewEndX = i_2 - mapSquareAbsX
+        tileViewStartY = i_3 - mapSquareAbsY
+        pixelViewStartX = i_4
+        pixelViewStartY = i_5
+        pixelViewEndX = i_6
+        pixelViewEndY = i_7
     }
 
     @JvmStatic
@@ -574,7 +574,7 @@ object WorldMap {
                 if (shape != 0 && width > 1 && height > 1) {
                     val clearType = if (clearPixels) 0 else 1
                     renderWorldmapTile(
-                        toolkit, aByteArrayArrayArray3464!!, anInt3469, x, y, underlayColor,
+                        toolkit, tileShapePatterns!!, halfZoomLevel, x, y, underlayColor,
                         overlayFloorColors!![overlayId], width, height, shape, tileShapeAndRotation shr 6 and 0x3, clearType
                     )
                 } else {
@@ -678,20 +678,20 @@ object WorldMap {
     }
 
     @JvmStatic
-    fun method5146(class282Sub361: WorldMapCategory, i_2: Int, i_3: Int) {
-        class282Sub361.anInt7990 = (i_2 * (class282Sub361.absX - anInt3485) shr 16) + anInt3489
-        class282Sub361.anInt7992 = anInt3492 - (i_3 * (class282Sub361.absY - anInt3465) shr 16)
+    fun positionCategory(class282Sub361: WorldMapCategory, i_2: Int, i_3: Int) {
+        class282Sub361.anInt7990 = (i_2 * (class282Sub361.absX - tileViewStartX) shr 16) + pixelViewStartX
+        class282Sub361.anInt7992 = pixelViewEndY - (i_3 * (class282Sub361.absY - tileViewStartY) shr 16)
     }
 
     @JvmStatic
-    fun method5147(toolkit: AbstractToolkit, worldMapCategory: WorldMapCategory, mectype: MECType) {
+    fun renderCategoryLines(toolkit: AbstractToolkit, worldMapCategory: WorldMapCategory, mectype: MECType) {
         if (mectype.offsets != null) {
             val positioning = IntArray(mectype.offsets!!.size)
             for (i_4 in 0 until positioning.size / 2) {
                 val i_5 = mectype.offsets!![i_4 * 2] + worldMapCategory.absX
                 val i_6 = worldMapCategory.absY + mectype.offsets!![i_4 * 2 + 1]
-                positioning[i_4 * 2] = anInt3489 + (anInt3476 - anInt3489) * (i_5 - anInt3485) / (anInt3480 - anInt3485)
-                positioning[i_4 * 2 + 1] = anInt3492 - (anInt3492 - anInt3490) * (i_6 - anInt3465) / (anInt3486 - anInt3465)
+                positioning[i_4 * 2] = pixelViewStartX + (pixelViewEndX - pixelViewStartX) * (i_5 - tileViewStartX) / (tileViewEndX - tileViewStartX)
+                positioning[i_4 * 2 + 1] = pixelViewEndY - (pixelViewEndY - pixelViewStartY) * (i_6 - tileViewStartY) / (tileViewEndY - tileViewStartY)
             }
 
             WorldMapRasterManager.method2471(toolkit, positioning, mectype.lineColor)
@@ -764,7 +764,7 @@ object WorldMap {
                     overlayIds!![y * mapSizeX + x] = 0
                 } else {
                     overlayIds!![y * mapSizeX + x] = i_10.toByte()
-                    aByteArray3487!![y * mapSizeX + x] = 0
+                    tileShapeAndRotations!![y * mapSizeX + x] = 0
                     underlayIds!![y * mapSizeX + x] = buffer.readByte()
                 }
             }
@@ -792,7 +792,7 @@ object WorldMap {
                 if (tileType == 0) {
                     underlayIds!![y * mapSizeX + x] = underlay.toByte()
                     overlayIds!![y * mapSizeX + x] = overlay.toByte()
-                    aByteArray3487!![y * mapSizeX + x] = tileRotationAndShape.toByte()
+                    tileShapeAndRotations!![y * mapSizeX + x] = tileRotationAndShape.toByte()
                     if (locCount == 1) {
                         tileDrawInfo!![y * mapSizeX + x] = buffer.readBigSmart()
                         shapesAndRotations!![y * mapSizeX + x] = buffer.readByte()
@@ -924,10 +924,10 @@ object WorldMap {
     }
 
     @JvmStatic
-    fun method5179(i_1: Int, i_2: Int): NodeCollection {
+    fun positionAllCategories(i_1: Int, i_2: Int): NodeCollection {
         var class282Sub365 = worldMapCategories.getFirst() as? WorldMapCategory
         while (class282Sub365 != null) {
-            method5146(class282Sub365, i_1, i_2)
+            positionCategory(class282Sub365, i_1, i_2)
             class282Sub365 = worldMapCategories.next() as? WorldMapCategory
         }
 
@@ -936,15 +936,15 @@ object WorldMap {
 
     @JvmStatic
     fun renderMap(graphicalrenderer0: AbstractToolkit) {
-        val i_1 = anInt3480 - anInt3485
-        val i_2 = anInt3486 - anInt3465
-        val i_3 = (anInt3476 - anInt3489 shl 16) / i_1
-        val i_4 = (anInt3492 - anInt3490 shl 16) / i_2
+        val i_1 = tileViewEndX - tileViewStartX
+        val i_2 = tileViewEndY - tileViewStartY
+        val i_3 = (pixelViewEndX - pixelViewStartX shl 16) / i_1
+        val i_4 = (pixelViewEndY - pixelViewStartY shl 16) / i_2
         renderMap(graphicalrenderer0, i_3, i_4)
     }
 
     @JvmStatic
-    fun method5183(i_1: Int, i_2: Int) {
+    fun loadMapTileData(i_1: Int, i_2: Int) {
         val buffer = Packet(MAP_AREA_RESOURCE!!.getNamedFile(staticElement!!.filenamePrefix, "area")!!)
         val i_4 = buffer.readUByte()
         val ints_5 = IntArray(i_4)
@@ -992,7 +992,7 @@ object WorldMap {
             }
 
             underlayRgbColors = ByteArray(mapSizeX * mapSizeY)
-            aShortArray3479 = ShortArray(mapSizeX * mapSizeY)
+            underlayGreenBlue = ShortArray(mapSizeX * mapSizeY)
 
             for (plane in 0..2) {
                 val underlays = ByteArray(mapSizeX * mapSizeY)
@@ -1008,7 +1008,7 @@ object WorldMap {
                     }
                 }
 
-                decodeUnderlayColors(underlays, underlayRgbColors!!, aShortArray3479!!, i_1, i_2)
+                decodeUnderlayColors(underlays, underlayRgbColors!!, underlayGreenBlue!!, i_1, i_2)
 
                 for (i_11 in 0 until worldMapTiles!![plane].size) {
                     for (i_12 in 0 until worldMapTiles!![plane][0].size) {
@@ -1016,7 +1016,7 @@ object WorldMap {
                         if (arraylist19 != null) {
                             for (tile in arraylist19) {
                                 val i_16 = i_11 * 64 + tile.mapsquarePosX + (i_12 * 64 + tile.mapsquarePosY) * mapSizeX
-                                tile.underlayIdOrColor = (underlayRgbColors!![i_16].toInt() and 0xff shl 16) or (aShortArray3479!![i_16].toInt() and 0xffff)
+                                tile.underlayIdOrColor = (underlayRgbColors!![i_16].toInt() and 0xff shl 16) or (underlayGreenBlue!![i_16].toInt() and 0xffff)
                                 if (tile.underlayIdOrColor != 0) {
                                     tile.underlayIdOrColor = tile.underlayIdOrColor or 0xff000000.toInt()
                                 }
@@ -1026,9 +1026,9 @@ object WorldMap {
                 }
             }
 
-            decodeUnderlayColors(underlayIds!!, underlayRgbColors!!, aShortArray3479!!, i_1, i_2)
+            decodeUnderlayColors(underlayIds!!, underlayRgbColors!!, underlayGreenBlue!!, i_1, i_2)
             underlayIds = null
-            method5136()
+            buildMapCategories()
             return
         }
     }
@@ -1160,14 +1160,14 @@ object WorldMap {
     }
 
     @JvmStatic
-    fun method11595(): WorldMapCategory? {
-        var category = WorldMapSub1.aClass4608030.next() as? WorldMapCategory
+    fun getNextActiveCategory(): WorldMapCategory? {
+        var category = WorldMapSub1.categoryIterator.next() as? WorldMapCategory
         while (category != null) {
             val mecType = MECTYPE_LIST!!.list(category.mecId)
             if (mecType != null && mecType.visible && mecType.shouldDraw(PLAYER_VAR_PROVIDER!!)) {
                 return category
             }
-            category = WorldMapSub1.aClass4608030.next() as? WorldMapCategory
+            category = WorldMapSub1.categoryIterator.next() as? WorldMapCategory
         }
         return null
     }
@@ -1187,17 +1187,17 @@ object WorldMap {
             toolkit.drawFilledRectangle(centerX - 150, centerY + 2, ComponentMinimap.mapAssetLoadingPercentage * 3, 30, Client.DEBUG_LOAD_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), 0)
             MiniMenu.minimenuHeader!!.renderCentered(LocalizedText.LOADING.translate(Client.CURRENT_LANGUAGE!!), centerX, b_7 + centerY, Client.DEBUG_TEXT_COLOR[Client.DEBUG_DISPLAY_COLOR_INDEX]!!.getRGB(), -1)
         } else {
-            val i_17 = WorldMapSub1.anInt5123 - (width / mapZoom).toInt()
-            val i_8 = (height / mapZoom).toInt() + WorldMapSub1.anInt5624
-            val i_9 = (width / mapZoom).toInt() + WorldMapSub1.anInt5123
-            val i_10 = WorldMapSub1.anInt5624 - (height / mapZoom).toInt()
-            DebugDisplay.anInt3991 = WorldMapSub1.anInt5123 - (width / mapZoom).toInt()
-            WorldMapSub1.anInt5765 = WorldMapSub1.anInt5624 - (height / mapZoom).toInt()
+            val i_17 = WorldMapSub1.mapCenterX - (width / mapZoom).toInt()
+            val i_8 = (height / mapZoom).toInt() + WorldMapSub1.mapCenterY
+            val i_9 = (width / mapZoom).toInt() + WorldMapSub1.mapCenterX
+            val i_10 = WorldMapSub1.mapCenterY - (height / mapZoom).toInt()
+            DebugDisplay.anInt3991 = WorldMapSub1.mapCenterX - (width / mapZoom).toInt()
+            WorldMapSub1.viewBottomTileY = WorldMapSub1.mapCenterY - (height / mapZoom).toInt()
             StaticMethods.anInt5760 = ((width * 2) / mapZoom).toInt()
             ComponentMinimap.anInt4097 = ((height * 2) / mapZoom).toInt()
-            method5139(i_17 + mapSquareAbsX, i_8 + mapSquareAbsY, i_9 + mapSquareAbsX, i_10 + mapSquareAbsY, left, top, left + width, top + height + 1)
+            setViewportBounds(i_17 + mapSquareAbsX, i_8 + mapSquareAbsY, i_9 + mapSquareAbsX, i_10 + mapSquareAbsY, left, top, left + width, top + height + 1)
             renderMap(toolkit)
-            val nodecollection11 = method5135()
+            val nodecollection11 = getViewportCategories()
             WorldMapSub1.renderInformation(toolkit, nodecollection11)
             if (JSObjectManager.anInt4185 > 0) {
                 if (--ServerEnvironment.anInt9282 == 0) {

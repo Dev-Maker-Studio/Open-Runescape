@@ -64,6 +64,33 @@
 - **Loading bar**: TipRenderDetails constants, decoder functions
 - **CreateAccountRequest + AccountCreationStage**: fields, methods, enum constants
 - **Shadow/WorldMap/UI/Fonts/StaticMethods/ArrayUtils/Utils/PacketEncoder**: ~75 methods + 30 fields
+- **Texture Operations (COMPLETE)**: All fields + methods in `config/material/texture/operation/` deobfuscated
+  - 29 TextureOp files + 5 rasterizer files, ~130 field renames + ~25 method renames
+  - TextureShapeRasterizer: fillColor, strokeColor, strokeWidth, pixelBuffer, drawFilled/Stroked/FilledAndStroked, drawLine, drawVerticalLine, drawClippedVerticalLine
+  - TextureOpRasterizer: clipMinX/Y, clipMaxX/Y, rasterizeShapes, setClipBounds
+  - EllipseRasterizer: centerX/Y, radiusX/Y, drawClipped/UnclippedEllipse, drawCircle, drawEllipse
+  - BezierCurveRasterizer: controlX0-3/controlY0-3, drawBresenhamLine, drawClipped/UnclippedBezier, drawBezierCurve
+  - LineRasterizer: startX/Y, endX/Y
+  - RectangleRasterizer: left, top, right, bottom, drawStrokedRectangle, drawClipped/UnclippedStrokedRectangle
+  - TextureOpIrregularBricks.backgroundColor: cross-referenced from CS2Interpreter + NativeSprite (NOT unused!)
+  - Remaining external refs (outside scope): StaticMethods.anInt118 (Voronoi F2 distance), TextureRaster.anInt3678
+- **WorldMapSub1 (COMPLETE own fields/methods)**: 14 fields + 6 methods renamed
+  - mapCenterX/Y, scrollTargetX/Y, requestedScrollX/Y, useTargetPosition, pendingMapElementId
+  - viewBottomTileY, hideIcons, highlightedCategoryId, hiddenMecIds, hiddenCategoryIds, categoryIterator
+  - clampMapCenter, setMapCenterX, setMapCenterY, highlightCategory, renderOffscreenIndicator, getFirstActiveCategory
+- **WorldMap.kt (COMPLETE own fields/methods)**: 12 fields + 8 methods renamed
+  - tileViewStart/EndX/Y, pixelViewStart/EndX/Y, tileShapeAndRotations, underlayGreenBlue, halfZoomLevel, tileShapePatterns
+  - getViewportCategories, buildMapCategories, setViewportBounds, positionCategory, renderCategoryLines, positionAllCategories, loadMapTileData, getNextActiveCategory
+- **BasType.kt (COMPLETE)**: 13 fields (yaw/roll/pitch accel/maxVelocity/targetAngle, modelWidth/Length, hillRotateX/Z, iconHeightOverride)
+- **GroundItem.kt**: tileHeightOffset
+- **PathingEntity.kt**: 4 fields + 5 methods (overhead sprites, ground contour, stalled steps, walk speed, equipment overrides, overhead interface)
+- **PlayerUpdate.kt**: 4 fields + 5 methods (inactive/update mask player indices, hint details, var change, entity priorities, entity positioning)
+- **PlayerEntity.kt**: 2 bools (hasPendingPositionUpdate, shouldSuppressMovingAnimation)
+- **CutsceneActionType.kt (COMPLETE)**: 16 constants renamed (PLAY_SONG/SYNTH/JINGLE/VORBIS, FADE_SCREEN, TILE_MESSAGE, POSITIONED_GFX, PROJECTILE_*, SET_VARIABLE, SET_BIT_VARIABLE, EXECUTE_SCRIPT, FINISHED, UNUSED_43)
+- **Component/InterfaceRenderer/InterfaceComponentRenderer (COMPLETE)**: All own obfuscated identifiers renamed
+  - Component.kt: 35 fields (event hooks, params, tick trackers, drag settings, video ID), 7 methods, 1 enum
+  - InterfaceRenderer.kt: 3 fields (worldMapDragStartY, dragTickCount, translatedUptext), 1 method (startDragging)
+  - InterfaceComponentRenderer.kt: 6 fields (deferredDrag*, chatDisplay*), 2 methods (setChatDisplay, drawMinimapText)
 
 ## Lessons Learned
 
@@ -81,6 +108,8 @@
 - **Stale TAR artifacts**: Use `./gradlew clean build` to resolve incremental build issues.
 - **CS2 opcode names are strongest evidence** for field naming.
 - **ShaderAttribute init block** reads from decoder: renaming decoder fields requires updating init block references.
+- **Edit tool replace_all does substring match**: `UnkSetting1` replace matched `anUnkSetting11` producing `anDragType1`. Always verify composite identifiers after bulk replace.
+- **Companion static fields may be cross-referenced from unrelated classes**: anInt9792 in TextureOpIrregularBricks was used by CS2Interpreter and NativeSprite as a backgroundColor. Always grep the ENTIRE codebase for companion field references before assuming "unused".
 
 ## Remaining Uncertain Fields (deliberately left obfuscated)
 

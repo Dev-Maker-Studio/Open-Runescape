@@ -3,55 +3,55 @@ package com.jagex.game.runetek5.config.material.texture.operation
 import com.jagex.game.runetek5.utils.ArrayUtils
 
 abstract class TextureShapeRasterizer(
-    @JvmField val anInt1743: Int,
-    @JvmField val anInt1741: Int,
-    @JvmField val anInt1742: Int
+    @JvmField val fillColor: Int,
+    @JvmField val strokeColor: Int,
+    @JvmField val strokeWidth: Int
 ) {
 
-    abstract fun method2556(var1: Int, var2: Int)
+    abstract fun drawFilled(var1: Int, var2: Int)
 
-    abstract fun method2557(var1: Int, var2: Int)
+    abstract fun drawFilledAndStroked(var1: Int, var2: Int)
 
-    abstract fun method2561(var1: Int, var2: Int)
+    abstract fun drawStroked(var1: Int, var2: Int)
 
     companion object {
         @JvmField
-        var anIntArrayArray7072: Array<IntArray>? = null
+        var pixelBuffer: Array<IntArray>? = null
 
         @JvmStatic
-        fun method13411(x: Int, y1: Int, y2: Int, color: Int) {
+        fun drawVerticalLine(x: Int, y1: Int, y2: Int, color: Int) {
             var y: Int
             if (y1 > y2) {
                 y = y2
                 while (y < y1) {
-                    anIntArrayArray7072!![y][x] = color
+                    pixelBuffer!![y][x] = color
                     y++
                 }
             } else {
                 y = y1
                 while (y < y2) {
-                    anIntArrayArray7072!![y][x] = color
+                    pixelBuffer!![y][x] = color
                     y++
                 }
             }
         }
 
         @JvmStatic
-        fun method12746(x: Int, y1: Int, y2: Int, color: Int) {
-            if (x >= TextureOpRasterizer.anInt7071 && x <= TextureOpRasterizer.anInt7069) {
-                val clampedY1 = ArrayUtils.method4890(y1, TextureOpRasterizer.anInt7070, TextureOpRasterizer.anInt7068)
-                val clampedY2 = ArrayUtils.method4890(y2, TextureOpRasterizer.anInt7070, TextureOpRasterizer.anInt7068)
-                method13411(x, clampedY1, clampedY2, color)
+        fun drawClippedVerticalLine(x: Int, y1: Int, y2: Int, color: Int) {
+            if (x >= TextureOpRasterizer.clipMinX && x <= TextureOpRasterizer.clipMaxX) {
+                val clampedY1 = ArrayUtils.method4890(y1, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+                val clampedY2 = ArrayUtils.method4890(y2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+                drawVerticalLine(x, clampedY1, clampedY2, color)
             }
         }
 
         @JvmStatic
-        fun method6159(x1: Int, y1: Int, x2: Int, y2: Int, color: Int) {
+        fun drawLine(x1: Int, y1: Int, x2: Int, y2: Int, color: Int) {
             val deltaX = x2 - x1
             val deltaY = y2 - y1
             if (deltaX == 0) {
                 if (deltaY != 0) {
-                    method12746(x1, y1, y2, color)
+                    drawClippedVerticalLine(x1, y1, y2, color)
                 }
             } else if (deltaY == 0) {
                 ArrayUtils.method11250(x1, x2, y1, color)
@@ -60,47 +60,47 @@ abstract class TextureShapeRasterizer(
                 val intercept = y1 - (x1 * slope shr 12)
                 val startX: Int
                 val startY: Int
-                if (x1 < TextureOpRasterizer.anInt7071) {
-                    startY = (slope * TextureOpRasterizer.anInt7071 shr 12) + intercept
-                    startX = TextureOpRasterizer.anInt7071
-                } else if (x1 > TextureOpRasterizer.anInt7069) {
-                    startY = (slope * TextureOpRasterizer.anInt7069 shr 12) + intercept
-                    startX = TextureOpRasterizer.anInt7069
+                if (x1 < TextureOpRasterizer.clipMinX) {
+                    startY = (slope * TextureOpRasterizer.clipMinX shr 12) + intercept
+                    startX = TextureOpRasterizer.clipMinX
+                } else if (x1 > TextureOpRasterizer.clipMaxX) {
+                    startY = (slope * TextureOpRasterizer.clipMaxX shr 12) + intercept
+                    startX = TextureOpRasterizer.clipMaxX
                 } else {
                     startY = y1
                     startX = x1
                 }
                 val endX: Int
                 val endY: Int
-                if (x2 < TextureOpRasterizer.anInt7071) {
-                    endY = (slope * TextureOpRasterizer.anInt7071 shr 12) + intercept
-                    endX = TextureOpRasterizer.anInt7071
-                } else if (x2 > TextureOpRasterizer.anInt7069) {
-                    endY = (slope * TextureOpRasterizer.anInt7069 shr 12) + intercept
-                    endX = TextureOpRasterizer.anInt7069
+                if (x2 < TextureOpRasterizer.clipMinX) {
+                    endY = (slope * TextureOpRasterizer.clipMinX shr 12) + intercept
+                    endX = TextureOpRasterizer.clipMinX
+                } else if (x2 > TextureOpRasterizer.clipMaxX) {
+                    endY = (slope * TextureOpRasterizer.clipMaxX shr 12) + intercept
+                    endX = TextureOpRasterizer.clipMaxX
                 } else {
                     endY = y2
                     endX = x2
                 }
                 var clampedStartY = startY
                 var clampedStartX = startX
-                if (clampedStartY < TextureOpRasterizer.anInt7070) {
-                    clampedStartY = TextureOpRasterizer.anInt7070
-                    clampedStartX = (TextureOpRasterizer.anInt7070 - intercept shl 12) / slope
-                } else if (clampedStartY > TextureOpRasterizer.anInt7068) {
-                    clampedStartY = TextureOpRasterizer.anInt7068
-                    clampedStartX = (TextureOpRasterizer.anInt7068 - intercept shl 12) / slope
+                if (clampedStartY < TextureOpRasterizer.clipMinY) {
+                    clampedStartY = TextureOpRasterizer.clipMinY
+                    clampedStartX = (TextureOpRasterizer.clipMinY - intercept shl 12) / slope
+                } else if (clampedStartY > TextureOpRasterizer.clipMaxY) {
+                    clampedStartY = TextureOpRasterizer.clipMaxY
+                    clampedStartX = (TextureOpRasterizer.clipMaxY - intercept shl 12) / slope
                 }
                 var clampedEndY = endY
                 var clampedEndX = endX
-                if (clampedEndY < TextureOpRasterizer.anInt7070) {
-                    clampedEndY = TextureOpRasterizer.anInt7070
-                    clampedEndX = (TextureOpRasterizer.anInt7070 - intercept shl 12) / slope
-                } else if (clampedEndY > TextureOpRasterizer.anInt7068) {
-                    clampedEndY = TextureOpRasterizer.anInt7068
-                    clampedEndX = (TextureOpRasterizer.anInt7068 - intercept shl 12) / slope
+                if (clampedEndY < TextureOpRasterizer.clipMinY) {
+                    clampedEndY = TextureOpRasterizer.clipMinY
+                    clampedEndX = (TextureOpRasterizer.clipMinY - intercept shl 12) / slope
+                } else if (clampedEndY > TextureOpRasterizer.clipMaxY) {
+                    clampedEndY = TextureOpRasterizer.clipMaxY
+                    clampedEndX = (TextureOpRasterizer.clipMaxY - intercept shl 12) / slope
                 }
-                BezierCurveRasterizer.method11220(clampedStartX, clampedStartY, clampedEndX, clampedEndY, color)
+                BezierCurveRasterizer.drawBresenhamLine(clampedStartX, clampedStartY, clampedEndX, clampedEndY, color)
             }
         }
     }

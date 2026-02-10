@@ -1571,7 +1571,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method3557(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var node3: Node<*>? = WorldMapSub1.aClass4658025.get(i_2.toLong())
+        var node3: Node<*>? = WorldMapSub1.hiddenMecIds.get(i_2.toLong())
         executor.intStack[++executor.intStackPtr - 1] = if (node3 != null) 1 else 0
     }
 
@@ -1973,7 +1973,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method5829(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        WorldMapSub1.method2094(i_2)
+        WorldMapSub1.highlightCategory(i_2)
     }
 
     @JvmStatic
@@ -2845,12 +2845,12 @@ object CS2Interpreter {
         executor.intStackPtr -= 2
         var i_2 = executor.intStack[executor.intStackPtr]
         var bool3 = executor.intStack[executor.intStackPtr + 1] == 1
-        var node4: Node<Any?>? = WorldMapSub1.aClass4658029.get(i_2.toLong())
+        var node4: Node<Any?>? = WorldMapSub1.hiddenCategoryIds.get(i_2.toLong())
         if (node4 != null && !bool3) {
             node4.unlink()
         } else if (node4 == null && bool3) {
             node4 = object : Node<Any?>() {}
-            WorldMapSub1.aClass4658029.put(node4!!, i_2.toLong())
+            WorldMapSub1.hiddenCategoryIds.put(node4!!, i_2.toLong())
         }
     }
 
@@ -2952,9 +2952,9 @@ object CS2Interpreter {
         var i_5 = executor.intStack[executor.intStackPtr + 1]
         var attributedefault6: ParamType? = TypeLists.PARAMS!!.list(i_4)
         if (i_5 != attributedefault6!!.defaultInt) {
-            icomponentdefinitions3!!.method1999(i_4, i_5)
+            icomponentdefinitions3!!.setIntParam(i_4, i_5)
         } else {
-            icomponentdefinitions3!!.method1995(i_4)
+            icomponentdefinitions3!!.removeParam(i_4)
         }
     }
 
@@ -3325,7 +3325,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3919(executor: CS2Executor) {
-        WorldMapSub1.aBool8027 = executor.intStack[--executor.intStackPtr] == 1
+        WorldMapSub1.hideIcons = executor.intStack[--executor.intStackPtr] == 1
     }
 
     @JvmStatic
@@ -3841,7 +3841,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method787(executor: CS2Executor) {
-        var class282Sub362: WorldMapCategory? = WorldMap.method11595()
+        var class282Sub362: WorldMapCategory? = WorldMap.getNextActiveCategory()
         if (class282Sub362 == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
             executor.intStack[++executor.intStackPtr - 1] = -1
@@ -4776,8 +4776,8 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1391(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = WorldMapSub1.anInt5123 + WorldMap.mapSquareAbsX
-        executor.intStack[++executor.intStackPtr - 1] = WorldMapSub1.anInt5624 + WorldMap.mapSquareAbsY
+        executor.intStack[++executor.intStackPtr - 1] = WorldMapSub1.mapCenterX + WorldMap.mapSquareAbsX
+        executor.intStack[++executor.intStackPtr - 1] = WorldMapSub1.mapCenterY + WorldMap.mapSquareAbsY
     }
 
     @JvmStatic
@@ -4863,7 +4863,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method2963(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var node3: Node<Any?>? = WorldMapSub1.aClass4658029.get(i_2.toLong())
+        var node3: Node<Any?>? = WorldMapSub1.hiddenCategoryIds.get(i_2.toLong())
         executor.intStack[++executor.intStackPtr - 1] = if (node3 != null) 1 else 0
     }
 
@@ -6100,7 +6100,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method543(executor: CS2Executor) {
-        executor.currentEntity!!.method15813(executor.intStack[--executor.intStackPtr])
+        executor.currentEntity!!.setOverheadInterfaceId(executor.intStack[--executor.intStackPtr])
     }
 
     @JvmStatic
@@ -7517,7 +7517,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5788(executor: CS2Executor) {
-        var class282Sub362: WorldMapCategory? = WorldMapSub1.method12538()
+        var class282Sub362: WorldMapCategory? = WorldMapSub1.getFirstActiveCategory()
         if (class282Sub362 == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
             executor.intStack[++executor.intStackPtr - 1] = -1
@@ -7948,7 +7948,7 @@ object CS2Interpreter {
         executor.intStackPtr -= 12
         MiniMenu.close()
         StaticMedia.resetChatMedia()
-        TextureOpIrregularBricks.anInt9792 = executor.intStack[executor.intStackPtr]
+        TextureOpIrregularBricks.backgroundColor = executor.intStack[executor.intStackPtr]
         NativeSprite.backgroundTransparency = executor.intStack[executor.intStackPtr + 1]
         MiniMenu.anInt188 = executor.intStack[executor.intStackPtr + 2]
         StaticMethods.anInt2262 = executor.intStack[executor.intStackPtr + 3]
@@ -8207,7 +8207,7 @@ object CS2Interpreter {
         var i_2 = executor.intStack[executor.intStackPtr]
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var underlaydefinition4: CS2Interface? = if (executor.aBool7022) executor.hookedInterface2  else executor.hookedInterface1
-        InterfaceRenderer.method12221(underlaydefinition4!!.comp!!, i_2, i_3)
+        InterfaceRenderer.startDragging(underlaydefinition4!!.comp!!, i_2, i_3)
     }
 
     @JvmStatic
@@ -8393,7 +8393,7 @@ object CS2Interpreter {
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var i_4 = executor.intStack[executor.intStackPtr + 2]
         var icomponentdefinitions5: Component? = Component.fromHash(i_4)
-        InterfaceRenderer.method12221(icomponentdefinitions5!!, i_2, i_3)
+        InterfaceRenderer.startDragging(icomponentdefinitions5!!, i_2, i_3)
     }
 
     @JvmStatic
@@ -8448,12 +8448,12 @@ object CS2Interpreter {
         executor.intStackPtr -= 2
         var i_2 = executor.intStack[executor.intStackPtr]
         var bool3 = executor.intStack[executor.intStackPtr + 1] == 1
-        var node4: Node<*>? = WorldMapSub1.aClass4658025.get(i_2.toLong())
+        var node4: Node<*>? = WorldMapSub1.hiddenMecIds.get(i_2.toLong())
         if (node4 != null && !bool3) {
             node4.unlink()
         } else if (node4 == null && bool3) {
             node4 = object : Node<Any?>() {}
-            WorldMapSub1.aClass4658025.put(node4, i_2.toLong())
+            WorldMapSub1.hiddenMecIds.put(node4, i_2.toLong())
         }
     }
 
@@ -9325,7 +9325,7 @@ object CS2Interpreter {
     fun method7043(executor: CS2Executor) {
         var class282Sub50Sub62: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub62 != null) {
-            var bool3 = class282Sub50Sub62.method14775(WorldMap.mapSquareAbsX + WorldMapSub1.anInt5123, WorldMap.mapSquareAbsY + WorldMapSub1.anInt5624, CS2Executor.anIntArray5900)
+            var bool3 = class282Sub50Sub62.method14775(WorldMap.mapSquareAbsX + WorldMapSub1.mapCenterX, WorldMap.mapSquareAbsY + WorldMapSub1.mapCenterY, CS2Executor.anIntArray5900)
             if (bool3) {
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![1]
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![2]
@@ -9377,7 +9377,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method11339(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (WorldMapSub1.aBool8027) 1  else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (WorldMapSub1.hideIcons) 1  else 0
     }
 
     @JvmStatic
@@ -9741,9 +9741,9 @@ object CS2Interpreter {
         var i_4 = executor.intStack[--executor.intStackPtr]
         var attributedefault5: ParamType? = TypeLists.PARAMS!!.list(i_4)
         if (attributedefault5!!.isString()) {
-            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3!!.method1998(i_4, attributedefault5!!.typeName!!)
+            executor.stringStack[++executor.stringStackPtr - 1] = icomponentdefinitions3!!.getStringParam(i_4, attributedefault5!!.typeName!!)
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.method1997(i_4, attributedefault5!!.defaultInt)
+            executor.intStack[++executor.intStackPtr - 1] = icomponentdefinitions3!!.getIntParam(i_4, attributedefault5!!.defaultInt)
         }
     }
 
@@ -9836,23 +9836,23 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4883(icomponentdefinitions0: Component, i_1: Int, i_2: Int) {
-        if (icomponentdefinitions0!!.anIntArray1267 == null) {
+        if (icomponentdefinitions0!!.keyCharCodes == null) {
             if (i_2 <= 0) {
                 return
             }
             icomponentdefinitions0!!.keyTriggeringAction = Array(11) { ByteArray(0) }
             icomponentdefinitions0!!.keyTriggerParams = Array(11) { ByteArray(0) }
             icomponentdefinitions0!!.cycleSteps = IntArray(11)
-            icomponentdefinitions0!!.anIntArray1267 = IntArray(11)
+            icomponentdefinitions0!!.keyCharCodes = IntArray(11)
         }
-        icomponentdefinitions0!!.anIntArray1267!![i_1] = i_2
+        icomponentdefinitions0!!.keyCharCodes!![i_1] = i_2
         if (i_2 > 0) {
             icomponentdefinitions0!!.hasInteraction = true
         } else {
             icomponentdefinitions0!!.hasInteraction = false
             val keyTriggeringActionArr = icomponentdefinitions0!!.keyTriggeringAction!!
             for (i_5 in 0 until keyTriggeringActionArr.size) {
-                if (keyTriggeringActionArr[i_5] != null || icomponentdefinitions0!!.anIntArray1267!![i_5] > 0) {
+                if (keyTriggeringActionArr[i_5] != null || icomponentdefinitions0!!.keyCharCodes!![i_5] > 0) {
                     icomponentdefinitions0!!.hasInteraction = true
                     break
                 }
@@ -9964,7 +9964,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.hookrequestType1Params = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onSubChange = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -9988,7 +9988,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1319 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onClickRepeat = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10004,7 +10004,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1413 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onChatTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10054,7 +10054,7 @@ object CS2Interpreter {
         if (ints_5 != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1397 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onVarpTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.varps = ints_5
         icomponentdefinitions0!!.hasScript = true
     }
@@ -10065,7 +10065,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1361 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onStockTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10091,7 +10091,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1393 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onTargetLeave = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10129,9 +10129,9 @@ object CS2Interpreter {
         var string_5: String? = cs2executor2.stringStack[--cs2executor2.stringStackPtr] as String?
         var attributedefault6: ParamType? = TypeLists.PARAMS!!.list(i_4)
         if (!attributedefault6!!.typeName.equals(string_5!!)) {
-            icomponentdefinitions0!!.method2000(i_4, string_5)
+            icomponentdefinitions0!!.setStringParam(i_4, string_5)
         } else {
-            icomponentdefinitions0!!.method1995(i_4)
+            icomponentdefinitions0!!.removeParam(i_4)
         }
     }
 
@@ -10142,7 +10142,7 @@ object CS2Interpreter {
         icomponentdefinitions0!!.scrollHeight = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
         Component.redrawComponent(icomponentdefinitions0!!)
         if (icomponentdefinitions0!!.type == ComponentType.CONTAINER) {
-            Component.method483(interface1, icomponentdefinitions0, false)
+            Component.updateEntityLayout(interface1, icomponentdefinitions0, false)
         }
     }
 
@@ -10212,7 +10212,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8387(icomponentdefinitions0: Component, cs2executor2: CS2Executor) {
-        icomponentdefinitions0!!.anInt1380 = cs2executor2.intStack[--cs2executor2.intStackPtr]
+        icomponentdefinitions0!!.dragDeadzone = cs2executor2.intStack[--cs2executor2.intStackPtr]
     }
 
     @JvmStatic
@@ -10229,7 +10229,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15256(icomponentdefinitions0: Component, cs2executor2: CS2Executor) {
-        icomponentdefinitions0!!.anInt1381 = cs2executor2.intStack[--cs2executor2.intStackPtr]
+        icomponentdefinitions0!!.dragDeadTime = cs2executor2.intStack[--cs2executor2.intStackPtr]
     }
 
     @JvmStatic
@@ -10238,7 +10238,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1292 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onKeyType = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10277,7 +10277,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1383 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onClanSettingsTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10292,7 +10292,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1419 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onMiscTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10305,7 +10305,7 @@ object CS2Interpreter {
             icomponentdefinitions0!!.keyTriggeringAction = Array(11) { ByteArray(0) }
             icomponentdefinitions0!!.keyTriggerParams = Array(11) { ByteArray(0) }
             icomponentdefinitions0!!.cycleSteps = IntArray(11)
-            icomponentdefinitions0!!.anIntArray1267 = IntArray(11)
+            icomponentdefinitions0!!.keyCharCodes = IntArray(11)
         }
         icomponentdefinitions0!!.keyTriggeringAction!![i_1] = bytes_2!!
         if (bytes_2 != null) {
@@ -10313,7 +10313,7 @@ object CS2Interpreter {
         } else {
             icomponentdefinitions0!!.hasInteraction = false
             for (i_6 in 0 until icomponentdefinitions0!!.keyTriggeringAction!!.size) {
-                if (icomponentdefinitions0!!.keyTriggeringAction!![i_6] != null || icomponentdefinitions0!!.anIntArray1267!![i_6] > 0) {
+                if (icomponentdefinitions0!!.keyTriggeringAction!![i_6] != null || icomponentdefinitions0!!.keyCharCodes!![i_6] > 0) {
                     icomponentdefinitions0!!.hasInteraction = true
                     break
                 }
@@ -10355,7 +10355,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1394 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onDragComplete = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10374,7 +10374,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1409 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onTimer = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10446,7 +10446,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1451 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onDrag = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10455,7 +10455,7 @@ object CS2Interpreter {
         cs2executor2.intStackPtr -= 3
         icomponentdefinitions0!!.textHorizontalAli = cs2executor2.intStack[cs2executor2.intStackPtr]
         icomponentdefinitions0!!.textVerticalAli = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
-        icomponentdefinitions0!!.anInt1358 = cs2executor2.intStack[cs2executor2.intStackPtr + 2]
+        icomponentdefinitions0!!.lineSpacing = cs2executor2.intStack[cs2executor2.intStackPtr + 2]
         Component.redrawComponent(icomponentdefinitions0!!)
     }
 
@@ -10465,7 +10465,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.hookrequestType0Params = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onSubClose = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10495,7 +10495,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1407 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onClanVarTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10538,7 +10538,7 @@ object CS2Interpreter {
         Component.redrawComponent(icomponentdefinitions0!!)
         method913(interface1, icomponentdefinitions0)
         if (icomponentdefinitions0!!.type == ComponentType.CONTAINER) {
-            Component.method483(interface1, icomponentdefinitions0, false)
+            Component.updateEntityLayout(interface1, icomponentdefinitions0, false)
         }
         if (icomponentdefinitions0!!.slotId == -1 && !interface1.preventInteraction) {
             PulseEventQueue.delayedIfpositionUpdate(icomponentdefinitions0!!.idHash)
@@ -10552,9 +10552,9 @@ object CS2Interpreter {
         var i_5 = cs2executor2.intStack[cs2executor2.intStackPtr + 1]
         var attributedefault6: ParamType? = TypeLists.PARAMS!!.list(i_4)
         if (i_5 != attributedefault6!!.defaultInt) {
-            icomponentdefinitions0!!.method1999(i_4, i_5)
+            icomponentdefinitions0!!.setIntParam(i_4, i_5)
         } else {
-            icomponentdefinitions0!!.method1995(i_4)
+            icomponentdefinitions0!!.removeParam(i_4)
         }
     }
 
@@ -10580,7 +10580,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1353 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onCamFinished = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10608,7 +10608,7 @@ object CS2Interpreter {
         Component.redrawComponent(icDefs)
         method913(interface1, icDefs)
         if (icDefs.type == ComponentType.CONTAINER) {
-            Component.method483(interface1, icDefs, false)
+            Component.updateEntityLayout(interface1, icDefs, false)
         }
     }
 
@@ -10643,7 +10643,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1271 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onResize = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10663,7 +10663,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1416 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onFriendsChatTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10679,7 +10679,7 @@ object CS2Interpreter {
         var fontmetrics3: FontMetrics? = icomponentdefinitions0!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
         var i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr]
         var i_5 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        var i_6 = fontmetrics3!!.method6956(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.anInt1358, i_5, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        var i_6 = fontmetrics3!!.method6956(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.lineSpacing, i_5, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = i_6
     }
 
@@ -10855,15 +10855,15 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1418 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onClanChannelTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
     @JvmStatic
     fun method5459(icomponentdefinitions0: Component, interface1: Interface, cs2executor2: CS2Executor) {
         var i_4 = cs2executor2.intStack[--cs2executor2.intStackPtr]
-        if (i_4 != icomponentdefinitions0!!.anInt1435) {
-            icomponentdefinitions0!!.anInt1435 = i_4
+        if (i_4 != icomponentdefinitions0!!.videoFileId) {
+            icomponentdefinitions0!!.videoFileId = i_4
             Component.redrawComponent(icomponentdefinitions0!!)
         }
         if (icomponentdefinitions0!!.slotId == -1 && !interface1.preventInteraction) {
@@ -10882,10 +10882,10 @@ object CS2Interpreter {
         if (cs2executor1.hookRequestCount >= 10) {
             throw RuntimeException()
         } else {
-            if (icomponentdefinitions0!!.anObjectArray1271 != null) {
+            if (icomponentdefinitions0!!.onResize != null) {
                 var hookrequest3: HookRequest? = HookRequest()
                 hookrequest3!!.source = icomponentdefinitions0
-                hookrequest3!!.params = icomponentdefinitions0!!.anObjectArray1271
+                hookrequest3!!.params = icomponentdefinitions0!!.onResize
                 hookrequest3!!.requestId = cs2executor1.hookRequestCount + 1
                 Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest3)
             }
@@ -10896,7 +10896,7 @@ object CS2Interpreter {
     fun method5001(icomponentdefinitions0: Component, cs2executor1: CS2Executor) {
         var fontmetrics3: FontMetrics? = icomponentdefinitions0!!.getFontMetrics(StaticMethods.initializedFontcombos!!, Client.FONT_PROVIDER)
         var i_4 = cs2executor1.intStack[--cs2executor1.intStackPtr]
-        var point5: Point? = fontmetrics3!!.method6954(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.anInt1358, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
+        var point5: Point? = fontmetrics3!!.method6954(icomponentdefinitions0!!.text, icomponentdefinitions0!!.width, icomponentdefinitions0!!.lineSpacing, i_4, @Suppress("UNCHECKED_CAST") (StaticMedia.nameIconSprites as Array<Sprite>?))
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = point5!!.x
         cs2executor1.intStack[++cs2executor1.intStackPtr - 1] = point5!!.y
     }
@@ -10908,8 +10908,8 @@ object CS2Interpreter {
         if (ints_5 != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1387 = popParamsDynamic(string_4, cs2executor2)
-        icomponentdefinitions0!!.anIntArray1402 = ints_5
+        icomponentdefinitions0!!.onStatTransmit = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.statTransmitFilter = ints_5
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -10921,7 +10921,7 @@ object CS2Interpreter {
         Component.redrawComponent(icomponentdefinitions0!!)
         method913(interface1, icomponentdefinitions0)
         if (icomponentdefinitions0!!.type == ComponentType.CONTAINER) {
-            Component.method483(interface1, icomponentdefinitions0, false)
+            Component.updateEntityLayout(interface1, icomponentdefinitions0, false)
         }
     }
 
@@ -10981,9 +10981,9 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method869(icomponentdefinitions0: Component, cs2executor2: CS2Executor) {
-        var i_4: Component.UnkSetting1? = Component.UnkSetting1.forId(cs2executor2.intStack[--cs2executor2.intStackPtr])
+        var i_4: Component.DragType? = Component.DragType.forId(cs2executor2.intStack[--cs2executor2.intStackPtr])
         if (i_4 != null)
-            icomponentdefinitions0.anUnkSetting11 = i_4
+            icomponentdefinitions0.dragType = i_4
     }
 
     @JvmStatic
@@ -11038,7 +11038,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1415 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onFriendTransmit = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 
@@ -11063,7 +11063,7 @@ object CS2Interpreter {
         if (popIntArrayParam(string_4, cs2executor2) != null) {
             string_4 = string_4!!.substring(0, string_4!!.length - 1)
         }
-        icomponentdefinitions0!!.anObjectArray1400 = popParamsDynamic(string_4, cs2executor2)
+        icomponentdefinitions0!!.onTargetEnter = popParamsDynamic(string_4, cs2executor2)
         icomponentdefinitions0!!.hasScript = true
     }
 

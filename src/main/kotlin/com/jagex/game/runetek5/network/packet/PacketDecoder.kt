@@ -2148,7 +2148,7 @@ object PacketDecoder {
             parent2Def = Component.fromHash(fromParentUid)
             if (parent2Def != null) {
                 Component.redrawComponent(parent2Def)
-                Component.method483(Interface.INTERFACES!![parent2Def.idHash ushr 16]!!, parent2Def, true)
+                Component.updateEntityLayout(Interface.INTERFACES!![parent2Def.idHash ushr 16]!!, parent2Def, true)
             }
             if (Client.BASE_WINDOW_ID != -1) {
                 Interface.openSub(Client.BASE_WINDOW_ID, 1)

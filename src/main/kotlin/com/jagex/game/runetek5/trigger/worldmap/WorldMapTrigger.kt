@@ -37,34 +37,34 @@ object WorldMapTrigger {
             if (WorldMap.mapZoom > WorldMap.requestedMapZoom) {
                 WorldMap.mapZoom = WorldMap.requestedMapZoom
             }
-            WorldMapSub1.method1502()
-            WorldMap.anInt3469 = WorldMap.mapZoom.toInt() shr 1
-            WorldMap.aByteArrayArrayArray3464 = BufferUtils.generateBytePatterns(WorldMap.anInt3469)
+            WorldMapSub1.clampMapCenter()
+            WorldMap.halfZoomLevel = WorldMap.mapZoom.toInt() shr 1
+            WorldMap.tileShapePatterns = BufferUtils.generateBytePatterns(WorldMap.halfZoomLevel)
         } else if (WorldMap.mapZoom > WorldMap.requestedMapZoom) {
             WorldMap.mapZoom = (WorldMap.mapZoom - WorldMap.mapZoom / 30.0).toFloat()
             if (WorldMap.mapZoom < WorldMap.requestedMapZoom) {
                 WorldMap.mapZoom = WorldMap.requestedMapZoom
             }
-            WorldMapSub1.method1502()
-            WorldMap.anInt3469 = WorldMap.mapZoom.toInt() shr 1
-            WorldMap.aByteArrayArrayArray3464 = BufferUtils.generateBytePatterns(WorldMap.anInt3469)
+            WorldMapSub1.clampMapCenter()
+            WorldMap.halfZoomLevel = WorldMap.mapZoom.toInt() shr 1
+            WorldMap.tileShapePatterns = BufferUtils.generateBytePatterns(WorldMap.halfZoomLevel)
         }
-        if (WorldMapSub1.anInt8014 != -1 && WorldMapSub1.anInt8016 != -1) {
-            var i_3 = WorldMapSub1.anInt8014 - WorldMapSub1.anInt5123
+        if (WorldMapSub1.scrollTargetX != -1 && WorldMapSub1.scrollTargetY != -1) {
+            var i_3 = WorldMapSub1.scrollTargetX - WorldMapSub1.mapCenterX
             if (i_3 < 2 || i_3 > 2) {
                 i_3 /= 8
             }
-            var i_4 = WorldMapSub1.anInt8016 - WorldMapSub1.anInt5624
+            var i_4 = WorldMapSub1.scrollTargetY - WorldMapSub1.mapCenterY
             if (i_4 < 2 || i_4 > 2) {
                 i_4 /= 8
             }
-            WorldMapSub1.anInt5123 += i_3
-            WorldMapSub1.anInt5624 += i_4
+            WorldMapSub1.mapCenterX += i_3
+            WorldMapSub1.mapCenterY += i_4
             if (i_3 == 0 && i_4 == 0) {
-                WorldMapSub1.anInt8014 = -1
-                WorldMapSub1.anInt8016 = -1
+                WorldMapSub1.scrollTargetX = -1
+                WorldMapSub1.scrollTargetY = -1
             }
-            WorldMapSub1.method1502()
+            WorldMapSub1.clampMapCenter()
         }
         if (JSObjectManager.anInt4185 > 0) {
             if (--ServerEnvironment.anInt9282 == 0) {
@@ -73,7 +73,7 @@ object WorldMapTrigger {
             }
         } else {
             WorldMapSub1.someMecId = -1
-            WorldMapSub1.anInt8026 = -1
+            WorldMapSub1.highlightedCategoryId = -1
         }
         val clickzones = WorldMapInteraction.MEC_CLICKZONES
         if (WorldMapSub1.isInteractive && clickzones != null) {

@@ -13,7 +13,7 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
 class TextureOpCombine : TextureOperation(2, false) {
 
     @JvmField
-    var anInt9895: Int = 6
+    var blendMode: Int = 6
 
     override fun getMonochromeOutput(i_1: Int): IntArray {
         val ints_3 = super.monochromeImageCache.getPalette(i_1)
@@ -23,7 +23,7 @@ class TextureOpCombine : TextureOperation(2, false) {
             var i_6: Int
             var i_7: Int
             var i_8: Int
-            when (this.anInt9895) {
+            when (this.blendMode) {
                 1 -> {
                     i_6 = 0
                     while (i_6 < TextureRaster.currentWidth) {
@@ -157,7 +157,7 @@ class TextureOpCombine : TextureOperation(2, false) {
             var i_19: Int
             var i_20: Int
             var i_21: Int
-            when (this.anInt9895) {
+            when (this.blendMode) {
                 1 -> {
                     i_15 = 0
                     while (i_15 < TextureRaster.currentWidth) {
@@ -320,7 +320,7 @@ class TextureOpCombine : TextureOperation(2, false) {
 
     override fun decodeOpcode(i_1: Int, rsbytebuffer2: Packet) {
         when (i_1) {
-            0 -> this.anInt9895 = rsbytebuffer2.readUByte()
+            0 -> this.blendMode = rsbytebuffer2.readUByte()
             1 -> super.monochrome = rsbytebuffer2.readUByte() == 1
         }
     }

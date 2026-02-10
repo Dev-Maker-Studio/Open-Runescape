@@ -29,9 +29,9 @@ class BasType {
     @JvmField
     var runDir1: Int = -1
     @JvmField
-    var anInt2786: Int = 0
+    var modelWidth: Int = 0
     @JvmField
-    var anInt2829: Int = 0
+    var modelLength: Int = 0
     @JvmField
     var objVisibility: IntArray? = null
 
@@ -47,21 +47,21 @@ class BasType {
     var objVerticeTransformations: Array<IntArray?>? = null
 
     @JvmField
-    var anInt2820: Int = 0
+    var yawAcceleration: Int = 0
     @JvmField
-    var anInt2804: Int = 0
+    var yawMaxVelocity: Int = 0
     @JvmField
-    var anInt2825: Int = 0
+    var rollAcceleration: Int = 0
     @JvmField
-    var anInt2823: Int = 0
+    var rollMaxVelocity: Int = 0
     @JvmField
-    var anInt2824: Int = 0
+    var rollTargetAngle: Int = 0
     @JvmField
-    var anInt2816: Int = 0
+    var pitchAcceleration: Int = 0
     @JvmField
-    var anInt2815: Int = 0
+    var pitchMaxVelocity: Int = 0
     @JvmField
-    var anInt2827: Int = 0
+    var pitchTargetAngle: Int = 0
     @JvmField
     var unused: Int = -1
     @JvmField
@@ -75,7 +75,7 @@ class BasType {
     @JvmField
     var walkDir1: Int = -1
     @JvmField
-    var anInt2798: Int = -1
+    var iconHeightOverride: Int = -1
     @JvmField
     var teleTurnCcwSequence: Int = -1
     @JvmField
@@ -95,9 +95,9 @@ class BasType {
     @JvmField
     var rendersShadow: Boolean = true
     @JvmField
-    var anInt2813: Int = 0
+    var hillRotateX: Int = 0
     @JvmField
-    var anInt2790: Int = 0
+    var hillRotateZ: Int = 0
     @JvmField
     var turnAngleAdjustment: IntArray? = null
     @JvmField
@@ -124,8 +124,8 @@ class BasType {
             8 -> this.runDir2 = buffer.readBigSmart()
             9 -> this.runDir1 = buffer.readBigSmart()
             26 -> {
-                this.anInt2786 = (buffer.readUByte() * 4).toShort().toInt()
-                this.anInt2829 = (buffer.readUByte() * 4).toShort().toInt()
+                this.modelWidth = (buffer.readUByte() * 4).toShort().toInt()
+                this.modelLength = (buffer.readUByte() * 4).toShort().toInt()
             }
             27 -> {
                 if (this.objVerticeTransformations == null) {
@@ -147,14 +147,14 @@ class BasType {
                     }
                 }
             }
-            29 -> this.anInt2820 = buffer.readUByte()
-            30 -> this.anInt2804 = buffer.readUShort()
-            31 -> this.anInt2825 = buffer.readUByte()
-            32 -> this.anInt2823 = buffer.readUShort()
-            33 -> this.anInt2824 = buffer.readShort()
-            34 -> this.anInt2816 = buffer.readUByte()
-            35 -> this.anInt2815 = buffer.readUShort()
-            36 -> this.anInt2827 = buffer.readShort()
+            29 -> this.yawAcceleration = buffer.readUByte()
+            30 -> this.yawMaxVelocity = buffer.readUShort()
+            31 -> this.rollAcceleration = buffer.readUByte()
+            32 -> this.rollMaxVelocity = buffer.readUShort()
+            33 -> this.rollTargetAngle = buffer.readShort()
+            34 -> this.pitchAcceleration = buffer.readUByte()
+            35 -> this.pitchMaxVelocity = buffer.readUShort()
+            36 -> this.pitchTargetAngle = buffer.readShort()
             37 -> this.unused = buffer.readUByte()
             38 -> this.standTurnCcwSequence = buffer.readBigSmart()
             39 -> this.standTurnCwSequence = buffer.readBigSmart()
@@ -163,7 +163,7 @@ class BasType {
             42 -> this.walkDir1 = buffer.readBigSmart()
             43 -> buffer.readUShort()
             44 -> buffer.readUShort()
-            45 -> this.anInt2798 = buffer.readUShort()
+            45 -> this.iconHeightOverride = buffer.readUShort()
             46 -> this.teleTurnCcwSequence = buffer.readBigSmart()
             47 -> this.teleTurnCwSequence = buffer.readBigSmart()
             48 -> this.runTurnCcwSequence = buffer.readBigSmart()
@@ -183,8 +183,8 @@ class BasType {
             }
             53 -> this.rendersShadow = false
             54 -> {
-                this.anInt2813 = buffer.readUByte() shl 6
-                this.anInt2790 = buffer.readUByte() shl 6
+                this.hillRotateX = buffer.readUByte() shl 6
+                this.hillRotateZ = buffer.readUByte() shl 6
             }
             55 -> {
                 if (this.turnAngleAdjustment == null) {

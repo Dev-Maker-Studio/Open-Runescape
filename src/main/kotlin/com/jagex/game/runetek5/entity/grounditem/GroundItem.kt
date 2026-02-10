@@ -42,7 +42,7 @@ class GroundItem(
     var nodeId: Int = 0
 
     @JvmField
-    var anInt10422: Int = 0
+    var tileHeightOffset: Int = 0
 
     @JvmField
     var lastId: Int = -1
@@ -74,7 +74,7 @@ class GroundItem(
     }
 
     override fun getIconHeight(): Int {
-        return anInt10422 - getMinY()
+        return tileHeightOffset - getMinY()
     }
 
     fun randomizeAppearance() {
@@ -163,15 +163,15 @@ class GroundItem(
             offsetY = -groundDecoration.floorOffsetY
         }
 
-        if (offsetY != anInt10422) {
-            vector33.y += (offsetY - anInt10422).toFloat()
+        if (offsetY != tileHeightOffset) {
+            vector33.y += (offsetY - tileHeightOffset).toFloat()
             setBasePosition(vector33)
-            anInt10422 = offsetY
+            tileHeightOffset = offsetY
         }
 
         val renderingMatrix = toolkit.getRenderingMatrix()
         renderingMatrix.reset()
-        if (anInt10422 == 0) {
+        if (tileHeightOffset == 0) {
             val class39011 = scene!!.localHeightmap!![collisionPlane.toInt()]!!
             val i_12 = size3d shl 1
             val i_14 = -i_12 / 2

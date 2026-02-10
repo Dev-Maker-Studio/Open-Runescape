@@ -41,10 +41,10 @@ object InterfaceRenderer {
 	var translatedUptext: String? = null
 
 	@JvmField
-	var anInt123: Int = 0
+	var worldMapDragStartY: Int = 0
 
 	@JvmField
-	var anInt8308: Int = 0
+	var dragTickCount: Int = 0
 
 	/**
 	 * Draws an interface and it's component,
@@ -112,7 +112,7 @@ object InterfaceRenderer {
 							}
 						}
 
-						val shouldAddSprite = childComponent.clickMask && childComponent.type == ComponentType.SPRITE && childComponent.transparency == 0 && childComponent.skyboxId < 0 && childComponent.containerItemId == -1 && childComponent.anInt1435 == -1 && !childComponent.tiling && childComponent.angle2d == 0
+						val shouldAddSprite = childComponent.clickMask && childComponent.type == ComponentType.SPRITE && childComponent.transparency == 0 && childComponent.skyboxId < 0 && childComponent.containerItemId == -1 && childComponent.videoFileId == -1 && !childComponent.tiling && childComponent.angle2d == 0
 						var withinBoundaries = false
 						if (mouseX >= clipMinX && mouseY >= clipMinY && mouseX < clipMaxX && mouseY < clipMaxY) {
 							if (shouldAddSprite) {
@@ -181,9 +181,9 @@ object InterfaceRenderer {
 							for (keyIndex in childComponent.keyTriggeringAction!!.indices) {
 								var keyTriggered = false
 								var hasAction = false
-								if (childComponent.anIntArray1267!![keyIndex] > 0) {
+								if (childComponent.keyCharCodes!![keyIndex] > 0) {
 									for (i in 0 until Client.keyCachePointerPoss) {
-										if (childComponent.anIntArray1267!![keyIndex] == Client.KEYS_PRESSED[i]!!.getCharacter().code) {
+										if (childComponent.keyCharCodes!![keyIndex] == Client.KEYS_PRESSED[i]!!.getCharacter().code) {
 											keyTriggered = true
 											val cycles = childComponent.cycles
 											if (cycles == null || cycles[keyIndex] <= Client.cycles) {
@@ -247,7 +247,7 @@ object InterfaceRenderer {
 						}
 
 						if (clickTriggered) {
-							method12221(childComponent, mouseRecord?.getX()?.minus(componentX) ?: 0, mouseRecord?.getY()?.minus(componentY) ?: 0)
+							startDragging(childComponent, mouseRecord?.getX()?.minus(componentX) ?: 0, mouseRecord?.getY()?.minus(componentY) ?: 0)
 						}
 
 						if (Client.draggingComponent != null && childComponent != Client.draggingComponent && withinBoundaries && Client.getComponentSettings(childComponent)!!.dragEnabled()) {
@@ -312,7 +312,7 @@ object InterfaceRenderer {
 										val player = PlayerUpdate.players[playerIndices[i]]
 										if (player != null) {
 											CS2Executor.executeIfTrigger(ClientTriggerType.IF_PLAYER_CYCLE, -1, player, playerIndices[i])
-											player.method15880(clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
+											player.processOverheadInterfaceCycle(clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
 										}
 									}
 
@@ -322,7 +322,7 @@ object InterfaceRenderer {
 										if (npcNode != null) {
 											val npcEntity = npcNode.value as NpcEntity
 											CS2Executor.executeIfTrigger(ClientTriggerType.IF_NPC_CYCLE, npcEntity.definitions?.type ?: 0, npcNode.value as PathingEntity, npcIndex)
-											(npcNode.value as PathingEntity).method15880(clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
+											(npcNode.value as PathingEntity).processOverheadInterfaceCycle(clipMinX, clipMinY, clipMaxX, clipMaxY, componentX - childComponent.scrollX, componentY - childComponent.scrollY, mouseX, mouseY)
 										}
 									}
 									continue
@@ -398,8 +398,8 @@ object InterfaceRenderer {
 									if (clickTriggeredVar) {
 										val clickX = ((mouseRecord?.getX()?.minus(componentX)?.minus(childComponent.width / 2))?.times(2.0)?.div(WorldMap.mapZoom))?.toInt()
 										val clickY = mouseRecord?.getY()?.minus(componentY)?.minus(childComponent.height / 2)?.let { (-(it) * 2.0 / WorldMap.mapZoom).toInt() }
-										val absX = clickX?.plus(WorldMap.mapSquareAbsX)?.plus(WorldMapSub1.anInt5123) ?: 0
-										val absY = clickY?.plus(WorldMap.mapSquareAbsY)?.plus(WorldMapSub1.anInt5624) ?: 0
+										val absX = clickX?.plus(WorldMap.mapSquareAbsX)?.plus(WorldMapSub1.mapCenterX) ?: 0
+										val absY = clickY?.plus(WorldMap.mapSquareAbsY)?.plus(WorldMapSub1.mapCenterY) ?: 0
 										val worldMapElement = WorldMapSub1.getStaticElement()
 										if (worldMapElement == null)
 											continue
@@ -427,15 +427,15 @@ object InterfaceRenderer {
 
 									if (leftClickVar && Client.menuItemCount > 0) {
 										if (Client.menuItemCount == 1 && (Client.mouseX != MouseRecord.recorder?.getMouseX() ?: 0 || Client.mouseY != MouseRecord.recorder?.getMouseY() ?: 0)) {
-											Interface.anInt3008 = WorldMapSub1.anInt5123
-											anInt123 = WorldMapSub1.anInt5624
+											Interface.anInt3008 = WorldMapSub1.mapCenterX
+											worldMapDragStartY = WorldMapSub1.mapCenterY
 											Client.menuItemCount = 2
 										}
 
 										if (Client.menuItemCount == 2) {
 											Client.isMapMoving = true
-											WorldMapSub1.method1503(Interface.anInt3008 + ((Client.mouseX - (MouseRecord.recorder?.getMouseX() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
-											WorldMapSub1.method5599(anInt123 - ((Client.mouseY - (MouseRecord.recorder?.getMouseY() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
+											WorldMapSub1.setMapCenterX(Interface.anInt3008 + ((Client.mouseX - (MouseRecord.recorder?.getMouseX() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
+											WorldMapSub1.setMapCenterY(worldMapDragStartY - ((Client.mouseY - (MouseRecord.recorder?.getMouseY() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
 										}
 										continue
 									}
@@ -460,7 +460,7 @@ object InterfaceRenderer {
 								}
 
 								if (childComponent.contentType == ComponentContentType.CONTENT_TYPE_1406) {
-									InterfaceComponentRenderer.method544(childComponent, componentX, componentY)
+									InterfaceComponentRenderer.setChatDisplay(childComponent, componentX, componentY)
 									continue
 								}
 							}
@@ -478,13 +478,13 @@ object InterfaceRenderer {
 								}
 							}
 
-							if (childComponent.isPressed && leftClickVar && childComponent.anObjectArray1319 != null) {
+							if (childComponent.isPressed && leftClickVar && childComponent.onClickRepeat != null) {
 								val hookRequest = HookRequest()
 								hookRequest.hasMousePosition = true
 								hookRequest.source = childComponent
 								hookRequest.mouseX = MouseRecord.recorder?.getMouseX() ?: 0 - componentX
 								hookRequest.mouseY = MouseRecord.recorder?.getMouseY() ?: 0 - componentY
-								hookRequest.params = childComponent.anObjectArray1319
+								hookRequest.params = childComponent.onClickRepeat
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
@@ -547,10 +547,10 @@ object InterfaceRenderer {
 								}
 							}
 
-							if (childComponent.anObjectArray1409 != null) {
+							if (childComponent.onTimer != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1409
+								hookRequest.params = childComponent.onTimer
 								Client.TICK_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
@@ -606,16 +606,16 @@ object InterfaceRenderer {
 								childComponent.lastMouseWheelCycle = Client.mouseWheelCycle
 							}
 
-							if (childComponent.anObjectArray1397 != null && Client.pulseEventConfigsPtr > childComponent.anInt1443) {
-								if (childComponent.varps != null && Client.pulseEventConfigsPtr - childComponent.anInt1443 <= 32) {
-									label921@ for (keyIndex in childComponent.anInt1443 until Client.pulseEventConfigsPtr) {
+							if (childComponent.onVarpTransmit != null && Client.pulseEventConfigsPtr > childComponent.lastVarpTransmitCycle) {
+								if (childComponent.varps != null && Client.pulseEventConfigsPtr - childComponent.lastVarpTransmitCycle <= 32) {
+									label921@ for (keyIndex in childComponent.lastVarpTransmitCycle until Client.pulseEventConfigsPtr) {
 										val i_25 = Client.PULSE_EVENT_CONFIGS_CACHE[keyIndex and 0x1f]
 
 										for (i_26 in childComponent.varps!!.indices) {
 											if (i_25 == childComponent.varps!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.anObjectArray1397
+												hookrequest54.params = childComponent.onVarpTransmit
 												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
 												break@label921
 											}
@@ -624,16 +624,16 @@ object InterfaceRenderer {
 								} else {
 									val hookRequest = HookRequest()
 									hookRequest.source = childComponent
-									hookRequest.params = childComponent.anObjectArray1397
+									hookRequest.params = childComponent.onVarpTransmit
 									Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 								}
 
-								childComponent.anInt1443 = Client.pulseEventConfigsPtr
+								childComponent.lastVarpTransmitCycle = Client.pulseEventConfigsPtr
 							}
 
-							if (childComponent.mouseLeaveScript != null && Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS > childComponent.anInt1444) {
-								if (childComponent.mouseLeaveArrayParams != null && Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - childComponent.anInt1444 <= 32) {
-									label897@ for (keyIndex in childComponent.anInt1444 until Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS) {
+							if (childComponent.mouseLeaveScript != null && Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS > childComponent.lastContainerTransmitCycle) {
+								if (childComponent.mouseLeaveArrayParams != null && Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - childComponent.lastContainerTransmitCycle <= 32) {
+									label897@ for (keyIndex in childComponent.lastContainerTransmitCycle until Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS) {
 										val i_25 = Client.RECENTLY_USED_ITEM_CONTAINERS[keyIndex and 0x1f]
 
 										for (i_26 in childComponent.mouseLeaveArrayParams!!.indices) {
@@ -653,19 +653,19 @@ object InterfaceRenderer {
 									Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 								}
 
-								childComponent.anInt1444 = Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS
+								childComponent.lastContainerTransmitCycle = Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS
 							}
 
-							if (childComponent.anObjectArray1387 != null && Client.skillUpdateCycle > childComponent.anInt1445) {
-								if (childComponent.anIntArray1402 != null && Client.skillUpdateCycle - childComponent.anInt1445 <= 32) {
-									label873@ for (keyIndex in childComponent.anInt1445 until Client.skillUpdateCycle) {
+							if (childComponent.onStatTransmit != null && Client.skillUpdateCycle > childComponent.lastStatTransmitCycle) {
+								if (childComponent.statTransmitFilter != null && Client.skillUpdateCycle - childComponent.lastStatTransmitCycle <= 32) {
+									label873@ for (keyIndex in childComponent.lastStatTransmitCycle until Client.skillUpdateCycle) {
 										val i_25 = Client.recentSkillUpdates[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.anIntArray1402!!.indices) {
-											if (i_25 == childComponent.anIntArray1402!![i_26]) {
+										for (i_26 in childComponent.statTransmitFilter!!.indices) {
+											if (i_25 == childComponent.statTransmitFilter!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.anObjectArray1387
+												hookrequest54.params = childComponent.onStatTransmit
 												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
 												break@label873
 											}
@@ -674,23 +674,23 @@ object InterfaceRenderer {
 								} else {
 									val hookRequest = HookRequest()
 									hookRequest.source = childComponent
-									hookRequest.params = childComponent.anObjectArray1387
+									hookRequest.params = childComponent.onStatTransmit
 									Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 								}
 
-								childComponent.anInt1445 = Client.skillUpdateCycle
+								childComponent.lastStatTransmitCycle = Client.skillUpdateCycle
 							}
 
-							if (childComponent.anObjectArray1407 != null && Client.CLAN_VAR_COUNTER > childComponent.anInt1448) {
-								if (childComponent.anIntArray1408 != null && Client.CLAN_VAR_COUNTER - childComponent.anInt1448 <= 32) {
-									label849@ for (keyIndex in childComponent.anInt1448 until Client.CLAN_VAR_COUNTER) {
+							if (childComponent.onClanVarTransmit != null && Client.CLAN_VAR_COUNTER > childComponent.lastClanVarTransmitCycle) {
+								if (childComponent.clanVarFilter != null && Client.CLAN_VAR_COUNTER - childComponent.lastClanVarTransmitCycle <= 32) {
+									label849@ for (keyIndex in childComponent.lastClanVarTransmitCycle until Client.CLAN_VAR_COUNTER) {
 										val i_25 = Client.CLAN_VAR_KEYS[keyIndex and 0x1f]
 
-										for (i_26 in childComponent.anIntArray1408!!.indices) {
-											if (i_25 == childComponent.anIntArray1408!![i_26]) {
+										for (i_26 in childComponent.clanVarFilter!!.indices) {
+											if (i_25 == childComponent.clanVarFilter!![i_26]) {
 												hookrequest54 = HookRequest()
 												hookrequest54.source = childComponent
-												hookrequest54.params = childComponent.anObjectArray1407
+												hookrequest54.params = childComponent.onClanVarTransmit
 												Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest54)
 												break@label849
 											}
@@ -699,78 +699,78 @@ object InterfaceRenderer {
 								} else {
 									val hookRequest = HookRequest()
 									hookRequest.source = childComponent
-									hookRequest.params = childComponent.anObjectArray1407
+									hookRequest.params = childComponent.onClanVarTransmit
 									Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 								}
 
-								childComponent.anInt1448 = Client.CLAN_VAR_COUNTER
+								childComponent.lastClanVarTransmitCycle = Client.CLAN_VAR_COUNTER
 							}
 
-							if (Client.lastChatMessageTick > childComponent.anInt1442 && childComponent.anObjectArray1413 != null) {
+							if (Client.lastChatMessageTick > childComponent.lastServerTick && childComponent.onChatTransmit != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1413
+								hookRequest.params = childComponent.onChatTransmit
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							if (Client.lastFriendIgnoreUpdateTick > childComponent.anInt1442 && childComponent.anObjectArray1415 != null) {
+							if (Client.lastFriendIgnoreUpdateTick > childComponent.lastServerTick && childComponent.onFriendTransmit != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1415
+								hookRequest.params = childComponent.onFriendTransmit
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							if (Client.lastFriendsChatUpdateTick > childComponent.anInt1442 && childComponent.anObjectArray1416 != null) {
+							if (Client.lastFriendsChatUpdateTick > childComponent.lastServerTick && childComponent.onFriendsChatTransmit != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1416
+								hookRequest.params = childComponent.onFriendsChatTransmit
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							if (Client.lastClanSettingsUpdateTick > childComponent.anInt1442 && childComponent.anObjectArray1383 != null) {
+							if (Client.lastClanSettingsUpdateTick > childComponent.lastServerTick && childComponent.onClanSettingsTransmit != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1383
+								hookRequest.params = childComponent.onClanSettingsTransmit
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							if (Client.lastClanChannelUpdateTick > childComponent.anInt1442 && childComponent.anObjectArray1418 != null) {
+							if (Client.lastClanChannelUpdateTick > childComponent.lastServerTick && childComponent.onClanChannelTransmit != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1418
+								hookRequest.params = childComponent.onClanChannelTransmit
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							if (Client.lastGrandExchangeUpdateTick > childComponent.anInt1442 && childComponent.anObjectArray1361 != null) {
+							if (Client.lastGrandExchangeUpdateTick > childComponent.lastServerTick && childComponent.onStockTransmit != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1361
+								hookRequest.params = childComponent.onStockTransmit
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							if (Client.lastMiscUpdateTick > childComponent.anInt1442 && childComponent.anObjectArray1419 != null) {
+							if (Client.lastMiscUpdateTick > childComponent.lastServerTick && childComponent.onMiscTransmit != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1419
+								hookRequest.params = childComponent.onMiscTransmit
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 
-							childComponent.anInt1442 = Client.serverTick
-							if (childComponent.anObjectArray1292 != null) {
+							childComponent.lastServerTick = Client.serverTick
+							if (childComponent.onKeyType != null) {
 								for (keyIndex in 0 until Client.keyCachePointerPoss) {
 									val hookrequest44 = HookRequest()
 									hookrequest44.source = childComponent
 									hookrequest44.typedKeyCode = Client.KEYS_PRESSED[keyIndex]!!.getCode()
 									hookrequest44.typedKeyChar = Client.KEYS_PRESSED[keyIndex]!!.getCharacter().code
-									hookrequest44.params = childComponent.anObjectArray1292
+									hookrequest44.params = childComponent.onKeyType
 									Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest44)
 								}
 							}
 
-							if (Client.cutsceneCameraCompleted && childComponent.anObjectArray1353 != null) {
+							if (Client.cutsceneCameraCompleted && childComponent.onCamFinished != null) {
 								val hookRequest = HookRequest()
 								hookRequest.source = childComponent
-								hookRequest.params = childComponent.anObjectArray1353
+								hookRequest.params = childComponent.onCamFinished
 								Client.PENDING_HOOK_REQUESTS.addFirst(hookRequest)
 							}
 						}
@@ -813,7 +813,7 @@ object InterfaceRenderer {
 			hook = Client.PENDING_HOOK_REQUESTS.getNext() as HookRequest?
 		}
 
-		if (anInt8308 == 0) {
+		if (dragTickCount == 0) {
 			Client.draggingComponent = null
 			Client.selectedComponent = null
 		}
@@ -896,22 +896,22 @@ object InterfaceRenderer {
 		if (interfaceComponent.contentType == ComponentContentType.GAME_WINDOW) {
 			Client.GAME_SCREEN_INTERFACE = interfaceComponent
 		}
-		if (hookRequest && interfaceComponent.anObjectArray1271 != null && (width != interfaceComponent.width || height != interfaceComponent.height)) {
+		if (hookRequest && interfaceComponent.onResize != null && (width != interfaceComponent.width || height != interfaceComponent.height)) {
 			val hookrequest7 = HookRequest()
 			hookrequest7.source = interfaceComponent
-			hookrequest7.params = interfaceComponent.anObjectArray1271
+			hookrequest7.params = interfaceComponent.onResize
 			Client.PENDING_HOOK_REQUESTS.addFirst(hookrequest7)
 		}
 	}
 
 	@JvmStatic
-	fun method12221(component: Component, offsetX: Int, offsetY: Int) {
+	fun startDragging(component: Component, offsetX: Int, offsetY: Int) {
 		if (Client.draggingComponent == null && !MiniMenu.isOpen && component != null && Client.hasDepthFlags(component)) {
 			Client.draggingComponent = component
 			Client.selectedComponent = Component.getDepthChild(component)
 			Client.mouseX = offsetX
 			Client.mouseY = offsetY
-			anInt8308 = 0
+			dragTickCount = 0
 			Client.isDragThresholdMet = false
 		}
 	}
@@ -932,10 +932,10 @@ object InterfaceRenderer {
 	@JvmStatic
 	fun setUseOptionFlags(componentDefs: Component?, flags: Int, interfaceId: Int) {
 		if (componentDefs != null) {
-			if (componentDefs.anObjectArray1400 != null) {
+			if (componentDefs.onTargetEnter != null) {
 				val hookrequest4 = HookRequest()
 				hookrequest4.source = componentDefs
-				hookrequest4.params = componentDefs.anObjectArray1400
+				hookrequest4.params = componentDefs.onTargetEnter
 				CS2Executor.executeHookInner(hookrequest4)
 			}
 			Client.interfaceSelectionActive = true

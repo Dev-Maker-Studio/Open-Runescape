@@ -12,14 +12,14 @@ import com.jagex.game.runetek5.config.material.texture.TextureRaster
  */
 class TextureOpTile : TextureOperation(1, false) {
 
-    @JvmField var anInt9673: Int = 4
-    @JvmField var anInt9674: Int = 4
+    @JvmField var tileCountX: Int = 4
+    @JvmField var tileCountY: Int = 4
 
     override fun getMonochromeOutput(y: Int): IntArray {
         val output = monochromeImageCache.getPalette(y)
         if (monochromeImageCache.dirty) {
-            val tileWidth = TextureRaster.currentWidth / anInt9673
-            val tileHeight = TextureRaster.currentHeight / anInt9674
+            val tileWidth = TextureRaster.currentWidth / tileCountX
+            val tileHeight = TextureRaster.currentHeight / tileCountY
             val childOutput: IntArray
             val index: Int
             if (tileHeight > 0) {
@@ -45,8 +45,8 @@ class TextureOpTile : TextureOperation(1, false) {
     override fun getColorOutput(y: Int): Array<IntArray> {
         val output = colorImageCache.getPalette(y)
         if (colorImageCache.dirty) {
-            val tileWidth = TextureRaster.currentWidth / anInt9673
-            val tileHeight = TextureRaster.currentHeight / anInt9674
+            val tileWidth = TextureRaster.currentWidth / tileCountX
+            val tileHeight = TextureRaster.currentHeight / tileCountY
             val childOutput: Array<IntArray>
             if (tileHeight > 0) {
                 val tileY = y % tileHeight
@@ -82,8 +82,8 @@ class TextureOpTile : TextureOperation(1, false) {
 
     override fun decodeOpcode(opcode: Int, buffer: Packet) {
         when (opcode) {
-            0 -> anInt9673 = buffer.readUByte()
-            1 -> anInt9674 = buffer.readUByte()
+            0 -> tileCountX = buffer.readUByte()
+            1 -> tileCountY = buffer.readUByte()
         }
     }
 }
