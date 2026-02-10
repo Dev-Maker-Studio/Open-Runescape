@@ -38,7 +38,7 @@ class AnimatedGameObject(
     var shadow: Shadow? = null
     var particleSystem: ParticleSystem? = null
     var currentCycle: Int = 0
-    var aBool1552: Boolean = false
+    var isShadowCurrent: Boolean = false
     var gameobjectId: Int = -1
     var modelMinY: Int = 0
 
@@ -161,7 +161,7 @@ class AnimatedGameObject(
         } else {
             sequence.animateSequence(randomSequenceId, 0, additionalAnimationFlag, replay)
             currentCycle = Client.cycles
-            aBool1552 = false
+            isShadowCurrent = false
             pairModel = null
         }
     }
@@ -181,12 +181,12 @@ class AnimatedGameObject(
 
         if (!hasSequenceId && gameobjectId != loctype.id) {
             animate(true, -1, 0)
-            aBool1552 = false
+            isShadowCurrent = false
             pairModel = null
         }
-        method2133()
+        progressAnimation()
         if (hasShadow) {
-            hasShadow = hasShadow && renderShadow && !aBool1552 && (PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0)
+            hasShadow = hasShadow && renderShadow && !isShadowCurrent && (PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0)
         }
         if (bool3 && !hasShadow) {
             gameobjectId = loctype.id
@@ -197,7 +197,7 @@ class AnimatedGameObject(
         val shadowLocal = shadow
         if (hasShadow && shadowLocal != null) {
             scene.removeShadow(shadowLocal, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), castShadowAtPlane)
-            aBool1552 = false
+            isShadowCurrent = false
         }
         val currentHeight = scene.localHeightmap!![heightLevel.toInt()]!!
         val nextHeight: Ground? = if (overlayHidden) {
@@ -232,7 +232,7 @@ class AnimatedGameObject(
                     val shadowLocal = shadow
                     if (shadowLocal != null) {
                         scene.renderShadows(shadowLocal, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), castShadowAtPlane)
-                        aBool1552 = true
+                        isShadowCurrent = true
                     }
                 }
                 modelMinY = model.getMinY()
@@ -271,7 +271,7 @@ class AnimatedGameObject(
                     if (shadowLocal != null) {
                         castShadowAtPlane = null
                         scene.renderShadows(shadowLocal, heightLevel.toInt(), scenePosition.x.toInt(), scenePosition.z.toInt(), null)
-                        aBool1552 = true
+                        isShadowCurrent = true
                     }
                 }
                 if (model != null) {
@@ -289,11 +289,11 @@ class AnimatedGameObject(
         return model
     }
 
-    fun method2133() {
+    fun progressAnimation() {
         if (sequence.hasType()) {
             if (sequence.progressCycle(Client.cycles - currentCycle)) {
                 if (PreferenceManager.preferences!!.sceneryShadows!!.getValue() == 2) {
-                    aBool1552 = false
+                    isShadowCurrent = false
                 }
                 if (sequence.needsReset()) {
                     sequence.update(-1)

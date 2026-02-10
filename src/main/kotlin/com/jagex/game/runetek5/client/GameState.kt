@@ -67,7 +67,7 @@ enum class GameState {
         @JvmStatic
         @JvmName("method6270")
         fun method6270() {
-            if (StaticMethods.method4180(Client.gameState)) {
+            if (StaticMethods.isInLobbyState(Client.gameState)) {
                 if (Client.LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
                     Client.setGameState(UNK_14)
                 } else {

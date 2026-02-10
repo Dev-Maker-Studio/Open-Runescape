@@ -20,7 +20,7 @@ enum class ServerEnvironment(
 
     companion object {
         @JvmField var SERVER_ENVIRONMENT: ServerEnvironment? = null
-        @JvmField var anInt9282: Int = 0
+        @JvmField var flashCycleCounter: Int = 0
 
         @JvmStatic
         fun getUrl(): String {

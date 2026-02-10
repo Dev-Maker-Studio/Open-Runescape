@@ -405,7 +405,7 @@ object InterfaceRenderer {
 											continue
 
 										val worldPosition = IntArray(3)
-										worldMapElement.method14775(absX, absY, worldPosition)
+										worldMapElement.mapToGameCoords(absX, absY, worldPosition)
 										if (worldPosition != null) {
 											if (KeyRecorder.keyRecorder?.held(82) == true && Client.PLAYER_RIGHTS > 0) {
 												CommandExecutor.executeTeleportCommand(worldPosition[0], worldPosition[1], worldPosition[2])
@@ -427,14 +427,14 @@ object InterfaceRenderer {
 
 									if (leftClickVar && Client.menuItemCount > 0) {
 										if (Client.menuItemCount == 1 && (Client.mouseX != MouseRecord.recorder?.getMouseX() ?: 0 || Client.mouseY != MouseRecord.recorder?.getMouseY() ?: 0)) {
-											Interface.anInt3008 = WorldMapSub1.mapCenterX
+											Interface.worldMapDragStartX = WorldMapSub1.mapCenterX
 											worldMapDragStartY = WorldMapSub1.mapCenterY
 											Client.menuItemCount = 2
 										}
 
 										if (Client.menuItemCount == 2) {
 											Client.isMapMoving = true
-											WorldMapSub1.setMapCenterX(Interface.anInt3008 + ((Client.mouseX - (MouseRecord.recorder?.getMouseX() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
+											WorldMapSub1.setMapCenterX(Interface.worldMapDragStartX + ((Client.mouseX - (MouseRecord.recorder?.getMouseX() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
 											WorldMapSub1.setMapCenterY(worldMapDragStartY - ((Client.mouseY - (MouseRecord.recorder?.getMouseY() ?: 0)) * 2.0 / WorldMap.requestedMapZoom).toInt())
 										}
 										continue
@@ -442,9 +442,9 @@ object InterfaceRenderer {
 
 									if (Client.menuItemCount > 0 && !Client.isMapMoving) {
 										if ((Client.menuOpenMode == 1 || MiniMenu.method12562()) && MiniMenu.entryCount > 2) {
-											StaticMethods.method4164(Client.mouseX, Client.mouseY)
+											StaticMethods.processMenuSelection(Client.mouseX, Client.mouseY)
 										} else if (MiniMenu.hasEntries()) {
-											StaticMethods.method4164(Client.mouseX, Client.mouseY)
+											StaticMethods.processMenuSelection(Client.mouseX, Client.mouseY)
 										}
 									}
 

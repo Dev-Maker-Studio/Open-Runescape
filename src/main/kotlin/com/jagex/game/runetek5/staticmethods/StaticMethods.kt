@@ -57,60 +57,60 @@ object StaticMethods {
     @JvmField val aClass384185: Matrix44 = Matrix44()
     @JvmField val INDEX36_FILE_CACHE: IterableNodeMap<VorbisNode> = IterableNodeMap(4)
     @JvmField var WORLD_LIST_VERSION: Int = 0
-    @JvmField var anInt2982: Int = 0
-    @JvmField var aNativeSprite4110: NativeSprite? = null
+    @JvmField var menuFontIndex: Int = 0
+    @JvmField var menuTopBorderSprite: NativeSprite? = null
     @JvmField var initializedFontcombos: FontCombo? = null
-    @JvmField var anInt5760: Int = 0
-    @JvmField var aNativeSprite612: NativeSprite? = null
-    @JvmField var anInt833: Int = 0
-    @JvmField var aShort828: Short = 0
-    @JvmField var aShort829: Short = 0
-    @JvmField var aShort830: Short = 0
-    @JvmField var anInt824: Int = 0
-    @JvmField var aBool826: Boolean = false
-    @JvmField var anInt72: Int = -2
-    @JvmField var anInt106: Int = -2
-    @JvmField var anInt107: Int = -2
-    @JvmField var anInt108: Int = -1
-    @JvmField var anInt109: Int = -1
-    @JvmField var anInt113: Int = 0
-    @JvmField var aBool74: Boolean = false
-    @JvmField var anInt76: Int = -1
-    @JvmField var aString99: String = ""
-    @JvmField var aString102: String = ""
-    @JvmField var anInt118: Int = 0
+    @JvmField var worldMapViewWidth: Int = 0
+    @JvmField var loadingBarTileSprite: NativeSprite? = null
+    @JvmField var cameraTargetAbsY: Int = 0
+    @JvmField var savedAspectFovMin: Short = 0
+    @JvmField var savedAspectFovMax: Short = 0
+    @JvmField var savedFovScaleMax: Short = 0
+    @JvmField var cutsceneViewportWidth: Int = 0
+    @JvmField var hasSavedFov: Boolean = false
+    @JvmField var lobbyLoginResponse: Int = -2
+    @JvmField var worldLoginResponse: Int = -2
+    @JvmField var lastDisconnectResponse: Int = -2
+    @JvmField var lastDisconnectArg1: Int = -1
+    @JvmField var lastDisconnectArg2: Int = -1
+    @JvmField var loginHandshakeCode: Int = 0
+    @JvmField var hasStoredCredentials: Boolean = false
+    @JvmField var selectedWorldId: Int = -1
+    @JvmField var loginUsername: String = ""
+    @JvmField var loginPassword: String = ""
+    @JvmField var voronoiF2Distance: Int = 0
     @JvmField var initialApplet: Loader? = null
-    @JvmField var aLong10459: Long = 0
+    @JvmField var errorReportUserId: Long = 0
     @JvmField var SPRITES_INDEX: Js5ResourceProvider? = null
-    @JvmField var anIntArray36: IntArray? = null
+    @JvmField var circleInnerRadiusBuffer: IntArray? = null
     @JvmField var aClass2505450: SoundBankCache? = null
-    @JvmField var anInt2262: Int = 0
-    @JvmField var anInt1005: Int = 0
-    @JvmField var anInt148: Int = 0
-    @JvmField var anInt3555: Int = 0
-    @JvmField var anInt4664: Int = 0
-    @JvmField var aBool1962: Boolean = false
-    @JvmField var anInt5396: Int = 0
-    @JvmField var aNativeSprite9315: NativeSprite? = null
-    @JvmField var anInt2300: Int = 0
+    @JvmField var menuBackgroundAlpha: Int = 0
+    @JvmField var menuHoverTextColor: Int = 0
+    @JvmField var menuCornerSpriteId: Int = 0
+    @JvmField var menuOpenX: Int = 0
+    @JvmField var songFadeInRate: Int = 0
+    @JvmField var songLooping: Boolean = false
+    @JvmField var menuSideBorderSpriteId: Int = 0
+    @JvmField var menuBottomRightCornerSprite: NativeSprite? = null
+    @JvmField var menuOpenY: Int = 0
     @JvmField var aNodeSub79563: MusicTrack? = null
-    @JvmField var aNativeSprite1571: NativeSprite? = null
-    @JvmField var anInt3145: Int = 0
-    @JvmField var anInt2912: Int = 0
-    @JvmField var anInt5438: Int = 0
+    @JvmField var menuBottomLeftCornerSprite: NativeSprite? = null
+    @JvmField var menuTopBorderSpriteId: Int = 0
+    @JvmField var cameraUpdateCooldown: Int = 0
+    @JvmField var loadingBarBackgroundSpriteId: Int = 0
 
     @JvmStatic
-    fun method6907() {
+    fun resetSceneAndCaches() {
         Resource.mapRegion!!.resetInteractiveEntities()
         ComponentMinimap.reset()
         TypeLists.resetCachedData(true)
-        method4250()
+        resetAllVorbisStreams()
         System.gc()
         Renderers.activeToolkit!!.applyClearFlags(2, 0)
     }
 
     @JvmStatic
-    fun method813(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
+    fun drawUnclippedFilledCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
         var i_5 = 0
         var i_6 = i_2
         var i_7 = -i_2
@@ -154,26 +154,26 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method6731(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+    fun drawStrokedAndFilledRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
         if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
-            ArrayUtils.method3230(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
+            ArrayUtils.drawUnclippedStrokedAndFilledRectangle(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
         } else {
-            ArrayUtils.method4034(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
+            ArrayUtils.drawClippedStrokedAndFilledRectangle(i_0, i_1, i_2, i_3, i_4, i_5, i_6)
         }
     }
 
     @JvmStatic
-    fun method3936(ints_0: Array<IntArray>?) {
+    fun setPixelBuffer(ints_0: Array<IntArray>?) {
         TextureShapeRasterizer.pixelBuffer = ints_0
     }
 
     @JvmStatic
-    fun method7914(long_0: Long): Int {
+    fun millisToJagexDays(long_0: Long): Int {
         return ((long_0 / 86400000L) - 11745).toInt()
     }
 
     @JvmStatic
-    fun method7039() {
+    fun drawInterfaces() {
         InterfaceComponentRenderer.deferredDragComponents = null
         Component.drawInterface(Client.BASE_WINDOW_ID, 0, 0, GameShell.screenCanvasWidth, GameShell.screenCanvasHeight * -969250379, 0, 0, -1)
         if (InterfaceComponentRenderer.deferredDragComponents != null) {
@@ -197,12 +197,12 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method755(var_3: Char): Int {
+    fun createShadowColorFromAlpha(var_3: Char): Int {
         return 68 or 22528 or 5505024 or ((var_3.code and 0xff) shl 24)
     }
 
     @JvmStatic
-    fun method4824(bytes_0: ByteArray, i_1: Int, i_2: Int): String {
+    fun decodeUtf8(bytes_0: ByteArray, i_1: Int, i_2: Int): String {
         val arr_4 = CharArray(i_2)
         var i_5 = 0
         var i_6 = i_1
@@ -257,58 +257,58 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method5360(randomInteger: Int, limit: Int): Int {
+    fun flooredMod(randomInteger: Int, limit: Int): Int {
         val offset = randomInteger shr 31 and (limit - 1)
         return (randomInteger + (randomInteger ushr 31)) % limit + offset
     }
 
     @JvmStatic
-    fun method6176(i_0: Int): Boolean {
+    fun isPlayerOption(i_0: Int): Boolean {
         return i_0 == 44 || i_0 == 45 || i_0 == 46 || i_0 == 47 || i_0 == 48 || i_0 == 49 || i_0 == 50 || i_0 == 51 || i_0 == 52 || i_0 == 53 || i_0 == 15
     }
 
     @JvmStatic
-    fun method6772(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+    fun drawFilledRectangleToPixelBuffer(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
-            method1564(i_0, i_1, i_2, i_3, i_4)
+            fillRectanglePixels(i_0, i_1, i_2, i_3, i_4)
         } else {
-            ArrayUtils.method7728(i_0, i_1, i_2, i_3, i_4)
+            ArrayUtils.fillClippedRectangle(i_0, i_1, i_2, i_3, i_4)
         }
     }
 
     @JvmStatic
-    fun method8209(toolkit: AbstractToolkit, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-        if ((aNativeSprite4110 == null || StaticMedia.aNativeSprite5339 == null || aNativeSprite1571 == null) && Resource.SPRITES!!.isFileCached(anInt3145) && Resource.SPRITES!!.isFileCached(anInt5396) && Resource.SPRITES!!.isFileCached(anInt148)) {
-            val spriteType = SpriteType.listSingle(Resource.SPRITES, anInt5396, 0)
+    fun drawMenuBorderSprites(toolkit: AbstractToolkit, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
+        if ((menuTopBorderSprite == null || StaticMedia.aNativeSprite5339 == null || menuBottomLeftCornerSprite == null) && Resource.SPRITES!!.isFileCached(menuTopBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuSideBorderSpriteId) && Resource.SPRITES!!.isFileCached(menuCornerSpriteId)) {
+            val spriteType = SpriteType.listSingle(Resource.SPRITES, menuSideBorderSpriteId, 0)
             StaticMedia.aNativeSprite5339 = toolkit.generateSprite(spriteType, true)
             spriteType!!.flipHorizontal()
             StaticMedia.aNativeSprite3452 = toolkit.generateSprite(spriteType, true)
-            aNativeSprite4110 = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES, anInt3145, 0), true)
-            val class9111 = SpriteType.listSingle(Resource.SPRITES, anInt148, 0)
-            aNativeSprite1571 = toolkit.generateSprite(class9111, true)
+            menuTopBorderSprite = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES, menuTopBorderSpriteId, 0), true)
+            val class9111 = SpriteType.listSingle(Resource.SPRITES, menuCornerSpriteId, 0)
+            menuBottomLeftCornerSprite = toolkit.generateSprite(class9111, true)
             class9111!!.flipHorizontal()
-            aNativeSprite9315 = toolkit.generateSprite(class9111, true)
+            menuBottomRightCornerSprite = toolkit.generateSprite(class9111, true)
         }
-        if (aNativeSprite4110 != null && StaticMedia.aNativeSprite5339 != null && aNativeSprite1571 != null) {
-            val i_7 = (i_3 - aNativeSprite1571!!.getWidth() * 2) / aNativeSprite4110!!.getWidth()
+        if (menuTopBorderSprite != null && StaticMedia.aNativeSprite5339 != null && menuBottomLeftCornerSprite != null) {
+            val i_7 = (i_3 - menuBottomLeftCornerSprite!!.getWidth() * 2) / menuTopBorderSprite!!.getWidth()
             var i_8: Int
             i_8 = 0
             while (i_8 < i_7) {
-                aNativeSprite4110!!.draw(i_1 + aNativeSprite1571!!.getWidth() + i_8 * aNativeSprite4110!!.getWidth(), i_2 + i_4 - aNativeSprite4110!!.getHeight())
+                menuTopBorderSprite!!.draw(i_1 + menuBottomLeftCornerSprite!!.getWidth() + i_8 * menuTopBorderSprite!!.getWidth(), i_2 + i_4 - menuTopBorderSprite!!.getHeight())
                 i_8++
             }
-            i_8 = (i_4 - i_5 - aNativeSprite1571!!.getHeight()) / StaticMedia.aNativeSprite5339!!.getHeight()
+            i_8 = (i_4 - i_5 - menuBottomLeftCornerSprite!!.getHeight()) / StaticMedia.aNativeSprite5339!!.getHeight()
             for (i_9 in 0 until i_8) {
                 StaticMedia.aNativeSprite5339!!.draw(i_1, i_5 + i_2 + i_9 * StaticMedia.aNativeSprite5339!!.getHeight())
                 StaticMedia.aNativeSprite3452!!.draw(i_3 + i_1 - StaticMedia.aNativeSprite3452!!.getWidth(), i_5 + i_2 + i_9 * StaticMedia.aNativeSprite5339!!.getHeight())
             }
-            aNativeSprite1571!!.draw(i_1, i_2 + i_4 - aNativeSprite1571!!.getHeight())
-            aNativeSprite9315!!.draw(i_3 + i_1 - aNativeSprite1571!!.getWidth(), i_2 + i_4 - aNativeSprite1571!!.getHeight())
+            menuBottomLeftCornerSprite!!.draw(i_1, i_2 + i_4 - menuBottomLeftCornerSprite!!.getHeight())
+            menuBottomRightCornerSprite!!.draw(i_3 + i_1 - menuBottomLeftCornerSprite!!.getWidth(), i_2 + i_4 - menuBottomLeftCornerSprite!!.getHeight())
         }
     }
 
     @JvmStatic
-    fun method14572(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+    fun drawStrokedRectangleToPixelBuffer(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         var i_2Var = i_2
         var i_3Var = i_3
         ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_2Var++], i_0, i_1, i_4)
@@ -324,67 +324,67 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method14501(i_0: Int, i_1: Int) {
+    fun setSongVolume(i_0: Int, i_1: Int) {
         SongPlayer.method2580(i_0, i_1)
     }
 
     @JvmStatic
-    fun method1169(var_0: Char): Boolean {
+    fun isAlphabetic(var_0: Char): Boolean {
         return var_0 >= 'A' && var_0 <= 'Z' || var_0 >= 'a' && var_0 <= 'z'
     }
 
     @JvmStatic
-    fun method14668(): CheckEmailRequest {
+    fun getCheckEmailStatus(): CheckEmailRequest {
         return AccountCreationStage.checkemailRequeststatus ?: CheckEmailRequest.DEFAULT
     }
 
     @JvmStatic
-    fun method1564(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+    fun fillRectanglePixels(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
         for (i_6 in i_2..i_3) {
             ArrayUtils.setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_6], i_0, i_1, i_4)
         }
     }
 
     @JvmStatic
-    fun method304(): Int {
+    fun getWorldMapZoomLevel(): Int {
         return if (WorldMap.requestedMapZoom == 3.0f) 37 else if (WorldMap.requestedMapZoom == 4.0f) 50 else if (WorldMap.requestedMapZoom == 6.0f) 75 else if (WorldMap.requestedMapZoom == 8.0f) 100 else 200
     }
 
     @JvmStatic
-    fun method3850(matrix440: Matrix44, centerX: Float, centerY: Float, f_4: Float, f_5: Float, width: Int, length: Int) {
+    fun setupOrthoProjection(matrix440: Matrix44, centerX: Float, centerY: Float, f_4: Float, f_5: Float, width: Int, length: Int) {
         val viewRangeEnd = Resource.mapRegion!!.viewRangeEnd
         val viewRangeStart = Resource.mapRegion!!.viewRangeStart
-        matrix440.method6531(centerX, centerY, f_4, f_5, viewRangeStart.toFloat(), viewRangeEnd.toFloat(), width.toFloat(), length.toFloat())
+        matrix440.setPerspective(centerX, centerY, f_4, f_5, viewRangeStart.toFloat(), viewRangeEnd.toFloat(), width.toFloat(), length.toFloat())
     }
 
     @JvmStatic
-    fun method488(i_0: Int, i_1: Int): Int {
+    fun calculateSoundAttenuation(i_0: Int, i_1: Int): Int {
         return if (i_1 < 0) i_0 else (i_0 * Math.sqrt(1.220703125E-4 * (16384 - i_1)) + 0.5).toInt()
     }
 
     @JvmStatic
-    fun method458(i_0: Int) {
+    fun selectWorldMapElement(i_0: Int) {
         WorldMapSub1.someMecId = i_0
         WorldMapSub1.highlightedCategoryId = -1
         JSObjectManager.anInt4185 = 3
-        ServerEnvironment.anInt9282 = 100
+        ServerEnvironment.flashCycleCounter = 100
     }
 
     @JvmStatic
-    fun method8020() {
+    fun updateSoundSystems() {
         MusicSample.method7042()
-        method15420()
+        updateSongFade()
         SoundEffectPlayer.updatePlayers()
-        AreaSoundPlayer.method5961()
+        AreaSoundPlayer.updateSpatialMusicVolume()
     }
 
     @JvmStatic
-    fun method12402(var_0: Char): Boolean {
+    fun isPrintableChar(var_0: Char): Boolean {
         return var_0 >= ' ' && var_0 <= '~' || (var_0.code >= 160 && var_0.code <= 255 || (var_0.code == 8364 || var_0.code == 338 || var_0.code == 8212 || var_0.code == 339 || var_0.code == 376))
     }
 
     @JvmStatic
-    fun method8146() {
+    fun applyCameraYawLeft() {
         if (!Client.cameraYawVelocityApplied) {
             Client.cameraYawVelocity += (-24.0f - Client.cameraYawVelocity) / 2.0f
             Client.sendCameraAngleToServer = true
@@ -393,20 +393,20 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method15430(i_0: Int) {
+    fun switchToWorldLogin(i_0: Int) {
         if (GameState.method6693()) {
-            if (i_0 != anInt76) {
+            if (i_0 != selectedWorldId) {
                 LoginManager.aLong77 = -1L
             }
 
-            anInt76 = i_0
+            selectedWorldId = i_0
             Client.LOBBY_CONNECTION_CONTEXT!!.closeConnection()
             Client.setGameState(GameState.UNK_14)
         }
     }
 
     @JvmStatic
-    fun method16114() {
+    fun applyCameraPitchDown() {
         if (!Client.cameraPitchVelocityApplied) {
             Client.cameraPitchVelocity += (-12.0f - Client.cameraPitchVelocity) / 2.0f
             Client.sendCameraAngleToServer = true
@@ -415,16 +415,16 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method6292(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
+    fun drawFilledCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
         if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_2 >= TextureOpRasterizer.clipMinY && i_2 + i_1 <= TextureOpRasterizer.clipMaxY) {
-            method813(i_0, i_1, i_2, i_3)
+            drawUnclippedFilledCircle(i_0, i_1, i_2, i_3)
         } else {
-            ArrayUtils.method4866(i_0, i_1, i_2, i_3)
+            ArrayUtils.drawClippedFilledCircle(i_0, i_1, i_2, i_3)
         }
     }
 
     @JvmStatic
-    fun method14263(i_0: Int, i_1: Int) {
+    fun setWorldMapScrollTarget(i_0: Int, i_1: Int) {
         WorldMapSub1.scrollTargetX = i_0 - WorldMap.mapSquareAbsX
         WorldMapSub1.scrollTargetY = i_1 - WorldMap.mapSquareAbsY
     }
@@ -435,7 +435,7 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method15420() {
+    fun updateSongFade() {
         try {
             if (SoundResourceManager.songLoadState == 1) {
                 var volume = SoundResourceManager.midiPcmStream!!.getMusicVolume()
@@ -460,13 +460,13 @@ object StaticMethods {
             if (SoundResourceManager.songLoadState == 3) {
                 var volume = SoundResourceManager.midiPcmStream!!.getMusicVolume()
                 if (volume < AreaSoundPlayer.SOUND_LEVEL && SoundResourceManager.midiPcmStream!!.dataLoaded()) {
-                    volume += anInt4664
+                    volume += songFadeInRate
                     if (volume > AreaSoundPlayer.SOUND_LEVEL) {
                         volume = AreaSoundPlayer.SOUND_LEVEL
                     }
                     SoundResourceManager.midiPcmStream!!.setMusicVolume(volume)
                 } else {
-                    anInt4664 = 0
+                    songFadeInRate = 0
                     SoundResourceManager.songLoadState = 0
                 }
             }
@@ -478,43 +478,43 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method15390(i_0: Int, i_1: Int): Int {
+    fun calculateSoundPan(i_0: Int, i_1: Int): Int {
         return if (i_1 < 0) -i_0 else (i_0 * Math.sqrt(1.220703125E-4 * i_1) + 0.5).toInt()
     }
 
     @JvmStatic
-    fun method3953() {
-        aShort828 = Client.aspectFovMin
-        aShort829 = Client.aspectFovMax
+    fun saveFovForCutscene() {
+        savedAspectFovMin = Client.aspectFovMin
+        savedAspectFovMax = Client.aspectFovMax
         AbstractMousePacket.aShort7079 = Client.fovScaleMin
-        aShort830 = Client.fovScaleMax
-        aBool826 = true
-        if (anInt824 != 0 && CutsceneTypeList.anInt825 != 0) {
+        savedFovScaleMax = Client.fovScaleMax
+        hasSavedFov = true
+        if (cutsceneViewportWidth != 0 && CutsceneTypeList.cutsceneViewportHeight != 0) {
             Client.fovScaleMin = 334
             Client.fovScaleMax = 334
-            Client.aspectFovMax = (anInt824 * 512 / CutsceneTypeList.anInt825).toShort()
+            Client.aspectFovMax = (cutsceneViewportWidth * 512 / CutsceneTypeList.cutsceneViewportHeight).toShort()
             Client.aspectFovMin = Client.aspectFovMax
         }
     }
 
     @JvmStatic
-    fun method6140(): Boolean {
+    fun isSongTransitioning(): Boolean {
         return SoundResourceManager.songLoadState != 0
     }
 
     @JvmStatic
-    fun method4164(i_0: Int, i_1: Int) {
+    fun processMenuSelection(i_0: Int, i_1: Int) {
         if (MiniMenu.anInt167 == 1) {
             MenuInteraction.processMenuclick(MiniMenu.aCacheableNodeSub7438, i_0, i_1)
         } else if (MiniMenu.anInt167 == 2) {
-            method4653(i_0, i_1)
+            openContextMenu(i_0, i_1)
         }
         MiniMenu.anInt167 = 0
         MiniMenu.aCacheableNodeSub7438 = null
     }
 
     @JvmStatic
-    fun method4166() {
+    fun applyCameraPitchUp() {
         if (!Client.cameraPitchVelocityApplied) {
             Client.cameraPitchVelocity += (12.0f - Client.cameraPitchVelocity) / 2.0f
             Client.sendCameraAngleToServer = true
@@ -523,12 +523,12 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method4180(i_0: GameState): Boolean {
+    fun isInLobbyState(i_0: GameState): Boolean {
         return i_0 == GameState.UNK_7 || i_0 == GameState.UNK_6
     }
 
     @JvmStatic
-    fun method1630(i_0: Int, i_1: Int, i_2: Int, i_4: Int, i_6: Int, class282Sub50Sub157: ColoredMiniMenuEntry, fontrenderer8: AbstractFontRenderer, fontmetrics9: FontMetrics, i_10: Int, i_11: Int) {
+    fun drawColoredMenuEntry(i_0: Int, i_1: Int, i_2: Int, i_4: Int, i_6: Int, class282Sub50Sub157: ColoredMiniMenuEntry, fontrenderer8: AbstractFontRenderer, fontmetrics9: FontMetrics, i_10: Int, i_11: Int) {
         var i_101 = i_10
         if (i_0 > i_2 && i_0 < i_2 + i_4 && i_1 > i_6 - fontmetrics9.topPadding - 1 && i_1 < fontmetrics9.bottomPadding + i_6) {
             i_101 = i_11
@@ -539,7 +539,7 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method4653(mouseX: Int, mouseY: Int) {
+    fun openContextMenu(mouseX: Int, mouseY: Int) {
         if (Client.ENTITY_DEFAULTS!!.aBool7044 || MiniMenu.entryCount != 1 && (!SHOW_FACE_HERE || MiniMenu.entryCount != 2 || !MiniMenu.aCacheableNodeSub712!!.action.equals(LocalizedText.FACE_HERE.translate(Client.CURRENT_LANGUAGE!!)))) {
             val fontMetrics = FontMetrics.getForMinimenu()
             var i_4 = fontMetrics!!.getWidthNoSprites(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
@@ -589,8 +589,8 @@ object StaticMethods {
             if (i_7 < 0) {
                 i_7 = 0
             }
-            anInt3555 = i_8
-            anInt2300 = i_7
+            menuOpenX = i_8
+            menuOpenY = i_7
             MiniMenu.anInt8975 = i_4
             NativeSprite.alphaJitter = (Math.random() * 24.0).toInt()
             MiniMenu.isOpen = true
@@ -607,7 +607,7 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method7931(random: Random, limit: Int): Int {
+    fun boundedRandom(random: Random, limit: Int): Int {
         if (limit <= 0) {
             throw IllegalArgumentException()
         }
@@ -619,14 +619,14 @@ object StaticMethods {
         do {
             randomInteger = random.nextInt()
         } while (randomInteger >= i_3)
-        return method5360(randomInteger, limit)
+        return flooredMod(randomInteger, limit)
     }
 
     @JvmStatic
-    fun method4250() {
+    fun resetAllVorbisStreams() {
         var vorbis = INDEX36_FILE_CACHE.first()
         while (vorbis != null) {
-            method1563(vorbis.fileId)
+            stopVorbisStream(vorbis.fileId)
             vorbis = INDEX36_FILE_CACHE.next()
         }
     }
@@ -641,7 +641,7 @@ object StaticMethods {
     }
 
     @JvmStatic
-    fun method1563(fileId: Int) {
+    fun stopVorbisStream(fileId: Int) {
         val varbisNode = INDEX36_FILE_CACHE.get(fileId.toLong())
         if (varbisNode != null) {
             varbisNode.vfReference!!.shutdown()

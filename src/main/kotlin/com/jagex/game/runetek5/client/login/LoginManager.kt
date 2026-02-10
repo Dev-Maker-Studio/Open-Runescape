@@ -126,7 +126,7 @@ object LoginManager {
                 if (socialNetworkLogin && loginStage.ordinal >= LoginStage.UNK_65.ordinal) {
                     timeout = 6000
                 }
-                if (lobbyStage != LobbyStage.LOBBY_TO_WORLD || loginStage != LoginStage.UNK_201 && StaticMethods.anInt106 != 42) {
+                if (lobbyStage != LobbyStage.LOBBY_TO_WORLD || loginStage != LoginStage.UNK_201 && StaticMethods.worldLoginResponse != 42) {
                     anInt90++
                 }
                 if (anInt90 > timeout) {
@@ -166,7 +166,7 @@ object LoginManager {
                             tcpPacket.buffer.writeByte(if (Client.gameState == GameState.UNK_10) 1 else 0)
                         }
                         val seedBlock = encodeClientSeed()
-                        seedBlock.writeByte(StaticMethods.anInt76)
+                        seedBlock.writeByte(StaticMethods.selectedWorldId)
                         seedBlock.writeShort((Math.random() * 9.9999999E7).toInt())
                         seedBlock.writeByte(Client.CURRENT_LANGUAGE!!.getValue())
                         seedBlock.writeInt(Client.AFFILIATE)
@@ -278,7 +278,7 @@ object LoginManager {
                             startPositionLoginBlock = loginBlock.currentPosition
                             loginBlock.writeByte(if (aLong77 == -1L) 1 else 0)
                             if (aLong77 == -1L) {
-                                loginBlock.writeString(StaticMethods.aString99)
+                                loginBlock.writeString(StaticMethods.loginUsername)
                             } else {
                                 loginBlock.writeLong(aLong77)
                             }
@@ -333,7 +333,7 @@ object LoginManager {
                             startPositionLoginBlock = loginBlock.currentPosition
                             loginBlock.writeByte(if (aLong77 == -1L) 1 else 0)
                             if (aLong77 == -1L) {
-                                loginBlock.writeString(StaticMethods.aString99)
+                                loginBlock.writeString(StaticMethods.loginUsername)
                             } else {
                                 loginBlock.writeLong(aLong77)
                             }
@@ -404,7 +404,7 @@ object LoginManager {
                             method13784(42)
                             return
                         }
-                        StaticMethods.aBool74 && !socialNetworkLogin && StaticMethods.anInt76 != -1 && i_10 == 35 -> {
+                        StaticMethods.hasStoredCredentials && !socialNetworkLogin && StaticMethods.selectedWorldId != -1 && i_10 == 35 -> {
                             socialNetworkLogin = true
                             anInt90 = 0
                             loginStage = LoginStage.UNK_18
@@ -441,7 +441,7 @@ object LoginManager {
                 } else if (loginStage == LoginStage.UNK_201) {
                     if (CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.available(2)) {
                         CURRENT_CONNECTION_CONTEXT!!.getConnection()!!.read(CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer, 0, 2)
-                        StaticMethods.anInt113 = ((CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff) shl 8) + (CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[1].toInt() and 0xff)
+                        StaticMethods.loginHandshakeCode = ((CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[0].toInt() and 0xff) shl 8) + (CURRENT_CONNECTION_CONTEXT!!.receivedBuffer.buffer[1].toInt() and 0xff)
                         loginStage = LoginStage.UNK_97
                     }
                 } else if (loginStage == LoginStage.UNK_180) {
@@ -686,8 +686,8 @@ object LoginManager {
     fun method5921() {
         when {
             Client.base64Url != null -> method6160()
-            StaticMethods.anInt76 != -1 -> method4964()
-            else -> lobbyLogin(StaticMethods.aString99, StaticMethods.aString102)
+            StaticMethods.selectedWorldId != -1 -> method4964()
+            else -> lobbyLogin(StaticMethods.loginUsername, StaticMethods.loginPassword)
         }
     }
 
@@ -723,7 +723,7 @@ object LoginManager {
     fun getSeedBlock(password: Boolean): Packet {
         val clientSeed = encodeClientSeed()
         clientSeed.writeLong(0L)
-        clientSeed.writeString(if (password) StaticMethods.aString102!! else lobbyAuthToken!!)
+        clientSeed.writeString(if (password) StaticMethods.loginPassword!! else lobbyAuthToken!!)
         clientSeed.writeLong(aLong86)
         clientSeed.writeLong(Client.clientRandomSeed)
         clientSeed.applyRSA()
@@ -748,8 +748,8 @@ object LoginManager {
     fun method1384() {
         when {
             Client.base64Url != null -> method7022()
-            StaticMethods.anInt76 != -1 -> method537()
-            else -> worldLogin(StaticMethods.aString99, StaticMethods.aString102)
+            StaticMethods.selectedWorldId != -1 -> method537()
+            else -> worldLogin(StaticMethods.loginUsername, StaticMethods.loginPassword)
         }
     }
 
@@ -765,9 +765,9 @@ object LoginManager {
     @JvmStatic
     fun method13784(i_0: Int) {
         if (lobbyStage == LobbyStage.LOGGING_IN_LOBBY) {
-            StaticMethods.anInt72 = i_0
+            StaticMethods.lobbyLoginResponse = i_0
         } else if (lobbyStage == LobbyStage.LOBBY_TO_WORLD) {
-            StaticMethods.anInt106 = i_0
+            StaticMethods.worldLoginResponse = i_0
         }
     }
 
@@ -783,8 +783,8 @@ object LoginManager {
         if (string_0.length <= 320 && GameState.method6693()) {
             Client.LOBBY_CONNECTION_CONTEXT.closeConnection()
             method5118()
-            StaticMethods.aString99 = string_0
-            StaticMethods.aString102 = string_1
+            StaticMethods.loginUsername = string_0
+            StaticMethods.loginPassword = string_1
             Client.setGameState(GameState.UNK_14)
         }
     }
@@ -792,16 +792,16 @@ object LoginManager {
     @JvmStatic
     fun method5558() {
         loginStage = LoginStage.NONE_2
-        StaticMethods.anInt106 = -2
-        StaticMethods.anInt72 = -2
+        StaticMethods.worldLoginResponse = -2
+        StaticMethods.lobbyLoginResponse = -2
     }
 
     @JvmStatic
     fun directLogin(string_0: String, string_1: String) {
         if (string_0.length <= 320 && GameState.method6693()) {
             method5118()
-            StaticMethods.aString99 = string_0
-            StaticMethods.aString102 = string_1
+            StaticMethods.loginUsername = string_0
+            StaticMethods.loginPassword = string_1
             Client.setGameState(GameState.UNK_19)
         }
     }
@@ -809,10 +809,10 @@ object LoginManager {
     @JvmStatic
     fun snLogin(i_0: Int) {
         if (GameState.method6693()) {
-            if (i_0 != StaticMethods.anInt76) {
+            if (i_0 != StaticMethods.selectedWorldId) {
                 aLong77 = -1L
             }
-            StaticMethods.anInt76 = i_0
+            StaticMethods.selectedWorldId = i_0
             Client.setGameState(GameState.UNK_19)
         }
     }
@@ -901,7 +901,7 @@ object LoginManager {
     fun method5118() {
         aLong77 = -1L
         aLong86 = 0L
-        StaticMethods.anInt76 = -1
+        StaticMethods.selectedWorldId = -1
     }
 
     @JvmField
@@ -947,8 +947,8 @@ object LoginManager {
 
         ItemContainer.resetContainerMap()
         Camera.cameraCalculationType = 2
-        StaticMethods.anInt833 = -1
-        PingRequester.anInt5864 = -1
+        StaticMethods.cameraTargetAbsY = -1
+        PingRequester.cameraTargetAbsX = -1
         Client.setGameState(GameState.LOGGED_INGAME)
 
         for (index in 0 until 107) {
@@ -1131,13 +1131,13 @@ object LoginManager {
     fun method7558(socialNetworkLogin: Boolean, bool1: Boolean, string_2: String, string_3: String, long_4: Long) {
         LoginManager.socialNetworkLogin = socialNetworkLogin
         if (!bool1) {
-            StaticMethods.anInt76 = -1
+            StaticMethods.selectedWorldId = -1
         }
-        StaticMethods.aBool74 = bool1
-        StaticMethods.aString99 = string_2
-        StaticMethods.aString102 = string_3
+        StaticMethods.hasStoredCredentials = bool1
+        StaticMethods.loginUsername = string_2
+        StaticMethods.loginPassword = string_3
         aLong77 = long_4
-        if (StaticMethods.aBool74 || StaticMethods.aString99.isNotEmpty() && StaticMethods.aString102.isNotEmpty()) {
+        if (StaticMethods.hasStoredCredentials || StaticMethods.loginUsername.isNotEmpty() && StaticMethods.loginPassword.isNotEmpty()) {
             if (lobbyStage != LobbyStage.LOGGING_IN_LOBBY) {
                 anInt103 = 0
                 anInt112 = -1

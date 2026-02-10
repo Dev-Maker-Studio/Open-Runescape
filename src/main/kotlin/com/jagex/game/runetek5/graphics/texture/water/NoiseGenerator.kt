@@ -14,5 +14,5 @@ internal abstract class NoiseGenerator {
      * @param amplitude Amplitude/intensity of the noise
      * @param output Output array to store generated noise values
      */
-    internal abstract fun method4634(layer: Int, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: FloatArray)
+    internal abstract fun generateNoise3D(layer: Int, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: FloatArray)
 }

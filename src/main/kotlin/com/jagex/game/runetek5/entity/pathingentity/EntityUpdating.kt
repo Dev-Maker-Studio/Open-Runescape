@@ -46,7 +46,7 @@ object EntityUpdating {
     var turnDirectionIndex: Int = 0
 
     @JvmStatic
-    fun method12366(i_0: Int, startX: Int, startY: Int, endX: Int, endY: Int, drawX: Int, drawY: Int) {
+    fun drawOverheadInterfaces(i_0: Int, startX: Int, startY: Int, endX: Int, endY: Int, drawX: Int, drawY: Int) {
         if (Client.MAP_LOADING_STAGE == 1) {
             val playerIndiceCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
             val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
@@ -202,9 +202,9 @@ object EntityUpdating {
                 if (!pathingEntity.isHidden && !pathingEntity.entityHitbars.isEmpty()) {
                     var entityHitbar = pathingEntity.entityHitbars.getFirst() as EntityHitbar?
                     while (entityHitbar != null) {
-                        val displayDetails = entityHitbar.method12600(Client.cycles)
+                        val displayDetails = entityHitbar.getActiveDisplay(Client.cycles)
                         if (displayDetails == null) {
-                            if (entityHitbar.method12602()) {
+                            if (entityHitbar.isEmpty()) {
                                 entityHitbar.unlinkNode()
                             }
                         } else {
@@ -720,7 +720,7 @@ object EntityUpdating {
             } else {
                 (Client.NPC_MAP.get((i_92 - 2048).toLong()) as ObjectNode).value
             }
-            method7140(entity as PathingEntity, obj14 as PathingEntity, --((entity as PathingEntity).overheadSpriteCount), clipLeft, clipTop)
+            drawOverheadSprite(entity as PathingEntity, obj14 as PathingEntity, --((entity as PathingEntity).overheadSpriteCount), clipLeft, clipTop)
         }
 
         val padding = FontMetrics.aClass4143438!!.bottomPadding + FontMetrics.aClass4143438!!.topPadding + 2
@@ -887,7 +887,7 @@ object EntityUpdating {
     }
 
     @JvmStatic
-    fun method7140(pathingEntity: PathingEntity, pathingNpc: PathingEntity, i_2: Int, clipLeft: Int, clipTop: Int) {
+    fun drawOverheadSprite(pathingEntity: PathingEntity, pathingNpc: PathingEntity, i_2: Int, clipLeft: Int, clipTop: Int) {
         val overheadSpriteId = pathingNpc.getOverheadSprite()
         if (overheadSpriteId != -1) {
             var overheadSprites = Client.OVERHEAD_SPRITES.get(overheadSpriteId.toLong()) as NativeSprite?
@@ -933,7 +933,7 @@ object EntityUpdating {
     }
 
     @JvmStatic
-    fun method8695(class275Sub20: EntityOverhead) {
+    fun recycleOverhead(class275Sub20: EntityOverhead) {
         class275Sub20.pathingEntity = null
         if (pooledOverheadCount < 20) {
             entityOverheadPool.offer(class275Sub20)
@@ -942,10 +942,10 @@ object EntityUpdating {
     }
 
     @JvmStatic
-    fun method14519() {
+    fun positionAllEntities() {
         var overhead = Client.ENTITY_OVERHEADS.get() as EntityOverhead?
         while (overhead != null) {
-            method8695(overhead)
+            recycleOverhead(overhead)
             overhead = Client.ENTITY_OVERHEADS.get() as EntityOverhead?
         }
 

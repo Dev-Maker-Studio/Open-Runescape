@@ -155,12 +155,12 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
             }
 
             if ((waterFlags and 0x20) != 0 && modelViewProjectionMatrixAttribute != null) {
-                VIEW_PROJECTION_MATRIX.calculatePerspective(toolkit.getModelViewMatrix(), toolkit.getProjectionMatrix())
+                VIEW_PROJECTION_MATRIX.setProduct(toolkit.getModelViewMatrix(), toolkit.getProjectionMatrix())
                 shader.loadMatrix(modelViewProjectionMatrixAttribute!!, VIEW_PROJECTION_MATRIX)
             }
 
             if ((waterFlags and 0x40) != 0 && viewProjectionMatrixAttribute != null) {
-                VIEW_PROJECTION_MATRIX.calculatePerspective(toolkit.getViewMatrix(), toolkit.getProjectionMatrix())
+                VIEW_PROJECTION_MATRIX.setProduct(toolkit.getViewMatrix(), toolkit.getProjectionMatrix())
                 shader.loadMatrix(viewProjectionMatrixAttribute!!, VIEW_PROJECTION_MATRIX)
             }
 
@@ -176,9 +176,9 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
     fun loadEyePositionOS(matrix44var2: Matrix43) {
         if (eyePositionOS != null) {
             val eyePosOsMatrix = toolkit.getEyePositionOsMatrix()
-            val eyePos = floatArrayOf(eyePosOsMatrix.faceList[12], eyePosOsMatrix.faceList[13], eyePosOsMatrix.faceList[14])
+            val eyePos = floatArrayOf(eyePosOsMatrix.elements[12], eyePosOsMatrix.elements[13], eyePosOsMatrix.elements[14])
             val floats5 = floatArrayOf(0.0f, 0.0f, 0.0f)
-            eyePosOsMatrix.method6528(floats5)
+            eyePosOsMatrix.transformPoint(floats5)
             val floats6 = floatArrayOf(0.0f, 0.0f, 0.0f)
             toolkit.copySunPosition().calculatePerspective(0.0f, 0.0f, 0.0f, floats6)
             matrix44var2.method5243(eyePos)
@@ -247,13 +247,13 @@ abstract class NativeWaterShader(toolkit: AbstractNativeToolkit) : AbstractWater
         }
 
         if (modelViewMatrixAttribute != null) {
-            VIEW_PROJECTION_MATRIX.calculatePerspective(matrix442, toolkit.getViewMatrix())
+            VIEW_PROJECTION_MATRIX.setProduct(matrix442, toolkit.getViewMatrix())
             activeShader!!.loadMatrix(modelViewMatrixAttribute!!, VIEW_PROJECTION_MATRIX)
             flags[slot] = flags[slot] and -17
         }
 
         if (modelViewProjectionMatrixAttribute != null) {
-            VIEW_PROJECTION_MATRIX.calculatePerspective(matrix442, toolkit.getFrustumClipMatrix())
+            VIEW_PROJECTION_MATRIX.setProduct(matrix442, toolkit.getFrustumClipMatrix())
             activeShader!!.loadMatrix(modelViewProjectionMatrixAttribute!!, VIEW_PROJECTION_MATRIX)
             flags[slot] = flags[slot] and -33
         }

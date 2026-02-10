@@ -119,7 +119,7 @@ class TextureOpBricks : TextureOperation(0, true) {
             var i_7: Int
             if (i_5 > 0) {
                 i_6 = rowHeight
-                i_7 = (StaticMethods.method7931(random2, 4096) - 2048) * rowHeightVariation shr 12
+                i_7 = (StaticMethods.boundedRandom(random2, 4096) - 2048) * rowHeightVariation shr 12
                 val adjusted = i_6 + (i_7 * i_4 shr 12)
                 rowBoundaries!![i_5] = adjusted + rowBoundaries!![i_5 - 1]
             }
@@ -129,13 +129,13 @@ class TextureOpBricks : TextureOperation(0, true) {
             for (i_6_2 in 0 until columnsPerRow) {
                 if (i_6_2 > 0) {
                     i_7 = columnWidth
-                    val i_8 = (StaticMethods.method7931(random2, 4096) - 2048) * columnWidthVariation shr 12
+                    val i_8 = (StaticMethods.boundedRandom(random2, 4096) - 2048) * columnWidthVariation shr 12
                     val adjusted = i_7 + (i_8 * i_3 shr 12)
                     columnBoundaries!![i_5][i_6_2] = columnBoundaries!![i_5][i_6_2 - 1] + adjusted
                 }
 
                 brickBrightness!![i_5][i_6_2] = if (brightnessVariation > 0) {
-                    4096 - StaticMethods.method7931(random2, brightnessVariation)
+                    4096 - StaticMethods.boundedRandom(random2, brightnessVariation)
                 } else {
                     4096
                 }

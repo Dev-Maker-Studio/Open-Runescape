@@ -39,8 +39,8 @@ abstract class TextureShapeRasterizer(
         @JvmStatic
         fun drawClippedVerticalLine(x: Int, y1: Int, y2: Int, color: Int) {
             if (x >= TextureOpRasterizer.clipMinX && x <= TextureOpRasterizer.clipMaxX) {
-                val clampedY1 = ArrayUtils.method4890(y1, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-                val clampedY2 = ArrayUtils.method4890(y2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+                val clampedY1 = ArrayUtils.clamp(y1, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+                val clampedY2 = ArrayUtils.clamp(y2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
                 drawVerticalLine(x, clampedY1, clampedY2, color)
             }
         }
@@ -54,7 +54,7 @@ abstract class TextureShapeRasterizer(
                     drawClippedVerticalLine(x1, y1, y2, color)
                 }
             } else if (deltaY == 0) {
-                ArrayUtils.method11250(x1, x2, y1, color)
+                ArrayUtils.drawClippedHorizontalLine(x1, x2, y1, color)
             } else {
                 val slope = (deltaY shl 12) / deltaX
                 val intercept = y1 - (x1 * slope shr 12)

@@ -95,10 +95,10 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
     fun render(nativeToolkit: AbstractNativeToolkit, particleWrapper: ParticleWrapper) {
         nativeToolkit.setDepthBuffering(false)
         currentLightIntensity = nativeToolkit.lightIntensity
-        val zNearA = nativeToolkit.particleMatrix.faceList[2]
-        val zNearB = nativeToolkit.particleMatrix.faceList[6]
-        val zNearC = nativeToolkit.particleMatrix.faceList[10]
-        val zNearD = nativeToolkit.particleMatrix.faceList[14]
+        val zNearA = nativeToolkit.particleMatrix.elements[2]
+        val zNearB = nativeToolkit.particleMatrix.elements[6]
+        val zNearC = nativeToolkit.particleMatrix.elements[10]
+        val zNearD = nativeToolkit.particleMatrix.elements[14]
         var i_7 = 0
         var i_8 = Int.MAX_VALUE
         var i_9 = 0
@@ -213,12 +213,12 @@ class NativeParticleRenderer(class505Sub21: AbstractNativeToolkit) {
     fun method1096(nativeToolkit: AbstractNativeToolkit, i_2: Int) {
         var i_3 = 0
         val particleMatrix = nativeToolkit.particleMatrix
-        val xA = particleMatrix.faceList[0]
-        val xB = particleMatrix.faceList[4]
-        val xC = particleMatrix.faceList[8]
-        val yA = particleMatrix.faceList[1]
-        val yB = particleMatrix.faceList[5]
-        val yC = particleMatrix.faceList[9]
+        val xA = particleMatrix.elements[0]
+        val xB = particleMatrix.elements[4]
+        val xC = particleMatrix.elements[8]
+        val yA = particleMatrix.elements[1]
+        val yB = particleMatrix.elements[5]
+        val yC = particleMatrix.elements[9]
         val scaleXA = xA + yA
         val scaleYA = xB + yB
         val scaleZA = xC + yC

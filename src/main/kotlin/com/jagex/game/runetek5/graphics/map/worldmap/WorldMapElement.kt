@@ -10,40 +10,40 @@ import com.jagex.game.runetek5.scene.MapSize
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 
 class WorldMapElement(
-    @JvmField val anInt9536: Int,
+    @JvmField val elementId: Int,
     @JvmField val filenamePrefix: String,
-    @JvmField val aString9534: String,
+    @JvmField val displayName: String,
     @JvmField val bitpackedPlacement: Int,
     color: Int,
     @JvmField var shouldRender: Boolean,
-    anInt9542: Int,
+    defaultZoomLevel: Int,
     i_8: Int
 ) : CacheableNode() {
 
-    @JvmField var anInt9542: Int = -1
-    @JvmField var anInt9539 = 12800
-    @JvmField var anInt9540 = 0
-    @JvmField var anInt9541 = 12800
-    @JvmField var anInt9535 = 0
+    @JvmField var defaultZoomLevel: Int = -1
+    @JvmField var boundsMinX = 12800
+    @JvmField var boundsMaxX = 0
+    @JvmField var boundsMinY = 12800
+    @JvmField var boundsMaxY = 0
     @JvmField var color = -1
     @JvmField val worldMapPlacements: NodeCollection
 
     init {
         this.color = color
-        this.anInt9542 = anInt9542
-        if (this.anInt9542 == 255) {
-            this.anInt9542 = 0
+        this.defaultZoomLevel = defaultZoomLevel
+        if (this.defaultZoomLevel == 255) {
+            this.defaultZoomLevel = 0
         }
 
         MapSize.get(i_8)
         this.worldMapPlacements = NodeCollection()
     }
 
-    fun method14775(i_1: Int, i_2: Int, position: IntArray): Boolean {
+    fun mapToGameCoords(i_1: Int, i_2: Int, position: IntArray): Boolean {
         var class282Sub285: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
         while (class282Sub285 != null) {
-            if (class282Sub285.method12409(i_1, i_2)) {
-                class282Sub285.method12410(i_1, i_2, position)
+            if (class282Sub285.withinMapBounds(i_1, i_2)) {
+                class282Sub285.mapToGameCoords(i_1, i_2, position)
                 return true
             }
             class282Sub285 = worldMapPlacements.next() as WorldMapPlacement?
@@ -52,7 +52,7 @@ class WorldMapElement(
         return false
     }
 
-    fun method14777(x: Int, y: Int, cacheInto: IntArray): Boolean {
+    fun gameToMapCoords(x: Int, y: Int, cacheInto: IntArray): Boolean {
         var class282Sub285: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
         while (class282Sub285 != null) {
             if (class282Sub285.withinBounds(x, y)) {
@@ -65,7 +65,7 @@ class WorldMapElement(
         return false
     }
 
-    fun method14778(plane: Int, x: Int, y: Int, cacheInto: IntArray): Boolean {
+    fun gameToMapCoordsForPlane(plane: Int, x: Int, y: Int, cacheInto: IntArray): Boolean {
         var worldmapPlacement: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
         while (worldmapPlacement != null) {
             if (worldmapPlacement.withinPlaneBounds(plane, x, y)) {
@@ -78,28 +78,28 @@ class WorldMapElement(
         return false
     }
 
-    fun method14779() {
-        anInt9539 = 12800
-        anInt9540 = 0
-        anInt9541 = 12800
-        anInt9535 = 0
+    fun recalculateBounds() {
+        boundsMinX = 12800
+        boundsMaxX = 0
+        boundsMinY = 12800
+        boundsMaxY = 0
 
         var class282Sub282: WorldMapPlacement? = worldMapPlacements.getFirst() as WorldMapPlacement?
         while (class282Sub282 != null) {
-            if (class282Sub282.anInt7701 < anInt9539) {
-                anInt9539 = class282Sub282.anInt7701
+            if (class282Sub282.mapMinX < boundsMinX) {
+                boundsMinX = class282Sub282.mapMinX
             }
 
-            if (class282Sub282.anInt7704 > anInt9540) {
-                anInt9540 = class282Sub282.anInt7704
+            if (class282Sub282.mapMaxX > boundsMaxX) {
+                boundsMaxX = class282Sub282.mapMaxX
             }
 
-            if (class282Sub282.anInt7703 < anInt9541) {
-                anInt9541 = class282Sub282.anInt7703
+            if (class282Sub282.mapMinY < boundsMinY) {
+                boundsMinY = class282Sub282.mapMinY
             }
 
-            if (class282Sub282.anInt7705 > anInt9535) {
-                anInt9535 = class282Sub282.anInt7705
+            if (class282Sub282.mapMaxY > boundsMaxY) {
+                boundsMaxY = class282Sub282.mapMaxY
             }
             class282Sub282 = worldMapPlacements.next() as WorldMapPlacement?
         }
@@ -147,7 +147,7 @@ class WorldMapElement(
                     )
                 )
             }
-            def.method14779()
+            def.recalculateBounds()
             return def
         }
 

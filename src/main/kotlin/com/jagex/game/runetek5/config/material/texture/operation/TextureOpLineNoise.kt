@@ -43,10 +43,10 @@ class TextureOpLineNoise : TextureOperation(0, true) {
             val random6 = Random(randomSeed.toLong())
 
             for (i_7 in 0 until lineCount) {
-                var i_8 = if (angleSpread > 0) angleOffset + (StaticMethods.method7931(random6, angleSpread) - i_4) else angleOffset
+                var i_8 = if (angleSpread > 0) angleOffset + (StaticMethods.boundedRandom(random6, angleSpread) - i_4) else angleOffset
                 i_8 = i_8 shr 4 and 0xff
-                val i_9 = StaticMethods.method7931(random6, TextureRaster.currentWidth)
-                val i_10 = StaticMethods.method7931(random6, TextureRaster.currentHeight)
+                val i_9 = StaticMethods.boundedRandom(random6, TextureRaster.currentWidth)
+                val i_10 = StaticMethods.boundedRandom(random6, TextureRaster.currentHeight)
                 val i_11 = i_9 + (TextureRaster.PALETTE_COS!![i_8] * lineLength shr 12)
                 val i_12 = i_10 + (TextureRaster.PALETTE_SIN!![i_8] * lineLength shr 12)
                 val i_13 = i_12 - i_10
@@ -81,7 +81,7 @@ class TextureOpLineNoise : TextureOperation(0, true) {
                     var i_18 = i_12_swap - i_10_swap
                     var i_19 = -i_17 / 2
                     val i_20 = 2048 / i_17
-                    val i_21 = 1024 - (StaticMethods.method7931(random6, 4096) shr 2)
+                    val i_21 = 1024 - (StaticMethods.boundedRandom(random6, 4096) shr 2)
                     val i_22 = if (i_10_swap < i_12_swap) 1 else -1
                     if (i_18 < 0) {
                         i_18 = -i_18

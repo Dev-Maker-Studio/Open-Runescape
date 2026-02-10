@@ -320,7 +320,7 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         return false
     }
 
-    fun method16164(string_1: String) {
+    fun setOverheadText(string_1: String) {
         val i_5 = GameShell.gameCyclesPerSecond() * Client.ENTITY_DEFAULTS!!.npcMessageDuration
         setHintDetails(string_1, 0, 0, i_5)
     }

@@ -548,8 +548,8 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method2637(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-		method7170(i_2)
+	fun drawUnclippedFilledAndStrokedCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
+		ensureCircleBufferCapacity(i_2)
 		var i_7 = 0
 		var i_8 = i_2 - i_5
 		if (i_8 < 0) {
@@ -573,7 +573,7 @@ object ArrayUtils {
 			i_10 += i_13
 			i_12 += i_14
 			if (i_12 >= 0 && i_11 >= 1) {
-				StaticMethods.anIntArray36!![i_11] = i_7
+				StaticMethods.circleInnerRadiusBuffer!![i_11] = i_7
 				--i_11
 				i_12 -= i_11 shl 1
 			}
@@ -598,7 +598,7 @@ object ArrayUtils {
 				} else {
 					ints_18 = TextureShapeRasterizer.pixelBuffer!![i_9 + i_1]
 					ints_19 = TextureShapeRasterizer.pixelBuffer!![i_1 - i_9]
-					i_20 = StaticMethods.anIntArray36!![i_9]
+					i_20 = StaticMethods.circleInnerRadiusBuffer!![i_9]
 					i_21 = i_0 + i_7
 					i_22 = i_0 - i_7
 					i_23 = i_0 + i_20
@@ -616,7 +616,7 @@ object ArrayUtils {
 			i_20 = i_0 + i_9
 			i_21 = i_0 - i_9
 			if (i_7 < i_8) {
-				i_22 = if (i_11 < i_7) StaticMethods.anIntArray36!![i_7] else i_11
+				i_22 = if (i_11 < i_7) StaticMethods.circleInnerRadiusBuffer!![i_7] else i_11
 				i_23 = i_0 + i_22
 				i_24 = i_0 - i_22
 				setArrayValuesTo(ints_18, i_21, i_24, i_4)
@@ -633,13 +633,13 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method744(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-		val i_7 = method4890(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_8 = method4890(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_9 = method4890(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_10 = method4890(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_11 = method4890(i_5 + i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_12 = method4890(i_3 - i_5, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+	fun drawClippedStrokedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
+		val i_7 = clamp(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_8 = clamp(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_9 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_10 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_11 = clamp(i_5 + i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_12 = clamp(i_3 - i_5, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
 		var i_13: Int
 		i_13 = i_7
 		while (i_13 < i_11) {
@@ -651,8 +651,8 @@ object ArrayUtils {
 			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_13], i_9, i_10, i_4)
 			--i_13
 		}
-		i_13 = method4890(i_5 + i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_14 = method4890(i_1 - i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		i_13 = clamp(i_5 + i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_14 = clamp(i_1 - i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 		for (i_15 in i_11..i_12) {
 			val ints_16 = TextureShapeRasterizer.pixelBuffer!![i_15]
 			setArrayValuesTo(ints_16, i_9, i_13, i_4)
@@ -661,8 +661,8 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method1174(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-		method7170(i_2)
+	fun drawClippedFilledAndStrokedCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
+		ensureCircleBufferCapacity(i_2)
 		var i_7 = 0
 		var i_8 = i_2 - i_5
 		if (i_8 < 0) {
@@ -680,10 +680,10 @@ object ArrayUtils {
 		var i_19: Int
 		if (i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY) {
 			val ints_15 = TextureShapeRasterizer.pixelBuffer!![i_1]
-			i_16 = method4890(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_17 = method4890(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_18 = method4890(i_0 - i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_19 = method4890(i_0 + i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			i_16 = clamp(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			i_17 = clamp(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			i_18 = clamp(i_0 - i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			i_19 = clamp(i_0 + i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 			setArrayValuesTo(ints_15, i_16, i_18, i_4)
 			setArrayValuesTo(ints_15, i_18, i_19, i_3)
 			setArrayValuesTo(ints_15, i_19, i_17, i_4)
@@ -696,7 +696,7 @@ object ArrayUtils {
 			if (i_12 >= 0 && i_11 >= 1) {
 				--i_11
 				i_12 -= i_11 shl 1
-				StaticMethods.anIntArray36!![i_11] = i_7
+				StaticMethods.circleInnerRadiusBuffer!![i_11] = i_7
 			}
 			++i_7
 			var i_20: Int
@@ -710,8 +710,8 @@ object ArrayUtils {
 				i_16 = i_9 + i_1
 				if (i_16 >= TextureOpRasterizer.clipMinY && i_23 <= TextureOpRasterizer.clipMaxY) {
 					if (i_9 >= i_8) {
-						i_17 = method4890(i_0 + i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_18 = method4890(i_0 - i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_17 = clamp(i_0 + i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_18 = clamp(i_0 - i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 						if (i_16 <= TextureOpRasterizer.clipMaxY) {
 							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_16], i_18, i_17, i_4)
 						}
@@ -719,11 +719,11 @@ object ArrayUtils {
 							setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_23], i_18, i_17, i_4)
 						}
 					} else {
-						i_17 = StaticMethods.anIntArray36!![i_9]
-						i_18 = method4890(i_0 + i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_19 = method4890(i_0 - i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_20 = method4890(i_0 + i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_21 = method4890(i_0 - i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_17 = StaticMethods.circleInnerRadiusBuffer!![i_9]
+						i_18 = clamp(i_0 + i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_19 = clamp(i_0 - i_7, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_20 = clamp(i_0 + i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_21 = clamp(i_0 - i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 						if (i_16 <= TextureOpRasterizer.clipMaxY) {
 							ints_22 = TextureShapeRasterizer.pixelBuffer!![i_16]
 							setArrayValuesTo(ints_22, i_19, i_21, i_4)
@@ -745,12 +745,12 @@ object ArrayUtils {
 				i_17 = i_0 + i_9
 				i_18 = i_0 - i_9
 				if (i_17 >= TextureOpRasterizer.clipMinX && i_18 <= TextureOpRasterizer.clipMaxX) {
-					i_17 = method4890(i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-					i_18 = method4890(i_18, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					i_17 = clamp(i_17, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					i_18 = clamp(i_18, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 					if (i_7 < i_8) {
-						i_19 = if (i_11 < i_7) StaticMethods.anIntArray36!![i_7] else i_11
-						i_20 = method4890(i_0 + i_19, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-						i_21 = method4890(i_0 - i_19, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_19 = if (i_11 < i_7) StaticMethods.circleInnerRadiusBuffer!![i_7] else i_11
+						i_20 = clamp(i_0 + i_19, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+						i_21 = clamp(i_0 - i_19, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 						if (i_16 <= TextureOpRasterizer.clipMaxY) {
 							ints_22 = TextureShapeRasterizer.pixelBuffer!![i_16]
 							setArrayValuesTo(ints_22, i_18, i_21, i_4)
@@ -777,7 +777,7 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method15405(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+	fun drawClippedFilledEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
 		var i_6 = 0
 		var i_7 = i_3
 		val i_8 = i_2 * i_2
@@ -796,8 +796,8 @@ object ArrayUtils {
 		var i_21: Int
 		var i_22: Int
 		if (i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY) {
-			i_21 = method4890(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_22 = method4890(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			i_21 = clamp(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			i_22 = clamp(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_1], i_22, i_21, i_4)
 		}
 		while (i_7 > 0) {
@@ -825,8 +825,8 @@ object ArrayUtils {
 			i_21 = i_1 - i_7
 			i_22 = i_7 + i_1
 			if (i_22 >= TextureOpRasterizer.clipMinY && i_21 <= TextureOpRasterizer.clipMaxY) {
-				val i_23 = method4890(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-				val i_24 = method4890(i_0 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				val i_23 = clamp(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				val i_24 = clamp(i_0 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 				if (i_21 >= TextureOpRasterizer.clipMinY) {
 					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_21], i_24, i_23, i_4)
 				}
@@ -838,13 +838,13 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method4866(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
+	fun drawClippedFilledCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
 		var i_5 = 0
 		var i_6 = i_2
 		var i_7 = -i_2
 		var i_8 = -1
-		val i_9 = method4890(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_10 = method4890(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_9 = clamp(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_10 = clamp(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 		setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_1], i_10, i_9, i_3)
 		while (i_6 > i_5) {
 			i_8 += 2
@@ -859,8 +859,8 @@ object ArrayUtils {
 				i_11 = i_1 - i_6
 				i_12 = i_6 + i_1
 				if (i_12 >= TextureOpRasterizer.clipMinY && i_11 <= TextureOpRasterizer.clipMaxY) {
-					i_13 = method4890(i_0 + i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-					i_14 = method4890(i_0 - i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					i_13 = clamp(i_0 + i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+					i_14 = clamp(i_0 - i_5, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 					if (i_12 <= TextureOpRasterizer.clipMaxY) {
 						setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_12], i_14, i_13, i_3)
 					}
@@ -873,8 +873,8 @@ object ArrayUtils {
 			i_11 = i_1 - i_5
 			i_12 = i_5 + i_1
 			if (i_12 >= TextureOpRasterizer.clipMinY && i_11 <= TextureOpRasterizer.clipMaxY) {
-				i_13 = method4890(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-				i_14 = method4890(i_0 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				i_13 = clamp(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+				i_14 = clamp(i_0 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 				if (i_12 <= TextureOpRasterizer.clipMaxY) {
 					setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_12], i_14, i_13, i_3)
 				}
@@ -886,13 +886,13 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method4034(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-		val i_8 = method4890(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_9 = method4890(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_10 = method4890(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_11 = method4890(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_12 = method4890(i_2 + i_6, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_13 = method4890(i_3 - i_6, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+	fun drawClippedStrokedAndFilledRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+		val i_8 = clamp(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_9 = clamp(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_10 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_11 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_12 = clamp(i_2 + i_6, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_13 = clamp(i_3 - i_6, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
 		var i_14: Int
 		i_14 = i_8
 		while (i_14 < i_12) {
@@ -904,8 +904,8 @@ object ArrayUtils {
 			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_14], i_10, i_11, i_5)
 			--i_14
 		}
-		i_14 = method4890(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_15 = method4890(i_1 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		i_14 = clamp(i_0 + i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_15 = clamp(i_1 - i_6, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 		for (i_16 in i_12..i_13) {
 			val ints_17 = TextureShapeRasterizer.pixelBuffer!![i_16]
 			setArrayValuesTo(ints_17, i_10, i_14, i_5)
@@ -915,23 +915,23 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method7728(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-		val i_6 = method4890(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_7 = method4890(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
-		val i_8 = method4890(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-		val i_9 = method4890(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+	fun fillClippedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+		val i_6 = clamp(i_2, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_7 = clamp(i_3, TextureOpRasterizer.clipMinY, TextureOpRasterizer.clipMaxY)
+		val i_8 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+		val i_9 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
 		for (i_10 in i_6..i_7) {
 			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_10], i_8, i_9, i_4)
 		}
 	}
 
 	@JvmStatic
-	fun method4890(i_0: Int, i_1: Int, i_2: Int): Int {
+	fun clamp(i_0: Int, i_1: Int, i_2: Int): Int {
 		return if (i_0 < i_1) i_1 else (Math.min(i_0, i_2))
 	}
 
 	@JvmStatic
-	fun method568(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
+	fun drawHorizontalLine(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
 		if (i_0 > i_1) {
 			setArrayValuesTo(TextureShapeRasterizer.pixelBuffer!![i_2], i_1, i_0, i_3)
 		} else {
@@ -940,13 +940,13 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method11250(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
+	fun drawClippedHorizontalLine(i_0: Int, i_1: Int, i_2: Int, i_3: Int) {
 		var i_0 = i_0
 		var i_1 = i_1
 		if (i_2 >= TextureOpRasterizer.clipMinY && i_2 <= TextureOpRasterizer.clipMaxY) {
-			i_0 = method4890(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			i_1 = method4890(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-			method568(i_0, i_1, i_2, i_3)
+			i_0 = clamp(i_0, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			i_1 = clamp(i_1, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+			drawHorizontalLine(i_0, i_1, i_2, i_3)
 		}
 	}
 
@@ -1046,7 +1046,7 @@ object ArrayUtils {
 			}
 			for (index in 0..254) {
 				val i_6 = 255 - index
-				val i_7 = StaticMethods.method7931(random, i_6)
+				val i_7 = StaticMethods.boundedRandom(random, i_6)
 				val temp = block[i_7]
 				block[i_7] = block[i_6]
 				block[i_6] = temp
@@ -1068,7 +1068,7 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method3751(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+	fun drawUnclippedFilledEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
 		var i_6 = 0
 		var i_7 = i_3
 		val i_8 = i_2 * i_2
@@ -1122,26 +1122,26 @@ object ArrayUtils {
 	}
 
 	@JvmStatic
-	fun method7170(i_0: Int) {
-		if (StaticMethods.anIntArray36 == null || StaticMethods.anIntArray36!!.size < i_0) {
-			StaticMethods.anIntArray36 = IntArray(i_0)
+	fun ensureCircleBufferCapacity(i_0: Int) {
+		if (StaticMethods.circleInnerRadiusBuffer == null || StaticMethods.circleInnerRadiusBuffer!!.size < i_0) {
+			StaticMethods.circleInnerRadiusBuffer = IntArray(i_0)
 		}
 	}
 
 	@JvmStatic
-	fun method14584(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+	fun drawFilledEllipse(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
 		if (i_3 == i_2) {
-			StaticMethods.method6292(i_0, i_1, i_2, i_4)
+			StaticMethods.drawFilledCircle(i_0, i_1, i_2, i_4)
 		} else if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_3 >= TextureOpRasterizer.clipMinY && i_3 + i_1 <= TextureOpRasterizer.clipMaxY) {
-			method3751(i_0, i_1, i_2, i_3, i_4)
+			drawUnclippedFilledEllipse(i_0, i_1, i_2, i_3, i_4)
 		} else {
-			method15405(i_0, i_1, i_2, i_3, i_4)
+			drawClippedFilledEllipse(i_0, i_1, i_2, i_3, i_4)
 		}
 
 	}
 
 	@JvmStatic
-	fun method3230(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
+	fun drawUnclippedStrokedAndFilledRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
 		val i_8 = i_2 + i_6
 		val i_9 = i_3 - i_6
 		var i_10: Int

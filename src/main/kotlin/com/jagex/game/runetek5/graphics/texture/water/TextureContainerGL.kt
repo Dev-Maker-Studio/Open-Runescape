@@ -15,35 +15,35 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
 
     @JvmField var textures2d: Array<OpenGl2DTexture>? = null
     @JvmField var texture3d: OpenGl3DTexture? = null
-    @JvmField var aClass137Sub1Array1634: Array<OpenGl2DTexture>? = null
-    @JvmField var aClass137Sub41636: OpenGl3DTexture? = null
+    @JvmField var billowTextures2d: Array<OpenGl2DTexture>? = null
+    @JvmField var billowTexture3d: OpenGl3DTexture? = null
     @JvmField var hdrTexture3d: OpenGl3DTexture? = null
     @JvmField val texture3dSupported: Boolean
 
     init {
         texture3dSupported = openglToolkit.texture3dSupported
-        method2348(openglToolkit)
+        initializeTextureData(openglToolkit)
         if (!texture3dSupported) {
             textures2d = Array(16) { index ->
-                val bytes = DataBuffer.readDataBuffer(anObject1637, index * 32768)!!
+                val bytes = DataBuffer.readDataBuffer(waveTextureDataBuffer, index * 32768)!!
                 OpenGl2DTexture(
                     openglToolkit, 3553, GLFormat.LUMINANCE_ALPHA,
                     GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.LUMINANCE_ALPHA, false
                 )
             }
 
-            aClass137Sub1Array1634 = Array(16) { index ->
-                val bytes = DataBuffer.readDataBuffer(anObject1627, index * 32768)!!
+            billowTextures2d = Array(16) { index ->
+                val bytes = DataBuffer.readDataBuffer(billowTextureDataBuffer, index * 32768)!!
                 OpenGl2DTexture(
                     openglToolkit, 3553, GLFormat.LUMINANCE_ALPHA,
                     GLActionFormat.PIXEL_FORMAT, 128, 128, true, bytes, GLFormat.LUMINANCE_ALPHA, false
                 )
             }
         } else {
-            var buffer = DataBuffer.unpackDataBuffer(anObject1637, false)!!
+            var buffer = DataBuffer.unpackDataBuffer(waveTextureDataBuffer, false)!!
             texture3d = OpenGl3DTexture(openglToolkit, GLFormat.LUMINANCE_ALPHA, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.LUMINANCE_ALPHA)
-            buffer = DataBuffer.unpackDataBuffer(anObject1627, false)!!
-            aClass137Sub41636 = OpenGl3DTexture(openglToolkit, GLFormat.LUMINANCE_ALPHA, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.LUMINANCE_ALPHA)
+            buffer = DataBuffer.unpackDataBuffer(billowTextureDataBuffer, false)!!
+            billowTexture3d = OpenGl3DTexture(openglToolkit, GLFormat.LUMINANCE_ALPHA, GLActionFormat.PIXEL_FORMAT, buffer, GLFormat.LUMINANCE_ALPHA)
             val shader = openglToolkit.texture3dShader
             if (shader?.createShader() == true) {
                 buffer = DataBuffer.unpackDataBuffer(databufferHdrTexture, false)!!
@@ -61,22 +61,22 @@ class TextureContainerGL(openglToolkit: OpenGlToolkit) {
     }
 
     companion object {
-        @JvmField var anObject1637: Any? = null
-        @JvmField var anObject1627: Any? = null
+        @JvmField var waveTextureDataBuffer: Any? = null
+        @JvmField var billowTextureDataBuffer: Any? = null
         @JvmField var databufferHdrTexture: Any? = null
 
         @JvmStatic
-        fun method2348(openglToolkit: OpenGlToolkit) {
-            if (anObject1637 == null) {
+        fun initializeTextureData(openglToolkit: OpenGlToolkit) {
+            if (waveTextureDataBuffer == null) {
                 val generator = GLWaveTextureData()
-                val buffer = generator.method15614()
-                anObject1637 = DataBuffer.createDataBuffer(buffer)
+                val buffer = generator.getData()
+                waveTextureDataBuffer = DataBuffer.createDataBuffer(buffer)
             }
 
-            if (anObject1627 == null) {
+            if (billowTextureDataBuffer == null) {
                 val generator = GLBillowTextureData()
                 val buffer = generator.getData()
-                anObject1627 = DataBuffer.createDataBuffer(buffer)
+                billowTextureDataBuffer = DataBuffer.createDataBuffer(buffer)
             }
 
             val shader = openglToolkit.texture3dShader

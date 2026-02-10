@@ -330,7 +330,7 @@ open class Packet : Node<Packet> {
         require(firstByte == 0.toByte()) { "First byte must be 0" }
         val length = readVarInt()
         require(length + currentPosition <= buffer.size) { "String too long" }
-        val result = StaticMethods.method4824(buffer, currentPosition, length)
+        val result = StaticMethods.decodeUtf8(buffer, currentPosition, length)
         currentPosition += length
         return result
     }

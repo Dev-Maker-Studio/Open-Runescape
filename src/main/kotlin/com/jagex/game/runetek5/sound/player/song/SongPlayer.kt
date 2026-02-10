@@ -70,7 +70,7 @@ object SongPlayer {
             SoundResourceManager.musicFileId = 0
             SoundResourceManager.pendingMidiStream = null
             AreaSoundPlayer.SOUND_LEVEL = soundLevel
-            StaticMethods.aBool1962 = false
+            StaticMethods.songLooping = false
             CutsceneBasicMovement.anInt9440 = SoundResourceManager.midiPcmStream!!.getMusicVolume() / i_0
             if (CutsceneBasicMovement.anInt9440 < 1) {
                 CutsceneBasicMovement.anInt9440 = 1
@@ -78,7 +78,7 @@ object SongPlayer {
             songTransition = transition
         } else {
             transition.transition()
-            AreaSoundPlayer.method13400(musicResource, musicArchive, soundLevel)
+            AreaSoundPlayer.playMusic(musicResource, musicArchive, soundLevel)
         }
     }
 

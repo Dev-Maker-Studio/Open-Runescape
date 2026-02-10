@@ -57,7 +57,7 @@ object GraphicsCache {
     @JvmStatic
     fun resetWorldmapCaches(preserveStaticElement: Boolean) {
         if (preserveStaticElement && WorldMap.staticElement != null) {
-            WorldMapSub1.pendingMapElementId = WorldMap.staticElement!!.anInt9536
+            WorldMapSub1.pendingMapElementId = WorldMap.staticElement!!.elementId
         } else {
             WorldMapSub1.pendingMapElementId = -1
         }

@@ -38,7 +38,7 @@ class StationaryWall(
 ) : AbstractWall(scene, x, y, z, plane, collisionPlane, getCullingType(shape, rotation)), GameObject {
 
     @JvmField
-    var aCacheableNodeSub1710517: Shadow? = null
+    var cachedShadow: Shadow? = null
 
     @JvmField
     var axisAlignedBoundingBox: Silhouette? = null
@@ -55,7 +55,7 @@ class StationaryWall(
     val locId: Int = locType.id
 
     @JvmField
-    val aBool10525: Boolean = bool10
+    val overlayHidden: Boolean = bool10
 
     override val shape: Int = shape
 
@@ -69,7 +69,7 @@ class StationaryWall(
     val interactive: Boolean = locType.hasActions != 0 && !bool10
 
     @JvmField
-    val aBool10516: Boolean = toolkit.hasShadows() && locType.dynamicShadow && !aBool10525 && PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0
+    val hasDynamicShadow: Boolean = toolkit.hasShadows() && locType.dynamicShadow && !overlayHidden && PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0
 
     @JvmField
     var model: Model? = null
@@ -84,10 +84,10 @@ class StationaryWall(
             i_14 = i_14 or 0x80000
         }
 
-        val typeResult = method16101(toolkit, i_14, aBool10516)
+        val typeResult = getTypeResult(toolkit, i_14, hasDynamicShadow)
         if (typeResult != null) {
             model = typeResult.mainObject as Model?
-            aCacheableNodeSub1710517 = typeResult.companionObject as Shadow?
+            cachedShadow = typeResult.companionObject as Shadow?
             if (shadowed || locType.dynamicTint) {
                 model = model!!.copy(0.toByte(), i_14, false)
                 if (locType.dynamicTint) {
@@ -102,12 +102,12 @@ class StationaryWall(
 
     override fun addShadow(toolkit: AbstractToolkit) {
         val shadow: Shadow?
-        if (aCacheableNodeSub1710517 == null && aBool10516) {
-            val typeResult = method16101(toolkit, 262144, true)
+        if (cachedShadow == null && hasDynamicShadow) {
+            val typeResult = getTypeResult(toolkit, 262144, true)
             shadow = if (typeResult != null) typeResult.companionObject as Shadow? else null
         } else {
-            shadow = aCacheableNodeSub1710517
-            aCacheableNodeSub1710517 = null
+            shadow = cachedShadow
+            cachedShadow = null
         }
 
         val abs = getAbsolutePosition().coords
@@ -118,12 +118,12 @@ class StationaryWall(
 
     override fun removeShadow(graphicalrenderer1: AbstractToolkit) {
         val class282Sub50Sub174: Shadow?
-        if (aCacheableNodeSub1710517 == null && aBool10516) {
-            val class4525 = method16101(graphicalrenderer1, 262144, true)
+        if (cachedShadow == null && hasDynamicShadow) {
+            val class4525 = getTypeResult(graphicalrenderer1, 262144, true)
             class282Sub50Sub174 = if (class4525 != null) class4525.companionObject as Shadow? else null
         } else {
-            class282Sub50Sub174 = aCacheableNodeSub1710517
-            aCacheableNodeSub1710517 = null
+            class282Sub50Sub174 = cachedShadow
+            cachedShadow = null
         }
 
         val abs = getAbsolutePosition().coords
@@ -136,11 +136,11 @@ class StationaryWall(
         return model == null || !model!!.hasAnimatedTexture()
     }
 
-    fun method16101(toolkit: AbstractToolkit, functionMask: Int, hasShadow: Boolean): TypeResult? {
+    fun getTypeResult(toolkit: AbstractToolkit, functionMask: Int, hasShadow: Boolean): TypeResult? {
         val locType = locTypeList.list(locId)
         val currentLevel: Ground
         val nextLevel: Ground?
-        if (aBool10525) {
+        if (overlayHidden) {
             currentLevel = scene!!.underwaterHeightmap!![collisionPlane.toInt()]!!
             nextLevel = scene!!.surfaceHeightmap[0]
         } else {
@@ -172,7 +172,7 @@ class StationaryWall(
         if (model != null && toolkit.mismatchingFunctionMask(model!!.getFunctionMask(), functionMask) == 0) {
             return model
         }
-        val typeResult = method16101(toolkit, functionMask, false)
+        val typeResult = getTypeResult(toolkit, functionMask, false)
         return if (typeResult != null) typeResult.mainObject as Model? else null
     }
 
@@ -216,7 +216,7 @@ class StationaryWall(
     }
 
     override fun hasRenderingShadow(): Boolean {
-        return aBool10516
+        return hasDynamicShadow
     }
 
     override fun draw(toolkit: AbstractToolkit): RenderedEntity? {
@@ -260,20 +260,20 @@ class StationaryWall(
 
     companion object {
         @JvmField
-        var anInt10526: Int = 0
+        var menuHeight: Int = 0
 
         @JvmField
-        val anIntArray10522 = intArrayOf(1, 2, 4, 8)
+        val WALL_STRAIGHT_CULLING_BITS = intArrayOf(1, 2, 4, 8)
 
         @JvmField
-        val anIntArray10518 = intArrayOf(16, 32, 64, 128)
+        val WALL_CORNER_CULLING_BITS = intArrayOf(16, 32, 64, 128)
 
         @JvmStatic
         fun getCullingType(type: Int, rotation: Int): Int {
             return if (type != ObjectShapes.WALL_DIAGONAL_CORNER.shape && type != ObjectShapes.WALL_STRAIGHT_CORNER.shape) {
-                anIntArray10522[rotation and 0x3]
+                WALL_STRAIGHT_CULLING_BITS[rotation and 0x3]
             } else {
-                anIntArray10518[rotation and 0x3]
+                WALL_CORNER_CULLING_BITS[rotation and 0x3]
             }
         }
     }

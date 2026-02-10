@@ -153,12 +153,12 @@ abstract class NativeSprite : Sprite {
             }
 
             if (StaticMedia.aNativeSprite5576 == null || StaticMedia.aNativeSprite647 == null) {
-                if (Resource.SPRITES!!.isFileCached(StaticMethods.anInt5438) && Resource.SPRITES!!.isFileCached(loadingBarTileSpriteId)) {
-                    StaticMedia.aNativeSprite5576 = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES!!, StaticMethods.anInt5438, 0), true)
+                if (Resource.SPRITES!!.isFileCached(StaticMethods.loadingBarBackgroundSpriteId) && Resource.SPRITES!!.isFileCached(loadingBarTileSpriteId)) {
+                    StaticMedia.aNativeSprite5576 = toolkit.generateSprite(SpriteType.listSingle(Resource.SPRITES!!, StaticMethods.loadingBarBackgroundSpriteId, 0), true)
                     val spriteType = SpriteType.listSingle(Resource.SPRITES!!, loadingBarTileSpriteId, 0)
                     StaticMedia.aNativeSprite647 = toolkit.generateSprite(spriteType, true)
                     spriteType!!.flipHorizontal()
-                    StaticMethods.aNativeSprite612 = toolkit.generateSprite(spriteType, true)
+                    StaticMethods.loadingBarTileSprite = toolkit.generateSprite(spriteType, true)
                 } else {
                     toolkit.drawFilledRectangle(x, y, width, height, i_10 shl 24 or TextureOpIrregularBricks.backgroundColor, 1)
                 }
@@ -170,7 +170,7 @@ abstract class NativeSprite : Sprite {
                     StaticMedia.aNativeSprite5576!!.draw(x + StaticMedia.aNativeSprite647!!.getWidth() + i_12 * StaticMedia.aNativeSprite5576!!.getWidth(), y)
                 }
                 StaticMedia.aNativeSprite647!!.draw(x, y)
-                StaticMethods.aNativeSprite612!!.draw(width + x - StaticMethods.aNativeSprite612!!.getWidth(), y)
+                StaticMethods.loadingBarTileSprite!!.draw(width + x - StaticMethods.loadingBarTileSprite!!.getWidth(), y)
             }
 
             fontrenderer.renderPlain(string_8, x + 3, (20 - fontmetrics.topPadding) / 2 + y + fontmetrics.topPadding, MiniMenu.anInt4722 or 0xffffff.inv(), -1)

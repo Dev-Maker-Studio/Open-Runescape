@@ -8,12 +8,12 @@ class HashTableIterator<T>(
     @JvmField val nodeMap: IterableNodeMap<*>
 ) : MutableIterator<T?> {
 
-    @JvmField var aNode5441: Node<*>? = null
+    @JvmField var lastReturnedNode: Node<*>? = null
     @JvmField var currentPosition: Int = 0
-    @JvmField var aNode5440: Node<*>? = null
+    @JvmField var nextNode: Node<*>? = null
 
     init {
-        method7512()
+        reset()
     }
 
     /**
@@ -22,46 +22,46 @@ class HashTableIterator<T>(
      * @return The first node
      */
     fun first(): T? {
-        method7512()
+        reset()
         return next()
     }
 
     override fun hasNext(): Boolean {
-        if (nodeMap.nodes[currentPosition - 1] != aNode5440) {
+        if (nodeMap.nodes[currentPosition - 1] != nextNode) {
             return true
         }
         while (currentPosition < nodeMap.size) {
             if (nodeMap.nodes[++currentPosition - 1].next != nodeMap.nodes[currentPosition - 1]) {
-                aNode5440 = nodeMap.nodes[currentPosition - 1].next
+                nextNode = nodeMap.nodes[currentPosition - 1].next
                 return true
             }
-            aNode5440 = nodeMap.nodes[currentPosition - 1]
+            nextNode = nodeMap.nodes[currentPosition - 1]
         }
         return false
     }
 
     override fun remove() {
-        if (aNode5441 == null) {
+        if (lastReturnedNode == null) {
             throw IllegalStateException()
         }
-        aNode5441!!.unlink()
-        aNode5441 = null
+        lastReturnedNode!!.unlink()
+        lastReturnedNode = null
     }
 
     override fun next(): T? {
         val node: Node<*>
-        if (nodeMap.nodes[currentPosition - 1] != aNode5440) {
-            node = aNode5440!!
-            aNode5440 = node.next
-            aNode5441 = node
+        if (nodeMap.nodes[currentPosition - 1] != nextNode) {
+            node = nextNode!!
+            nextNode = node.next
+            lastReturnedNode = node
             @Suppress("UNCHECKED_CAST")
             return node as T
         }
         while (currentPosition < nodeMap.size) {
             val candidateNode = nodeMap.nodes[++currentPosition - 1].next
             if (candidateNode != nodeMap.nodes[currentPosition - 1]) {
-                aNode5440 = candidateNode!!.next
-                aNode5441 = candidateNode
+                nextNode = candidateNode!!.next
+                lastReturnedNode = candidateNode
                 @Suppress("UNCHECKED_CAST")
                 return candidateNode as T
             }
@@ -72,9 +72,9 @@ class HashTableIterator<T>(
     /**
      * Resets the iterator to the beginning.
      */
-    fun method7512() {
-        aNode5440 = nodeMap.nodes[0].next
+    fun reset() {
+        nextNode = nodeMap.nodes[0].next
         currentPosition = 1
-        aNode5441 = null
+        lastReturnedNode = null
     }
 }

@@ -27,9 +27,9 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
     var cornerRadius: Int = 0
 
     fun drawBrick(random1: Random, ints_2: Array<IntArray?>, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-        val i_8 = if (brightnessVariation > 0) 4096 - StaticMethods.method7931(random1, brightnessVariation) else 4096
+        val i_8 = if (brightnessVariation > 0) 4096 - StaticMethods.boundedRandom(random1, brightnessVariation) else 4096
         val i_9 = heightVariationMultiplier * cornerRadius shr 12
-        val i_10 = cornerRadius - if (i_9 > 0) StaticMethods.method7931(random1, i_9) else 0
+        val i_10 = cornerRadius - if (i_9 > 0) StaticMethods.boundedRandom(random1, i_9) else 0
         var i_3Var = i_3
         if (i_3Var >= TextureRaster.currentWidth) {
             i_3Var -= TextureRaster.currentWidth
@@ -183,8 +183,8 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                 var ints_20 = Array(i_18) { IntArray(3) }
                 val random21 = Random(randomSeed.toLong())
                 while (true) {
-                    var i_22 = i_14 + StaticMethods.method7931(random21, i_15 - i_14)
-                    var i_23 = i_16 + StaticMethods.method7931(random21, i_17 - i_16)
+                    var i_22 = i_14 + StaticMethods.boundedRandom(random21, i_15 - i_14)
+                    var i_23 = i_16 + StaticMethods.boundedRandom(random21, i_17 - i_16)
                     var i_24 = i_22 + i_8
                     if (i_24 > TextureRaster.currentWidth) {
                         i_22 = TextureRaster.currentWidth - i_8
@@ -281,7 +281,7 @@ class TextureOpIrregularBricks : TextureOperation(0, true) {
                         i_12 = i_13
                         i_13 = 0
                         i_7 = i_6
-                        i_6 = StaticMethods.method7931(random21, TextureRaster.currentWidth)
+                        i_6 = StaticMethods.boundedRandom(random21, TextureRaster.currentWidth)
                         i_5 = i_6 - i_7
                         i_8 = 0
                         i_28 = i_5

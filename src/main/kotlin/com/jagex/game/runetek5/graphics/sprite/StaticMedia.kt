@@ -203,13 +203,13 @@ object StaticMedia {
     @JvmStatic
     fun resetChatMedia() {
         aNativeSprite647 = null
-        StaticMethods.aNativeSprite612 = null
+        StaticMethods.loadingBarTileSprite = null
         aNativeSprite5576 = null
         aNativeSprite5339 = null
         aNativeSprite3452 = null
-        StaticMethods.aNativeSprite4110 = null
-        StaticMethods.aNativeSprite1571 = null
-        StaticMethods.aNativeSprite9315 = null
+        StaticMethods.menuTopBorderSprite = null
+        StaticMethods.menuBottomLeftCornerSprite = null
+        StaticMethods.menuBottomRightCornerSprite = null
         FontMetrics.aFontRenderer2348 = null
         aClass4142200 = null
     }

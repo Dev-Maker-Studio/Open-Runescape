@@ -3,7 +3,7 @@ package com.jagex.game.runetek5.cache.compression
 object Bzip2Compressor {
 
     @JvmField val BLOCK_ENTRY = Bzip2BlockEntry()
-    @JvmField var anIntArray3288: IntArray? = null
+    @JvmField var transformTable: IntArray? = null
 
     @JvmStatic
     fun decompress(decompressed: ByteArray, decompressedLength: Int, compressed: ByteArray): Int {
@@ -12,12 +12,12 @@ object Bzip2Compressor {
             BLOCK_ENTRY.compressed = compressed
             BLOCK_ENTRY.startOffset = 9
             BLOCK_ENTRY.decompressed = decompressed
-            BLOCK_ENTRY.anInt5506 = 0
+            BLOCK_ENTRY.outputPosition = 0
             BLOCK_ENTRY.decompressedLength = length
-            BLOCK_ENTRY.anInt5532 = 0
-            BLOCK_ENTRY.anInt5511 = 0
-            BLOCK_ENTRY.anInt5499 = 0
-            BLOCK_ENTRY.anInt5508 = 0
+            BLOCK_ENTRY.bitBufferLength = 0
+            BLOCK_ENTRY.bitBuffer = 0
+            BLOCK_ENTRY.bytesRead = 0
+            BLOCK_ENTRY.blockCrc = 0
             decompress(BLOCK_ENTRY)
             length -= BLOCK_ENTRY.decompressedLength
             BLOCK_ENTRY.compressed = null
@@ -27,32 +27,32 @@ object Bzip2Compressor {
     }
 
     @JvmStatic
-    fun method7831(class4590: Bzip2BlockEntry): Byte {
-        return method7833(8, class4590).toByte()
+    fun readByte(class4590: Bzip2BlockEntry): Byte {
+        return readBits(8, class4590).toByte()
     }
 
     @JvmStatic
-    fun method7832(class4590: Bzip2BlockEntry): Byte {
-        return method7833(1, class4590).toByte()
+    fun readBit(class4590: Bzip2BlockEntry): Byte {
+        return readBits(1, class4590).toByte()
     }
 
     @JvmStatic
-    fun method7833(i_0: Int, class4591: Bzip2BlockEntry): Int {
-        while (class4591.anInt5532 < i_0) {
-            class4591.anInt5511 = class4591.anInt5511 shl 8 or (class4591.compressed!![class4591.startOffset].toInt() and 0xff)
-            class4591.anInt5532 += 8
+    fun readBits(i_0: Int, class4591: Bzip2BlockEntry): Int {
+        while (class4591.bitBufferLength < i_0) {
+            class4591.bitBuffer = class4591.bitBuffer shl 8 or (class4591.compressed!![class4591.startOffset].toInt() and 0xff)
+            class4591.bitBufferLength += 8
             ++class4591.startOffset
-            class4591.anInt5499 += 1564222761
-            val i_10000 = class4591.anInt5499
+            class4591.bytesRead += 1564222761
+            val i_10000 = class4591.bytesRead
         }
 
-        val i_2 = class4591.anInt5511 shr class4591.anInt5532 - i_0 and (1 shl i_0) - 1
-        class4591.anInt5532 -= i_0
+        val i_2 = class4591.bitBuffer shr class4591.bitBufferLength - i_0 and (1 shl i_0) - 1
+        class4591.bitBufferLength -= i_0
         return i_2
     }
 
     @JvmStatic
-    fun method7835(ints_0: IntArray, ints_1: IntArray, ints_2: IntArray, bytes_3: ByteArray, i_4: Int, i_5: Int, i_6: Int) {
+    fun buildHuffmanTable(ints_0: IntArray, ints_1: IntArray, ints_2: IntArray, bytes_3: ByteArray, i_4: Int, i_5: Int, i_6: Int) {
         var i_7 = 0
 
         var i_8: Int
@@ -112,17 +112,17 @@ object Bzip2Compressor {
     }
 
     @JvmStatic
-    fun method7836(class4590: Bzip2BlockEntry) {
-        var b_1 = class4590.aByte5509
-        var i_2 = class4590.anInt5496
-        var i_3 = class4590.anInt5518
-        var i_4 = class4590.anInt5516
-        val ints_5 = anIntArray3288!!
-        var i_6 = class4590.anInt5515
+    fun decodeBlock(class4590: Bzip2BlockEntry) {
+        var b_1 = class4590.currentByte
+        var i_2 = class4590.runCount
+        var i_3 = class4590.blockPosition
+        var i_4 = class4590.lastByte
+        val ints_5 = transformTable!!
+        var i_6 = class4590.bwtPointer
         val bytes_7 = class4590.decompressed!!
-        var i_8 = class4590.anInt5506
+        var i_8 = class4590.outputPosition
         var i_9 = class4590.decompressedLength
-        val i_11 = class4590.anInt5505 + 1
+        val i_11 = class4590.blockSize + 1
 
         label56@ while (true) {
             if (i_2 > 0) {
@@ -202,27 +202,27 @@ object Bzip2Compressor {
             break
         }
 
-        val i_13 = class4590.anInt5508
-        val i_10000 = class4590.anInt5508 * -1541698763
-        class4590.aByte5509 = b_1
-        class4590.anInt5496 = i_2
-        class4590.anInt5518 = i_3
-        class4590.anInt5516 = i_4
-        anIntArray3288 = ints_5
-        class4590.anInt5515 = i_6
+        val i_13 = class4590.blockCrc
+        val i_10000 = class4590.blockCrc * -1541698763
+        class4590.currentByte = b_1
+        class4590.runCount = i_2
+        class4590.blockPosition = i_3
+        class4590.lastByte = i_4
+        transformTable = ints_5
+        class4590.bwtPointer = i_6
         class4590.decompressed = bytes_7
-        class4590.anInt5506 = i_8
+        class4590.outputPosition = i_8
         class4590.decompressedLength = i_9
     }
 
     @JvmStatic
-    fun method7844(class4590: Bzip2BlockEntry) {
-        class4590.anInt5520 = 0
+    fun buildSymbolMap(class4590: Bzip2BlockEntry) {
+        class4590.symbolCount = 0
 
         for (i_1 in 0 until 256) {
             if (class4590.inUse[i_1]) {
-                class4590.seqToUnseq[class4590.anInt5520] = i_1.toByte()
-                ++class4590.anInt5520
+                class4590.seqToUnseq[class4590.symbolCount] = i_1.toByte()
+                ++class4590.symbolCount
             }
         }
     }
@@ -233,41 +233,41 @@ object Bzip2Compressor {
         var ints_20: IntArray? = null
         var ints_21: IntArray? = null
         var ints_22: IntArray? = null
-        class4590.anInt5513 = 1
-        if (anIntArray3288 == null) {
-            anIntArray3288 = IntArray(class4590.anInt5513 * 100000)
+        class4590.blockSizeMultiplier = 1
+        if (transformTable == null) {
+            transformTable = IntArray(class4590.blockSizeMultiplier * 100000)
         }
 
         var bool23 = true
 
         while (bool23) {
-            var b_24 = method7831(class4590)
+            var b_24 = readByte(class4590)
             if (b_24 == 23.toByte()) {
                 break
             }
 
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7831(class4590)
-            b_24 = method7832(class4590)
-            class4590.anInt5514 = 0
-            var b_25 = method7831(class4590)
-            class4590.anInt5514 = class4590.anInt5514 shl 8 or (b_25.toInt() and 0xff)
-            b_25 = method7831(class4590)
-            class4590.anInt5514 = class4590.anInt5514 shl 8 or (b_25.toInt() and 0xff)
-            b_25 = method7831(class4590)
-            class4590.anInt5514 = class4590.anInt5514 shl 8 or (b_25.toInt() and 0xff)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readByte(class4590)
+            b_24 = readBit(class4590)
+            class4590.origPtr = 0
+            var b_25 = readByte(class4590)
+            class4590.origPtr = class4590.origPtr shl 8 or (b_25.toInt() and 0xff)
+            b_25 = readByte(class4590)
+            class4590.origPtr = class4590.origPtr shl 8 or (b_25.toInt() and 0xff)
+            b_25 = readByte(class4590)
+            class4590.origPtr = class4590.origPtr shl 8 or (b_25.toInt() and 0xff)
 
             var i_26: Int
             i_26 = 0
             while (i_26 < 16) {
-                b_24 = method7832(class4590)
+                b_24 = readBit(class4590)
                 class4590.inUse16[i_26] = b_24 == 1.toByte()
                 i_26++
             }
@@ -284,7 +284,7 @@ object Bzip2Compressor {
                 if (class4590.inUse16[i_26]) {
                     i_27 = 0
                     while (i_27 < 16) {
-                        b_24 = method7832(class4590)
+                        b_24 = readBit(class4590)
                         if (b_24 == 1.toByte()) {
                             class4590.inUse[i_27 + i_26 * 16] = true
                         }
@@ -294,10 +294,10 @@ object Bzip2Compressor {
                 i_26++
             }
 
-            method7844(class4590)
-            i_26 = class4590.anInt5520 + 2
-            i_27 = method7833(3, class4590)
-            val i_28 = method7833(15, class4590)
+            buildSymbolMap(class4590)
+            i_26 = class4590.symbolCount + 2
+            i_27 = readBits(3, class4590)
+            val i_28 = readBits(15, class4590)
 
             var i_30: Int
             var i_29 = 0
@@ -305,7 +305,7 @@ object Bzip2Compressor {
                 i_30 = 0
 
                 while (true) {
-                    b_24 = method7832(class4590)
+                    b_24 = readBit(class4590)
                     if (b_24 == 0.toByte()) {
                         class4590.selectorMtf[i_29] = i_30.toByte()
                         break
@@ -345,18 +345,18 @@ object Bzip2Compressor {
             var i_49: Int
             i_30 = 0
             while (i_30 < i_27) {
-                i_48 = method7833(5, class4590)
+                i_48 = readBits(5, class4590)
 
                 i_49 = 0
                 while (i_49 < i_26) {
                     while (true) {
-                        b_24 = method7832(class4590)
+                        b_24 = readBit(class4590)
                         if (b_24 == 0.toByte()) {
                             class4590.len[i_30][i_49] = i_48.toByte()
                             break
                         }
 
-                        b_24 = method7832(class4590)
+                        b_24 = readBit(class4590)
                         if (b_24 == 0.toByte()) {
                             ++i_48
                         } else {
@@ -386,12 +386,12 @@ object Bzip2Compressor {
                     i_33++
                 }
 
-                method7835(class4590.limit[i_30], class4590.base[i_30], class4590.perm[i_30], class4590.len[i_30], b_31.toInt(), b_32.toInt(), i_26)
+                buildHuffmanTable(class4590.limit[i_30], class4590.base[i_30], class4590.perm[i_30], class4590.len[i_30], b_31.toInt(), b_32.toInt(), i_26)
                 class4590.minLens[i_30] = b_31.toInt()
                 i_30++
             }
 
-            i_30 = class4590.anInt5520 + 1
+            i_30 = class4590.symbolCount + 1
             i_48 = -1
             var b_50: Byte = 0
 
@@ -414,7 +414,7 @@ object Bzip2Compressor {
                     --i_35
                 }
 
-                class4590.anIntArray5525[i_34] = i_33 + 1
+                class4590.mtfmBase[i_34] = i_33 + 1
                 --i_34
             }
 
@@ -432,10 +432,10 @@ object Bzip2Compressor {
 
             var b_36: Byte
             var i_37: Int
-            i_37 = method7833(i_19, class4590)
+            i_37 = readBits(i_19, class4590)
             while (i_37 > ints_20!![i_35]) {
                 ++i_35
-                b_36 = method7832(class4590)
+                b_36 = readBit(class4590)
                 i_37 = i_37 shl 1 or b_36.toInt()
             }
 
@@ -449,7 +449,7 @@ object Bzip2Compressor {
                         i_39 = i_38 - 1
                         var i_52: Int
                         if (i_39 < 16) {
-                            i_40 = class4590.anIntArray5525[0]
+                            i_40 = class4590.mtfmBase[0]
 
                             b_24 = class4590.yy[i_40 + i_39]
                             while (i_39 > 3) {
@@ -470,44 +470,44 @@ object Bzip2Compressor {
                         } else {
                             i_40 = i_39 / 16
                             i_52 = i_39 % 16
-                            var i_42 = class4590.anIntArray5525[i_40] + i_52
+                            var i_42 = class4590.mtfmBase[i_40] + i_52
 
                             b_24 = class4590.yy[i_42]
-                            while (i_42 > class4590.anIntArray5525[i_40]) {
+                            while (i_42 > class4590.mtfmBase[i_40]) {
                                 class4590.yy[i_42] = class4590.yy[i_42 - 1]
                                 --i_42
                             }
 
-                            ++class4590.anIntArray5525[i_40]
+                            ++class4590.mtfmBase[i_40]
 
                             while (i_40 > 0) {
-                                --class4590.anIntArray5525[i_40]
-                                class4590.yy[class4590.anIntArray5525[i_40]] = class4590.yy[class4590.anIntArray5525[i_40 - 1] + 16 - 1]
+                                --class4590.mtfmBase[i_40]
+                                class4590.yy[class4590.mtfmBase[i_40]] = class4590.yy[class4590.mtfmBase[i_40 - 1] + 16 - 1]
                                 --i_40
                             }
 
-                            --class4590.anIntArray5525[0]
-                            class4590.yy[class4590.anIntArray5525[0]] = b_24
-                            if (class4590.anIntArray5525[0] == 0) {
+                            --class4590.mtfmBase[0]
+                            class4590.yy[class4590.mtfmBase[0]] = b_24
+                            if (class4590.mtfmBase[0] == 0) {
                                 i_33 = 4095
 
                                 var i_43 = 15
                                 while (i_43 >= 0) {
                                     var i_44 = 15
                                     while (i_44 >= 0) {
-                                        class4590.yy[i_33] = class4590.yy[class4590.anIntArray5525[i_43] + i_44]
+                                        class4590.yy[i_33] = class4590.yy[class4590.mtfmBase[i_43] + i_44]
                                         --i_33
                                         --i_44
                                     }
 
-                                    class4590.anIntArray5525[i_43] = i_33 + 1
+                                    class4590.mtfmBase[i_43] = i_33 + 1
                                     --i_43
                                 }
                             }
                         }
 
                         ++class4590.unzftab[class4590.seqToUnseq[b_24.toInt() and 0xff].toInt() and 0xff]
-                        anIntArray3288!![i_34] = class4590.seqToUnseq[b_24.toInt() and 0xff].toInt() and 0xff
+                        transformTable!![i_34] = class4590.seqToUnseq[b_24.toInt() and 0xff].toInt() and 0xff
                         ++i_34
                         if (i_49 == 0) {
                             ++i_48
@@ -522,10 +522,10 @@ object Bzip2Compressor {
                         --i_49
                         i_35 = i_19
 
-                        i_37 = method7833(i_19, class4590)
+                        i_37 = readBits(i_19, class4590)
                         while (i_37 > ints_20!![i_35]) {
                             ++i_35
-                            b_36 = method7832(class4590)
+                            b_36 = readBit(class4590)
                             i_37 = i_37 shl 1 or b_36.toInt()
                         }
 
@@ -555,10 +555,10 @@ object Bzip2Compressor {
                             --i_49
                             i_35 = i_19
 
-                            i_37 = method7833(i_19, class4590)
+                            i_37 = readBits(i_19, class4590)
                             while (i_37 > ints_20!![i_35]) {
                                 ++i_35
-                                b_36 = method7832(class4590)
+                                b_36 = readBit(class4590)
                                 i_37 = i_37 shl 1 or b_36.toInt()
                             }
 
@@ -566,50 +566,50 @@ object Bzip2Compressor {
                         } while (i_38 == 0 || i_38 == 1)
 
                         ++i_39
-                        b_25 = class4590.seqToUnseq[class4590.yy[class4590.anIntArray5525[0]].toInt() and 0xff]
+                        b_25 = class4590.seqToUnseq[class4590.yy[class4590.mtfmBase[0]].toInt() and 0xff]
 
                         class4590.unzftab[b_25.toInt() and 0xff] += i_39
                         while (i_39 > 0) {
-                            anIntArray3288!![i_34] = b_25.toInt() and 0xff
+                            transformTable!![i_34] = b_25.toInt() and 0xff
                             ++i_34
                             --i_39
                         }
                     }
                 }
 
-                class4590.anInt5496 = 0
-                class4590.aByte5509 = 0
-                class4590.anIntArray5519[0] = 0
+                class4590.runCount = 0
+                class4590.currentByte = 0
+                class4590.cftab[0] = 0
 
                 i_39 = 1
                 while (i_39 <= 256) {
-                    class4590.anIntArray5519[i_39] = class4590.unzftab[i_39 - 1]
+                    class4590.cftab[i_39] = class4590.unzftab[i_39 - 1]
                     i_39++
                 }
 
                 i_39 = 1
                 while (i_39 <= 256) {
-                    class4590.anIntArray5519[i_39] += class4590.anIntArray5519[i_39 - 1]
+                    class4590.cftab[i_39] += class4590.cftab[i_39 - 1]
                     i_39++
                 }
 
                 i_39 = 0
                 while (i_39 < i_34) {
-                    b_25 = (anIntArray3288!![i_39] and 0xff).toByte()
-                    anIntArray3288!![class4590.anIntArray5519[b_25.toInt() and 0xff]] = anIntArray3288!![class4590.anIntArray5519[b_25.toInt() and 0xff]] or (i_39 shl 8)
-                    ++class4590.anIntArray5519[b_25.toInt() and 0xff]
+                    b_25 = (transformTable!![i_39] and 0xff).toByte()
+                    transformTable!![class4590.cftab[b_25.toInt() and 0xff]] = transformTable!![class4590.cftab[b_25.toInt() and 0xff]] or (i_39 shl 8)
+                    ++class4590.cftab[b_25.toInt() and 0xff]
                     i_39++
                 }
 
-                class4590.anInt5515 = anIntArray3288!![class4590.anInt5514] shr 8
-                class4590.anInt5518 = 0
-                class4590.anInt5515 = anIntArray3288!![class4590.anInt5515]
-                class4590.anInt5516 = (class4590.anInt5515 and 0xff)
-                class4590.anInt5515 = class4590.anInt5515 shr 8
-                ++class4590.anInt5518
-                class4590.anInt5505 = i_34
-                method7836(class4590)
-                if (class4590.anInt5505 + 1 == class4590.anInt5518 && class4590.anInt5496 == 0) {
+                class4590.bwtPointer = transformTable!![class4590.origPtr] shr 8
+                class4590.blockPosition = 0
+                class4590.bwtPointer = transformTable!![class4590.bwtPointer]
+                class4590.lastByte = (class4590.bwtPointer and 0xff)
+                class4590.bwtPointer = class4590.bwtPointer shr 8
+                ++class4590.blockPosition
+                class4590.blockSize = i_34
+                decodeBlock(class4590)
+                if (class4590.blockSize + 1 == class4590.blockPosition && class4590.runCount == 0) {
                     bool23 = true
                     break
                 }

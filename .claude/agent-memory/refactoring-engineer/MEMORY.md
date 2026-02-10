@@ -63,7 +63,7 @@
 - **Class renames**: 8 Node_Sub, 6 unidentified package migrations, 18 Class renames
 - **Loading bar**: TipRenderDetails constants, decoder functions
 - **CreateAccountRequest + AccountCreationStage**: fields, methods, enum constants
-- **Shadow/WorldMap/UI/Fonts/StaticMethods/ArrayUtils/Utils/PacketEncoder**: ~75 methods + 30 fields
+- **Shadow/WorldMap/UI/Fonts/StaticMethods/ArrayUtils/Utils/PacketEncoder**: ~75 methods + 30 fields + Phase 5C additions
 - **Texture Operations (COMPLETE)**: All fields + methods in `config/material/texture/operation/` deobfuscated
   - 29 TextureOp files + 5 rasterizer files, ~130 field renames + ~25 method renames
   - TextureShapeRasterizer: fillColor, strokeColor, strokeWidth, pixelBuffer, drawFilled/Stroked/FilledAndStroked, drawLine, drawVerticalLine, drawClippedVerticalLine
@@ -111,6 +111,63 @@
   - Own: mixSamplesForward, mixSamplesBackward
   - Companion: mixForward/BackwardStereo/MonoConstant/Interpolated[Fading] (16 variants)
 - **PcmStream**: method12228 -> getActiveVoiceCount (abstract, updated in all 6 overrides)
+- **Phase 5C Core Utils/Cache/Network/WorldMap (COMPLETE)**: ~200 renames across 30+ files
+  - HashTableIterator: 2 fields + 1 method (lastReturnedNode, nextNode, reset)
+  - PingRequester.anInt5864 -> cameraTargetAbsX (6 cross-ref files)
+  - ServerEnvironment.anInt9282 -> flashCycleCounter (5 cross-ref files)
+  - TextUtils: 3 methods (stripDiacritics, compareLocaleAware, isValidCp1252Byte)
+  - Interface: 6 methods + 1 field (getOrCreateMutableComponents, removeComponentSettings, runInterfaceScripts, moveComponentToBack/Front, hasActiveMenuEntry, worldMapDragStartX)
+  - PacketEncoder: 11 methods (sendSignUpForm, sendPlayerOperation, sendInterfaceDragOntoInterface, sendInterfaceOnInterface, checkSongLoaded, writeInterfaceComponentData, sendClanOperation, sendLobbyHyperlink, sendJoinFriendchat, sendInterfaceOnPlayer, sendAccountCreationStage)
+  - StaticMethods: 36 fields + 40 methods (menu rendering, login state, camera, songs, etc.)
+  - ArrayUtils: 14 drawing methods (drawFilledCircle/Ellipse, drawStrokedRectangle variants, clamp, etc.)
+  - Parameter: 6 fields identified (BASE64_URL_DATA, JS5_AUTH_TOKEN, SERVER_ENVIRONMENT, MACHINE_UID, MAP_OWNER_IDENTIFIER, AFFILIATE_P)
+  - FileOnDisk: 7 fields + 1 method (fileChannelPosition, writeBufferFilePosition, readBufferFilePosition, readBuffer, writeBuffer, readBufferValidBytes, obfuscatedWriteBufferSize, flushWriteBuffer)
+  - WorldMapElement: 7 fields + 4 methods (elementId, displayName, defaultZoomLevel, boundsMinX/MaxX/MinY/MaxY, mapToGameCoords, gameToMapCoords, gameToMapCoordsForPlane, recalculateBounds)
+  - WorldMapPlacement: 4 fields + 2 methods (mapMinX/MinY/MaxX/MaxY, withinMapBounds, mapToGameCoords)
+  - WorldMapRasterManager: 5 fields + 7 methods (edgeBufferSize, edgeBuffer, scanEdgeIndex, nextEdgeIndex, activeEdgeStart, scanlineStartX/EndX/Y, fillPolygon, fillPolygonMasked, rasterizePolygon, resetEdgeBuffer, buildEdgesFromPolygon, sortEdgesByY, sortActiveEdgesByX, initializeScanline, advanceScanline)
+  - PostProcessEffect: aBool7506->isActive, method12129->isActive()
+  - RectangularTextureGL: aClass137Sub110038->bloomTextureA, aClass137Sub110034->bloomTextureB
+- **Phase 5A Compression/Buffer/Water/Sprite/Matrix (COMPLETE)**: ~150 renames across 20+ files
+  - Bzip2BlockEntry: 16 fields (runCount, currentByte, blockPosition, lastByte, bwtPointer, blockSize, outputPosition, bitBufferLength, bitBuffer, bytesRead, blockCrc, blockSizeMultiplier, origPtr, symbolCount, cftab, mtfmBase)
+  - Bzip2Compressor: 7 methods + 1 field (readByte, readBit, readBits, buildHuffmanTable, decodeBlock, buildSymbolMap, transformTable)
+  - NativeBuffer: 2 private fields + 6 methods (size, address, putBytes, getBufferSize, getCapacity, getAddress, getPointer, getBaseAddress, getNativeAddress)
+  - MapBuffer: isMapped
+  - Stream: 2 fields + 18 methods (targetBuffer, bufferOffset, setTarget, setOffset, putIntLittleEndian, putIntMedium, flush, etc.)
+  - WaterTextureGenerator: 7 fields + 5 methods (seed, permutationTable, scaleX/Y/Z, octaveCount, octaveWeights, generateNoise, initOctaveWeights, gradientDot, initPermutationTable, computeSCurve)
+  - BillowNoiseGenerator: 4 fields + 1 method (outputBuffer, writePosition, accumulator, amplitudeWeights, writeSample)
+  - WaveNoiseGenerator: outputBuffer
+  - GLWaveTextureData: textureData, getData
+  - NativeWaveTextureData: textureData
+  - NoiseGenerator/PerlinNoiseGenerator: generateNoise3D
+  - NativeWaterTexture: waveTextureDataBuffer, billowTextureDataBuffer
+  - TextureContainerGL: waveTextureDataBuffer, billowTextureDataBuffer, billowTextures2d, billowTexture3d, initializeTextureData
+  - ColorImageCache: 7 fields + 1 method (maxCachedRows, totalRows, rgbData, cacheEntries, lruList, cachedRowCount, lastAccessedRow, SENTINEL_ENTRY, getAllPalettes)
+  - ImageProducerGL2: 7 fields + 1 method (isDisposed, openGlToolkit, canvas, openGL, surfaceHandle, displayHeight, displayWidth, updateDimensions)
+  - SpriteSM: 6 instance fields + 25 companion statics + 4 methods (offsetX/Y, trimRight/Bottom, imageWidth/Height, viewportStride, pixelOffset, dudx/dvdx/dudy/dvdy, subpixelOffsetX/Y, uBase/vBase, uOffsetX/vOffsetX, drawMinX/Width/MinY/Height, blendColor, colorAlpha/InverseAlpha/Red/Green/Blue, overlayAlpha/InverseAlpha/Precomputed, drawAffineTransformed, drawParticle, computeAffineTransform, drawMasked)
+  - Matrix44: faceList->elements (529 refs), 16 methods (determinant, setDiagonal, isIdentity, transformPoint, setOrtho, setPerspective, setPerspectiveFromViewport, getNearClipDistance, extractRotationInto, extractLeftPlane, extractRightPlane, extractTopPlane, extractNearPlane, extractFarPlane, extractBottomPlane, setRotatedTranslation, setProduct, transpose, getComponentsXY typo fix)
+- **Phase 5B Entity/Scene/Cutscene/Sound (COMPLETE)**: ~100 renames across 26 files, BUILD SUCCESSFUL
+  - CutsceneProjectile: 11 fields (startTileX/Y, endTileX/Y, sourceEntityIndex, targetEntityIndex, fixedPlane, startHeight, duration, angle, slope)
+  - CutsceneDirectCameraTransition: 6 fields (positionMovementIndex, lookAtMovementIndex, positionKeyframe, lookAtKeyframe, splineSpeedStart/End)
+  - CutsceneAction+PlaySynth+PlayVorbis+PacketEncoder: method1593→stopAction
+  - CutscenePlaySynth: 5 fields (areaSound, soundId, volume, sampleRate, timesRepeated)
+  - CutsceneExecuteScript: 2 fields (scriptStringParam, scriptIntParam)
+  - CutsceneArea+MapRegion: chunkBaseX/Y
+  - CutsceneTypeList+StaticMethods: cutsceneViewportHeight
+  - SceneGraphNode+Scene: 5 fields + 1 method (calculateNegatedPosition, firstChild, parent, nextSibling, _negatedPosition, detach)
+  - AnimatedGameObject: isShadowCurrent, progressAnimation
+  - AnimatedWallDecoration: hasTransparency
+  - StationaryInteractiveObject: 7 fields + 2 methods (locTypeList, overlayHidden, shapeAsByte, rotationAsByte, interactive, hasTileShadow, hasDynamicShadow, getModel, getTypeResult)
+  - StationaryWall+MenuInteraction+MiniMenu: 7 ids (cachedShadow, overlayHidden, hasDynamicShadow, getTypeResult, menuHeight, WALL_STRAIGHT_CULLING_BITS, WALL_CORNER_CULLING_BITS)
+  - EntityHitbar+EntityUpdating+Bot: getActiveDisplay, isEmpty
+  - EntityUpdating+InterfaceComponentRenderer+Client: drawOverheadInterfaces, drawOverheadSprite, recycleOverhead, positionAllEntities
+  - PlayerEntity: getAnimatedBodyModel
+  - NpcEntity+NPCUpdate: setOverheadText
+  - FrustumCulling+Culling: depthWriteCount, processDepthScanline
+  - GroundGL: lightOffsetsA/B, projectShadow, renderShadows
+  - ShadowMapperGL+GroundGL: 9 ids (shadowTiles, renderShadowOverlay, applyShadow, invalidate/initializeShadowTiles, removeShadow, subtract/add/hasShadowData)
+  - AreaSoundPlayer+Client+CS2Interpreter+SongPlayer: 6 methods (updateAreaSounds, playMusicWithTransition, playMusic, playMusicFromStart, loadAndPlayMusic, updateSpatialMusicVolume)
+  - SoundEffectPlayer+CS2Interpreter+Client: 4 methods (setMusicVolume, updateAllAmbientSounds, updateAmbientSound, getCurrentMidiStream)
+  - PcmPlayer: 5 ids (streamUpdateCountdown, fillSoundBuffer, enqueueStreamByPriority, skipAudioSamples, resetStreamFillState)
 
 ## Lessons Learned
 
@@ -133,6 +190,10 @@
 - **Linter applies renames from sound-package.md**: The linter reads agent memory files (e.g. sound-package.md) and applies method renames (method15095->setChannelVolume etc.) that haven't actually been applied to the declaration file. Always verify linter edits with grep before building.
 - **Use sed -i for ALL renames**: The Write tool triggers the linter which can revert ALL changes. Always use sed -i via Bash for field/method renames, never the Write tool for files with many renames.
 - **Pre-existing build errors**: AreaSoundStream, AudioBufferStream, MixedAudioStream, MusicPatchPcmStream have pre-existing errors from previous rename sessions where MusicPatchNode fields and AbstractAudioFile methods were renamed but not all cross-references were updated.
+- **Pre-existing GL constant errors**: After "severe refactor of rendering" commit (993ebe91), many GL constants (GL_TEXTURE1, GL_VIEWPORT_BIT, GL_QUADS, GL_MODULATE, etc.) are unresolved in FramebufferCompositor.kt, RectangularTextureGL.kt, OpenGlToolkit.kt. These are NOT caused by refactoring agent renames. Also Bot.kt/MenuInteraction.kt have unresolved hashFromInterface/componentIdFromHash/interfaceIdFromHash.
+- **Constructor param name conflicts in Kotlin**: When renaming @JvmField val fields, the constructor params cannot share the same name. Rename constructor params differently (e.g., `toolkit` for param, `openGlToolkit` for field) and use `this.` prefix for assignment.
+- **Incremental build cache can mask pre-existing errors**: First `./gradlew build` can succeed due to cache. Use `./gradlew clean build` if you see errors that seem unrelated to your changes.
+- **Matrix44.scale() shares name with Model.scale()**: Cannot rename with sed without distinguishing types. Leave alone or use file-specific targeting.
 
 ## Remaining Uncertain Fields (deliberately left obfuscated)
 

@@ -11,65 +11,65 @@ import com.jagex.game.runetek5.config.sequence.Projectile
 
 class CutsceneProjectile(rsbytebuffer1: Packet, i_2: Int, i_3: Int) : CutsceneAction(rsbytebuffer1) {
 
-    @JvmField val anInt9403: Int
-    @JvmField val anInt9404: Int
-    @JvmField val anInt9402: Int
-    @JvmField val anInt9407: Int
-    @JvmField val anInt9408: Int
-    @JvmField val anInt9400: Int
-    @JvmField val anInt9401: Int
+    @JvmField val startTileX: Int
+    @JvmField val startTileY: Int
+    @JvmField val sourceEntityIndex: Int
+    @JvmField val endTileX: Int
+    @JvmField val endTileY: Int
+    @JvmField val targetEntityIndex: Int
+    @JvmField val fixedPlane: Int
     @JvmField val gfxId: Int
-    @JvmField val anInt9405: Int
+    @JvmField val startHeight: Int
     @JvmField val endHeight: Int
-    @JvmField val anInt9409: Int
-    @JvmField val anInt9412: Int
-    @JvmField val anInt9399: Int
+    @JvmField val duration: Int
+    @JvmField val angle: Int
+    @JvmField val slope: Int
 
     init {
         var i_4: Int
         if (i_2 == 0) {
             i_4 = rsbytebuffer1.readInt()
-            anInt9403 = i_4 ushr 16
-            anInt9404 = i_4 and 0xffff
-            anInt9402 = -1
+            startTileX = i_4 ushr 16
+            startTileY = i_4 and 0xffff
+            sourceEntityIndex = -1
         } else {
-            anInt9403 = -1
-            anInt9404 = -1
-            anInt9402 = rsbytebuffer1.readUShort()
+            startTileX = -1
+            startTileY = -1
+            sourceEntityIndex = rsbytebuffer1.readUShort()
         }
         if (i_3 == 0) {
             i_4 = rsbytebuffer1.readInt()
-            anInt9407 = i_4 ushr 16
-            anInt9408 = i_4 and 0xffff
-            anInt9400 = -1
+            endTileX = i_4 ushr 16
+            endTileY = i_4 and 0xffff
+            targetEntityIndex = -1
         } else {
-            anInt9407 = -1
-            anInt9408 = -1
-            anInt9400 = rsbytebuffer1.readUShort()
+            endTileX = -1
+            endTileY = -1
+            targetEntityIndex = rsbytebuffer1.readUShort()
         }
         if (i_2 == 0 && i_3 == 0) {
-            anInt9401 = rsbytebuffer1.readUByte()
+            fixedPlane = rsbytebuffer1.readUByte()
         } else {
-            anInt9401 = -1
+            fixedPlane = -1
         }
         gfxId = rsbytebuffer1.readUShort()
-        anInt9405 = rsbytebuffer1.readUByte()
+        startHeight = rsbytebuffer1.readUByte()
         endHeight = rsbytebuffer1.readUByte()
-        anInt9409 = rsbytebuffer1.readUMedium()
-        anInt9412 = rsbytebuffer1.readUShort()
-        anInt9399 = rsbytebuffer1.readUByte()
+        duration = rsbytebuffer1.readUMedium()
+        angle = rsbytebuffer1.readUShort()
+        slope = rsbytebuffer1.readUByte()
     }
 
     override fun perform() {
         val dstX: Int
         val dstY: Int
         var plane: Int
-        if (anInt9403 >= 0) {
-            dstX = anInt9403 * 512 + 256
-            dstY = anInt9404 * 512 + 256
-            plane = anInt9401
+        if (startTileX >= 0) {
+            dstX = startTileX * 512 + 256
+            dstY = startTileY * 512 + 256
+            plane = fixedPlane
         } else {
-            val animable9 = CutsceneTypeList.CUTSCENE_ENTITIES!![anInt9402].getEntity()
+            val animable9 = CutsceneTypeList.CUTSCENE_ENTITIES!![sourceEntityIndex].getEntity()
             val abs = animable9.getAbsolutePosition().coords
             dstX = abs.x.toInt()
             dstY = abs.z.toInt()
@@ -77,11 +77,11 @@ class CutsceneProjectile(rsbytebuffer1: Packet, i_2: Int, i_3: Int) : CutsceneAc
         }
         val srcX: Int
         val srcY: Int
-        if (anInt9404 >= 0) {
-            srcX = anInt9407 * 512 + 256
-            srcY = anInt9408 * 512 + 256
+        if (startTileY >= 0) {
+            srcX = endTileX * 512 + 256
+            srcY = endTileY * 512 + 256
         } else {
-            val entity = CutsceneTypeList.CUTSCENE_ENTITIES!![anInt9400].getEntity()
+            val entity = CutsceneTypeList.CUTSCENE_ENTITIES!![targetEntityIndex].getEntity()
             val abs = entity.getAbsolutePosition().coords
             srcX = abs.x.toInt()
             srcY = abs.z.toInt()
@@ -89,12 +89,12 @@ class CutsceneProjectile(rsbytebuffer1: Packet, i_2: Int, i_3: Int) : CutsceneAc
                 plane = entity.plane.toInt()
             }
         }
-        val i_7 = anInt9399 shl 2
+        val i_7 = slope shl 2
         val projectile = Projectile(
             Resource.mapRegion!!.getScene()!!, gfxId, plane, plane, dstX, dstY,
-            anInt9405 shl 2, Client.cycles, anInt9409 + Client.cycles, anInt9412, i_7, anInt9402 + 1, anInt9400 + 1, endHeight shl 2, false, 0
+            startHeight shl 2, Client.cycles, duration + Client.cycles, angle, i_7, sourceEntityIndex + 1, targetEntityIndex + 1, endHeight shl 2, false, 0
         )
-        projectile.start(srcX, srcY, endHeight shl 2, anInt9409 + Client.cycles)
+        projectile.start(srcX, srcY, endHeight shl 2, duration + Client.cycles)
         Client.PROJECTILES.addFirst(ProjectileSpawnRequest(projectile))
     }
 

@@ -291,12 +291,12 @@ END
         }
 
         val depth = glToolkit.waterDepth.toFloat()
-        val scaleX = matrix.faceList[4] * depth + matrix.faceList[12]
-        val scaleY = matrix.faceList[5] * depth + matrix.faceList[13]
-        val scaleZ = matrix.faceList[6] * depth + matrix.faceList[14]
-        XYZW[0] = -matrix.faceList[4]
-        XYZW[1] = -matrix.faceList[5]
-        XYZW[2] = -matrix.faceList[6]
+        val scaleX = matrix.elements[4] * depth + matrix.elements[12]
+        val scaleY = matrix.elements[5] * depth + matrix.elements[13]
+        val scaleZ = matrix.elements[6] * depth + matrix.elements[14]
+        XYZW[0] = -matrix.elements[4]
+        XYZW[1] = -matrix.elements[5]
+        XYZW[2] = -matrix.elements[6]
         XYZW[3] = -(XYZW[0] * scaleX + XYZW[1] * scaleY + XYZW[2] * scaleZ)
         OpenGL.glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 1, XYZW[0], XYZW[1], XYZW[2], XYZW[3])
         OpenGL.glEnable(GL_VERTEX_PROGRAM_ARB)

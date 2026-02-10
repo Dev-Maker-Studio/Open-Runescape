@@ -1502,15 +1502,15 @@ open class ModelSM : Model {
             for (emitterIndex in this.particleEmitters!!.indices) {
                 val emitter = this.particleEmitters!![emitterIndex]
                 val childEmitter = emitter.child ?: emitter
-                childEmitter.verticeXA = (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX!![emitter.faceA] + particleMatrix.faceList[4] * this.verticesY!![emitter.faceA] + particleMatrix.faceList[8] * this.verticesZ!![emitter.faceA]).toInt()
-                childEmitter.verticeYA = (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX!![emitter.faceA] + particleMatrix.faceList[5] * this.verticesY!![emitter.faceA] + particleMatrix.faceList[9] * this.verticesZ!![emitter.faceA]).toInt()
-                childEmitter.verticeZA = (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX!![emitter.faceA] + particleMatrix.faceList[6] * this.verticesY!![emitter.faceA] + particleMatrix.faceList[10] * this.verticesZ!![emitter.faceA]).toInt()
-                childEmitter.verticeXB = (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX!![emitter.faceB] + particleMatrix.faceList[4] * this.verticesY!![emitter.faceB] + particleMatrix.faceList[8] * this.verticesZ!![emitter.faceB]).toInt()
-                childEmitter.verticeYB = (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX!![emitter.faceB] + particleMatrix.faceList[5] * this.verticesY!![emitter.faceB] + particleMatrix.faceList[9] * this.verticesZ!![emitter.faceB]).toInt()
-                childEmitter.verticeZB = (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX!![emitter.faceB] + particleMatrix.faceList[6] * this.verticesY!![emitter.faceB] + particleMatrix.faceList[10] * this.verticesZ!![emitter.faceB]).toInt()
-                childEmitter.verticeXC = (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX!![emitter.faceC] + particleMatrix.faceList[4] * this.verticesY!![emitter.faceC] + particleMatrix.faceList[8] * this.verticesZ!![emitter.faceC]).toInt()
-                childEmitter.verticeYC = (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX!![emitter.faceC] + particleMatrix.faceList[5] * this.verticesY!![emitter.faceC] + particleMatrix.faceList[9] * this.verticesZ!![emitter.faceC]).toInt()
-                childEmitter.verticeZC = (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX!![emitter.faceC] + particleMatrix.faceList[6] * this.verticesY!![emitter.faceC] + particleMatrix.faceList[10] * this.verticesZ!![emitter.faceC]).toInt()
+                childEmitter.verticeXA = (particleMatrix.elements[12] + particleMatrix.elements[0] * this.verticesX!![emitter.faceA] + particleMatrix.elements[4] * this.verticesY!![emitter.faceA] + particleMatrix.elements[8] * this.verticesZ!![emitter.faceA]).toInt()
+                childEmitter.verticeYA = (particleMatrix.elements[13] + particleMatrix.elements[1] * this.verticesX!![emitter.faceA] + particleMatrix.elements[5] * this.verticesY!![emitter.faceA] + particleMatrix.elements[9] * this.verticesZ!![emitter.faceA]).toInt()
+                childEmitter.verticeZA = (particleMatrix.elements[14] + particleMatrix.elements[2] * this.verticesX!![emitter.faceA] + particleMatrix.elements[6] * this.verticesY!![emitter.faceA] + particleMatrix.elements[10] * this.verticesZ!![emitter.faceA]).toInt()
+                childEmitter.verticeXB = (particleMatrix.elements[12] + particleMatrix.elements[0] * this.verticesX!![emitter.faceB] + particleMatrix.elements[4] * this.verticesY!![emitter.faceB] + particleMatrix.elements[8] * this.verticesZ!![emitter.faceB]).toInt()
+                childEmitter.verticeYB = (particleMatrix.elements[13] + particleMatrix.elements[1] * this.verticesX!![emitter.faceB] + particleMatrix.elements[5] * this.verticesY!![emitter.faceB] + particleMatrix.elements[9] * this.verticesZ!![emitter.faceB]).toInt()
+                childEmitter.verticeZB = (particleMatrix.elements[14] + particleMatrix.elements[2] * this.verticesX!![emitter.faceB] + particleMatrix.elements[6] * this.verticesY!![emitter.faceB] + particleMatrix.elements[10] * this.verticesZ!![emitter.faceB]).toInt()
+                childEmitter.verticeXC = (particleMatrix.elements[12] + particleMatrix.elements[0] * this.verticesX!![emitter.faceC] + particleMatrix.elements[4] * this.verticesY!![emitter.faceC] + particleMatrix.elements[8] * this.verticesZ!![emitter.faceC]).toInt()
+                childEmitter.verticeYC = (particleMatrix.elements[13] + particleMatrix.elements[1] * this.verticesX!![emitter.faceC] + particleMatrix.elements[5] * this.verticesY!![emitter.faceC] + particleMatrix.elements[9] * this.verticesZ!![emitter.faceC]).toInt()
+                childEmitter.verticeZC = (particleMatrix.elements[14] + particleMatrix.elements[2] * this.verticesX!![emitter.faceC] + particleMatrix.elements[6] * this.verticesY!![emitter.faceC] + particleMatrix.elements[10] * this.verticesZ!![emitter.faceC]).toInt()
             }
         }
         if (this.effectors != null) {
@@ -1522,9 +1522,9 @@ open class ModelSM : Model {
                 } else {
                     effectiveVertex.matrix = Matrix44(particleMatrix)
                 }
-                effectiveVertexChild.verticeX = (particleMatrix.faceList[12] + particleMatrix.faceList[0] * this.verticesX!![effectiveVertex.appliesOnVertex] + particleMatrix.faceList[4] * this.verticesY!![effectiveVertex.appliesOnVertex] + particleMatrix.faceList[8] * this.verticesZ!![effectiveVertex.appliesOnVertex]).toInt()
-                effectiveVertexChild.verticeY = (particleMatrix.faceList[13] + particleMatrix.faceList[1] * this.verticesX!![effectiveVertex.appliesOnVertex] + particleMatrix.faceList[5] * this.verticesY!![effectiveVertex.appliesOnVertex] + particleMatrix.faceList[9] * this.verticesZ!![effectiveVertex.appliesOnVertex]).toInt()
-                effectiveVertexChild.verticeZ = (particleMatrix.faceList[14] + particleMatrix.faceList[2] * this.verticesX!![effectiveVertex.appliesOnVertex] + particleMatrix.faceList[6] * this.verticesY!![effectiveVertex.appliesOnVertex] + particleMatrix.faceList[10] * this.verticesZ!![effectiveVertex.appliesOnVertex]).toInt()
+                effectiveVertexChild.verticeX = (particleMatrix.elements[12] + particleMatrix.elements[0] * this.verticesX!![effectiveVertex.appliesOnVertex] + particleMatrix.elements[4] * this.verticesY!![effectiveVertex.appliesOnVertex] + particleMatrix.elements[8] * this.verticesZ!![effectiveVertex.appliesOnVertex]).toInt()
+                effectiveVertexChild.verticeY = (particleMatrix.elements[13] + particleMatrix.elements[1] * this.verticesX!![effectiveVertex.appliesOnVertex] + particleMatrix.elements[5] * this.verticesY!![effectiveVertex.appliesOnVertex] + particleMatrix.elements[9] * this.verticesZ!![effectiveVertex.appliesOnVertex]).toInt()
+                effectiveVertexChild.verticeZ = (particleMatrix.elements[14] + particleMatrix.elements[2] * this.verticesX!![effectiveVertex.appliesOnVertex] + particleMatrix.elements[6] * this.verticesY!![effectiveVertex.appliesOnVertex] + particleMatrix.elements[10] * this.verticesZ!![effectiveVertex.appliesOnVertex]).toInt()
             }
         }
     }
@@ -2397,7 +2397,7 @@ open class ModelSM : Model {
             if (!this.boundsUpdated) {
                 calculateBounds()
             }
-            val bool8 = particleMatrix.method6526()
+            val bool8 = particleMatrix.isIdentity()
             val particleOffsets = resource.particleOffsets
             particleMatrix.scale(0.0f, this.minY.toFloat(), 0.0f, particleOffsets)
             val offsetXA = particleOffsets!![0]
@@ -2420,16 +2420,16 @@ open class ModelSM : Model {
             val nNearFaceA: Float
             val zNearFaceD: Float
             if (bool8) {
-                zNearFaceD = matrix446.faceList[14]
-                nNearFaceA = matrix446.faceList[6]
+                zNearFaceD = matrix446.elements[14]
+                nNearFaceA = matrix446.elements[6]
             } else {
-                zNearFaceD = particleMatrix.faceList[12] * matrix446.faceList[2] + particleMatrix.faceList[13] * matrix446.faceList[6] + particleMatrix.faceList[14] * matrix446.faceList[10] + matrix446.faceList[14]
-                nNearFaceA = particleMatrix.faceList[4] * matrix446.faceList[2] + particleMatrix.faceList[5] * matrix446.faceList[6] + particleMatrix.faceList[6] * matrix446.faceList[10]
+                zNearFaceD = particleMatrix.elements[12] * matrix446.elements[2] + particleMatrix.elements[13] * matrix446.elements[6] + particleMatrix.elements[14] * matrix446.elements[10] + matrix446.elements[14]
+                nNearFaceA = particleMatrix.elements[4] * matrix446.elements[2] + particleMatrix.elements[5] * matrix446.elements[6] + particleMatrix.elements[6] * matrix446.elements[10]
             }
             f_18 = zNearFaceD + this.minY * nNearFaceA
             f_19 = zNearFaceD + this.maxY * nNearFaceA
             val f_20 = if (f_18 > f_19) f_18 + this.size2d else f_19 + this.size2d
-            val f_21 = matrix447.faceList[10] * f_20 + matrix447.faceList[14]
+            val f_21 = matrix447.elements[10] * f_20 + matrix447.elements[14]
             if (this.toolkit.executingThreadCount > 1) {
                 synchronized(this) {
                     while (this.renderLock) {
@@ -2460,10 +2460,10 @@ open class ModelSM : Model {
                 val verticeX = this.verticesX!![verticeIndex]
                 val verticeY = this.verticesY!![verticeIndex]
                 val verticeZ = this.verticesZ!![verticeIndex]
-                val matrixX = renderMatrix.faceList[0] * verticeX + renderMatrix.faceList[4] * verticeY + renderMatrix.faceList[8] * verticeZ + renderMatrix.faceList[12]
-                val matrixY = renderMatrix.faceList[1] * verticeX + renderMatrix.faceList[5] * verticeY + renderMatrix.faceList[9] * verticeZ + renderMatrix.faceList[13]
-                val matrixZ = renderMatrix.faceList[2] * verticeX + renderMatrix.faceList[6] * verticeY + renderMatrix.faceList[10] * verticeZ + renderMatrix.faceList[14]
-                val zz = renderMatrix.faceList[3] * verticeX + renderMatrix.faceList[7] * verticeY + renderMatrix.faceList[11] * verticeZ + renderMatrix.faceList[15]
+                val matrixX = renderMatrix.elements[0] * verticeX + renderMatrix.elements[4] * verticeY + renderMatrix.elements[8] * verticeZ + renderMatrix.elements[12]
+                val matrixY = renderMatrix.elements[1] * verticeX + renderMatrix.elements[5] * verticeY + renderMatrix.elements[9] * verticeZ + renderMatrix.elements[13]
+                val matrixZ = renderMatrix.elements[2] * verticeX + renderMatrix.elements[6] * verticeY + renderMatrix.elements[10] * verticeZ + renderMatrix.elements[14]
+                val zz = renderMatrix.elements[3] * verticeX + renderMatrix.elements[7] * verticeY + renderMatrix.elements[11] * verticeZ + renderMatrix.elements[15]
                 this.projectedVerticesZ!![verticeIndex] = this.threadResource!!.aFloat2335 + this.threadResource!!.aFloat2311 * matrixZ / zz
                 this.projectedVerticesZ2!![verticeIndex] = zz
                 if (matrixZ >= -zz) {
@@ -2474,7 +2474,7 @@ open class ModelSM : Model {
                     offscreen = true
                 }
                 if (this.threadResource!!.hasWaterUpdate) {
-                    this.waterRenderHeight!![verticeIndex] = (particleMatrix.faceList[13] + particleMatrix.faceList[1] * verticeX + particleMatrix.faceList[5] * verticeY + particleMatrix.faceList[9] * verticeZ).toInt()
+                    this.waterRenderHeight!![verticeIndex] = (particleMatrix.elements[13] + particleMatrix.elements[1] * verticeX + particleMatrix.elements[5] * verticeY + particleMatrix.elements[9] * verticeZ).toInt()
                 }
             }
             if (this.billboardEffects != null) {
@@ -2487,27 +2487,27 @@ open class ModelSM : Model {
                     val avgX = (this.verticesX!![a.toInt()] + this.verticesX!![b.toInt()] + this.verticesX!![c.toInt()]) / 3
                     val avgY = (this.verticesY!![a.toInt()] + this.verticesY!![b.toInt()] + this.verticesY!![c.toInt()]) / 3
                     val avgZ = (this.verticesZ!![a.toInt()] + this.verticesZ!![b.toInt()] + this.verticesZ!![c.toInt()]) / 3
-                    var mX = renderMatrix.faceList[0] * avgX + renderMatrix.faceList[4] * avgY + renderMatrix.faceList[8] * avgZ + renderMatrix.faceList[12]
-                    var mY = renderMatrix.faceList[1] * avgX + renderMatrix.faceList[5] * avgY + renderMatrix.faceList[9] * avgZ + renderMatrix.faceList[13]
-                    var mZ = renderMatrix.faceList[2] * avgX + renderMatrix.faceList[6] * avgY + renderMatrix.faceList[10] * avgZ + renderMatrix.faceList[14]
-                    var mZB2 = renderMatrix.faceList[3] * avgX + renderMatrix.faceList[7] * avgY + renderMatrix.faceList[11] * avgZ + renderMatrix.faceList[15]
-                    mZ += matrix447.faceList[2] * surface.offsetX + matrix447.faceList[6] * surface.offsetY
-                    mZB2 += matrix447.faceList[3] * surface.offsetX + matrix447.faceList[7] * surface.offsetY
+                    var mX = renderMatrix.elements[0] * avgX + renderMatrix.elements[4] * avgY + renderMatrix.elements[8] * avgZ + renderMatrix.elements[12]
+                    var mY = renderMatrix.elements[1] * avgX + renderMatrix.elements[5] * avgY + renderMatrix.elements[9] * avgZ + renderMatrix.elements[13]
+                    var mZ = renderMatrix.elements[2] * avgX + renderMatrix.elements[6] * avgY + renderMatrix.elements[10] * avgZ + renderMatrix.elements[14]
+                    var mZB2 = renderMatrix.elements[3] * avgX + renderMatrix.elements[7] * avgY + renderMatrix.elements[11] * avgZ + renderMatrix.elements[15]
+                    mZ += matrix447.elements[2] * surface.offsetX + matrix447.elements[6] * surface.offsetY
+                    mZB2 += matrix447.elements[3] * surface.offsetX + matrix447.elements[7] * surface.offsetY
                     if (mZ > -mZB2) {
-                        mX += matrix447.faceList[0] * surface.offsetX + matrix447.faceList[4] * surface.offsetY
-                        mY += matrix447.faceList[1] * surface.offsetX + matrix447.faceList[5] * surface.offsetY
+                        mX += matrix447.elements[0] * surface.offsetX + matrix447.elements[4] * surface.offsetY
+                        mY += matrix447.elements[1] * surface.offsetX + matrix447.elements[5] * surface.offsetY
                         val xx = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * mX / mZB2
                         val yy = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * mY / mZB2
                         val adjustedSizeX = surface.scaleX * effect.size2d
                         val adjustedSizeY = surface.scaleY * effect.size3d
-                        val adjustX = mX + matrix447.faceList[0] * adjustedSizeX + matrix447.faceList[4] * adjustedSizeY
-                        val adjustY = mY + matrix447.faceList[1] * adjustedSizeX + matrix447.faceList[5] * adjustedSizeY
-                        val adjustZB2 = mZB2 + matrix447.faceList[3] * adjustedSizeX + matrix447.faceList[7] * adjustedSizeY
+                        val adjustX = mX + matrix447.elements[0] * adjustedSizeX + matrix447.elements[4] * adjustedSizeY
+                        val adjustY = mY + matrix447.elements[1] * adjustedSizeX + matrix447.elements[5] * adjustedSizeY
+                        val adjustZB2 = mZB2 + matrix447.elements[3] * adjustedSizeX + matrix447.elements[7] * adjustedSizeY
                         val otherX = this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * adjustX / adjustZB2
                         val otherY = this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * adjustY / adjustZB2
                         surface.x = xx.toInt()
                         surface.y = yy.toInt()
-                        surface.z = this.toolkit.depthRangeNear + this.toolkit.depthRangeFar * (mZ - matrix447.faceList[10] * effect.distance) / mZB2
+                        surface.z = this.toolkit.depthRangeNear + this.toolkit.depthRangeFar * (mZ - matrix447.elements[10] * effect.distance) / mZB2
                         surface.size2d = (if (otherX < xx) xx - otherX else otherX - xx).toInt()
                         surface.size3d = (if (otherY < yy) yy - otherY else otherY - yy).toInt()
                     } else {
@@ -2522,10 +2522,10 @@ open class ModelSM : Model {
                 val sizeDeltaX = this.minX + this.maxX shr 1
                 val sizeDeltaZ = this.minZ + this.maxZ shr 1
                 var mY = this.minY
-                var zz = renderMatrix.faceList[0] * sizeDeltaX + renderMatrix.faceList[4] * mY + renderMatrix.faceList[8] * sizeDeltaZ + renderMatrix.faceList[12]
-                var f_64 = renderMatrix.faceList[1] * sizeDeltaX + renderMatrix.faceList[5] * mY + renderMatrix.faceList[9] * sizeDeltaZ + renderMatrix.faceList[13]
-                var f_33 = renderMatrix.faceList[2] * sizeDeltaX + renderMatrix.faceList[6] * mY + renderMatrix.faceList[10] * sizeDeltaZ + renderMatrix.faceList[14]
-                var f_34 = renderMatrix.faceList[3] * sizeDeltaX + renderMatrix.faceList[7] * mY + renderMatrix.faceList[11] * sizeDeltaZ + renderMatrix.faceList[15]
+                var zz = renderMatrix.elements[0] * sizeDeltaX + renderMatrix.elements[4] * mY + renderMatrix.elements[8] * sizeDeltaZ + renderMatrix.elements[12]
+                var f_64 = renderMatrix.elements[1] * sizeDeltaX + renderMatrix.elements[5] * mY + renderMatrix.elements[9] * sizeDeltaZ + renderMatrix.elements[13]
+                var f_33 = renderMatrix.elements[2] * sizeDeltaX + renderMatrix.elements[6] * mY + renderMatrix.elements[10] * sizeDeltaZ + renderMatrix.elements[14]
+                var f_34 = renderMatrix.elements[3] * sizeDeltaX + renderMatrix.elements[7] * mY + renderMatrix.elements[11] * sizeDeltaZ + renderMatrix.elements[15]
                 if (f_33 >= -f_34) {
                     renderedEntity.left = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * zz / f_34).toInt()
                     renderedEntity.bottom = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_64 / f_34).toInt()
@@ -2533,10 +2533,10 @@ open class ModelSM : Model {
                     bool57 = true
                 }
                 mY = this.maxY
-                val f_35 = renderMatrix.faceList[0] * sizeDeltaX + renderMatrix.faceList[4] * mY + renderMatrix.faceList[8] * sizeDeltaZ + renderMatrix.faceList[12]
-                val f_36 = renderMatrix.faceList[1] * sizeDeltaX + renderMatrix.faceList[5] * mY + renderMatrix.faceList[9] * sizeDeltaZ + renderMatrix.faceList[13]
-                val f_37 = renderMatrix.faceList[2] * sizeDeltaX + renderMatrix.faceList[6] * mY + renderMatrix.faceList[10] * sizeDeltaZ + renderMatrix.faceList[14]
-                val f_38 = renderMatrix.faceList[3] * sizeDeltaX + renderMatrix.faceList[7] * mY + renderMatrix.faceList[11] * sizeDeltaZ + renderMatrix.faceList[15]
+                val f_35 = renderMatrix.elements[0] * sizeDeltaX + renderMatrix.elements[4] * mY + renderMatrix.elements[8] * sizeDeltaZ + renderMatrix.elements[12]
+                val f_36 = renderMatrix.elements[1] * sizeDeltaX + renderMatrix.elements[5] * mY + renderMatrix.elements[9] * sizeDeltaZ + renderMatrix.elements[13]
+                val f_37 = renderMatrix.elements[2] * sizeDeltaX + renderMatrix.elements[6] * mY + renderMatrix.elements[10] * sizeDeltaZ + renderMatrix.elements[14]
+                val f_38 = renderMatrix.elements[3] * sizeDeltaX + renderMatrix.elements[7] * mY + renderMatrix.elements[11] * sizeDeltaZ + renderMatrix.elements[15]
                 if (f_37 >= -f_38) {
                     renderedEntity.right = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_35 / f_38).toInt()
                     renderedEntity.top = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_36 / f_38).toInt()
@@ -2564,12 +2564,12 @@ open class ModelSM : Model {
                 }
                 if (bool58) {
                     if (f_33 / f_34 > f_37 / f_38) {
-                        val f_39 = zz + matrix447.faceList[0] * this.size2d + matrix447.faceList[12]
-                        val f_40 = f_34 + matrix447.faceList[3] * this.size2d + matrix447.faceList[15]
+                        val f_39 = zz + matrix447.elements[0] * this.size2d + matrix447.elements[12]
+                        val f_40 = f_34 + matrix447.elements[3] * this.size2d + matrix447.elements[15]
                         renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.left + this.toolkit.viewportHalfWidth * f_39 / f_40).toInt()
                     } else {
-                        val f_39 = f_35 + matrix447.faceList[0] * this.size2d + matrix447.faceList[12]
-                        val f_40 = f_38 + matrix447.faceList[3] * this.size2d + matrix447.faceList[15]
+                        val f_39 = f_35 + matrix447.elements[0] * this.size2d + matrix447.elements[12]
+                        val f_40 = f_38 + matrix447.elements[3] * this.size2d + matrix447.elements[15]
                         renderedEntity.size = (this.toolkit.viewportOriginX - renderedEntity.right + this.toolkit.viewportHalfWidth * f_39 / f_40).toInt()
                     }
                     renderedEntity.positionCalculated = true
@@ -2741,10 +2741,10 @@ open class ModelSM : Model {
             val b = this.facesB!![faceIndex].toInt()
             val c = this.facesC!![faceIndex].toInt()
             val matrix448 = this.toolkit.modelMatrix!!
-            val f_9 = matrix448.faceList[10]
-            val f_10 = matrix448.faceList[14]
-            val f_11 = matrix448.faceList[11]
-            val f_12 = matrix448.faceList[15]
+            val f_9 = matrix448.elements[10]
+            val f_10 = matrix448.elements[14]
+            val f_11 = matrix448.elements[11]
+            val f_12 = matrix448.elements[15]
             val f_13 = f_10 * f_11 - f_9 * f_12
             val f_14 = (this.projectedVerticesZ!![a] - this.threadResource!!.aFloat2335) * this.threadResource!!.aFloat2308
             val f_15 = (this.projectedVerticesZ!![b] - this.threadResource!!.aFloat2335) * this.threadResource!!.aFloat2308
@@ -2899,11 +2899,11 @@ open class ModelSM : Model {
             val x = this.matrixX!![matrixIndex]
             val y = this.matrixY!![matrixIndex]
             val z = this.matrixZ!![matrixIndex]
-            val depthA = renderMatrix.faceList[2] * x + renderMatrix.faceList[6] * y + renderMatrix.faceList[10] * z + renderMatrix.faceList[14]
-            val depthB = renderMatrix.faceList[3] * x + renderMatrix.faceList[7] * y + renderMatrix.faceList[11] * z + renderMatrix.faceList[15]
+            val depthA = renderMatrix.elements[2] * x + renderMatrix.elements[6] * y + renderMatrix.elements[10] * z + renderMatrix.elements[14]
+            val depthB = renderMatrix.elements[3] * x + renderMatrix.elements[7] * y + renderMatrix.elements[11] * z + renderMatrix.elements[15]
             if (depthA >= -depthB) {
-                val f_31 = renderMatrix.faceList[0] * x + renderMatrix.faceList[4] * y + renderMatrix.faceList[8] * z + renderMatrix.faceList[12]
-                val f_32 = renderMatrix.faceList[1] * x + renderMatrix.faceList[5] * y + renderMatrix.faceList[9] * z + renderMatrix.faceList[13]
+                val f_31 = renderMatrix.elements[0] * x + renderMatrix.elements[4] * y + renderMatrix.elements[8] * z + renderMatrix.elements[12]
+                val f_32 = renderMatrix.elements[1] * x + renderMatrix.elements[5] * y + renderMatrix.elements[9] * z + renderMatrix.elements[13]
                 val screenPosX = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * f_31 / depthB).toInt()
                 val screenPosY = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * f_32 / depthB).toInt()
                 if (screenPosX < left) {
@@ -2929,11 +2929,11 @@ open class ModelSM : Model {
                 val x = this.verticesX!![verticeIndex]
                 val y = this.verticesY!![verticeIndex]
                 val z = this.verticesZ!![verticeIndex]
-                val depthA = renderMatrix.faceList[2] * x + renderMatrix.faceList[6] * y + renderMatrix.faceList[10] * z + renderMatrix.faceList[14]
-                val depthB = renderMatrix.faceList[3] * x + renderMatrix.faceList[7] * y + renderMatrix.faceList[11] * z + renderMatrix.faceList[15]
+                val depthA = renderMatrix.elements[2] * x + renderMatrix.elements[6] * y + renderMatrix.elements[10] * z + renderMatrix.elements[14]
+                val depthB = renderMatrix.elements[3] * x + renderMatrix.elements[7] * y + renderMatrix.elements[11] * z + renderMatrix.elements[15]
                 if (depthA >= -depthB) {
-                    val multiplierX = renderMatrix.faceList[0] * x + renderMatrix.faceList[4] * y + renderMatrix.faceList[8] * z + renderMatrix.faceList[12]
-                    val multiplierY = renderMatrix.faceList[1] * x + renderMatrix.faceList[5] * y + renderMatrix.faceList[9] * z + renderMatrix.faceList[13]
+                    val multiplierX = renderMatrix.elements[0] * x + renderMatrix.elements[4] * y + renderMatrix.elements[8] * z + renderMatrix.elements[12]
+                    val multiplierY = renderMatrix.elements[1] * x + renderMatrix.elements[5] * y + renderMatrix.elements[9] * z + renderMatrix.elements[13]
                     this.projectedVerticesX!![verticeIndex] = (this.toolkit.viewportOriginX + this.toolkit.viewportHalfWidth * multiplierX / depthB)
                     this.projectedVerticesY!![verticeIndex] = (this.toolkit.viewportOriginY + this.toolkit.viewportHalfHeight * multiplierY / depthB)
                 } else {

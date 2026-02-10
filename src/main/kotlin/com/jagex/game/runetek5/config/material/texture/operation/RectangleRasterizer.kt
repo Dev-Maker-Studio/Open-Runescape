@@ -32,7 +32,7 @@ class RectangleRasterizer(
         val i_5 = right * i_1 shr 12
         val i_6 = i_2 * top shr 12
         val i_7 = i_2 * bottom shr 12
-        StaticMethods.method6772(i_4, i_5, i_6, i_7, fillColor)
+        StaticMethods.drawFilledRectangleToPixelBuffer(i_4, i_5, i_6, i_7, fillColor)
     }
 
     override fun drawFilledAndStroked(i_1: Int, i_2: Int) {
@@ -40,7 +40,7 @@ class RectangleRasterizer(
         val i_5 = right * i_1 shr 12
         val i_6 = i_2 * top shr 12
         val i_7 = i_2 * bottom shr 12
-        StaticMethods.method6731(i_4, i_5, i_6, i_7, fillColor, strokeColor, strokeWidth)
+        StaticMethods.drawStrokedAndFilledRectangle(i_4, i_5, i_6, i_7, fillColor, strokeColor, strokeWidth)
     }
 
     companion object {
@@ -147,14 +147,14 @@ class RectangleRasterizer(
         fun drawStrokedRectangle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
             if (i_0 >= TextureOpRasterizer.clipMinX && i_1 <= TextureOpRasterizer.clipMaxX && i_2 >= TextureOpRasterizer.clipMinY && i_3 <= TextureOpRasterizer.clipMaxY) {
                 if (i_5 == 1) {
-                    StaticMethods.method14572(i_0, i_1, i_2, i_3, i_4)
+                    StaticMethods.drawStrokedRectangleToPixelBuffer(i_0, i_1, i_2, i_3, i_4)
                 } else {
                     drawUnclippedStrokedRectangle(i_0, i_1, i_2, i_3, i_4, i_5)
                 }
             } else if (i_5 == 1) {
                 drawClippedStrokedRectangle(i_0, i_1, i_2, i_3, i_4)
             } else {
-                ArrayUtils.method744(i_0, i_1, i_2, i_3, i_4, i_5)
+                ArrayUtils.drawClippedStrokedRectangle(i_0, i_1, i_2, i_3, i_4, i_5)
             }
         }
     }

@@ -29,7 +29,7 @@ internal class PerlinNoiseGenerator : NoiseGenerator() {
         }
     }
 
-    override fun method4634(layer: Int, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: FloatArray) {
+    override fun generateNoise3D(layer: Int, scaleX: Float, scaleY: Float, scaleZ: Float, amplitude: Float, output: FloatArray) {
         var outputIndex = 0
         var xMask = (128 * scaleX - 1.0f).toInt()
         xMask = xMask and 0xff

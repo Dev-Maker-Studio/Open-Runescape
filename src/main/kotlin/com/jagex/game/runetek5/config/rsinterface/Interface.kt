@@ -35,7 +35,7 @@ class Interface(
         return subComponents ?: components
     }
 
-    fun method1617(): Array<Component?> {
+    fun getOrCreateMutableComponents(): Array<Component?> {
         if (subComponents == null) {
             val i2 = components.size
             subComponents = Array(i2) { null }
@@ -55,7 +55,7 @@ class Interface(
         var interfaceResource: Js5ResourceProvider? = null
 
         @JvmField
-        var anInt3008: Int = 0
+        var worldMapDragStartX: Int = 0
 
         @JvmField
         var preferenceMask: Int = 0
@@ -107,7 +107,7 @@ class Interface(
         @JvmName("open_sub")
         fun openSub(interfaceId: Int, i1: Int) {
             if (interfaceLoaded(interfaceId, null)) {
-                method2591(INTERFACES!![interfaceId]!!.components, i1)
+                runInterfaceScripts(INTERFACES!![interfaceId]!!.components, i1)
             }
         }
 
@@ -140,7 +140,7 @@ class Interface(
             if (unload) {
                 unloadInterface(parentInterfaceId)
             }
-            method14650(parentInterfaceId)
+            removeComponentSettings(parentInterfaceId)
             val component = Component.fromHash(interfaceHash)
             if (component != null) {
                 Component.redrawComponent(component)
@@ -282,7 +282,7 @@ class Interface(
         }
 
         @JvmStatic
-        fun method14650(i0: Int) {
+        fun removeComponentSettings(i0: Int) {
             var node = Client.ICOMPONENT_SETTINGS_SLOTS.first()
             while (node != null) {
                 if (i0 == (node.pointer shr 48 and 0xffffL).toInt()) {
@@ -293,7 +293,7 @@ class Interface(
         }
 
         @JvmStatic
-        fun method4248(interfaceAndComponent: Int, i1: Int): Boolean {
+        fun hasActiveMenuEntry(interfaceAndComponent: Int, i1: Int): Boolean {
             if (!MiniMenu.isOpen) {
                 return false
             }
@@ -382,52 +382,52 @@ class Interface(
                         when (option) {
                             1 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP1, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             2 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP2, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             3 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP3, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             4 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP4, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             5 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP5, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             6 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP6, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             7 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP7, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             8 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP8, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             9 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP9, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                             10 -> {
                                 packet = PacketEncoder.createPacket(ClientProt.IF_OP10, connection.isaac)
-                                PacketEncoder.method12590(packet, interfaceHash, slotId, component.containerItemId)
+                                PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, component.containerItemId)
                                 connection.queuePacket(packet)
                             }
                         }
@@ -470,13 +470,13 @@ class Interface(
         }
 
         @JvmStatic
-        fun method2591(components: Array<Component?>, i1: Int) {
+        fun runInterfaceScripts(components: Array<Component?>, i1: Int) {
             for (index in components.indices) {
                 val component = components[index]
                 if (component != null) {
                     if (component.type == ComponentType.CONTAINER) {
                         if (component.itemSlots != null) {
-                            method2591(component.itemSlots!!, i1)
+                            runInterfaceScripts(component.itemSlots!!, i1)
                         }
                         val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong()) as SubInterface?
                         if (subInterface != null) {
@@ -506,7 +506,7 @@ class Interface(
         }
 
         @JvmStatic
-        fun method7554(inter: Interface, defs: Component?) {
+        fun moveComponentToBack(inter: Interface, defs: Component?) {
             if (defs != null) {
                 var i4: Int
                 if (defs.slotId != -1) {
@@ -536,7 +536,7 @@ class Interface(
                         }
                     }
                 } else {
-                    val arr6 = inter.method1617()
+                    val arr6 = inter.getOrCreateMutableComponents()
                     i4 = 0
                     while (i4 < arr6.size && arr6[i4] != defs) {
                         i4++
@@ -550,7 +550,7 @@ class Interface(
         }
 
         @JvmStatic
-        fun method3710(inter: Interface, defs: Component?) {
+        fun moveComponentToFront(inter: Interface, defs: Component?) {
             if (defs != null) {
                 var i4: Int
                 if (defs.slotId != -1) {
@@ -580,7 +580,7 @@ class Interface(
                         }
                     }
                 } else {
-                    val arr6 = inter.method1617()
+                    val arr6 = inter.getOrCreateMutableComponents()
                     i4 = 0
                     while (i4 < arr6.size && arr6[i4] != defs) {
                         i4++

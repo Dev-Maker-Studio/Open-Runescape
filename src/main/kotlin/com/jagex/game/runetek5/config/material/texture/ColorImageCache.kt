@@ -9,33 +9,33 @@ import com.jagex.game.runetek5.cache.node.LinkedList
  * @author OpenOSRS - naming
  */
 class ColorImageCache(
-    @JvmField val anInt3613: Int,
-    @JvmField val anInt3611: Int,
+    @JvmField val maxCachedRows: Int,
+    @JvmField val totalRows: Int,
     dataLength: Int
 ) {
 
     @JvmField var dirty: Boolean = false
-    @JvmField var aNodeSub16Array3615: Array<ColorImageCacheEntry?>
-    @JvmField var anIntArrayArrayArray3614: Array<Array<IntArray>>
-    @JvmField var aClass4733612: LinkedList? = LinkedList()
-    @JvmField var anInt3617: Int = 0
-    @JvmField var anInt3616: Int = -1
+    @JvmField var cacheEntries: Array<ColorImageCacheEntry?>
+    @JvmField var rgbData: Array<Array<IntArray>>
+    @JvmField var lruList: LinkedList? = LinkedList()
+    @JvmField var cachedRowCount: Int = 0
+    @JvmField var lastAccessedRow: Int = -1
 
     init {
-        anIntArrayArrayArray3614 = Array(anInt3613) {
+        rgbData = Array(maxCachedRows) {
             Array(3) { IntArray(dataLength) }
         }
-        aNodeSub16Array3615 = arrayOfNulls(anInt3611)
+        cacheEntries = arrayOfNulls(totalRows)
     }
 
     /**
      * Clears and releases the cache.
      */
     fun clear() {
-        aNodeSub16Array3615 = emptyArray()
-        anIntArrayArrayArray3614 = emptyArray()
-        aClass4733612!!.clear()
-        aClass4733612 = null
+        cacheEntries = emptyArray()
+        rgbData = emptyArray()
+        lruList!!.clear()
+        lruList = null
     }
 
     /**
@@ -45,35 +45,35 @@ class ColorImageCache(
      * @return The RGB palette data for this row
      */
     fun getPalette(index: Int): Array<IntArray> {
-        if (anInt3611 == anInt3613) {
-            dirty = aNodeSub16Array3615[index] == null
-            aNodeSub16Array3615[index] = aNodeSub163618
-            return anIntArrayArrayArray3614[index]
+        if (totalRows == maxCachedRows) {
+            dirty = cacheEntries[index] == null
+            cacheEntries[index] = SENTINEL_ENTRY
+            return rgbData[index]
         }
 
-        if (anInt3613 == 1) {
-            dirty = anInt3616 != index
-            anInt3616 = index
-            return anIntArrayArrayArray3614[0]
+        if (maxCachedRows == 1) {
+            dirty = lastAccessedRow != index
+            lastAccessedRow = index
+            return rgbData[0]
         }
 
-        var entry = aNodeSub16Array3615[index]
+        var entry = cacheEntries[index]
         if (entry == null) {
             dirty = true
-            if (anInt3617 >= anInt3613) {
-                val oldEntry = aClass4733612!!.getNext() as ColorImageCacheEntry
+            if (cachedRowCount >= maxCachedRows) {
+                val oldEntry = lruList!!.getNext() as ColorImageCacheEntry
                 entry = ColorImageCacheEntry(index, oldEntry.index)
-                aNodeSub16Array3615[oldEntry.row] = null
+                cacheEntries[oldEntry.row] = null
                 oldEntry.unlink()
             } else {
-                entry = ColorImageCacheEntry(index, anInt3617++)
+                entry = ColorImageCacheEntry(index, cachedRowCount++)
             }
-            aNodeSub16Array3615[index] = entry
+            cacheEntries[index] = entry
         } else {
             dirty = false
         }
-        aClass4733612!!.insertHead(entry)
-        return anIntArrayArrayArray3614[entry.index]
+        lruList!!.insertHead(entry)
+        return rgbData[entry.index]
     }
 
     /**
@@ -81,18 +81,18 @@ class ColorImageCache(
      *
      * @return All RGB palette data
      */
-    fun method5464(): Array<Array<IntArray>> {
-        if (anInt3613 != anInt3611) {
+    fun getAllPalettes(): Array<Array<IntArray>> {
+        if (maxCachedRows != totalRows) {
             throw RuntimeException()
         }
-        for (i in 0 until anInt3613) {
-            aNodeSub16Array3615[i] = aNodeSub163618
+        for (i in 0 until maxCachedRows) {
+            cacheEntries[i] = SENTINEL_ENTRY
         }
-        return anIntArrayArrayArray3614
+        return rgbData
     }
 
     companion object {
         @JvmField var CS2_QUERY_RESULTS: ShortArray? = null
-        @JvmField val aNodeSub163618 = ColorImageCacheEntry(0, 0)
+        @JvmField val SENTINEL_ENTRY = ColorImageCacheEntry(0, 0)
     }
 }

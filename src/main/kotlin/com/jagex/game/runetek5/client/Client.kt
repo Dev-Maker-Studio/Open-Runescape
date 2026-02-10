@@ -316,7 +316,7 @@ class Client : GameShell() {
                 requestManager!!.pulse()
             }
 
-            StaticMethods.method8020()
+            StaticMethods.updateSoundSystems()
             VorbisNode.method15536()
             KeyRecorder.keyRecorder!!.prepareAwaitingKeys()
             MouseRecord.recorder!!.syncMouseState()
@@ -398,11 +398,11 @@ class Client : GameShell() {
                 processGameTick()
             } else if (gameState == GameState.UNK_10 || gameState == GameState.UNK_17) {
                 LoginManager.loginBlock()
-                if (StaticMethods.anInt106 != -3 && StaticMethods.anInt106 != 2 && StaticMethods.anInt106 != 15) {
+                if (StaticMethods.worldLoginResponse != -3 && StaticMethods.worldLoginResponse != 2 && StaticMethods.worldLoginResponse != 15) {
                     if (gameState == GameState.UNK_17) {
-                        StaticMethods.anInt109 = LoginManager.anInt112
-                        StaticMethods.anInt108 = LoginManager.anInt94
-                        StaticMethods.anInt107 = StaticMethods.anInt106
+                        StaticMethods.lastDisconnectArg2 = LoginManager.anInt112
+                        StaticMethods.lastDisconnectArg1 = LoginManager.anInt94
+                        StaticMethods.lastDisconnectResponse = StaticMethods.worldLoginResponse
                         if (WorldConnection.reconnectingWorld) {
                             LoginManager.setGameHost(WorldConnection.connectionInfo!!.worldId, WorldConnection.connectionInfo!!.host!!)
                             GAME_CONNECTION_CONTEXT.reset()
@@ -901,7 +901,7 @@ class Client : GameShell() {
     }
 
     fun processLobbyTick() {
-        if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
+        if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
             if (REBOOT_TIMER > 1) {
                 REBOOT_TIMER--
                 lastMiscUpdateTick = serverTick
@@ -982,7 +982,7 @@ class Client : GameShell() {
             }
         }
 
-        if ((gameState == GameState.UNK_5 || gameState == GameState.UNK_7 || gameState == GameState.UNK_0 || gameState == GameState.IN_ACCOUNT_CREATION) && (!LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42) && !AccountCreationStage.isCreatingAccount()) {
+        if ((gameState == GameState.UNK_5 || gameState == GameState.UNK_7 || gameState == GameState.UNK_0 || gameState == GameState.IN_ACCOUNT_CREATION) && (!LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42) && !AccountCreationStage.isCreatingAccount()) {
             if (Camera.cameraCalculationType == 5) {
                 Camera.calculateCameraPosition()
             } else {
@@ -1013,7 +1013,7 @@ class Client : GameShell() {
                                                 processDrag()
                                             }
 
-                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42) {
+                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42) {
                                                 MenuInteraction.method7703()
                                             }
 
@@ -1038,7 +1038,7 @@ class Client : GameShell() {
                                                 loginStateUpdate = PLAYER_LOGINSTATE_UPDATES.getNext() as LoginStateUpdate?
                                             }
 
-                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.anInt106 == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
+                                            if (gameState == GameState.UNK_0 && !LoginManager.method3360() || gameState == GameState.UNK_7 && StaticMethods.worldLoginResponse == 42 || gameState == GameState.IN_ACCOUNT_CREATION) {
                                                 if (gameState != GameState.UNK_7 && LOBBY_CONNECTION_CONTEXT.getConnection() == null) {
                                                     logout(false)
                                                 } else {
@@ -1882,7 +1882,7 @@ class Client : GameShell() {
             SoundResourceManager.musicFileId = -1
             SoundResourceManager.pendingMidiStream = null
             AreaSoundPlayer.SOUND_LEVEL = 0
-            StaticMethods.aBool1962 = false
+            StaticMethods.songLooping = false
             CutsceneBasicMovement.anInt9440 = 2
             SongPlayer.songTransition = null
         }
@@ -1952,7 +1952,7 @@ class Client : GameShell() {
                     if (gameState == GameState.LOGGED_INGAME) {
                         Resource.mapRegion!!.getEnvironmentManager().updateAtmosphere(Resource.mapRegion!!)
                         LocAction.transformObjects()
-                        AreaSoundPlayer.method1623()
+                        AreaSoundPlayer.updateAreaSounds()
                         if (drawsSinceLastPacket > 10) {
                             ++GAME_CONNECTION_CONTEXT.idleReadPulses
                         }
@@ -1974,7 +1974,7 @@ class Client : GameShell() {
                                     MAP_LOADING_STAGE = 4
                                     cycleCutsceneLoaded = cycles
                                     CUTSCENE_MISC_ACTION_INDEX = 0
-                                    StaticMethods.method3953()
+                                    StaticMethods.saveFovForCutscene()
                                 }
                                 if (MAP_LOADING_STAGE == 4) {
                                     val cyclesPassed: Int = cycles - cycleCutsceneLoaded
@@ -2239,7 +2239,7 @@ class Client : GameShell() {
                         ComponentMinimap.minimapFlagY = -1
                         PulseEventQueue.delayedClearMinimapFlagUpdate()
                     }
-                    EntityUpdating.method14519()
+                    EntityUpdating.positionAllEntities()
                     if (!bool4) {
                         MapRegion.addProjectileSpawnsToScene()
                     }
@@ -2325,7 +2325,7 @@ class Client : GameShell() {
                     SUN_MATRIX.rotate(-1.0f, 0.0f, 0.0f, MathUtils.getTheta(-Camera.cameraYaw and 0x3fff))
                     SUN_MATRIX.rotate(0.0f, 0.0f, -1.0f, MathUtils.getTheta(-Camera.cameraPitch and 0x3fff))
                     Renderers.activeToolkit!!.setSunPosition(SUN_MATRIX)
-                    StaticMethods.method3850(Camera.projectionMatrix, (gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
+                    StaticMethods.setupOrthoProjection(Camera.projectionMatrix, (gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
                     Renderers.activeToolkit!!.setModelMatrix(Camera.projectionMatrix)
                     if (sceneAtmosphere.getSkybox() != null) {
                         Renderers.activeToolkit!!.updateSun(1.0f)
@@ -2361,7 +2361,7 @@ class Client : GameShell() {
                         Renderers.activeToolkit!!.clearPixels(x, y, gameAreaWidth, gameAreaHeight, 0xffffff.inv())
                         MessageBox.draw(LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!), false, Renderers.activeToolkit, FontManager.debugOverlayFont, FontManager.messageboxFont)
                     }
-                    StaticMethods.method3850(Camera.projectionMatrix, (x + gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2 + y).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
+                    StaticMethods.setupOrthoProjection(Camera.projectionMatrix, (x + gameAreaWidth / 2).toFloat(), (gameAreaHeight / 2 + y).toFloat(), (viewportScaledFov shl 1).toFloat(), (viewportScaledFov shl 1).toFloat(), gameAreaWidth, gameAreaHeight)
                     Renderers.activeToolkit!!.setModelMatrix(Camera.projectionMatrix)
                     Camera.storeViewProjectionMatrix(Camera.projectionMatrix)
                 }
@@ -2442,7 +2442,7 @@ class Client : GameShell() {
             lastRenderedCycle = cycles
             if (BASE_WINDOW_ID != -1) {
                 componentBackgroundCount = 0
-                StaticMethods.method7039()
+                StaticMethods.drawInterfaces()
             }
 
             Renderers.activeToolkit!!.resetClipping()
@@ -2503,12 +2503,12 @@ class Client : GameShell() {
                             CS2Executor.executeHookInner(hookrequest5)
                         }
                         if (hoveredComponent != null && getDragTarget(draggingComponent) != null) {
-                            PacketEncoder.method2076(draggingComponent, hoveredComponent)
+                            PacketEncoder.sendInterfaceDragOntoInterface(draggingComponent, hoveredComponent)
                         }
                     } else if ((menuOpenMode == 1 || MiniMenu.method12562()) && MiniMenu.entryCount > 2) {
-                        StaticMethods.method4164(mouseX + dragStartX, dragStartY + mouseY)
+                        StaticMethods.processMenuSelection(mouseX + dragStartX, dragStartY + mouseY)
                     } else if (MiniMenu.hasEntries()) {
-                        StaticMethods.method4164(dragStartX + mouseX, dragStartY + mouseY)
+                        StaticMethods.processMenuSelection(dragStartX + mouseX, dragStartY + mouseY)
                     }
                     draggingComponent = null
                     selectedComponent = null
@@ -2592,7 +2592,7 @@ class Client : GameShell() {
             MiniMenu.method6451(-1, -1)
             if (BASE_WINDOW_ID != -1) {
                 componentBackgroundCount = 0
-                StaticMethods.method7039()
+                StaticMethods.drawInterfaces()
             }
             Renderers.activeToolkit!!.resetClipping()
             MiniMenu.method15411(Renderers.activeToolkit!!)
@@ -2606,7 +2606,7 @@ class Client : GameShell() {
             CursorTypeList.setCustomCursor(cursor)
             val size = PlayerUpdate.MY_PLAYER!!.getSize() shl 8
             val absolute = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
-            SoundEffectPlayer.method14675(PlayerUpdate.MY_PLAYER!!.plane.toInt(), size + absolute.x.toInt(), size + absolute.z.toInt(), animatingStep)
+            SoundEffectPlayer.updateAllAmbientSounds(PlayerUpdate.MY_PLAYER!!.plane.toInt(), size + absolute.x.toInt(), size + absolute.z.toInt(), animatingStep)
             animatingStep = 0
         }
 

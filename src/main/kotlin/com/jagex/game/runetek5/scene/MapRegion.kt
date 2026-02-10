@@ -288,8 +288,8 @@ class MapRegion(var asyncMaploading: Boolean) {
             val isRotated = (rotation and 0x1) == 1
             val chunkX: Int = cutsceneArea.regionX shr 3
             val chunkY: Int = cutsceneArea.regionY shr 3
-            val cutsceneChunkXBase: Int = cutsceneArea.anInt7480
-            val cutsceneChunkYBase: Int = cutsceneArea.anInt7483
+            val cutsceneChunkXBase: Int = cutsceneArea.chunkBaseX
+            val cutsceneChunkYBase: Int = cutsceneArea.chunkBaseY
             val z: Int = cutsceneArea.plane
             val cutscenePlane: Int = cutsceneArea.cutscenePlane
             val stepX: Int = cutsceneArea.width
@@ -596,7 +596,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             TypeLists.resetCachedData(true)
         }
         if (!this.asyncMaploading) {
-            StaticMethods.method4250() // not in 910
+            StaticMethods.resetAllVorbisStreams() // not in 910
         }
         var hasUnderwaterMap = false
         if (PreferenceManager.preferences!!.water!!.getValue() == 2) {
@@ -1148,8 +1148,8 @@ class MapRegion(var asyncMaploading: Boolean) {
             Camera.cameraBaseY -= deltaY * 512
             if (Camera.cameraCalculationType != 4) {
                 Camera.cameraCalculationType = 2
-                StaticMethods.anInt833 = -1
-                PingRequester.anInt5864 = -1
+                StaticMethods.cameraTargetAbsY = -1
+                PingRequester.cameraTargetAbsX = -1
             }
         } else {
             Camera.cameraMovementLocalX -= deltaX
@@ -1489,15 +1489,15 @@ class MapRegion(var asyncMaploading: Boolean) {
                     var absoluteZ = absolutePosition.z.toInt()
                     val regionMap = Resource.mapRegion!!.settingsBits
                     val scene = Resource.mapRegion!!.getScene()!!!!
-                    if (Camera.cameraCalculationType != 2 && PingRequester.anInt5864 == -1) {
+                    if (Camera.cameraCalculationType != 2 && PingRequester.cameraTargetAbsX == -1) {
                         val tileheight: Int = tileheightForAbsolutePosition(Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteY, PlayerUpdate.MY_PLAYER_PLANE)
                         if (tileheight - Camera.cameraPositionAbsoluteZ < 3200 && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][Camera.cameraPositionAbsoluteX shr 9][Camera.cameraPositionAbsoluteY shr 9].toInt() and 0x4) != 0) {
                             Companion.calculateVisibilityAdjustments(scene.tiles as Array<Array<Array<Tile>?>?>?, 1, Camera.cameraPositionAbsoluteX shr 9, Camera.cameraPositionAbsoluteY shr 9, false)
                         }
                     } else {
                         if (Camera.cameraCalculationType != 2) {
-                            absoluteX = PingRequester.anInt5864
-                            absoluteZ = StaticMethods.anInt833
+                            absoluteX = PingRequester.cameraTargetAbsX
+                            absoluteZ = StaticMethods.cameraTargetAbsY
                         }
 
                         if ((regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][absoluteX shr 9][absoluteZ shr 9].toInt() and 0x4) != 0) {

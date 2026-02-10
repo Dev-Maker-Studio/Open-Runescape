@@ -140,7 +140,7 @@ class Sun(
             val size = sunUseDimension * 1024 / highestDimension
             val matrix4412 = toolkit.copyModelMatrix()
             val matrix4413 = toolkit.getScratchMatrix()
-            matrix4413.method6532(
+            matrix4413.setPerspectiveFromViewport(
                 (sunUseDimension / 2).toFloat(),
                 (sunUseDimension / 2).toFloat(),
                 size.toFloat(),
@@ -225,7 +225,7 @@ class Sun(
         }
         val matrix4414 = toolkit.copyModelMatrix()
         val matrix449 = toolkit.getScratchMatrix()
-        matrix449.method6532(
+        matrix449.setPerspectiveFromViewport(
             (sunUseDimension / 2).toFloat(),
             (sunUseDimension / 2).toFloat(),
             size.toFloat(),

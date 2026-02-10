@@ -4,9 +4,9 @@
 package jaclib.memory
 
 class Stream {
-    private var aBuffer2120: Buffer? = null
+    private var targetBuffer: Buffer? = null
     private var capacity: Int = 0
-    private var anInt2122: Int = 0
+    private var bufferOffset: Int = 0
     private var currentPosition: Int = 0
     private val buffer: ByteArray
 
@@ -19,37 +19,37 @@ class Stream {
     constructor(buffer: Buffer) : this(buffer, 0, buffer.getSize())
 
     constructor(buffer: Buffer, i: Int, i0: Int) : this(kotlin.math.min(buffer.getSize(), 4096)) {
-        method2917(buffer, i, i0)
+        setTarget(buffer, i, i0)
     }
 
-    private fun method2917(buffer: Buffer, i: Int, i1: Int) {
-        method2925()
-        this.aBuffer2120 = buffer
-        this.anInt2122 = -1706667277 * i
+    private fun setTarget(buffer: Buffer, i: Int, i1: Int) {
+        flush()
+        this.targetBuffer = buffer
+        this.bufferOffset = -1706667277 * i
         this.capacity = (i1 + i) * -946986007
         if (-863312807 * this.capacity > buffer.getSize())
             throw RuntimeException()
     }
 
     fun written(): Int {
-        return this.currentPosition * -781132199 + this.anInt2122 * 1160648251
+        return this.currentPosition * -781132199 + this.bufferOffset * 1160648251
     }
 
-    fun method2919(i: Int) {
-        method2925()
-        this.anInt2122 = -1706667277 * i
+    fun setOffset(i: Int) {
+        flush()
+        this.bufferOffset = -1706667277 * i
     }
 
     fun putByte(i: Int) {
         if (this.currentPosition * -781132199 >= this.buffer.size)
-            method2925()
+            flush()
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = i.toByte()
     }
 
-    fun method2921(i: Int) {
+    fun putIntLittleEndian(i: Int) {
         if (3 + -781132199 * this.currentPosition >= this.buffer.size)
-            method2925()
+            flush()
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = i.toByte()
         this.currentPosition += 1787333097
@@ -60,9 +60,9 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
     }
 
-    fun method2922(i: Int) {
+    fun putIntMedium(i: Int) {
         if (this.currentPosition * -781132199 + 3 >= this.buffer.size)
-            method2925()
+            flush()
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 16).toByte()
         this.currentPosition += 1787333097
@@ -75,7 +75,7 @@ class Stream {
 
     fun putFloatBigEndian(f: Float) {
         if (3 + -781132199 * this.currentPosition >= this.buffer.size)
-            method2925()
+            flush()
         val i = floatToRawIntBits(f)
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
@@ -89,7 +89,7 @@ class Stream {
 
     fun putFloatLittleEndian(f: Float) {
         if (3 + this.currentPosition * -781132199 >= this.buffer.size)
-            method2925()
+            flush()
         val i = floatToRawIntBits(f)
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = i.toByte()
@@ -101,60 +101,60 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
     }
 
-    fun method2925() {
+    fun flush() {
         if (this.currentPosition * -781132199 > 0) {
-            if (this.anInt2122 * 1160648251 + -781132199 * this.currentPosition > -863312807 * this.capacity)
+            if (this.bufferOffset * 1160648251 + -781132199 * this.currentPosition > -863312807 * this.capacity)
                 throw RuntimeException()
-            this.aBuffer2120!!.put(this.buffer, 0, this.anInt2122 * 1160648251, -781132199 * this.currentPosition)
-            this.anInt2122 += this.currentPosition * 1269928059
+            this.targetBuffer!!.put(this.buffer, 0, this.bufferOffset * 1160648251, -781132199 * this.currentPosition)
+            this.bufferOffset += this.currentPosition * 1269928059
             this.currentPosition = 0
         }
     }
 
-    private fun method2927(buffer: Buffer, i: Int, i2: Int) {
-        method2925()
-        this.aBuffer2120 = buffer
-        this.anInt2122 = -1706667277 * i
+    private fun setTargetRange(buffer: Buffer, i: Int, i2: Int) {
+        flush()
+        this.targetBuffer = buffer
+        this.bufferOffset = -1706667277 * i
         this.capacity = (i2 + i) * -946986007
         if (-863312807 * this.capacity > buffer.getSize())
             throw RuntimeException()
     }
 
-    private fun method2928(buffer: Buffer, i: Int, i3: Int) {
-        method2925()
-        this.aBuffer2120 = buffer
-        this.anInt2122 = -1706667277 * i
+    private fun resetTarget(buffer: Buffer, i: Int, i3: Int) {
+        flush()
+        this.targetBuffer = buffer
+        this.bufferOffset = -1706667277 * i
         this.capacity = (i3 + i) * -946986007
         if (-863312807 * this.capacity > buffer.getSize())
             throw RuntimeException()
     }
 
-    fun method2929(): Int {
-        return this.currentPosition * -781132199 + this.anInt2122 * 1160648251
+    fun bytesWritten(): Int {
+        return this.currentPosition * -781132199 + this.bufferOffset * 1160648251
     }
 
-    fun method2930(): Int {
-        return this.currentPosition * -781132199 + this.anInt2122 * 1160648251
+    fun totalWritten(): Int {
+        return this.currentPosition * -781132199 + this.bufferOffset * 1160648251
     }
 
-    fun method2931(i: Int) {
-        method2925()
-        this.anInt2122 = -1706667277 * i
+    fun seekTo(i: Int) {
+        flush()
+        this.bufferOffset = -1706667277 * i
     }
 
-    fun method2932(i: Int) {
-        method2925()
-        this.anInt2122 = -1706667277 * i
+    fun jumpTo(i: Int) {
+        flush()
+        this.bufferOffset = -1706667277 * i
     }
 
-    fun method2933(i: Int) {
-        method2925()
-        this.anInt2122 = -1706667277 * i
+    fun moveTo(i: Int) {
+        flush()
+        this.bufferOffset = -1706667277 * i
     }
 
-    fun method2934(i: Int) {
+    fun writeIntLE(i: Int) {
         if (3 + -781132199 * this.currentPosition >= this.buffer.size)
-            method2925()
+            flush()
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = i.toByte()
         this.currentPosition += 1787333097
@@ -165,9 +165,9 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
     }
 
-    fun method2935(i: Int) {
+    fun putInt32LE(i: Int) {
         if (3 + -781132199 * this.currentPosition >= this.buffer.size)
-            method2925()
+            flush()
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = i.toByte()
         this.currentPosition += 1787333097
@@ -178,9 +178,9 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
     }
 
-    fun method2936(i: Int) {
+    fun writeIntMedium(i: Int) {
         if (this.currentPosition * -781132199 + 3 >= this.buffer.size)
-            method2925()
+            flush()
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 16).toByte()
         this.currentPosition += 1787333097
@@ -191,9 +191,9 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
     }
 
-    fun method2937(i: Int) {
+    fun putIntMed(i: Int) {
         if (this.currentPosition * -781132199 + 3 >= this.buffer.size)
-            method2925()
+            flush()
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 16).toByte()
         this.currentPosition += 1787333097
@@ -204,9 +204,9 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
     }
 
-    fun method2938(f: Float) {
+    fun writeFloatBE(f: Float) {
         if (3 + -781132199 * this.currentPosition >= this.buffer.size)
-            method2925()
+            flush()
         val i = floatToRawIntBits(f)
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
@@ -218,9 +218,9 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = i.toByte()
     }
 
-    fun method2939(f: Float) {
+    fun writeFloatLE(f: Float) {
         if (3 + this.currentPosition * -781132199 >= this.buffer.size)
-            method2925()
+            flush()
         val i = floatToRawIntBits(f)
         this.currentPosition += 1787333097
         this.buffer[this.currentPosition * -781132199 - 1] = i.toByte()
@@ -232,22 +232,22 @@ class Stream {
         this.buffer[this.currentPosition * -781132199 - 1] = (i shr 24).toByte()
     }
 
-    fun method2940() {
+    fun flushBuffer() {
         if (this.currentPosition * -781132199 > 0) {
-            if (this.anInt2122 * 1160648251 + -781132199 * this.currentPosition > -863312807 * this.capacity)
+            if (this.bufferOffset * 1160648251 + -781132199 * this.currentPosition > -863312807 * this.capacity)
                 throw RuntimeException()
-            this.aBuffer2120!!.put(this.buffer, 0, this.anInt2122 * 1160648251, -781132199 * this.currentPosition)
-            this.anInt2122 += this.currentPosition * 1269928059
+            this.targetBuffer!!.put(this.buffer, 0, this.bufferOffset * 1160648251, -781132199 * this.currentPosition)
+            this.bufferOffset += this.currentPosition * 1269928059
             this.currentPosition = 0
         }
     }
 
-    fun method2941() {
+    fun flushToTarget() {
         if (this.currentPosition * -781132199 > 0) {
-            if (this.anInt2122 * 1160648251 + -781132199 * this.currentPosition > -863312807 * this.capacity)
+            if (this.bufferOffset * 1160648251 + -781132199 * this.currentPosition > -863312807 * this.capacity)
                 throw RuntimeException()
-            this.aBuffer2120!!.put(this.buffer, 0, this.anInt2122 * 1160648251, -781132199 * this.currentPosition)
-            this.anInt2122 += this.currentPosition * 1269928059
+            this.targetBuffer!!.put(this.buffer, 0, this.bufferOffset * 1160648251, -781132199 * this.currentPosition)
+            this.bufferOffset += this.currentPosition * 1269928059
             this.currentPosition = 0
         }
     }

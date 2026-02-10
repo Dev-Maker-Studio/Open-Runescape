@@ -63,7 +63,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method2074(string_0: String?, string_1: String?, i_2: Int, bool3: Boolean) {
+    fun sendSignUpForm(string_0: String?, string_1: String?, i_2: Int, bool3: Boolean) {
         if (Client.gameState == GameState.IN_ACCOUNT_CREATION) {
             val tcpmessage5 = createPacket(ClientProt.SEND_SIGN_UP_FORM, Client.LOBBY_CONNECTION_CONTEXT.isaac)
             tcpmessage5.buffer.writeShort(0)
@@ -85,7 +85,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method2075(i_0: Int, string_1: String?) {
+    fun sendPlayerOperation(i_0: Int, string_1: String?) {
         val i_3 = PlayerUpdate.NUM_OUT_PLAYER_INDICES
         val ints_4 = PlayerUpdate.OUT_PLAYER_INDICES
         var bool5 = false
@@ -121,7 +121,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method2076(icomponentdefinitions0: Component?, icomponentdefinitions1: Component?) {
+    fun sendInterfaceDragOntoInterface(icomponentdefinitions0: Component?, icomponentdefinitions1: Component?) {
         val tcpmessage3 = createPacket(ClientProt.IF_DRAG_ONTO_IF, Client.GAME_CONNECTION_CONTEXT.isaac)
         tcpmessage3.buffer.writeShortAddLittle(icomponentdefinitions1!!.slotId)
         tcpmessage3.buffer.writeShortLittle(icomponentdefinitions0!!.slotId)
@@ -133,7 +133,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method2590(icomponentdefinitions0: Component?) {
+    fun sendInterfaceOnInterface(icomponentdefinitions0: Component?) {
         if (Client.interfaceSelectionActive) {
             if (icomponentdefinitions0!!.onTargetLeave != null) {
                 val icomponentdefinitions2 = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
@@ -158,7 +158,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method3675() {
+    fun checkSongLoaded() {
         if (SongPlayer.currentSong != null && !SongPlayer.currentSong!!.isLoaded() && SongPlayer.currentSong!!.initialize()) {
             val tcpmessage1 = createPacket(ClientProt.SONG_LOADED, Client.GAME_CONNECTION_CONTEXT.isaac)
             tcpmessage1.buffer.writeInt(SongPlayer.currentSong!!.musicId)
@@ -193,7 +193,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method12590(packet: TcpPacket?, interfaceHash: Int, slotId: Int, itemId: Int) {
+    fun writeInterfaceComponentData(packet: TcpPacket?, interfaceHash: Int, slotId: Int, itemId: Int) {
         Console.writeLine(packet!!.packet.toString() + ": interfaceId: " + interfaceIdFromHash(interfaceHash) + " componentId: " + componentIdFromHash(interfaceHash) + " slotId: " + slotId + " itemId: " + itemId)
         packet.buffer.writeIntLittle(interfaceHash)
         packet.buffer.writeShort(itemId)
@@ -213,7 +213,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method6811(i_0: Int) {
+    fun sendClanOperation(i_0: Int) {
         if (Client.CLAN_CHANNEL != null && i_0 >= 0 && i_0 < Client.CLAN_CHANNEL!!.numPlayers) {
             val class572: ClanChannelPlayer? = Client.CLAN_CHANNEL!!.players?.get(i_0)
             if (class572 != null && class572.rank.toInt() == -1) {
@@ -250,7 +250,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method11404(string_0: String?, string_1: String?, string_2: String?, bool3: Boolean, bool4: Boolean) {
+    fun sendLobbyHyperlink(string_0: String?, string_1: String?, string_2: String?, bool3: Boolean, bool4: Boolean) {
         val class1846 = Client.connectionContext
         if (class1846.getConnection() != null) {
             val tcpmessage7 = createPacket(ClientProt.LOBBY_HYPERLINK, class1846.isaac)
@@ -271,7 +271,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method3345(string_0: String?) {
+    fun sendJoinFriendchat(string_0: String?) {
         if (!string_0.isNullOrEmpty()) {
             val class1842 = Client.connectionContext
             val tcpmessage3 = createPacket(ClientProt.FC_JOIN, class1842.isaac)
@@ -448,12 +448,12 @@ object PacketEncoder {
             Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpPacket)
         }
 
-        if (StaticMethods.anInt2912 > 0) {
-            StaticMethods.anInt2912--
+        if (StaticMethods.cameraUpdateCooldown > 0) {
+            StaticMethods.cameraUpdateCooldown--
         }
 
-        if (Client.sendCameraAngleToServer && StaticMethods.anInt2912 <= 0) {
-            StaticMethods.anInt2912 = 20
+        if (Client.sendCameraAngleToServer && StaticMethods.cameraUpdateCooldown <= 0) {
+            StaticMethods.cameraUpdateCooldown = 20
             Client.sendCameraAngleToServer = false
             tcpPacket = createPacket(ClientProt.MOVE_CAMERA, Client.GAME_CONNECTION_CONTEXT.isaac)
             tcpPacket.buffer.writeShortAddLittle(Camera.camAngleX.toInt() shr 3)
@@ -490,7 +490,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method4167(string_0: String?) {
+    fun sendInterfaceOnPlayer(string_0: String?) {
         if (Client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x18) != 0) {
             var bool2 = false
             val count = PlayerUpdate.NUM_OUT_PLAYER_INDICES
@@ -545,7 +545,7 @@ object PacketEncoder {
                     // NOOP
                 }
                 val username = PlayerUpdate.MY_PLAYER_USERNAME
-                val url = URL(StaticMethods.initialApplet!!.getCodeBase(), "clienterror.ws?c=" + SystemInfo.clientBuild + "&cs=" + SystemInfo.clientBuildSub + "&u=" + (if (username != null) Utils.formatRequestParameter(username) else "" + StaticMethods.aLong10459) + "&v1=" + Utils.formatRequestParameter(vendor) + "&v2=" + Utils.formatRequestParameter(version) + "&e=" + errorString)
+                val url = URL(StaticMethods.initialApplet!!.getCodeBase(), "clienterror.ws?c=" + SystemInfo.clientBuild + "&cs=" + SystemInfo.clientBuildSub + "&u=" + (if (username != null) Utils.formatRequestParameter(username) else "" + StaticMethods.errorReportUserId) + "&v1=" + Utils.formatRequestParameter(vendor) + "&v2=" + Utils.formatRequestParameter(version) + "&e=" + errorString)
                 val dataInputStream = DataInputStream(url.openStream())
                 dataInputStream.read()
                 dataInputStream.close()
@@ -556,7 +556,7 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun method16088(i_0: Int) {
+    fun sendAccountCreationStage(i_0: Int) {
         if (Client.gameState == GameState.IN_ACCOUNT_CREATION) {
             val packet = createPacket(ClientProt.ACCOUNT_CREATION_STAGE, Client.LOBBY_CONNECTION_CONTEXT.isaac)
             packet.buffer.writeByte(i_0)
@@ -573,7 +573,7 @@ object PacketEncoder {
                 if (arr_2 != null) {
                     for (i_3 in arr_2.indices) {
                         val class964: CutsceneAction? = arr_2[i_3]
-                        class964?.method1593()
+                        class964?.stopAction()
                     }
                 }
             }

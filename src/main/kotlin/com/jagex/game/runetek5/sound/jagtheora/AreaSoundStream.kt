@@ -87,8 +87,8 @@ abstract class AreaSoundStream : PcmStream() {
         if (i_11 == 0) {
             setVolumeAndPan(i_2, i_3)
         } else {
-            val i_5 = StaticMethods.method488(i_2, i_3)
-            val i_6 = StaticMethods.method15390(i_2, i_3)
+            val i_5 = StaticMethods.calculateSoundAttenuation(i_2, i_3)
+            val i_6 = StaticMethods.calculateSoundPan(i_2, i_3)
             if (i_5 == this.leftChannelVolume && i_6 == this.rightChannelVolume) {
                 this.fadeSamplesRemaining = 0
             } else {
@@ -190,8 +190,8 @@ abstract class AreaSoundStream : PcmStream() {
             i_3 = 0
             i_2 = 0
         } else {
-            i_3 = StaticMethods.method488(i_2, this.panPosition)
-            i_4 = StaticMethods.method15390(i_2, this.panPosition)
+            i_3 = StaticMethods.calculateSoundAttenuation(i_2, this.panPosition)
+            i_4 = StaticMethods.calculateSoundPan(i_2, this.panPosition)
         }
 
         if (i_2 == this.currentVolume && i_3 == this.leftChannelVolume && i_4 == this.rightChannelVolume) {
@@ -428,8 +428,8 @@ abstract class AreaSoundStream : PcmStream() {
 
     fun recalculateChannelVolumes() {
         this.currentVolume = this.targetVolume
-        this.leftChannelVolume = StaticMethods.method488(this.targetVolume, this.panPosition)
-        this.rightChannelVolume = StaticMethods.method15390(this.targetVolume, this.panPosition)
+        this.leftChannelVolume = StaticMethods.calculateSoundAttenuation(this.targetVolume, this.panPosition)
+        this.rightChannelVolume = StaticMethods.calculateSoundPan(this.targetVolume, this.panPosition)
     }
 
     override fun getPriority(): Int {

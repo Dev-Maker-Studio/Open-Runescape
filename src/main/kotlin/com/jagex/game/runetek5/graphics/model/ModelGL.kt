@@ -1567,10 +1567,10 @@ class ModelGL : Model {
         val verticesXLocal = this.verticesX
         val verticesYLocal = this.verticesY
         val verticesZLocal = this.verticesZ
-        val faceList = matrix441.faceList
+        val elements = matrix441.elements
 
         if (billboardEffectsLocal != null && billboardSurfacesLocal != null &&
-            verticesXLocal != null && verticesYLocal != null && verticesZLocal != null && faceList != null) {
+            verticesXLocal != null && verticesYLocal != null && verticesZLocal != null && elements != null) {
             val matrix442 = this.toolkit.billboardMatrix
             this.toolkit.pushMatrix()
             this.toolkit.setDepthBuffering(!this.hasAlphaTransition)
@@ -1584,11 +1584,11 @@ class ModelGL : Model {
                     val f_6 = (verticesXLocal[effect.faceA] + verticesXLocal[effect.faceB] + verticesXLocal[effect.faceC]) * 0.3333333f
                     val f_7 = (verticesYLocal[effect.faceA] + verticesYLocal[effect.faceB] + verticesYLocal[effect.faceC]) * 0.3333333f
                     val f_8 = (verticesZLocal[effect.faceA] + verticesZLocal[effect.faceB] + verticesZLocal[effect.faceC]) * 0.3333333f
-                    val f_9 = faceList[0] * f_6 + faceList[4] * f_7 + faceList[8] * f_8 + faceList[12]
-                    val f_10 = faceList[1] * f_6 + faceList[5] * f_7 + faceList[9] * f_8 + faceList[13]
-                    val f_11 = faceList[2] * f_6 + faceList[6] * f_7 + faceList[10] * f_8 + faceList[14]
+                    val f_9 = elements[0] * f_6 + elements[4] * f_7 + elements[8] * f_8 + elements[12]
+                    val f_10 = elements[1] * f_6 + elements[5] * f_7 + elements[9] * f_8 + elements[13]
+                    val f_11 = elements[2] * f_6 + elements[6] * f_7 + elements[10] * f_8 + elements[14]
                     val f_12 = (1.0 / sqrt((f_9 * f_9 + f_10 * f_10 + f_11 * f_11).toDouble())).toFloat() * effect.distance
-                    matrix442.method6549(surface.rotation, (surface.scaleX * effect.sizeX) shr 7, (surface.scaleY * effect.sizeY) shr 7, f_9 + surface.offsetX - f_9 * f_12, f_10 + surface.offsetY - f_10 * f_12, f_11 - f_11 * f_12)
+                    matrix442.setRotatedTranslation(surface.rotation, (surface.scaleX * effect.sizeX) shr 7, (surface.scaleY * effect.sizeY) shr 7, f_9 + surface.offsetX - f_9 * f_12, f_10 + surface.offsetY - f_10 * f_12, f_11 - f_11 * f_12)
                     this.toolkit.loadMatrix(matrix442)
                     val diffuseColor = surface.diffuseColor
                     OpenGL.glColor4ub((diffuseColor shr 16).toByte(), (diffuseColor shr 8).toByte(), diffuseColor.toByte(), (diffuseColor shr 24).toByte())
@@ -2133,11 +2133,11 @@ class ModelGL : Model {
             val i_39 = matrixX[i_24]
             val i_26 = matrixY[i_24]
             val i_27 = matrixZ[i_24]
-            val f_28 = matrix446.faceList!![2] * i_39 + matrix446.faceList!![6] * i_26 + matrix446.faceList!![10] * i_27 + matrix446.faceList!![14]
-            val f_29 = matrix446.faceList!![3] * i_39 + matrix446.faceList!![7] * i_26 + matrix446.faceList!![11] * i_27 + matrix446.faceList!![15]
+            val f_28 = matrix446.elements!![2] * i_39 + matrix446.elements!![6] * i_26 + matrix446.elements!![10] * i_27 + matrix446.elements!![14]
+            val f_29 = matrix446.elements!![3] * i_39 + matrix446.elements!![7] * i_26 + matrix446.elements!![11] * i_27 + matrix446.elements!![15]
             if (f_28 >= -f_29) {
-                val f_30 = matrix446.faceList!![0] * i_39 + matrix446.faceList!![4] * i_26 + matrix446.faceList!![8] * i_27 + matrix446.faceList!![12]
-                val f_31 = matrix446.faceList!![1] * i_39 + matrix446.faceList!![5] * i_26 + matrix446.faceList!![9] * i_27 + matrix446.faceList!![13]
+                val f_30 = matrix446.elements!![0] * i_39 + matrix446.elements!![4] * i_26 + matrix446.elements!![8] * i_27 + matrix446.elements!![12]
+                val f_31 = matrix446.elements!![1] * i_39 + matrix446.elements!![5] * i_26 + matrix446.elements!![9] * i_27 + matrix446.elements!![13]
                 val i_32 = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_30 / f_29).toInt()
                 val i_33 = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_31 / f_29).toInt()
                 if (i_32 < i_8) {
@@ -2177,11 +2177,11 @@ class ModelGL : Model {
                 val i_27 = this.verticesX!![i_26]
                 val i_40 = this.verticesY!![i_26]
                 val i_41 = this.verticesZ!![i_26]
-                val f_30 = matrix446.faceList!![2] * i_27 + matrix446.faceList!![6] * i_40 + matrix446.faceList!![10] * i_41 + matrix446.faceList!![14]
-                val f_31 = matrix446.faceList!![3] * i_27 + matrix446.faceList!![7] * i_40 + matrix446.faceList!![11] * i_41 + matrix446.faceList!![15]
+                val f_30 = matrix446.elements!![2] * i_27 + matrix446.elements!![6] * i_40 + matrix446.elements!![10] * i_41 + matrix446.elements!![14]
+                val f_31 = matrix446.elements!![3] * i_27 + matrix446.elements!![7] * i_40 + matrix446.elements!![11] * i_41 + matrix446.elements!![15]
                 if (f_30 >= -f_31) {
-                    val f_42 = matrix446.faceList!![0] * i_27 + matrix446.faceList!![4] * i_40 + matrix446.faceList!![8] * i_41 + matrix446.faceList!![12]
-                    val f_43 = matrix446.faceList!![1] * i_27 + matrix446.faceList!![5] * i_40 + matrix446.faceList!![9] * i_41 + matrix446.faceList!![13]
+                    val f_42 = matrix446.elements!![0] * i_27 + matrix446.elements!![4] * i_40 + matrix446.elements!![8] * i_41 + matrix446.elements!![12]
+                    val f_43 = matrix446.elements!![1] * i_27 + matrix446.elements!![5] * i_40 + matrix446.elements!![9] * i_41 + matrix446.elements!![13]
                     val i_34 = this.triangles!![i_26]
                     val i_35 = this.triangles!![i_26 + 1]
 
@@ -2264,10 +2264,10 @@ class ModelGL : Model {
                 val i_35 = (this.minX + this.maxX) shr 1
                 val i_36 = (this.minZ + this.maxZ) shr 1
                 var s_19 = this.minY
-                var f_21 = matrix446.faceList!![0] * i_35 + matrix446.faceList!![4] * s_19 + matrix446.faceList!![8] * i_36 + matrix446.faceList!![12]
-                var f_22 = matrix446.faceList!![1] * i_35 + matrix446.faceList!![5] * s_19 + matrix446.faceList!![9] * i_36 + matrix446.faceList!![13]
-                var f_23 = matrix446.faceList!![2] * i_35 + matrix446.faceList!![6] * s_19 + matrix446.faceList!![10] * i_36 + matrix446.faceList!![14]
-                var f_24 = matrix446.faceList!![3] * i_35 + matrix446.faceList!![7] * s_19 + matrix446.faceList!![11] * i_36 + matrix446.faceList!![15]
+                var f_21 = matrix446.elements!![0] * i_35 + matrix446.elements!![4] * s_19 + matrix446.elements!![8] * i_36 + matrix446.elements!![12]
+                var f_22 = matrix446.elements!![1] * i_35 + matrix446.elements!![5] * s_19 + matrix446.elements!![9] * i_36 + matrix446.elements!![13]
+                var f_23 = matrix446.elements!![2] * i_35 + matrix446.elements!![6] * s_19 + matrix446.elements!![10] * i_36 + matrix446.elements!![14]
+                var f_24 = matrix446.elements!![3] * i_35 + matrix446.elements!![7] * s_19 + matrix446.elements!![11] * i_36 + matrix446.elements!![15]
                 if (f_23 >= -f_24) {
                     boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_21 / f_24).toInt()
                     boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_22 / f_24).toInt()
@@ -2276,10 +2276,10 @@ class ModelGL : Model {
                 }
 
                 s_19 = this.maxY
-                val f_25 = matrix446.faceList!![0] * i_35 + matrix446.faceList!![4] * s_19 + matrix446.faceList!![8] * i_36 + matrix446.faceList!![12]
-                val f_26 = matrix446.faceList!![1] * i_35 + matrix446.faceList!![5] * s_19 + matrix446.faceList!![9] * i_36 + matrix446.faceList!![13]
-                val f_27 = matrix446.faceList!![2] * i_35 + matrix446.faceList!![6] * s_19 + matrix446.faceList!![10] * i_36 + matrix446.faceList!![14]
-                val f_28 = matrix446.faceList!![3] * i_35 + matrix446.faceList!![7] * s_19 + matrix446.faceList!![11] * i_36 + matrix446.faceList!![15]
+                val f_25 = matrix446.elements!![0] * i_35 + matrix446.elements!![4] * s_19 + matrix446.elements!![8] * i_36 + matrix446.elements!![12]
+                val f_26 = matrix446.elements!![1] * i_35 + matrix446.elements!![5] * s_19 + matrix446.elements!![9] * i_36 + matrix446.elements!![13]
+                val f_27 = matrix446.elements!![2] * i_35 + matrix446.elements!![6] * s_19 + matrix446.elements!![10] * i_36 + matrix446.elements!![14]
+                val f_28 = matrix446.elements!![3] * i_35 + matrix446.elements!![7] * s_19 + matrix446.elements!![11] * i_36 + matrix446.elements!![15]
                 if (f_27 >= -f_28) {
                     boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * f_25 / f_28).toInt()
                     boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * f_26 / f_28).toInt()
@@ -2315,12 +2315,12 @@ class ModelGL : Model {
 
                 if (bool15) {
                     if (f_23 / f_24 > f_27 / f_28) {
-                        f_29 = f_21 + matrix444.faceList!![0] * this.size2d + matrix444.faceList!![12]
-                        f_30 = f_24 + matrix444.faceList!![3] * this.size2d + matrix444.faceList!![15]
+                        f_29 = f_21 + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
+                        f_30 = f_24 + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
                         boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
                     } else {
-                        f_29 = f_25 + matrix444.faceList!![0] * this.size2d + matrix444.faceList!![12]
-                        f_30 = f_28 + matrix444.faceList!![3] * this.size2d + matrix444.faceList!![15]
+                        f_29 = f_25 + matrix444.elements!![0] * this.size2d + matrix444.elements!![12]
+                        f_30 = f_28 + matrix444.elements!![3] * this.size2d + matrix444.elements!![15]
                         boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * f_29 / f_30).toInt()
                     }
 
@@ -2759,15 +2759,15 @@ class ModelGL : Model {
                 val class874 = this.emissiveTriangles!![i_3]
                 val class875 = if (class874.child != null) class874.child!! else class874
 
-                class875.verticeXA = (matrix442.faceList!![12] + matrix442.faceList!![0] * this.verticesX!![class874.faceA] + matrix442.faceList!![4] * this.verticesY!![class874.faceA] + matrix442.faceList!![8] * this.verticesZ!![class874.faceA]).toInt()
-                class875.verticeYA = (matrix442.faceList!![13] + matrix442.faceList!![1] * this.verticesX!![class874.faceA] + matrix442.faceList!![5] * this.verticesY!![class874.faceA] + matrix442.faceList!![9] * this.verticesZ!![class874.faceA]).toInt()
-                class875.verticeZA = (matrix442.faceList!![14] + matrix442.faceList!![2] * this.verticesX!![class874.faceA] + matrix442.faceList!![6] * this.verticesY!![class874.faceA] + matrix442.faceList!![10] * this.verticesZ!![class874.faceA]).toInt()
-                class875.verticeXB = (matrix442.faceList!![12] + matrix442.faceList!![0] * this.verticesX!![class874.faceB] + matrix442.faceList!![4] * this.verticesY!![class874.faceB] + matrix442.faceList!![8] * this.verticesZ!![class874.faceB]).toInt()
-                class875.verticeYB = (matrix442.faceList!![13] + matrix442.faceList!![1] * this.verticesX!![class874.faceB] + matrix442.faceList!![5] * this.verticesY!![class874.faceB] + matrix442.faceList!![9] * this.verticesZ!![class874.faceB]).toInt()
-                class875.verticeZB = (matrix442.faceList!![14] + matrix442.faceList!![2] * this.verticesX!![class874.faceB] + matrix442.faceList!![6] * this.verticesY!![class874.faceB] + matrix442.faceList!![10] * this.verticesZ!![class874.faceB]).toInt()
-                class875.verticeXC = (matrix442.faceList!![12] + matrix442.faceList!![0] * this.verticesX!![class874.faceC] + matrix442.faceList!![4] * this.verticesY!![class874.faceC] + matrix442.faceList!![8] * this.verticesZ!![class874.faceC]).toInt()
-                class875.verticeYC = (matrix442.faceList!![13] + matrix442.faceList!![1] * this.verticesX!![class874.faceC] + matrix442.faceList!![5] * this.verticesY!![class874.faceC] + matrix442.faceList!![9] * this.verticesZ!![class874.faceC]).toInt()
-                class875.verticeZC = (matrix442.faceList!![14] + matrix442.faceList!![2] * this.verticesX!![class874.faceC] + matrix442.faceList!![6] * this.verticesY!![class874.faceC] + matrix442.faceList!![10] * this.verticesZ!![class874.faceC]).toInt()
+                class875.verticeXA = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class874.faceA] + matrix442.elements!![4] * this.verticesY!![class874.faceA] + matrix442.elements!![8] * this.verticesZ!![class874.faceA]).toInt()
+                class875.verticeYA = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class874.faceA] + matrix442.elements!![5] * this.verticesY!![class874.faceA] + matrix442.elements!![9] * this.verticesZ!![class874.faceA]).toInt()
+                class875.verticeZA = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class874.faceA] + matrix442.elements!![6] * this.verticesY!![class874.faceA] + matrix442.elements!![10] * this.verticesZ!![class874.faceA]).toInt()
+                class875.verticeXB = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class874.faceB] + matrix442.elements!![4] * this.verticesY!![class874.faceB] + matrix442.elements!![8] * this.verticesZ!![class874.faceB]).toInt()
+                class875.verticeYB = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class874.faceB] + matrix442.elements!![5] * this.verticesY!![class874.faceB] + matrix442.elements!![9] * this.verticesZ!![class874.faceB]).toInt()
+                class875.verticeZB = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class874.faceB] + matrix442.elements!![6] * this.verticesY!![class874.faceB] + matrix442.elements!![10] * this.verticesZ!![class874.faceB]).toInt()
+                class875.verticeXC = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class874.faceC] + matrix442.elements!![4] * this.verticesY!![class874.faceC] + matrix442.elements!![8] * this.verticesZ!![class874.faceC]).toInt()
+                class875.verticeYC = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class874.faceC] + matrix442.elements!![5] * this.verticesY!![class874.faceC] + matrix442.elements!![9] * this.verticesZ!![class874.faceC]).toInt()
+                class875.verticeZC = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class874.faceC] + matrix442.elements!![6] * this.verticesY!![class874.faceC] + matrix442.elements!![10] * this.verticesZ!![class874.faceC]).toInt()
             }
         }
 
@@ -2782,9 +2782,9 @@ class ModelGL : Model {
                     class1726.matrix = Matrix44(matrix442)
                 }
 
-                class1727.verticeX = (matrix442.faceList!![12] + matrix442.faceList!![0] * this.verticesX!![class1726.appliesOnVertex] + matrix442.faceList!![4] * this.verticesY!![class1726.appliesOnVertex] + matrix442.faceList!![8] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
-                class1727.verticeY = (matrix442.faceList!![13] + matrix442.faceList!![1] * this.verticesX!![class1726.appliesOnVertex] + matrix442.faceList!![5] * this.verticesY!![class1726.appliesOnVertex] + matrix442.faceList!![9] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
-                class1727.verticeZ = (matrix442.faceList!![14] + matrix442.faceList!![2] * this.verticesX!![class1726.appliesOnVertex] + matrix442.faceList!![6] * this.verticesY!![class1726.appliesOnVertex] + matrix442.faceList!![10] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
+                class1727.verticeX = (matrix442.elements!![12] + matrix442.elements!![0] * this.verticesX!![class1726.appliesOnVertex] + matrix442.elements!![4] * this.verticesY!![class1726.appliesOnVertex] + matrix442.elements!![8] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
+                class1727.verticeY = (matrix442.elements!![13] + matrix442.elements!![1] * this.verticesX!![class1726.appliesOnVertex] + matrix442.elements!![5] * this.verticesY!![class1726.appliesOnVertex] + matrix442.elements!![9] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
+                class1727.verticeZ = (matrix442.elements!![14] + matrix442.elements!![2] * this.verticesX!![class1726.appliesOnVertex] + matrix442.elements!![6] * this.verticesY!![class1726.appliesOnVertex] + matrix442.elements!![10] * this.verticesZ!![class1726.appliesOnVertex]).toInt()
             }
         }
     }

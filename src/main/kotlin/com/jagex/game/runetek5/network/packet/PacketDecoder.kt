@@ -944,8 +944,8 @@ object PacketDecoder {
             val key = buffer.readUIntLittle()
             Client.requestVarVerifyid()
             if (key == -1) {
-                PingRequester.anInt5864 = -1
-                StaticMethods.anInt833 = -1
+                PingRequester.cameraTargetAbsX = -1
+                StaticMethods.cameraTargetAbsY = -1
             } else {
                 val coordgrid114 = Resource.mapRegion!!.getBaseCoordinates()
                 var i_6 = key shr 14 and 0x3fff
@@ -962,8 +962,8 @@ object PacketDecoder {
                 } else if (i_7 >= Resource.mapRegion!!.sceneSizeY) {
                     i_7 = Resource.mapRegion!!.sceneSizeY
                 }
-                PingRequester.anInt5864 = (i_6 shl 9) + 256
-                StaticMethods.anInt833 = (i_7 shl 9) + 256
+                PingRequester.cameraTargetAbsX = (i_6 shl 9) + 256
+                StaticMethods.cameraTargetAbsY = (i_7 shl 9) + 256
             }
             context.currentPacket = null
             return true
@@ -1403,7 +1403,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.aClass3754362) { //request packet 37?
             val key = buffer.readUShortAddLittle()
             Client.requestVarVerifyid()
-            StaticMethods.method1563(key)
+            StaticMethods.stopVorbisStream(key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLANSETTINGS_FULL) {
@@ -1646,7 +1646,7 @@ object PacketDecoder {
             val b_100 = buffer.readByte()
             val flags = buffer.readUByteInverse()
             Client.requestVarVerifyid()
-            StaticMethods.method14501(b_100.toInt(), flags)
+            StaticMethods.setSongVolume(b_100.toInt(), flags)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARCLAN_ENABLE) {

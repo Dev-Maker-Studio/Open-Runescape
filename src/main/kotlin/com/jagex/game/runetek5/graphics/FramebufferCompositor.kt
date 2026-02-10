@@ -247,7 +247,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
     }
 
     fun removeEffect(class282Sub51: PostProcessEffect) {
-        class282Sub51.aBool7506 = false
+        class282Sub51.isActive = false
         class282Sub51.destroy()
         class282Sub51.unlink()
         recalculateFormat()
@@ -319,7 +319,7 @@ class FramebufferCompositor(val activeToolkit: OpenGlToolkit) {
                     if (s != -1 && t != -1) {
                         node.calculateMipmaps(s, t)
                     }
-                    node.aBool7506 = true
+                    node.isActive = true
                     return true
                 }
             }

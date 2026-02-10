@@ -55,9 +55,9 @@ open class WorldDescriptor : WorldDescriptorFlags() {
 
                 return playersWorld1 - playersWorld2
             } else if (type == 2) {
-                return TextUtils.method7557(world1.getWorld().activity!!, world2.getWorld().activity!!, Client.CURRENT_LANGUAGE!!)
+                return TextUtils.compareLocaleAware(world1.getWorld().activity!!, world2.getWorld().activity!!, Client.CURRENT_LANGUAGE!!)
             } else if (type == 3) {
-                return if ("-" == world1.unknown) (if ("-" == world2.unknown) 0 else (if (bool3) -1 else 1)) else (if ("-" == world2.unknown) (if (bool3) 1 else -1) else TextUtils.method7557(
+                return if ("-" == world1.unknown) (if ("-" == world2.unknown) 0 else (if (bool3) -1 else 1)) else (if ("-" == world2.unknown) (if (bool3) 1 else -1) else TextUtils.compareLocaleAware(
                     world1.unknown!!,
                     world2.unknown!!,
                     Client.CURRENT_LANGUAGE!!

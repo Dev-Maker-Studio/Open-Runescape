@@ -49,7 +49,7 @@ class OggKateDecoder(oggstreamstate1: OggStreamState) : OggStreamDecoder(oggstre
                         endTime = (granuleRateDenominator * (long_7 + long_5)).toFloat() / granuleRateNumerator
                         val i_11 = rsbytebuffer3.readUIntLittle()
                         if (i_11 >= 0 && i_11 <= rsbytebuffer3.buffer.size - rsbytebuffer3.currentPosition) {
-                            subtitleText = StaticMethods.method4824(rsbytebuffer3.buffer, rsbytebuffer3.currentPosition, i_11)
+                            subtitleText = StaticMethods.decodeUtf8(rsbytebuffer3.buffer, rsbytebuffer3.currentPosition, i_11)
                         } else {
                             throw IllegalStateException()
                         }

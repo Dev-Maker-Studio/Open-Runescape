@@ -22,7 +22,7 @@ class EntityHitbar(
      * @param clientCycle The current client cycle
      * @return The hitbar display details, or null if none are active
      */
-    fun method12600(clientCycle: Int): EntityHitbarDisplayDetails? {
+    fun getActiveDisplay(clientCycle: Int): EntityHitbarDisplayDetails? {
         var details = entityList.getFirst()
         if (details != null && details.discardAtCycle <= clientCycle) {
             var nextDetails = entityList.getNext()
@@ -84,7 +84,7 @@ class EntityHitbar(
      *
      * @return True if there are no active hitbars
      */
-    fun method12602(): Boolean {
+    fun isEmpty(): Boolean {
         return entityList.isEmpty()
     }
 }

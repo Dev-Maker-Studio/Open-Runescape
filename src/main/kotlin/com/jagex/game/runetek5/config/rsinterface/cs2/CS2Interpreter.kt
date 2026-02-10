@@ -1150,9 +1150,9 @@ object CS2Interpreter {
         var icomponentdefinitions4: Component? = underlaydefinition3!!.comp
         var interface5: Interface? = underlaydefinition3!!.inter
         if (bool) {
-            Interface.method7554(interface5!!, icomponentdefinitions4)
+            Interface.moveComponentToBack(interface5!!, icomponentdefinitions4)
         } else {
-            Interface.method3710(interface5!!, icomponentdefinitions4)
+            Interface.moveComponentToFront(interface5!!, icomponentdefinitions4)
         }
     }
 
@@ -1162,9 +1162,9 @@ object CS2Interpreter {
         var icomponentdefinitions4: Component? = Component.fromHash(i_3)
         var interface5: Interface? = Interface.INTERFACES!![(i_3 shr 16)]
         if (bool) {
-            Interface.method7554(interface5!!, icomponentdefinitions4)
+            Interface.moveComponentToBack(interface5!!, icomponentdefinitions4)
         } else {
-            Interface.method3710(interface5!!, icomponentdefinitions4)
+            Interface.moveComponentToFront(interface5!!, icomponentdefinitions4)
         }
 
     }
@@ -1275,7 +1275,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7518() {
-        StaticMethods.method8146()
+        StaticMethods.applyCameraYawLeft()
     }
 
     @JvmStatic
@@ -1393,8 +1393,8 @@ object CS2Interpreter {
                     } else {
                         Client.cameraLookAtKeyframe = i_5
                         Camera.cameraCalculationType = 3
-                        StaticMethods.anInt833 = -1
-                        PingRequester.anInt5864 = -1
+                        StaticMethods.cameraTargetAbsY = -1
+                        PingRequester.cameraTargetAbsX = -1
                     }
                 }
             }
@@ -1420,7 +1420,7 @@ object CS2Interpreter {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub63 != null) {
-            var bool4 = class282Sub50Sub63.method14775((i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
+            var bool4 = class282Sub50Sub63.mapToGameCoords((i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
             if (bool4) {
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![1]
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![2]
@@ -1561,9 +1561,9 @@ object CS2Interpreter {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub63 != null) {
-            var bool4 = class282Sub50Sub63.method14778((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
+            var bool4 = class282Sub50Sub63.gameToMapCoordsForPlane((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
             if (bool4) {
-                StaticMethods.method14263(CS2Executor.anIntArray5900!![1], CS2Executor.anIntArray5900!![2])
+                StaticMethods.setWorldMapScrollTarget(CS2Executor.anIntArray5900!![1], CS2Executor.anIntArray5900!![2])
             }
         }
     }
@@ -2177,7 +2177,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15399(executor: CS2Executor) {
-        PacketEncoder.method4167(executor.stringStack[--executor.stringStackPtr] as String?)
+        PacketEncoder.sendInterfaceOnPlayer(executor.stringStack[--executor.stringStackPtr] as String?)
     }
 
     @JvmStatic
@@ -2582,7 +2582,7 @@ object CS2Interpreter {
     @JvmStatic
     fun charIsalpha(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = if (StaticMethods.method1169(i_2.toChar())) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (StaticMethods.isAlphabetic(i_2.toChar())) 1 else 0
     }
 
     @JvmStatic
@@ -2655,7 +2655,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6285(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt72
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lobbyLoginResponse
     }
 
     @JvmStatic
@@ -2863,7 +2863,7 @@ object CS2Interpreter {
     fun method12561(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
         if (i_2 != -1) {
-            StaticMethods.method1563(i_2)
+            StaticMethods.stopVorbisStream(i_2)
         }
     }
 
@@ -2880,7 +2880,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4091(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = if (WorldMap.staticElement != null) WorldMap.staticElement!!.anInt9536 else -1
+        executor.intStack[++executor.intStackPtr - 1] = if (WorldMap.staticElement != null) WorldMap.staticElement!!.elementId else -1
     }
 
     @JvmStatic
@@ -3004,7 +3004,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method5119(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.method14668().getValue()
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.getCheckEmailStatus().getValue()
     }
 
     @JvmStatic
@@ -3151,7 +3151,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method7704(executor: CS2Executor) {
-        PacketEncoder.method16088(executor.intStack[--executor.intStackPtr])
+        PacketEncoder.sendAccountCreationStage(executor.intStack[--executor.intStackPtr])
     }
 
     @JvmStatic
@@ -3295,7 +3295,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method4252(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        executor.intStack[++executor.intStackPtr - 1] = if (StaticMethods.method12402(i_2.toChar())) 1 else 0
+        executor.intStack[++executor.intStackPtr - 1] = if (StaticMethods.isPrintableChar(i_2.toChar())) 1 else 0
     }
 
     @JvmStatic
@@ -3922,7 +3922,7 @@ object CS2Interpreter {
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var i_4 = executor.intStack[executor.intStackPtr + 2]
         var long_5 = CalenderUtil.getGmtNoon(i_2, i_3, i_4)
-        var i_7 = StaticMethods.method7914(long_5)
+        var i_7 = StaticMethods.millisToJagexDays(long_5)
         if (i_4 < 1970) {
             --i_7
         }
@@ -3983,7 +3983,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method301(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt106
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldLoginResponse
     }
 
     @JvmStatic
@@ -4276,7 +4276,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method4775() {
-        StaticMethods.method4166()
+        StaticMethods.applyCameraPitchUp()
     }
 
     @JvmStatic
@@ -4412,7 +4412,7 @@ object CS2Interpreter {
     @JvmStatic
     fun stringEqual(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        executor.intStack[++executor.intStackPtr - 1] = TextUtils.method7557(executor.stringStack[executor.stringStackPtr] as CharSequence, executor.stringStack[executor.stringStackPtr + 1] as CharSequence, Client.CURRENT_LANGUAGE!!)
+        executor.intStack[++executor.intStackPtr - 1] = TextUtils.compareLocaleAware(executor.stringStack[executor.stringStackPtr] as CharSequence, executor.stringStack[executor.stringStackPtr + 1] as CharSequence, Client.CURRENT_LANGUAGE!!)
     }
 
     @JvmStatic
@@ -4446,7 +4446,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8219(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt5760
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldMapViewWidth
         executor.intStack[++executor.intStackPtr - 1] = ComponentMinimap.anInt4097
     }
 
@@ -4515,7 +4515,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method6396(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        StaticMethods.method15430(i_2)
+        StaticMethods.switchToWorldLogin(i_2)
     }
 
     @JvmStatic
@@ -4660,8 +4660,8 @@ object CS2Interpreter {
         Client.cameraTargetAbsX = ((i_3 shl 9)) + 256
         Client.cameraTargetAbsY = ((i_4 shl 9)) + 256
         Camera.cameraCalculationType = 4
-        StaticMethods.anInt833 = -1
-        PingRequester.anInt5864 = -1
+        StaticMethods.cameraTargetAbsY = -1
+        PingRequester.cameraTargetAbsX = -1
     }
 
     @JvmStatic
@@ -4830,7 +4830,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1627() {
-        StaticMethods.method16114()
+        StaticMethods.applyCameraPitchDown()
     }
 
     @JvmStatic
@@ -4946,7 +4946,7 @@ object CS2Interpreter {
     fun method6194(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var string_3: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        PacketEncoder.method2075(i_2, string_3)
+        PacketEncoder.sendPlayerOperation(i_2, string_3)
     }
 
     @JvmStatic
@@ -4979,7 +4979,7 @@ object CS2Interpreter {
         var bool5 = false
         var class282Sub50Sub66: WorldMapElement? = class4774?.getNext() as WorldMapElement?
         while (class282Sub50Sub66 != null) {
-            if (i_3 == class282Sub50Sub66.anInt9536) {
+            if (i_3 == class282Sub50Sub66.elementId) {
                 bool5 = true
                 break
             }
@@ -4995,7 +4995,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method3768(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        StaticMethods.method14263((i_2 shr 14) and 0x3fff, i_2 and 0x3fff)
+        StaticMethods.setWorldMapScrollTarget((i_2 shr 14) and 0x3fff, i_2 and 0x3fff)
     }
 
     @JvmStatic
@@ -5335,14 +5335,14 @@ object CS2Interpreter {
         if (i_2 != i_3) {
             if (GameState.isRenderingScene(Client.gameState)) {
                 if (i_3 == 0 && AreaSoundPlayer.currentMusicArchive != -1) {
-                    AreaSoundPlayer.method13400(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
+                    AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
                     SongPlayer.method12658()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else if (i_2 == 0) {
                 	SoundResourceManager.discardSongData()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else {
-                    SoundEffectPlayer.method1491(i_2)
+                    SoundEffectPlayer.setMusicVolume(i_2)
                 }
             }
             PreferenceManager.preferences!!.musicVolume!!.setValue(i_2)
@@ -5855,14 +5855,14 @@ object CS2Interpreter {
         if (i_3 != i_2 && AreaSoundPlayer.titlescreenMusicArchive == AreaSoundPlayer.currentMusicArchive) {
             if (!GameState.isRenderingScene(Client.gameState)) {
                 if (i_3 == 0) {
-                    AreaSoundPlayer.method13400(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
+                    AreaSoundPlayer.playMusic(Resource.MUSIC!!, AreaSoundPlayer.currentMusicArchive, i_2)
                     SongPlayer.method12658()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else if (i_2 == 0) {
                 	SoundResourceManager.discardSongData()
                     SoundEffectPlayer.soundJinglePlaying = false
                 } else {
-                    SoundEffectPlayer.method1491(i_2)
+                    SoundEffectPlayer.setMusicVolume(i_2)
                 }
             }
             PreferenceManager.preferences!!.soundLevel!!.setValue(i_2)
@@ -5886,7 +5886,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method4902(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        PacketEncoder.method3345(string_2)
+        PacketEncoder.sendJoinFriendchat(string_2)
     }
 
     @JvmStatic
@@ -6064,7 +6064,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method8303(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt106
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.worldLoginResponse
     }
 
     @JvmStatic
@@ -6370,7 +6370,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method2153(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt113
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.loginHandshakeCode
     }
 
     @JvmStatic
@@ -6609,8 +6609,8 @@ object CS2Interpreter {
     fun method6073(executor: CS2Executor) {
         var class282Sub50Sub62: WorldMapElement? = WorldMap.poll(executor.intStack[--executor.intStackPtr])
         if (class282Sub50Sub62 != null) {
-            if (class282Sub50Sub62.aString9534 != null) {
-                executor.stringStack[++executor.stringStackPtr - 1] = class282Sub50Sub62.aString9534
+            if (class282Sub50Sub62.displayName != null) {
+                executor.stringStack[++executor.stringStackPtr - 1] = class282Sub50Sub62.displayName
                 return
             }
         }
@@ -6719,7 +6719,7 @@ object CS2Interpreter {
         var i_3 = executor.intStack[executor.intStackPtr + 1]
         var ints_4: IntArray? = executor.intStack
         var i_5 = ++executor.intStackPtr - 1
-        val b_6 = if (Interface.method4248(i_2, i_3)) 1 else 0
+        val b_6 = if (Interface.hasActiveMenuEntry(i_2, i_3)) 1 else 0
         ints_4!![i_5] = b_6
     }
 
@@ -6889,11 +6889,11 @@ object CS2Interpreter {
             } else if (i_4 >= Resource.mapRegion!!.sceneSizeY) {
                 i_4 = Resource.mapRegion!!.sceneSizeY
             }
-            PingRequester.anInt5864 = ((i_3 shl 9)) + 256
-            StaticMethods.anInt833 = ((i_4 shl 9)) + 256
+            PingRequester.cameraTargetAbsX = ((i_3 shl 9)) + 256
+            StaticMethods.cameraTargetAbsY = ((i_4 shl 9)) + 256
         } else {
-            PingRequester.anInt5864 = -1
-            StaticMethods.anInt833 = -1
+            PingRequester.cameraTargetAbsX = -1
+            StaticMethods.cameraTargetAbsY = -1
         }
     }
 
@@ -7126,7 +7126,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method810(executor: CS2Executor) {
-        StaticMethods.method458(executor.intStack[--executor.intStackPtr])
+        StaticMethods.selectWorldMapElement(executor.intStack[--executor.intStackPtr])
     }
 
     @JvmStatic
@@ -7457,12 +7457,12 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3119(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt107
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt109
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.anInt108
-        StaticMethods.anInt107 = -2
-        StaticMethods.anInt109 = -1
-        StaticMethods.anInt108 = -1
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectResponse
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectArg2
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.lastDisconnectArg1
+        StaticMethods.lastDisconnectResponse = -2
+        StaticMethods.lastDisconnectArg2 = -1
+        StaticMethods.lastDisconnectArg1 = -1
     }
 
     @JvmStatic
@@ -7663,7 +7663,7 @@ object CS2Interpreter {
         if (class282Sub50Sub63 == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.anInt9542
+            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.defaultZoomLevel
         }
     }
 
@@ -7731,7 +7731,7 @@ object CS2Interpreter {
         var i_2 = executor.intStack[--executor.intStackPtr]
         var class282Sub50Sub63: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub63 != null) {
-            var bool4 = class282Sub50Sub63.method14778((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
+            var bool4 = class282Sub50Sub63.gameToMapCoordsForPlane((i_2 shr 28) and 0x3, (i_2 shr 14) and 0x3fff, i_2 and 0x3fff, CS2Executor.anIntArray5900)
             if (bool4) {
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![1]
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![2]
@@ -7752,7 +7752,7 @@ object CS2Interpreter {
         if (class282Sub50Sub63 == null) {
             executor.intStack[++executor.intStackPtr - 1] = -1
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.anInt9536
+            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.elementId
         }
     }
 
@@ -7951,26 +7951,26 @@ object CS2Interpreter {
         TextureOpIrregularBricks.backgroundColor = executor.intStack[executor.intStackPtr]
         NativeSprite.backgroundTransparency = executor.intStack[executor.intStackPtr + 1]
         MiniMenu.anInt188 = executor.intStack[executor.intStackPtr + 2]
-        StaticMethods.anInt2262 = executor.intStack[executor.intStackPtr + 3]
-        StaticMethods.anInt5438 = executor.intStack[executor.intStackPtr + 4]
+        StaticMethods.menuBackgroundAlpha = executor.intStack[executor.intStackPtr + 3]
+        StaticMethods.loadingBarBackgroundSpriteId = executor.intStack[executor.intStackPtr + 4]
         NativeSprite.loadingBarTileSpriteId = executor.intStack[executor.intStackPtr + 5]
-        StaticMethods.anInt3145 = executor.intStack[executor.intStackPtr + 6]
-        StaticMethods.anInt5396 = executor.intStack[executor.intStackPtr + 7]
-        StaticMethods.anInt148 = executor.intStack[executor.intStackPtr + 8]
+        StaticMethods.menuTopBorderSpriteId = executor.intStack[executor.intStackPtr + 6]
+        StaticMethods.menuSideBorderSpriteId = executor.intStack[executor.intStackPtr + 7]
+        StaticMethods.menuCornerSpriteId = executor.intStack[executor.intStackPtr + 8]
         MiniMenu.anInt4722 = executor.intStack[executor.intStackPtr + 9]
-        StaticMethods.anInt1005 = executor.intStack[executor.intStackPtr + 10]
-        StaticMethods.anInt2982 = executor.intStack[executor.intStackPtr + 11]
-        Resource.SPRITES!!.isFileCached(StaticMethods.anInt5438)
+        StaticMethods.menuHoverTextColor = executor.intStack[executor.intStackPtr + 10]
+        StaticMethods.menuFontIndex = executor.intStack[executor.intStackPtr + 11]
+        Resource.SPRITES!!.isFileCached(StaticMethods.loadingBarBackgroundSpriteId)
         Resource.SPRITES!!.isFileCached(NativeSprite.loadingBarTileSpriteId)
-        Resource.SPRITES!!.isFileCached(StaticMethods.anInt3145)
-        Resource.SPRITES!!.isFileCached(StaticMethods.anInt5396)
-        Resource.SPRITES!!.isFileCached(StaticMethods.anInt148)
-        Resource.SPRITES!!.isFileCached(StaticMethods.anInt2982)
-        Resource.FONT_METRICS!!.isFileCached(StaticMethods.anInt2982)
-        StaticMethods.aNativeSprite4110 = null
-        StaticMethods.aNativeSprite9315 = null
-        StaticMethods.aNativeSprite1571 = null
-        StaticMethods.aNativeSprite612 = null
+        Resource.SPRITES!!.isFileCached(StaticMethods.menuTopBorderSpriteId)
+        Resource.SPRITES!!.isFileCached(StaticMethods.menuSideBorderSpriteId)
+        Resource.SPRITES!!.isFileCached(StaticMethods.menuCornerSpriteId)
+        Resource.SPRITES!!.isFileCached(StaticMethods.menuFontIndex)
+        Resource.FONT_METRICS!!.isFileCached(StaticMethods.menuFontIndex)
+        StaticMethods.menuTopBorderSprite = null
+        StaticMethods.menuBottomRightCornerSprite = null
+        StaticMethods.menuBottomLeftCornerSprite = null
+        StaticMethods.loadingBarTileSprite = null
         StaticMedia.aNativeSprite647 = null
         StaticMedia.aNativeSprite5576 = null
         StaticMedia.aNativeSprite3452 = null
@@ -8080,7 +8080,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15075(executor: CS2Executor) {
-        PacketEncoder.method6811(executor.intStack[--executor.intStackPtr])
+        PacketEncoder.sendClanOperation(executor.intStack[--executor.intStackPtr])
     }
 
     @JvmStatic
@@ -8094,7 +8094,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method14434(executor: CS2Executor) {
         executor.stringStackPtr -= 2
-        PacketEncoder.method11404(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, "", executor.intStack[--executor.intStackPtr] == 1, false)
+        PacketEncoder.sendLobbyHyperlink(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, "", executor.intStack[--executor.intStackPtr] == 1, false)
     }
 
     @JvmStatic
@@ -8406,7 +8406,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method15417(executor: CS2Executor) {
-        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.method304()
+        executor.intStack[++executor.intStackPtr - 1] = StaticMethods.getWorldMapZoomLevel()
     }
 
     @JvmStatic
@@ -8724,7 +8724,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method12210(executor: CS2Executor) {
         executor.stringStackPtr -= 3
-        PacketEncoder.method11404(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, executor.stringStack[executor.stringStackPtr + 2] as String?, executor.intStack[--executor.intStackPtr] == 1, true)
+        PacketEncoder.sendLobbyHyperlink(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, executor.stringStack[executor.stringStackPtr + 2] as String?, executor.intStack[--executor.intStackPtr] == 1, true)
     }
 
     @JvmStatic
@@ -9311,8 +9311,8 @@ object CS2Interpreter {
             executor.intStack[++executor.intStackPtr - 1] = 0
             executor.intStack[++executor.intStackPtr - 1] = 0
         } else {
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.anInt9540 - class282Sub50Sub63.anInt9539
-            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.anInt9535 - class282Sub50Sub63.anInt9541
+            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.boundsMaxX - class282Sub50Sub63.boundsMinX
+            executor.intStack[++executor.intStackPtr - 1] = class282Sub50Sub63.boundsMaxY - class282Sub50Sub63.boundsMinY
         }
     }
 
@@ -9325,7 +9325,7 @@ object CS2Interpreter {
     fun method7043(executor: CS2Executor) {
         var class282Sub50Sub62: WorldMapElement? = WorldMapSub1.getStaticElement()
         if (class282Sub50Sub62 != null) {
-            var bool3 = class282Sub50Sub62.method14775(WorldMap.mapSquareAbsX + WorldMapSub1.mapCenterX, WorldMap.mapSquareAbsY + WorldMapSub1.mapCenterY, CS2Executor.anIntArray5900)
+            var bool3 = class282Sub50Sub62.mapToGameCoords(WorldMap.mapSquareAbsX + WorldMapSub1.mapCenterX, WorldMap.mapSquareAbsY + WorldMapSub1.mapCenterY, CS2Executor.anIntArray5900)
             if (bool3) {
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![1]
                 executor.intStack[++executor.intStackPtr - 1] = CS2Executor.anIntArray5900!![2]
@@ -9455,7 +9455,7 @@ object CS2Interpreter {
     fun sendSignupFormPacket(executor: CS2Executor) {
         executor.stringStackPtr -= 2
         executor.intStackPtr -= 2
-        PacketEncoder.method2074(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1] == 1)
+        PacketEncoder.sendSignUpForm(executor.stringStack[executor.stringStackPtr] as String?, executor.stringStack[executor.stringStackPtr + 1] as String?, executor.intStack[executor.intStackPtr], executor.intStack[executor.intStackPtr + 1] == 1)
     }
 
     @JvmStatic

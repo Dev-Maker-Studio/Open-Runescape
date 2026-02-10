@@ -177,7 +177,7 @@ object WorldMap {
         if (detailsFileIds != null) {
             for (index in detailsFileIds.indices) {
                 val element = WorldMapElement.list(MAP_AREA_RESOURCE!!, detailsArchiveId, detailsFileIds[index])
-                WORLDMAP_DEFS.put(element, element.anInt9536.toLong())
+                WORLDMAP_DEFS.put(element, element.elementId.toLong())
             }
         }
 
@@ -662,7 +662,7 @@ object WorldMap {
     fun loadWorldMapCategories() {
         val placement = IntArray(3)
         for (index in 0 until staticElements!!.elementCount) {
-            val addToMap = staticElement!!.method14778(
+            val addToMap = staticElement!!.gameToMapCoordsForPlane(
                 staticElements!!.bitpackedPlacement[index] shr 28 and 0x3,
                 staticElements!!.bitpackedPlacement[index] shr 14 and 0x3fff,
                 staticElements!!.bitpackedPlacement[index] and 0x3fff,
@@ -694,7 +694,7 @@ object WorldMap {
                 positioning[i_4 * 2 + 1] = pixelViewEndY - (pixelViewEndY - pixelViewStartY) * (i_6 - tileViewStartY) / (tileViewEndY - tileViewStartY)
             }
 
-            WorldMapRasterManager.method2471(toolkit, positioning, mectype.lineColor)
+            WorldMapRasterManager.fillPolygon(toolkit, positioning, mectype.lineColor)
             if (mectype.anInt2748 > 0) {
                 for (index in 0 until positioning.size / 2 - 1) {
                     var x = positioning[index * 2]
@@ -1193,16 +1193,16 @@ object WorldMap {
             val i_10 = WorldMapSub1.mapCenterY - (height / mapZoom).toInt()
             DebugDisplay.anInt3991 = WorldMapSub1.mapCenterX - (width / mapZoom).toInt()
             WorldMapSub1.viewBottomTileY = WorldMapSub1.mapCenterY - (height / mapZoom).toInt()
-            StaticMethods.anInt5760 = ((width * 2) / mapZoom).toInt()
+            StaticMethods.worldMapViewWidth = ((width * 2) / mapZoom).toInt()
             ComponentMinimap.anInt4097 = ((height * 2) / mapZoom).toInt()
             setViewportBounds(i_17 + mapSquareAbsX, i_8 + mapSquareAbsY, i_9 + mapSquareAbsX, i_10 + mapSquareAbsY, left, top, left + width, top + height + 1)
             renderMap(toolkit)
             val nodecollection11 = getViewportCategories()
             WorldMapSub1.renderInformation(toolkit, nodecollection11)
             if (JSObjectManager.anInt4185 > 0) {
-                if (--ServerEnvironment.anInt9282 == 0) {
+                if (--ServerEnvironment.flashCycleCounter == 0) {
                     JSObjectManager.anInt4185--
-                    ServerEnvironment.anInt9282 = 20
+                    ServerEnvironment.flashCycleCounter = 20
                 }
             }
             if (Client.DRAW_DEBUG) {

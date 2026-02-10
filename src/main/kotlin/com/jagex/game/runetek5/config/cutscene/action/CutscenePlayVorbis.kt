@@ -33,7 +33,7 @@ class CutscenePlayVorbis(buffer: Packet) : CutsceneAction(buffer) {
         this.vorbisSound = AreaSoundPlayer.playSoundVorbis(this.soundId, this.timesRepeated, 0, this.volume, false, this.sampleRate)
     }
 
-    override fun method1593() {
+    override fun stopAction() {
         if (this.vorbisSound != null) {
             AreaSoundPlayer.resetAreaSound(this.vorbisSound!!)
             this.vorbisSound = null

@@ -26,7 +26,7 @@ class EllipseRasterizer(
         val i_5 = radiusX * i_1 shr 12
         val i_6 = i_2 * centerY shr 12
         val i_7 = i_2 * radiusY shr 12
-        ArrayUtils.method14584(i_4, i_6, i_5, i_7, fillColor)
+        ArrayUtils.drawFilledEllipse(i_4, i_6, i_5, i_7, fillColor)
     }
 
     override fun drawFilledAndStroked(i_1: Int, i_2: Int) {
@@ -90,10 +90,10 @@ class EllipseRasterizer(
             var i_43: Int
             if (i_1 >= TextureOpRasterizer.clipMinY && i_1 <= TextureOpRasterizer.clipMaxY) {
                 val ints_39 = TextureShapeRasterizer.pixelBuffer!![i_1]
-                i_40 = ArrayUtils.method4890(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-                i_41 = ArrayUtils.method4890(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-                i_42 = ArrayUtils.method4890(i_0 - i_11, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-                i_43 = ArrayUtils.method4890(i_0 + i_11, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                i_40 = ArrayUtils.clamp(i_0 - i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                i_41 = ArrayUtils.clamp(i_0 + i_2, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                i_42 = ArrayUtils.clamp(i_0 - i_11, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                i_43 = ArrayUtils.clamp(i_0 + i_11, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
                 ArrayUtils.setArrayValuesTo(ints_39, i_40, i_42, i_5)
                 ArrayUtils.setArrayValuesTo(ints_39, i_42, i_43, i_4)
                 ArrayUtils.setArrayValuesTo(ints_39, i_43, i_41, i_5)
@@ -152,11 +152,11 @@ class EllipseRasterizer(
                 i_40 = i_1 - i_9
                 i_41 = i_9 + i_1
                 if (i_41 >= TextureOpRasterizer.clipMinY && i_40 <= TextureOpRasterizer.clipMaxY) {
-                    i_42 = ArrayUtils.method4890(i_0 + i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-                    i_43 = ArrayUtils.method4890(i_0 - i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                    i_42 = ArrayUtils.clamp(i_0 + i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                    i_43 = ArrayUtils.clamp(i_0 - i_8, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
                     if (bool47) {
-                        val i_44 = ArrayUtils.method4890(i_0 + i_10, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
-                        val i_45 = ArrayUtils.method4890(i_0 - i_10, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                        val i_44 = ArrayUtils.clamp(i_0 + i_10, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
+                        val i_45 = ArrayUtils.clamp(i_0 - i_10, TextureOpRasterizer.clipMinX, TextureOpRasterizer.clipMaxX)
                         var ints_46: IntArray
                         if (i_40 >= TextureOpRasterizer.clipMinY) {
                             ints_46 = TextureShapeRasterizer.pixelBuffer!![i_40]
@@ -295,9 +295,9 @@ class EllipseRasterizer(
         @JvmStatic
         fun drawCircle(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
             if (i_0 - i_2 >= TextureOpRasterizer.clipMinX && i_0 + i_2 <= TextureOpRasterizer.clipMaxX && i_1 - i_2 >= TextureOpRasterizer.clipMinY && i_2 + i_1 <= TextureOpRasterizer.clipMaxY) {
-                ArrayUtils.method2637(i_0, i_1, i_2, i_3, i_4, i_5)
+                ArrayUtils.drawUnclippedFilledAndStrokedCircle(i_0, i_1, i_2, i_3, i_4, i_5)
             } else {
-                ArrayUtils.method1174(i_0, i_1, i_2, i_3, i_4, i_5)
+                ArrayUtils.drawClippedFilledAndStrokedCircle(i_0, i_1, i_2, i_3, i_4, i_5)
             }
         }
 

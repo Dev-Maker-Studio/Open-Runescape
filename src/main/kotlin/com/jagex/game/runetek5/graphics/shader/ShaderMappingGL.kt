@@ -132,7 +132,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
 
         val i_3 = (class282Sub21Sub11 as ShaderAttributeGL).getActiveUniformLocation()
         if (i_3 != -1) {
-            OpenGL.glUniform2fv(i_3, 4, matrix442.getComponenetsXY(Companion.matrixBuffer), 0)
+            OpenGL.glUniform2fv(i_3, 4, matrix442.getComponentsXY(Companion.matrixBuffer), 0)
         }
     }
 
@@ -198,7 +198,7 @@ class ShaderMappingGL : ShaderMapping, AutoCloseable {
     }
 
     override fun uniform3fSavedSize8(i_1: Int, matrix442: Matrix44) {
-        OpenGL.glUniform2fv(i_1, 4, matrix442.getComponenetsXY(Companion.matrixBuffer), 0)
+        OpenGL.glUniform2fv(i_1, 4, matrix442.getComponentsXY(Companion.matrixBuffer), 0)
     }
 
     override fun uniform3fSavedSize16(location: Int, matrix4x4: Matrix44) {

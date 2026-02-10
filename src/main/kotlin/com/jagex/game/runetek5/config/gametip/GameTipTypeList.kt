@@ -117,7 +117,7 @@ class GameTipTypeList(resourceProvider: Js5ResourceProvider) {
                 val updateDetailsCache = Array(stage.gameTipUpdateDetails.size) { GameTipUpdateDetails(0, 0, 0) }
                 System.arraycopy(stage.gameTipUpdateDetails, 0, updateDetailsCache, 0, updateDetailsCache.size)
                 for (src in start until updateDetailsCache.size) {
-                    val dst = StaticMethods.method7931(random, updateDetailsCache.size - start) + start
+                    val dst = StaticMethods.boundedRandom(random, updateDetailsCache.size - start) + start
                     val updateDetails = stage.gameTipUpdateDetails[src]
                     updateDetailsCache[src] = updateDetailsCache[dst]
                     updateDetailsCache[dst] = updateDetails

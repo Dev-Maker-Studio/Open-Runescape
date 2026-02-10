@@ -36,7 +36,7 @@ class TextureOpVoronoiNoise : TextureOperation(0, true) {
             for (x in 0 until TextureRaster.currentWidth) {
                 fourthNearestDistance = Int.MAX_VALUE
                 thirdNearestDistance = Int.MAX_VALUE
-                StaticMethods.anInt118 = Int.MAX_VALUE
+                StaticMethods.voronoiF2Distance = Int.MAX_VALUE
                 nearestDistance = Int.MAX_VALUE
 
                 val horizontalPos = TextureRaster.horizontalTable!![x] * cellCountX + 2048
@@ -77,13 +77,13 @@ class TextureOpVoronoiNoise : TextureOperation(0, true) {
 
                         if (distance < nearestDistance) {
                             fourthNearestDistance = thirdNearestDistance
-                            thirdNearestDistance = StaticMethods.anInt118
-                            StaticMethods.anInt118 = nearestDistance
+                            thirdNearestDistance = StaticMethods.voronoiF2Distance
+                            StaticMethods.voronoiF2Distance = nearestDistance
                             nearestDistance = distance
-                        } else if (distance < StaticMethods.anInt118) {
+                        } else if (distance < StaticMethods.voronoiF2Distance) {
                             fourthNearestDistance = thirdNearestDistance
-                            thirdNearestDistance = StaticMethods.anInt118
-                            StaticMethods.anInt118 = distance
+                            thirdNearestDistance = StaticMethods.voronoiF2Distance
+                            StaticMethods.voronoiF2Distance = distance
                         } else if (distance < thirdNearestDistance) {
                             fourthNearestDistance = thirdNearestDistance
                             thirdNearestDistance = distance
@@ -95,8 +95,8 @@ class TextureOpVoronoiNoise : TextureOperation(0, true) {
 
                 output[x] = when (distanceOutputMode) {
                     0 -> nearestDistance
-                    1 -> StaticMethods.anInt118
-                    2 -> StaticMethods.anInt118 - nearestDistance
+                    1 -> StaticMethods.voronoiF2Distance
+                    2 -> StaticMethods.voronoiF2Distance - nearestDistance
                     3 -> thirdNearestDistance
                     4 -> fourthNearestDistance
                     else -> 0
@@ -116,7 +116,7 @@ class TextureOpVoronoiNoise : TextureOperation(0, true) {
         pointPositions = ShortArray(512)
         if (pointJitter > 0) {
             for (i in 0 until 512) {
-                pointPositions[i] = StaticMethods.method7931(random, pointJitter).toShort()
+                pointPositions[i] = StaticMethods.boundedRandom(random, pointJitter).toShort()
             }
         }
     }

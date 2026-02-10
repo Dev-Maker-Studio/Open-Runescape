@@ -8,7 +8,7 @@ abstract class CutsceneAction protected constructor(buffer: Packet) {
 
     abstract fun perform()
 
-    open fun method1593() {
+    open fun stopAction() {
     }
 
     open fun isFullyCached(): Boolean {

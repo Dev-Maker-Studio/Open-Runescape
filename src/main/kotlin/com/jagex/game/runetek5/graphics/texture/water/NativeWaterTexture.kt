@@ -29,7 +29,7 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 waterTextureSamplers = arrayOfNulls(16)
 
                 for (index in 0 until 16) {
-                    val data = DataBuffer.readDataBuffer(anObject482, index * 32768)
+                    val data = DataBuffer.readDataBuffer(waveTextureDataBuffer, index * 32768)
                     waterTextureSamplers!![index] = activeToolkit.createTextureSampler(
                         GLFormat.LUMINANCE_ALPHA,
                         128,
@@ -42,7 +42,7 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                 textureSamplers = arrayOfNulls(16)
 
                 for (index in 0 until 16) {
-                    val data = DataBuffer.readDataBuffer(anObject477, index * 32768)
+                    val data = DataBuffer.readDataBuffer(billowTextureDataBuffer, index * 32768)
                     textureSamplers!![index] = activeToolkit.createTextureSampler(
                         GLFormat.LUMINANCE_ALPHA,
                         128,
@@ -52,9 +52,9 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
                     )
                 }
             } else {
-                var bytes = DataBuffer.unpackDataBuffer(anObject482, false)
+                var bytes = DataBuffer.unpackDataBuffer(waveTextureDataBuffer, false)
                 waterSampler3d = activeToolkit.create3DTexture(GLFormat.LUMINANCE_ALPHA, bytes!!)
-                bytes = DataBuffer.unpackDataBuffer(anObject477, false)
+                bytes = DataBuffer.unpackDataBuffer(billowTextureDataBuffer, false)
                 billowSampler = activeToolkit.create3DTexture(GLFormat.LUMINANCE_ALPHA, bytes!!)
             }
         }
@@ -113,26 +113,26 @@ class NativeWaterTexture(val activeToolkit: AbstractNativeToolkit) {
 
     companion object {
         @JvmStatic
-        var anObject482: Any? = null
+        var waveTextureDataBuffer: Any? = null
 
         @JvmStatic
-        var anObject477: Any? = null
+        var billowTextureDataBuffer: Any? = null
 
         @JvmStatic
         var hdrDatabuffer: Any? = null
 
         @JvmStatic
         fun initializeWaterData() {
-            if (anObject482 == null) {
+            if (waveTextureDataBuffer == null) {
                 val generator1 = NativeWaveTextureData()
                 val data = generator1.getData()
-                anObject482 = DataBuffer.createDataBuffer(data)
+                waveTextureDataBuffer = DataBuffer.createDataBuffer(data)
             }
 
-            if (anObject477 == null) {
+            if (billowTextureDataBuffer == null) {
                 val generator2 = NativeBillowTextureData()
                 val data = generator2.getData()
-                anObject477 = DataBuffer.createDataBuffer(data)
+                billowTextureDataBuffer = DataBuffer.createDataBuffer(data)
             }
         }
     }

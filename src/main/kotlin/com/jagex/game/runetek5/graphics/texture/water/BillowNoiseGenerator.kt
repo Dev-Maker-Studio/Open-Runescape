@@ -2,39 +2,39 @@ package com.jagex.game.runetek5.graphics.texture.water
 
 internal open class BillowNoiseGenerator : WaterTextureGenerator(12, 16, 2) {
 
-    @JvmField var aByteArray7759: ByteArray? = null
-    @JvmField var anInt7758: Int = 0
-    @JvmField var anInt7760: Int = 0
-    @JvmField val anIntArray7761: IntArray
+    @JvmField var outputBuffer: ByteArray? = null
+    @JvmField var writePosition: Int = 0
+    @JvmField var accumulator: Int = 0
+    @JvmField val amplitudeWeights: IntArray
 
     init {
-        this.anIntArray7761 = IntArray(super.anInt4290)
+        this.amplitudeWeights = IntArray(super.octaveCount)
 
-        for (i_7 in 0 until super.anInt4290) {
-            this.anIntArray7761[i_7] = (Math.pow(0.45, i_7.toDouble()) * 4096.0).toInt()
+        for (i_7 in 0 until super.octaveCount) {
+            this.amplitudeWeights[i_7] = (Math.pow(0.45, i_7.toDouble()) * 4096.0).toInt()
         }
     }
 
-    open fun method12517(i_1: Int, b_2: Byte) {
-        this.aByteArray7759!![this.anInt7758++] = ((b_2.toInt() and 0xff shr 1) + 127).toByte()
+    open fun writeSample(i_1: Int, b_2: Byte) {
+        this.outputBuffer!![this.writePosition++] = ((b_2.toInt() and 0xff shr 1) + 127).toByte()
     }
 
     override fun update(i_1: Int, i_2: Int) {
-        this.anInt7760 += i_2 * this.anIntArray7761[i_1] shr 12
+        this.accumulator += i_2 * this.amplitudeWeights[i_1] shr 12
     }
 
     override fun clear() {
-        this.anInt7758 = 0
-        this.anInt7760 = 0
+        this.writePosition = 0
+        this.accumulator = 0
     }
 
     override fun reset() {
-        this.anInt7760 = Math.abs(this.anInt7760)
-        if (this.anInt7760 >= 4096) {
-            this.anInt7760 = 4095
+        this.accumulator = Math.abs(this.accumulator)
+        if (this.accumulator >= 4096) {
+            this.accumulator = 4095
         }
 
-        method12517(this.anInt7758++, (this.anInt7760 shr 4).toByte())
-        this.anInt7760 = 0
+        writeSample(this.writePosition++, (this.accumulator shr 4).toByte())
+        this.accumulator = 0
     }
 }

@@ -45,9 +45,9 @@ open class GroundGL(
     @JvmField var tileOffsetsZ: Array<Array<IntArray?>>? = null
     @JvmField var tileOffsetsX: Array<Array<IntArray?>>? = null
     @JvmField var tileColors: Array<Array<IntArray?>>? = null
-    @JvmField var anIntArrayArrayArray8662: Array<Array<IntArray?>>? = null
+    @JvmField var lightOffsetsB: Array<Array<IntArray?>>? = null
     @JvmField var tileBlendColors: Array<Array<IntArray?>>? = null
-    @JvmField var anIntArrayArrayArray8649: Array<Array<IntArray?>>? = null
+    @JvmField var lightOffsetsA: Array<Array<IntArray?>>? = null
     @JvmField var materials: Array<Array<Array<GroundMaterialGL>?>>? = null
     @JvmField var shadowing: Array<ByteArray>? = null
     @JvmField var materialTable: HashTable? = null
@@ -79,7 +79,7 @@ open class GroundGL(
         this.waterFunctionMask = waterFunctionMask
         quarterTileScale = tileScale - 2
         quarterTileUnits = 1 shl quarterTileScale
-        anIntArrayArrayArray8649 = Array(regionSizeX) { Array(regionSizeY) { null } }
+        lightOffsetsA = Array(regionSizeX) { Array(regionSizeY) { null } }
         materials = Array(regionSizeX) { Array(regionSizeY) { null } }
         tileOffsetsX = Array(regionSizeX) { Array(regionSizeY) { null } }
         tileOffsetsZ = Array(regionSizeX) { Array(regionSizeY) { null } }
@@ -107,7 +107,7 @@ open class GroundGL(
         }
     }
 
-    fun method13879(shadowGl: ShadowGL, offsetsXCount: Int, offsetsYCount: Int) {
+    fun projectShadow(shadowGl: ShadowGL, offsetsXCount: Int, offsetsYCount: Int) {
         val offsetsX = tileOffsetsX!![offsetsXCount][offsetsYCount]!!
         val offsetsZ = tileOffsetsZ!![offsetsXCount][offsetsYCount]!!
         val totalOffsets = offsetsX.size
@@ -207,7 +207,7 @@ open class GroundGL(
         addBlendedTile(i_1, i_2, ints_17, ints_23, ints_18, ints_24, ints_19, ints_20, ints_21, ints_22, class9014, false)
     }
 
-    fun method13881(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
+    fun renderShadows(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
         if (goundMaterialNodes != null) {
             var i_7 = i_3 + i_3 + 1
             i_7 *= i_7
@@ -293,7 +293,7 @@ open class GroundGL(
                 OpenGL.glPushMatrix()
                 OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
-                shadowMapper!!.method2290(i_1, i_2, i_3, bools_4, bool5)
+                shadowMapper!!.renderShadowOverlay(i_1, i_2, i_3, bools_4, bool5)
                 OpenGL.glPopMatrix()
             }
         }
@@ -319,7 +319,7 @@ open class GroundGL(
                 (goundMaterialNodes!![nodeIndex] as GroundMaterialGL).generateNativeBuffer(currentColorCount)
             }
             var bufferEntrySize = 24
-            if (anIntArrayArrayArray8662 != null) {
+            if (lightOffsetsB != null) {
                 bufferEntrySize += 4
             }
             if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0) {
@@ -346,8 +346,8 @@ open class GroundGL(
                         if (blendingColors == null) {
                             blendingColors = mainColors
                         }
-                        val floorOffsets = if (anIntArrayArrayArray8649 != null) anIntArrayArrayArray8649!![x][y] else null
-                        val ints_17 = if (anIntArrayArrayArray8662 != null) anIntArrayArrayArray8662!![x][y] else null
+                        val floorOffsets = if (lightOffsetsA != null) lightOffsetsA!![x][y] else null
+                        val ints_17 = if (lightOffsetsB != null) lightOffsetsB!![x][y] else null
 
                         val lightingXSouthWest = lightingX!![x][y]
                         val lightingYSouthWest = lightingY!![x][y]
@@ -508,7 +508,7 @@ open class GroundGL(
                                     nativeStream.putByte(-1)
                                     nativeStream.putFloatBigEndian(sceneX.toFloat())
                                     nativeStream.putFloatBigEndian(sceneY.toFloat())
-                                    if (anIntArrayArrayArray8662 != null) {
+                                    if (lightOffsetsB != null) {
                                         nativeStream.putFloatBigEndian(if (ints_17 != null) (ints_17[loop] - 1).toFloat() else 0.0f)
                                     }
                                     if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0) {
@@ -526,7 +526,7 @@ open class GroundGL(
                                     nativeStream.putByte(-1)
                                     nativeStream.putFloatLittleEndian(sceneX.toFloat())
                                     nativeStream.putFloatLittleEndian(sceneY.toFloat())
-                                    if (anIntArrayArrayArray8662 != null) {
+                                    if (lightOffsetsB != null) {
                                         nativeStream.putFloatLittleEndian(if (ints_17 != null) (ints_17[loop] - 1).toFloat() else 0.0f)
                                     }
                                     if ((waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0) {
@@ -613,7 +613,7 @@ open class GroundGL(
                     }
                 }
             }
-            nativeStream.method2925()
+            nativeStream.flush()
             dataArrayBuffer = activeToolkit.createDataArrayBuffer(bufferEntrySize, nativeHeapBuffer, nativeStream.written())
             if (dataArrayBuffer is GlVboArrayBuffer) {
                 nativeHeapBuffer.deallocateBuffer()
@@ -621,7 +621,7 @@ open class GroundGL(
             vertexBuffer = OpenGlArrayDrawBuffer(dataArrayBuffer!!, GL_FLOAT, 3, 0)
             colorBuffer = OpenGlArrayDrawBuffer(dataArrayBuffer!!, GL_UNSIGNED_BYTE, 4, 12)
             val pointerOffset: Int
-            if (anIntArrayArrayArray8662 != null) {
+            if (lightOffsetsB != null) {
                 textureBuffer = OpenGlArrayDrawBuffer(dataArrayBuffer!!, GL_FLOAT, 3, 16)
                 pointerOffset = 28
             } else {
@@ -643,7 +643,7 @@ open class GroundGL(
 
             ArrayUtils.quicksort(pointers, goundMaterialNodes!!)
             if (shadowMapper != null) {
-                shadowMapper!!.method2309()
+                shadowMapper!!.initializeShadowTiles()
             }
         } else {
             shadowMapper = null
@@ -655,9 +655,9 @@ open class GroundGL(
             tileColors = null
         }
 
-        anIntArrayArrayArray8662 = null
+        lightOffsetsB = null
         tileBlendColors = null
-        anIntArrayArrayArray8649 = null
+        lightOffsetsA = null
         materials = null
         shadowing = null
         materialTable = null
@@ -781,7 +781,7 @@ open class GroundGL(
         if (shadowMapper != null && class282Sub50Sub171 != null) {
             val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
             val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
-            shadowMapper!!.method2314(class282Sub50Sub171, i_7, i_8)
+            shadowMapper!!.removeShadow(class282Sub50Sub171, i_7, i_8)
         }
     }
 
@@ -789,7 +789,7 @@ open class GroundGL(
         if (shadowMapper != null && shadow != null) {
             val i_7 = i_2 - (i_3 * activeToolkit.shadowOffsetX shr 8) shr activeToolkit.shadowScale
             val i_8 = i_4 - (i_3 * activeToolkit.shadowOffsetZ shr 8) shr activeToolkit.shadowScale
-            return shadowMapper!!.method2293(shadow, i_7, i_8)
+            return shadowMapper!!.applyShadow(shadow, i_7, i_8)
         }
         return false
     }
@@ -821,27 +821,27 @@ open class GroundGL(
         hasShadows: Boolean
     ) {
         val materialProvider = activeToolkit.materialProvider
-        if (lightGroundOffsetsB != null && anIntArrayArrayArray8662 == null) {
-            anIntArrayArrayArray8662 = Array(width) { Array(length) { null } }
+        if (lightGroundOffsetsB != null && lightOffsetsB == null) {
+            lightOffsetsB = Array(width) { Array(length) { null } }
         }
-        if (lightGroundOffsetsA != null && anIntArrayArrayArray8649 == null) {
-            anIntArrayArrayArray8649 = Array(width) { Array(length) { null } }
+        if (lightGroundOffsetsA != null && lightOffsetsA == null) {
+            lightOffsetsA = Array(width) { Array(length) { null } }
         }
         tileOffsetsX!![tileX][tileY] = offsetsX
         tileOffsetsZ!![tileX][tileY] = offsetsZ
         tileColors!![tileX][tileY] = mainColors
         tileBlendColors!![tileX][tileY] = blendColors
-        if (lightGroundOffsetsB != null && anIntArrayArrayArray8662 == null) {
+        if (lightGroundOffsetsB != null && lightOffsetsB == null) {
             // Already handled above
         }
-        if (lightGroundOffsetsA != null && anIntArrayArrayArray8649 == null) {
+        if (lightGroundOffsetsA != null && lightOffsetsA == null) {
             // Already handled below
         }
-        if (anIntArrayArrayArray8662 != null) {
-            anIntArrayArrayArray8662!![tileX][tileY] = lightGroundOffsetsB
+        if (lightOffsetsB != null) {
+            lightOffsetsB!![tileX][tileY] = lightGroundOffsetsB
         }
-        if (anIntArrayArrayArray8649 != null) {
-            anIntArrayArrayArray8649!![tileX][tileY] = lightGroundOffsetsA
+        if (lightOffsetsA != null) {
+            lightOffsetsA!![tileX][tileY] = lightGroundOffsetsA
         }
         val groundMaterial = Array<GroundMaterialGL?>(mainColors.size) { null }
         materials!![tileX][tileY] = @Suppress("UNCHECKED_CAST") (groundMaterial as Array<GroundMaterialGL>)
@@ -882,7 +882,7 @@ open class GroundGL(
     }
 
     override fun renderFloor(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
-        method13881(i_1, i_2, i_3, bools_4, bool5)
+        renderShadows(i_1, i_2, i_3, bools_4, bool5)
     }
 
     override fun createShadowAt(tileX: Int, tileY: Int, shadow: Shadow?): Shadow? {
@@ -900,7 +900,7 @@ open class GroundGL(
         }
 
         generatedOpenglShadow.setDimension(0, 0, dimension, dimension)
-        method13879(generatedOpenglShadow, tileX, tileY)
+        projectShadow(generatedOpenglShadow, tileX, tileY)
         return generatedOpenglShadow
     }
 }

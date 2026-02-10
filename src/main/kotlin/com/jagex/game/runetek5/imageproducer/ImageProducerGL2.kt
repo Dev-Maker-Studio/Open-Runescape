@@ -6,58 +6,58 @@ import java.awt.Canvas
 
 class ImageProducerGL2 : DelegatingDisplay {
 
-    @JvmField var aBool10122: Boolean = false
-    @JvmField val aGraphicalRendererSub110118: OpenGlToolkit
-    @JvmField val aCanvas10120: Canvas
-    @JvmField val anOpenGL10119: OpenGL
-    @JvmField val aLong10117: Long
-    @JvmField var anInt10121: Int = 0
-    @JvmField var anInt10116: Int = 0
+    @JvmField var isDisposed: Boolean = false
+    @JvmField val openGlToolkit: OpenGlToolkit
+    @JvmField val canvas: Canvas
+    @JvmField val openGL: OpenGL
+    @JvmField val surfaceHandle: Long
+    @JvmField var displayHeight: Int = 0
+    @JvmField var displayWidth: Int = 0
 
-    constructor(openGlToolkit: OpenGlToolkit, canvas: Canvas, surfaceHandle: Long) {
-        aBool10122 = false
-        aGraphicalRendererSub110118 = openGlToolkit
-        aCanvas10120 = canvas
-        anOpenGL10119 = openGlToolkit.activeOpenglInstance!!
-        aLong10117 = surfaceHandle
-        method15526()
+    constructor(toolkit: OpenGlToolkit, canvasParam: Canvas, handle: Long) {
+        isDisposed = false
+        this.openGlToolkit = toolkit
+        this.canvas = canvasParam
+        this.openGL = toolkit.activeOpenglInstance!!
+        this.surfaceHandle = handle
+        updateDimensions()
     }
 
-    constructor(openGlToolkit: OpenGlToolkit, canvas: Canvas) : this(
-        openGlToolkit,
-        canvas,
-        openGlToolkit.activeOpenglInstance!!.prepareSurface(canvas)
+    constructor(toolkit: OpenGlToolkit, canvasParam: Canvas) : this(
+        toolkit,
+        canvasParam,
+        toolkit.activeOpenglInstance!!.prepareSurface(canvasParam)
     )
 
     override fun getWidth(): Int {
-        return anInt10116
+        return displayWidth
     }
 
     override fun getHeight(): Int {
-        return anInt10121
+        return displayHeight
     }
 
-    fun method15526() {
-        val dimension = aCanvas10120.size
-        anInt10121 = dimension.height
-        anInt10116 = dimension.width
+    fun updateDimensions() {
+        val dimension = canvas.size
+        displayHeight = dimension.height
+        displayWidth = dimension.width
     }
 
     override fun draw(): Int {
-        if (aBool10122) {
+        if (isDisposed) {
             throw IllegalStateException()
         } else {
-            anOpenGL10119.swapBuffers(aLong10117)
+            openGL.swapBuffers(surfaceHandle)
             return 0
         }
     }
 
     override fun reload(): Boolean {
-        if (aBool10122) {
+        if (isDisposed) {
             throw IllegalStateException()
         } else {
-            anOpenGL10119.setSurface(aLong10117)
-            aGraphicalRendererSub110118.resetDisplay()
+            openGL.setSurface(surfaceHandle)
+            openGlToolkit.resetDisplay()
             return true
         }
     }
@@ -67,22 +67,22 @@ class ImageProducerGL2 : DelegatingDisplay {
     }
 
     override fun cleanup() {
-        if (aBool10122) {
+        if (isDisposed) {
             throw IllegalStateException()
         } else {
-            anOpenGL10119.releaseSurface(aCanvas10120, aLong10117)
-            aBool10122 = true
+            openGL.releaseSurface(canvas, surfaceHandle)
+            isDisposed = true
         }
     }
 
     override fun resize(width: Int, height: Int) {
-        if (aBool10122) {
+        if (isDisposed) {
             throw IllegalStateException()
         } else {
-            anOpenGL10119.surfaceResized(aLong10117)
-            method15526()
-            if (this == aGraphicalRendererSub110118.getDisplay()) {
-                aGraphicalRendererSub110118.resetOrthoAndDisplay()
+            openGL.surfaceResized(surfaceHandle)
+            updateDimensions()
+            if (this == openGlToolkit.getDisplay()) {
+                openGlToolkit.resetOrthoAndDisplay()
             }
         }
     }

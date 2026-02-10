@@ -141,7 +141,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     override fun particleCycle(toolkit: AbstractToolkit) {
-        if (playerAppearance != null && (particlesInitialized || method16133(toolkit, 0))) {
+        if (playerAppearance != null && (particlesInitialized || getAnimatedBodyModel(toolkit, 0))) {
             val renderingMatrix = toolkit.getRenderingMatrix()
             renderingMatrix.translateFromCoordspace(getAbsolutePosition())
             renderingMatrix.translate(0.0f, -5.0f, 0.0f)
@@ -245,7 +245,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     override fun calculateProjection(toolkit: AbstractToolkit, i_2: Int, i_3: Int): Boolean {
-        if (playerAppearance != null && method16133(toolkit, 131072)) {
+        if (playerAppearance != null && getAnimatedBodyModel(toolkit, 131072)) {
             val projectionMatrix = getProjectionMatrix()
             var bool6 = false
 
@@ -290,7 +290,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
         movementTypes[0] = movementType
     }
 
-    fun method16133(toolkit: AbstractToolkit, initialFunctionMask: Int): Boolean {
+    fun getAnimatedBodyModel(toolkit: AbstractToolkit, initialFunctionMask: Int): Boolean {
         var functionMask = initialFunctionMask
         val bastype = getBastype()
         val currSeq = if (currentSequence.hasType() && !currentSequence.hasSpeed()) currentSequence else null
@@ -571,7 +571,7 @@ open class PlayerEntity(scene: Scene?) : PathingEntity(scene) {
     }
 
     override fun draw(activeToolkit: AbstractToolkit): RenderedEntity? {
-        if (playerAppearance != null && method16133(activeToolkit, 2048)) {
+        if (playerAppearance != null && getAnimatedBodyModel(activeToolkit, 2048)) {
             val renderingMatrix = activeToolkit.getRenderingMatrix()
             val projectionMatrix = getProjectionMatrix()
             val absolute = getAbsolutePosition()

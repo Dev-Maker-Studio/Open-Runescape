@@ -92,7 +92,7 @@ class ReflectingTextureEffect(toolkit: OpenGlToolkit) : MaterialEffectGL(toolkit
             glToolkit.activateTexture(1)
             glToolkit.setActiveTexture(cubeMap)
             OpenGL.glMatrixMode(GL_TEXTURE)
-            OpenGL.glLoadMatrixf(glToolkit.inverseSunMatrix44.method6534(glToolkit.textureMatrix), 0)
+            OpenGL.glLoadMatrixf(glToolkit.inverseSunMatrix44.extractRotationInto(glToolkit.textureMatrix), 0)
             OpenGL.glMatrixMode(GL_MODELVIEW)
             glToolkit.activateTexture(0)
             loaded = true

@@ -458,7 +458,7 @@ object ComponentMinimap {
                 }
                 val class11919: InteractiveComponentSprite? = component.addInteractiveSprite(toolkit)
                 if (class11919 != null) {
-                    WorldMapRasterManager.method2505(toolkit, ints_10, mecType.lineColor, class11919.rowStartX!!, class11919.rowWidth!!)
+                    WorldMapRasterManager.fillPolygonMasked(toolkit, ints_10, mecType.lineColor, class11919.rowStartX!!, class11919.rowWidth!!)
                 }
                 if (mecType.anInt2748 > 0) {
                     var i_15: Int

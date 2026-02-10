@@ -97,7 +97,7 @@ class LappingWaterEffect(
             listUtils!!.callList(0)
             glToolkit.activateTexture(1)
             OpenGL.glMatrixMode(GL_TEXTURE)
-            OpenGL.glLoadMatrixf(glToolkit.inverseSunMatrix44.faceList, 0)
+            OpenGL.glLoadMatrixf(glToolkit.inverseSunMatrix44.elements, 0)
             OpenGL.glMatrixMode(GL_MODELVIEW)
             glToolkit.activateTexture(0)
             if (glToolkit.textureAnimatingProgression != animatingProgression) {

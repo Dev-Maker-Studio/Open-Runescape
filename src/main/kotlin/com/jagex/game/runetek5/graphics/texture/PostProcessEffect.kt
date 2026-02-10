@@ -8,7 +8,7 @@ abstract class PostProcessEffect(
     @JvmField val activeToolkit: OpenGlToolkit
 ) : Node<PostProcessEffect>() {
 
-    @JvmField var aBool7506: Boolean = false
+    @JvmField var isActive: Boolean = false
 
     abstract fun draw(var2: OpenGl2DTexture)
 
@@ -30,8 +30,8 @@ abstract class PostProcessEffect(
         return GLActionFormat.PIXEL_FORMAT
     }
 
-    fun method12129(): Boolean {
-        return this.aBool7506
+    fun isActive(): Boolean {
+        return this.isActive
     }
 
     abstract fun createShaders(): Boolean

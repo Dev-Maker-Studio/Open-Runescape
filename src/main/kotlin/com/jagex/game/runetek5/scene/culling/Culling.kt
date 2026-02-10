@@ -214,7 +214,7 @@ open class Culling(
                 processCullingCluster(activeToolkit!!, diagonalWallCulling[index]!!, nextPlane)
             }
 
-            frustumCulling!!.anInt2588 = 0
+            frustumCulling!!.depthWriteCount = 0
             if (frusumCullingCursorPos > 0) {
                 val size = anIntArray2565!!.size
                 var i = 0
@@ -286,7 +286,7 @@ open class Culling(
      */
     fun isTileHidden(plane: Int, x: Int, y: Int): Boolean {
         if (cullingEnabled && drawingScene) {
-            if (frustumCulling!!.anInt2588 < 102) {
+            if (frustumCulling!!.depthWriteCount < 102) {
                 return false
             }
             val lastDrawCycle = tileDrawCycles[plane][x][y]
@@ -335,7 +335,7 @@ open class Culling(
 
     fun isTileHidden(z: Int, x: Int, y: Int, minY: Int): Boolean {
         if (cullingEnabled && drawingScene) {
-            if (frustumCulling!!.anInt2588 < 102) {
+            if (frustumCulling!!.depthWriteCount < 102) {
                 return false
             }
             if (!isTileHidden(z, x, y)) {
@@ -350,7 +350,7 @@ open class Culling(
 
     fun hideTile(z: Int, startX: Int, endX: Int, startY: Int, endY: Int, axisAlignedBoundingBox: Silhouette?): Boolean {
         if (cullingEnabled && drawingScene) {
-            if (frustumCulling!!.anInt2588 < 102) {
+            if (frustumCulling!!.depthWriteCount < 102) {
                 return false
             }
             if (endX == startX && endY == startY) {
@@ -370,7 +370,7 @@ open class Culling(
 
     fun hideWall(wall: AbstractWall, z: Int, x: Int, y: Int): Boolean {
         if (cullingEnabled && drawingScene) {
-            if (frustumCulling!!.anInt2588 < 102) {
+            if (frustumCulling!!.depthWriteCount < 102) {
                 return false
             }
             if (!isTileHidden(z, x, y)) {

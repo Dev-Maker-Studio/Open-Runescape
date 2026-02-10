@@ -63,7 +63,7 @@ class DisplayModeDetails {
                 Client.SUN_MATRIX.setViewPosition(0.0f, 256.0f, 0.0f)
                 Renderers.activeToolkit!!.setSunPosition(Client.SUN_MATRIX)
                 val renderMatrix = Renderers.activeToolkit!!.getScratchMatrix()
-                renderMatrix.method6531(
+                renderMatrix.setPerspective(
                     (dimension.width / 2f), (dimension.height / 2f), 512.0f, 512.0f,
                     Resource.mapRegion!!.viewRangeStart.toFloat(), Resource.mapRegion!!.viewRangeEnd.toFloat(),
                     dimension.width.toFloat(), dimension.height.toFloat()

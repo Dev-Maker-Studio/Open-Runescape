@@ -70,7 +70,7 @@ class WaterfallEffect(
         listUtils.callList(0)
         if (textureContainer.texture3dSupported) {
             glToolkit.activateTexture(1)
-            glToolkit.setActiveTexture(textureContainer.aClass137Sub41636)
+            glToolkit.setActiveTexture(textureContainer.billowTexture3d)
             glToolkit.activateTexture(0)
         }
     }
@@ -112,7 +112,7 @@ class WaterfallEffect(
         OpenGL.glTexGenfv(GL_T, GL_EYE_PLANE, PLANE_PARAMETERS, 0)
         if (!textureContainer.texture3dSupported) {
             val texture = (wPos * glToolkit.textureAnimatingProgression * 16.0f).toInt()
-            glToolkit.setActiveTexture(textureContainer.aClass137Sub1Array1634!![texture % 16])
+            glToolkit.setActiveTexture(textureContainer.billowTextures2d!![texture % 16])
         } else {
             PLANE_PARAMETERS[0] = 0.0f
             PLANE_PARAMETERS[1] = 0.0f

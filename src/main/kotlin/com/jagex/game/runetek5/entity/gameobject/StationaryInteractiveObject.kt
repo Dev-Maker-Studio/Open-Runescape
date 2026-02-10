@@ -58,29 +58,29 @@ class StationaryInteractiveObject(
     var axisAlignedBoundingBox: Silhouette? = null
 
     @JvmField
-    val aClass47410542: ObjectTypeList = locTypeList
+    val locTypeList: ObjectTypeList = locTypeList
 
     override val id: Int = objectdefinitions4.id
 
     @JvmField
-    val aBool10536: Boolean = bool10
+    val overlayHidden: Boolean = bool10
 
     override val shape: Int = i_15
 
     @JvmField
-    val aByte10539: Byte = i_15.toByte()
+    val shapeAsByte: Byte = i_15.toByte()
 
     @JvmField
-    val aByte10540: Byte = i_16.toByte()
+    val rotationAsByte: Byte = i_16.toByte()
 
     @JvmField
-    val aBool10541: Boolean = objectdefinitions4.hasActions != 0 && !bool10
+    val interactive: Boolean = objectdefinitions4.hasActions != 0 && !bool10
 
     @JvmField
-    var aBool10543: Boolean = bool17
+    var hasTileShadow: Boolean = bool17
 
     @JvmField
-    val aBool10544: Boolean = toolkit.hasShadows() && objectdefinitions4.dynamicShadow && !aBool10536 && PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0
+    val hasDynamicShadow: Boolean = toolkit.hasShadows() && objectdefinitions4.dynamicShadow && !overlayHidden && PreferenceManager.preferences!!.sceneryShadows!!.getValue() != 0
 
     @JvmField
     var interactiveModel: Model? = null
@@ -91,17 +91,17 @@ class StationaryInteractiveObject(
     init {
         collisionPlane = i_6.toByte()
         var i_18 = 2048
-        if (aBool10543) {
+        if (hasTileShadow) {
             i_18 = i_18 or 0x10000
         }
         if (objectdefinitions4.dynamicTint) {
             i_18 = i_18 or 0x80000
         }
-        val class45219 = method16117(toolkit, i_18, aBool10544)
+        val class45219 = getTypeResult(toolkit, i_18, hasDynamicShadow)
         if (class45219 != null) {
             interactiveModel = class45219.mainObject as Model?
             currentShadow = class45219.companionObject as Shadow?
-            if (aBool10543 || objectdefinitions4.dynamicTint) {
+            if (hasTileShadow || objectdefinitions4.dynamicTint) {
                 interactiveModel = interactiveModel!!.copy(0.toByte(), i_18, false)
                 if (objectdefinitions4.dynamicTint) {
                     val class34120 = Resource.mapRegion!!.dynamicTint
@@ -114,8 +114,8 @@ class StationaryInteractiveObject(
 
     override fun addShadow(toolkit: AbstractToolkit) {
         val shadow: Shadow?
-        if (currentShadow == null && aBool10544) {
-            val typeResult = method16117(toolkit, 262144, true)
+        if (currentShadow == null && hasDynamicShadow) {
+            val typeResult = getTypeResult(toolkit, 262144, true)
             shadow = if (typeResult != null) typeResult.companionObject as Shadow? else null
         } else {
             shadow = currentShadow
@@ -135,19 +135,19 @@ class StationaryInteractiveObject(
         return if (interactiveModel != null) interactiveModel!!.getSize2d() / 4 else 15
     }
 
-    fun method16116(toolkit: AbstractToolkit, functionMask: Int): Model? {
+    fun getModel(toolkit: AbstractToolkit, functionMask: Int): Model? {
         if (interactiveModel != null && toolkit.mismatchingFunctionMask(interactiveModel!!.getFunctionMask(), functionMask) == 0) {
             return interactiveModel
         }
-        val typeResult = method16117(toolkit, functionMask, false)
+        val typeResult = getTypeResult(toolkit, functionMask, false)
         return if (typeResult != null) typeResult.mainObject as Model? else null
     }
 
-    fun method16117(graphicalrenderer1: AbstractToolkit, i_2: Int, bool3: Boolean): TypeResult? {
-        val objectdefinitions5 = aClass47410542.list(id)
+    fun getTypeResult(graphicalrenderer1: AbstractToolkit, i_2: Int, bool3: Boolean): TypeResult? {
+        val objectdefinitions5 = locTypeList.list(id)
         val class3906: Ground
         val class3907: Ground?
-        if (aBool10536) {
+        if (overlayHidden) {
             class3906 = scene!!.underwaterHeightmap!![collisionPlane.toInt()]!!
             class3907 = scene!!.surfaceHeightmap[0]
         } else {
@@ -162,8 +162,8 @@ class StationaryInteractiveObject(
         return objectdefinitions5.getPair(
             graphicalrenderer1,
             i_2,
-            if (aByte10539 != ObjectShapes.GROUND_INTERACT.shape.toByte()) aByte10539.toInt() else ObjectShapes.SCENERY_INTERACT.shape,
-            if (ObjectShapes.GROUND_INTERACT.shape.toByte() == aByte10539) aByte10540 + 4 else aByte10540.toInt(),
+            if (shapeAsByte != ObjectShapes.GROUND_INTERACT.shape.toByte()) shapeAsByte.toInt() else ObjectShapes.SCENERY_INTERACT.shape,
+            if (ObjectShapes.GROUND_INTERACT.shape.toByte() == shapeAsByte) rotationAsByte + 4 else rotationAsByte.toInt(),
             class3906,
             class3907,
             vector38.x.toInt(),
@@ -181,14 +181,14 @@ class StationaryInteractiveObject(
                 vector33.x.toInt(),
                 vector33.y.toInt(),
                 vector33.z.toInt(),
-                method16116(graphicalrenderer1, 0)
+                getModel(graphicalrenderer1, 0)
             )
         }
         return axisAlignedBoundingBox
     }
 
     override fun hasTileShadow(): Boolean {
-        return aBool10543
+        return hasTileShadow
     }
 
     override fun castShadow(class521Sub12: SceneGraphEntity, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean) {
@@ -204,7 +204,7 @@ class StationaryInteractiveObject(
     }
 
     override fun removeTileShadow() {
-        aBool10543 = false
+        hasTileShadow = false
         if (interactiveModel != null) {
             interactiveModel!!.applyShading(interactiveModel!!.getFunctionMask() and -65537)
         }
@@ -215,23 +215,23 @@ class StationaryInteractiveObject(
             return null
         }
         val matrix44var3 = getProjectionMatrix()
-        val class2854 = RenderedEntityCache.generate(aBool10541)
+        val class2854 = RenderedEntityCache.generate(interactive)
         interactiveModel!!.drawMatrixThreaded(matrix44var3, boundingBoxPolygons!![0], ModelFunctionMaskGL.EMPTY)
         return class2854
     }
 
     override fun getRotation(): Int {
-        return aByte10540.toInt()
+        return rotationAsByte.toInt()
     }
 
     override fun hasRenderingShadow(): Boolean {
-        return aBool10544
+        return hasDynamicShadow
     }
 
     override fun removeShadow(graphicalrenderer1: AbstractToolkit) {
         val class282Sub50Sub174: Shadow?
-        if (currentShadow == null && aBool10544) {
-            val class4525 = method16117(graphicalrenderer1, 262144, true)
+        if (currentShadow == null && hasDynamicShadow) {
+            val class4525 = getTypeResult(graphicalrenderer1, 262144, true)
             class282Sub50Sub174 = if (class4525 != null) class4525.companionObject as Shadow? else null
         } else {
             class282Sub50Sub174 = currentShadow
@@ -248,7 +248,7 @@ class StationaryInteractiveObject(
     }
 
     override fun calculateProjection(toolkit: AbstractToolkit, camX: Int, camY: Int): Boolean {
-        val model = method16116(toolkit, 131072)
+        val model = getModel(toolkit, 131072)
         if (model != null) {
             val projectionMatrix = getProjectionMatrix()
             return model.calculateProjection(camX, camY, projectionMatrix, false, 0)

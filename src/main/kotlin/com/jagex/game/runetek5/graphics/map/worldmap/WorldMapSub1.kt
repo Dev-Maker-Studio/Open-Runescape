@@ -137,21 +137,21 @@ object WorldMapSub1 {
                     return
                 }
 
-                StaticMethods.method6907()
+                StaticMethods.resetSceneAndCaches()
                 ComponentMinimap.mapAssetLoadingPercentage = 10
             }
 
             if (ComponentMinimap.mapAssetLoadingPercentage == 10) {
-                WorldMap.mapSquareAbsX = WorldMap.staticElement!!.anInt9539 shr 6 shl 6
-                WorldMap.mapSquareAbsY = WorldMap.staticElement!!.anInt9541 shr 6 shl 6
-                WorldMap.mapSizeX = (WorldMap.staticElement!!.anInt9540 shr 6 shl 6) - WorldMap.mapSquareAbsX + 64
-                WorldMap.mapSizeY = (WorldMap.staticElement!!.anInt9535 shr 6 shl 6) - WorldMap.mapSquareAbsY + 64
+                WorldMap.mapSquareAbsX = WorldMap.staticElement!!.boundsMinX shr 6 shl 6
+                WorldMap.mapSquareAbsY = WorldMap.staticElement!!.boundsMinY shr 6 shl 6
+                WorldMap.mapSizeX = (WorldMap.staticElement!!.boundsMaxX shr 6 shl 6) - WorldMap.mapSquareAbsX + 64
+                WorldMap.mapSizeY = (WorldMap.staticElement!!.boundsMaxY shr 6 shl 6) - WorldMap.mapSquareAbsY + 64
                 val placement = IntArray(3)
                 var i_4 = -1
                 var i_5 = -1
                 val absolute: Vector3 = PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords
                 val base: CoordGrid = Resource.mapRegion!!.getBaseCoordinates()
-                if (WorldMap.staticElement!!.method14778(PlayerUpdate.MY_PLAYER!!.plane.toInt(), (absolute.x.toInt() shr 9) + base.x, (absolute.z.toInt() shr 9) + base.y, placement)) {
+                if (WorldMap.staticElement!!.gameToMapCoordsForPlane(PlayerUpdate.MY_PLAYER!!.plane.toInt(), (absolute.x.toInt() shr 9) + base.x, (absolute.z.toInt() shr 9) + base.y, placement)) {
                     i_4 = placement[1] - WorldMap.mapSquareAbsX
                     i_5 = placement[2] - WorldMap.mapSquareAbsY
                 }
@@ -162,7 +162,7 @@ object WorldMapSub1 {
                     mapCenterX = i_4
                     mapCenterY = i_5
                 } else if (requestedScrollX != -1 && requestedScrollY != -1) {
-                    WorldMap.staticElement!!.method14777(requestedScrollX, requestedScrollY, placement)
+                    WorldMap.staticElement!!.gameToMapCoords(requestedScrollX, requestedScrollY, placement)
                     mapCenterX = placement[1] - WorldMap.mapSquareAbsX
                     mapCenterY = placement[2] - WorldMap.mapSquareAbsY
 
@@ -170,12 +170,12 @@ object WorldMapSub1 {
                     requestedScrollX = -1
                     useTargetPosition = false
                 } else {
-                    WorldMap.staticElement!!.method14777(WorldMap.staticElement!!.bitpackedPlacement shr 14 and 0x3fff, WorldMap.staticElement!!.bitpackedPlacement and 0x3fff, placement)
+                    WorldMap.staticElement!!.gameToMapCoords(WorldMap.staticElement!!.bitpackedPlacement shr 14 and 0x3fff, WorldMap.staticElement!!.bitpackedPlacement and 0x3fff, placement)
                     mapCenterX = placement[1] - WorldMap.mapSquareAbsX
                     mapCenterY = placement[2] - WorldMap.mapSquareAbsY
                 }
 
-                when (WorldMap.staticElement!!.anInt9542) {
+                when (WorldMap.staticElement!!.defaultZoomLevel) {
                     37 -> {
                         WorldMap.mapZoom = 3.0f
                         WorldMap.requestedMapZoom = 3.0f
@@ -346,7 +346,7 @@ object WorldMapSub1 {
         someMecId = -1
         highlightedCategoryId = i_0
         JSObjectManager.anInt4185 = 3
-        ServerEnvironment.anInt9282 = 100
+        ServerEnvironment.flashCycleCounter = 100
     }
 
     @JvmStatic
@@ -448,10 +448,10 @@ object WorldMapSub1 {
             WorldMap.renderCategoryLines(toolkit, mapCategory, mectype)
             if (iconSprite != null) {
                 if (JSObjectManager.anInt4185 > 0 && (someMecId != -1 && someMecId == mapCategory.mecId || highlightedCategoryId != -1 && mectype.anInt2718 == highlightedCategoryId)) {
-                    val color = if (ServerEnvironment.anInt9282 > 50) {
-                        200 - ServerEnvironment.anInt9282 * 2
+                    val color = if (ServerEnvironment.flashCycleCounter > 50) {
+                        200 - ServerEnvironment.flashCycleCounter * 2
                     } else {
-                        ServerEnvironment.anInt9282 * 2
+                        ServerEnvironment.flashCycleCounter * 2
                     }
                     val alpha = color shl 24 or 0xffff00
                     toolkit.drawMapCategory(mapCategory.anInt7990, mapCategory.anInt7992, iconSprite.getWidth() / 2 + 7, alpha)

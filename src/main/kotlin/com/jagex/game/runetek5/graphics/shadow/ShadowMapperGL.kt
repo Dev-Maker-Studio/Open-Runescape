@@ -16,7 +16,7 @@ class ShadowMapperGL(
     val sizeShift: Int
     val sizeX: Int
     val sizeY: Int
-    var aClass124ArrayArray1585: Array<Array<ShadowTileGL?>>? = null
+    var shadowTiles: Array<Array<ShadowTileGL?>>? = null
 
     init {
         width = (ground.width * ground.tileUnits shr toolkit.shadowScale) + 2
@@ -27,7 +27,7 @@ class ShadowMapperGL(
         sizeY = ground.length shr sizeShift
     }
 
-    fun method2290(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
+    fun renderShadowOverlay(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
         toolkit.setLightingEnabled(false)
         toolkit.setDepthMask(false)
         toolkit.renderTexture(-2)
@@ -60,7 +60,7 @@ class ShadowMapperGL(
                                     OpenGL.glScalef(f_6, f_6, 1.0f)
                                     OpenGL.glTranslatef((-i_10) / f_6, (-i_7) / f_6, 1.0f)
                                     OpenGL.glMatrixMode(5888)
-                                    aClass124ArrayArray1585!![i_10][i_7]!!.method2155()
+                                    shadowTiles!![i_10][i_7]!!.method2155()
                                     continue@label136
                                 }
                             }
@@ -120,7 +120,7 @@ class ShadowMapperGL(
                         OpenGL.glScalef(f_6, f_6, 1.0f)
                         OpenGL.glTranslatef((-i_10) / f_6, (-i_7) / f_6, 1.0f)
                         OpenGL.glMatrixMode(5888)
-                        aClass124ArrayArray1585!![i_10][i_7]!!.method2156(class282Sub35Sub114.buffer, i_11)
+                        shadowTiles!![i_10][i_7]!!.method2156(class282Sub35Sub114.buffer, i_11)
                     }
                 }
                 i_7++
@@ -132,7 +132,7 @@ class ShadowMapperGL(
         OpenGL.glMatrixMode(5888) //GL_MODELVIEW
     }
 
-    fun method2293(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int): Boolean {
+    fun applyShadow(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int): Boolean {
         var i_31 = i_3
         var i_21 = i_2
         val class282Sub50Sub17Sub14 = class282Sub50Sub171 as ShadowGL
@@ -172,21 +172,21 @@ class ShadowMapperGL(
         if (i_7 > 0 && i_6 > 0) {
             val b_10: Byte = 8
             i_8 += (b_10 - 1) * width
-            return method2297(shadowMapperData, i_5, i_7, i_6, i_8, b_10.toInt())
+            return hasShadowData(shadowMapperData, i_5, i_7, i_6, i_8, b_10.toInt())
         } else {
             return false
         }
     }
 
-    fun method2298(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        if (aClass124ArrayArray1585 != null) {
+    fun invalidateShadowTiles(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+        if (shadowTiles != null) {
             val i_5 = (i_1 - 1) shr 7
             val i_6 = (i_3 + (i_1 - 1) - 1) shr 7
             val i_7 = (i_2 - 1) shr 7
             val i_8 = (i_2 - 1 + i_4 - 1) shr 7
 
             for (i_9 in i_5..i_6) {
-                val arr_10 = aClass124ArrayArray1585!![i_9]
+                val arr_10 = shadowTiles!![i_9]
 
                 for (i_11 in i_7..i_8) {
                     arr_10[i_11]!!.needsTextureRegeneration = true
@@ -195,12 +195,12 @@ class ShadowMapperGL(
         }
     }
 
-    fun method2309() {
-        aClass124ArrayArray1585 = Array(sizeX) { arrayOfNulls(sizeY) }
+    fun initializeShadowTiles() {
+        shadowTiles = Array(sizeX) { arrayOfNulls(sizeY) }
 
         for (y in 0 until sizeY) {
             for (x in 0 until sizeX) {
-                aClass124ArrayArray1585!![x][y] = ShadowTileGL(toolkit, this, ground, x, y, sizeShift, x * 128 + 1, y * 128 + 1)
+                shadowTiles!![x][y] = ShadowTileGL(toolkit, this, ground, x, y, sizeShift, x * 128 + 1, y * 128 + 1)
             }
         }
     }
@@ -249,12 +249,12 @@ class ShadowMapperGL(
         }
 
         if (i_8 > 0 && i_7 > 0) {
-            method2296(shadowMapperData, shadow.shade, i_6, i_5, i_8, i_7, i_9, i_10)
-            method2298(i_21, i_31, i_8, i_7)
+            addShadowData(shadowMapperData, shadow.shade, i_6, i_5, i_8, i_7, i_9, i_10)
+            invalidateShadowTiles(i_21, i_31, i_8, i_7)
         }
     }
 
-    fun method2314(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int) {
+    fun removeShadow(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int) {
         var i_31 = i_3
         var i_21 = i_2
         val class282Sub50Sub17Sub14 = class282Sub50Sub171 as ShadowGL
@@ -298,14 +298,14 @@ class ShadowMapperGL(
         }
 
         if (i_8 > 0 && i_7 > 0) {
-            method2295(shadowMapperData, class282Sub50Sub17Sub14.shade, i_6, i_5, i_8, i_7, i_9, i_10)
-            method2298(i_21, i_31, i_8, i_7)
+            subtractShadowData(shadowMapperData, class282Sub50Sub17Sub14.shade, i_6, i_5, i_8, i_7, i_9, i_10)
+            invalidateShadowTiles(i_21, i_31, i_8, i_7)
         }
     }
 
     companion object {
         @JvmStatic
-        fun method2295(bytes_0: ByteArray, bytes_1: ByteArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
+        fun subtractShadowData(bytes_0: ByteArray, bytes_1: ByteArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
             var dstPos = i_3
             var srcPos = i_2
             val i_8 = -(i_4 shr 2)
@@ -338,7 +338,7 @@ class ShadowMapperGL(
         }
 
         @JvmStatic
-        fun method2296(dst: ByteArray, shade: ByteArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
+        fun addShadowData(dst: ByteArray, shade: ByteArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
             var dstPos = i_3
             var srcPos = i_2
             val i_8 = -(i_4 shr 2)
@@ -371,7 +371,7 @@ class ShadowMapperGL(
         }
 
         @JvmStatic
-        fun method2297(bytes_0: ByteArray, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Boolean {
+        fun hasShadowData(bytes_0: ByteArray, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Boolean {
             var pos = i_1
             val i_6 = i_2 % i_5
             val i_7 = if (i_6 != 0) {

@@ -88,9 +88,9 @@ object SoundResourceManager {
                 if (class282Sub15Sub22!!.ready(aNodeSub79563, SOUND_MIDI_PROVIDER!!, StaticMethods.aClass2505450!!)) {
                     midiPcmStream = class282Sub15Sub22
                     midiPcmStream!!.resetMusicPatches()
-                    if (StaticMethods.anInt4664 > 0) {
+                    if (StaticMethods.songFadeInRate > 0) {
                         songLoadState = 3
-                        midiPcmStream!!.setMusicVolume(Math.min(StaticMethods.anInt4664, AreaSoundPlayer.SOUND_LEVEL))
+                        midiPcmStream!!.setMusicVolume(Math.min(StaticMethods.songFadeInRate, AreaSoundPlayer.SOUND_LEVEL))
                         for (i_3 in SongPlayer.channelVolumes!!.indices) {
                             midiPcmStream!!.setChannelVolume(i_3, SongPlayer.channelVolumes!![i_3])
                             SongPlayer.channelVolumes!![i_3] = 255
@@ -105,9 +105,9 @@ object SoundResourceManager {
                     }
                     if (pendingMidiStream == null) {
                         if (songStartPosition > 0L) {
-                            midiPcmStream!!.setMusicTrackAtPosition(aNodeSub79563, StaticMethods.aBool1962, songStartPosition)
+                            midiPcmStream!!.setMusicTrackAtPosition(aNodeSub79563, StaticMethods.songLooping, songStartPosition)
                         } else {
-                            midiPcmStream!!.setMusicTrack(aNodeSub79563, StaticMethods.aBool1962)
+                            midiPcmStream!!.setMusicTrack(aNodeSub79563, StaticMethods.songLooping)
                         }
                         if (SongPlayer.songTransition != null) {
                             SongPlayer.songTransition!!.transition()

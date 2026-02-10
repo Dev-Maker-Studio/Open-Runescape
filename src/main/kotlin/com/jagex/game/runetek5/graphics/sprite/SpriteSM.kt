@@ -6,47 +6,47 @@ import com.jagex.game.runetek5.toolkit.ComponentDimensionSM
 
 abstract class SpriteSM(
     @JvmField val toolkit: SafeModeToolkit,
-    @JvmField val anInt8851: Int,
-    @JvmField val anInt8867: Int
+    @JvmField val imageWidth: Int,
+    @JvmField val imageHeight: Int
 ) : NativeSprite() {
 
     @JvmField
-    var anInt8853: Int = 0
+    var offsetX: Int = 0
     @JvmField
-    var anInt8854: Int = 0
+    var offsetY: Int = 0
     @JvmField
-    var anInt8855: Int = 0
+    var trimRight: Int = 0
     @JvmField
-    var anInt8856: Int = 0
+    var trimBottom: Int = 0
     @JvmField
     var cachedClipping: IntArray? = null
 
     override fun setSize(minX: Int, minY: Int, i_3: Int, i_4: Int) {
-        anInt8853 = minX
-        anInt8854 = minY
-        anInt8855 = i_3
-        anInt8856 = i_4
+        offsetX = minX
+        offsetY = minY
+        trimRight = i_3
+        trimBottom = i_4
     }
 
     override fun getWidth(): Int {
-        return anInt8851
+        return imageWidth
     }
 
     override fun getHeight(): Int {
-        return anInt8867
+        return imageHeight
     }
 
-    abstract fun method14245(var1: Int, var2: Int)
+    abstract fun drawAffineTransformed(var1: Int, var2: Int)
 
     override fun getSpriteHeight(): Int {
-        return anInt8854 + anInt8867 + anInt8856
+        return offsetY + imageHeight + trimBottom
     }
 
     override abstract fun draw(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int)
 
     override abstract fun drawWithSurface(var1: Int, var2: Int, var3: ComponentSurface, var4: Int, var5: Int)
 
-    abstract fun method14247(
+    abstract fun drawParticle(
         colorWrite: Boolean,
         depthWrite: Boolean,
         transparent: Boolean,
@@ -86,9 +86,9 @@ abstract class SpriteSM(
         toolkit.setClipping(cachedClipping!![0], cachedClipping!![1], cachedClipping!![2], cachedClipping!![3])
     }
 
-    fun method14248(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float): Boolean {
-        val i_7 = anInt8853 + anInt8851 + anInt8855
-        val i_8 = anInt8854 + anInt8867 + anInt8856
+    fun computeAffineTransform(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float): Boolean {
+        val i_7 = offsetX + imageWidth + trimRight
+        val i_8 = offsetY + imageHeight + trimBottom
         var f_9: Float
         var f_10: Float
         var f_11: Float
@@ -103,19 +103,19 @@ abstract class SpriteSM(
         var f_4Var = f_4
         var f_5Var = f_5
         var f_6Var = f_6
-        if (i_7 != anInt8851 || i_8 != anInt8867) {
+        if (i_7 != imageWidth || i_8 != imageHeight) {
             f_9 = (f_3Var - f_1Var) / i_7
             f_10 = (f_4Var - f_2Var) / i_7
             f_11 = (f_5Var - f_1Var) / i_8
             f_12 = (f_6Var - f_2Var) / i_8
-            f_13 = f_11 * anInt8854
-            f_14 = f_12 * anInt8854
-            f_15 = f_9 * anInt8853
-            f_16 = f_10 * anInt8853
-            val f_17 = -f_9 * anInt8855
-            val f_18 = -f_10 * anInt8855
-            val f_19 = -f_11 * anInt8856
-            val f_20 = -f_12 * anInt8856
+            f_13 = f_11 * offsetY
+            f_14 = f_12 * offsetY
+            f_15 = f_9 * offsetX
+            f_16 = f_10 * offsetX
+            val f_17 = -f_9 * trimRight
+            val f_18 = -f_10 * trimRight
+            val f_19 = -f_11 * trimBottom
+            val f_20 = -f_12 * trimBottom
             f_1Var += f_15 + f_13
             f_2Var += f_16 + f_14
             f_3Var += f_17 + f_13
@@ -198,24 +198,24 @@ abstract class SpriteSM(
             if (f_14 >= 0.0f) {
                 return false
             } else {
-                anInt8850 = toolkit.viewportWidth
-                anInt8870 = (f_13.toInt() * anInt8850 + f_11).toInt()
+                viewportStride = toolkit.viewportWidth
+                pixelOffset = (f_13.toInt() * viewportStride + f_11).toInt()
                 f_15 = (f_3Var - f_1Var) * (f_6Var - f_2Var) - (f_4Var - f_2Var) * (f_5Var - f_1Var)
                 f_16 = (f_5Var - f_1Var) * (f_4Var - f_2Var) - (f_6Var - f_2Var) * (f_3Var - f_1Var)
-                anInt8865 = ((f_6Var - f_2Var) * 4096.0f * anInt8851 / f_15).toInt()
-                anInt8868 = ((f_4Var - f_2Var) * 4096.0f * anInt8867 / f_16).toInt()
-                anInt8869 = ((f_5Var - f_1Var) * 4096.0f * anInt8851 / f_16).toInt()
-                anInt8876 = ((f_3Var - f_1Var) * 4096.0f * anInt8867 / f_15).toInt()
-                anInt8871 = (f_11 * 16.0f + 8.0f - (f_1Var + f_3Var + f_5Var + f_9) / 4.0f * 16.0f).toInt()
-                anInt8872 = (f_13 * 16.0f + 8.0f - (f_2Var + f_4Var + f_6Var + f_10) / 4.0f * 16.0f).toInt()
-                anInt8873 = (anInt8851 shr 1 shl 12) + (anInt8872 * anInt8869 shr 4)
-                anInt8874 = (anInt8867 shr 1 shl 12) + (anInt8872 * anInt8876 shr 4)
-                anInt8858 = anInt8871 * anInt8865 shr 4
-                anInt8866 = anInt8871 * anInt8868 shr 4
-                anInt8861 = f_11.toInt()
-                anInt8862 = f_12.toInt()
-                anInt8863 = f_13.toInt()
-                anInt8864 = f_14.toInt()
+                dudx = ((f_6Var - f_2Var) * 4096.0f * imageWidth / f_15).toInt()
+                dvdx = ((f_4Var - f_2Var) * 4096.0f * imageHeight / f_16).toInt()
+                dudy = ((f_5Var - f_1Var) * 4096.0f * imageWidth / f_16).toInt()
+                dvdy = ((f_3Var - f_1Var) * 4096.0f * imageHeight / f_15).toInt()
+                subpixelOffsetX = (f_11 * 16.0f + 8.0f - (f_1Var + f_3Var + f_5Var + f_9) / 4.0f * 16.0f).toInt()
+                subpixelOffsetY = (f_13 * 16.0f + 8.0f - (f_2Var + f_4Var + f_6Var + f_10) / 4.0f * 16.0f).toInt()
+                uBase = (imageWidth shr 1 shl 12) + (subpixelOffsetY * dudy shr 4)
+                vBase = (imageHeight shr 1 shl 12) + (subpixelOffsetY * dvdy shr 4)
+                uOffsetX = subpixelOffsetX * dudx shr 4
+                vOffsetX = subpixelOffsetX * dvdx shr 4
+                drawMinX = f_11.toInt()
+                drawWidth = f_12.toInt()
+                drawMinY = f_13.toInt()
+                drawHeight = f_14.toInt()
                 return true
             }
         }
@@ -225,55 +225,55 @@ abstract class SpriteSM(
         if (toolkit.hasBeenShutdown()) {
             throw IllegalStateException()
         } else {
-            if (method14248(f_1, f_2, f_3, f_4, f_5, f_6)) {
-                anInt8877 = i_8
+            if (computeAffineTransform(f_1, f_2, f_3, f_4, f_5, f_6)) {
+                blendColor = i_8
                 if (i_7 != 1) {
-                    anInt8878 = i_8 ushr 24
-                    anInt8879 = 256 - anInt8878
+                    colorAlpha = i_8 ushr 24
+                    colorInverseAlpha = 256 - colorAlpha
                     if (i_7 == 0) {
-                        anInt8880 = (i_8 and 0xff0000) shr 16
-                        anInt8852 = (i_8 and 0xff00) shr 8
-                        anInt8882 = i_8 and 0xff
+                        colorRed = (i_8 and 0xff0000) shr 16
+                        colorGreen = (i_8 and 0xff00) shr 8
+                        colorBlue = i_8 and 0xff
                     } else if (i_7 == 2) {
-                        anInt8883 = i_8 ushr 24
-                        anInt8884 = 256 - anInt8883
-                        val i_11 = (i_8 and 0xff00ff) * anInt8884 and -16711936
-                        val i_12 = (i_8 and 0xff00) * anInt8884 and 0xff0000
-                        anInt8885 = (i_11 or i_12) ushr 8
+                        overlayAlpha = i_8 ushr 24
+                        overlayInverseAlpha = 256 - overlayAlpha
+                        val i_11 = (i_8 and 0xff00ff) * overlayInverseAlpha and -16711936
+                        val i_12 = (i_8 and 0xff00) * overlayInverseAlpha and 0xff0000
+                        overlayPrecomputed = (i_11 or i_12) ushr 8
                     }
                 }
 
                 if (i_7 == 1) {
                     if (i_9 == 0) {
-                        method14245(1, 0)
+                        drawAffineTransformed(1, 0)
                     } else if (i_9 == 1) {
-                        method14245(1, 1)
+                        drawAffineTransformed(1, 1)
                     } else if (i_9 == 2) {
-                        method14245(1, 2)
+                        drawAffineTransformed(1, 2)
                     }
                 } else if (i_7 == 0) {
                     if (i_9 == 0) {
-                        method14245(0, 0)
+                        drawAffineTransformed(0, 0)
                     } else if (i_9 == 1) {
-                        method14245(0, 1)
+                        drawAffineTransformed(0, 1)
                     } else if (i_9 == 2) {
-                        method14245(0, 2)
+                        drawAffineTransformed(0, 2)
                     }
                 } else if (i_7 == 3) {
                     if (i_9 == 0) {
-                        method14245(3, 0)
+                        drawAffineTransformed(3, 0)
                     } else if (i_9 == 1) {
-                        method14245(3, 1)
+                        drawAffineTransformed(3, 1)
                     } else if (i_9 == 2) {
-                        method14245(3, 2)
+                        drawAffineTransformed(3, 2)
                     }
                 } else if (i_7 == 2) {
                     if (i_9 == 0) {
-                        method14245(2, 0)
+                        drawAffineTransformed(2, 0)
                     } else if (i_9 == 1) {
-                        method14245(2, 1)
+                        drawAffineTransformed(2, 1)
                     } else if (i_9 == 2) {
-                        method14245(2, 2)
+                        drawAffineTransformed(2, 2)
                     }
                 }
             }
@@ -281,16 +281,16 @@ abstract class SpriteSM(
     }
 
     override fun getSpriteWidth(): Int {
-        return anInt8853 + anInt8851 + anInt8855
+        return offsetX + imageWidth + trimRight
     }
 
-    abstract fun method14250(var1: IntArray, var2: IntArray, var3: Int, var4: Int)
+    abstract fun drawMasked(var1: IntArray, var2: IntArray, var3: Int, var4: Int)
 
     override fun cacheSizeInto(ints_1: IntArray) {
-        ints_1[0] = anInt8853
-        ints_1[1] = anInt8854
-        ints_1[2] = anInt8855
-        ints_1[3] = anInt8856
+        ints_1[0] = offsetX
+        ints_1[1] = offsetY
+        ints_1[2] = trimRight
+        ints_1[3] = trimBottom
     }
 
     override abstract fun drawColoredCircle(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, colorArgb: Int, blendMode: Int)
@@ -299,62 +299,62 @@ abstract class SpriteSM(
         if (toolkit.hasBeenShutdown()) {
             throw IllegalStateException()
         }
-        if (method14248(f_1, f_2, f_3, f_4, f_5, f_6)) {
+        if (computeAffineTransform(f_1, f_2, f_3, f_4, f_5, f_6)) {
             val packetsdecoder11 = class4558 as ComponentDimensionSM
-            method14250(packetsdecoder11.anIntArray9077, packetsdecoder11.anIntArray9078, anInt8861 - i_9, -i_10 - (anInt8864 - anInt8863))
+            drawMasked(packetsdecoder11.anIntArray9077, packetsdecoder11.anIntArray9078, drawMinX - i_9, -i_10 - (drawHeight - drawMinY))
         }
     }
 
     companion object {
         @JvmField
-        var anInt8878: Int = 0
+        var colorAlpha: Int = 0
         @JvmField
-        var anInt8879: Int = 0
+        var colorInverseAlpha: Int = 0
         @JvmField
-        var anInt8880: Int = 0
+        var colorRed: Int = 0
         @JvmField
-        var anInt8852: Int = 0
+        var colorGreen: Int = 0
         @JvmField
-        var anInt8882: Int = 0
+        var colorBlue: Int = 0
         @JvmField
-        var anInt8883: Int = 0
+        var overlayAlpha: Int = 0
         @JvmField
-        var anInt8884: Int = 0
+        var overlayInverseAlpha: Int = 0
         @JvmField
-        var anInt8885: Int = 0
+        var overlayPrecomputed: Int = 0
         @JvmField
-        var anInt8850: Int = 0
+        var viewportStride: Int = 0
         @JvmField
-        var anInt8870: Int = 0
+        var pixelOffset: Int = 0
         @JvmField
-        var anInt8865: Int = 0
+        var dudx: Int = 0
         @JvmField
-        var anInt8868: Int = 0
+        var dvdx: Int = 0
         @JvmField
-        var anInt8869: Int = 0
+        var dudy: Int = 0
         @JvmField
-        var anInt8876: Int = 0
+        var dvdy: Int = 0
         @JvmField
-        var anInt8871: Int = 0
+        var subpixelOffsetX: Int = 0
         @JvmField
-        var anInt8872: Int = 0
+        var subpixelOffsetY: Int = 0
         @JvmField
-        var anInt8873: Int = 0
+        var uBase: Int = 0
         @JvmField
-        var anInt8874: Int = 0
+        var vBase: Int = 0
         @JvmField
-        var anInt8858: Int = 0
+        var uOffsetX: Int = 0
         @JvmField
-        var anInt8866: Int = 0
+        var vOffsetX: Int = 0
         @JvmField
-        var anInt8861: Int = 0
+        var drawMinX: Int = 0
         @JvmField
-        var anInt8862: Int = 0
+        var drawWidth: Int = 0
         @JvmField
-        var anInt8863: Int = 0
+        var drawMinY: Int = 0
         @JvmField
-        var anInt8864: Int = 0
+        var drawHeight: Int = 0
         @JvmField
-        var anInt8877: Int = 0
+        var blendColor: Int = 0
     }
 }

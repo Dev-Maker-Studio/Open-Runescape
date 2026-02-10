@@ -122,10 +122,10 @@ object MiniMenu {
 
             i_4 += 8
             val i_9 = class282Sub50Sub150.queueSize * anInt178 + 21
-            StationaryWall.anInt10526 = (if (FontMetrics.useBoldFont) 26 else 22) + anInt178 * class282Sub50Sub150.queueSize
-            i_6 = StaticMethods.anInt3555 + anInt8975
+            StationaryWall.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + anInt178 * class282Sub50Sub150.queueSize
+            i_6 = StaticMethods.menuOpenX + anInt8975
             if (i_4 + i_6 > GameShell.screenCanvasWidth) {
-                i_6 = StaticMethods.anInt3555 - i_4
+                i_6 = StaticMethods.menuOpenX - i_4
             }
 
             if (i_6 < 0) {
@@ -223,7 +223,7 @@ object MiniMenu {
                 Mouse.isClicktypeObj(clickType) -> 2
                 Mouse.isClicktypeLoc(clickType) -> 3
                 Mouse.isClicktypeNpc(clickType) -> 4
-                StaticMethods.method6176(clickType) -> 7
+                StaticMethods.isPlayerOption(clickType) -> 7
                 clickType == 16 -> 8
                 else -> 5
             }
@@ -508,8 +508,8 @@ object MiniMenu {
     @JvmStatic
     fun method4908(toolkit: AbstractToolkit) {
         val fillColor = -10660793
-        AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, fillColor)
-        minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!), StaticMethods.anInt3555 + 3, StaticMethods.anInt2300 + 14, fillColor, -1)
+        AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104, fillColor)
+        minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!), StaticMethods.menuOpenX + 3, StaticMethods.menuOpenY + 14, fillColor, -1)
         val mouseX = MouseRecord.recorder!!.getMouseX()
         val mouseY = MouseRecord.recorder!!.getMouseY()
         var i_5: Int
@@ -520,8 +520,8 @@ object MiniMenu {
             var class282Sub50Sub76Temp: MiniMenuEntry? = aClass482171.getFirst() as? MiniMenuEntry
             while (class282Sub50Sub76Temp != null) {
                 class282Sub50Sub76 = class282Sub50Sub76Temp
-                i_7 = (entryCount - 1 - i_5) * anInt178 + StaticMethods.anInt2300 + 31
-                method12400(mouseX, mouseY, StaticMethods.anInt3555, anInt8975, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                i_7 = (entryCount - 1 - i_5) * anInt178 + StaticMethods.menuOpenY + 31
+                method12400(mouseX, mouseY, StaticMethods.menuOpenX, anInt8975, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
                 ++i_5
                 class282Sub50Sub76Temp = aClass482171.next() as? MiniMenuEntry
             }
@@ -529,17 +529,17 @@ object MiniMenu {
             i_5 = 0
             var class282Sub50Sub158: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
             while (class282Sub50Sub158 != null) {
-                i_7 = i_5 * anInt178 + StaticMethods.anInt2300 + 31
+                i_7 = i_5 * anInt178 + StaticMethods.menuOpenY + 31
                 if (class282Sub50Sub158.queueSize == 1) {
-                    method12400(mouseX, mouseY, StaticMethods.anInt3555, anInt8975, i_7, (class282Sub50Sub158.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    method12400(mouseX, mouseY, StaticMethods.menuOpenX, anInt8975, i_7, (class282Sub50Sub158.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
                 } else {
-                    StaticMethods.method1630(mouseX, mouseY, StaticMethods.anInt3555, anInt8975, i_7, class282Sub50Sub158, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
+                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, anInt8975, i_7, class282Sub50Sub158, minimenuHeader!!, FontMetrics.aClass4143438!!, -1, -256)
                 }
                 ++i_5
                 class282Sub50Sub158 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (aCacheableNodeSub15163 != null) {
-                AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.anInt10526, fillColor)
+                AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight, fillColor)
                 minimenuHeader!!.renderPlain(aCacheableNodeSub15163!!.tagStart, anInt3996 + 3, anInt9471 + 14, fillColor, -1)
                 i_5 = 0
                 class282Sub50Sub76 = aCacheableNodeSub15163!!.nodeQueue.getNext() as? MiniMenuEntry
@@ -557,7 +557,7 @@ object MiniMenu {
     fun close() {
         method6810()
         isOpen = false
-        InterfaceComponentRenderer.inboundsComponentToTop(StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104)
+        InterfaceComponentRenderer.inboundsComponentToTop(StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104)
         aCacheableNodeSub79445 = null
         aCacheableNodeSub7168 = null
     }
@@ -633,14 +633,14 @@ object MiniMenu {
                 var class282Sub50Sub77: MiniMenuEntry?
                 var i_8: Int
                 if (!aBool162) {
-                    if (mouseX > StaticMethods.anInt3555 && mouseX < StaticMethods.anInt3555 + anInt8975) {
+                    if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + anInt8975) {
                         i_4 = -1
                         i_5 = 0
                         while (i_5 < entryCount) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = (entryCount - 1 - i_5) * anInt178 + minimenuFont.topPadding + StaticMethods.anInt2300 + 1 + 20
+                                i_8 = (entryCount - 1 - i_5) * anInt178 + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
                             } else {
-                                i_8 = (entryCount - 1 - i_5) * anInt178 + StaticMethods.anInt2300 + 31
+                                i_8 = (entryCount - 1 - i_5) * anInt178 + StaticMethods.menuOpenY + 31
                             }
                             if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
                                 i_4 = i_5
@@ -661,14 +661,14 @@ object MiniMenu {
                     }
                 } else {
                     var class4699: QueueIterator
-                    if (mouseX > StaticMethods.anInt3555 && mouseX < StaticMethods.anInt3555 + anInt8975) {
+                    if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + anInt8975) {
                         i_4 = -1
                         i_5 = 0
                         while (i_5 < anInt170) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = i_5 * anInt178 + minimenuFont.topPadding + StaticMethods.anInt2300 + 1 + 20
+                                i_8 = i_5 * anInt178 + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
                             } else {
-                                i_8 = i_5 * anInt178 + StaticMethods.anInt2300 + 31
+                                i_8 = i_5 * anInt178 + StaticMethods.menuOpenY + 31
                             }
                             if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
                                 i_4 = i_5
@@ -722,7 +722,7 @@ object MiniMenu {
     fun method6810() {
         if (aCacheableNodeSub15163 != null) {
             aCacheableNodeSub15163 = null
-            InterfaceComponentRenderer.inboundsComponentToTop(anInt3996, anInt9471, anInt8518, StationaryWall.anInt10526)
+            InterfaceComponentRenderer.inboundsComponentToTop(anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight)
         }
 
     }
@@ -732,14 +732,14 @@ object MiniMenu {
 
     @JvmStatic
     fun method857(toolkit: AbstractToolkit) {
-        val i_2 = StaticMethods.anInt3555
-        val i_3 = StaticMethods.anInt2300
+        val i_2 = StaticMethods.menuOpenX
+        val i_3 = StaticMethods.menuOpenY
         val i_4 = anInt8975
         val i_5 = anInt1104 - 3
         val b_6 = 20
         if (FontMetrics.aFontRenderer2348 == null || StaticMedia.aClass4142200 == null) {
-            FontMetrics.aFontRenderer2348 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.anInt2982, true, true) as? AbstractFontRenderer
-            StaticMedia.aClass4142200 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.anInt2982)
+            FontMetrics.aFontRenderer2348 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex, true, true) as? AbstractFontRenderer
+            StaticMedia.aClass4142200 = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex)
             if (FontMetrics.aFontRenderer2348 != null && StaticMedia.aClass4142200 != null) {
                 close()
                 var i_15 = i_4 / 2 + i_2
@@ -749,7 +749,7 @@ object MiniMenu {
                 if (i_15 < 0) {
                     i_15 = 0
                 }
-                StaticMethods.method4653(i_15, StaticMethods.anInt2300)
+                StaticMethods.openContextMenu(i_15, StaticMethods.menuOpenY)
                 return
             }
         }
@@ -760,8 +760,8 @@ object MiniMenu {
             fontrenderer7 = minimenuHeader
         }
         val fontmetrics8 = FontMetrics.getForMinimenu()
-        NativeSprite.drawLoadingBarBackground(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
-        var alpha = 255 - StaticMethods.anInt2262 - NativeSprite.alphaJitter
+        NativeSprite.drawLoadingBarBackground(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
+        var alpha = 255 - StaticMethods.menuBackgroundAlpha - NativeSprite.alphaJitter
         if (alpha < 0) {
             alpha = 0
         }
@@ -777,8 +777,8 @@ object MiniMenu {
             while (class282Sub50Sub713Temp != null) {
                 class282Sub50Sub713 = class282Sub50Sub713Temp
                 i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * anInt178 + fontmetrics8.topPadding + 1
-                if (i_10 > StaticMethods.anInt3555 && i_10 < StaticMethods.anInt3555 + anInt8975 && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.aBool9583) {
-                    toolkit.drawFilledRectangle(StaticMethods.anInt3555, i_14 - fontmetrics8.topPadding, anInt8975, anInt178, alpha shl 24 or anInt188, 1)
+                if (i_10 > StaticMethods.menuOpenX && i_10 < StaticMethods.menuOpenX + anInt8975 && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.aBool9583) {
+                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, anInt8975, anInt178, alpha shl 24 or anInt188, 1)
                 }
                 ++i_12
                 class282Sub50Sub713Temp = aClass482171.next() as? MiniMenuEntry
@@ -789,14 +789,14 @@ object MiniMenu {
             while (class282Sub50Sub1516Temp != null) {
                 class282Sub50Sub1516 = class282Sub50Sub1516Temp
                 i_14 = i_3 + b_6 + i_12 * anInt178 + fontmetrics8.topPadding + 1
-                if (i_10 > StaticMethods.anInt3555 && i_10 < anInt8975 + StaticMethods.anInt3555 && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && (class282Sub50Sub1516.queueSize > 1 || ((class282Sub50Sub1516.nodeQueue.current.nextCache as MiniMenuEntry).aBool9583))) {
-                    toolkit.drawFilledRectangle(StaticMethods.anInt3555, i_14 - fontmetrics8.topPadding, anInt8975, anInt178, alpha shl 24 or anInt188, 1)
+                if (i_10 > StaticMethods.menuOpenX && i_10 < anInt8975 + StaticMethods.menuOpenX && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && (class282Sub50Sub1516.queueSize > 1 || ((class282Sub50Sub1516.nodeQueue.current.nextCache as MiniMenuEntry).aBool9583))) {
+                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, anInt8975, anInt178, alpha shl 24 or anInt188, 1)
                 }
                 ++i_12
                 class282Sub50Sub1516Temp = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (aCacheableNodeSub15163 != null) {
-                NativeSprite.drawLoadingBarBackground(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.anInt10526, b_6, fontrenderer7, fontmetrics8, aCacheableNodeSub15163!!.tagStart)
+                NativeSprite.drawLoadingBarBackground(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight, b_6, fontrenderer7, fontmetrics8, aCacheableNodeSub15163!!.tagStart)
                 i_12 = 0
                 class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (class282Sub50Sub713 != null) {
@@ -807,17 +807,17 @@ object MiniMenu {
                     ++i_12
                     class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
-                StaticMethods.method8209(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.anInt10526, b_6)
+                StaticMethods.drawMenuBorderSprites(toolkit, anInt3996, anInt9471, anInt8518, StationaryWall.menuHeight, b_6)
             }
         }
-        StaticMethods.method8209(toolkit, StaticMethods.anInt3555, StaticMethods.anInt2300, anInt8975, anInt1104, b_6)
+        StaticMethods.drawMenuBorderSprites(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, anInt8975, anInt1104, b_6)
         if (!aBool162) {
             i_12 = 0
             var class282Sub50Sub713Temp2: MiniMenuEntry? = aClass482171.getFirst() as? MiniMenuEntry
             while (class282Sub50Sub713Temp2 != null) {
                 class282Sub50Sub713 = class282Sub50Sub713Temp2
                 i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * anInt178 + fontmetrics8.topPadding + 1
-                method12400(i_10, i_11, i_2, i_4, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.anInt1005 or -0xffffff.inv())
+                method12400(i_10, i_11, i_2, i_4, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 ++i_12
                 class282Sub50Sub713Temp2 = aClass482171.next() as? MiniMenuEntry
             }
@@ -826,11 +826,11 @@ object MiniMenu {
             var class282Sub50Sub1516Temp2: ColoredMiniMenuEntry? = aClass477182.getNext() as? ColoredMiniMenuEntry
             while (class282Sub50Sub1516Temp2 != null) {
                 class282Sub50Sub1516 = class282Sub50Sub1516Temp2
-                i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + StaticMethods.anInt2300 + 1
+                i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + StaticMethods.menuOpenY + 1
                 if (class282Sub50Sub1516.queueSize == 1) {
-                    method12400(i_10, i_11, StaticMethods.anInt3555, anInt8975, i_14, (class282Sub50Sub1516.nodeQueue.current.next as MiniMenuEntry), fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.anInt1005 or -0xffffff.inv())
+                    method12400(i_10, i_11, StaticMethods.menuOpenX, anInt8975, i_14, (class282Sub50Sub1516.nodeQueue.current.next as MiniMenuEntry), fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 } else {
-                    StaticMethods.method1630(i_10, i_11, StaticMethods.anInt3555, anInt8975, i_14, class282Sub50Sub1516, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.anInt1005 or -0xffffff.inv())
+                    StaticMethods.drawColoredMenuEntry(i_10, i_11, StaticMethods.menuOpenX, anInt8975, i_14, class282Sub50Sub1516, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 }
                 ++i_12
                 class282Sub50Sub1516Temp2 = aClass477182.getDirectNext() as? ColoredMiniMenuEntry
@@ -840,7 +840,7 @@ object MiniMenu {
                 class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (class282Sub50Sub713 != null) {
                     i_14 = b_6 + i_12 * anInt178 + fontmetrics8.topPadding + anInt9471 + 1
-                    method12400(i_10, i_11, anInt3996, anInt8518, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.anInt1005 or -0xffffff.inv())
+                    method12400(i_10, i_11, anInt3996, anInt8518, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, anInt4722 or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                     ++i_12
                     class282Sub50Sub713 = aCacheableNodeSub15163!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }

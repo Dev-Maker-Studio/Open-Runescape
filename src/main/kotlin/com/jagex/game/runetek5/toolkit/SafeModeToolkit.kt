@@ -469,17 +469,17 @@ open class SafeModeToolkit : AbstractToolkit {
             val positionX = pointEntry.x shr 12
             val positionY = pointEntry.y shr 12
             val positionZ = pointEntry.z shr 12
-            val f_12 = this.floorMatrix!!.faceList[14] + this.floorMatrix!!.faceList[10] * positionZ + positionX * this.floorMatrix!!.faceList[2] + positionY * this.floorMatrix!!.faceList[6]
-            val f_13 = this.floorMatrix!!.faceList[15] + this.floorMatrix!!.faceList[7] * positionY + this.floorMatrix!!.faceList[3] * positionX + this.floorMatrix!!.faceList[11] * positionZ
+            val f_12 = this.floorMatrix!!.elements[14] + this.floorMatrix!!.elements[10] * positionZ + positionX * this.floorMatrix!!.elements[2] + positionY * this.floorMatrix!!.elements[6]
+            val f_13 = this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[7] * positionY + this.floorMatrix!!.elements[3] * positionX + this.floorMatrix!!.elements[11] * positionZ
             if (f_12 >= -f_13) {
                 val f_14 = this.depthRangeNear + f_12 * this.depthRangeFar / f_13
                 if (f_12 <= threadResource!!.aFloat2305) {
-                    val f_15 = this.floorMatrix!!.faceList[0] * positionX + this.floorMatrix!!.faceList[4] * positionY + positionZ * this.floorMatrix!!.faceList[8] + this.floorMatrix!!.faceList[12]
-                    val f_16 = positionZ * this.floorMatrix!!.faceList[9] + this.floorMatrix!!.faceList[1] * positionX + this.floorMatrix!!.faceList[5] * positionY + this.floorMatrix!!.faceList[13]
+                    val f_15 = this.floorMatrix!!.elements[0] * positionX + this.floorMatrix!!.elements[4] * positionY + positionZ * this.floorMatrix!!.elements[8] + this.floorMatrix!!.elements[12]
+                    val f_16 = positionZ * this.floorMatrix!!.elements[9] + this.floorMatrix!!.elements[1] * positionX + this.floorMatrix!!.elements[5] * positionY + this.floorMatrix!!.elements[13]
                     if (f_15 >= -f_13 && f_15 <= f_13 && f_16 >= -f_13 && f_16 <= f_13) {
                         val f_17 = pointEntry.size / 4096.0f
-                        val f_18 = f_17 * this.modelMatrix!!.faceList[0] + f_15
-                        val f_19 = f_13 + this.modelMatrix!!.faceList[3] * f_17
+                        val f_18 = f_17 * this.modelMatrix!!.elements[0] + f_15
+                        val f_19 = f_13 + this.modelMatrix!!.elements[3] * f_17
                         val f_20 = this.viewportOriginX + f_15 * this.viewportHalfWidth / f_13
                         val f_21 = this.viewportHalfHeight * f_16 / f_13 + this.viewportOriginY
                         val f_22 = this.viewportOriginX + f_18 * this.viewportHalfWidth / f_19
@@ -1558,18 +1558,18 @@ open class SafeModeToolkit : AbstractToolkit {
 
     override fun isOnScreen(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
         var flags = 0
-        val f_8 = i_3 * this.floorMatrix!!.faceList[10] + i_2 * this.floorMatrix!!.faceList[6] + this.floorMatrix!!.faceList[14] + i_1 * this.floorMatrix!!.faceList[2]
-        val f_9 = this.floorMatrix!!.faceList[6] * i_5 + this.floorMatrix!!.faceList[14] + this.floorMatrix!!.faceList[2] * i_4 + this.floorMatrix!!.faceList[10] * i_6
-        val f_10 = this.floorMatrix!!.faceList[15] + i_1 * this.floorMatrix!!.faceList[3] + i_2 * this.floorMatrix!!.faceList[7] + i_3 * this.floorMatrix!!.faceList[11]
-        val f_11 = i_5 * this.floorMatrix!!.faceList[7] + this.floorMatrix!!.faceList[15] + this.floorMatrix!!.faceList[3] * i_4 + i_6 * this.floorMatrix!!.faceList[11]
+        val f_8 = i_3 * this.floorMatrix!!.elements[10] + i_2 * this.floorMatrix!!.elements[6] + this.floorMatrix!!.elements[14] + i_1 * this.floorMatrix!!.elements[2]
+        val f_9 = this.floorMatrix!!.elements[6] * i_5 + this.floorMatrix!!.elements[14] + this.floorMatrix!!.elements[2] * i_4 + this.floorMatrix!!.elements[10] * i_6
+        val f_10 = this.floorMatrix!!.elements[15] + i_1 * this.floorMatrix!!.elements[3] + i_2 * this.floorMatrix!!.elements[7] + i_3 * this.floorMatrix!!.elements[11]
+        val f_11 = i_5 * this.floorMatrix!!.elements[7] + this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[3] * i_4 + i_6 * this.floorMatrix!!.elements[11]
         if (f_8 < -f_10 && f_9 < -f_11) {
             flags = flags or 0x10
         } else if (f_8 > f_10 && f_9 > f_11) {
             flags = flags or 0x20
         }
 
-        val f_12 = this.floorMatrix!!.faceList[4] * i_2 + this.floorMatrix!!.faceList[12] + i_1 * this.floorMatrix!!.faceList[0] + i_3 * this.floorMatrix!!.faceList[8]
-        val f_13 = i_6 * this.floorMatrix!!.faceList[8] + i_4 * this.floorMatrix!!.faceList[0] + this.floorMatrix!!.faceList[12] + this.floorMatrix!!.faceList[4] * i_5
+        val f_12 = this.floorMatrix!!.elements[4] * i_2 + this.floorMatrix!!.elements[12] + i_1 * this.floorMatrix!!.elements[0] + i_3 * this.floorMatrix!!.elements[8]
+        val f_13 = i_6 * this.floorMatrix!!.elements[8] + i_4 * this.floorMatrix!!.elements[0] + this.floorMatrix!!.elements[12] + this.floorMatrix!!.elements[4] * i_5
         if (f_12 < -f_10 && f_13 < -f_11) {
             flags = flags or 0x1
         }
@@ -1578,8 +1578,8 @@ open class SafeModeToolkit : AbstractToolkit {
             flags = flags or 0x2
         }
 
-        val f_14 = this.floorMatrix!!.faceList[5] * i_2 + i_1 * this.floorMatrix!!.faceList[1] + this.floorMatrix!!.faceList[13] + this.floorMatrix!!.faceList[9] * i_3
-        val f_15 = this.floorMatrix!!.faceList[13] + this.floorMatrix!!.faceList[1] * i_4 + this.floorMatrix!!.faceList[5] * i_5 + i_6 * this.floorMatrix!!.faceList[9]
+        val f_14 = this.floorMatrix!!.elements[5] * i_2 + i_1 * this.floorMatrix!!.elements[1] + this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[9] * i_3
+        val f_15 = this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[1] * i_4 + this.floorMatrix!!.elements[5] * i_5 + i_6 * this.floorMatrix!!.elements[9]
         if (f_14 < -f_10 && f_15 < -f_11) {
             flags = flags or 0x4
         }
@@ -1599,10 +1599,10 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
     override fun calculateProjection(width: Float, height: Float, length: Float, matrix: FloatArray) {
-        val z = length * this.floorMatrix!!.faceList[11] + this.floorMatrix!!.faceList[7] * height + width * this.floorMatrix!!.faceList[3] + this.floorMatrix!!.faceList[15]
-        val x = height * this.floorMatrix!!.faceList[4] + width * this.floorMatrix!!.faceList[0] + this.floorMatrix!!.faceList[12] + this.floorMatrix!!.faceList[8] * length
-        val y = height * this.floorMatrix!!.faceList[5] + width * this.floorMatrix!!.faceList[1] + this.floorMatrix!!.faceList[13] + length * this.floorMatrix!!.faceList[9]
-        val floorOffset = length * this.viewMatrix44!!.faceList[10] + this.viewMatrix44!!.faceList[6] * height + width * this.viewMatrix44!!.faceList[2] + this.viewMatrix44!!.faceList[14]
+        val z = length * this.floorMatrix!!.elements[11] + this.floorMatrix!!.elements[7] * height + width * this.floorMatrix!!.elements[3] + this.floorMatrix!!.elements[15]
+        val x = height * this.floorMatrix!!.elements[4] + width * this.floorMatrix!!.elements[0] + this.floorMatrix!!.elements[12] + this.floorMatrix!!.elements[8] * length
+        val y = height * this.floorMatrix!!.elements[5] + width * this.floorMatrix!!.elements[1] + this.floorMatrix!!.elements[13] + length * this.floorMatrix!!.elements[9]
+        val floorOffset = length * this.viewMatrix44!!.elements[10] + this.viewMatrix44!!.elements[6] * height + width * this.viewMatrix44!!.elements[2] + this.viewMatrix44!!.elements[14]
         matrix[0] = this.viewportOriginX + x * this.viewportHalfWidth / z
         matrix[1] = this.viewportOriginY + y * this.viewportHalfHeight / z
         matrix[2] = floorOffset
@@ -1718,7 +1718,7 @@ open class SafeModeToolkit : AbstractToolkit {
                 this.renderedNativeSprite = textureSprite
             }
             ++i_8
-            (this.renderedNativeSprite as SpriteSM).method14247(bool1, bool2, false, i_5 - i_10, i_6 - i_10, f_7, i_8, i_8, 0, pointEntity.colorArgb, 1, false)
+            (this.renderedNativeSprite as SpriteSM).drawParticle(bool1, bool2, false, i_5 - i_10, i_6 - i_10, f_7, i_8, i_8, 0, pointEntity.colorArgb, 1, false)
         }
 
     }
@@ -1742,7 +1742,7 @@ open class SafeModeToolkit : AbstractToolkit {
                         this.renderedMaterialId = materialId
                         this.renderedNativeSprite = nativeSprite
                     }
-                    (this.renderedNativeSprite as SpriteSM).method14247(colorWrite, depthWrite, transparent, x - size2d, y - size3d, z, size2d shl 1, size3d shl 1, blendType, color, shape, material.effectCombiner != 2)
+                    (this.renderedNativeSprite as SpriteSM).drawParticle(colorWrite, depthWrite, transparent, x - size2d, y - size3d, z, size2d shl 1, size3d shl 1, blendType, color, shape, material.effectCombiner != 2)
                     return
                 }
             }
@@ -2086,15 +2086,15 @@ open class SafeModeToolkit : AbstractToolkit {
         this.viewMatrix44!!.fromMatrix(this.currentSunPosition!!)
         this.floorMatrix!!.copyFrom(this.viewMatrix44!!)
         this.floorMatrix!!.multiplyBy(this.modelMatrix!!)
-        this.floorMatrix!!.method6539(this.frustumPlanes[0])
-        this.floorMatrix!!.method6540(this.frustumPlanes[1])
-        this.floorMatrix!!.method6535(this.frustumPlanes[2])
-        this.floorMatrix!!.method6536(this.frustumPlanes[3])
-        this.floorMatrix!!.method6613(this.frustumPlanes[4])
-        this.floorMatrix!!.method6538(this.frustumPlanes[5])
+        this.floorMatrix!!.extractNearPlane(this.frustumPlanes[0])
+        this.floorMatrix!!.extractFarPlane(this.frustumPlanes[1])
+        this.floorMatrix!!.extractLeftPlane(this.frustumPlanes[2])
+        this.floorMatrix!!.extractRightPlane(this.frustumPlanes[3])
+        this.floorMatrix!!.extractBottomPlane(this.frustumPlanes[4])
+        this.floorMatrix!!.extractTopPlane(this.frustumPlanes[5])
         val f_1 = this.modelMatrix!!.getDepthPerspectiveCD()
-        val f_2 = this.modelMatrix!!.faceList[10] * (f_1 - 255.0f) + this.modelMatrix!!.faceList[14]
-        val f_3 = this.modelMatrix!!.faceList[10] * f_1 + this.modelMatrix!!.faceList[14]
+        val f_2 = this.modelMatrix!!.elements[10] * (f_1 - 255.0f) + this.modelMatrix!!.elements[14]
+        val f_3 = this.modelMatrix!!.elements[10] * f_1 + this.modelMatrix!!.elements[14]
         val f_4 = f_3 - f_2
 
         for (i_5 in 0 until this.executingThreadCount) {
@@ -2147,14 +2147,14 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
     override fun computeWorldToScreen(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.floorMatrix!!.faceList[10] * f_3 + f_1 * this.floorMatrix!!.faceList[2] + this.floorMatrix!!.faceList[14] + f_2 * this.floorMatrix!!.faceList[6]
-        val f_6 = this.floorMatrix!!.faceList[3] * f_1 + this.floorMatrix!!.faceList[15] + this.floorMatrix!!.faceList[7] * f_2 + f_3 * this.floorMatrix!!.faceList[11]
+        val f_5 = this.floorMatrix!!.elements[10] * f_3 + f_1 * this.floorMatrix!!.elements[2] + this.floorMatrix!!.elements[14] + f_2 * this.floorMatrix!!.elements[6]
+        val f_6 = this.floorMatrix!!.elements[3] * f_1 + this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[7] * f_2 + f_3 * this.floorMatrix!!.elements[11]
         if (f_5 >= -f_6 && f_5 <= f_6) {
-            val f_7 = f_2 * this.floorMatrix!!.faceList[4] + this.floorMatrix!!.faceList[12] + f_1 * this.floorMatrix!!.faceList[0] + this.floorMatrix!!.faceList[8] * f_3
+            val f_7 = f_2 * this.floorMatrix!!.elements[4] + this.floorMatrix!!.elements[12] + f_1 * this.floorMatrix!!.elements[0] + this.floorMatrix!!.elements[8] * f_3
             if (f_7 >= -f_6 && f_7 <= f_6) {
-                val f_8 = f_3 * this.floorMatrix!!.faceList[9] + this.floorMatrix!!.faceList[13] + this.floorMatrix!!.faceList[1] * f_1 + this.floorMatrix!!.faceList[5] * f_2
+                val f_8 = f_3 * this.floorMatrix!!.elements[9] + this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[1] * f_1 + this.floorMatrix!!.elements[5] * f_2
                 if (f_8 >= -f_6 && f_8 <= f_6) {
-                    val f_9 = this.viewMatrix44!!.faceList[14] + this.viewMatrix44!!.faceList[2] * f_1 + this.viewMatrix44!!.faceList[6] * f_2 + this.viewMatrix44!!.faceList[10] * f_3
+                    val f_9 = this.viewMatrix44!!.elements[14] + this.viewMatrix44!!.elements[2] * f_1 + this.viewMatrix44!!.elements[6] * f_2 + this.viewMatrix44!!.elements[10] * f_3
                     floats_4[0] = this.viewportOriginX + f_7 * this.viewportHalfWidth / f_6
                     floats_4[1] = f_8 * this.viewportHalfHeight / f_6 + this.viewportOriginY
                     floats_4[2] = f_9

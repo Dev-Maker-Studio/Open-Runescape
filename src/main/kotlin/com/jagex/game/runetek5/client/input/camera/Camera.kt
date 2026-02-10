@@ -225,8 +225,8 @@ object Camera {
             cameraPositionAbsoluteZ = MapRegion.tileheightForAbsolutePosition(cameraPositionAbsoluteX, cameraPositionAbsoluteY, PlayerUpdate.MY_PLAYER_PLANE) - cameraMovementZ
         }
         cameraCalculationType = 5
-        StaticMethods.anInt833 = -1
-        PingRequester.anInt5864 = -1
+        StaticMethods.cameraTargetAbsY = -1
+        PingRequester.cameraTargetAbsX = -1
     }
 
     @JvmStatic
@@ -250,8 +250,8 @@ object Camera {
         val i_2 = Client.cycles - Client.lastCameraSmoothCycle
         if (i_2 >= 100) {
             cameraCalculationType = 2
-            StaticMethods.anInt833 = -1
-            PingRequester.anInt5864 = -1
+            StaticMethods.cameraTargetAbsY = -1
+            PingRequester.cameraTargetAbsX = -1
         } else {
             var yaw = camAngleX.toInt()
             if (regularLowestYaw shr 8 > yaw) {
@@ -345,8 +345,8 @@ object Camera {
             }
         }
         cameraCalculationType = 5
-        StaticMethods.anInt833 = -1
-        PingRequester.anInt5864 = -1
+        StaticMethods.cameraTargetAbsY = -1
+        PingRequester.cameraTargetAbsX = -1
     }
 
     @JvmStatic
@@ -514,8 +514,8 @@ object Camera {
         moveCameraSpeed = 0
         moveCameraAngle = 0
         cameraCalculationType = 2
-        StaticMethods.anInt833 = -1
-        PingRequester.anInt5864 = -1
+        StaticMethods.cameraTargetAbsY = -1
+        PingRequester.cameraTargetAbsX = -1
     }
 
     @JvmStatic
@@ -529,8 +529,8 @@ object Camera {
         moveCameraSpeed = 0
         moveCameraAngle = 0
         cameraCalculationType = 1
-        StaticMethods.anInt833 = -1
-        PingRequester.anInt5864 = -1
+        StaticMethods.cameraTargetAbsY = -1
+        PingRequester.cameraTargetAbsX = -1
         Client.lastCameraSmoothCycle = Client.cycles
         transitionStartX = cameraPositionAbsoluteX
         transitionStartZ = cameraPositionAbsoluteZ

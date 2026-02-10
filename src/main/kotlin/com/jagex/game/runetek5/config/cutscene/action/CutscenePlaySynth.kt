@@ -7,20 +7,20 @@ import com.jagex.game.runetek5.sound.player.area.AreaSoundPlayer
 
 class CutscenePlaySynth(rsbytebuffer1: Packet) : CutsceneAction(rsbytebuffer1) {
 
-    @JvmField var aClass2689367: AreaSound? = null
-    @JvmField val anInt9363: Int = rsbytebuffer1.readUShort()
-    @JvmField val anInt9365: Int = rsbytebuffer1.readUByte()
-    @JvmField val anInt9364: Int = rsbytebuffer1.readUByte()
-    @JvmField val anInt9366: Int = rsbytebuffer1.readUByte()
+    @JvmField var areaSound: AreaSound? = null
+    @JvmField val soundId: Int = rsbytebuffer1.readUShort()
+    @JvmField val volume: Int = rsbytebuffer1.readUByte()
+    @JvmField val sampleRate: Int = rsbytebuffer1.readUByte()
+    @JvmField val timesRepeated: Int = rsbytebuffer1.readUByte()
 
     override fun perform() {
-        this.aClass2689367 = AreaSoundPlayer.playSoundSynth(this.anInt9363, this.anInt9366, 0, this.anInt9365, this.anInt9364)
+        this.areaSound = AreaSoundPlayer.playSoundSynth(this.soundId, this.timesRepeated, 0, this.volume, this.sampleRate)
     }
 
-    override fun method1593() {
-        if (this.aClass2689367 != null) {
-            AreaSoundPlayer.resetAreaSound(this.aClass2689367!!)
-            this.aClass2689367 = null
+    override fun stopAction() {
+        if (this.areaSound != null) {
+            AreaSoundPlayer.resetAreaSound(this.areaSound!!)
+            this.areaSound = null
         }
     }
 }

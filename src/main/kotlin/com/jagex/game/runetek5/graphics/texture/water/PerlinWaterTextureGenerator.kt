@@ -25,7 +25,7 @@ internal class PerlinWaterTextureGenerator {
 
             for (octave in 0 until 8) {
                 var writePos = offset
-                noiseGen.method4634(layer, currentScaleX / 128, currentScaleY / 128, currentScaleZ / 16, currentAmplitude * 127.0f, tempBuffer)
+                noiseGen.generateNoise3D(layer, currentScaleX / 128, currentScaleY / 128, currentScaleZ / 16, currentAmplitude * 127.0f, tempBuffer)
 
                 for (i in 0 until octaveSize) {
                     output[writePos] = (output[writePos] + tempBuffer[i]).toInt().toByte()

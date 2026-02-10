@@ -10,8 +10,8 @@ class CutsceneArea internal constructor(buffer: Packet) : Node<CutsceneArea>() {
     @JvmField val width: Int
     @JvmField val length: Int
     @JvmField val cutscenePlane: Int
-    @JvmField val anInt7480: Int
-    @JvmField val anInt7483: Int
+    @JvmField val chunkBaseX: Int
+    @JvmField val chunkBaseY: Int
     @JvmField val rotation: Int
 
     init {
@@ -22,8 +22,8 @@ class CutsceneArea internal constructor(buffer: Packet) : Node<CutsceneArea>() {
         this.width = buffer.readUByte()
         this.length = buffer.readUByte()
         this.cutscenePlane = buffer.readUByte()
-        this.anInt7480 = buffer.readUByte()
-        this.anInt7483 = buffer.readUByte()
+        this.chunkBaseX = buffer.readUByte()
+        this.chunkBaseY = buffer.readUByte()
         this.rotation = buffer.readUByte()
     }
 }

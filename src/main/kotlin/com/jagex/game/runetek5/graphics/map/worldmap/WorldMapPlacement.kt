@@ -23,16 +23,16 @@ class WorldMapPlacement(
     @JvmField val endY: Int,
 
     /** Minimum X coordinate in world map space */
-    @JvmField val anInt7701: Int,
+    @JvmField val mapMinX: Int,
 
     /** Minimum Y coordinate in world map space */
-    @JvmField val anInt7703: Int,
+    @JvmField val mapMinY: Int,
 
     /** Maximum X coordinate in world map space */
-    @JvmField val anInt7704: Int,
+    @JvmField val mapMaxX: Int,
 
     /** Maximum Y coordinate in world map space */
-    @JvmField val anInt7705: Int
+    @JvmField val mapMaxY: Int
 ) : Node<WorldMapPlacement>() {
 
     /**
@@ -48,8 +48,8 @@ class WorldMapPlacement(
      * @param i_2 World map Y coordinate
      * @return true if coordinates are within world map bounds
      */
-    fun method12409(i_1: Int, i_2: Int): Boolean {
-        return i_1 >= this.anInt7701 && i_1 <= this.anInt7704 && i_2 >= this.anInt7703 && i_2 <= this.anInt7705
+    fun withinMapBounds(i_1: Int, i_2: Int): Boolean {
+        return i_1 >= this.mapMinX && i_1 <= this.mapMaxX && i_2 >= this.mapMinY && i_2 <= this.mapMaxY
     }
 
     /**
@@ -58,10 +58,10 @@ class WorldMapPlacement(
      * @param i_2 World map Y coordinate
      * @param position Output array [plane, gameX, gameY]
      */
-    fun method12410(i_1: Int, i_2: Int, position: IntArray) {
+    fun mapToGameCoords(i_1: Int, i_2: Int, position: IntArray) {
         position[0] = this.plane
-        position[1] = this.startX - this.anInt7701 + i_1
-        position[2] = this.startY - this.anInt7703 + i_2
+        position[1] = this.startX - this.mapMinX + i_1
+        position[2] = this.startY - this.mapMinY + i_2
     }
 
     /**
@@ -72,8 +72,8 @@ class WorldMapPlacement(
      */
     fun cache(offsetX: Int, offsetY: Int, position: IntArray) {
         position[0] = 0
-        position[1] = this.anInt7701 - this.startX + offsetX
-        position[2] = this.anInt7703 - this.startY + offsetY
+        position[1] = this.mapMinX - this.startX + offsetX
+        position[2] = this.mapMinY - this.startY + offsetY
     }
 
     /**

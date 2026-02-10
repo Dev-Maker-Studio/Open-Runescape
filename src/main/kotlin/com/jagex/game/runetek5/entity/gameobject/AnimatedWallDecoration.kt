@@ -33,7 +33,7 @@ class AnimatedWallDecoration(
 ) : AbstractWallDecoration(scene, x, y, z, h, logicHeight, posX, posY), GameObject {
 
     @JvmField val wallDecoration: AnimatedGameObject
-    @JvmField var aBool10504 = true
+    @JvmField var hasTransparency = true
     @JvmField var axisAlignedBoundingBox: Silhouette? = null
     @JvmField val interactive: Boolean
 
@@ -60,7 +60,7 @@ class AnimatedWallDecoration(
     }
 
     override fun hasAlpha(): Boolean {
-        return aBool10504
+        return hasTransparency
     }
 
 
@@ -93,7 +93,7 @@ class AnimatedWallDecoration(
             val class1519 = wallDecoration.particleSystem!!.getAllParticles()
             toolkit.renderParticles(class1519)
         }
-        aBool10504 = model.accountForLayers() || wallDecoration.particleSystem != null
+        hasTransparency = model.accountForLayers() || wallDecoration.particleSystem != null
         val currentBoundingBox = axisAlignedBoundingBox
         if (currentBoundingBox == null) {
             axisAlignedBoundingBox = Silhouette.generate(abs.coords.x.toInt(), abs.coords.y.toInt(), abs.coords.z.toInt(), model)

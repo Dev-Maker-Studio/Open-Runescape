@@ -824,24 +824,24 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun calculateProjection(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * f_1 + this.viewProjectionMatrix.faceList[7] * f_2 + this.viewProjectionMatrix.faceList[11] * f_3
-        val f_6 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * f_1 + this.viewProjectionMatrix.faceList[4] * f_2 + this.viewProjectionMatrix.faceList[8] * f_3
-        val f_7 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * f_1 + this.viewProjectionMatrix.faceList[5] * f_2 + this.viewProjectionMatrix.faceList[9] * f_3
-        val f_8 = this.viewMatrix44.faceList[14] + this.viewMatrix44.faceList[2] * f_1 + this.viewMatrix44.faceList[6] * f_2 + this.viewMatrix44.faceList[10] * f_3
+        val f_5 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * f_1 + this.viewProjectionMatrix.elements[7] * f_2 + this.viewProjectionMatrix.elements[11] * f_3
+        val f_6 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * f_1 + this.viewProjectionMatrix.elements[4] * f_2 + this.viewProjectionMatrix.elements[8] * f_3
+        val f_7 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * f_1 + this.viewProjectionMatrix.elements[5] * f_2 + this.viewProjectionMatrix.elements[9] * f_3
+        val f_8 = this.viewMatrix44.elements[14] + this.viewMatrix44.elements[2] * f_1 + this.viewMatrix44.elements[6] * f_2 + this.viewMatrix44.elements[10] * f_3
         floats_4[0] = this.viewportOriginX + this.imageProducerCenterX * f_6 / f_5
         floats_4[1] = this.viewportOriginY + this.imageProducerCenterY * f_7 / f_5
         floats_4[2] = f_8
     }
 
     override fun computeWorldToScreen(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.viewProjectionMatrix.faceList[14] + this.viewProjectionMatrix.faceList[2] * f_1 + this.viewProjectionMatrix.faceList[6] * f_2 + this.viewProjectionMatrix.faceList[10] * f_3
-        val f_6 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * f_1 + this.viewProjectionMatrix.faceList[7] * f_2 + this.viewProjectionMatrix.faceList[11] * f_3
+        val f_5 = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * f_1 + this.viewProjectionMatrix.elements[6] * f_2 + this.viewProjectionMatrix.elements[10] * f_3
+        val f_6 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * f_1 + this.viewProjectionMatrix.elements[7] * f_2 + this.viewProjectionMatrix.elements[11] * f_3
         if (f_5 >= -f_6 && f_5 <= f_6) {
-            val f_7 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * f_1 + this.viewProjectionMatrix.faceList[4] * f_2 + this.viewProjectionMatrix.faceList[8] * f_3
+            val f_7 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * f_1 + this.viewProjectionMatrix.elements[4] * f_2 + this.viewProjectionMatrix.elements[8] * f_3
             if (f_7 >= -f_6 && f_7 <= f_6) {
-                val f_8 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * f_1 + this.viewProjectionMatrix.faceList[5] * f_2 + this.viewProjectionMatrix.faceList[9] * f_3
+                val f_8 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * f_1 + this.viewProjectionMatrix.elements[5] * f_2 + this.viewProjectionMatrix.elements[9] * f_3
                 if (f_8 >= -f_6 && f_8 <= f_6) {
-                    val f_9 = this.viewMatrix44.faceList[14] + this.viewMatrix44.faceList[2] * f_1 + this.viewMatrix44.faceList[6] * f_2 + this.viewMatrix44.faceList[10] * f_3
+                    val f_9 = this.viewMatrix44.elements[14] + this.viewMatrix44.elements[2] * f_1 + this.viewMatrix44.elements[6] * f_2 + this.viewMatrix44.elements[10] * f_3
                     floats_4[0] = this.viewportOriginX + this.imageProducerCenterX * f_7 / f_6
                     floats_4[1] = this.viewportOriginY + this.imageProducerCenterY * f_8 / f_6
                     floats_4[2] = f_9
@@ -1309,7 +1309,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     fun loadMatrix(matrix4x4: Matrix44) {
-        OpenGL.glLoadMatrixf(matrix4x4.faceList, 0)
+        OpenGL.glLoadMatrixf(matrix4x4.elements, 0)
     }
 
     override fun setSunPosition(matrix44var1: Matrix43) {
@@ -1351,12 +1351,12 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun recalculateFogAndProjection() {
         this.fogFarDistance = this.currentModelMatrix.getDepthPerspectiveCD()
-        this.fogMinimumStartPosition = this.currentModelMatrix.method6533()
+        this.fogMinimumStartPosition = this.currentModelMatrix.getNearClipDistance()
         setFogRange()
         if (this.depthClippingMode == 2) {
-            invertMatrix(this.currentModelMatrix.faceList)
+            invertMatrix(this.currentModelMatrix.elements)
         } else if (this.depthClippingMode == 1) {
-            invertMatrix(this.orthoProjectionMatrix.faceList)
+            invertMatrix(this.orthoProjectionMatrix.elements)
         }
     }
 
@@ -1410,18 +1410,18 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     override fun isOnScreen(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
         var i_7 = 0
-        val f_8 = this.viewProjectionMatrix.faceList[14] + this.viewProjectionMatrix.faceList[2] * i_1 + this.viewProjectionMatrix.faceList[6] * i_2 + this.viewProjectionMatrix.faceList[10] * i_3
-        val f_9 = this.viewProjectionMatrix.faceList[14] + this.viewProjectionMatrix.faceList[2] * i_4 + this.viewProjectionMatrix.faceList[6] * i_5 + this.viewProjectionMatrix.faceList[10] * i_6
-        val f_10 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * i_1 + this.viewProjectionMatrix.faceList[7] * i_2 + this.viewProjectionMatrix.faceList[11] * i_3
-        val f_11 = this.viewProjectionMatrix.faceList[15] + this.viewProjectionMatrix.faceList[3] * i_4 + this.viewProjectionMatrix.faceList[7] * i_5 + this.viewProjectionMatrix.faceList[11] * i_6
+        val f_8 = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * i_1 + this.viewProjectionMatrix.elements[6] * i_2 + this.viewProjectionMatrix.elements[10] * i_3
+        val f_9 = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * i_4 + this.viewProjectionMatrix.elements[6] * i_5 + this.viewProjectionMatrix.elements[10] * i_6
+        val f_10 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * i_1 + this.viewProjectionMatrix.elements[7] * i_2 + this.viewProjectionMatrix.elements[11] * i_3
+        val f_11 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * i_4 + this.viewProjectionMatrix.elements[7] * i_5 + this.viewProjectionMatrix.elements[11] * i_6
         if (f_8 < -f_10 && f_9 < -f_11) {
             i_7 = i_7 or 0x10
         } else if (f_8 > f_10 && f_9 > f_11) {
             i_7 = i_7 or 0x20
         }
 
-        val f_12 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * i_1 + this.viewProjectionMatrix.faceList[4] * i_2 + this.viewProjectionMatrix.faceList[8] * i_3
-        val f_13 = this.viewProjectionMatrix.faceList[12] + this.viewProjectionMatrix.faceList[0] * i_4 + this.viewProjectionMatrix.faceList[4] * i_5 + this.viewProjectionMatrix.faceList[8] * i_6
+        val f_12 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * i_1 + this.viewProjectionMatrix.elements[4] * i_2 + this.viewProjectionMatrix.elements[8] * i_3
+        val f_13 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * i_4 + this.viewProjectionMatrix.elements[4] * i_5 + this.viewProjectionMatrix.elements[8] * i_6
         if (f_12 < -f_10 && f_13 < -f_11) {
             i_7 = i_7 or 0x1
         }
@@ -1430,8 +1430,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             i_7 = i_7 or 0x2
         }
 
-        val f_14 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * i_1 + this.viewProjectionMatrix.faceList[5] * i_2 + this.viewProjectionMatrix.faceList[9] * i_3
-        val f_15 = this.viewProjectionMatrix.faceList[13] + this.viewProjectionMatrix.faceList[1] * i_4 + this.viewProjectionMatrix.faceList[5] * i_5 + this.viewProjectionMatrix.faceList[9] * i_6
+        val f_14 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * i_1 + this.viewProjectionMatrix.elements[5] * i_2 + this.viewProjectionMatrix.elements[9] * i_3
+        val f_15 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * i_4 + this.viewProjectionMatrix.elements[5] * i_5 + this.viewProjectionMatrix.elements[9] * i_6
         if (f_14 < -f_10 && f_15 < -f_11) {
             i_7 = i_7 or 0x4
         }
@@ -1531,7 +1531,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     override fun bloomSupported(): Boolean {
         if (this.rectangularTexture != null) {
-            if (!this.rectangularTexture!!.method12129()) {
+            if (!this.rectangularTexture!!.isActive()) {
                 if (!this.framebufferCompositor!!.addEffect(this.rectangularTexture!!)) {
                     return false
                 }
@@ -1543,14 +1543,14 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun resetBloom() {
-        if (this.rectangularTexture != null && this.rectangularTexture!!.method12129()) {
+        if (this.rectangularTexture != null && this.rectangularTexture!!.isActive()) {
             this.framebufferCompositor!!.removeEffect(this.rectangularTexture!!)
             this.textureCache?.resetBloomCache()
         }
     }
 
     override fun bloomEnabled(): Boolean {
-        return this.rectangularTexture != null && this.rectangularTexture!!.method12129()
+        return this.rectangularTexture != null && this.rectangularTexture!!.isActive()
     }
 
     override fun setBloomFilter(whitePoint: Float, bloom: Float, brightpass: Float) {
@@ -1570,12 +1570,12 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     fun updateViewProjectionMatrix() {
         this.viewProjectionMatrix.copyFrom(this.viewMatrix44)
         this.viewProjectionMatrix.multiplyBy(this.currentModelMatrix)
-        this.viewProjectionMatrix.method6539(this.frustumPlanes[0])
-        this.viewProjectionMatrix.method6540(this.frustumPlanes[1])
-        this.viewProjectionMatrix.method6535(this.frustumPlanes[2])
-        this.viewProjectionMatrix.method6536(this.frustumPlanes[3])
-        this.viewProjectionMatrix.method6613(this.frustumPlanes[4])
-        this.viewProjectionMatrix.method6538(this.frustumPlanes[5])
+        this.viewProjectionMatrix.extractNearPlane(this.frustumPlanes[0])
+        this.viewProjectionMatrix.extractFarPlane(this.frustumPlanes[1])
+        this.viewProjectionMatrix.extractLeftPlane(this.frustumPlanes[2])
+        this.viewProjectionMatrix.extractRightPlane(this.frustumPlanes[3])
+        this.viewProjectionMatrix.extractBottomPlane(this.frustumPlanes[4])
+        this.viewProjectionMatrix.extractTopPlane(this.frustumPlanes[5])
     }
 
     fun createElementsArrayBuffer(bytes_2: ByteArray, i_3: Int, bool4: Boolean): ElementsBufferGL {
@@ -1894,7 +1894,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun multiMatrix(matrix44: Matrix44) {
         OpenGL.glPushMatrix()
-        OpenGL.glMultMatrixf(matrix44.faceList, 0)
+        OpenGL.glMultMatrixf(matrix44.elements, 0)
     }
 
     fun updatePointSizeRange(red: Float, green: Float, blue: Float, alpha: Float) {
@@ -1939,7 +1939,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
         val displayWidth = display!!.getWidth()
         val displayHeight = display!!.getHeight()
-        this.orthoProjectionMatrix.method6530(0.0f, displayWidth.toFloat(), 0.0f, displayHeight.toFloat(), -1.0f, 1.0f)
+        this.orthoProjectionMatrix.setOrtho(0.0f, displayWidth.toFloat(), 0.0f, displayHeight.toFloat(), -1.0f, 1.0f)
         calculateViewportCenter()
         setOrthoMatrixMode()
         resetClipping()
@@ -1977,7 +1977,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     fun setModelViewMatrixMode() {
         if (this.depthClippingMode != 2) {
             this.depthClippingMode = 2
-            invertMatrix(this.currentModelMatrix.faceList)
+            invertMatrix(this.currentModelMatrix.elements)
             updateModelViewAndLights()
             updateViewportAndCenter()
             updateDepthRange()
@@ -2323,7 +2323,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun updateModelViewAndLights() {
         OpenGL.glLoadIdentity()
-        OpenGL.glMultMatrixf(this.viewMatrix44.faceList, 0)
+        OpenGL.glMultMatrixf(this.viewMatrix44.elements, 0)
         if (this.renderStillWater) {
             this.effectManager!!.waterEffect.enable()
         }

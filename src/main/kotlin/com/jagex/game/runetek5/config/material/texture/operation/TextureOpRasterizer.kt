@@ -29,7 +29,7 @@ class TextureOpRasterizer : TextureOperation(0, true) {
             val i_4 = TextureRaster.currentWidth
             val i_5 = TextureRaster.currentHeight
             val ints_6 = Array(i_5) { IntArray(i_4) }
-            val ints_7 = colorImageCache.method5464()
+            val ints_7 = colorImageCache.getAllPalettes()
             @Suppress("UNCHECKED_CAST")
             rasterizeShapes(ints_6 as Array<IntArray?>)
             for (i_8 in 0 until TextureRaster.currentHeight) {
@@ -53,7 +53,7 @@ class TextureOpRasterizer : TextureOperation(0, true) {
         val i_3 = TextureRaster.currentWidth
         val i_4 = TextureRaster.currentHeight
         @Suppress("UNCHECKED_CAST")
-        StaticMethods.method3936(ints_1 as Array<IntArray>?)
+        StaticMethods.setPixelBuffer(ints_1 as Array<IntArray>?)
         setClipBounds(TextureRaster.rowEnd, TextureRaster.columnEnd)
         if (shapes != null) {
             for (i_5 in shapes!!.indices) {

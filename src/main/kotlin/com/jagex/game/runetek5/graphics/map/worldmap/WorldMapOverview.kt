@@ -66,7 +66,7 @@ object WorldMapOverview {
 
             ComponentMinimap.aNativeSprite5883!!.draw(adjustedX, adjustedY)
 
-            val backgroundWidth = scaledWidth * StaticMethods.anInt5760 / WorldMap.mapSizeX
+            val backgroundWidth = scaledWidth * StaticMethods.worldMapViewWidth / WorldMap.mapSizeX
             val backgroundHeight = scaledHeight * ComponentMinimap.anInt4097 / WorldMap.mapSizeY
             val backgroundX = scaledWidth * DebugDisplay.anInt3991 / WorldMap.mapSizeX + adjustedX
             val backgroundY = scaledHeight + adjustedY - scaledHeight * WorldMapSub1.viewBottomTileY / WorldMap.mapSizeY - backgroundHeight
@@ -80,10 +80,10 @@ object WorldMapOverview {
             toolkit.drawRectangleOutline(backgroundX, backgroundY, backgroundWidth, backgroundHeight, backgroundColor, 0)
 
             if (JSObjectManager.anInt4185 > 0) {
-                val randomizedColor: Int = if (ServerEnvironment.anInt9282 > 50) {
-                    500 - ServerEnvironment.anInt9282 * 5
+                val randomizedColor: Int = if (ServerEnvironment.flashCycleCounter > 50) {
+                    500 - ServerEnvironment.flashCycleCounter * 5
                 } else {
-                    ServerEnvironment.anInt9282 * 5
+                    ServerEnvironment.flashCycleCounter * 5
                 }
 
                 var mapCategory = WorldMap.worldMapCategories.getFirst() as WorldMapCategory?

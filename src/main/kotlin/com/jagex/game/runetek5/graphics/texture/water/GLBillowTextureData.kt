@@ -6,11 +6,11 @@ internal class GLBillowTextureData : BillowNoiseGenerator() {
 
     fun getData(): ByteArray {
         data = ByteArray(524288)
-        method6322()
+        generateNoise()
         return data!!
     }
 
-    override fun method12517(i_1: Int, b_2: Byte) {
+    override fun writeSample(i_1: Int, b_2: Byte) {
         var i_3 = i_1 * 2
         var processedByte = (((b_2.toInt() and 0xff) shr 1) + 127).toByte()
         data!![i_3++] = processedByte

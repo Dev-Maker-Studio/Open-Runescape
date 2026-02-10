@@ -23,7 +23,7 @@ open class PcmPlayer {
     var nextUpdate: Long = 0
     var lastDataConsumed: Int = 0
     var shutdown: Boolean = false
-    var anInt3117: Int = 0
+    var streamUpdateCountdown: Int = 0
     val anInt3123: Int = 32
     val activeStreams: Array<PcmStream?> = arrayOfNulls(8)
     val inactiveStreams: Array<PcmStream?> = arrayOfNulls(8)
@@ -39,7 +39,7 @@ open class PcmPlayer {
                 }
 
                 while (currentTime > this.timeLastCycle + 5000L) {
-                    method4373()
+                    skipAudioSamples()
                     this.timeLastCycle += 256000 / PcmPlayerManager.sampleRate
                     currentTime = Utils.time()
                 }
@@ -86,7 +86,7 @@ open class PcmPlayer {
                     }
 
                     while (dataLeft < offset) {
-                        method4337(this.bitpackedSoundData!!)
+                        fillSoundBuffer(this.bitpackedSoundData!!)
                         writeToBuffer()
                         dataLeft += 256
                     }
@@ -161,18 +161,18 @@ open class PcmPlayer {
         this.shutdown = true
     }
 
-    fun method4337(bitpackedSoundData: IntArray) {
+    fun fillSoundBuffer(bitpackedSoundData: IntArray) {
         var bufferLength = 256
         if (PcmPlayerManager.stereo) {
             bufferLength = 512
         }
 
         Arrays.fill(bitpackedSoundData, 0, bufferLength, 0)
-        this.anInt3117 -= 256
-        if (this.currentPcmStream != null && this.anInt3117 <= 0) {
-            this.anInt3117 += PcmPlayerManager.sampleRate shr 4
-            method4338(this.currentPcmStream!!)
-            method4339(this.currentPcmStream!!, this.currentPcmStream!!.getPriority())
+        this.streamUpdateCountdown -= 256
+        if (this.currentPcmStream != null && this.streamUpdateCountdown <= 0) {
+            this.streamUpdateCountdown += PcmPlayerManager.sampleRate shr 4
+            resetStreamFillState(this.currentPcmStream!!)
+            enqueueStreamByPriority(this.currentPcmStream!!, this.currentPcmStream!!.getPriority())
             var i_4 = 0
             var i_5 = 255
 
@@ -225,7 +225,7 @@ open class PcmPlayer {
                                     if (class282Sub1514 != null) {
                                         val i_15 = activeStream.streamPriority
                                         while (class282Sub1514 != null) {
-                                            method4339(class282Sub1514, i_15 * class282Sub1514.getPriority() shr 8)
+                                            enqueueStreamByPriority(class282Sub1514, i_15 * class282Sub1514.getPriority() shr 8)
                                             class282Sub1514 = activeStream.getNextStream()
                                         }
                                     }
@@ -267,8 +267,8 @@ open class PcmPlayer {
             }
         }
 
-        if (this.anInt3117 < 0) {
-            this.anInt3117 = 0
+        if (this.streamUpdateCountdown < 0) {
+            this.streamUpdateCountdown = 0
         }
 
         if (this.currentPcmStream != null) {
@@ -278,7 +278,7 @@ open class PcmPlayer {
         this.timeLastCycle = Utils.time()
     }
 
-    fun method4339(next: PcmStream, priority: Int) {
+    fun enqueueStreamByPriority(next: PcmStream, priority: Int) {
         val i_3 = priority shr 5
         val inactive = this.inactiveStreams[i_3]
         if (inactive == null) {
@@ -317,10 +317,10 @@ open class PcmPlayer {
         // NOOP
     }
 
-    fun method4373() {
-        this.anInt3117 -= 256
-        if (this.anInt3117 < 0) {
-            this.anInt3117 = 0
+    fun skipAudioSamples() {
+        this.streamUpdateCountdown -= 256
+        if (this.streamUpdateCountdown < 0) {
+            this.streamUpdateCountdown = 0
         }
 
         if (this.currentPcmStream != null) {
@@ -330,7 +330,7 @@ open class PcmPlayer {
 
     companion object {
         @JvmStatic
-        fun method4338(stream: PcmStream) {
+        fun resetStreamFillState(stream: PcmStream) {
             stream.fill = false
             if (stream.buffer != null) {
                 stream.buffer!!.anInt7690 = 0
@@ -338,7 +338,7 @@ open class PcmPlayer {
 
             var patchStream: PcmStream? = stream.getFirstStream()
             while (patchStream != null) {
-                method4338(patchStream)
+                resetStreamFillState(patchStream)
                 patchStream = stream.getNextStream()
             }
         }

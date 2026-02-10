@@ -554,7 +554,7 @@ object Bot {
         }
 
         val packet = PacketEncoder.createPacket(prot, context.isaac)
-        PacketEncoder.method12590(packet, interfaceHash, slotId, slotId2)
+        PacketEncoder.writeInterfaceComponentData(packet, interfaceHash, slotId, slotId2)
         context.queuePacket(packet)
     }
 
@@ -642,7 +642,7 @@ object Bot {
         for (hitbar in entity.entityHitbars) {
             val bar = hitbar as? EntityHitbar ?: continue
             if (bar.hitbarType != hitbarDef) continue
-            val update = bar.method12600(Client.cycles)
+            val update = bar.getActiveDisplay(Client.cycles)
             if (update != null) return update.toPercentage
         }
         return -1
@@ -1137,5 +1137,5 @@ object Bot {
     }
 
     fun loginLobby(un: String, pw: String) = LoginManager.lobbyLogin(un, pw)
-    fun loginWorld() = LoginManager.worldLogin(StaticMethods.aString99, StaticMethods.aString102)
+    fun loginWorld() = LoginManager.worldLogin(StaticMethods.loginUsername, StaticMethods.loginPassword)
 }

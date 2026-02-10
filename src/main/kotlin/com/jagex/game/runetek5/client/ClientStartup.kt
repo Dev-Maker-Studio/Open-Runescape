@@ -597,7 +597,7 @@ object ClientStartup {
 
     @JvmStatic
     fun method12708() {
-        StaticMethods.aString102 = ""
-        StaticMethods.aString99 = ""
+        StaticMethods.loginPassword = ""
+        StaticMethods.loginUsername = ""
     }
 }

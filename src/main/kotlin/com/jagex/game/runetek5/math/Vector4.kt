@@ -92,10 +92,10 @@ class Vector4 {
         val origY = y
         val origZ = z
         val origW = w
-        x = matrix.faceList[0] * origX + matrix.faceList[4] * origY + matrix.faceList[8] * origZ + matrix.faceList[12] * origW
-        y = matrix.faceList[1] * origX + matrix.faceList[5] * origY + matrix.faceList[9] * origZ + matrix.faceList[13] * origW
-        z = matrix.faceList[2] * origX + matrix.faceList[6] * origY + matrix.faceList[10] * origZ + matrix.faceList[14] * origW
-        w = matrix.faceList[3] * origX + matrix.faceList[7] * origY + matrix.faceList[11] * origZ + matrix.faceList[15] * origW
+        x = matrix.elements[0] * origX + matrix.elements[4] * origY + matrix.elements[8] * origZ + matrix.elements[12] * origW
+        y = matrix.elements[1] * origX + matrix.elements[5] * origY + matrix.elements[9] * origZ + matrix.elements[13] * origW
+        z = matrix.elements[2] * origX + matrix.elements[6] * origY + matrix.elements[10] * origZ + matrix.elements[14] * origW
+        w = matrix.elements[3] * origX + matrix.elements[7] * origY + matrix.elements[11] * origZ + matrix.elements[15] * origW
     }
 
     /**

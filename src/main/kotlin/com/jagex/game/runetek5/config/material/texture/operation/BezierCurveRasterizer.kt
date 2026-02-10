@@ -52,7 +52,7 @@ class BezierCurveRasterizer(
                     TextureShapeRasterizer.drawVerticalLine(i_01, i_15, i_31, i_4)
                 }
             } else if (i_6 == 0) {
-                ArrayUtils.method568(i_01, i_21, i_15, i_4)
+                ArrayUtils.drawHorizontalLine(i_01, i_21, i_15, i_4)
             } else {
                 var i_6_adj = if (i_6 < 0) -i_6 else i_6
                 var i_7_adj = if (i_7 < 0) -i_7 else i_7

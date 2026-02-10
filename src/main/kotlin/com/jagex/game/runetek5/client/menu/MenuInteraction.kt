@@ -248,7 +248,7 @@ object MenuInteraction {
             if (clickType == 58) {
                 val component = Component.listIcomponent(attr2, attr1)
                 if (component != null) {
-                    PacketEncoder.method2590(component)
+                    PacketEncoder.sendInterfaceOnInterface(component)
                 }
             }
 
@@ -407,7 +407,7 @@ object MenuInteraction {
                 if (KeyDownCommand.isActive(TypeLists.INTERACTION_DEFAULTS!!.openMinimenuInputSubscriber, mouseRecord)) {
                     var i_5: Int
                     var class46915: QueueIterator?
-                    if (MiniMenu.aCacheableNodeSub15163 != null && mouseX >= MiniMenu.anInt3996 && mouseX <= MiniMenu.anInt3996 + MiniMenu.anInt8518 && mouseY >= MiniMenu.anInt9471 && mouseY <= StationaryWall.anInt10526 + MiniMenu.anInt9471) {
+                    if (MiniMenu.aCacheableNodeSub15163 != null && mouseX >= MiniMenu.anInt3996 && mouseX <= MiniMenu.anInt3996 + MiniMenu.anInt8518 && mouseY >= MiniMenu.anInt9471 && mouseY <= StationaryWall.menuHeight + MiniMenu.anInt9471) {
                         i_5 = -1
                         i_6 = 0
                         while (i_6 < MiniMenu.aCacheableNodeSub15163!!.queueSize) {
@@ -438,18 +438,18 @@ object MenuInteraction {
                             }
                         }
                         MiniMenu.close()
-                    } else if (mouseX >= StaticMethods.anInt3555 && mouseX <= MiniMenu.anInt8975 + StaticMethods.anInt3555 && mouseY >= StaticMethods.anInt2300 && mouseY <= StaticMethods.anInt2300 + MiniMenu.anInt1104) {
+                    } else if (mouseX >= StaticMethods.menuOpenX && mouseX <= MiniMenu.anInt8975 + StaticMethods.menuOpenX && mouseY >= StaticMethods.menuOpenY && mouseY <= StaticMethods.menuOpenY + MiniMenu.anInt1104) {
                         if (!MiniMenu.aBool162) {
                             i_5 = -1
                             i_6 = 0
                             while (i_6 < MiniMenu.entryCount) {
                                 if (FontMetrics.useBoldFont) {
-                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.anInt2300 + 1 + 20
+                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
                                     if (mouseY > i_11 - menufont.topPadding - 1 && mouseY < i_11 + menufont.bottomPadding) {
                                         i_5 = i_6
                                     }
                                 } else {
-                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.anInt178 + StaticMethods.anInt2300 + 31
+                                    i_11 = (MiniMenu.entryCount - 1 - i_6) * MiniMenu.anInt178 + StaticMethods.menuOpenY + 31
                                     if (mouseY > i_11 - 13 && mouseY < i_11 + 3) {
                                         i_5 = i_6
                                     }
@@ -475,13 +475,13 @@ object MenuInteraction {
                             i_6 = 0
                             while (i_6 < MiniMenu.anInt170) {
                                 if (FontMetrics.useBoldFont) {
-                                    i_11 = i_6 * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.anInt2300 + 1 + 20
+                                    i_11 = i_6 * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
                                     if (mouseY > i_11 - menufont.topPadding - 1 && mouseY < i_11 + menufont.bottomPadding) {
                                         i_5 = i_6
                                         break
                                     }
                                 } else {
-                                    i_11 = i_6 * MiniMenu.anInt178 + StaticMethods.anInt2300 + 31
+                                    i_11 = i_6 * MiniMenu.anInt178 + StaticMethods.menuOpenY + 31
                                     if (mouseY > i_11 - 13 && mouseY < i_11 + 3) {
                                         i_5 = i_6
                                         break
@@ -508,14 +508,14 @@ object MenuInteraction {
                 } else {
                     var bool16 = false
                     if (MiniMenu.aCacheableNodeSub15163 != null) {
-                        if (mouseX >= MiniMenu.anInt3996 - 10 && mouseX <= MiniMenu.anInt8518 + MiniMenu.anInt3996 + 10 && mouseY >= MiniMenu.anInt9471 - 10 && mouseY <= StationaryWall.anInt10526 + MiniMenu.anInt9471 + 10) {
+                        if (mouseX >= MiniMenu.anInt3996 - 10 && mouseX <= MiniMenu.anInt8518 + MiniMenu.anInt3996 + 10 && mouseY >= MiniMenu.anInt9471 - 10 && mouseY <= StationaryWall.menuHeight + MiniMenu.anInt9471 + 10) {
                             bool16 = true
                         } else {
                             MiniMenu.method6810()
                         }
                     }
                     if (!bool16) {
-                        if (mouseX >= StaticMethods.anInt3555 - 10 && mouseX <= MiniMenu.anInt8975 + StaticMethods.anInt3555 + 10 && mouseY >= StaticMethods.anInt2300 - 10 && mouseY <= MiniMenu.anInt1104 + StaticMethods.anInt2300 + 10) {
+                        if (mouseX >= StaticMethods.menuOpenX - 10 && mouseX <= MiniMenu.anInt8975 + StaticMethods.menuOpenX + 10 && mouseY >= StaticMethods.menuOpenY - 10 && mouseY <= MiniMenu.anInt1104 + StaticMethods.menuOpenY + 10) {
                             if (MiniMenu.aBool162) {
                                 i_6 = -1
                                 i_11 = -1
@@ -524,14 +524,14 @@ object MenuInteraction {
                                 while (i_12 < MiniMenu.anInt170) {
                                     val i_13: Int
                                     if (FontMetrics.useBoldFont) {
-                                        i_13 = i_12 * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.anInt2300 + 1 + 20
+                                        i_13 = i_12 * MiniMenu.anInt178 + menufont!!.topPadding + StaticMethods.menuOpenY + 1 + 20
                                         if (mouseY > i_13 - menufont.topPadding - 1 && mouseY < i_13 + menufont.bottomPadding) {
                                             i_6 = i_12
                                             i_11 = i_13 - menufont.topPadding - 1
                                             break
                                         }
                                     } else {
-                                        i_13 = i_12 * MiniMenu.anInt178 + StaticMethods.anInt2300 + 31
+                                        i_13 = i_12 * MiniMenu.anInt178 + StaticMethods.menuOpenY + 31
                                         if (mouseY > i_13 - 13 && mouseY < i_13 + 3) {
                                             i_6 = i_12
                                             i_11 = i_13 - 13
@@ -570,7 +570,7 @@ object MenuInteraction {
                 }
                 if (bool20 && MiniMenu.entryCount > 0) {
                     if (Client.draggingComponent == null && Client.menuItemCount == 0) {
-                        StaticMethods.method4653(mouseX, mouseY)
+                        StaticMethods.openContextMenu(mouseX, mouseY)
                     } else {
                         MiniMenu.anInt167 = 2
                     }

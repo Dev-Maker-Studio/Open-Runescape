@@ -7,7 +7,7 @@ import kotlin.math.pow
  */
 internal open class WaveNoiseGenerator : WaterTextureGenerator(8, 8, 8) {
 
-    @JvmField var aByteArray7752: ByteArray? = null
+    @JvmField var outputBuffer: ByteArray? = null
     @JvmField var intensity: Int = 0
     @JvmField var displacement: Int = 0
     @JvmField var attenuation: Int = 0
@@ -47,7 +47,7 @@ internal open class WaveNoiseGenerator : WaterTextureGenerator(8, 8, 8) {
     }
 
     open fun set(index: Int, value: Byte) {
-        aByteArray7752!![index] = value
+        outputBuffer!![index] = value
     }
 
     override fun reset() {

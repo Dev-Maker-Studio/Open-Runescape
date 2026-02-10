@@ -18,7 +18,7 @@ class TransparentSpriteSM : SpriteSM {
             this.anIntArray10235 = ints_2
         }
 
-        var adjustedI4 = i_4 - anInt8851
+        var adjustedI4 = i_4 - imageWidth
         var i_8 = 0
         var i_3Var = i_3
 
@@ -39,7 +39,7 @@ class TransparentSpriteSM : SpriteSM {
     }
 
     override fun getFramebuffer(): FrameBuffer {
-        return SafeModeFrameBuffer(anInt8851, anInt8867, this.anIntArray10235)
+        return SafeModeFrameBuffer(imageWidth, imageHeight, this.anIntArray10235)
     }
 
     override fun draw(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
@@ -51,12 +51,12 @@ class TransparentSpriteSM : SpriteSM {
         }
         val ints_6 = toolkit.colourBuffer ?: return
         val i_7 = toolkit.viewportWidth
-        i_110 += anInt8853
-        i_26 += anInt8854
+        i_110 += offsetX
+        i_26 += offsetY
         var i_8 = i_7 * i_26 + i_110
         var i_9 = 0
-        var i_10 = anInt8867
-        var i_11 = anInt8851
+        var i_10 = imageHeight
+        var i_11 = imageWidth
         var i_12 = i_7 - i_11
         var i_13 = 0
         var i_14: Int
@@ -441,12 +441,12 @@ class TransparentSpriteSM : SpriteSM {
             throw IllegalStateException()
         }
         val ints_6 = toolkit.colourBuffer ?: return
-        i_15 += anInt8853
-        i_29 += anInt8854
+        i_15 += offsetX
+        i_29 += offsetY
         var i_7 = 0
         val i_8 = toolkit.viewportWidth
-        var i_9 = anInt8851
-        var i_10 = anInt8867
+        var i_9 = imageWidth
+        var i_10 = imageHeight
         var i_11 = i_8 - i_9
         var i_12 = 0
         var i_13 = i_8 * i_29 + i_15
@@ -488,7 +488,7 @@ class TransparentSpriteSM : SpriteSM {
             if (i_5 > i_29) {
                 i_17 = i_5
                 i_13 += i_8 * (i_5 - i_29)
-                i_7 += (i_5 - i_29) * anInt8851
+                i_7 += (i_5 - i_29) * imageWidth
             }
 
             val i_18 = minOf(ints_15.size + i_5, i_10 + i_29)
@@ -541,7 +541,7 @@ class TransparentSpriteSM : SpriteSM {
         }
     }
 
-    override fun method14247(
+    override fun drawParticle(
         bool1: Boolean,
         bool2: Boolean,
         bool3: Boolean,
@@ -563,29 +563,29 @@ class TransparentSpriteSM : SpriteSM {
         if (i_71 > 0 && i_81 > 0 && (bool1 || bool2)) {
             var i_14 = 0
             var i_15 = 0
-            val i_16 = anInt8853 + anInt8851 + anInt8855
-            val i_17 = anInt8854 + anInt8867 + anInt8856
+            val i_16 = offsetX + imageWidth + trimRight
+            val i_17 = offsetY + imageHeight + trimBottom
             val i_18 = (i_16 shl 16) / i_71
             val i_19 = (i_17 shl 16) / i_81
             var i_20: Int
-            if (anInt8853 > 0) {
-                i_20 = (i_18 + (anInt8853 shl 16) - 1) / i_18
+            if (offsetX > 0) {
+                i_20 = (i_18 + (offsetX shl 16) - 1) / i_18
                 i_4Var += i_20
-                i_14 += i_20 * i_18 - (anInt8853 shl 16)
+                i_14 += i_20 * i_18 - (offsetX shl 16)
             }
 
-            if (anInt8854 > 0) {
-                i_20 = (i_19 + (anInt8854 shl 16) - 1) / i_19
+            if (offsetY > 0) {
+                i_20 = (i_19 + (offsetY shl 16) - 1) / i_19
                 i_5Var += i_20
-                i_15 += i_20 * i_19 - (anInt8854 shl 16)
+                i_15 += i_20 * i_19 - (offsetY shl 16)
             }
 
-            if (anInt8851 < i_16) {
-                i_71 = ((anInt8851 shl 16) - i_14 + i_18 - 1) / i_18
+            if (imageWidth < i_16) {
+                i_71 = ((imageWidth shl 16) - i_14 + i_18 - 1) / i_18
             }
 
-            if (anInt8867 < i_17) {
-                i_81 = ((anInt8867 shl 16) - i_15 + i_19 - 1) / i_19
+            if (imageHeight < i_17) {
+                i_81 = ((imageHeight shl 16) - i_15 + i_19 - 1) / i_19
             }
 
             i_20 = i_5Var * toolkit.viewportWidth + i_4Var
@@ -635,7 +635,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_25 = -i_81
                     while (i_25 < 0) {
-                        i_26 = anInt8851 * (i_15 shr 16)
+                        i_26 = imageWidth * (i_15 shr 16)
 
                         i_27 = -i_71
                         while (i_27 < 0) {
@@ -667,7 +667,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_28 = -i_81
                     while (i_28 < 0) {
-                        i_29 = anInt8851 * (i_15 shr 16)
+                        i_29 = imageWidth * (i_15 shr 16)
 
                         i_30 = -i_71
                         while (i_30 < 0) {
@@ -700,7 +700,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_25 = -i_81
                     while (i_25 < 0) {
-                        i_26 = anInt8851 * (i_15 shr 16)
+                        i_26 = imageWidth * (i_15 shr 16)
 
                         i_27 = -i_71
                         while (i_27 < 0) {
@@ -742,7 +742,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_29 = -i_81
                     while (i_29 < 0) {
-                        i_30 = anInt8851 * (i_15 shr 16)
+                        i_30 = imageWidth * (i_15 shr 16)
 
                         i_31 = -i_71
                         while (i_31 < 0) {
@@ -780,7 +780,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_25 = -i_81
                         while (i_25 < 0) {
-                            i_26 = anInt8851 * (i_15 shr 16)
+                            i_26 = imageWidth * (i_15 shr 16)
 
                             i_27 = -i_71
                             while (i_27 < 0) {
@@ -813,7 +813,7 @@ class TransparentSpriteSM : SpriteSM {
                         if ((i_101 and 0xffffff) == 16777215) {
                             i_25 = -i_81
                             while (i_25 < 0) {
-                                i_26 = anInt8851 * (i_15 shr 16)
+                                i_26 = imageWidth * (i_15 shr 16)
 
                                 i_27 = -i_71
                                 while (i_27 < 0) {
@@ -848,7 +848,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_28 = -i_81
                             while (i_28 < 0) {
-                                i_29 = anInt8851 * (i_15 shr 16)
+                                i_29 = imageWidth * (i_15 shr 16)
 
                                 i_30 = -i_71
                                 while (i_30 < 0) {
@@ -904,7 +904,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_25 = -i_81
                         while (i_25 < 0) {
-                            i_26 = anInt8851 * (i_15 shr 16)
+                            i_26 = imageWidth * (i_15 shr 16)
 
                             i_27 = -i_71
                             while (i_27 < 0) {
@@ -955,7 +955,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_29 = -i_81
                         while (i_29 < 0) {
-                            i_30 = anInt8851 * (i_15 shr 16)
+                            i_30 = imageWidth * (i_15 shr 16)
 
                             i_31 = -i_71
                             while (i_31 < 0) {
@@ -997,7 +997,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_25 = -i_81
                         while (i_25 < 0) {
-                            i_26 = anInt8851 * (i_15 shr 16)
+                            i_26 = imageWidth * (i_15 shr 16)
 
                             i_27 = -i_71
                             while (i_27 < 0) {
@@ -1036,7 +1036,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_28 = -i_81
                         while (i_28 < 0) {
-                            i_29 = anInt8851 * (i_15 shr 16)
+                            i_29 = imageWidth * (i_15 shr 16)
 
                             i_30 = -i_71
                             while (i_30 < 0) {
@@ -1076,7 +1076,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_25 = -i_81
                         while (i_25 < 0) {
-                            i_26 = anInt8851 * (i_15 shr 16)
+                            i_26 = imageWidth * (i_15 shr 16)
 
                             i_27 = -i_71
                             while (i_27 < 0) {
@@ -1123,7 +1123,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_29 = -i_81
                         while (i_29 < 0) {
-                            i_30 = anInt8851 * (i_15 shr 16)
+                            i_30 = imageWidth * (i_15 shr 16)
 
                             i_31 = -i_71
                             while (i_31 < 0) {
@@ -1179,17 +1179,17 @@ class TransparentSpriteSM : SpriteSM {
     override fun pixelTransfer() {
         val ints_4 = toolkit.colourBuffer
             ?: throw IllegalStateException("")
-        for (i_5 in 0 until anInt8867) {
-            val i_6 = i_5 * anInt8851
+        for (i_5 in 0 until imageHeight) {
+            val i_6 = i_5 * imageWidth
             val i_7 = toolkit.viewportWidth * i_5
 
-            for (i_8 in 0 until anInt8851) {
+            for (i_8 in 0 until imageWidth) {
                 this.anIntArray10235[i_6 + i_8] = this.anIntArray10235[i_6 + i_8] and 0xffffff or (if (ints_4[i_7 + i_8] != 0) 0xff000000.toInt() else 0)
             }
         }
     }
 
-    override fun method14245(i_1: Int, i_2: Int) {
+    override fun drawAffineTransformed(i_1: Int, i_2: Int) {
         val ints_3 = toolkit.colourBuffer ?: return
         var i_4: Int
         var i_5: Int
@@ -1206,30 +1206,30 @@ class TransparentSpriteSM : SpriteSM {
         var i_16: Int
         var i_17: Int
         var i_18: Int
-        if (anInt8865 == 0) {
-            if (anInt8868 == 0) {
-                i_4 = anInt8864
+        if (dudx == 0) {
+            if (dvdx == 0) {
+                i_4 = drawHeight
                 while (i_4 < 0) {
-                    i_5 = anInt8870
-                    i_6 = anInt8873
-                    i_7 = anInt8874
-                    i_8 = anInt8862
-                    if (i_6 >= 0 && i_7 >= 0 && i_6 - (anInt8851 shl 12) < 0 && i_7 - (anInt8867 shl 12) < 0) {
+                    i_5 = pixelOffset
+                    i_6 = uBase
+                    i_7 = vBase
+                    i_8 = drawWidth
+                    if (i_6 >= 0 && i_7 >= 0 && i_6 - (imageWidth shl 12) < 0 && i_7 - (imageHeight shl 12) < 0) {
                         while (i_8 < 0) {
-                            i_9 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                            i_9 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                             i_10 = i_5++
                             if (i_2 == 0) {
                                 if (i_1 == 1) {
                                     ints_3[i_10] = this.anIntArray10235[i_9]
                                 } else if (i_1 == 0) {
                                     i_11 = this.anIntArray10235[i_9++]
-                                    i_12 = anInt8880 * (i_11 and 0xff0000) and 0xff000000.toInt()
-                                    i_13 = (i_11 and 0xff00) * anInt8852 and 0xff0000
-                                    i_14 = (i_11 and 0xff) * anInt8882 and 0xff00
+                                    i_12 = colorRed * (i_11 and 0xff0000) and 0xff000000.toInt()
+                                    i_13 = (i_11 and 0xff00) * colorGreen and 0xff0000
+                                    i_14 = (i_11 and 0xff) * colorBlue and 0xff00
                                     ints_3[i_10] = (i_12 or i_13 or i_14) ushr 8
                                 } else if (i_1 == 3) {
                                     i_11 = this.anIntArray10235[i_9++]
-                                    i_12 = anInt8877
+                                    i_12 = blendColor
                                     i_13 = i_11 + i_12
                                     i_14 = (i_11 and 0xff00ff) + (i_12 and 0xff00ff)
                                     i_15 = (i_14 and 0x1000100) + (i_13 - i_14 and 0x10000)
@@ -1239,9 +1239,9 @@ class TransparentSpriteSM : SpriteSM {
                                         throw IllegalArgumentException()
                                     }
                                     i_11 = this.anIntArray10235[i_9]
-                                    i_12 = (i_11 and 0xff00ff) * anInt8878 and -16711936
-                                    i_13 = (i_11 and 0xff00) * anInt8878 and 0xff0000
-                                    ints_3[i_10] = ((i_12 or i_13) ushr 8) + anInt8885
+                                    i_12 = (i_11 and 0xff00ff) * colorAlpha and -16711936
+                                    i_13 = (i_11 and 0xff00) * colorAlpha and 0xff0000
+                                    ints_3[i_10] = ((i_12 or i_13) ushr 8) + overlayPrecomputed
                                 }
                             } else if (i_2 == 1) {
                                 if (i_1 == 1) {
@@ -1252,32 +1252,32 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_10] = ((i_11 and 0xff00ff) * i_12 + (i_14 and 0xff00ff) * i_13 and -16711936) + (i_12 * (i_11 and 0xff00) + i_13 * (i_14 and 0xff00) and 0xff0000) shr 8
                                 } else if (i_1 == 0) {
                                     i_11 = this.anIntArray10235[i_9]
-                                    i_12 = (i_11 ushr 24) * anInt8878 shr 8
+                                    i_12 = (i_11 ushr 24) * colorAlpha shr 8
                                     i_13 = 256 - i_12
-                                    if ((anInt8877 and 0xffffff) == 16777215) {
+                                    if ((blendColor and 0xffffff) == 16777215) {
                                         i_14 = ints_3[i_10]
                                         ints_3[i_10] = ((i_11 and 0xff00ff) * i_12 + (i_14 and 0xff00ff) * i_13 and -16711936) + (i_12 * (i_11 and 0xff00) + i_13 * (i_14 and 0xff00) and 0xff0000) shr 8
                                     } else if (i_12 != 255) {
-                                        i_14 = anInt8880 * (i_11 and 0xff0000) and 0xff000000.toInt()
-                                        i_15 = (i_11 and 0xff00) * anInt8852 and 0xff0000
-                                        i_16 = (i_11 and 0xff) * anInt8882 and 0xff00
+                                        i_14 = colorRed * (i_11 and 0xff0000) and 0xff000000.toInt()
+                                        i_15 = (i_11 and 0xff00) * colorGreen and 0xff0000
+                                        i_16 = (i_11 and 0xff) * colorBlue and 0xff00
                                         i_11 = (i_14 or i_15 or i_16) ushr 8
                                         i_17 = ints_3[i_10]
                                         ints_3[i_10] = ((i_11 and 0xff00ff) * i_12 + (i_17 and 0xff00ff) * i_13 and -16711936) + (i_12 * (i_11 and 0xff00) + i_13 * (i_17 and 0xff00) and 0xff0000) shr 8
                                     } else {
-                                        i_14 = anInt8880 * (i_11 and 0xff0000) and 0xff000000.toInt()
-                                        i_15 = (i_11 and 0xff00) * anInt8852 and 0xff0000
-                                        i_16 = (i_11 and 0xff) * anInt8882 and 0xff00
+                                        i_14 = colorRed * (i_11 and 0xff0000) and 0xff000000.toInt()
+                                        i_15 = (i_11 and 0xff00) * colorGreen and 0xff0000
+                                        i_16 = (i_11 and 0xff) * colorBlue and 0xff00
                                         ints_3[i_10] = (i_14 or i_15 or i_16) ushr 8
                                     }
                                 } else if (i_1 == 3) {
                                     i_11 = this.anIntArray10235[i_9]
-                                    i_12 = anInt8877
+                                    i_12 = blendColor
                                     i_13 = i_11 + i_12
                                     i_14 = (i_11 and 0xff00ff) + (i_12 and 0xff00ff)
                                     i_15 = (i_14 and 0x1000100) + (i_13 - i_14 and 0x10000)
                                     i_15 = i_13 - i_15 or (i_15 - (i_15 ushr 8))
-                                    i_16 = (i_11 ushr 24) * anInt8878 shr 8
+                                    i_16 = (i_11 ushr 24) * colorAlpha shr 8
                                     i_17 = 256 - i_16
                                     if (i_16 != 255) {
                                         i_11 = i_15
@@ -1292,9 +1292,9 @@ class TransparentSpriteSM : SpriteSM {
                                     i_11 = this.anIntArray10235[i_9]
                                     i_12 = i_11 ushr 24
                                     i_13 = 256 - i_12
-                                    i_14 = (i_11 and 0xff00ff) * anInt8878 and -16711936
-                                    i_15 = (i_11 and 0xff00) * anInt8878 and 0xff0000
-                                    i_11 = ((i_14 or i_15) ushr 8) + anInt8885
+                                    i_14 = (i_11 and 0xff00ff) * colorAlpha and -16711936
+                                    i_15 = (i_11 and 0xff00) * colorAlpha and 0xff0000
+                                    i_11 = ((i_14 or i_15) ushr 8) + overlayPrecomputed
                                     i_16 = ints_3[i_10]
                                     ints_3[i_10] = ((i_11 and 0xff00ff) * i_12 + (i_16 and 0xff00ff) * i_13 and -16711936) + (i_12 * (i_11 and 0xff00) + i_13 * (i_16 and 0xff00) and 0xff0000) shr 8
                                 }
@@ -1311,9 +1311,9 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_10] = i_13 - i_12 or (i_12 - (i_12 ushr 8))
                                 } else if (i_1 == 0) {
                                     i_11 = this.anIntArray10235[i_9]
-                                    i_12 = anInt8880 * (i_11 and 0xff0000) and 0xff000000.toInt()
-                                    i_13 = (i_11 and 0xff00) * anInt8852 and 0xff0000
-                                    i_14 = (i_11 and 0xff) * anInt8882 and 0xff00
+                                    i_12 = colorRed * (i_11 and 0xff0000) and 0xff000000.toInt()
+                                    i_13 = (i_11 and 0xff00) * colorGreen and 0xff0000
+                                    i_14 = (i_11 and 0xff) * colorBlue and 0xff00
                                     i_11 = (i_12 or i_13 or i_14) ushr 8
                                     i_15 = ints_3[i_10]
                                     i_16 = i_11 + i_15
@@ -1322,7 +1322,7 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_10] = i_16 - i_15 or (i_15 - (i_15 ushr 8))
                                 } else if (i_1 == 3) {
                                     i_11 = this.anIntArray10235[i_9]
-                                    i_12 = anInt8877
+                                    i_12 = blendColor
                                     i_13 = i_11 + i_12
                                     i_14 = (i_11 and 0xff00ff) + (i_12 and 0xff00ff)
                                     i_15 = (i_14 and 0x1000100) + (i_13 - i_14 and 0x10000)
@@ -1334,9 +1334,9 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_10] = i_13 - i_15 or (i_15 - (i_15 ushr 8))
                                 } else if (i_1 == 2) {
                                     i_11 = this.anIntArray10235[i_9]
-                                    i_12 = (i_11 and 0xff00ff) * anInt8878 and -16711936
-                                    i_13 = (i_11 and 0xff00) * anInt8878 and 0xff0000
-                                    i_11 = ((i_12 or i_13) ushr 8) + anInt8885
+                                    i_12 = (i_11 and 0xff00ff) * colorAlpha and -16711936
+                                    i_13 = (i_11 and 0xff00) * colorAlpha and 0xff0000
+                                    i_11 = ((i_12 or i_13) ushr 8) + overlayPrecomputed
                                     i_14 = ints_3[i_10]
                                     i_15 = i_11 + i_14
                                     i_16 = (i_11 and 0xff00ff) + (i_14 and 0xff00ff)
@@ -1348,42 +1348,42 @@ class TransparentSpriteSM : SpriteSM {
                         }
                     }
                     ++i_4
-                    anInt8870 += anInt8850
+                    pixelOffset += viewportStride
                 }
-            } else if (anInt8868 < 0) {
-                i_4 = anInt8864
+            } else if (dvdx < 0) {
+                i_4 = drawHeight
                 while (i_4 < 0) {
-                    i_5 = anInt8870
-                    i_6 = anInt8873
-                    i_7 = anInt8874 + anInt8866
-                    i_8 = anInt8862
-                    if (i_6 >= 0 && i_6 - (anInt8851 shl 12) < 0) {
-                        i_9 = i_7 - (anInt8867 shl 12)
+                    i_5 = pixelOffset
+                    i_6 = uBase
+                    i_7 = vBase + vOffsetX
+                    i_8 = drawWidth
+                    if (i_6 >= 0 && i_6 - (imageWidth shl 12) < 0) {
+                        i_9 = i_7 - (imageHeight shl 12)
                         if (i_9 >= 0) {
-                            i_9 = (anInt8868 - i_9) / anInt8868
+                            i_9 = (dvdx - i_9) / dvdx
                             i_8 += i_9
-                            i_7 += i_9 * anInt8868
+                            i_7 += i_9 * dvdx
                             i_5 += i_9
                         }
-                        i_9 = (i_7 - anInt8868) / anInt8868
+                        i_9 = (i_7 - dvdx) / dvdx
                         if (i_9 > i_8) {
                             i_8 = i_9
                         }
                         while (i_8 < 0) {
-                            i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                            i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                             i_11 = i_5++
                             if (i_2 == 0) {
                                 if (i_1 == 1) {
                                     ints_3[i_11] = this.anIntArray10235[i_10]
                                 } else if (i_1 == 0) {
                                     i_12 = this.anIntArray10235[i_10++]
-                                    i_13 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                    i_14 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                    i_15 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                    i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                    i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                    i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                                     ints_3[i_11] = (i_13 or i_14 or i_15) ushr 8
                                 } else if (i_1 == 3) {
                                     i_12 = this.anIntArray10235[i_10++]
-                                    i_13 = anInt8877
+                                    i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
@@ -1393,9 +1393,9 @@ class TransparentSpriteSM : SpriteSM {
                                         throw IllegalArgumentException()
                                     }
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                                    i_14 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                                    ints_3[i_11] = ((i_13 or i_14) ushr 8) + anInt8885
+                                    i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                                    i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                                    ints_3[i_11] = ((i_13 or i_14) ushr 8) + overlayPrecomputed
                                 }
                             } else if (i_2 == 1) {
                                 if (i_1 == 1) {
@@ -1406,32 +1406,32 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
                                 } else if (i_1 == 0) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = (i_12 ushr 24) * anInt8878 shr 8
+                                    i_13 = (i_12 ushr 24) * colorAlpha shr 8
                                     i_14 = 256 - i_13
-                                    if ((anInt8877 and 0xffffff) == 16777215) {
+                                    if ((blendColor and 0xffffff) == 16777215) {
                                         i_15 = ints_3[i_11]
                                         ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
                                     } else if (i_13 != 255) {
-                                        i_15 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                        i_16 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                        i_17 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                        i_15 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                        i_16 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                        i_17 = (i_12 and 0xff) * colorBlue and 0xff00
                                         i_12 = (i_15 or i_16 or i_17) ushr 8
                                         i_18 = ints_3[i_11]
                                         ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_18 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_18 and 0xff00) and 0xff0000) shr 8
                                     } else {
-                                        i_15 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                        i_16 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                        i_17 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                        i_15 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                        i_16 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                        i_17 = (i_12 and 0xff) * colorBlue and 0xff00
                                         ints_3[i_11] = (i_15 or i_16 or i_17) ushr 8
                                     }
                                 } else if (i_1 == 3) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = anInt8877
+                                    i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                                     i_16 = i_14 - i_16 or (i_16 - (i_16 ushr 8))
-                                    i_17 = (i_12 ushr 24) * anInt8878 shr 8
+                                    i_17 = (i_12 ushr 24) * colorAlpha shr 8
                                     i_18 = 256 - i_17
                                     if (i_17 != 255) {
                                         i_12 = i_16
@@ -1446,9 +1446,9 @@ class TransparentSpriteSM : SpriteSM {
                                     i_12 = this.anIntArray10235[i_10]
                                     i_13 = i_12 ushr 24
                                     i_14 = 256 - i_13
-                                    i_15 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                                    i_16 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                                    i_12 = ((i_15 or i_16) ushr 8) + anInt8885
+                                    i_15 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                                    i_16 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                                    i_12 = ((i_15 or i_16) ushr 8) + overlayPrecomputed
                                     i_17 = ints_3[i_11]
                                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_17 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_17 and 0xff00) and 0xff0000) shr 8
                                 }
@@ -1465,9 +1465,9 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_14 - i_13 or (i_13 - (i_13 ushr 8))
                                 } else if (i_1 == 0) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                    i_14 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                    i_15 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                    i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                    i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                    i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                                     i_12 = (i_13 or i_14 or i_15) ushr 8
                                     i_16 = ints_3[i_11]
                                     i_17 = i_12 + i_16
@@ -1476,7 +1476,7 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_17 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 3) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = anInt8877
+                                    i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
@@ -1488,9 +1488,9 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_14 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 2) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                                    i_14 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                                    i_12 = ((i_13 or i_14) ushr 8) + anInt8885
+                                    i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                                    i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                                    i_12 = ((i_13 or i_14) ushr 8) + overlayPrecomputed
                                     i_15 = ints_3[i_11]
                                     i_16 = i_12 + i_15
                                     i_17 = (i_12 and 0xff00ff) + (i_15 and 0xff00ff)
@@ -1498,47 +1498,47 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_16 - i_15 or (i_15 - (i_15 ushr 8))
                                 }
                             }
-                            i_7 += anInt8868
+                            i_7 += dvdx
                             ++i_8
                         }
                     }
                     ++i_4
-                    anInt8873 += anInt8869
-                    anInt8870 += anInt8850
+                    uBase += dudy
+                    pixelOffset += viewportStride
                 }
             } else {
-                i_4 = anInt8864
+                i_4 = drawHeight
                 while (i_4 < 0) {
-                    i_5 = anInt8870
-                    i_6 = anInt8873
-                    i_7 = anInt8874 + anInt8866
-                    i_8 = anInt8862
-                    if (i_6 >= 0 && i_6 - (anInt8851 shl 12) < 0) {
+                    i_5 = pixelOffset
+                    i_6 = uBase
+                    i_7 = vBase + vOffsetX
+                    i_8 = drawWidth
+                    if (i_6 >= 0 && i_6 - (imageWidth shl 12) < 0) {
                         if (i_7 < 0) {
-                            i_9 = (anInt8868 - 1 - i_7) / anInt8868
+                            i_9 = (dvdx - 1 - i_7) / dvdx
                             i_8 += i_9
-                            i_7 += i_9 * anInt8868
+                            i_7 += i_9 * dvdx
                             i_5 += i_9
                         }
-                        i_9 = (i_7 + 1 - (anInt8867 shl 12) - anInt8868) / anInt8868
+                        i_9 = (i_7 + 1 - (imageHeight shl 12) - dvdx) / dvdx
                         if (i_9 > i_8) {
                             i_8 = i_9
                         }
                         while (i_8 < 0) {
-                            i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                            i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                             i_11 = i_5++
                             if (i_2 == 0) {
                                 if (i_1 == 1) {
                                     ints_3[i_11] = this.anIntArray10235[i_10]
                                 } else if (i_1 == 0) {
                                     i_12 = this.anIntArray10235[i_10++]
-                                    i_13 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                    i_14 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                    i_15 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                    i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                    i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                    i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                                     ints_3[i_11] = (i_13 or i_14 or i_15) ushr 8
                                 } else if (i_1 == 3) {
                                     i_12 = this.anIntArray10235[i_10++]
-                                    i_13 = anInt8877
+                                    i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
@@ -1548,9 +1548,9 @@ class TransparentSpriteSM : SpriteSM {
                                         throw IllegalArgumentException()
                                     }
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                                    i_14 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                                    ints_3[i_11] = ((i_13 or i_14) ushr 8) + anInt8885
+                                    i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                                    i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                                    ints_3[i_11] = ((i_13 or i_14) ushr 8) + overlayPrecomputed
                                 }
                             } else if (i_2 == 1) {
                                 if (i_1 == 1) {
@@ -1561,32 +1561,32 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
                                 } else if (i_1 == 0) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = (i_12 ushr 24) * anInt8878 shr 8
+                                    i_13 = (i_12 ushr 24) * colorAlpha shr 8
                                     i_14 = 256 - i_13
-                                    if ((anInt8877 and 0xffffff) == 16777215) {
+                                    if ((blendColor and 0xffffff) == 16777215) {
                                         i_15 = ints_3[i_11]
                                         ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
                                     } else if (i_13 != 255) {
-                                        i_15 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                        i_16 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                        i_17 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                        i_15 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                        i_16 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                        i_17 = (i_12 and 0xff) * colorBlue and 0xff00
                                         i_12 = (i_15 or i_16 or i_17) ushr 8
                                         i_18 = ints_3[i_11]
                                         ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_18 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_18 and 0xff00) and 0xff0000) shr 8
                                     } else {
-                                        i_15 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                        i_16 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                        i_17 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                        i_15 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                        i_16 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                        i_17 = (i_12 and 0xff) * colorBlue and 0xff00
                                         ints_3[i_11] = (i_15 or i_16 or i_17) ushr 8
                                     }
                                 } else if (i_1 == 3) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = anInt8877
+                                    i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                                     i_16 = i_14 - i_16 or (i_16 - (i_16 ushr 8))
-                                    i_17 = (i_12 ushr 24) * anInt8878 shr 8
+                                    i_17 = (i_12 ushr 24) * colorAlpha shr 8
                                     i_18 = 256 - i_17
                                     if (i_17 != 255) {
                                         i_12 = i_16
@@ -1601,9 +1601,9 @@ class TransparentSpriteSM : SpriteSM {
                                     i_12 = this.anIntArray10235[i_10]
                                     i_13 = i_12 ushr 24
                                     i_14 = 256 - i_13
-                                    i_15 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                                    i_16 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                                    i_12 = ((i_15 or i_16) ushr 8) + anInt8885
+                                    i_15 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                                    i_16 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                                    i_12 = ((i_15 or i_16) ushr 8) + overlayPrecomputed
                                     i_17 = ints_3[i_11]
                                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_17 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_17 and 0xff00) and 0xff0000) shr 8
                                 }
@@ -1620,9 +1620,9 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_14 - i_13 or (i_13 - (i_13 ushr 8))
                                 } else if (i_1 == 0) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                                    i_14 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                                    i_15 = (i_12 and 0xff) * anInt8882 and 0xff00
+                                    i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                                    i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                                    i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                                     i_12 = (i_13 or i_14 or i_15) ushr 8
                                     i_16 = ints_3[i_11]
                                     i_17 = i_12 + i_16
@@ -1631,7 +1631,7 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_17 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 3) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = anInt8877
+                                    i_13 = blendColor
                                     i_14 = i_12 + i_13
                                     i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                                     i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
@@ -1643,9 +1643,9 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_14 - i_16 or (i_16 - (i_16 ushr 8))
                                 } else if (i_1 == 2) {
                                     i_12 = this.anIntArray10235[i_10]
-                                    i_13 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                                    i_14 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                                    i_12 = ((i_13 or i_14) ushr 8) + anInt8885
+                                    i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                                    i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                                    i_12 = ((i_13 or i_14) ushr 8) + overlayPrecomputed
                                     i_15 = ints_3[i_11]
                                     i_16 = i_12 + i_15
                                     i_17 = (i_12 and 0xff00ff) + (i_15 and 0xff00ff)
@@ -1653,16 +1653,16 @@ class TransparentSpriteSM : SpriteSM {
                                     ints_3[i_11] = i_16 - i_15 or (i_15 - (i_15 ushr 8))
                                 }
                             }
-                            i_7 += anInt8868
+                            i_7 += dvdx
                             ++i_8
                         }
                     }
                     ++i_4
-                    anInt8873 += anInt8869
-                    anInt8870 += anInt8850
+                    uBase += dudy
+                    pixelOffset += viewportStride
                 }
             }
-        } else if (anInt8865 < 0) {
+        } else if (dudx < 0) {
             method14245NegX(i_1, i_2, ints_3)
         } else {
             method14245PosX(i_1, i_2, ints_3)
@@ -1685,123 +1685,123 @@ class TransparentSpriteSM : SpriteSM {
         var i_16: Int
         var i_17: Int
         var i_18: Int
-        if (anInt8868 == 0) {
-            i_4 = anInt8864
+        if (dvdx == 0) {
+            i_4 = drawHeight
             while (i_4 < 0) {
-                i_5 = anInt8870
-                i_6 = anInt8873 + anInt8858
-                i_7 = anInt8874
-                i_8 = anInt8862
-                if (i_7 >= 0 && i_7 - (anInt8867 shl 12) < 0) {
-                    i_9 = i_6 - (anInt8851 shl 12)
+                i_5 = pixelOffset
+                i_6 = uBase + uOffsetX
+                i_7 = vBase
+                i_8 = drawWidth
+                if (i_7 >= 0 && i_7 - (imageHeight shl 12) < 0) {
+                    i_9 = i_6 - (imageWidth shl 12)
                     if (i_9 >= 0) {
-                        i_9 = (anInt8865 - i_9) / anInt8865
+                        i_9 = (dudx - i_9) / dudx
                         i_8 += i_9
-                        i_6 += i_9 * anInt8865
+                        i_6 += i_9 * dudx
                         i_5 += i_9
                     }
-                    i_9 = (i_6 - anInt8865) / anInt8865
+                    i_9 = (i_6 - dudx) / dudx
                     if (i_9 > i_8) {
                         i_8 = i_9
                     }
                     while (i_8 < 0) {
-                        i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                        i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                         i_11 = i_5++
                         renderPixel14245(i_1, i_2, ints_3, i_10, i_11)
-                        i_6 += anInt8865
+                        i_6 += dudx
                         ++i_8
                     }
                 }
                 ++i_4
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
-        } else if (anInt8868 < 0) {
-            i_4 = anInt8864
+        } else if (dvdx < 0) {
+            i_4 = drawHeight
             while (i_4 < 0) {
-                i_5 = anInt8870
-                i_6 = anInt8873 + anInt8858
-                i_7 = anInt8874 + anInt8866
-                i_8 = anInt8862
-                i_9 = i_6 - (anInt8851 shl 12)
+                i_5 = pixelOffset
+                i_6 = uBase + uOffsetX
+                i_7 = vBase + vOffsetX
+                i_8 = drawWidth
+                i_9 = i_6 - (imageWidth shl 12)
                 if (i_9 >= 0) {
-                    i_9 = (anInt8865 - i_9) / anInt8865
+                    i_9 = (dudx - i_9) / dudx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_6 - anInt8865) / anInt8865
+                i_9 = (i_6 - dudx) / dudx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
-                i_9 = i_7 - (anInt8867 shl 12)
+                i_9 = i_7 - (imageHeight shl 12)
                 if (i_9 >= 0) {
-                    i_9 = (anInt8868 - i_9) / anInt8868
+                    i_9 = (dvdx - i_9) / dvdx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_7 - anInt8868) / anInt8868
+                i_9 = (i_7 - dvdx) / dvdx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
                 while (i_8 < 0) {
-                    i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                    i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                     i_11 = i_5++
                     renderPixel14245(i_1, i_2, ints_3, i_10, i_11)
-                    i_6 += anInt8865
-                    i_7 += anInt8868
+                    i_6 += dudx
+                    i_7 += dvdx
                     ++i_8
                 }
                 ++i_4
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
         } else {
-            i_4 = anInt8864
+            i_4 = drawHeight
             while (i_4 < 0) {
-                i_5 = anInt8870
-                i_6 = anInt8873 + anInt8858
-                i_7 = anInt8874 + anInt8866
-                i_8 = anInt8862
-                i_9 = i_6 - (anInt8851 shl 12)
+                i_5 = pixelOffset
+                i_6 = uBase + uOffsetX
+                i_7 = vBase + vOffsetX
+                i_8 = drawWidth
+                i_9 = i_6 - (imageWidth shl 12)
                 if (i_9 >= 0) {
-                    i_9 = (anInt8865 - i_9) / anInt8865
+                    i_9 = (dudx - i_9) / dudx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_6 - anInt8865) / anInt8865
+                i_9 = (i_6 - dudx) / dudx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
                 if (i_7 < 0) {
-                    i_9 = (anInt8868 - 1 - i_7) / anInt8868
+                    i_9 = (dvdx - 1 - i_7) / dvdx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_7 + 1 - (anInt8867 shl 12) - anInt8868) / anInt8868
+                i_9 = (i_7 + 1 - (imageHeight shl 12) - dvdx) / dvdx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
                 while (i_8 < 0) {
-                    i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                    i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                     i_11 = i_5++
                     renderPixel14245(i_1, i_2, ints_3, i_10, i_11)
-                    i_6 += anInt8865
-                    i_7 += anInt8868
+                    i_6 += dudx
+                    i_7 += dvdx
                     ++i_8
                 }
                 ++i_4
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
         }
     }
@@ -1815,121 +1815,121 @@ class TransparentSpriteSM : SpriteSM {
         var i_9: Int
         var i_10: Int
         var i_11: Int
-        if (anInt8868 == 0) {
-            i_4 = anInt8864
+        if (dvdx == 0) {
+            i_4 = drawHeight
             while (i_4 < 0) {
-                i_5 = anInt8870
-                i_6 = anInt8873 + anInt8858
-                i_7 = anInt8874
-                i_8 = anInt8862
-                if (i_7 >= 0 && i_7 - (anInt8867 shl 12) < 0) {
+                i_5 = pixelOffset
+                i_6 = uBase + uOffsetX
+                i_7 = vBase
+                i_8 = drawWidth
+                if (i_7 >= 0 && i_7 - (imageHeight shl 12) < 0) {
                     if (i_6 < 0) {
-                        i_9 = (anInt8865 - 1 - i_6) / anInt8865
+                        i_9 = (dudx - 1 - i_6) / dudx
                         i_8 += i_9
-                        i_6 += i_9 * anInt8865
+                        i_6 += i_9 * dudx
                         i_5 += i_9
                     }
-                    i_9 = (i_6 + 1 - (anInt8851 shl 12) - anInt8865) / anInt8865
+                    i_9 = (i_6 + 1 - (imageWidth shl 12) - dudx) / dudx
                     if (i_9 > i_8) {
                         i_8 = i_9
                     }
                     while (i_8 < 0) {
-                        i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                        i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                         i_11 = i_5++
                         renderPixel14245(i_1, i_2, ints_3, i_10, i_11)
-                        i_6 += anInt8865
+                        i_6 += dudx
                         ++i_8
                     }
                 }
                 ++i_4
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
-        } else if (anInt8868 < 0) {
-            i_4 = anInt8864
+        } else if (dvdx < 0) {
+            i_4 = drawHeight
             while (i_4 < 0) {
-                i_5 = anInt8870
-                i_6 = anInt8873 + anInt8858
-                i_7 = anInt8874 + anInt8866
-                i_8 = anInt8862
+                i_5 = pixelOffset
+                i_6 = uBase + uOffsetX
+                i_7 = vBase + vOffsetX
+                i_8 = drawWidth
                 if (i_6 < 0) {
-                    i_9 = (anInt8865 - 1 - i_6) / anInt8865
+                    i_9 = (dudx - 1 - i_6) / dudx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_6 + 1 - (anInt8851 shl 12) - anInt8865) / anInt8865
+                i_9 = (i_6 + 1 - (imageWidth shl 12) - dudx) / dudx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
-                i_9 = i_7 - (anInt8867 shl 12)
+                i_9 = i_7 - (imageHeight shl 12)
                 if (i_9 >= 0) {
-                    i_9 = (anInt8868 - i_9) / anInt8868
+                    i_9 = (dvdx - i_9) / dvdx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_7 - anInt8868) / anInt8868
+                i_9 = (i_7 - dvdx) / dvdx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
                 while (i_8 < 0) {
-                    i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                    i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                     i_11 = i_5++
                     renderPixel14245(i_1, i_2, ints_3, i_10, i_11)
-                    i_6 += anInt8865
-                    i_7 += anInt8868
+                    i_6 += dudx
+                    i_7 += dvdx
                     ++i_8
                 }
                 ++i_4
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
         } else {
-            i_4 = anInt8864
+            i_4 = drawHeight
             while (i_4 < 0) {
-                i_5 = anInt8870
-                i_6 = anInt8873 + anInt8858
-                i_7 = anInt8874 + anInt8866
-                i_8 = anInt8862
+                i_5 = pixelOffset
+                i_6 = uBase + uOffsetX
+                i_7 = vBase + vOffsetX
+                i_8 = drawWidth
                 if (i_6 < 0) {
-                    i_9 = (anInt8865 - 1 - i_6) / anInt8865
+                    i_9 = (dudx - 1 - i_6) / dudx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_6 + 1 - (anInt8851 shl 12) - anInt8865) / anInt8865
+                i_9 = (i_6 + 1 - (imageWidth shl 12) - dudx) / dudx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
                 if (i_7 < 0) {
-                    i_9 = (anInt8868 - 1 - i_7) / anInt8868
+                    i_9 = (dvdx - 1 - i_7) / dvdx
                     i_8 += i_9
-                    i_6 += i_9 * anInt8865
-                    i_7 += i_9 * anInt8868
+                    i_6 += i_9 * dudx
+                    i_7 += i_9 * dvdx
                     i_5 += i_9
                 }
-                i_9 = (i_7 + 1 - (anInt8867 shl 12) - anInt8868) / anInt8868
+                i_9 = (i_7 + 1 - (imageHeight shl 12) - dvdx) / dvdx
                 if (i_9 > i_8) {
                     i_8 = i_9
                 }
                 while (i_8 < 0) {
-                    i_10 = (i_6 shr 12) + (i_7 shr 12) * anInt8851
+                    i_10 = (i_6 shr 12) + (i_7 shr 12) * imageWidth
                     i_11 = i_5++
                     renderPixel14245(i_1, i_2, ints_3, i_10, i_11)
-                    i_6 += anInt8865
-                    i_7 += anInt8868
+                    i_6 += dudx
+                    i_7 += dvdx
                     ++i_8
                 }
                 ++i_4
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
         }
     }
@@ -1947,13 +1947,13 @@ class TransparentSpriteSM : SpriteSM {
                 ints_3[i_11] = this.anIntArray10235[i_10]
             } else if (i_1 == 0) {
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                i_14 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                i_15 = (i_12 and 0xff) * anInt8882 and 0xff00
+                i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                 ints_3[i_11] = (i_13 or i_14 or i_15) ushr 8
             } else if (i_1 == 3) {
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = anInt8877
+                i_13 = blendColor
                 i_14 = i_12 + i_13
                 i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                 i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
@@ -1963,9 +1963,9 @@ class TransparentSpriteSM : SpriteSM {
                     throw IllegalArgumentException()
                 }
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                i_14 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                ints_3[i_11] = ((i_13 or i_14) ushr 8) + anInt8885
+                i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                ints_3[i_11] = ((i_13 or i_14) ushr 8) + overlayPrecomputed
             }
         } else if (i_2 == 1) {
             if (i_1 == 1) {
@@ -1976,32 +1976,32 @@ class TransparentSpriteSM : SpriteSM {
                 ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
             } else if (i_1 == 0) {
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = (i_12 ushr 24) * anInt8878 shr 8
+                i_13 = (i_12 ushr 24) * colorAlpha shr 8
                 i_14 = 256 - i_13
-                if ((anInt8877 and 0xffffff) == 16777215) {
+                if ((blendColor and 0xffffff) == 16777215) {
                     i_15 = ints_3[i_11]
                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_15 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_15 and 0xff00) and 0xff0000) shr 8
                 } else if (i_13 != 255) {
-                    i_15 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                    i_16 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                    i_17 = (i_12 and 0xff) * anInt8882 and 0xff00
+                    i_15 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                    i_16 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                    i_17 = (i_12 and 0xff) * colorBlue and 0xff00
                     i_12 = (i_15 or i_16 or i_17) ushr 8
                     i_18 = ints_3[i_11]
                     ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_18 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_18 and 0xff00) and 0xff0000) shr 8
                 } else {
-                    i_15 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                    i_16 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                    i_17 = (i_12 and 0xff) * anInt8882 and 0xff00
+                    i_15 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                    i_16 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                    i_17 = (i_12 and 0xff) * colorBlue and 0xff00
                     ints_3[i_11] = (i_15 or i_16 or i_17) ushr 8
                 }
             } else if (i_1 == 3) {
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = anInt8877
+                i_13 = blendColor
                 i_14 = i_12 + i_13
                 i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                 i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
                 i_16 = i_14 - i_16 or (i_16 - (i_16 ushr 8))
-                i_17 = (i_12 ushr 24) * anInt8878 shr 8
+                i_17 = (i_12 ushr 24) * colorAlpha shr 8
                 i_18 = 256 - i_17
                 if (i_17 != 255) {
                     i_12 = i_16
@@ -2016,9 +2016,9 @@ class TransparentSpriteSM : SpriteSM {
                 i_12 = this.anIntArray10235[i_10]
                 i_13 = i_12 ushr 24
                 i_14 = 256 - i_13
-                i_15 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                i_16 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                i_12 = ((i_15 or i_16) ushr 8) + anInt8885
+                i_15 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                i_16 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                i_12 = ((i_15 or i_16) ushr 8) + overlayPrecomputed
                 i_17 = ints_3[i_11]
                 ints_3[i_11] = ((i_12 and 0xff00ff) * i_13 + (i_17 and 0xff00ff) * i_14 and -16711936) + (i_13 * (i_12 and 0xff00) + i_14 * (i_17 and 0xff00) and 0xff0000) shr 8
             }
@@ -2035,9 +2035,9 @@ class TransparentSpriteSM : SpriteSM {
                 ints_3[i_11] = i_14 - i_13 or (i_13 - (i_13 ushr 8))
             } else if (i_1 == 0) {
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = anInt8880 * (i_12 and 0xff0000) and 0xff000000.toInt()
-                i_14 = (i_12 and 0xff00) * anInt8852 and 0xff0000
-                i_15 = (i_12 and 0xff) * anInt8882 and 0xff00
+                i_13 = colorRed * (i_12 and 0xff0000) and 0xff000000.toInt()
+                i_14 = (i_12 and 0xff00) * colorGreen and 0xff0000
+                i_15 = (i_12 and 0xff) * colorBlue and 0xff00
                 i_12 = (i_13 or i_14 or i_15) ushr 8
                 i_16 = ints_3[i_11]
                 i_17 = i_12 + i_16
@@ -2046,7 +2046,7 @@ class TransparentSpriteSM : SpriteSM {
                 ints_3[i_11] = i_17 - i_16 or (i_16 - (i_16 ushr 8))
             } else if (i_1 == 3) {
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = anInt8877
+                i_13 = blendColor
                 i_14 = i_12 + i_13
                 i_15 = (i_12 and 0xff00ff) + (i_13 and 0xff00ff)
                 i_16 = (i_15 and 0x1000100) + (i_14 - i_15 and 0x10000)
@@ -2058,9 +2058,9 @@ class TransparentSpriteSM : SpriteSM {
                 ints_3[i_11] = i_14 - i_16 or (i_16 - (i_16 ushr 8))
             } else if (i_1 == 2) {
                 i_12 = this.anIntArray10235[i_10]
-                i_13 = (i_12 and 0xff00ff) * anInt8878 and -16711936
-                i_14 = (i_12 and 0xff00) * anInt8878 and 0xff0000
-                i_12 = ((i_13 or i_14) ushr 8) + anInt8885
+                i_13 = (i_12 and 0xff00ff) * colorAlpha and -16711936
+                i_14 = (i_12 and 0xff00) * colorAlpha and 0xff0000
+                i_12 = ((i_13 or i_14) ushr 8) + overlayPrecomputed
                 i_15 = ints_3[i_11]
                 i_16 = i_12 + i_15
                 i_17 = (i_12 and 0xff00ff) + (i_15 and 0xff00ff)
@@ -2070,7 +2070,7 @@ class TransparentSpriteSM : SpriteSM {
         }
     }
 
-    override fun method14250(ints_1: IntArray, ints_2: IntArray, i_3: Int, i_4: Int) {
+    override fun drawMasked(ints_1: IntArray, ints_2: IntArray, i_3: Int, i_4: Int) {
         val ints_5 = toolkit.colourBuffer ?: return
         var i_6: Int
         var i_7: Int
@@ -2086,9 +2086,9 @@ class TransparentSpriteSM : SpriteSM {
         var i_17: Int
         var i_18: Int
         var i_19: Int
-        if (anInt8865 == 0) {
-            if (anInt8868 == 0) {
-                i_6 = anInt8864
+        if (dudx == 0) {
+            if (dvdx == 0) {
+                i_6 = drawHeight
                 while (i_6 < 0) {
                     i_7 = i_6 + i_4
                     if (i_7 >= 0) {
@@ -2096,19 +2096,19 @@ class TransparentSpriteSM : SpriteSM {
                             break
                         }
 
-                        i_8 = anInt8870
-                        i_9 = anInt8873
-                        i_10 = anInt8874
-                        i_11 = anInt8862
-                        if (i_9 >= 0 && i_10 >= 0 && i_9 - (anInt8851 shl 12) < 0 && i_10 - (anInt8867 shl 12) < 0) {
+                        i_8 = pixelOffset
+                        i_9 = uBase
+                        i_10 = vBase
+                        i_11 = drawWidth
+                        if (i_9 >= 0 && i_10 >= 0 && i_9 - (imageWidth shl 12) < 0 && i_10 - (imageHeight shl 12) < 0) {
                             i_12 = ints_1[i_7] - i_3
                             i_13 = -ints_2[i_7]
-                            i_14 = i_12 - (i_8 - anInt8870)
+                            i_14 = i_12 - (i_8 - pixelOffset)
                             if (i_14 > 0) {
                                 i_8 += i_14
                                 i_11 += i_14
-                                i_9 += i_14 * anInt8865
-                                i_10 += i_14 * anInt8868
+                                i_9 += i_14 * dudx
+                                i_10 += i_14 * dvdx
                             } else {
                                 i_13 -= i_14
                             }
@@ -2118,7 +2118,7 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_15 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                                i_15 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_16 = i_15 ushr 24
                                 i_17 = 256 - i_16
                                 i_18 = ints_5[i_8]
@@ -2129,10 +2129,10 @@ class TransparentSpriteSM : SpriteSM {
                     }
 
                     ++i_6
-                    anInt8870 += anInt8850
+                    pixelOffset += viewportStride
                 }
-            } else if (anInt8868 < 0) {
-                i_6 = anInt8864
+            } else if (dvdx < 0) {
+                i_6 = drawHeight
                 while (i_6 < 0) {
                     i_7 = i_6 + i_4
                     if (i_7 >= 0) {
@@ -2140,32 +2140,32 @@ class TransparentSpriteSM : SpriteSM {
                             break
                         }
 
-                        i_8 = anInt8870
-                        i_9 = anInt8873
-                        i_10 = anInt8874 + anInt8866
-                        i_11 = anInt8862
-                        if (i_9 >= 0 && i_9 - (anInt8851 shl 12) < 0) {
-                            i_12 = i_10 - (anInt8867 shl 12)
+                        i_8 = pixelOffset
+                        i_9 = uBase
+                        i_10 = vBase + vOffsetX
+                        i_11 = drawWidth
+                        if (i_9 >= 0 && i_9 - (imageWidth shl 12) < 0) {
+                            i_12 = i_10 - (imageHeight shl 12)
                             if (i_12 >= 0) {
-                                i_12 = (anInt8868 - i_12) / anInt8868
+                                i_12 = (dvdx - i_12) / dvdx
                                 i_11 += i_12
-                                i_10 += i_12 * anInt8868
+                                i_10 += i_12 * dvdx
                                 i_8 += i_12
                             }
 
-                            i_12 = (i_10 - anInt8868) / anInt8868
+                            i_12 = (i_10 - dvdx) / dvdx
                             if (i_12 > i_11) {
                                 i_11 = i_12
                             }
 
                             i_13 = ints_1[i_7] - i_3
                             i_14 = -ints_2[i_7]
-                            i_15 = i_13 - (i_8 - anInt8870)
+                            i_15 = i_13 - (i_8 - pixelOffset)
                             if (i_15 > 0) {
                                 i_8 += i_15
                                 i_11 += i_15
-                                i_9 += i_15 * anInt8865
-                                i_10 += i_15 * anInt8868
+                                i_9 += i_15 * dudx
+                                i_10 += i_15 * dvdx
                             } else {
                                 i_14 -= i_15
                             }
@@ -2175,23 +2175,23 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_17 = i_16 ushr 24
                                 i_18 = 256 - i_17
                                 i_19 = ints_5[i_8]
                                 ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                                i_10 += anInt8868
+                                i_10 += dvdx
                                 ++i_11
                             }
                         }
                     }
 
                     ++i_6
-                    anInt8873 += anInt8869
-                    anInt8870 += anInt8850
+                    uBase += dudy
+                    pixelOffset += viewportStride
                 }
             } else {
-                i_6 = anInt8864
+                i_6 = drawHeight
                 while (i_6 < 0) {
                     i_7 = i_6 + i_4
                     if (i_7 >= 0) {
@@ -2199,31 +2199,31 @@ class TransparentSpriteSM : SpriteSM {
                             break
                         }
 
-                        i_8 = anInt8870
-                        i_9 = anInt8873
-                        i_10 = anInt8874 + anInt8866
-                        i_11 = anInt8862
-                        if (i_9 >= 0 && i_9 - (anInt8851 shl 12) < 0) {
+                        i_8 = pixelOffset
+                        i_9 = uBase
+                        i_10 = vBase + vOffsetX
+                        i_11 = drawWidth
+                        if (i_9 >= 0 && i_9 - (imageWidth shl 12) < 0) {
                             if (i_10 < 0) {
-                                i_12 = (anInt8868 - 1 - i_10) / anInt8868
+                                i_12 = (dvdx - 1 - i_10) / dvdx
                                 i_11 += i_12
-                                i_10 += i_12 * anInt8868
+                                i_10 += i_12 * dvdx
                                 i_8 += i_12
                             }
 
-                            i_12 = (i_10 + 1 - (anInt8867 shl 12) - anInt8868) / anInt8868
+                            i_12 = (i_10 + 1 - (imageHeight shl 12) - dvdx) / dvdx
                             if (i_12 > i_11) {
                                 i_11 = i_12
                             }
 
                             i_13 = ints_1[i_7] - i_3
                             i_14 = -ints_2[i_7]
-                            i_15 = i_13 - (i_8 - anInt8870)
+                            i_15 = i_13 - (i_8 - pixelOffset)
                             if (i_15 > 0) {
                                 i_8 += i_15
                                 i_11 += i_15
-                                i_9 += i_15 * anInt8865
-                                i_10 += i_15 * anInt8868
+                                i_9 += i_15 * dudx
+                                i_10 += i_15 * dvdx
                             } else {
                                 i_14 -= i_15
                             }
@@ -2233,25 +2233,25 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_17 = i_16 ushr 24
                                 i_18 = 256 - i_17
                                 i_19 = ints_5[i_8]
                                 ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                                i_10 += anInt8868
+                                i_10 += dvdx
                                 ++i_11
                             }
                         }
                     }
 
                     ++i_6
-                    anInt8873 += anInt8869
-                    anInt8870 += anInt8850
+                    uBase += dudy
+                    pixelOffset += viewportStride
                 }
             }
-        } else if (anInt8865 < 0) {
-            if (anInt8868 == 0) {
-                i_6 = anInt8864
+        } else if (dudx < 0) {
+            if (dvdx == 0) {
+                i_6 = drawHeight
                 while (i_6 < 0) {
                     i_7 = i_6 + i_4
                     if (i_7 >= 0) {
@@ -2259,32 +2259,32 @@ class TransparentSpriteSM : SpriteSM {
                             break
                         }
 
-                        i_8 = anInt8870
-                        i_9 = anInt8873 + anInt8858
-                        i_10 = anInt8874
-                        i_11 = anInt8862
-                        if (i_10 >= 0 && i_10 - (anInt8867 shl 12) < 0) {
-                            i_12 = i_9 - (anInt8851 shl 12)
+                        i_8 = pixelOffset
+                        i_9 = uBase + uOffsetX
+                        i_10 = vBase
+                        i_11 = drawWidth
+                        if (i_10 >= 0 && i_10 - (imageHeight shl 12) < 0) {
+                            i_12 = i_9 - (imageWidth shl 12)
                             if (i_12 >= 0) {
-                                i_12 = (anInt8865 - i_12) / anInt8865
+                                i_12 = (dudx - i_12) / dudx
                                 i_11 += i_12
-                                i_9 += i_12 * anInt8865
+                                i_9 += i_12 * dudx
                                 i_8 += i_12
                             }
 
-                            i_12 = (i_9 - anInt8865) / anInt8865
+                            i_12 = (i_9 - dudx) / dudx
                             if (i_12 > i_11) {
                                 i_11 = i_12
                             }
 
                             i_13 = ints_1[i_7] - i_3
                             i_14 = -ints_2[i_7]
-                            i_15 = i_13 - (i_8 - anInt8870)
+                            i_15 = i_13 - (i_8 - pixelOffset)
                             if (i_15 > 0) {
                                 i_8 += i_15
                                 i_11 += i_15
-                                i_9 += i_15 * anInt8865
-                                i_10 += i_15 * anInt8868
+                                i_9 += i_15 * dudx
+                                i_10 += i_15 * dvdx
                             } else {
                                 i_14 -= i_15
                             }
@@ -2294,23 +2294,23 @@ class TransparentSpriteSM : SpriteSM {
                             }
 
                             while (i_11 < 0) {
-                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                                i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                                 i_17 = i_16 ushr 24
                                 i_18 = 256 - i_17
                                 i_19 = ints_5[i_8]
                                 ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                                i_9 += anInt8865
+                                i_9 += dudx
                                 ++i_11
                             }
                         }
                     }
 
                     ++i_6
-                    anInt8874 += anInt8876
-                    anInt8870 += anInt8850
+                    vBase += dvdy
+                    pixelOffset += viewportStride
                 }
-            } else if (anInt8868 < 0) {
-                i_6 = anInt8864
+            } else if (dvdx < 0) {
+                i_6 = drawHeight
                 while (i_6 < 0) {
                     i_7 = i_6 + i_4
                     if (i_7 >= 0) {
@@ -2318,46 +2318,46 @@ class TransparentSpriteSM : SpriteSM {
                             break
                         }
 
-                        i_8 = anInt8870
-                        i_9 = anInt8873 + anInt8858
-                        i_10 = anInt8874 + anInt8866
-                        i_11 = anInt8862
-                        i_12 = i_9 - (anInt8851 shl 12)
+                        i_8 = pixelOffset
+                        i_9 = uBase + uOffsetX
+                        i_10 = vBase + vOffsetX
+                        i_11 = drawWidth
+                        i_12 = i_9 - (imageWidth shl 12)
                         if (i_12 >= 0) {
-                            i_12 = (anInt8865 - i_12) / anInt8865
+                            i_12 = (dudx - i_12) / dudx
                             i_11 += i_12
-                            i_9 += i_12 * anInt8865
-                            i_10 += i_12 * anInt8868
+                            i_9 += i_12 * dudx
+                            i_10 += i_12 * dvdx
                             i_8 += i_12
                         }
 
-                        i_12 = (i_9 - anInt8865) / anInt8865
+                        i_12 = (i_9 - dudx) / dudx
                         if (i_12 > i_11) {
                             i_11 = i_12
                         }
 
-                        i_12 = i_10 - (anInt8867 shl 12)
+                        i_12 = i_10 - (imageHeight shl 12)
                         if (i_12 >= 0) {
-                            i_12 = (anInt8868 - i_12) / anInt8868
+                            i_12 = (dvdx - i_12) / dvdx
                             i_11 += i_12
-                            i_9 += i_12 * anInt8865
-                            i_10 += i_12 * anInt8868
+                            i_9 += i_12 * dudx
+                            i_10 += i_12 * dvdx
                             i_8 += i_12
                         }
 
-                        i_12 = (i_10 - anInt8868) / anInt8868
+                        i_12 = (i_10 - dvdx) / dvdx
                         if (i_12 > i_11) {
                             i_11 = i_12
                         }
 
                         i_13 = ints_1[i_7] - i_3
                         i_14 = -ints_2[i_7]
-                        i_15 = i_13 - (i_8 - anInt8870)
+                        i_15 = i_13 - (i_8 - pixelOffset)
                         if (i_15 > 0) {
                             i_8 += i_15
                             i_11 += i_15
-                            i_9 += i_15 * anInt8865
-                            i_10 += i_15 * anInt8868
+                            i_9 += i_15 * dudx
+                            i_10 += i_15 * dvdx
                         } else {
                             i_14 -= i_15
                         }
@@ -2367,24 +2367,24 @@ class TransparentSpriteSM : SpriteSM {
                         }
 
                         while (i_11 < 0) {
-                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                             i_17 = i_16 ushr 24
                             i_18 = 256 - i_17
                             i_19 = ints_5[i_8]
                             ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                            i_9 += anInt8865
-                            i_10 += anInt8868
+                            i_9 += dudx
+                            i_10 += dvdx
                             ++i_11
                         }
                     }
 
                     ++i_6
-                    anInt8873 += anInt8869
-                    anInt8874 += anInt8876
-                    anInt8870 += anInt8850
+                    uBase += dudy
+                    vBase += dvdy
+                    pixelOffset += viewportStride
                 }
             } else {
-                i_6 = anInt8864
+                i_6 = drawHeight
                 while (i_6 < 0) {
                     i_7 = i_6 + i_4
                     if (i_7 >= 0) {
@@ -2392,45 +2392,45 @@ class TransparentSpriteSM : SpriteSM {
                             break
                         }
 
-                        i_8 = anInt8870
-                        i_9 = anInt8873 + anInt8858
-                        i_10 = anInt8874 + anInt8866
-                        i_11 = anInt8862
-                        i_12 = i_9 - (anInt8851 shl 12)
+                        i_8 = pixelOffset
+                        i_9 = uBase + uOffsetX
+                        i_10 = vBase + vOffsetX
+                        i_11 = drawWidth
+                        i_12 = i_9 - (imageWidth shl 12)
                         if (i_12 >= 0) {
-                            i_12 = (anInt8865 - i_12) / anInt8865
+                            i_12 = (dudx - i_12) / dudx
                             i_11 += i_12
-                            i_9 += i_12 * anInt8865
-                            i_10 += i_12 * anInt8868
+                            i_9 += i_12 * dudx
+                            i_10 += i_12 * dvdx
                             i_8 += i_12
                         }
 
-                        i_12 = (i_9 - anInt8865) / anInt8865
+                        i_12 = (i_9 - dudx) / dudx
                         if (i_12 > i_11) {
                             i_11 = i_12
                         }
 
                         if (i_10 < 0) {
-                            i_12 = (anInt8868 - 1 - i_10) / anInt8868
+                            i_12 = (dvdx - 1 - i_10) / dvdx
                             i_11 += i_12
-                            i_9 += i_12 * anInt8865
-                            i_10 += i_12 * anInt8868
+                            i_9 += i_12 * dudx
+                            i_10 += i_12 * dvdx
                             i_8 += i_12
                         }
 
-                        i_12 = (i_10 + 1 - (anInt8867 shl 12) - anInt8868) / anInt8868
+                        i_12 = (i_10 + 1 - (imageHeight shl 12) - dvdx) / dvdx
                         if (i_12 > i_11) {
                             i_11 = i_12
                         }
 
                         i_13 = ints_1[i_7] - i_3
                         i_14 = -ints_2[i_7]
-                        i_15 = i_13 - (i_8 - anInt8870)
+                        i_15 = i_13 - (i_8 - pixelOffset)
                         if (i_15 > 0) {
                             i_8 += i_15
                             i_11 += i_15
-                            i_9 += i_15 * anInt8865
-                            i_10 += i_15 * anInt8868
+                            i_9 += i_15 * dudx
+                            i_10 += i_15 * dvdx
                         } else {
                             i_14 -= i_15
                         }
@@ -2440,25 +2440,25 @@ class TransparentSpriteSM : SpriteSM {
                         }
 
                         while (i_11 < 0) {
-                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                             i_17 = i_16 ushr 24
                             i_18 = 256 - i_17
                             i_19 = ints_5[i_8]
                             ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                            i_9 += anInt8865
-                            i_10 += anInt8868
+                            i_9 += dudx
+                            i_10 += dvdx
                             ++i_11
                         }
                     }
 
                     ++i_6
-                    anInt8873 += anInt8869
-                    anInt8874 += anInt8876
-                    anInt8870 += anInt8850
+                    uBase += dudy
+                    vBase += dvdy
+                    pixelOffset += viewportStride
                 }
             }
-        } else if (anInt8868 == 0) {
-            i_6 = anInt8864
+        } else if (dvdx == 0) {
+            i_6 = drawHeight
             while (i_6 < 0) {
                 i_7 = i_6 + i_4
                 if (i_7 >= 0) {
@@ -2466,31 +2466,31 @@ class TransparentSpriteSM : SpriteSM {
                         break
                     }
 
-                    i_8 = anInt8870
-                    i_9 = anInt8873 + anInt8858
-                    i_10 = anInt8874
-                    i_11 = anInt8862
-                    if (i_10 >= 0 && i_10 - (anInt8867 shl 12) < 0) {
+                    i_8 = pixelOffset
+                    i_9 = uBase + uOffsetX
+                    i_10 = vBase
+                    i_11 = drawWidth
+                    if (i_10 >= 0 && i_10 - (imageHeight shl 12) < 0) {
                         if (i_9 < 0) {
-                            i_12 = (anInt8865 - 1 - i_9) / anInt8865
+                            i_12 = (dudx - 1 - i_9) / dudx
                             i_11 += i_12
-                            i_9 += i_12 * anInt8865
+                            i_9 += i_12 * dudx
                             i_8 += i_12
                         }
 
-                        i_12 = (i_9 + 1 - (anInt8851 shl 12) - anInt8865) / anInt8865
+                        i_12 = (i_9 + 1 - (imageWidth shl 12) - dudx) / dudx
                         if (i_12 > i_11) {
                             i_11 = i_12
                         }
 
                         i_13 = ints_1[i_7] - i_3
                         i_14 = -ints_2[i_7]
-                        i_15 = i_13 - (i_8 - anInt8870)
+                        i_15 = i_13 - (i_8 - pixelOffset)
                         if (i_15 > 0) {
                             i_8 += i_15
                             i_11 += i_15
-                            i_9 += i_15 * anInt8865
-                            i_10 += i_15 * anInt8868
+                            i_9 += i_15 * dudx
+                            i_10 += i_15 * dvdx
                         } else {
                             i_14 -= i_15
                         }
@@ -2500,24 +2500,24 @@ class TransparentSpriteSM : SpriteSM {
                         }
 
                         while (i_11 < 0) {
-                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                            i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                             i_17 = i_16 ushr 24
                             i_18 = 256 - i_17
                             i_19 = ints_5[i_8]
                             ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                            i_9 += anInt8865
+                            i_9 += dudx
                             ++i_11
                         }
                     }
                 }
 
                 ++i_6
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
-        } else if (anInt8868 < 0) {
-            i_6 = anInt8864
+        } else if (dvdx < 0) {
+            i_6 = drawHeight
             while (i_6 < 0) {
                 i_7 = i_6 + i_4
                 if (i_7 >= 0) {
@@ -2525,45 +2525,45 @@ class TransparentSpriteSM : SpriteSM {
                         break
                     }
 
-                    i_8 = anInt8870
-                    i_9 = anInt8873 + anInt8858
-                    i_10 = anInt8874 + anInt8866
-                    i_11 = anInt8862
+                    i_8 = pixelOffset
+                    i_9 = uBase + uOffsetX
+                    i_10 = vBase + vOffsetX
+                    i_11 = drawWidth
                     if (i_9 < 0) {
-                        i_12 = (anInt8865 - 1 - i_9) / anInt8865
+                        i_12 = (dudx - 1 - i_9) / dudx
                         i_11 += i_12
-                        i_9 += i_12 * anInt8865
-                        i_10 += i_12 * anInt8868
+                        i_9 += i_12 * dudx
+                        i_10 += i_12 * dvdx
                         i_8 += i_12
                     }
 
-                    i_12 = (i_9 + 1 - (anInt8851 shl 12) - anInt8865) / anInt8865
+                    i_12 = (i_9 + 1 - (imageWidth shl 12) - dudx) / dudx
                     if (i_12 > i_11) {
                         i_11 = i_12
                     }
 
-                    i_12 = i_10 - (anInt8867 shl 12)
+                    i_12 = i_10 - (imageHeight shl 12)
                     if (i_12 >= 0) {
-                        i_12 = (anInt8868 - i_12) / anInt8868
+                        i_12 = (dvdx - i_12) / dvdx
                         i_11 += i_12
-                        i_9 += i_12 * anInt8865
-                        i_10 += i_12 * anInt8868
+                        i_9 += i_12 * dudx
+                        i_10 += i_12 * dvdx
                         i_8 += i_12
                     }
 
-                    i_12 = (i_10 - anInt8868) / anInt8868
+                    i_12 = (i_10 - dvdx) / dvdx
                     if (i_12 > i_11) {
                         i_11 = i_12
                     }
 
                     i_13 = ints_1[i_7] - i_3
                     i_14 = -ints_2[i_7]
-                    i_15 = i_13 - (i_8 - anInt8870)
+                    i_15 = i_13 - (i_8 - pixelOffset)
                     if (i_15 > 0) {
                         i_8 += i_15
                         i_11 += i_15
-                        i_9 += i_15 * anInt8865
-                        i_10 += i_15 * anInt8868
+                        i_9 += i_15 * dudx
+                        i_10 += i_15 * dvdx
                     } else {
                         i_14 -= i_15
                     }
@@ -2573,24 +2573,24 @@ class TransparentSpriteSM : SpriteSM {
                     }
 
                     while (i_11 < 0) {
-                        i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                        i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                         i_17 = i_16 ushr 24
                         i_18 = 256 - i_17
                         i_19 = ints_5[i_8]
                         ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                        i_9 += anInt8865
-                        i_10 += anInt8868
+                        i_9 += dudx
+                        i_10 += dvdx
                         ++i_11
                     }
                 }
 
                 ++i_6
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
         } else {
-            i_6 = anInt8864
+            i_6 = drawHeight
             while (i_6 < 0) {
                 i_7 = i_6 + i_4
                 if (i_7 >= 0) {
@@ -2598,44 +2598,44 @@ class TransparentSpriteSM : SpriteSM {
                         break
                     }
 
-                    i_8 = anInt8870
-                    i_9 = anInt8873 + anInt8858
-                    i_10 = anInt8874 + anInt8866
-                    i_11 = anInt8862
+                    i_8 = pixelOffset
+                    i_9 = uBase + uOffsetX
+                    i_10 = vBase + vOffsetX
+                    i_11 = drawWidth
                     if (i_9 < 0) {
-                        i_12 = (anInt8865 - 1 - i_9) / anInt8865
+                        i_12 = (dudx - 1 - i_9) / dudx
                         i_11 += i_12
-                        i_9 += i_12 * anInt8865
-                        i_10 += i_12 * anInt8868
+                        i_9 += i_12 * dudx
+                        i_10 += i_12 * dvdx
                         i_8 += i_12
                     }
 
-                    i_12 = (i_9 + 1 - (anInt8851 shl 12) - anInt8865) / anInt8865
+                    i_12 = (i_9 + 1 - (imageWidth shl 12) - dudx) / dudx
                     if (i_12 > i_11) {
                         i_11 = i_12
                     }
 
                     if (i_10 < 0) {
-                        i_12 = (anInt8868 - 1 - i_10) / anInt8868
+                        i_12 = (dvdx - 1 - i_10) / dvdx
                         i_11 += i_12
-                        i_9 += i_12 * anInt8865
-                        i_10 += i_12 * anInt8868
+                        i_9 += i_12 * dudx
+                        i_10 += i_12 * dvdx
                         i_8 += i_12
                     }
 
-                    i_12 = (i_10 + 1 - (anInt8867 shl 12) - anInt8868) / anInt8868
+                    i_12 = (i_10 + 1 - (imageHeight shl 12) - dvdx) / dvdx
                     if (i_12 > i_11) {
                         i_11 = i_12
                     }
 
                     i_13 = ints_1[i_7] - i_3
                     i_14 = -ints_2[i_7]
-                    i_15 = i_13 - (i_8 - anInt8870)
+                    i_15 = i_13 - (i_8 - pixelOffset)
                     if (i_15 > 0) {
                         i_8 += i_15
                         i_11 += i_15
-                        i_9 += i_15 * anInt8865
-                        i_10 += i_15 * anInt8868
+                        i_9 += i_15 * dudx
+                        i_10 += i_15 * dvdx
                     } else {
                         i_14 -= i_15
                     }
@@ -2645,21 +2645,21 @@ class TransparentSpriteSM : SpriteSM {
                     }
 
                     while (i_11 < 0) {
-                        i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * anInt8851]
+                        i_16 = this.anIntArray10235[(i_9 shr 12) + (i_10 shr 12) * imageWidth]
                         i_17 = i_16 ushr 24
                         i_18 = 256 - i_17
                         i_19 = ints_5[i_8]
                         ints_5[i_8++] = ((i_16 and 0xff00ff) * i_17 + (i_19 and 0xff00ff) * i_18 and -16711936) + (i_17 * (i_16 and 0xff00) + i_18 * (i_19 and 0xff00) and 0xff0000) shr 8
-                        i_9 += anInt8865
-                        i_10 += anInt8868
+                        i_9 += dudx
+                        i_10 += dvdx
                         ++i_11
                     }
                 }
 
                 ++i_6
-                anInt8873 += anInt8869
-                anInt8874 += anInt8876
-                anInt8870 += anInt8850
+                uBase += dudy
+                vBase += dvdy
+                pixelOffset += viewportStride
             }
         }
     }
@@ -2678,29 +2678,29 @@ class TransparentSpriteSM : SpriteSM {
             var i_10 = 0
             var i_11 = 0
             val i_12 = toolkit.viewportWidth
-            val i_13 = anInt8853 + anInt8851 + anInt8855
-            val i_14 = anInt8854 + anInt8867 + anInt8856
+            val i_13 = offsetX + imageWidth + trimRight
+            val i_14 = offsetY + imageHeight + trimBottom
             val i_15 = (i_13 shl 16) / i_33
             val i_16 = (i_14 shl 16) / i_41
             var i_17: Int
-            if (anInt8853 > 0) {
-                i_17 = (i_15 + (anInt8853 shl 16) - 1) / i_15
+            if (offsetX > 0) {
+                i_17 = (i_15 + (offsetX shl 16) - 1) / i_15
                 i_1Var += i_17
-                i_10 += i_17 * i_15 - (anInt8853 shl 16)
+                i_10 += i_17 * i_15 - (offsetX shl 16)
             }
 
-            if (anInt8854 > 0) {
-                i_17 = (i_16 + (anInt8854 shl 16) - 1) / i_16
+            if (offsetY > 0) {
+                i_17 = (i_16 + (offsetY shl 16) - 1) / i_16
                 i_2Var += i_17
-                i_11 += i_17 * i_16 - (anInt8854 shl 16)
+                i_11 += i_17 * i_16 - (offsetY shl 16)
             }
 
-            if (anInt8851 < i_13) {
-                i_33 = ((anInt8851 shl 16) - i_10 + i_15 - 1) / i_15
+            if (imageWidth < i_13) {
+                i_33 = ((imageWidth shl 16) - i_10 + i_15 - 1) / i_15
             }
 
-            if (anInt8867 < i_14) {
-                i_41 = ((anInt8867 shl 16) - i_11 + i_16 - 1) / i_16
+            if (imageHeight < i_14) {
+                i_41 = ((imageHeight shl 16) - i_11 + i_16 - 1) / i_16
             }
 
             i_17 = i_12 * i_2Var + i_1Var
@@ -2747,7 +2747,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_20 = -i_41
                     while (i_20 < 0) {
-                        i_21 = anInt8851 * (i_11 shr 16)
+                        i_21 = imageWidth * (i_11 shr 16)
 
                         i_22 = -i_33
                         while (i_22 < 0) {
@@ -2769,7 +2769,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_23 = -i_41
                     while (i_23 < 0) {
-                        i_24 = anInt8851 * (i_11 shr 16)
+                        i_24 = imageWidth * (i_11 shr 16)
 
                         i_25 = -i_33
                         while (i_25 < 0) {
@@ -2792,7 +2792,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_20 = -i_41
                     while (i_20 < 0) {
-                        i_21 = anInt8851 * (i_11 shr 16)
+                        i_21 = imageWidth * (i_11 shr 16)
 
                         i_22 = -i_33
                         while (i_22 < 0) {
@@ -2824,7 +2824,7 @@ class TransparentSpriteSM : SpriteSM {
 
                     i_24 = -i_41
                     while (i_24 < 0) {
-                        i_25 = anInt8851 * (i_11 shr 16)
+                        i_25 = imageWidth * (i_11 shr 16)
 
                         i_26 = -i_33
                         while (i_26 < 0) {
@@ -2852,7 +2852,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_20 = -i_41
                         while (i_20 < 0) {
-                            i_21 = anInt8851 * (i_11 shr 16)
+                            i_21 = imageWidth * (i_11 shr 16)
 
                             i_22 = -i_33
                             while (i_22 < 0) {
@@ -2875,7 +2875,7 @@ class TransparentSpriteSM : SpriteSM {
                         if ((i_61 and 0xffffff) == 16777215) {
                             i_20 = -i_41
                             while (i_20 < 0) {
-                                i_21 = anInt8851 * (i_11 shr 16)
+                                i_21 = imageWidth * (i_11 shr 16)
 
                                 i_22 = -i_33
                                 while (i_22 < 0) {
@@ -2900,7 +2900,7 @@ class TransparentSpriteSM : SpriteSM {
 
                             i_23 = -i_41
                             while (i_23 < 0) {
-                                i_24 = anInt8851 * (i_11 shr 16)
+                                i_24 = imageWidth * (i_11 shr 16)
 
                                 i_25 = -i_33
                                 while (i_25 < 0) {
@@ -2936,7 +2936,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_20 = -i_41
                         while (i_20 < 0) {
-                            i_21 = anInt8851 * (i_11 shr 16)
+                            i_21 = imageWidth * (i_11 shr 16)
 
                             i_22 = -i_33
                             while (i_22 < 0) {
@@ -2977,7 +2977,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_24 = -i_41
                         while (i_24 < 0) {
-                            i_25 = anInt8851 * (i_11 shr 16)
+                            i_25 = imageWidth * (i_11 shr 16)
 
                             i_26 = -i_33
                             while (i_26 < 0) {
@@ -3009,7 +3009,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_20 = -i_41
                         while (i_20 < 0) {
-                            i_21 = anInt8851 * (i_11 shr 16)
+                            i_21 = imageWidth * (i_11 shr 16)
 
                             i_22 = -i_33
                             while (i_22 < 0) {
@@ -3041,7 +3041,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_23 = -i_41
                         while (i_23 < 0) {
-                            i_24 = anInt8851 * (i_11 shr 16)
+                            i_24 = imageWidth * (i_11 shr 16)
 
                             i_25 = -i_33
                             while (i_25 < 0) {
@@ -3074,7 +3074,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_20 = -i_41
                         while (i_20 < 0) {
-                            i_21 = anInt8851 * (i_11 shr 16)
+                            i_21 = imageWidth * (i_11 shr 16)
 
                             i_22 = -i_33
                             while (i_22 < 0) {
@@ -3111,7 +3111,7 @@ class TransparentSpriteSM : SpriteSM {
 
                         i_24 = -i_41
                         while (i_24 < 0) {
-                            i_25 = anInt8851 * (i_11 shr 16)
+                            i_25 = imageWidth * (i_11 shr 16)
 
                             i_26 = -i_33
                             while (i_26 < 0) {

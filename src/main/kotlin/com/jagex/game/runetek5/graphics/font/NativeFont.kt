@@ -194,10 +194,10 @@ class NativeFont(
         class476.setColours(3, i_4)
         val f_7 = aGraphicalRendererSub29321.getDisplay()!!.getWidth().toFloat()
         val f_8 = aGraphicalRendererSub29321.getDisplay()!!.getHeight().toFloat()
-        class476.worldViewProjectionMatrix.method6525(2.0f / f_7, 2.0f / f_8, 1.0f, 1.0f)
-        class476.worldViewProjectionMatrix.faceList[12] = (i_2 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_7 - 1.0f
-        class476.worldViewProjectionMatrix.faceList[13] = (i_3 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_8 - 1.0f
-        class476.worldViewProjectionMatrix.faceList[14] = -1.0f
+        class476.worldViewProjectionMatrix.setDiagonal(2.0f / f_7, 2.0f / f_8, 1.0f, 1.0f)
+        class476.worldViewProjectionMatrix.elements[12] = (i_2 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_7 - 1.0f
+        class476.worldViewProjectionMatrix.elements[13] = (i_3 + aGraphicalRendererSub29321.getPixelOffset()) * 2.0f / f_8 - 1.0f
+        class476.worldViewProjectionMatrix.elements[14] = -1.0f
         class476.spriteTexCoordMatrix.identity()
         class476.vertexStream = anInterface49320
         class476.startVertex = var_1 * 4

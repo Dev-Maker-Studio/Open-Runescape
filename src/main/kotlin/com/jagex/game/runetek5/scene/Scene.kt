@@ -604,7 +604,7 @@ class Scene(
 
     fun pushIntoStack(renderedNode: SceneGraphEntity?) {
         if (renderedNode != null) {
-            renderedNode.method11176()
+            renderedNode.detach()
             for (index in 0..1) {
                 var childNode: SceneGraphEntity? = null
                 var primaryNode: SceneGraphEntity? = this.renderObjects3d[index]

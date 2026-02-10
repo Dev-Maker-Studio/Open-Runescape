@@ -109,7 +109,7 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun method2599(character: Char, language: Language): Char {
+    fun stripDiacritics(character: Char, language: Language): Char {
         if (character in '\u00c0'..'\u00ff') {
             when {
                 character <= '\u00c6' -> return 'A'
@@ -140,7 +140,7 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun method7557(str1: CharSequence, str2: CharSequence, language: Language): Int {
+    fun compareLocaleAware(str1: CharSequence, str2: CharSequence, language: Language): Int {
         val length1 = str1.length
         val length2 = str2.length
         var index1 = 0
@@ -160,8 +160,8 @@ object TextUtils {
 
             var8 = Utils.method7778(var10)
             var9 = Utils.method7778(var15)
-            val char10 = method2599(var10, language)
-            val char15 = method2599(var15, language)
+            val char10 = stripDiacritics(var10, language)
+            val char15 = stripDiacritics(var15, language)
 
             if (char10 != char15 && Character.toUpperCase(char10) != Character.toUpperCase(char15)) {
                 val lower10 = Character.toLowerCase(char10)
@@ -299,7 +299,7 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun method3600(b0: Byte): Boolean {
+    fun isValidCp1252Byte(b0: Byte): Boolean {
         val value = b0.toInt() and 0xff
         return value != 0 && (value < 128 || value >= 160 || Utils.UNICODE_TABLE[value - 128].code != 0)
     }
@@ -342,7 +342,7 @@ object TextUtils {
                     }
                 }
 
-                if (fullCp1252 != 0 && method3600(fullCp1252.toByte())) {
+                if (fullCp1252 != 0 && isValidCp1252Byte(fullCp1252.toByte())) {
                     sb.append(Utils.cp1252ToChar(fullCp1252.toByte()))
                 }
                 charIndex += 2

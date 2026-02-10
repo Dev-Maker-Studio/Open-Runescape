@@ -180,7 +180,7 @@ object InterfaceComponentRenderer {
                         if (component.contentType != null) {
                             if (component.contentType == GAME_WINDOW || component.contentType == CONTENT_TYPE_1403) {
                                 Client.drawGameArea(startX, startY, component.width, component.height, component.contentType == CONTENT_TYPE_1403)
-                                EntityUpdating.method12366(componentReference, clipStartX, clipStartY, endX, endY, startX, startY)
+                                EntityUpdating.drawOverheadInterfaces(componentReference, clipStartX, clipStartY, endX, endY, startX, startY)
                                 Renderers.activeToolkit!!.calculateViewportCenter()
                                 Renderers.activeToolkit!!.setClipping(clippingLeft, clippingTop, clippingRight, clippingBottom)
                                 Client.IS_COMPONENT_ON_TOP[componentReference] = true
@@ -461,12 +461,12 @@ object InterfaceComponentRenderer {
                                     viewRangeEnd += component.spriteScale
                                     if (component.usesOrthogonal) {
                                         if (component.hasOrigin) {
-                                            matrix44!!.method6532(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), component.spriteScale.toFloat())
+                                            matrix44!!.setPerspectiveFromViewport(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), component.spriteScale.toFloat())
                                         } else {
-                                            matrix44!!.method6532(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), (component.spriteScale shl 2).toFloat())
+                                            matrix44!!.setPerspectiveFromViewport(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat(), (component.spriteScale shl 2).toFloat())
                                         }
                                     } else {
-                                        matrix44!!.method6531(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat())
+                                        matrix44!!.setPerspective(modelX.toFloat(), modelY.toFloat(), width.toFloat(), height.toFloat(), viewRangeStart.toFloat(), viewRangeEnd.toFloat(), GameShell.screenCanvasWidth.toFloat(), (GameShell.screenCanvasHeight * -969250379).toFloat())
                                     }
                                     Renderers.activeToolkit!!.setModelMatrix(matrix44)
                                     Renderers.activeToolkit!!.applyClearFlags(2, 0)

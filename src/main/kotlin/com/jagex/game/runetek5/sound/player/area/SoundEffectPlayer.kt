@@ -32,7 +32,7 @@ import com.jagex.game.runetek5.vardomain.VarProviders
 object SoundEffectPlayer {
 
 	@JvmStatic
-	fun method1491(i_0: Int) {
+	fun setMusicVolume(i_0: Int) {
 	    if (SoundResourceManager.songLoadState != 0) {
 	        AreaSoundPlayer.SOUND_LEVEL = i_0
 	    } else {
@@ -47,10 +47,10 @@ object SoundEffectPlayer {
 	}
 
 	@JvmStatic
-	fun method14675(plane: Int, absX: Int, absZ: Int, step: Int) {
+	fun updateAllAmbientSounds(plane: Int, absX: Int, absZ: Int, step: Int) {
 	    var ambient: AmbientSound? = AmbientSound.LOC_AMBIENT_SOUNDS.getFirst() as? AmbientSound
 	    while (ambient != null) {
-	        method2964(ambient, plane, absX, absZ, step)
+	        updateAmbientSound(ambient, plane, absX, absZ, step)
 	        ambient = AmbientSound.LOC_AMBIENT_SOUNDS.next() as? AmbientSound
 	    }
 	    var sound: AmbientSound? = AmbientSound.NPC_AMBIENT_SOUNDS.getFirst() as? AmbientSound
@@ -113,7 +113,7 @@ object SoundEffectPlayer {
 	        sound.absStartY = abs.z.toInt()
 	        sound.absEndY = abs.z.toInt() + (sound.npcEntity!!.getSize() shl 8)
 	        sound.plane = sound.npcEntity!!.plane.toInt()
-	        method2964(sound, plane, absX, absZ, step)
+	        updateAmbientSound(sound, plane, absX, absZ, step)
 	        sound = AmbientSound.NPC_AMBIENT_SOUNDS.next() as? AmbientSound
 	    }
 	    var playerSound: AmbientSound? = AmbientSound.PLAYER_AMBIENT_SOUNDS.first() as? AmbientSound
@@ -166,13 +166,13 @@ object SoundEffectPlayer {
 	        playerSound.absStartY = abs.z.toInt()
 	        playerSound.absEndY = abs.z.toInt() + (playerSound.playerEntity!!.getSize() shl 8)
 	        playerSound.plane = playerSound.playerEntity!!.plane.toInt()
-	        method2964(playerSound, plane, absX, absZ, step)
+	        updateAmbientSound(playerSound, plane, absX, absZ, step)
 	        playerSound = AmbientSound.PLAYER_AMBIENT_SOUNDS.next() as? AmbientSound
 	    }
 	}
 
 	@JvmStatic
-	fun method2964(ambientSound: AmbientSound, plane: Int, absX: Int, absY: Int, step: Int) {
+	fun updateAmbientSound(ambientSound: AmbientSound, plane: Int, absX: Int, absY: Int, step: Int) {
 	    if (ambientSound.soundEffectId != -1 || ambientSound.ambientSoundGroupIds != null) {
 	        var hearDistance = 0
 	        val preferedVolume = ambientSound.ambientSoundVolume * PreferenceManager.preferences!!.ambientSoundVolume!!.getValue() shr 8
@@ -366,13 +366,13 @@ object SoundEffectPlayer {
 	fun playSoundJingle(jingleId: Int, volume: Int) {
 	    val adjustedVolume = volume * PreferenceManager.preferences!!.musicVolume!!.getValue() shr 8
 	    if (adjustedVolume != 0 && jingleId != -1) {
-	        if (!soundJinglePlaying && AreaSoundPlayer.currentMusicArchive != -1 && SongReference.method1966() && !StaticMethods.method6140()) {
-	            jingleStream = method7272()
+	        if (!soundJinglePlaying && AreaSoundPlayer.currentMusicArchive != -1 && SongReference.method1966() && !StaticMethods.isSongTransitioning()) {
+	            jingleStream = getCurrentMidiStream()
 	            SongPlayer.method3912()
 	            val jingleStreamImpl = getStream(jingleStream)
 	            setJingleStream(jingleStreamImpl)
 	        }
-	        AreaSoundPlayer.method13400(Resource.JINGLE!!, jingleId, adjustedVolume)
+	        AreaSoundPlayer.playMusic(Resource.JINGLE!!, jingleId, adjustedVolume)
 	        SongPlayer.method2580(-1, 255)
 	        soundJinglePlaying = true
 	    }
@@ -441,7 +441,7 @@ object SoundEffectPlayer {
 	}
 
 	@JvmStatic
-	fun method7272(): MidiPcmStream {
+	fun getCurrentMidiStream(): MidiPcmStream {
 	    return SoundResourceManager.midiPcmStream!!
 	}
 }

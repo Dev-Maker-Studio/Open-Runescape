@@ -47,8 +47,8 @@ object AreaSoundPlayer {
     }
 
     @JvmStatic
-    fun method1623() {
-        PacketEncoder.method3675()
+    fun updateAreaSounds() {
+        PacketEncoder.checkSongLoaded()
         var soundIndex = 0
         while (soundIndex < AREA_SOUND_CACHE_SIZE) {
             val sound = AREA_SOUND_CACHE[soundIndex]!!
@@ -157,9 +157,9 @@ object AreaSoundPlayer {
         if (SoundEffectPlayer.soundJinglePlaying && !SongReference.method1966()) {
             if (PreferenceManager.preferences!!.musicVolume!!.getValue() != 0 && currentMusicArchive != -1) {
                 if (SoundEffectPlayer.jingleStream != null) {
-                    method3690(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences!!.musicVolume!!.getValue(), SoundEffectPlayer.jingleStream!!)
+                    playMusicWithTransition(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences!!.musicVolume!!.getValue(), SoundEffectPlayer.jingleStream!!)
                 } else {
-                    method13400(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences!!.musicVolume!!.getValue())
+                    playMusic(Resource.MUSIC!!, currentMusicArchive, PreferenceManager.preferences!!.musicVolume!!.getValue())
                 }
             }
             SoundEffectPlayer.soundJinglePlaying = false
@@ -180,7 +180,7 @@ object AreaSoundPlayer {
         SoundResourceManager.musicFileId = 0
         SoundResourceManager.pendingMidiStream = null
         SOUND_LEVEL = soundLevel
-        StaticMethods.aBool1962 = false
+        StaticMethods.songLooping = false
         CutsceneBasicMovement.anInt9440 = 2
         SongPlayer.songTransition = null
     }
@@ -264,37 +264,37 @@ object AreaSoundPlayer {
     }
 
     @JvmStatic
-    fun method3690(musicResource: Js5ResourceProvider, archive: Int, volume: Int, class282Sub15Sub25: MidiPcmStream) {
-        method13400(musicResource, archive, volume)
+    fun playMusicWithTransition(musicResource: Js5ResourceProvider, archive: Int, volume: Int, class282Sub15Sub25: MidiPcmStream) {
+        playMusic(musicResource, archive, volume)
         SoundResourceManager.pendingMidiStream = class282Sub15Sub25
     }
 
     @JvmStatic
-    fun method13400(musicResource: Js5ResourceProvider, musicArchive: Int, soundLevel: Int) {
-        method4827(musicResource, musicArchive, soundLevel)
+    fun playMusic(musicResource: Js5ResourceProvider, musicArchive: Int, soundLevel: Int) {
+        playMusicFromStart(musicResource, musicArchive, soundLevel)
     }
 
     @JvmStatic
-    fun method4827(musicResource: Js5ResourceProvider, musicArchive: Int, soundLevel: Int) {
-        method1859(musicResource, musicArchive, 0, soundLevel, false)
+    fun playMusicFromStart(musicResource: Js5ResourceProvider, musicArchive: Int, soundLevel: Int) {
+        loadAndPlayMusic(musicResource, musicArchive, 0, soundLevel, false)
     }
 
     @JvmStatic
-    fun method1859(musicResource: Js5ResourceProvider, musicArchive: Int, musicFile: Int, soundLevel: Int, bool4: Boolean) {
+    fun loadAndPlayMusic(musicResource: Js5ResourceProvider, musicArchive: Int, musicFile: Int, soundLevel: Int, bool4: Boolean) {
         SoundResourceManager.songLoadState = 1
         MUSIC_RESOURCE = musicResource
         SongPlayer.musicArchiveId = musicArchive
         SoundResourceManager.musicFileId = musicFile
         SoundResourceManager.pendingMidiStream = null
         SOUND_LEVEL = soundLevel
-        StaticMethods.aBool1962 = bool4
+        StaticMethods.songLooping = bool4
         CutsceneBasicMovement.anInt9440 = 10000
         SoundResourceManager.songStartPosition = 0
-        StaticMethods.anInt4664 = 0
+        StaticMethods.songFadeInRate = 0
     }
 
     @JvmStatic
-    fun method5961() {
+    fun updateSpatialMusicVolume() {
         if (SongPlayer.primarySound != null) {
             val abs = Vector3Pool.vector3From(PlayerUpdate.MY_PLAYER!!.getAbsolutePosition().coords)
             val base = Resource.mapRegion!!.getBaseCoordinates()

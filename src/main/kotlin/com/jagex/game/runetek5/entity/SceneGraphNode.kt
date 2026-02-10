@@ -20,11 +20,11 @@ import com.jagex.game.runetek5.movement.CoordinateSpace
 open class SceneGraphNode {
 
     @JvmField var calculateAbsolutePosition: Boolean = true
-    @JvmField var aBool5945: Boolean = true
+    @JvmField var calculateNegatedPosition: Boolean = true
     @JvmField var projectionUpdate: Boolean = false
-    @JvmField var aGraphNode5944: SceneGraphNode? = null
-    @JvmField var aGraphNode5943: SceneGraphNode? = null
-    @JvmField var aGraphNode5940: SceneGraphNode? = null
+    @JvmField var firstChild: SceneGraphNode? = null
+    @JvmField var parent: SceneGraphNode? = null
+    @JvmField var nextSibling: SceneGraphNode? = null
     @JvmField val basePosition: CoordinateSpace = CoordinateSpace()
 
     /**
@@ -32,7 +32,7 @@ open class SceneGraphNode {
      * Private backing field - use getAbsolutePosition() for public access
      */
     private val _absolutePosition: CoordinateSpace = CoordinateSpace()
-    private val _aClass3055939: CoordinateSpace = CoordinateSpace()
+    private val _negatedPosition: CoordinateSpace = CoordinateSpace()
     private val _projectionMatrix: Matrix43
 
     init {
@@ -40,9 +40,9 @@ open class SceneGraphNode {
         Matrix44()
         _projectionMatrix = Matrix43()
         projectionUpdate = true
-        aGraphNode5943 = null
-        aGraphNode5944 = null
-        aGraphNode5940 = null
+        parent = null
+        firstChild = null
+        nextSibling = null
     }
 
     open fun getBasePosition(): CoordinateSpace {
@@ -55,9 +55,9 @@ open class SceneGraphNode {
     open fun getAbsolutePosition(): CoordinateSpace {
         if (calculateAbsolutePosition) {
             calculateAbsolutePosition = false
-            if (aGraphNode5943 != null) {
+            if (parent != null) {
                 _absolutePosition.copy(basePosition)
-                _absolutePosition.offset(aGraphNode5943!!.getAbsolutePosition())
+                _absolutePosition.offset(parent!!.getAbsolutePosition())
             } else {
                 _absolutePosition.copy(basePosition)
             }
@@ -66,10 +66,10 @@ open class SceneGraphNode {
     }
 
     open fun getOffset(): CoordinateSpace {
-        if (aBool5945) {
-            aBool5945 = false
-            _aClass3055939.copy(getAbsolutePosition())
-            _aClass3055939.negate()
+        if (calculateNegatedPosition) {
+            calculateNegatedPosition = false
+            _negatedPosition.copy(getAbsolutePosition())
+            _negatedPosition.negate()
         }
 
         return _absolutePosition
@@ -86,23 +86,23 @@ open class SceneGraphNode {
     open fun setBasePosition(copyFrom: Vector3) {
         basePosition.coords.copy(copyFrom)
         requestProjectionUpdate()
-        if (aGraphNode5944 != null) {
-            aGraphNode5944!!.update()
+        if (firstChild != null) {
+            firstChild!!.update()
         }
     }
 
     open fun setBasePosition(baseX: Float, plane: Float, baseY: Float) {
         basePosition.coords.set(baseX, plane, baseY)
         requestProjectionUpdate()
-        if (aGraphNode5944 != null) {
-            aGraphNode5944!!.update()
+        if (firstChild != null) {
+            firstChild!!.update()
         }
     }
 
     open fun setAbsolutePosition(abs: CoordinateSpace) {
-        if (aGraphNode5943 != null) {
+        if (parent != null) {
             val copy = CoordinateSpace(abs)
-            copy.offset(aGraphNode5943!!.getOffset())
+            copy.offset(parent!!.getOffset())
             setBasePosition(copy)
         } else {
             setBasePosition(abs)
@@ -112,70 +112,70 @@ open class SceneGraphNode {
     open fun setBasePosition(copyFrom: CoordinateSpace) {
         basePosition.copy(copyFrom)
         requestProjectionUpdate()
-        if (aGraphNode5944 != null) {
-            aGraphNode5944!!.update()
+        if (firstChild != null) {
+            firstChild!!.update()
         }
     }
 
     open fun requestProjectionUpdate() {
         calculateAbsolutePosition = true
-        aBool5945 = true
+        calculateNegatedPosition = true
         projectionUpdate = true
     }
 
-    open fun method11176() {
-        if (aGraphNode5943 != null) {
-            var sceneGraphNode = aGraphNode5943!!.aGraphNode5944
+    open fun detach() {
+        if (parent != null) {
+            var sceneGraphNode = parent!!.firstChild
             if (sceneGraphNode === this) {
-                aGraphNode5943!!.aGraphNode5944 = aGraphNode5940
+                parent!!.firstChild = nextSibling
             } else {
-                while (this !== sceneGraphNode!!.aGraphNode5940) {
-                    sceneGraphNode = sceneGraphNode.aGraphNode5940
+                while (this !== sceneGraphNode!!.nextSibling) {
+                    sceneGraphNode = sceneGraphNode.nextSibling
                 }
 
-                sceneGraphNode.aGraphNode5940 = aGraphNode5940
+                sceneGraphNode.nextSibling = nextSibling
             }
         }
 
         requestProjectionUpdate()
-        if (aGraphNode5944 != null) {
-            aGraphNode5944!!.update()
-            var sceneGraphNode = aGraphNode5944
+        if (firstChild != null) {
+            firstChild!!.update()
+            var sceneGraphNode = firstChild
 
             while (true) {
                 sceneGraphNode!!.basePosition.offset(basePosition)
-                sceneGraphNode.aGraphNode5943 = aGraphNode5943
-                if (sceneGraphNode.aGraphNode5940 == null) {
-                    sceneGraphNode.aGraphNode5940 = aGraphNode5943!!.aGraphNode5944
-                    aGraphNode5943!!.aGraphNode5944 = aGraphNode5944
+                sceneGraphNode.parent = parent
+                if (sceneGraphNode.nextSibling == null) {
+                    sceneGraphNode.nextSibling = parent!!.firstChild
+                    parent!!.firstChild = firstChild
                     break
                 }
 
-                sceneGraphNode = sceneGraphNode.aGraphNode5940
+                sceneGraphNode = sceneGraphNode.nextSibling
             }
         }
 
-        aGraphNode5943 = null
-        aGraphNode5940 = null
-        aGraphNode5944 = null
+        parent = null
+        nextSibling = null
+        firstChild = null
     }
 
     open fun rotationUpdate(quaternion: Quaternion) {
         basePosition.quaternion.copy(quaternion)
         requestProjectionUpdate()
-        if (aGraphNode5944 != null) {
-            aGraphNode5944!!.update()
+        if (firstChild != null) {
+            firstChild!!.update()
         }
     }
 
     open fun update() {
         requestProjectionUpdate()
-        if (aGraphNode5944 != null) {
-            aGraphNode5944!!.update()
+        if (firstChild != null) {
+            firstChild!!.update()
         }
 
-        if (aGraphNode5940 != null) {
-            aGraphNode5940!!.update()
+        if (nextSibling != null) {
+            nextSibling!!.update()
         }
     }
 }

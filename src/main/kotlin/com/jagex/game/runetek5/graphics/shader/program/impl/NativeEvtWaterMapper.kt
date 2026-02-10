@@ -75,8 +75,8 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
 
     override fun loadTextureMatrix(matrix441: Matrix44) {
         val matrix442 = Matrix44()
-        matrix442.method6525(textureScale, textureScale, 1.0f, 1.0f)
-        matrix442.calculatePerspective(matrix441, matrix442)
+        matrix442.setDiagonal(textureScale, textureScale, 1.0f, 1.0f)
+        matrix442.setProduct(matrix441, matrix442)
         super.loadTextureMatrix(matrix442)
     }
 
@@ -95,7 +95,7 @@ class NativeEvtWaterMapper(class505Sub21: AbstractNativeToolkit, class492: Nativ
         val y = 0.4f
         val x = 0.1f
         val waveExponent = 5
-        textureCoordinateMatrix.method6525(textureScale, textureScale, textureScale, textureScale)
+        textureCoordinateMatrix.setDiagonal(textureScale, textureScale, textureScale, textureScale)
         sunDirectionAndExponentVector.set(-toolkit.sunPosition[0], -toolkit.sunPosition[1], -toolkit.sunPosition[2], 32.0f)
         sunColorAndWaveExponentVector.set(toolkit.baseLightColorRed, toolkit.baseLightColorGreen, toolkit.baseLightColorBlue, waveExponent.toFloat())
         waveIntensityAndBreakWaterDepthAndOffsetVector.set(x, y, z.toFloat(), w)

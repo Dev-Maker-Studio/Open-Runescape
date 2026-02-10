@@ -46,7 +46,7 @@ class GroundMaterialGL(
     }
 
     fun appendToNativeStream(i_1: Int) {
-        nativeStream!!.method2919(i_1 * 4 + 3)
+        nativeStream!!.setOffset(i_1 * 4 + 3)
         nativeStream!!.putByte(-1)
     }
 
@@ -118,7 +118,7 @@ class GroundMaterialGL(
             }
             color = red shl 16 or (green shl 8) or blue
         }
-        nativeStream!!.method2919(i_1 * 4)
+        nativeStream!!.setOffset(i_1 * 4)
         nativeStream!!.putByte(color shr 16)
         nativeStream!!.putByte(color shr 8)
         nativeStream!!.putByte(color)
@@ -196,7 +196,7 @@ class GroundMaterialGL(
     }
 
     fun createDataArrayBuffer(totalTiles: Int) {
-        nativeStream!!.method2925()
+        nativeStream!!.flush()
         val pointer = toolkit.createDataArrayBuffer(4, nativeHeapBuffer!!, totalTiles * 4)
         if (pointer is GlVboArrayBuffer) {
             nativeHeapBuffer!!.deallocateBuffer()

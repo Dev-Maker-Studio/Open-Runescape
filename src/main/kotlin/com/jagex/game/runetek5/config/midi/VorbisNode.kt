@@ -34,7 +34,7 @@ class VorbisNode(
             var node = StaticMethods.INDEX36_FILE_CACHE.first()
             while (node != null) {
                 if (!node.aBool7996) {
-                    StaticMethods.method1563(node.fileId)
+                    StaticMethods.stopVorbisStream(node.fileId)
                 } else {
                     node.aBool7996 = false
                 }
@@ -47,7 +47,7 @@ class VorbisNode(
             var node = StaticMethods.INDEX36_FILE_CACHE.first()
             while (node != null) {
                 if (node.vfReference.isPlaybackComplete()) {
-                    StaticMethods.method1563(node.fileId)
+                    StaticMethods.stopVorbisStream(node.fileId)
                 } else {
                     node.vfReference.prefetchChunks()
 
@@ -55,7 +55,7 @@ class VorbisNode(
                         node.vfReference.processStreams()
                     } catch (exception: Exception) {
                         PacketEncoder.sendErrorToServer("" + node.fileId, exception)
-                        StaticMethods.method1563(node.fileId)
+                        StaticMethods.stopVorbisStream(node.fileId)
                     }
 
                     if (!node.aBool8000 && !node.aBool7995) {

@@ -119,7 +119,7 @@ class PingRequester : Runnable {
 
     companion object {
         @JvmField
-        var anInt5864: Int = 0
+        var cameraTargetAbsX: Int = 0
 
         private const val MAX_CONCURRENT_PINGS = 10
 

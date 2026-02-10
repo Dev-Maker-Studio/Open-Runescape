@@ -782,12 +782,12 @@ abstract class AbstractNativeToolkit(
     fun updateFrustumMatrix() {
         transformMatrix.copyFrom(particleMatrix)
         transformMatrix.multiplyBy(currentModelMatrix)
-        transformMatrix.method6539(frustumPlanes[0])
-        transformMatrix.method6540(frustumPlanes[1])
-        transformMatrix.method6535(frustumPlanes[2])
-        transformMatrix.method6536(frustumPlanes[3])
-        transformMatrix.method6613(frustumPlanes[4])
-        transformMatrix.method6538(frustumPlanes[5])
+        transformMatrix.extractNearPlane(frustumPlanes[0])
+        transformMatrix.extractFarPlane(frustumPlanes[1])
+        transformMatrix.extractLeftPlane(frustumPlanes[2])
+        transformMatrix.extractRightPlane(frustumPlanes[3])
+        transformMatrix.extractBottomPlane(frustumPlanes[4])
+        transformMatrix.extractTopPlane(frustumPlanes[5])
         frustumClipMatrix.copyFrom(transformMatrix)
         loadWorldViewProjectionMatrix(frustumClipMatrix)
     }
@@ -829,7 +829,7 @@ abstract class AbstractNativeToolkit(
 
             val matrix443 = screenOrthoMatrix
             if (width != 0 && height != 0) {
-                matrix443.method6530(0.0f, width.toFloat(), 0.0f, height.toFloat(), -1.0f, 1.0f)
+                matrix443.setOrtho(0.0f, width.toFloat(), 0.0f, height.toFloat(), -1.0f, 1.0f)
             } else {
                 matrix443.identity()
             }
@@ -978,24 +978,24 @@ abstract class AbstractNativeToolkit(
     }
 
     override fun calculateProjection(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = transformMatrix.faceList[15] + transformMatrix.faceList[3] * f_1 + transformMatrix.faceList[7] * f_2 + transformMatrix.faceList[11] * f_3
-        val f_6 = transformMatrix.faceList[12] + transformMatrix.faceList[0] * f_1 + transformMatrix.faceList[4] * f_2 + transformMatrix.faceList[8] * f_3
-        val f_7 = transformMatrix.faceList[13] + transformMatrix.faceList[1] * f_1 + transformMatrix.faceList[5] * f_2 + transformMatrix.faceList[9] * f_3
-        val f_8 = particleMatrix.faceList[14] + particleMatrix.faceList[2] * f_1 + particleMatrix.faceList[6] * f_2 + particleMatrix.faceList[10] * f_3
+        val f_5 = transformMatrix.elements[15] + transformMatrix.elements[3] * f_1 + transformMatrix.elements[7] * f_2 + transformMatrix.elements[11] * f_3
+        val f_6 = transformMatrix.elements[12] + transformMatrix.elements[0] * f_1 + transformMatrix.elements[4] * f_2 + transformMatrix.elements[8] * f_3
+        val f_7 = transformMatrix.elements[13] + transformMatrix.elements[1] * f_1 + transformMatrix.elements[5] * f_2 + transformMatrix.elements[9] * f_3
+        val f_8 = particleMatrix.elements[14] + particleMatrix.elements[2] * f_1 + particleMatrix.elements[6] * f_2 + particleMatrix.elements[10] * f_3
         floats_4[0] = viewportOriginX + viewportCenterX * f_6 / f_5
         floats_4[1] = viewportOriginY + viewportCenterY * f_7 / f_5
         floats_4[2] = f_8
     }
 
     override fun computeWorldToScreen(x: Float, y: Float, z: Float, screenCoords: FloatArray) {
-        val wX = transformMatrix.faceList[14] + transformMatrix.faceList[2] * x + transformMatrix.faceList[6] * y + transformMatrix.faceList[10] * z
-        val wY = transformMatrix.faceList[15] + transformMatrix.faceList[3] * x + transformMatrix.faceList[7] * y + transformMatrix.faceList[11] * z
+        val wX = transformMatrix.elements[14] + transformMatrix.elements[2] * x + transformMatrix.elements[6] * y + transformMatrix.elements[10] * z
+        val wY = transformMatrix.elements[15] + transformMatrix.elements[3] * x + transformMatrix.elements[7] * y + transformMatrix.elements[11] * z
         if (wX >= -wY && wX <= wY) {
-            val wZ = transformMatrix.faceList[12] + transformMatrix.faceList[0] * x + transformMatrix.faceList[4] * y + transformMatrix.faceList[8] * z
+            val wZ = transformMatrix.elements[12] + transformMatrix.elements[0] * x + transformMatrix.elements[4] * y + transformMatrix.elements[8] * z
             if (wZ >= -wY && wZ <= wY) {
-                val f_8 = transformMatrix.faceList[13] + transformMatrix.faceList[1] * x + transformMatrix.faceList[5] * y + transformMatrix.faceList[9] * z
+                val f_8 = transformMatrix.elements[13] + transformMatrix.elements[1] * x + transformMatrix.elements[5] * y + transformMatrix.elements[9] * z
                 if (f_8 >= -wY && f_8 <= wY) {
-                    val screenZ = particleMatrix.faceList[14] + particleMatrix.faceList[2] * x + particleMatrix.faceList[6] * y + particleMatrix.faceList[10] * z
+                    val screenZ = particleMatrix.elements[14] + particleMatrix.elements[2] * x + particleMatrix.elements[6] * y + particleMatrix.elements[10] * z
                     screenCoords[0] = viewportOriginX + viewportCenterX * wZ / wY
                     screenCoords[1] = viewportOriginY + viewportCenterY * f_8 / wY
                     screenCoords[2] = screenZ
@@ -1542,8 +1542,8 @@ abstract class AbstractNativeToolkit(
     fun calculateViewRange() {
         projectionMatrix.copyFrom(activeProjectionSource)
         loadWorldViewProjectionMatrix(projectionMatrix)
-        camFar = (projectionMatrix.faceList[14] - projectionMatrix.faceList[15]) / (projectionMatrix.faceList[11] - projectionMatrix.faceList[10])
-        camNear = -projectionMatrix.faceList[14] / projectionMatrix.faceList[10]
+        camFar = (projectionMatrix.elements[14] - projectionMatrix.elements[15]) / (projectionMatrix.elements[11] - projectionMatrix.elements[10])
+        camNear = -projectionMatrix.elements[14] / projectionMatrix.elements[10]
         updateFogAndWater()
     }
 
@@ -1643,18 +1643,18 @@ abstract class AbstractNativeToolkit(
 
     override fun isOnScreen(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
         var i_7 = 0
-        val f_8 = transformMatrix.faceList[14] + transformMatrix.faceList[2] * i_1 + transformMatrix.faceList[6] * i_2 + transformMatrix.faceList[10] * i_3
-        val f_9 = transformMatrix.faceList[14] + transformMatrix.faceList[2] * i_4 + transformMatrix.faceList[6] * i_5 + transformMatrix.faceList[10] * i_6
-        val f_10 = transformMatrix.faceList[15] + transformMatrix.faceList[3] * i_1 + transformMatrix.faceList[7] * i_2 + transformMatrix.faceList[11] * i_3
-        val f_11 = transformMatrix.faceList[15] + transformMatrix.faceList[3] * i_4 + transformMatrix.faceList[7] * i_5 + transformMatrix.faceList[11] * i_6
+        val f_8 = transformMatrix.elements[14] + transformMatrix.elements[2] * i_1 + transformMatrix.elements[6] * i_2 + transformMatrix.elements[10] * i_3
+        val f_9 = transformMatrix.elements[14] + transformMatrix.elements[2] * i_4 + transformMatrix.elements[6] * i_5 + transformMatrix.elements[10] * i_6
+        val f_10 = transformMatrix.elements[15] + transformMatrix.elements[3] * i_1 + transformMatrix.elements[7] * i_2 + transformMatrix.elements[11] * i_3
+        val f_11 = transformMatrix.elements[15] + transformMatrix.elements[3] * i_4 + transformMatrix.elements[7] * i_5 + transformMatrix.elements[11] * i_6
         if (f_8 < -f_10 && f_9 < -f_11) {
             i_7 = i_7 or 0x10
         } else if (f_8 > f_10 && f_9 > f_11) {
             i_7 = i_7 or 0x20
         }
 
-        val f_12 = transformMatrix.faceList[12] + transformMatrix.faceList[0] * i_1 + transformMatrix.faceList[4] * i_2 + transformMatrix.faceList[8] * i_3
-        val f_13 = transformMatrix.faceList[12] + transformMatrix.faceList[0] * i_4 + transformMatrix.faceList[4] * i_5 + transformMatrix.faceList[8] * i_6
+        val f_12 = transformMatrix.elements[12] + transformMatrix.elements[0] * i_1 + transformMatrix.elements[4] * i_2 + transformMatrix.elements[8] * i_3
+        val f_13 = transformMatrix.elements[12] + transformMatrix.elements[0] * i_4 + transformMatrix.elements[4] * i_5 + transformMatrix.elements[8] * i_6
         if (f_12 < -f_10 && f_13 < -f_11) {
             i_7 = i_7 or 0x1
         }
@@ -1663,8 +1663,8 @@ abstract class AbstractNativeToolkit(
             i_7 = i_7 or 0x2
         }
 
-        val f_14 = transformMatrix.faceList[13] + transformMatrix.faceList[1] * i_1 + transformMatrix.faceList[5] * i_2 + transformMatrix.faceList[9] * i_3
-        val f_15 = transformMatrix.faceList[13] + transformMatrix.faceList[1] * i_4 + transformMatrix.faceList[5] * i_5 + transformMatrix.faceList[9] * i_6
+        val f_14 = transformMatrix.elements[13] + transformMatrix.elements[1] * i_1 + transformMatrix.elements[5] * i_2 + transformMatrix.elements[9] * i_3
+        val f_15 = transformMatrix.elements[13] + transformMatrix.elements[1] * i_4 + transformMatrix.elements[5] * i_5 + transformMatrix.elements[9] * i_6
         if (f_14 < -f_10 && f_15 < -f_11) {
             i_7 = i_7 or 0x4
         }

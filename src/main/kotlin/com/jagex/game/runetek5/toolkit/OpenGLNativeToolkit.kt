@@ -414,7 +414,7 @@ open class OpenGLNativeToolkit(
     }
 
     override fun loadWorldViewProjectionMatrix(matrix441: Matrix44) {
-        val floats_2 = matrix441.faceList
+        val floats_2 = matrix441.elements
         floats_2[1] = -floats_2[1]
         floats_2[5] = -floats_2[5]
         floats_2[9] = -floats_2[9]
@@ -436,7 +436,7 @@ open class OpenGLNativeToolkit(
 
     override fun configureLights() {
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        OpenGL.glLoadMatrixf(particleMatrix.faceList, 0)
+        OpenGL.glLoadMatrixf(particleMatrix.elements, 0)
 
         var index = 0
         while (index < lastSceneLightCount) {
@@ -1072,15 +1072,15 @@ open class OpenGLNativeToolkit(
 
     override fun setMatrixTransform(matrix441: Matrix44, matrix442: Matrix44, matrix443: Matrix44) {
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        perspectiveMatrix.calculatePerspective(matrix441, matrix442)
-        OpenGL.glLoadMatrixf(perspectiveMatrix.faceList, 0)
+        perspectiveMatrix.setProduct(matrix441, matrix442)
+        OpenGL.glLoadMatrixf(perspectiveMatrix.elements, 0)
         OpenGL.glMatrixMode(5889)
-        OpenGL.glLoadMatrixf(matrix443.faceList, 0)
+        OpenGL.glLoadMatrixf(matrix443.elements, 0)
     }
 
     override fun setLightPosition() {
         OpenGL.glMatrixMode(GL_MODELVIEW)
-        OpenGL.glLoadMatrixf(particleMatrix.faceList, 0)
+        OpenGL.glLoadMatrixf(particleMatrix.elements, 0)
         OpenGL.glLightfv(GL_LIGHT0, GL_POSITION, sunPosition, 0)
         OpenGL.glLightfv(GL_LIGHT1, GL_POSITION, lightPosition, 0)
     }

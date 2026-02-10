@@ -580,7 +580,7 @@ object NPCUpdate {
 
             // Say text (0x2)
             if ((updateFlag and 0x2) != 0) {
-                npc.method16164(buffer.readString())
+                npc.setOverheadText(buffer.readString())
             }
 
             // Unknown (0x4000)

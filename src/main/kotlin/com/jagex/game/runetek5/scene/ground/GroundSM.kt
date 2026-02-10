@@ -1145,22 +1145,22 @@ class GroundSM(
             throw IllegalStateException("")
         }
         val floorMatrix = toolkit.floorMatrix!!
-        vertexXA = floorMatrix.faceList[0]
-        vertexYA = floorMatrix.faceList[1]
-        vertexZNearA = floorMatrix.faceList[2]
-        vertexZFarA = floorMatrix.faceList[3]
-        vertexXB = floorMatrix.faceList[4]
-        vertexYB = floorMatrix.faceList[5]
-        vertexZNearB = floorMatrix.faceList[6]
-        vertexZFarB = floorMatrix.faceList[7]
-        vertexXC = floorMatrix.faceList[8]
-        vertexYC = floorMatrix.faceList[9]
-        vertexZNearC = floorMatrix.faceList[10]
-        vertexZFarC = floorMatrix.faceList[11]
-        vertexXD = floorMatrix.faceList[12]
-        vertexYD = floorMatrix.faceList[13]
-        vertexZNearD = floorMatrix.faceList[14]
-        vertexZFarD = floorMatrix.faceList[15]
+        vertexXA = floorMatrix.elements[0]
+        vertexYA = floorMatrix.elements[1]
+        vertexZNearA = floorMatrix.elements[2]
+        vertexZFarA = floorMatrix.elements[3]
+        vertexXB = floorMatrix.elements[4]
+        vertexYB = floorMatrix.elements[5]
+        vertexZNearB = floorMatrix.elements[6]
+        vertexZFarB = floorMatrix.elements[7]
+        vertexXC = floorMatrix.elements[8]
+        vertexYC = floorMatrix.elements[9]
+        vertexZNearC = floorMatrix.elements[10]
+        vertexZFarC = floorMatrix.elements[11]
+        vertexXD = floorMatrix.elements[12]
+        vertexYD = floorMatrix.elements[13]
+        vertexZNearD = floorMatrix.elements[14]
+        vertexZFarD = floorMatrix.elements[15]
 
         for (startX in 0 until visibleTiles + visibleTiles) {
             for (startY in 0 until visibleTiles + visibleTiles) {

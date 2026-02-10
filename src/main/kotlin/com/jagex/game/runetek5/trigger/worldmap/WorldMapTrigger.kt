@@ -67,9 +67,9 @@ object WorldMapTrigger {
             WorldMapSub1.clampMapCenter()
         }
         if (JSObjectManager.anInt4185 > 0) {
-            if (--ServerEnvironment.anInt9282 == 0) {
+            if (--ServerEnvironment.flashCycleCounter == 0) {
                 JSObjectManager.anInt4185--
-                ServerEnvironment.anInt9282 = 100
+                ServerEnvironment.flashCycleCounter = 100
             }
         } else {
             WorldMapSub1.someMecId = -1

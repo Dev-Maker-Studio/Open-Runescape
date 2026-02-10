@@ -18,8 +18,8 @@ import jaggl.OpenGL
 class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) {
 
     var display: IntegratedGraphicsDisplayGL? = null
-    var aClass137Sub110038: OpenGl2DTexture? = null
-    var aClass137Sub110034: OpenGl2DTexture? = null
+    var bloomTextureA: OpenGl2DTexture? = null
+    var bloomTextureB: OpenGl2DTexture? = null
     var scenetexShader: OpenGLShaderManager? = null
     var mipmappedScenetexShader: OpenGLShaderManager? = null
     var bloomScenetexShader: OpenGLShaderManager? = null
@@ -119,7 +119,7 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
         OpenGL.glEnd()
 
         display!!.drawBuffer(1)
-        activeToolkit.setActiveTexture(aClass137Sub110038)
+        activeToolkit.setActiveTexture(bloomTextureA)
         val handle = basetexShader!!.programHandle
         OpenGL.glUseProgram(handle)
         OpenGL.glUniform1i(OpenGL.glGetUniformLocation(handle, "baseTex"), 0)
@@ -135,7 +135,7 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
         OpenGL.glVertex2i(0, 1)
         OpenGL.glEnd()
         display!!.drawBuffer(0)
-        activeToolkit.setActiveTexture(aClass137Sub110034)
+        activeToolkit.setActiveTexture(bloomTextureB)
         OpenGL.glUniform3f(OpenGL.glGetUniformLocation(handle, "step"), 0.0f, 0.00390625f, 0.0f)
         OpenGL.glBegin(GL_QUADS)
         OpenGL.glTexCoord2f(0.0f, 0.0f)
@@ -157,7 +157,7 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
         OpenGL.glUniform1i(OpenGL.glGetUniformLocation(handle2, "bloomTex"), 1)
         OpenGL.glUniform3f(OpenGL.glGetUniformLocation(handle2, "params"), brightpass, bloom, 0.0f)
         activeToolkit.activateTexture(1)
-        activeToolkit.setActiveTexture(aClass137Sub110038)
+        activeToolkit.setActiveTexture(bloomTextureA)
         activeToolkit.activateTexture(0)
         activeToolkit.setActiveTexture(texture)
     }
@@ -173,13 +173,13 @@ class RectangularTextureGL(toolkit: OpenGlToolkit) : PostProcessEffect(toolkit) 
     override fun createShaders(): Boolean {
         if (activeToolkit.intelGpu && activeToolkit.arbFragmentShader && activeToolkit.arbTextureFloat) {
             display = IntegratedGraphicsDisplayGL(super.activeToolkit)
-            aClass137Sub110038 = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, 256, 256)
-            aClass137Sub110038!!.setRepeat(false, false)
-            aClass137Sub110034 = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, 256, 256)
-            aClass137Sub110034!!.setRepeat(false, false)
+            bloomTextureA = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, 256, 256)
+            bloomTextureA!!.setRepeat(false, false)
+            bloomTextureB = OpenGl2DTexture(activeToolkit, GL_TEXTURE_2D, GLFormat.HDR, GLActionFormat.FLOAT_16_ARB, 256, 256)
+            bloomTextureB!!.setRepeat(false, false)
             activeToolkit.setDisplay(display!!)
-            display!!.setFramebuffer(0, aClass137Sub110038!!.createFrameBuffer())
-            display!!.setFramebuffer(1, aClass137Sub110034!!.createFrameBuffer())
+            display!!.setFramebuffer(0, bloomTextureA!!.createFrameBuffer())
+            display!!.setFramebuffer(1, bloomTextureB!!.createFrameBuffer())
             display!!.drawBuffer(0)
             if (!display!!.isFramebufferComplete()) {
                 activeToolkit.resizeDisplay(display!!)
@@ -308,8 +308,8 @@ void main() {	vec4 fragCol = texture2D(baseTex, gl_TexCoord[0].xy)*0.091396265;	
         textureDisplay = null
         mipmaps = null
         display = null
-        aClass137Sub110038 = null
-        aClass137Sub110034 = null
+        bloomTextureA = null
+        bloomTextureB = null
         scenetexShader = null
         mipmappedScenetexShader = null
         bloomScenetexShader = null

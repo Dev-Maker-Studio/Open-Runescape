@@ -22,7 +22,7 @@ object CutsceneTypeList {
     val CUTSCENE_AREAS = NodeCollection()
 
     @JvmField
-    var anInt825: Int = 0
+    var cutsceneViewportHeight: Int = 0
 
     @JvmField
     var CUTSCENE_BUFFER: Packet? = null
@@ -161,8 +161,8 @@ object CutsceneTypeList {
             val opcode = buffer.readUByte()
             when (opcode) {
                 0 -> {
-                    anInt825 = buffer.readUShort()
-                    StaticMethods.anInt824 = buffer.readUShort()
+                    cutsceneViewportHeight = buffer.readUShort()
+                    StaticMethods.cutsceneViewportWidth = buffer.readUShort()
                 }
                 255 -> return
             }
@@ -191,16 +191,16 @@ object CutsceneTypeList {
         CUTSCENE_ENTITY_MOVEMENTS = null
         CUTSCENE_MISC_ACTIONS = null
         CutsceneEntity.drawPriority = 1
-        anInt825 = 0
-        StaticMethods.anInt824 = 0
+        cutsceneViewportHeight = 0
+        StaticMethods.cutsceneViewportWidth = 0
         activeCutsceneLoadingstage = null
         activeCutsceneId = -1
-        if (StaticMethods.aBool826) {
-            Client.aspectFovMin = StaticMethods.aShort828
-            Client.aspectFovMax = StaticMethods.aShort829
+        if (StaticMethods.hasSavedFov) {
+            Client.aspectFovMin = StaticMethods.savedAspectFovMin
+            Client.aspectFovMax = StaticMethods.savedAspectFovMax
             Client.fovScaleMin = AbstractMousePacket.aShort7079
-            Client.fovScaleMax = StaticMethods.aShort830
-            StaticMethods.aBool826 = false
+            Client.fovScaleMax = StaticMethods.savedFovScaleMax
+            StaticMethods.hasSavedFov = false
         }
     }
 }
