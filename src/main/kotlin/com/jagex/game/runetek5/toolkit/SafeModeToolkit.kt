@@ -169,7 +169,7 @@ open class SafeModeToolkit : AbstractToolkit {
     @JvmField
     var depthBuffer: FloatArray? = null
 
-    constructor(interface221: MaterialProvider?) : super(interface221) {
+    constructor(materialProvider: MaterialProvider?) : super(materialProvider) {
         this.shutdown = false
         this.initialized = false
         this.clipLeft = 0
@@ -327,14 +327,14 @@ open class SafeModeToolkit : AbstractToolkit {
                 var width = this.clipRight - this.clipLeft
                 val height = this.clipBottom - this.clipTop
                 val scanOffset = this.viewportWidth - width
-                val i_4 = this.viewportWidth * this.clipTop + this.clipLeft
-                val i_5 = width shr 3
-                val i_6 = width and 0x7
-                width = i_4 - 1
+                val bufferStart = this.viewportWidth * this.clipTop + this.clipLeft
+                val unrolledBlocks = width shr 3
+                val remainingPixels = width and 0x7
+                width = bufferStart - 1
                 for (invertedHeight in -height until 0) {
-                    var i_8: Int
-                    if (i_5 > 0) {
-                        i_8 = i_5
+                    var blockCounter: Int
+                    if (unrolledBlocks > 0) {
+                        blockCounter = unrolledBlocks
                         do {
                             ++width
                             this.depthBuffer!![width] = 2.14748365E9f
@@ -352,17 +352,17 @@ open class SafeModeToolkit : AbstractToolkit {
                             this.depthBuffer!![width] = 2.14748365E9f
                             ++width
                             this.depthBuffer!![width] = 2.14748365E9f
-                            --i_8
-                        } while (i_8 > 0)
+                            --blockCounter
+                        } while (blockCounter > 0)
                     }
 
-                    if (i_6 > 0) {
-                        i_8 = i_6
+                    if (remainingPixels > 0) {
+                        blockCounter = remainingPixels
                         do {
                             ++width
                             this.depthBuffer!![width] = 2.14748365E9f
-                            --i_8
-                        } while (i_8 > 0)
+                            --blockCounter
+                        } while (blockCounter > 0)
                     }
                     width += scanOffset
                 }
@@ -384,11 +384,11 @@ open class SafeModeToolkit : AbstractToolkit {
         viewportUpdate()
     }
 
-    override fun setDrawableArea(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        this.drawableX = i_1
-        this.drawableY = i_2
-        this.drawableWidth = i_3
-        this.drawableHeight = i_4
+    override fun setDrawableArea(x: Int, y: Int, width: Int, height: Int) {
+        this.drawableX = x
+        this.drawableY = y
+        this.drawableWidth = width
+        this.drawableHeight = height
         viewportUpdate()
     }
 
@@ -403,17 +403,17 @@ open class SafeModeToolkit : AbstractToolkit {
     fun viewportUpdate() {
         val clipWidth = this.clipRight - this.clipLeft
         val clipHeight = this.clipBottom - this.clipTop
-        val f_3 = this.drawableWidth / 2.0f
-        this.viewportHalfWidth = f_3
-        val f_4 = this.drawableHeight / 2.0f
-        this.viewportHalfHeight = f_4
-        this.viewportOriginX = this.drawableX + f_3
-        this.viewportOriginY = this.drawableY + f_4
+        val halfWidth = this.drawableWidth / 2.0f
+        this.viewportHalfWidth = halfWidth
+        val halfHeight = this.drawableHeight / 2.0f
+        this.viewportHalfHeight = halfHeight
+        this.viewportOriginX = this.drawableX + halfWidth
+        this.viewportOriginY = this.drawableY + halfHeight
         for (threadIndex in 0 until this.executingThreadCount) {
             val renderingThread = this.renderingThreads!![threadIndex]
             val rasterizer = renderingThread.rasterizer
-            rasterizer!!.offsetX = f_3
-            rasterizer.offsetY = f_4
+            rasterizer!!.offsetX = halfWidth
+            rasterizer.offsetY = halfHeight
             rasterizer.centerX = this.viewportOriginX - this.clipLeft
             rasterizer.centerY = this.viewportOriginY - this.clipTop
             rasterizer.clipWidth = clipWidth
@@ -455,11 +455,11 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
 
-    override fun setBloomFilter(f_1: Float, f_2: Float, f_3: Float) {
+    override fun setBloomFilter(whitePoint: Float, bloom: Float, brightpass: Float) {
     }
 
 
-    fun renderParticles(bool1: Boolean, bool2: Boolean, particleWrapper: ParticleWrapper) {
+    fun renderParticles(hasColorBuffer: Boolean, hasDepthBuffer: Boolean, particleWrapper: ParticleWrapper) {
         val threadResource = getThreadResource(Thread.currentThread())
         val mainNode = particleWrapper.particleBinaryTree.current
 
@@ -469,21 +469,21 @@ open class SafeModeToolkit : AbstractToolkit {
             val positionX = pointEntry.x shr 12
             val positionY = pointEntry.y shr 12
             val positionZ = pointEntry.z shr 12
-            val f_12 = this.floorMatrix!!.elements[14] + this.floorMatrix!!.elements[10] * positionZ + positionX * this.floorMatrix!!.elements[2] + positionY * this.floorMatrix!!.elements[6]
-            val f_13 = this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[7] * positionY + this.floorMatrix!!.elements[3] * positionX + this.floorMatrix!!.elements[11] * positionZ
-            if (f_12 >= -f_13) {
-                val f_14 = this.depthRangeNear + f_12 * this.depthRangeFar / f_13
-                if (f_12 <= threadResource!!.fogStartDistance) {
-                    val f_15 = this.floorMatrix!!.elements[0] * positionX + this.floorMatrix!!.elements[4] * positionY + positionZ * this.floorMatrix!!.elements[8] + this.floorMatrix!!.elements[12]
-                    val f_16 = positionZ * this.floorMatrix!!.elements[9] + this.floorMatrix!!.elements[1] * positionX + this.floorMatrix!!.elements[5] * positionY + this.floorMatrix!!.elements[13]
-                    if (f_15 >= -f_13 && f_15 <= f_13 && f_16 >= -f_13 && f_16 <= f_13) {
-                        val f_17 = pointEntry.size / 4096.0f
-                        val f_18 = f_17 * this.modelMatrix!!.elements[0] + f_15
-                        val f_19 = f_13 + this.modelMatrix!!.elements[3] * f_17
-                        val f_20 = this.viewportOriginX + f_15 * this.viewportHalfWidth / f_13
-                        val f_21 = this.viewportHalfHeight * f_16 / f_13 + this.viewportOriginY
-                        val f_22 = this.viewportOriginX + f_18 * this.viewportHalfWidth / f_19
-                        renderMaterializedSprite(bool1, bool2, pointEntry, f_20.toInt(), f_21.toInt(), f_14, (if (f_22 < f_20) f_20 - f_22 else f_22 - f_20).toInt())
+            val clipZ = this.floorMatrix!!.elements[14] + this.floorMatrix!!.elements[10] * positionZ + positionX * this.floorMatrix!!.elements[2] + positionY * this.floorMatrix!!.elements[6]
+            val clipW = this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[7] * positionY + this.floorMatrix!!.elements[3] * positionX + this.floorMatrix!!.elements[11] * positionZ
+            if (clipZ >= -clipW) {
+                val depth = this.depthRangeNear + clipZ * this.depthRangeFar / clipW
+                if (clipZ <= threadResource!!.fogStartDistance) {
+                    val clipX = this.floorMatrix!!.elements[0] * positionX + this.floorMatrix!!.elements[4] * positionY + positionZ * this.floorMatrix!!.elements[8] + this.floorMatrix!!.elements[12]
+                    val clipY = positionZ * this.floorMatrix!!.elements[9] + this.floorMatrix!!.elements[1] * positionX + this.floorMatrix!!.elements[5] * positionY + this.floorMatrix!!.elements[13]
+                    if (clipX >= -clipW && clipX <= clipW && clipY >= -clipW && clipY <= clipW) {
+                        val scaledSize = pointEntry.size / 4096.0f
+                        val scaledClipX = scaledSize * this.modelMatrix!!.elements[0] + clipX
+                        val scaledClipW = clipW + this.modelMatrix!!.elements[3] * scaledSize
+                        val screenX = this.viewportOriginX + clipX * this.viewportHalfWidth / clipW
+                        val screenY = this.viewportHalfHeight * clipY / clipW + this.viewportOriginY
+                        val screenXScaled = this.viewportOriginX + scaledClipX * this.viewportHalfWidth / scaledClipW
+                        renderMaterializedSprite(hasColorBuffer, hasDepthBuffer, pointEntry, screenX.toInt(), screenY.toInt(), depth, (if (screenXScaled < screenX) screenX - screenXScaled else screenXScaled - screenX).toInt())
                     }
                 }
             }
@@ -528,8 +528,8 @@ open class SafeModeToolkit : AbstractToolkit {
         return true
     }
 
-    override fun createDelegatingDisplay(canvas1: Canvas, i_2: Int, i_3: Int): DelegatingDisplay {
-        return createImageProducer(this, canvas1, i_2, i_3)
+    override fun createDelegatingDisplay(canvas: Canvas, width: Int, height: Int): DelegatingDisplay {
+        return createImageProducer(this, canvas, width, height)
     }
 
     override fun setDepthBuffering(useDepthBuffer: Boolean) {
@@ -555,21 +555,21 @@ open class SafeModeToolkit : AbstractToolkit {
     override fun renderLastFrame() {
     }
 
-    override fun createNativeSprite(ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean): NativeSprite {
-        var bool7 = false
-        var i_8 = i_2
+    override fun createNativeSprite(pixels: IntArray, pixelOffset: Int, stride: Int, width: Int, height: Int, hasAlpha: Boolean): NativeSprite {
+        var hasTransparency = false
+        var pixelIndex = pixelOffset
 
-        for (i_9 in 0 until i_5) {
-            for (i_10 in 0 until i_4) {
-                val i_11 = ints_1[i_8++] ushr 24
-                if (i_11 != 0 && i_11 != 255) {
-                    bool7 = true
-                    return TransparentSpriteSM(this, ints_1, i_2, i_3, i_4, i_5, bool6)
+        for (row in 0 until height) {
+            for (col in 0 until width) {
+                val alphaValue = pixels[pixelIndex++] ushr 24
+                if (alphaValue != 0 && alphaValue != 255) {
+                    hasTransparency = true
+                    return TransparentSpriteSM(this, pixels, pixelOffset, stride, width, height, hasAlpha)
                 }
             }
         }
 
-        return OpaqueSpriteSM(this, ints_1, i_2, i_3, i_4, i_5, bool6)
+        return OpaqueSpriteSM(this, pixels, pixelOffset, stride, width, height, hasAlpha)
     }
 
     override fun createFontRenderer(fontmetrics: FontMetrics?, spriteTypes: Array<SpriteType>?, monochome: Boolean): AbstractFontRenderer {
@@ -634,28 +634,28 @@ open class SafeModeToolkit : AbstractToolkit {
                 height = this.clipBottom - y
             }
             if (width > 0 && height > 0 && x <= this.clipRight && y <= this.clipBottom) {
-                val i_7 = this.viewportWidth - width
-                var i_8 = y * this.viewportWidth + x
+                val scanlineStride = this.viewportWidth - width
+                var bufferOffset = y * this.viewportWidth + x
                 val alpha = color ushr 24
                 var transparency: Int
-                var i_11: Int
-                var i_12: Int
+                var rowCounter: Int
+                var colCounter: Int
                 if (type != 0 && (type != 1 || alpha != 255)) {
                     var lastColor: Int
                     if (type == 1) {
                         color = (alpha * ((color and -16711936) ushr 8) and -16711936) + (alpha * (color and 0xff00ff) shr 8 and 0xff00ff)
                         transparency = 256 - alpha
-                        i_11 = 0
-                        while (i_11 < height) {
-                            i_12 = -width
-                            while (i_12 < 0) {
-                                lastColor = this.colourBuffer!![i_8]
+                        rowCounter = 0
+                        while (rowCounter < height) {
+                            colCounter = -width
+                            while (colCounter < 0) {
+                                lastColor = this.colourBuffer!![bufferOffset]
                                 lastColor = (((lastColor and -16711936) ushr 8) * transparency and -16711936) + ((lastColor and 0xff00ff) * transparency shr 8 and 0xff00ff)
-                                this.colourBuffer!![i_8++] = color + lastColor
-                                i_12++
+                                this.colourBuffer!![bufferOffset++] = color + lastColor
+                                colCounter++
                             }
-                            i_8 += i_7
-                            i_11++
+                            bufferOffset += scanlineStride
+                            rowCounter++
                         }
                     } else {
                         if (type != 2) {
@@ -663,25 +663,25 @@ open class SafeModeToolkit : AbstractToolkit {
                         }
                         transparency = 0
                         while (transparency < height) {
-                            i_11 = -width
-                            while (i_11 < 0) {
-                                i_12 = this.colourBuffer!![i_8]
-                                lastColor = color + i_12
-                                val i_14 = (i_12 and 0xff00ff) + (color and 0xff00ff)
-                                i_12 = (i_14 and 0x1000100) + (lastColor - i_14 and 0x10000)
-                                this.colourBuffer!![i_8++] = lastColor - i_12 or (i_12 - (i_12 ushr 8))
-                                i_11++
+                            rowCounter = -width
+                            while (rowCounter < 0) {
+                                colCounter = this.colourBuffer!![bufferOffset]
+                                lastColor = color + colCounter
+                                val channelSum = (colCounter and 0xff00ff) + (color and 0xff00ff)
+                                colCounter = (channelSum and 0x1000100) + (lastColor - channelSum and 0x10000)
+                                this.colourBuffer!![bufferOffset++] = lastColor - colCounter or (colCounter - (colCounter ushr 8))
+                                rowCounter++
                             }
-                            i_8 += i_7
+                            bufferOffset += scanlineStride
                             transparency++
                         }
                     }
                 } else {
                     transparency = width shr 3
-                    i_11 = width and 0x7
-                    width = i_8 - 1
-                    i_12 = -height
-                    while (i_12 < 0) {
+                    rowCounter = width and 0x7
+                    width = bufferOffset - 1
+                    colCounter = -height
+                    while (colCounter < 0) {
                         if (transparency > 0) {
                             var xx = transparency
                             do {
@@ -704,315 +704,315 @@ open class SafeModeToolkit : AbstractToolkit {
                                 --xx
                             } while (xx > 0)
                         }
-                        if (i_11 > 0) {
-                            var xx = i_11
+                        if (rowCounter > 0) {
+                            var xx = rowCounter
                             do {
                                 ++width
                                 this.colourBuffer!![width] = color
                                 --xx
                             } while (xx > 0)
                         }
-                        width += i_7
-                        i_12++
+                        width += scanlineStride
+                        colCounter++
                     }
                 }
             }
         }
     }
 
-    override fun renderWorldmapTile(x: Int, y: Int, width: Int, height: Int, color2: Int, color: Int, bytes_7: ByteArray, i_8: Int, i_9: Int) {
+    override fun renderWorldmapTile(x: Int, y: Int, width: Int, height: Int, color2: Int, color: Int, tileData: ByteArray, tileWidth: Int, blendMode: Int) {
         var x = x
         var width = width
         var height = height
         if (this.colourBuffer != null && width > 0 && height > 0) {
-            var i_10 = 0
-            var i_11 = 0
-            val i_12 = (i_8 shl 16) / width
-            val i_13 = (bytes_7.size / i_8 shl 16) / height
-            var i_14 = y * this.viewportWidth + x
-            var i_15 = this.viewportWidth - width
+            var srcX = 0
+            var srcY = 0
+            val scaleX = (tileWidth shl 16) / width
+            val scaleY = (tileData.size / tileWidth shl 16) / height
+            var bufferOffset = y * this.viewportWidth + x
+            var scanlineStride = this.viewportWidth - width
             if (y + height > this.clipBottom) {
                 height -= y + height - this.clipBottom
             }
-            var i_16: Int
+            var clipAdjust: Int
             if (y < this.clipTop) {
-                i_16 = this.clipTop - y
-                height -= i_16
-                i_14 += i_16 * this.viewportWidth
-                i_11 += i_16 * i_13
+                clipAdjust = this.clipTop - y
+                height -= clipAdjust
+                bufferOffset += clipAdjust * this.viewportWidth
+                srcY += clipAdjust * scaleY
             }
             if (width + x > this.clipRight) {
-                i_16 = width + x - this.clipRight
-                width -= i_16
-                i_15 += i_16
+                clipAdjust = width + x - this.clipRight
+                width -= clipAdjust
+                scanlineStride += clipAdjust
             }
             if (x < this.clipLeft) {
-                i_16 = this.clipLeft - x
-                width -= i_16
-                i_14 += i_16
-                i_10 += i_16 * i_12
-                i_15 += i_16
+                clipAdjust = this.clipLeft - x
+                width -= clipAdjust
+                bufferOffset += clipAdjust
+                srcX += clipAdjust * scaleX
+                scanlineStride += clipAdjust
             }
-            i_16 = color2 ushr 24
-            val i_17 = color ushr 24
-            var i_18: Int
-            var i_19: Int
-            var i_20: Int
-            var i_21: Int
-            if (i_9 == 0 || i_9 == 1 && i_16 == 255 && i_17 == 255) {
-                i_18 = i_10
-                i_19 = -height
-                while (i_19 < 0) {
-                    i_20 = i_8 * (i_11 shr 16)
-                    i_21 = -width
-                    while (i_21 < 0) {
-                        if (bytes_7[i_20 + (i_10 shr 16)].toInt() != 0) {
-                            this.colourBuffer!![i_14++] = color
+            clipAdjust = color2 ushr 24
+            val fgAlpha = color ushr 24
+            var savedSrcX: Int
+            var rowIndex: Int
+            var tileRowOffset: Int
+            var colIndex: Int
+            if (blendMode == 0 || blendMode == 1 && clipAdjust == 255 && fgAlpha == 255) {
+                savedSrcX = srcX
+                rowIndex = -height
+                while (rowIndex < 0) {
+                    tileRowOffset = tileWidth * (srcY shr 16)
+                    colIndex = -width
+                    while (colIndex < 0) {
+                        if (tileData[tileRowOffset + (srcX shr 16)].toInt() != 0) {
+                            this.colourBuffer!![bufferOffset++] = color
                         } else {
-                            this.colourBuffer!![i_14++] = color2
+                            this.colourBuffer!![bufferOffset++] = color2
                         }
-                        i_10 += i_12
-                        i_21++
+                        srcX += scaleX
+                        colIndex++
                     }
-                    i_11 += i_13
-                    i_10 = i_18
-                    i_14 += i_15
-                    i_19++
+                    srcY += scaleY
+                    srcX = savedSrcX
+                    bufferOffset += scanlineStride
+                    rowIndex++
                 }
             } else {
-                var i_22: Int
-                var i_23: Int
-                var i_24: Int
-                var i_25: Int
-                if (i_9 == 1) {
-                    i_18 = i_10
-                    i_19 = -height
-                    while (i_19 < 0) {
-                        i_20 = i_8 * (i_11 shr 16)
-                        i_21 = -width
-                        while (i_21 < 0) {
-                            i_22 = color2
-                            if (bytes_7[i_20 + (i_10 shr 16)].toInt() != 0) {
-                                i_22 = color
+                var selectedColor: Int
+                var srcAlpha: Int
+                var dstAlpha: Int
+                var existingPixel: Int
+                if (blendMode == 1) {
+                    savedSrcX = srcX
+                    rowIndex = -height
+                    while (rowIndex < 0) {
+                        tileRowOffset = tileWidth * (srcY shr 16)
+                        colIndex = -width
+                        while (colIndex < 0) {
+                            selectedColor = color2
+                            if (tileData[tileRowOffset + (srcX shr 16)].toInt() != 0) {
+                                selectedColor = color
                             }
-                            i_23 = i_22 ushr 24
-                            i_24 = 255 - i_23
-                            i_25 = this.colourBuffer!![i_14]
-                            this.colourBuffer!![i_14++] = (i_24 * (i_25 and 0xff00) + i_23 * (i_22 and 0xff00) and 0xff0000) + ((i_25 and 0xff00ff) * i_24 + (i_22 and 0xff00ff) * i_23 and -16711936) shr 8
-                            i_10 += i_12
-                            i_21++
+                            srcAlpha = selectedColor ushr 24
+                            dstAlpha = 255 - srcAlpha
+                            existingPixel = this.colourBuffer!![bufferOffset]
+                            this.colourBuffer!![bufferOffset++] = (dstAlpha * (existingPixel and 0xff00) + srcAlpha * (selectedColor and 0xff00) and 0xff0000) + ((existingPixel and 0xff00ff) * dstAlpha + (selectedColor and 0xff00ff) * srcAlpha and -16711936) shr 8
+                            srcX += scaleX
+                            colIndex++
                         }
-                        i_11 += i_13
-                        i_10 = i_18
-                        i_14 += i_15
-                        i_19++
+                        srcY += scaleY
+                        srcX = savedSrcX
+                        bufferOffset += scanlineStride
+                        rowIndex++
                     }
                 } else {
-                    if (i_9 != 2) {
+                    if (blendMode != 2) {
                         throw IllegalArgumentException()
                     }
-                    i_18 = i_10
-                    i_19 = -height
-                    while (i_19 < 0) {
-                        i_20 = i_8 * (i_11 shr 16)
-                        i_21 = -width
-                        while (i_21 < 0) {
-                            i_22 = color2
-                            if (bytes_7[i_20 + (i_10 shr 16)].toInt() != 0) {
-                                i_22 = color
+                    savedSrcX = srcX
+                    rowIndex = -height
+                    while (rowIndex < 0) {
+                        tileRowOffset = tileWidth * (srcY shr 16)
+                        colIndex = -width
+                        while (colIndex < 0) {
+                            selectedColor = color2
+                            if (tileData[tileRowOffset + (srcX shr 16)].toInt() != 0) {
+                                selectedColor = color
                             }
-                            if (i_22 != 0) {
-                                i_23 = this.colourBuffer!![i_14]
-                                i_24 = i_22 + i_23
-                                i_25 = (i_23 and 0xff00ff) + (i_22 and 0xff00ff)
-                                i_23 = (i_25 and 0x1000100) + (i_24 - i_25 and 0x10000)
-                                this.colourBuffer!![i_14++] = i_24 - i_23 or (i_23 - (i_23 ushr 8))
+                            if (selectedColor != 0) {
+                                srcAlpha = this.colourBuffer!![bufferOffset]
+                                dstAlpha = selectedColor + srcAlpha
+                                existingPixel = (srcAlpha and 0xff00ff) + (selectedColor and 0xff00ff)
+                                srcAlpha = (existingPixel and 0x1000100) + (dstAlpha - existingPixel and 0x10000)
+                                this.colourBuffer!![bufferOffset++] = dstAlpha - srcAlpha or (srcAlpha - (srcAlpha ushr 8))
                             } else {
-                                ++i_14
+                                ++bufferOffset
                             }
-                            i_10 += i_12
-                            i_21++
+                            srcX += scaleX
+                            colIndex++
                         }
-                        i_11 += i_13
-                        i_10 = i_18
-                        i_14 += i_15
-                        i_19++
+                        srcY += scaleY
+                        srcX = savedSrcX
+                        bufferOffset += scanlineStride
+                        rowIndex++
                     }
                 }
             }
         }
     }
 
-    override fun drawCircle(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        var i_3 = i_3
-        var i_4 = i_4
-        var i_22 = i_2
+    override fun drawCircle(centerX: Int, centerY: Int, radius: Int, colorArgb: Int) {
+        var radius = radius
+        var colorArgb = colorArgb
+        var centerYLocal = centerY
         if (this.colourBuffer != null) {
-            if (i_3 < 0) {
-                i_3 = -i_3
+            if (radius < 0) {
+                radius = -radius
             }
 
-            var i_6 = i_22 - i_3
-            if (i_6 < this.clipTop) {
-                i_6 = this.clipTop
+            var topY = centerYLocal - radius
+            if (topY < this.clipTop) {
+                topY = this.clipTop
             }
 
-            var i_7 = i_3 + i_22 + 1
-            if (i_7 > this.clipBottom) {
-                i_7 = this.clipBottom
+            var bottomY = radius + centerYLocal + 1
+            if (bottomY > this.clipBottom) {
+                bottomY = this.clipBottom
             }
 
-            var i_8 = i_6
-            val i_9 = i_3 * i_3
-            var i_10 = 0
-            var i_11 = i_22 - i_6
-            var i_12 = i_11 * i_11
-            var i_13 = i_12 - i_11
-            if (i_22 > i_7) {
-                i_22 = i_7
+            var scanY = topY
+            val radiusSq = radius * radius
+            var halfWidth = 0
+            var dy = centerYLocal - topY
+            var dySq = dy * dy
+            var dySqMinusDy = dySq - dy
+            if (centerYLocal > bottomY) {
+                centerYLocal = bottomY
             }
 
-            val i_14 = i_4 ushr 24
-            var i_15: Int
-            var i_16: Int
-            var i_17: Int
-            var i_18: Int
-            if ((i_14 != 255)) {
-                var i_19: Int
-                var i_20: Int
-                i_4 = (i_14 * (i_4 and 0xff00ff) shr 8 and 0xff00ff) + (i_14 * (i_4 and 0xff00) shr 8 and 0xff00) + (i_14 shl 24)
+            val alpha = colorArgb ushr 24
+            var transparency: Int
+            var leftX: Int
+            var rightX: Int
+            var bufferOffset: Int
+            if ((alpha != 255)) {
+                var pixelX: Int
+                var existingColor: Int
+                colorArgb = (alpha * (colorArgb and 0xff00ff) shr 8 and 0xff00ff) + (alpha * (colorArgb and 0xff00) shr 8 and 0xff00) + (alpha shl 24)
 
-                i_15 = 256 - i_14
-                while (i_8 < i_22) {
-                    while (i_13 <= i_9 || i_12 <= i_9) {
-                        i_12 += i_10 + i_10
-                        i_13 += i_10++ + i_10
+                transparency = 256 - alpha
+                while (scanY < centerYLocal) {
+                    while (dySqMinusDy <= radiusSq || dySq <= radiusSq) {
+                        dySq += halfWidth + halfWidth
+                        dySqMinusDy += halfWidth++ + halfWidth
                     }
 
-                    i_16 = i_1 - i_10 + 1
-                    if (i_16 < this.clipLeft) {
-                        i_16 = this.clipLeft
+                    leftX = centerX - halfWidth + 1
+                    if (leftX < this.clipLeft) {
+                        leftX = this.clipLeft
                     }
 
-                    i_17 = i_10 + i_1
-                    if (i_17 > this.clipRight) {
-                        i_17 = this.clipRight
+                    rightX = halfWidth + centerX
+                    if (rightX > this.clipRight) {
+                        rightX = this.clipRight
                     }
 
-                    i_18 = i_16 + i_8 * this.viewportWidth
+                    bufferOffset = leftX + scanY * this.viewportWidth
 
-                    i_19 = i_16
-                    while (i_19 < i_17) {
-                        i_20 = this.colourBuffer!![i_18]
-                        i_20 = ((i_20 and 0xff00ff) * i_15 shr 8 and 0xff00ff) + (i_15 * (i_20 and 0xff00) shr 8 and 0xff00)
-                        this.colourBuffer!![i_18++] = i_20 + i_4
-                        i_19++
+                    pixelX = leftX
+                    while (pixelX < rightX) {
+                        existingColor = this.colourBuffer!![bufferOffset]
+                        existingColor = ((existingColor and 0xff00ff) * transparency shr 8 and 0xff00ff) + (transparency * (existingColor and 0xff00) shr 8 and 0xff00)
+                        this.colourBuffer!![bufferOffset++] = existingColor + colorArgb
+                        pixelX++
                     }
 
-                    ++i_8
-                    i_12 -= i_11-- + i_11
-                    i_13 -= i_11 + i_11
+                    ++scanY
+                    dySq -= dy-- + dy
+                    dySqMinusDy -= dy + dy
                 }
 
-                i_10 = i_3
-                i_11 = -i_11
-                i_13 = i_9 + i_11 * i_11
-                i_12 = i_13 - i_3
+                halfWidth = radius
+                dy = -dy
+                dySqMinusDy = radiusSq + dy * dy
+                dySq = dySqMinusDy - radius
 
-                i_13 -= i_11
-                while (i_8 < i_7) {
-                    while (i_13 > i_9 && i_12 > i_9) {
-                        i_13 -= i_10-- + i_10
-                        i_12 -= i_10 + i_10
+                dySqMinusDy -= dy
+                while (scanY < bottomY) {
+                    while (dySqMinusDy > radiusSq && dySq > radiusSq) {
+                        dySqMinusDy -= halfWidth-- + halfWidth
+                        dySq -= halfWidth + halfWidth
                     }
 
-                    i_16 = i_1 - i_10
-                    if (i_16 < this.clipLeft) {
-                        i_16 = this.clipLeft
+                    leftX = centerX - halfWidth
+                    if (leftX < this.clipLeft) {
+                        leftX = this.clipLeft
                     }
 
-                    i_17 = i_10 + i_1
-                    if (i_17 > this.clipRight - 1) {
-                        i_17 = this.clipRight - 1
+                    rightX = halfWidth + centerX
+                    if (rightX > this.clipRight - 1) {
+                        rightX = this.clipRight - 1
                     }
 
-                    i_18 = i_16 + i_8 * this.viewportWidth
+                    bufferOffset = leftX + scanY * this.viewportWidth
 
-                    i_19 = i_16
-                    while (i_19 <= i_17) {
-                        i_20 = this.colourBuffer!![i_18]
-                        i_20 = (i_15 * (i_20 and 0xff00) shr 8 and 0xff00) + ((i_20 and 0xff00ff) * i_15 shr 8 and 0xff00ff)
-                        this.colourBuffer!![i_18++] = i_20 + i_4
-                        i_19++
+                    pixelX = leftX
+                    while (pixelX <= rightX) {
+                        existingColor = this.colourBuffer!![bufferOffset]
+                        existingColor = (transparency * (existingColor and 0xff00) shr 8 and 0xff00) + ((existingColor and 0xff00ff) * transparency shr 8 and 0xff00ff)
+                        this.colourBuffer!![bufferOffset++] = existingColor + colorArgb
+                        pixelX++
                     }
 
-                    ++i_8
-                    i_13 += i_11 + i_11
-                    i_12 += i_11++ + i_11
+                    ++scanY
+                    dySqMinusDy += dy + dy
+                    dySq += dy++ + dy
                 }
             } else {
-                while (i_8 < i_22) {
-                    while (i_13 <= i_9 || i_12 <= i_9) {
-                        i_12 += i_10 + i_10
-                        i_13 += i_10++ + i_10
+                while (scanY < centerYLocal) {
+                    while (dySqMinusDy <= radiusSq || dySq <= radiusSq) {
+                        dySq += halfWidth + halfWidth
+                        dySqMinusDy += halfWidth++ + halfWidth
                     }
 
-                    i_15 = i_1 - i_10 + 1
-                    if (i_15 < this.clipLeft) {
-                        i_15 = this.clipLeft
+                    transparency = centerX - halfWidth + 1
+                    if (transparency < this.clipLeft) {
+                        transparency = this.clipLeft
                     }
 
-                    i_16 = i_10 + i_1
-                    if (i_16 > this.clipRight) {
-                        i_16 = this.clipRight
+                    leftX = halfWidth + centerX
+                    if (leftX > this.clipRight) {
+                        leftX = this.clipRight
                     }
 
-                    i_17 = i_15 + i_8 * this.viewportWidth
+                    rightX = transparency + scanY * this.viewportWidth
 
-                    i_18 = i_15
-                    while (i_18 < i_16) {
-                        this.colourBuffer!![i_17++] = i_4
-                        i_18++
+                    bufferOffset = transparency
+                    while (bufferOffset < leftX) {
+                        this.colourBuffer!![rightX++] = colorArgb
+                        bufferOffset++
                     }
 
-                    ++i_8
-                    i_12 -= i_11-- + i_11
-                    i_13 -= i_11 + i_11
+                    ++scanY
+                    dySq -= dy-- + dy
+                    dySqMinusDy -= dy + dy
                 }
 
-                i_10 = i_3
-                i_11 = i_8 - i_22
-                i_13 = i_9 + i_11 * i_11
-                i_12 = i_13 - i_3
+                halfWidth = radius
+                dy = scanY - centerYLocal
+                dySqMinusDy = radiusSq + dy * dy
+                dySq = dySqMinusDy - radius
 
-                i_13 -= i_11
-                while (i_8 < i_7) {
-                    while (i_13 > i_9 && i_12 > i_9) {
-                        i_13 -= i_10-- + i_10
-                        i_12 -= i_10 + i_10
+                dySqMinusDy -= dy
+                while (scanY < bottomY) {
+                    while (dySqMinusDy > radiusSq && dySq > radiusSq) {
+                        dySqMinusDy -= halfWidth-- + halfWidth
+                        dySq -= halfWidth + halfWidth
                     }
 
-                    i_15 = i_1 - i_10
-                    if (i_15 < this.clipLeft) {
-                        i_15 = this.clipLeft
+                    transparency = centerX - halfWidth
+                    if (transparency < this.clipLeft) {
+                        transparency = this.clipLeft
                     }
 
-                    i_16 = i_10 + i_1
-                    if (i_16 > this.clipRight - 1) {
-                        i_16 = this.clipRight - 1
+                    leftX = halfWidth + centerX
+                    if (leftX > this.clipRight - 1) {
+                        leftX = this.clipRight - 1
                     }
 
-                    i_17 = i_15 + i_8 * this.viewportWidth
+                    rightX = transparency + scanY * this.viewportWidth
 
-                    i_18 = i_15
-                    while (i_18 <= i_16) {
-                        this.colourBuffer!![i_17++] = i_4
-                        i_18++
+                    bufferOffset = transparency
+                    while (bufferOffset <= leftX) {
+                        this.colourBuffer!![rightX++] = colorArgb
+                        bufferOffset++
                     }
 
-                    ++i_8
-                    i_13 += i_11 + i_11
-                    i_12 += i_11++ + i_11
+                    ++scanY
+                    dySqMinusDy += dy + dy
+                    dySq += dy++ + dy
                 }
 
             }
@@ -1034,36 +1034,36 @@ open class SafeModeToolkit : AbstractToolkit {
                 width = this.clipRight - x
             }
 
-            val i_6 = y * this.viewportWidth + x
+            val bufferStart = y * this.viewportWidth + x
             val colorAlpha = color ushr 24
-            var i_8: Int
+            var invAlpha: Int
             if (alpha == 0 || alpha == 1 && colorAlpha == 255) {
-                for (i_8 in 0 until width) {
-                    this.colourBuffer!![i_6 + i_8] = color
+                for (pixelIdx in 0 until width) {
+                    this.colourBuffer!![bufferStart + pixelIdx] = color
                 }
             } else {
-                var i_9: Int
-                var i_10: Int
+                var pixelIdx: Int
+                var existingColor: Int
                 if (alpha == 1) {
                     color = (colorAlpha * (color and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha shl 24) + (colorAlpha * (color and 0xff00) shr 8 and 0xff00)
-                    i_8 = 256 - colorAlpha
+                    invAlpha = 256 - colorAlpha
 
-                    for (i_9 in 0 until width) {
-                        i_10 = this.colourBuffer!![i_9 + i_6]
-                        i_10 = ((i_10 and 0xff00ff) * i_8 shr 8 and 0xff00ff) + (i_8 * (i_10 and 0xff00) shr 8 and 0xff00)
-                        this.colourBuffer!![i_9 + i_6] = i_10 + color
+                    for (pixelIdx in 0 until width) {
+                        existingColor = this.colourBuffer!![pixelIdx + bufferStart]
+                        existingColor = ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00)
+                        this.colourBuffer!![pixelIdx + bufferStart] = existingColor + color
                     }
                 } else {
                     if (alpha != 2) {
                         throw IllegalArgumentException()
                     }
 
-                    for (i_8 in 0 until width) {
-                        i_9 = this.colourBuffer!![i_6 + i_8]
-                        i_10 = i_9 + color
-                        val i_11 = (i_9 and 0xff00ff) + (color and 0xff00ff)
-                        i_9 = (i_11 and 0x1000100) + (i_10 - i_11 and 0x10000)
-                        this.colourBuffer!![i_8 + i_6] = i_10 - i_9 or (i_9 - (i_9 ushr 8))
+                    for (colIdx in 0 until width) {
+                        pixelIdx = this.colourBuffer!![bufferStart + colIdx]
+                        existingColor = pixelIdx + color
+                        val channelSum = (pixelIdx and 0xff00ff) + (color and 0xff00ff)
+                        pixelIdx = (channelSum and 0x1000100) + (existingColor - channelSum and 0x10000)
+                        this.colourBuffer!![colIdx + bufferStart] = existingColor - pixelIdx or (pixelIdx - (pixelIdx ushr 8))
                     }
                 }
             }
@@ -1071,23 +1071,23 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-    fun drawDashedHorizontalLine(x: Int, y: Int, width: Int, color: Int, maxY: Int, i_7: Int, i_8: Int) {
+    fun drawDashedHorizontalLine(x: Int, y: Int, width: Int, color: Int, dashLength: Int, gapLength: Int, dashOffset: Int) {
         var color = color
         if (this.colourBuffer != null && y >= this.clipTop && y < this.clipBottom) {
             val offset = y * this.viewportWidth + x
             val alphaComponent = color ushr 24
-            val i_11 = i_7 + maxY
-            var deltaY = i_8 % i_11
+            val dashCycle = gapLength + dashLength
+            var dashPhase = dashOffset % dashCycle
             if (alphaComponent == 255) {
                 var deltaX = 0
                 while (deltaX < width) {
-                    if (deltaX + x >= this.clipLeft && deltaX + x < this.clipRight && deltaY < maxY) {
+                    if (deltaX + x >= this.clipLeft && deltaX + x < this.clipRight && dashPhase < dashLength) {
                         this.colourBuffer!![deltaX + offset] = color
                     }
 
                     ++deltaX
-                    ++deltaY
-                    deltaY %= i_11
+                    ++dashPhase
+                    dashPhase %= dashCycle
                 }
             } else {
                 var deltaX: Int
@@ -1097,15 +1097,15 @@ open class SafeModeToolkit : AbstractToolkit {
 
                 deltaX = 0
                 while (deltaX < width) {
-                    if (deltaX + x >= this.clipLeft && deltaX + x < this.clipRight && deltaY < maxY) {
+                    if (deltaX + x >= this.clipLeft && deltaX + x < this.clipRight && dashPhase < dashLength) {
                         currentColor = this.colourBuffer!![deltaX + offset]
                         currentColor = ((currentColor and 0xff00ff) * transparency shr 8 and 0xff00ff) + (transparency * (currentColor and 0xff00) shr 8 and 0xff00)
                         this.colourBuffer!![deltaX + offset] = currentColor + color
                     }
 
                     ++deltaX
-                    ++deltaY
-                    deltaY %= i_11
+                    ++dashPhase
+                    dashPhase %= dashCycle
                 }
             }
         }
@@ -1141,21 +1141,21 @@ open class SafeModeToolkit : AbstractToolkit {
                     height = -height
                 }
 
-                var i_7: Int
-                var i_8: Int
-                var i_9: Int
-                var i_10: Int
-                var i_11: Int
-                var i_12: Int
-                var i_13: Int
+                var slope: Int
+                var colorAlpha: Int
+                var invAlpha: Int
+                var pixelY: Int
+                var bufferIdx: Int
+                var existingPixel: Int
+                var channelSum: Int
                 if (width > height) {
                     y = y shl 16
                     y += 32768
                     height = height shl 16
-                    i_7 = floor(0.5 + height.toDouble() / width).toInt()
+                    slope = floor(0.5 + height.toDouble() / width).toInt()
                     width += x
                     if (x < this.clipLeft) {
-                        y += i_7 * (this.clipLeft - x)
+                        y += slope * (this.clipLeft - x)
                         x = this.clipLeft
                     }
 
@@ -1163,22 +1163,22 @@ open class SafeModeToolkit : AbstractToolkit {
                         width = this.clipRight - 1
                     }
 
-                    i_8 = color ushr 24
-                    if (alpha != 0 && (alpha != 1 || i_8 != 255)) {
+                    colorAlpha = color ushr 24
+                    if (alpha != 0 && (alpha != 1 || colorAlpha != 255)) {
                         if (alpha == 1) {
-                            color = (i_8 * (color and 0xff00ff) shr 8 and 0xff00ff) + (i_8 * (color and 0xff00) shr 8 and 0xff00) + (i_8 shl 24)
+                            color = (colorAlpha * (color and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha * (color and 0xff00) shr 8 and 0xff00) + (colorAlpha shl 24)
 
-                            i_9 = 256 - i_8
+                            invAlpha = 256 - colorAlpha
                             while (x <= width) {
-                                i_10 = y shr 16
-                                if (i_10 >= this.clipTop && i_10 < this.clipBottom) {
-                                    i_11 = i_10 * this.viewportWidth + x
-                                    i_12 = this.colourBuffer!![i_11]
-                                    i_12 = (i_9 * (i_12 and 0xff00) shr 8 and 0xff00) + ((i_12 and 0xff00ff) * i_9 shr 8 and 0xff00ff)
-                                    this.colourBuffer!![i_11] = color + i_12
+                                pixelY = y shr 16
+                                if (pixelY >= this.clipTop && pixelY < this.clipBottom) {
+                                    bufferIdx = pixelY * this.viewportWidth + x
+                                    existingPixel = this.colourBuffer!![bufferIdx]
+                                    existingPixel = (invAlpha * (existingPixel and 0xff00) shr 8 and 0xff00) + ((existingPixel and 0xff00ff) * invAlpha shr 8 and 0xff00ff)
+                                    this.colourBuffer!![bufferIdx] = color + existingPixel
                                 }
 
-                                y += i_7
+                                y += slope
                                 x++
                             }
                         } else {
@@ -1187,28 +1187,28 @@ open class SafeModeToolkit : AbstractToolkit {
                             }
 
                             while (x <= width) {
-                                i_9 = y shr 16
-                                if (i_9 >= this.clipTop && i_9 < this.clipBottom) {
-                                    i_10 = i_9 * this.viewportWidth + x
-                                    i_11 = this.colourBuffer!![i_10]
-                                    i_12 = color + i_11
-                                    i_13 = (i_11 and 0xff00ff) + (color and 0xff00ff)
-                                    i_11 = (i_13 and 0x1000100) + (i_12 - i_13 and 0x10000)
-                                    this.colourBuffer!![i_10] = i_12 - i_11 or (i_11 - (i_11 ushr 8))
+                                invAlpha = y shr 16
+                                if (invAlpha >= this.clipTop && invAlpha < this.clipBottom) {
+                                    pixelY = invAlpha * this.viewportWidth + x
+                                    bufferIdx = this.colourBuffer!![pixelY]
+                                    existingPixel = color + bufferIdx
+                                    channelSum = (bufferIdx and 0xff00ff) + (color and 0xff00ff)
+                                    bufferIdx = (channelSum and 0x1000100) + (existingPixel - channelSum and 0x10000)
+                                    this.colourBuffer!![pixelY] = existingPixel - bufferIdx or (bufferIdx - (bufferIdx ushr 8))
                                 }
 
-                                y += i_7
+                                y += slope
                                 ++x
                             }
                         }
                     } else {
                         while (x <= width) {
-                            i_9 = y shr 16
-                            if (i_9 >= this.clipTop && i_9 < this.clipBottom) {
-                                this.colourBuffer!![i_9 * this.viewportWidth + x] = color
+                            invAlpha = y shr 16
+                            if (invAlpha >= this.clipTop && invAlpha < this.clipBottom) {
+                                this.colourBuffer!![invAlpha * this.viewportWidth + x] = color
                             }
 
-                            y += i_7
+                            y += slope
                             ++x
                         }
                     }
@@ -1216,10 +1216,10 @@ open class SafeModeToolkit : AbstractToolkit {
                     x = x shl 16
                     x += 32768
                     width = width shl 16
-                    i_7 = floor(width.toDouble() / height + 0.5).toInt()
+                    slope = floor(width.toDouble() / height + 0.5).toInt()
                     height += y
                     if (y < this.clipTop) {
-                        x += i_7 * (this.clipTop - y)
+                        x += slope * (this.clipTop - y)
                         y = this.clipTop
                     }
 
@@ -1227,31 +1227,31 @@ open class SafeModeToolkit : AbstractToolkit {
                         height = this.clipBottom - 1
                     }
 
-                    i_8 = color ushr 24
-                    if (alpha == 0 || alpha == 1 && i_8 == 255) {
+                    colorAlpha = color ushr 24
+                    if (alpha == 0 || alpha == 1 && colorAlpha == 255) {
                         while (y <= height) {
-                            i_9 = x shr 16
-                            if (i_9 >= this.clipLeft && i_9 < this.clipRight) {
-                                this.colourBuffer!![y * this.viewportWidth + i_9] = color
+                            invAlpha = x shr 16
+                            if (invAlpha >= this.clipLeft && invAlpha < this.clipRight) {
+                                this.colourBuffer!![y * this.viewportWidth + invAlpha] = color
                             }
 
-                            x += i_7
+                            x += slope
                             ++y
                         }
                     } else if (alpha == 1) {
-                        color = (i_8 * (color and 0xff00ff) shr 8 and 0xff00ff) + (i_8 * (color and 0xff00) shr 8 and 0xff00) + (i_8 shl 24)
+                        color = (colorAlpha * (color and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha * (color and 0xff00) shr 8 and 0xff00) + (colorAlpha shl 24)
 
-                        i_9 = 256 - i_8
+                        invAlpha = 256 - colorAlpha
                         while (y <= height) {
-                            i_10 = x shr 16
-                            if (i_10 >= this.clipLeft && i_10 < this.clipRight) {
-                                i_11 = y * this.viewportWidth + i_10
-                                i_12 = this.colourBuffer!![i_11]
-                                i_12 = ((i_12 and 0xff00ff) * i_9 shr 8 and 0xff00ff) + (i_9 * (i_12 and 0xff00) shr 8 and 0xff00)
-                                this.colourBuffer!![y * this.viewportWidth + i_10] = color + i_12
+                            pixelY = x shr 16
+                            if (pixelY >= this.clipLeft && pixelY < this.clipRight) {
+                                bufferIdx = y * this.viewportWidth + pixelY
+                                existingPixel = this.colourBuffer!![bufferIdx]
+                                existingPixel = ((existingPixel and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingPixel and 0xff00) shr 8 and 0xff00)
+                                this.colourBuffer!![y * this.viewportWidth + pixelY] = color + existingPixel
                             }
 
-                            x += i_7
+                            x += slope
                             y++
                         }
                     } else {
@@ -1260,17 +1260,17 @@ open class SafeModeToolkit : AbstractToolkit {
                         }
 
                         while (y <= height) {
-                            i_9 = x shr 16
-                            if (i_9 >= this.clipLeft && i_9 < this.clipRight) {
-                                i_10 = y * this.viewportWidth + i_9
-                                i_11 = this.colourBuffer!![i_10]
-                                i_12 = color + i_11
-                                i_13 = (i_11 and 0xff00ff) + (color and 0xff00ff)
-                                i_11 = (i_13 and 0x1000100) + (i_12 - i_13 and 0x10000)
-                                this.colourBuffer!![i_10] = i_12 - i_11 or (i_11 - (i_11 ushr 8))
+                            invAlpha = x shr 16
+                            if (invAlpha >= this.clipLeft && invAlpha < this.clipRight) {
+                                pixelY = y * this.viewportWidth + invAlpha
+                                bufferIdx = this.colourBuffer!![pixelY]
+                                existingPixel = color + bufferIdx
+                                channelSum = (bufferIdx and 0xff00ff) + (color and 0xff00ff)
+                                bufferIdx = (channelSum and 0x1000100) + (existingPixel - channelSum and 0x10000)
+                                this.colourBuffer!![pixelY] = existingPixel - bufferIdx or (bufferIdx - (bufferIdx ushr 8))
                             }
 
-                            x += i_7
+                            x += slope
                             ++y
                         }
                     }
@@ -1280,136 +1280,136 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
     override fun getScratchMatrix(): Matrix44 {
-        val class1851 = getThreadResource(Thread.currentThread())
-        return class1851!!.scratchMatrix44!!
+        val threadResource = getThreadResource(Thread.currentThread())
+        return threadResource!!.scratchMatrix44!!
     }
 
-    override fun drawSurfaceLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
-        var i_11 = i_1
-        var i_31 = i_3
-        var i_24 = i_2
-        var i_41 = i_4
-        var i_5 = i_5
+    override fun drawSurfaceLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, surfaceClipLeft: Int, surfaceClipTop: Int) {
+        var curX = startX
+        var curEndX = endX
+        var curY = startY
+        var curEndY = endY
+        var colorArgb = colorArgb
         if (this.colourBuffer != null) {
-            val packetsdecoder10 = class4557 as ComponentDimensionSM
-            val ints_11 = packetsdecoder10.rowStartX
-            val ints_12 = packetsdecoder10.rowWidth
-            val i_13 = maxOf(this.clipTop, i_9)
-            val i_14 = minOf(this.clipBottom, ints_11!!.size + i_9)
-            i_31 -= i_11
-            i_41 -= i_24
-            if (i_31 + i_41 < 0) {
-                i_11 += i_31
-                i_31 = -i_31
-                i_24 += i_41
-                i_41 = -i_41
+            val dimensionSM = surface as ComponentDimensionSM
+            val rowStartX = dimensionSM.rowStartX
+            val rowWidth = dimensionSM.rowWidth
+            val clipTopBound = maxOf(this.clipTop, surfaceClipTop)
+            val clipBottomBound = minOf(this.clipBottom, rowStartX!!.size + surfaceClipTop)
+            curEndX -= curX
+            curEndY -= curY
+            if (curEndX + curEndY < 0) {
+                curX += curEndX
+                curEndX = -curEndX
+                curY += curEndY
+                curEndY = -curEndY
             }
 
-            var i_15: Int
-            var i_16: Int
-            var i_17: Int
-            var i_18: Int
-            var i_19: Int
-            var i_20: Int
-            var i_21: Int
-            var i_22: Int
-            var i_23: Int
-            if (i_31 > i_41) {
-                i_24 = i_24 shl 16
-                i_24 += 32768
-                i_41 = i_41 shl 16
-                i_15 = floor(i_41.toDouble() / i_31 + 0.5).toInt()
-                i_31 += i_11
-                if (i_11 < this.clipLeft) {
-                    i_24 += i_15 * (this.clipLeft - i_11)
-                    i_11 = this.clipLeft
+            var slope: Int
+            var colorAlpha: Int
+            var invAlpha: Int
+            var pixelY: Int
+            var surfaceRow: Int
+            var surfaceLeft: Int
+            var bufferIdx: Int
+            var existingColor: Int
+            var unused: Int
+            if (curEndX > curEndY) {
+                curY = curY shl 16
+                curY += 32768
+                curEndY = curEndY shl 16
+                slope = floor(curEndY.toDouble() / curEndX + 0.5).toInt()
+                curEndX += curX
+                if (curX < this.clipLeft) {
+                    curY += slope * (this.clipLeft - curX)
+                    curX = this.clipLeft
                 }
 
-                if (i_31 >= this.clipRight) {
-                    i_31 = this.clipRight - 1
+                if (curEndX >= this.clipRight) {
+                    curEndX = this.clipRight - 1
                 }
 
-                i_16 = i_5 ushr 24
-                if (i_16 == 255) {
-                    while (i_11 <= i_31) {
-                        i_17 = i_24 shr 16
-                        i_18 = i_17 - i_9
-                        if (i_17 >= i_13 && i_17 < i_14) {
-                            i_19 = i_8 + ints_11[i_18]
-                            if (i_11 >= i_19 && i_11 < i_19 + ints_12!![i_18]) {
-                                this.colourBuffer!![i_17 * this.viewportWidth + i_11] = i_5
+                colorAlpha = colorArgb ushr 24
+                if (colorAlpha == 255) {
+                    while (curX <= curEndX) {
+                        invAlpha = curY shr 16
+                        pixelY = invAlpha - surfaceClipTop
+                        if (invAlpha >= clipTopBound && invAlpha < clipBottomBound) {
+                            surfaceRow = surfaceClipLeft + rowStartX[pixelY]
+                            if (curX >= surfaceRow && curX < surfaceRow + rowWidth!![pixelY]) {
+                                this.colourBuffer!![invAlpha * this.viewportWidth + curX] = colorArgb
                             }
                         }
 
-                        i_24 += i_15
-                        ++i_11
+                        curY += slope
+                        ++curX
                     }
                 } else {
-                    i_5 = (i_16 * (i_5 and 0xff00ff) shr 8 and 0xff00ff) + (i_16 * (i_5 and 0xff00) shr 8 and 0xff00) + (i_16 shl 24)
+                    colorArgb = (colorAlpha * (colorArgb and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha * (colorArgb and 0xff00) shr 8 and 0xff00) + (colorAlpha shl 24)
 
-                    i_17 = 256 - i_16
-                    while (i_11 <= i_31) {
-                        i_18 = i_24 shr 16
-                        i_19 = i_18 - i_9
-                        if (i_18 >= i_13 && i_18 < i_14) {
-                            i_20 = i_8 + ints_11[i_19]
-                            if (i_11 >= i_20 && i_11 < i_20 + ints_12!![i_19]) {
-                                i_21 = i_18 * this.viewportWidth + i_11
-                                i_22 = this.colourBuffer!![i_21]
-                                i_22 = (i_17 * (i_22 and 0xff00) shr 8 and 0xff00) + ((i_22 and 0xff00ff) * i_17 shr 8 and 0xff00ff)
-                                this.colourBuffer!![i_21] = i_5 + i_22
+                    invAlpha = 256 - colorAlpha
+                    while (curX <= curEndX) {
+                        pixelY = curY shr 16
+                        surfaceRow = pixelY - surfaceClipTop
+                        if (pixelY >= clipTopBound && pixelY < clipBottomBound) {
+                            surfaceLeft = surfaceClipLeft + rowStartX[surfaceRow]
+                            if (curX >= surfaceLeft && curX < surfaceLeft + rowWidth!![surfaceRow]) {
+                                bufferIdx = pixelY * this.viewportWidth + curX
+                                existingColor = this.colourBuffer!![bufferIdx]
+                                existingColor = (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00) + ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff)
+                                this.colourBuffer!![bufferIdx] = colorArgb + existingColor
                             }
                         }
 
-                        i_24 += i_15
-                        i_11++
+                        curY += slope
+                        curX++
                     }
                 }
             } else {
-                i_11 = i_11 shl 16
-                i_11 += 32768
-                i_31 = i_31 shl 16
-                i_15 = floor(0.5 + i_31.toDouble() / i_41).toInt()
-                i_41 += i_24
-                if (i_24 < i_13) {
-                    i_11 += (i_13 - i_24) * i_15
-                    i_24 = i_13
+                curX = curX shl 16
+                curX += 32768
+                curEndX = curEndX shl 16
+                slope = floor(0.5 + curEndX.toDouble() / curEndY).toInt()
+                curEndY += curY
+                if (curY < clipTopBound) {
+                    curX += (clipTopBound - curY) * slope
+                    curY = clipTopBound
                 }
 
-                if (i_41 >= i_14) {
-                    i_41 = i_14 - 1
+                if (curEndY >= clipBottomBound) {
+                    curEndY = clipBottomBound - 1
                 }
 
-                i_16 = i_5 ushr 24
-                if ((i_16 != 255)) {
-                    i_5 = (i_16 * (i_5 and 0xff00) shr 8 and 0xff00) + (i_16 * (i_5 and 0xff00ff) shr 8 and 0xff00ff) + (i_16 shl 24)
+                colorAlpha = colorArgb ushr 24
+                if ((colorAlpha != 255)) {
+                    colorArgb = (colorAlpha * (colorArgb and 0xff00) shr 8 and 0xff00) + (colorAlpha * (colorArgb and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha shl 24)
 
-                    i_17 = 256 - i_16
-                    while (i_24 <= i_41) {
-                        i_18 = i_11 shr 16
-                        i_19 = i_24 - i_9
-                        i_20 = i_8 + ints_11[i_19]
-                        if (i_18 >= this.clipLeft && i_18 < this.clipRight && i_18 >= i_20 && i_18 < i_20 + ints_12!![i_19]) {
-                            i_21 = i_24 * this.viewportWidth + i_18
-                            i_22 = this.colourBuffer!![i_21]
-                            i_22 = (i_17 * (i_22 and 0xff00) shr 8 and 0xff00) + ((i_22 and 0xff00ff) * i_17 shr 8 and 0xff00ff)
-                            this.colourBuffer!![i_24 * this.viewportWidth + i_18] = i_5 + i_22
+                    invAlpha = 256 - colorAlpha
+                    while (curY <= curEndY) {
+                        pixelY = curX shr 16
+                        surfaceRow = curY - surfaceClipTop
+                        surfaceLeft = surfaceClipLeft + rowStartX[surfaceRow]
+                        if (pixelY >= this.clipLeft && pixelY < this.clipRight && pixelY >= surfaceLeft && pixelY < surfaceLeft + rowWidth!![surfaceRow]) {
+                            bufferIdx = curY * this.viewportWidth + pixelY
+                            existingColor = this.colourBuffer!![bufferIdx]
+                            existingColor = (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00) + ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff)
+                            this.colourBuffer!![curY * this.viewportWidth + pixelY] = colorArgb + existingColor
                         }
 
-                        i_11 += i_15
-                        i_24++
+                        curX += slope
+                        curY++
                     }
                 } else {
-                    while (i_24 <= i_41) {
-                        i_17 = i_11 shr 16
-                        i_18 = i_24 - i_9
-                        i_19 = i_8 + ints_11[i_18]
-                        if (i_17 >= this.clipLeft && i_17 < this.clipRight && i_17 >= i_19 && i_17 < i_19 + ints_12!![i_18]) {
-                            this.colourBuffer!![i_24 * this.viewportWidth + i_17] = i_5
+                    while (curY <= curEndY) {
+                        invAlpha = curX shr 16
+                        pixelY = curY - surfaceClipTop
+                        surfaceRow = surfaceClipLeft + rowStartX[pixelY]
+                        if (invAlpha >= this.clipLeft && invAlpha < this.clipRight && invAlpha >= surfaceRow && invAlpha < surfaceRow + rowWidth!![pixelY]) {
+                            this.colourBuffer!![curY * this.viewportWidth + invAlpha] = colorArgb
                         }
 
-                        i_11 += i_15
-                        ++i_24
+                        curX += slope
+                        ++curY
                     }
                 }
             }
@@ -1417,138 +1417,138 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-    override fun drawTexturedLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int) {
-        var i_1 = i_1
-        var i_2 = i_2
-        var i_3 = i_3
-        var i_4 = i_4
-        var i_5 = i_5
-        var i_10 = i_10
-        var i_11 = i_11
-        var i_12 = i_12
+    override fun drawTexturedLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, surfaceClipLeft: Int, surfaceClipTop: Int, dashLength: Int, gapLength: Int, dashOffset: Int) {
+        var startX = startX
+        var startY = startY
+        var endX = endX
+        var endY = endY
+        var colorArgb = colorArgb
+        var dashLength = dashLength
+        var gapLength = gapLength
+        var dashOffset = dashOffset
         if (this.colourBuffer != null) {
-            val packetsdecoder13 = class4557 as ComponentDimensionSM
-            val ints_14 = packetsdecoder13.rowStartX
-            val ints_15 = packetsdecoder13.rowWidth
-            val i_16 = maxOf(this.clipTop, i_9)
-            val i_17 = minOf(this.clipBottom, ints_14!!.size + i_9)
-            i_12 = i_12 shl 8
-            i_10 = i_10 shl 8
-            i_11 = i_11 shl 8
-            val i_18 = i_11 + i_10
-            i_12 %= i_18
-            i_3 -= i_1
-            i_4 -= i_2
-            var i_19: Int
-            var i_20: Int
-            if (i_3 + i_4 < 0) {
-                i_19 = (sqrt((i_3 * i_3 + i_4 * i_4).toDouble()) * 256.0).toInt()
-                i_20 = i_19 % i_18
-                i_12 = i_10 + i_18 - i_12 - i_20
-                i_12 %= i_18
-                if (i_12 < 0) {
-                    i_12 += i_18
+            val dimensionSM = surface as ComponentDimensionSM
+            val rowStartX = dimensionSM.rowStartX
+            val rowWidth = dimensionSM.rowWidth
+            val clipTopBound = maxOf(this.clipTop, surfaceClipTop)
+            val clipBottomBound = minOf(this.clipBottom, rowStartX!!.size + surfaceClipTop)
+            dashOffset = dashOffset shl 8
+            dashLength = dashLength shl 8
+            gapLength = gapLength shl 8
+            val dashCycle = gapLength + dashLength
+            dashOffset %= dashCycle
+            endX -= startX
+            endY -= startY
+            var slope: Int
+            var lineLength: Int
+            if (endX + endY < 0) {
+                slope = (sqrt((endX * endX + endY * endY).toDouble()) * 256.0).toInt()
+                lineLength = slope % dashCycle
+                dashOffset = dashLength + dashCycle - dashOffset - lineLength
+                dashOffset %= dashCycle
+                if (dashOffset < 0) {
+                    dashOffset += dashCycle
                 }
 
-                i_1 += i_3
-                i_3 = -i_3
-                i_2 += i_4
-                i_4 = -i_4
+                startX += endX
+                endX = -endX
+                startY += endY
+                endY = -endY
             }
 
-            var i_21: Int
-            var i_22: Int
-            var i_23: Int
-            var i_24: Int
-            var i_25: Int
-            var i_26: Int
-            var i_27: Int
-            if (i_3 > i_4) {
-                i_2 = i_2 shl 16
-                i_2 += 32768
-                i_4 = i_4 shl 16
-                i_19 = floor(i_4.toDouble() / i_3 + 0.5).toInt()
-                i_3 += i_1
-                i_20 = i_5 ushr 24
-                i_21 = sqrt(((i_19 shr 8) * (i_19 shr 8) + 65536).toDouble()).toInt()
-                if (i_20 == 255) {
-                    while (i_1 <= i_3) {
-                        i_22 = i_2 shr 16
-                        i_23 = i_22 - i_9
-                        if (i_1 >= this.clipLeft && i_1 < this.clipRight && i_22 >= i_16 && i_22 < i_17 && i_12 < i_10) {
-                            i_24 = i_8 + ints_14[i_23]
-                            if (i_1 >= i_24 && i_1 < i_24 + ints_15!![i_23]) {
-                                this.colourBuffer!![i_22 * this.viewportWidth + i_1] = i_5
+            var stepLength: Int
+            var invAlpha: Int
+            var pixelY: Int
+            var surfaceRow: Int
+            var surfaceLeft: Int
+            var bufferIdx: Int
+            var existingColor: Int
+            if (endX > endY) {
+                startY = startY shl 16
+                startY += 32768
+                endY = endY shl 16
+                slope = floor(endY.toDouble() / endX + 0.5).toInt()
+                endX += startX
+                lineLength = colorArgb ushr 24
+                stepLength = sqrt(((slope shr 8) * (slope shr 8) + 65536).toDouble()).toInt()
+                if (lineLength == 255) {
+                    while (startX <= endX) {
+                        invAlpha = startY shr 16
+                        pixelY = invAlpha - surfaceClipTop
+                        if (startX >= this.clipLeft && startX < this.clipRight && invAlpha >= clipTopBound && invAlpha < clipBottomBound && dashOffset < dashLength) {
+                            surfaceRow = surfaceClipLeft + rowStartX[pixelY]
+                            if (startX >= surfaceRow && startX < surfaceRow + rowWidth!![pixelY]) {
+                                this.colourBuffer!![invAlpha * this.viewportWidth + startX] = colorArgb
                             }
                         }
 
-                        i_2 += i_19
-                        ++i_1
-                        i_12 += i_21
-                        i_12 %= i_18
+                        startY += slope
+                        ++startX
+                        dashOffset += stepLength
+                        dashOffset %= dashCycle
                     }
                 } else {
-                    i_5 = (i_20 * (i_5 and 0xff00ff) shr 8 and 0xff00ff) + (i_20 * (i_5 and 0xff00) shr 8 and 0xff00) + (i_20 shl 24)
+                    colorArgb = (lineLength * (colorArgb and 0xff00ff) shr 8 and 0xff00ff) + (lineLength * (colorArgb and 0xff00) shr 8 and 0xff00) + (lineLength shl 24)
 
-                    i_22 = 256 - i_20
-                    while (i_1 <= i_3) {
-                        i_23 = i_2 shr 16
-                        i_24 = i_23 - i_9
-                        if (i_1 >= this.clipLeft && i_1 < this.clipRight && i_23 >= i_16 && i_23 < i_17 && i_12 < i_10) {
-                            i_25 = i_8 + ints_14[i_24]
-                            if (i_1 >= i_25 && i_1 < i_25 + ints_15!![i_24]) {
-                                i_26 = i_23 * this.viewportWidth + i_1
-                                i_27 = this.colourBuffer!![i_26]
-                                i_27 = (i_22 * (i_27 and 0xff00) shr 8 and 0xff00) + ((i_27 and 0xff00ff) * i_22 shr 8 and 0xff00ff)
-                                this.colourBuffer!![i_26] = i_5 + i_27
+                    invAlpha = 256 - lineLength
+                    while (startX <= endX) {
+                        pixelY = startY shr 16
+                        surfaceRow = pixelY - surfaceClipTop
+                        if (startX >= this.clipLeft && startX < this.clipRight && pixelY >= clipTopBound && pixelY < clipBottomBound && dashOffset < dashLength) {
+                            surfaceLeft = surfaceClipLeft + rowStartX[surfaceRow]
+                            if (startX >= surfaceLeft && startX < surfaceLeft + rowWidth!![surfaceRow]) {
+                                bufferIdx = pixelY * this.viewportWidth + startX
+                                existingColor = this.colourBuffer!![bufferIdx]
+                                existingColor = (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00) + ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff)
+                                this.colourBuffer!![bufferIdx] = colorArgb + existingColor
                             }
                         }
 
-                        i_2 += i_19
-                        ++i_1
-                        i_12 += i_21
-                        i_12 %= i_18
+                        startY += slope
+                        ++startX
+                        dashOffset += stepLength
+                        dashOffset %= dashCycle
                     }
                 }
             } else {
-                i_1 = i_1 shl 16
-                i_1 += 32768
-                i_3 = i_3 shl 16
-                i_19 = floor(0.5 + i_3.toDouble() / i_4).toInt()
-                i_20 = sqrt(((i_19 shr 8) * (i_19 shr 8) + 65536).toDouble()).toInt()
-                i_4 += i_2
-                i_21 = i_5 ushr 24
-                if (i_21 == 255) {
-                    while (i_2 <= i_4) {
-                        i_22 = i_1 shr 16
-                        i_23 = i_2 - i_9
-                        if (i_2 >= i_16 && i_2 < i_17 && i_22 >= this.clipLeft && i_22 < this.clipRight && i_12 < i_10 && i_22 >= i_8 + ints_14[i_23] && i_22 < i_8 + ints_14[i_23] + ints_15!![i_23]) {
-                            this.colourBuffer!![i_2 * this.viewportWidth + i_22] = i_5
+                startX = startX shl 16
+                startX += 32768
+                endX = endX shl 16
+                slope = floor(0.5 + endX.toDouble() / endY).toInt()
+                lineLength = sqrt(((slope shr 8) * (slope shr 8) + 65536).toDouble()).toInt()
+                endY += startY
+                stepLength = colorArgb ushr 24
+                if (stepLength == 255) {
+                    while (startY <= endY) {
+                        invAlpha = startX shr 16
+                        pixelY = startY - surfaceClipTop
+                        if (startY >= clipTopBound && startY < clipBottomBound && invAlpha >= this.clipLeft && invAlpha < this.clipRight && dashOffset < dashLength && invAlpha >= surfaceClipLeft + rowStartX[pixelY] && invAlpha < surfaceClipLeft + rowStartX[pixelY] + rowWidth!![pixelY]) {
+                            this.colourBuffer!![startY * this.viewportWidth + invAlpha] = colorArgb
                         }
 
-                        i_1 += i_19
-                        ++i_2
-                        i_12 += i_20
-                        i_12 %= i_18
+                        startX += slope
+                        ++startY
+                        dashOffset += lineLength
+                        dashOffset %= dashCycle
                     }
                 } else {
-                    i_5 = (i_21 * (i_5 and 0xff00ff) shr 8 and 0xff00ff) + (i_21 * (i_5 and 0xff00) shr 8 and 0xff00) + (i_21 shl 24)
+                    colorArgb = (stepLength * (colorArgb and 0xff00ff) shr 8 and 0xff00ff) + (stepLength * (colorArgb and 0xff00) shr 8 and 0xff00) + (stepLength shl 24)
 
-                    i_22 = 256 - i_21
-                    while (i_2 <= i_4) {
-                        i_23 = i_1 shr 16
-                        i_24 = i_2 - i_9
-                        if (i_2 >= i_16 && i_2 < i_17 && i_23 >= this.clipLeft && i_23 < this.clipRight && i_12 < i_10 && i_23 >= i_8 + ints_14[i_24] && i_23 < i_8 + ints_14[i_24] + ints_15!![i_24]) {
-                            i_25 = i_2 * this.viewportWidth + i_23
-                            i_26 = this.colourBuffer!![i_25]
-                            i_26 = (i_22 * (i_26 and 0xff00) shr 8 and 0xff00) + ((i_26 and 0xff00ff) * i_22 shr 8 and 0xff00ff)
-                            this.colourBuffer!![i_2 * this.viewportWidth + i_23] = i_5 + i_26
+                    invAlpha = 256 - stepLength
+                    while (startY <= endY) {
+                        pixelY = startX shr 16
+                        surfaceRow = startY - surfaceClipTop
+                        if (startY >= clipTopBound && startY < clipBottomBound && pixelY >= this.clipLeft && pixelY < this.clipRight && dashOffset < dashLength && pixelY >= surfaceClipLeft + rowStartX[surfaceRow] && pixelY < surfaceClipLeft + rowStartX[surfaceRow] + rowWidth!![surfaceRow]) {
+                            surfaceLeft = startY * this.viewportWidth + pixelY
+                            bufferIdx = this.colourBuffer!![surfaceLeft]
+                            bufferIdx = (invAlpha * (bufferIdx and 0xff00) shr 8 and 0xff00) + ((bufferIdx and 0xff00ff) * invAlpha shr 8 and 0xff00ff)
+                            this.colourBuffer!![startY * this.viewportWidth + pixelY] = colorArgb + bufferIdx
                         }
 
-                        i_1 += i_19
-                        ++i_2
-                        i_12 += i_20
-                        i_12 %= i_18
+                        startX += slope
+                        ++startY
+                        dashOffset += lineLength
+                        dashOffset %= dashCycle
                     }
                 }
             }
@@ -1556,46 +1556,46 @@ open class SafeModeToolkit : AbstractToolkit {
 
     }
 
-    override fun isOnScreen(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
+    override fun isOnScreen(minX: Int, minY: Int, minZ: Int, maxX: Int, maxY: Int, maxZ: Int): Int {
         var flags = 0
-        val f_8 = i_3 * this.floorMatrix!!.elements[10] + i_2 * this.floorMatrix!!.elements[6] + this.floorMatrix!!.elements[14] + i_1 * this.floorMatrix!!.elements[2]
-        val f_9 = this.floorMatrix!!.elements[6] * i_5 + this.floorMatrix!!.elements[14] + this.floorMatrix!!.elements[2] * i_4 + this.floorMatrix!!.elements[10] * i_6
-        val f_10 = this.floorMatrix!!.elements[15] + i_1 * this.floorMatrix!!.elements[3] + i_2 * this.floorMatrix!!.elements[7] + i_3 * this.floorMatrix!!.elements[11]
-        val f_11 = i_5 * this.floorMatrix!!.elements[7] + this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[3] * i_4 + i_6 * this.floorMatrix!!.elements[11]
-        if (f_8 < -f_10 && f_9 < -f_11) {
+        val clipZMin = minZ * this.floorMatrix!!.elements[10] + minY * this.floorMatrix!!.elements[6] + this.floorMatrix!!.elements[14] + minX * this.floorMatrix!!.elements[2]
+        val clipZMax = this.floorMatrix!!.elements[6] * maxY + this.floorMatrix!!.elements[14] + this.floorMatrix!!.elements[2] * maxX + this.floorMatrix!!.elements[10] * maxZ
+        val clipWMin = this.floorMatrix!!.elements[15] + minX * this.floorMatrix!!.elements[3] + minY * this.floorMatrix!!.elements[7] + minZ * this.floorMatrix!!.elements[11]
+        val clipWMax = maxY * this.floorMatrix!!.elements[7] + this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[3] * maxX + maxZ * this.floorMatrix!!.elements[11]
+        if (clipZMin < -clipWMin && clipZMax < -clipWMax) {
             flags = flags or 0x10
-        } else if (f_8 > f_10 && f_9 > f_11) {
+        } else if (clipZMin > clipWMin && clipZMax > clipWMax) {
             flags = flags or 0x20
         }
 
-        val f_12 = this.floorMatrix!!.elements[4] * i_2 + this.floorMatrix!!.elements[12] + i_1 * this.floorMatrix!!.elements[0] + i_3 * this.floorMatrix!!.elements[8]
-        val f_13 = i_6 * this.floorMatrix!!.elements[8] + i_4 * this.floorMatrix!!.elements[0] + this.floorMatrix!!.elements[12] + this.floorMatrix!!.elements[4] * i_5
-        if (f_12 < -f_10 && f_13 < -f_11) {
+        val clipXMin = this.floorMatrix!!.elements[4] * minY + this.floorMatrix!!.elements[12] + minX * this.floorMatrix!!.elements[0] + minZ * this.floorMatrix!!.elements[8]
+        val clipXMax = maxZ * this.floorMatrix!!.elements[8] + maxX * this.floorMatrix!!.elements[0] + this.floorMatrix!!.elements[12] + this.floorMatrix!!.elements[4] * maxY
+        if (clipXMin < -clipWMin && clipXMax < -clipWMax) {
             flags = flags or 0x1
         }
 
-        if (f_12 > f_10 && f_13 > f_11) {
+        if (clipXMin > clipWMin && clipXMax > clipWMax) {
             flags = flags or 0x2
         }
 
-        val f_14 = this.floorMatrix!!.elements[5] * i_2 + i_1 * this.floorMatrix!!.elements[1] + this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[9] * i_3
-        val f_15 = this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[1] * i_4 + this.floorMatrix!!.elements[5] * i_5 + i_6 * this.floorMatrix!!.elements[9]
-        if (f_14 < -f_10 && f_15 < -f_11) {
+        val clipYMin = this.floorMatrix!!.elements[5] * minY + minX * this.floorMatrix!!.elements[1] + this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[9] * minZ
+        val clipYMax = this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[1] * maxX + this.floorMatrix!!.elements[5] * maxY + maxZ * this.floorMatrix!!.elements[9]
+        if (clipYMin < -clipWMin && clipYMax < -clipWMax) {
             flags = flags or 0x4
         }
 
-        if (f_14 > f_10 && f_15 > f_11) {
+        if (clipYMin > clipWMin && clipYMax > clipWMax) {
             flags = flags or 0x8
         }
 
         return flags
     }
 
-    override fun setNativeHeap(class282Sub11: NativeMemoryNode) {
+    override fun setNativeHeap(nativeMemory: NativeMemoryNode) {
     }
 
-    override fun generateEmptySprite(i_1: Int, i_2: Int, bool3: Boolean, bool4: Boolean): NativeSprite {
-        return if (bool3) TransparentSpriteSM(this, i_1, i_2) else OpaqueSpriteSM(this, i_1, i_2)
+    override fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, unused: Boolean): NativeSprite {
+        return if (transparent) TransparentSpriteSM(this, width, height) else OpaqueSpriteSM(this, width, height)
     }
 
     override fun calculateProjection(width: Float, height: Float, length: Float, matrix: FloatArray) {
@@ -1608,45 +1608,45 @@ open class SafeModeToolkit : AbstractToolkit {
         matrix[2] = floorOffset
     }
 
-    override fun createNativeSprite(i_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean): NativeSprite {
+    override fun createNativeSprite(srcX: Int, srcY: Int, srcWidth: Int, srcHeight: Int, hasAlpha: Boolean): NativeSprite {
         if (this.colourBuffer == null) {
             throw IllegalStateException("")
         } else {
-            val ints_6 = IntArray(i_3 * i_4)
-            var i_7 = i_2 * this.viewportWidth + i_1
-            val i_8 = this.viewportWidth - i_3
+            val pixelBuffer = IntArray(srcWidth * srcHeight)
+            var srcOffset = srcY * this.viewportWidth + srcX
+            val scanlineStride = this.viewportWidth - srcWidth
 
-            for (i_9 in 0 until i_4) {
-                val i_10 = i_3 * i_9
+            for (rowIdx in 0 until srcHeight) {
+                val rowStart = srcWidth * rowIdx
 
-                for (i_11 in 0 until i_3) {
-                    ints_6[i_10 + i_11] = this.colourBuffer!![i_7++]
+                for (colIdx in 0 until srcWidth) {
+                    pixelBuffer[rowStart + colIdx] = this.colourBuffer!![srcOffset++]
                 }
 
-                i_7 += i_8
+                srcOffset += scanlineStride
             }
 
-            return if (bool5) {
-                TransparentSpriteSM(this, ints_6, i_3, i_4)
+            return if (hasAlpha) {
+                TransparentSpriteSM(this, pixelBuffer, srcWidth, srcHeight)
             } else {
-                OpaqueSpriteSM(this, ints_6, i_3, i_4)
+                OpaqueSpriteSM(this, pixelBuffer, srcWidth, srcHeight)
             }
         }
     }
 
-    override fun createComponentSurface(i_1: Int, i_2: Int, ints_3: IntArray, ints_4: IntArray): ComponentSurface {
-        return ComponentDimensionSM(ints_3, ints_4)
+    override fun createComponentSurface(sizeX: Int, sizeY: Int, rowStartX: IntArray, rowWidth: IntArray): ComponentSurface {
+        return ComponentDimensionSM(rowStartX, rowWidth)
     }
 
     override fun resetDepthClippingMask() {
         this.depthRangeFar = 1.0f
         this.depthRangeNear = 0.0f
 
-        for (i_3 in 0 until this.executingThreadCount) {
-            val class1854 = this.renderingThreads!![i_3]
-            val choppyitemfixclass5 = class1854.rasterizer
-            choppyitemfixclass5!!.depthRangeFar = this.depthRangeFar
-            choppyitemfixclass5.depthRangeNear = this.depthRangeNear
+        for (threadIdx in 0 until this.executingThreadCount) {
+            val threadResource = this.renderingThreads!![threadIdx]
+            val rasterizer = threadResource.rasterizer
+            rasterizer!!.depthRangeFar = this.depthRangeFar
+            rasterizer.depthRangeNear = this.depthRangeNear
         }
 
     }
@@ -1665,15 +1665,15 @@ open class SafeModeToolkit : AbstractToolkit {
 
 
     override fun getRenderingMatrix(): Matrix43 {
-        val class1851 = getThreadResource(Thread.currentThread())
-        return class1851!!.renderingMatrix43!!
+        val threadResource = getThreadResource(Thread.currentThread())
+        return threadResource!!.renderingMatrix43!!
     }
 
     override fun bloomEnabled(): Boolean {
         return false
     }
 
-    override fun copyLights(i_1: Int, arr_2: Array<PointLight>?) {
+    override fun copyLights(lightCount: Int, lights: Array<PointLight>?) {
     }
 
     fun initializeThreads(threadCount: Int) {
@@ -1695,13 +1695,13 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
 
-    fun renderMaterializedSprite(bool1: Boolean, bool2: Boolean, pointEntity: PointEntity, i_5: Int, i_6: Int, f_7: Float, i_8: Int) {
-        var i_8 = i_8
+    fun renderMaterializedSprite(hasColorBuffer: Boolean, hasDepthBuffer: Boolean, pointEntity: PointEntity, screenX: Int, screenY: Int, depth: Float, halfSize: Int) {
+        var halfSize = halfSize
         val materialId = pointEntity.materialId
-        val i_10 = i_8
-        i_8 = i_8 shl 1
+        val radius = halfSize
+        halfSize = halfSize shl 1
         if (materialId == -1) {
-            drawParticleShape(bool2, i_5, i_6, f_7, i_10, pointEntity.colorArgb, 1)
+            drawParticleShape(hasDepthBuffer, screenX, screenY, depth, radius, pointEntity.colorArgb, 1)
         } else {
             if (materialId != this.renderedMaterialId) {
                 var textureSprite = this.animatedSpriteMaterials.get(materialId.toLong()) as NativeSprite?
@@ -1717,8 +1717,8 @@ open class SafeModeToolkit : AbstractToolkit {
                 this.renderedMaterialId = materialId
                 this.renderedNativeSprite = textureSprite
             }
-            ++i_8
-            (this.renderedNativeSprite as SpriteSM).drawParticle(bool1, bool2, false, i_5 - i_10, i_6 - i_10, f_7, i_8, i_8, 0, pointEntity.colorArgb, 1, false)
+            ++halfSize
+            (this.renderedNativeSprite as SpriteSM).drawParticle(hasColorBuffer, hasDepthBuffer, false, screenX - radius, screenY - radius, depth, halfSize, halfSize, 0, pointEntity.colorArgb, 1, false)
         }
 
     }
@@ -1770,260 +1770,260 @@ open class SafeModeToolkit : AbstractToolkit {
                 lowestY = this.clipBottom
             }
 
-            var i_10 = highestY
-            val i_11 = deltaY * deltaY
+            var scanY = highestY
+            val radiusSq = deltaY * deltaY
             var deltaX = 0
-            var i_13 = y - highestY
-            var i_14 = i_13 * i_13
-            var i_15 = i_14 - i_13
+            var dy = y - highestY
+            var dySq = dy * dy
+            var dySqMinusDy = dySq - dy
             if (y > lowestY) {
                 y = lowestY
             }
 
             val alpha = color ushr 24
-            var i_17: Int
-            var i_18: Int
-            var i_19: Int
-            var i_20: Int
+            var invAlpha: Int
+            var leftX: Int
+            var rightX: Int
+            var bufferOffset: Int
             if (shape != 0 && (shape != 1 || alpha != 255)) {
-                var i_21: Int
-                var i_22: Int
+                var pixelX: Int
+                var existingColor: Int
                 if (shape == 1) {
                     color = ((color and 0xff00ff) * alpha shr 8 and 0xff00ff) + (alpha shl 24) + (alpha * (color and 0xff00) shr 8 and 0xff00)
 
-                    i_17 = 256 - alpha
-                    while (i_10 < y) {
-                        while (i_15 <= i_11 || i_14 <= i_11) {
-                            i_14 += deltaX + deltaX
-                            i_15 += deltaX++ + deltaX
+                    invAlpha = 256 - alpha
+                    while (scanY < y) {
+                        while (dySqMinusDy <= radiusSq || dySq <= radiusSq) {
+                            dySq += deltaX + deltaX
+                            dySqMinusDy += deltaX++ + deltaX
                         }
 
-                        i_18 = x - deltaX + 1
-                        if (i_18 < this.clipLeft) {
-                            i_18 = this.clipLeft
+                        leftX = x - deltaX + 1
+                        if (leftX < this.clipLeft) {
+                            leftX = this.clipLeft
                         }
 
-                        i_19 = deltaX + x
-                        if (i_19 > this.clipRight) {
-                            i_19 = this.clipRight
+                        rightX = deltaX + x
+                        if (rightX > this.clipRight) {
+                            rightX = this.clipRight
                         }
 
-                        i_20 = i_18 + i_10 * this.viewportWidth
+                        bufferOffset = leftX + scanY * this.viewportWidth
 
-                        i_21 = i_18
-                        while (i_21 < i_19) {
-                            if (!writeDepth || z < this.depthBuffer!![i_20]) {
-                                i_22 = this.colourBuffer!![i_20]
-                                i_22 = ((i_22 and 0xff00ff) * i_17 shr 8 and 0xff00ff) + (i_17 * (i_22 and 0xff00) shr 8 and 0xff00)
-                                this.colourBuffer!![i_20] = i_22 + color
+                        pixelX = leftX
+                        while (pixelX < rightX) {
+                            if (!writeDepth || z < this.depthBuffer!![bufferOffset]) {
+                                existingColor = this.colourBuffer!![bufferOffset]
+                                existingColor = ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00)
+                                this.colourBuffer!![bufferOffset] = existingColor + color
                             }
 
-                            ++i_20
-                            i_21++
+                            ++bufferOffset
+                            pixelX++
                         }
 
-                        ++i_10
-                        i_14 -= i_13-- + i_13
-                        i_15 -= i_13 + i_13
+                        ++scanY
+                        dySq -= dy-- + dy
+                        dySqMinusDy -= dy + dy
                     }
 
                     deltaX = deltaY
-                    i_13 = -i_13
-                    i_15 = i_11 + i_13 * i_13
-                    i_14 = i_15 - deltaY
+                    dy = -dy
+                    dySqMinusDy = radiusSq + dy * dy
+                    dySq = dySqMinusDy - deltaY
 
-                    i_15 -= i_13
-                    while (i_10 < lowestY) {
-                        while (i_15 > i_11 && i_14 > i_11) {
-                            i_15 -= deltaX-- + deltaX
-                            i_14 -= deltaX + deltaX
+                    dySqMinusDy -= dy
+                    while (scanY < lowestY) {
+                        while (dySqMinusDy > radiusSq && dySq > radiusSq) {
+                            dySqMinusDy -= deltaX-- + deltaX
+                            dySq -= deltaX + deltaX
                         }
 
-                        i_18 = x - deltaX
-                        if (i_18 < this.clipLeft) {
-                            i_18 = this.clipLeft
+                        leftX = x - deltaX
+                        if (leftX < this.clipLeft) {
+                            leftX = this.clipLeft
                         }
 
-                        i_19 = deltaX + x
-                        if (i_19 > this.clipRight - 1) {
-                            i_19 = this.clipRight - 1
+                        rightX = deltaX + x
+                        if (rightX > this.clipRight - 1) {
+                            rightX = this.clipRight - 1
                         }
 
-                        i_20 = i_18 + i_10 * this.viewportWidth
+                        bufferOffset = leftX + scanY * this.viewportWidth
 
-                        i_21 = i_18
-                        while (i_21 <= i_19) {
-                            if (!writeDepth || z < this.depthBuffer!![i_20]) {
-                                i_22 = this.colourBuffer!![i_20]
-                                i_22 = ((i_22 and 0xff00ff) * i_17 shr 8 and 0xff00ff) + (i_17 * (i_22 and 0xff00) shr 8 and 0xff00)
-                                this.colourBuffer!![i_20] = i_22 + color
+                        pixelX = leftX
+                        while (pixelX <= rightX) {
+                            if (!writeDepth || z < this.depthBuffer!![bufferOffset]) {
+                                existingColor = this.colourBuffer!![bufferOffset]
+                                existingColor = ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00)
+                                this.colourBuffer!![bufferOffset] = existingColor + color
                             }
 
-                            ++i_20
-                            i_21++
+                            ++bufferOffset
+                            pixelX++
                         }
 
-                        ++i_10
-                        i_15 += i_13 + i_13
-                        i_14 += i_13++ + i_13
+                        ++scanY
+                        dySqMinusDy += dy + dy
+                        dySq += dy++ + dy
                     }
                 } else {
                     if (shape != 2) {
                         throw IllegalArgumentException()
                     }
 
-                    var i_23: Int
-                    while (i_10 < y) {
-                        while (i_15 <= i_11 || i_14 <= i_11) {
-                            i_14 += deltaX + deltaX
-                            i_15 += deltaX++ + deltaX
+                    var channelSum: Int
+                    while (scanY < y) {
+                        while (dySqMinusDy <= radiusSq || dySq <= radiusSq) {
+                            dySq += deltaX + deltaX
+                            dySqMinusDy += deltaX++ + deltaX
                         }
 
-                        i_17 = x - deltaX + 1
-                        if (i_17 < this.clipLeft) {
-                            i_17 = this.clipLeft
+                        invAlpha = x - deltaX + 1
+                        if (invAlpha < this.clipLeft) {
+                            invAlpha = this.clipLeft
                         }
 
-                        i_18 = deltaX + x
-                        if (i_18 > this.clipRight) {
-                            i_18 = this.clipRight
+                        leftX = deltaX + x
+                        if (leftX > this.clipRight) {
+                            leftX = this.clipRight
                         }
 
-                        i_19 = i_17 + i_10 * this.viewportWidth
+                        rightX = invAlpha + scanY * this.viewportWidth
 
-                        i_20 = i_17
-                        while (i_20 < i_18) {
-                            if (!writeDepth || z < this.depthBuffer!![i_19]) {
-                                i_21 = this.colourBuffer!![i_19]
-                                i_22 = i_21 + color
-                                i_23 = (i_21 and 0xff00ff) + (color and 0xff00ff)
-                                i_21 = (i_23 and 0x1000100) + (i_22 - i_23 and 0x10000)
-                                this.colourBuffer!![i_19] = i_22 - i_21 or (i_21 - (i_21 ushr 8))
+                        bufferOffset = invAlpha
+                        while (bufferOffset < leftX) {
+                            if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                                pixelX = this.colourBuffer!![rightX]
+                                existingColor = pixelX + color
+                                channelSum = (pixelX and 0xff00ff) + (color and 0xff00ff)
+                                pixelX = (channelSum and 0x1000100) + (existingColor - channelSum and 0x10000)
+                                this.colourBuffer!![rightX] = existingColor - pixelX or (pixelX - (pixelX ushr 8))
                             }
 
-                            ++i_19
-                            i_20++
+                            ++rightX
+                            bufferOffset++
                         }
 
-                        ++i_10
-                        i_14 -= i_13-- + i_13
-                        i_15 -= i_13 + i_13
+                        ++scanY
+                        dySq -= dy-- + dy
+                        dySqMinusDy -= dy + dy
                     }
 
                     deltaX = deltaY
-                    i_13 = -i_13
-                    i_15 = i_11 + i_13 * i_13
-                    i_14 = i_15 - deltaY
+                    dy = -dy
+                    dySqMinusDy = radiusSq + dy * dy
+                    dySq = dySqMinusDy - deltaY
 
-                    i_15 -= i_13
-                    while (i_10 < lowestY) {
-                        while (i_15 > i_11 && i_14 > i_11) {
-                            i_15 -= deltaX-- + deltaX
-                            i_14 -= deltaX + deltaX
+                    dySqMinusDy -= dy
+                    while (scanY < lowestY) {
+                        while (dySqMinusDy > radiusSq && dySq > radiusSq) {
+                            dySqMinusDy -= deltaX-- + deltaX
+                            dySq -= deltaX + deltaX
                         }
 
-                        i_17 = x - deltaX
-                        if (i_17 < this.clipLeft) {
-                            i_17 = this.clipLeft
+                        invAlpha = x - deltaX
+                        if (invAlpha < this.clipLeft) {
+                            invAlpha = this.clipLeft
                         }
 
-                        i_18 = deltaX + x
-                        if (i_18 > this.clipRight - 1) {
-                            i_18 = this.clipRight - 1
+                        leftX = deltaX + x
+                        if (leftX > this.clipRight - 1) {
+                            leftX = this.clipRight - 1
                         }
 
-                        i_19 = i_17 + i_10 * this.viewportWidth
+                        rightX = invAlpha + scanY * this.viewportWidth
 
-                        i_20 = i_17
-                        while (i_20 <= i_18) {
-                            if (!writeDepth || z < this.depthBuffer!![i_19]) {
-                                i_21 = this.colourBuffer!![i_19]
-                                i_22 = i_21 + color
-                                i_23 = (i_21 and 0xff00ff) + (color and 0xff00ff)
-                                i_21 = (i_23 and 0x1000100) + (i_22 - i_23 and 0x10000)
-                                this.colourBuffer!![i_19] = i_22 - i_21 or (i_21 - (i_21 ushr 8))
+                        bufferOffset = invAlpha
+                        while (bufferOffset <= leftX) {
+                            if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                                pixelX = this.colourBuffer!![rightX]
+                                existingColor = pixelX + color
+                                channelSum = (pixelX and 0xff00ff) + (color and 0xff00ff)
+                                pixelX = (channelSum and 0x1000100) + (existingColor - channelSum and 0x10000)
+                                this.colourBuffer!![rightX] = existingColor - pixelX or (pixelX - (pixelX ushr 8))
                             }
 
-                            ++i_19
-                            i_20++
+                            ++rightX
+                            bufferOffset++
                         }
 
-                        ++i_10
-                        i_15 += i_13 + i_13
-                        i_14 += i_13++ + i_13
+                        ++scanY
+                        dySqMinusDy += dy + dy
+                        dySq += dy++ + dy
                     }
                 }
             } else {
-                while (i_10 < y) {
-                    while (i_15 <= i_11 || i_14 <= i_11) {
-                        i_14 += deltaX + deltaX
-                        i_15 += deltaX++ + deltaX
+                while (scanY < y) {
+                    while (dySqMinusDy <= radiusSq || dySq <= radiusSq) {
+                        dySq += deltaX + deltaX
+                        dySqMinusDy += deltaX++ + deltaX
                     }
 
-                    i_17 = x - deltaX + 1
-                    if (i_17 < this.clipLeft) {
-                        i_17 = this.clipLeft
+                    invAlpha = x - deltaX + 1
+                    if (invAlpha < this.clipLeft) {
+                        invAlpha = this.clipLeft
                     }
 
-                    i_18 = deltaX + x
-                    if (i_18 > this.clipRight) {
-                        i_18 = this.clipRight
+                    leftX = deltaX + x
+                    if (leftX > this.clipRight) {
+                        leftX = this.clipRight
                     }
 
-                    i_19 = i_17 + i_10 * this.viewportWidth
+                    rightX = invAlpha + scanY * this.viewportWidth
 
-                    i_20 = i_17
-                    while (i_20 < i_18) {
-                        if (!writeDepth || z < this.depthBuffer!![i_19]) {
-                            this.colourBuffer!![i_19] = color
+                    bufferOffset = invAlpha
+                    while (bufferOffset < leftX) {
+                        if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                            this.colourBuffer!![rightX] = color
                         }
 
-                        ++i_19
-                        i_20++
+                        ++rightX
+                        bufferOffset++
                     }
 
-                    ++i_10
-                    i_14 -= i_13-- + i_13
-                    i_15 -= i_13 + i_13
+                    ++scanY
+                    dySq -= dy-- + dy
+                    dySqMinusDy -= dy + dy
                 }
 
                 deltaX = deltaY
-                i_13 = i_10 - y
-                i_15 = i_11 + i_13 * i_13
-                i_14 = i_15 - deltaY
+                dy = scanY - y
+                dySqMinusDy = radiusSq + dy * dy
+                dySq = dySqMinusDy - deltaY
 
-                i_15 -= i_13
-                while (i_10 < lowestY) {
-                    while (i_15 > i_11 && i_14 > i_11) {
-                        i_15 -= deltaX-- + deltaX
-                        i_14 -= deltaX + deltaX
+                dySqMinusDy -= dy
+                while (scanY < lowestY) {
+                    while (dySqMinusDy > radiusSq && dySq > radiusSq) {
+                        dySqMinusDy -= deltaX-- + deltaX
+                        dySq -= deltaX + deltaX
                     }
 
-                    i_17 = x - deltaX
-                    if (i_17 < this.clipLeft) {
-                        i_17 = this.clipLeft
+                    invAlpha = x - deltaX
+                    if (invAlpha < this.clipLeft) {
+                        invAlpha = this.clipLeft
                     }
 
-                    i_18 = deltaX + x
-                    if (i_18 > this.clipRight - 1) {
-                        i_18 = this.clipRight - 1
+                    leftX = deltaX + x
+                    if (leftX > this.clipRight - 1) {
+                        leftX = this.clipRight - 1
                     }
 
-                    i_19 = i_17 + i_10 * this.viewportWidth
+                    rightX = invAlpha + scanY * this.viewportWidth
 
-                    i_20 = i_17
-                    while (i_20 <= i_18) {
-                        if (!writeDepth || z < this.depthBuffer!![i_19]) {
-                            this.colourBuffer!![i_19] = color
+                    bufferOffset = invAlpha
+                    while (bufferOffset <= leftX) {
+                        if (!writeDepth || z < this.depthBuffer!![rightX]) {
+                            this.colourBuffer!![rightX] = color
                         }
 
-                        ++i_19
-                        i_20++
+                        ++rightX
+                        bufferOffset++
                     }
 
-                    ++i_10
-                    i_15 += i_13 + i_13
-                    i_14 += i_13++ + i_13
+                    ++scanY
+                    dySqMinusDy += dy + dy
+                    dySq += dy++ + dy
                 }
 
             }
@@ -2044,13 +2044,13 @@ open class SafeModeToolkit : AbstractToolkit {
         return Matrix44(this.modelMatrix!!)
     }
 
-    override fun applyLighting(i_1: Int, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float) {
-        this.lowestContrast = (65535.0f * f_2).toInt()
-        this.highestContrast = (65535.0f * f_3).toInt()
-        val f_7 = sqrt((f_6 * f_6 + f_5 * f_5 + f_4 * f_4).toDouble()).toFloat()
-        this.lightX = (f_4 * 65535.0f / f_7).toInt()
-        this.lightY = (65535.0f * f_5 / f_7).toInt()
-        this.lightZ = (f_6 * 65535.0f / f_7).toInt()
+    override fun applyLighting(sunColor: Int, intensity: Float, antiIntensity: Float, x: Float, y: Float, z: Float) {
+        this.lowestContrast = (65535.0f * intensity).toInt()
+        this.highestContrast = (65535.0f * antiIntensity).toInt()
+        val magnitude = sqrt((z * z + y * y + x * x).toDouble()).toFloat()
+        this.lightX = (x * 65535.0f / magnitude).toInt()
+        this.lightY = (65535.0f * y / magnitude).toInt()
+        this.lightZ = (z * 65535.0f / magnitude).toInt()
     }
 
     override fun generateFlags() {
@@ -2092,27 +2092,27 @@ open class SafeModeToolkit : AbstractToolkit {
         this.floorMatrix!!.extractRightPlane(this.frustumPlanes[3])
         this.floorMatrix!!.extractBottomPlane(this.frustumPlanes[4])
         this.floorMatrix!!.extractTopPlane(this.frustumPlanes[5])
-        val f_1 = this.modelMatrix!!.getDepthPerspectiveCD()
-        val f_2 = this.modelMatrix!!.elements[10] * (f_1 - 255.0f) + this.modelMatrix!!.elements[14]
-        val f_3 = this.modelMatrix!!.elements[10] * f_1 + this.modelMatrix!!.elements[14]
-        val f_4 = f_3 - f_2
+        val depthPerspective = this.modelMatrix!!.getDepthPerspectiveCD()
+        val fogNear = this.modelMatrix!!.elements[10] * (depthPerspective - 255.0f) + this.modelMatrix!!.elements[14]
+        val fogFar = this.modelMatrix!!.elements[10] * depthPerspective + this.modelMatrix!!.elements[14]
+        val fogRange = fogFar - fogNear
 
-        for (i_5 in 0 until this.executingThreadCount) {
-            val class1856 = this.renderingThreads!![i_5]
-            class1856.fogStartDistance = f_2
-            class1856.fogRange = f_4
+        for (threadIdx in 0 until this.executingThreadCount) {
+            val threadResource = this.renderingThreads!![threadIdx]
+            threadResource.fogStartDistance = fogNear
+            threadResource.fogRange = fogRange
         }
 
     }
 
-    override fun createCubeTexture(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): AbstractCubeTextureGenerator? {
+    override fun createCubeTexture(materialAtPositiveX: Int, materialAtNegativeX: Int, materialAtPositiveY: Int, materialAtNegativeY: Int, materialAtPositiveZ: Int, materialAtNegativeZ: Int): AbstractCubeTextureGenerator? {
         return null
     }
 
     override fun resetBloom() {
     }
 
-    override fun beginBloomCapture(i_3: Int, i_4: Int) {
+    override fun beginBloomCapture(width: Int, height: Int) {
     }
 
 
@@ -2146,79 +2146,79 @@ open class SafeModeToolkit : AbstractToolkit {
         return SafeModeRenderBuffer(width, height)
     }
 
-    override fun computeWorldToScreen(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.floorMatrix!!.elements[10] * f_3 + f_1 * this.floorMatrix!!.elements[2] + this.floorMatrix!!.elements[14] + f_2 * this.floorMatrix!!.elements[6]
-        val f_6 = this.floorMatrix!!.elements[3] * f_1 + this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[7] * f_2 + f_3 * this.floorMatrix!!.elements[11]
-        if (f_5 >= -f_6 && f_5 <= f_6) {
-            val f_7 = f_2 * this.floorMatrix!!.elements[4] + this.floorMatrix!!.elements[12] + f_1 * this.floorMatrix!!.elements[0] + this.floorMatrix!!.elements[8] * f_3
-            if (f_7 >= -f_6 && f_7 <= f_6) {
-                val f_8 = f_3 * this.floorMatrix!!.elements[9] + this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[1] * f_1 + this.floorMatrix!!.elements[5] * f_2
-                if (f_8 >= -f_6 && f_8 <= f_6) {
-                    val f_9 = this.viewMatrix44!!.elements[14] + this.viewMatrix44!!.elements[2] * f_1 + this.viewMatrix44!!.elements[6] * f_2 + this.viewMatrix44!!.elements[10] * f_3
-                    floats_4[0] = this.viewportOriginX + f_7 * this.viewportHalfWidth / f_6
-                    floats_4[1] = f_8 * this.viewportHalfHeight / f_6 + this.viewportOriginY
-                    floats_4[2] = f_9
+    override fun computeWorldToScreen(worldX: Float, worldY: Float, worldZ: Float, screenCoords: FloatArray) {
+        val clipZ = this.floorMatrix!!.elements[10] * worldZ + worldX * this.floorMatrix!!.elements[2] + this.floorMatrix!!.elements[14] + worldY * this.floorMatrix!!.elements[6]
+        val clipW = this.floorMatrix!!.elements[3] * worldX + this.floorMatrix!!.elements[15] + this.floorMatrix!!.elements[7] * worldY + worldZ * this.floorMatrix!!.elements[11]
+        if (clipZ >= -clipW && clipZ <= clipW) {
+            val clipX = worldY * this.floorMatrix!!.elements[4] + this.floorMatrix!!.elements[12] + worldX * this.floorMatrix!!.elements[0] + this.floorMatrix!!.elements[8] * worldZ
+            if (clipX >= -clipW && clipX <= clipW) {
+                val clipY = worldZ * this.floorMatrix!!.elements[9] + this.floorMatrix!!.elements[13] + this.floorMatrix!!.elements[1] * worldX + this.floorMatrix!!.elements[5] * worldY
+                if (clipY >= -clipW && clipY <= clipW) {
+                    val depth = this.viewMatrix44!!.elements[14] + this.viewMatrix44!!.elements[2] * worldX + this.viewMatrix44!!.elements[6] * worldY + this.viewMatrix44!!.elements[10] * worldZ
+                    screenCoords[0] = this.viewportOriginX + clipX * this.viewportHalfWidth / clipW
+                    screenCoords[1] = clipY * this.viewportHalfHeight / clipW + this.viewportOriginY
+                    screenCoords[2] = depth
                 } else {
-                    floats_4[2] = Float.NaN
-                    floats_4[1] = Float.NaN
-                    floats_4[0] = Float.NaN
+                    screenCoords[2] = Float.NaN
+                    screenCoords[1] = Float.NaN
+                    screenCoords[0] = Float.NaN
                 }
             } else {
-                floats_4[2] = Float.NaN
-                floats_4[1] = Float.NaN
-                floats_4[0] = Float.NaN
+                screenCoords[2] = Float.NaN
+                screenCoords[1] = Float.NaN
+                screenCoords[0] = Float.NaN
             }
         } else {
-            floats_4[2] = Float.NaN
-            floats_4[1] = Float.NaN
-            floats_4[0] = Float.NaN
+            screenCoords[2] = Float.NaN
+            screenCoords[1] = Float.NaN
+            screenCoords[0] = Float.NaN
         }
 
     }
 
-    override fun clearRectangle(class4552: ComponentSurface, i_3: Int, i_4: Int) {
-        var i_41 = i_4
+    override fun clearRectangle(surface: ComponentSurface, clipOffsetX: Int, clipOffsetY: Int) {
+        var offsetY = clipOffsetY
         if (this.colourBuffer != null) {
-            val packetsdecoder5 = class4552 as ComponentDimensionSM
-            val ints_6 = packetsdecoder5.rowStartX
-            val ints_7 = packetsdecoder5.rowWidth
-            var i_8: Int
-            if (this.clipBottom < ints_6!!.size + i_41) {
-                i_8 = this.clipBottom - i_41
+            val dimensionSM = surface as ComponentDimensionSM
+            val rowStartX = dimensionSM.rowStartX
+            val rowWidth = dimensionSM.rowWidth
+            var visibleRows: Int
+            if (this.clipBottom < rowStartX!!.size + offsetY) {
+                visibleRows = this.clipBottom - offsetY
             } else {
-                i_8 = ints_6.size
+                visibleRows = rowStartX.size
             }
 
-            var i_9: Int
-            if (this.clipTop > i_41) {
-                i_9 = this.clipTop - i_41
-                i_41 = this.clipTop
+            var startRow: Int
+            if (this.clipTop > offsetY) {
+                startRow = this.clipTop - offsetY
+                offsetY = this.clipTop
             } else {
-                i_9 = 0
+                startRow = 0
             }
 
-            if (i_8 - i_9 > 0) {
-                var i_10 = i_41 * this.viewportWidth
+            if (visibleRows - startRow > 0) {
+                var scanlineOffset = offsetY * this.viewportWidth
 
-                for (i_11 in i_9 until i_8) {
-                    var i_12 = i_3 + ints_6[i_11]
-                    var i_13 = ints_7!![i_11]
-                    if (this.clipLeft > i_12) {
-                        i_13 -= this.clipLeft - i_12
-                        i_12 = this.clipLeft
+                for (row in startRow until visibleRows) {
+                    var rowX = clipOffsetX + rowStartX[row]
+                    var rowW = rowWidth!![row]
+                    if (this.clipLeft > rowX) {
+                        rowW -= this.clipLeft - rowX
+                        rowX = this.clipLeft
                     }
 
-                    if (this.clipRight < i_13 + i_12) {
-                        i_13 = this.clipRight - i_12
+                    if (this.clipRight < rowW + rowX) {
+                        rowW = this.clipRight - rowX
                     }
 
-                    i_12 += i_10
+                    rowX += scanlineOffset
 
-                    for (i_14 in -i_13 until 0) {
-                        this.colourBuffer!![i_12++] = -16777216.toInt()
+                    for (pixel in -rowW until 0) {
+                        this.colourBuffer!![rowX++] = -16777216.toInt()
                     }
 
-                    i_10 += this.viewportWidth
+                    scanlineOffset += this.viewportWidth
                 }
             }
         }
@@ -2230,7 +2230,7 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
 
-    override fun setSunCubeTexture(class1521: AbstractCubeTextureGenerator?) {
+    override fun setSunCubeTexture(cubeTexture: AbstractCubeTextureGenerator?) {
     }
 
 
@@ -2294,8 +2294,8 @@ open class SafeModeToolkit : AbstractToolkit {
                 for (h in 0 until spriteHeight) {
                     val currentPos = h * spriteWidth
                     for (w in 0 until spriteWidth) {
-                        val i_13 = spritePalette!![spritePixels!![w + currentPos].toInt() and 0xff]
-                        spriteTransparentPixels[currentPos + w] = if (i_13 != 0) -16777216.toInt() or i_13 else 0
+                        val paletteColor = spritePalette!![spritePixels!![w + currentPos].toInt() and 0xff]
+                        spriteTransparentPixels[currentPos + w] = if (paletteColor != 0) -16777216.toInt() or paletteColor else 0
                     }
                 }
                 safeModeSprite = OpaqueSpriteSM(this, spriteTransparentPixels, spriteWidth, spriteHeight)
@@ -2312,11 +2312,11 @@ open class SafeModeToolkit : AbstractToolkit {
             val rasterizer = dependencies!!.rasterizer
             val width = x - startX
             val height = y - startY
-            val i_12 = if (width >= 0) width else -width
-            val i_13 = if (height >= 0) height else -height
-            var dimension = i_12
-            if (i_12 < i_13) {
-                dimension = i_13
+            val absWidth = if (width >= 0) width else -width
+            val absHeight = if (height >= 0) height else -height
+            var dimension = absWidth
+            if (absWidth < absHeight) {
+                dimension = absHeight
             }
             if (dimension != 0) {
                 val lineX = (width shl 16) / dimension
@@ -2369,7 +2369,7 @@ open class SafeModeToolkit : AbstractToolkit {
     override fun debugModeChanged() {
     }
 
-    override fun getNativeMemory(i_1: Int): NativeMemoryNode? {
+    override fun getNativeMemory(size: Int): NativeMemoryNode? {
         return null
     }
 
@@ -2378,42 +2378,42 @@ open class SafeModeToolkit : AbstractToolkit {
         return 0
     }
 
-    fun drawDashedVerticalLine(x: Int, y: Int, i_3: Int, color: Int, i_6: Int, i_7: Int, i_8: Int) {
+    fun drawDashedVerticalLine(x: Int, y: Int, height: Int, color: Int, dashLength: Int, gapLength: Int, dashOffset: Int) {
         var color = color
         if (this.colourBuffer != null && x >= this.clipLeft && x < this.clipRight) {
             val currentPos = y * this.viewportWidth + x
             val alpha = color ushr 24
-            val i_11 = i_7 + i_6
-            var i_12 = i_8 % i_11
-            var i_13: Int
+            val dashCycle = gapLength + dashLength
+            var dashPhase = dashOffset % dashCycle
+            var loopIdx: Int
             if (alpha == 255) {
-                i_13 = 0
-                while (i_13 < i_3) {
-                    if (i_13 + y >= this.clipTop && i_13 + y < this.clipBottom && i_12 < i_6) {
-                        this.colourBuffer!![currentPos + i_13 * this.viewportWidth] = color
+                loopIdx = 0
+                while (loopIdx < height) {
+                    if (loopIdx + y >= this.clipTop && loopIdx + y < this.clipBottom && dashPhase < dashLength) {
+                        this.colourBuffer!![currentPos + loopIdx * this.viewportWidth] = color
                     }
 
-                    ++i_13
-                    ++i_12
-                    i_12 %= i_11
+                    ++loopIdx
+                    ++dashPhase
+                    dashPhase %= dashCycle
                 }
             } else {
-                var i_14: Int
-                var i_15: Int
-                var i_16: Int
+                var deltaIdx: Int
+                var bufferIdx: Int
+                var existingColor: Int
                 color = (alpha * (color and 0xff00ff) shr 8 and 0xff00ff) + (alpha * (color and 0xff00) shr 8 and 0xff00) + (alpha shl 24)
-                i_13 = 256 - alpha
-                i_14 = 0
-                while (i_14 < i_3) {
-                    if (i_14 + y >= this.clipTop && i_14 + y < this.clipBottom && i_12 < i_6) {
-                        i_15 = currentPos + i_14 * this.viewportWidth
-                        i_16 = this.colourBuffer!![i_15]
-                        i_16 = (i_13 * (i_16 and 0xff00) shr 8 and 0xff00) + ((i_16 and 0xff00ff) * i_13 shr 8 and 0xff00ff)
-                        this.colourBuffer!![i_15] = i_16 + color
+                loopIdx = 256 - alpha
+                deltaIdx = 0
+                while (deltaIdx < height) {
+                    if (deltaIdx + y >= this.clipTop && deltaIdx + y < this.clipBottom && dashPhase < dashLength) {
+                        bufferIdx = currentPos + deltaIdx * this.viewportWidth
+                        existingColor = this.colourBuffer!![bufferIdx]
+                        existingColor = (loopIdx * (existingColor and 0xff00) shr 8 and 0xff00) + ((existingColor and 0xff00ff) * loopIdx shr 8 and 0xff00ff)
+                        this.colourBuffer!![bufferIdx] = existingColor + color
                     }
-                    ++i_14
-                    ++i_12
-                    i_12 %= i_11
+                    ++deltaIdx
+                    ++dashPhase
+                    dashPhase %= dashCycle
                 }
             }
         }
@@ -2444,28 +2444,28 @@ open class SafeModeToolkit : AbstractToolkit {
                 height = this.clipBottom - y
             }
 
-            val i_6 = y * this.viewportWidth + x
+            val bufferStart = y * this.viewportWidth + x
             val colorAlpha = color ushr 24
             if (alpha == 0 || alpha == 1 && colorAlpha == 255) {
                 for (h in 0 until height) {
-                    this.colourBuffer!![i_6 + h * this.viewportWidth] = color
+                    this.colourBuffer!![bufferStart + h * this.viewportWidth] = color
                 }
             } else {
                 if (alpha == 1) {
                     color = (colorAlpha * (color and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha shl 24) + (colorAlpha * (color and 0xff00) shr 8 and 0xff00)
-                    val i_8 = 256 - colorAlpha
-                    for (i_9 in 0 until height) {
-                        val i_10 = i_6 + i_9 * this.viewportWidth
-                        var i_11 = this.colourBuffer!![i_10]
-                        i_11 = ((i_11 and 0xff00ff) * i_8 shr 8 and 0xff00ff) + (i_8 * (i_11 and 0xff00) shr 8 and 0xff00)
-                        this.colourBuffer!![i_10] = i_11 + color
+                    val invAlpha = 256 - colorAlpha
+                    for (rowIdx in 0 until height) {
+                        val bufferIdx = bufferStart + rowIdx * this.viewportWidth
+                        var existingColor = this.colourBuffer!![bufferIdx]
+                        existingColor = ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00)
+                        this.colourBuffer!![bufferIdx] = existingColor + color
                     }
                 } else {
                     if (alpha != 2) {
                         throw IllegalArgumentException()
                     }
-                    for (i_8 in 0 until height) {
-                        val colorIndex = i_6 + i_8 * this.viewportWidth
+                    for (rowIdx in 0 until height) {
+                        val colorIndex = bufferStart + rowIdx * this.viewportWidth
                         var originalColor = this.colourBuffer!![colorIndex]
                         val colorSum = originalColor + color
                         val blendColor = (originalColor and 0xff00ff) + (color and 0xff00ff)
@@ -2521,7 +2521,7 @@ open class SafeModeToolkit : AbstractToolkit {
         viewportUpdate()
     }
 
-    override fun drawQuad(class1521: AbstractCubeTextureGenerator?, class1522: AbstractCubeTextureGenerator?, f_3: Float, class1524: AbstractCubeTextureGenerator?): AbstractCubeTextureGenerator? {
+    override fun drawQuad(cubeTexture1: AbstractCubeTextureGenerator?, cubeTexture2: AbstractCubeTextureGenerator?, alpha: Float, cubeTexture3: AbstractCubeTextureGenerator?): AbstractCubeTextureGenerator? {
         return null
     }
 
@@ -2531,62 +2531,62 @@ open class SafeModeToolkit : AbstractToolkit {
     }
 
 
-    override fun drawLine(x: Int, y: Int, width: Int, length: Int, color: Int, i_7: Int, i_8: Int, i_9: Int) {
+    override fun drawLine(x: Int, y: Int, width: Int, length: Int, color: Int, lineSpacing: Int, lineLength: Int, dashOffset: Int) {
         var x = x
         var y = y
         var width = width
         var length = length
         var color = color
-        var i_7 = i_7
-        var i_8 = i_8
-        var i_9 = i_9
+        var lineSpacing = lineSpacing
+        var lineLength = lineLength
+        var dashOffset = dashOffset
         if (this.colourBuffer != null) {
             width -= x
             length -= y
-            var i_10: Int
+            var dashCycle: Int
             if (length == 0) {
                 if (width >= 0) {
-                    drawDashedHorizontalLine(x, y, width + 1, color, i_7, i_8, i_9)
+                    drawDashedHorizontalLine(x, y, width + 1, color, lineSpacing, lineLength, dashOffset)
                 } else {
-                    i_10 = i_8 + i_7
-                    i_9 %= i_10
-                    i_9 = i_10 + i_7 - i_9 - (-width + 1) % i_10
-                    i_9 %= i_10
-                    if (i_9 < 0) {
-                        i_9 += i_10
+                    dashCycle = lineLength + lineSpacing
+                    dashOffset %= dashCycle
+                    dashOffset = dashCycle + lineSpacing - dashOffset - (-width + 1) % dashCycle
+                    dashOffset %= dashCycle
+                    if (dashOffset < 0) {
+                        dashOffset += dashCycle
                     }
 
-                    drawDashedHorizontalLine(width + x, y, -width + 1, color, i_7, i_8, i_9)
+                    drawDashedHorizontalLine(width + x, y, -width + 1, color, lineSpacing, lineLength, dashOffset)
                 }
             } else if (width == 0) {
                 if (length >= 0) {
-                    drawDashedVerticalLine(x, y, length + 1, color, i_7, i_8, i_9)
+                    drawDashedVerticalLine(x, y, length + 1, color, lineSpacing, lineLength, dashOffset)
                 } else {
-                    i_10 = i_8 + i_7
-                    i_9 %= i_10
-                    i_9 = i_10 + i_7 - i_9 - (-length + 1) % i_10
-                    i_9 %= i_10
-                    if (i_9 < 0) {
-                        i_9 += i_10
+                    dashCycle = lineLength + lineSpacing
+                    dashOffset %= dashCycle
+                    dashOffset = dashCycle + lineSpacing - dashOffset - (-length + 1) % dashCycle
+                    dashOffset %= dashCycle
+                    if (dashOffset < 0) {
+                        dashOffset += dashCycle
                     }
 
-                    drawDashedVerticalLine(x, y + length, -length + 1, color, i_7, i_8, i_9)
+                    drawDashedVerticalLine(x, y + length, -length + 1, color, lineSpacing, lineLength, dashOffset)
                 }
             } else {
-                i_9 = i_9 shl 8
-                i_7 = i_7 shl 8
-                i_8 = i_8 shl 8
-                i_10 = i_8 + i_7
-                i_9 %= i_10
-                var i_11: Int
-                var i_12: Int
+                dashOffset = dashOffset shl 8
+                lineSpacing = lineSpacing shl 8
+                lineLength = lineLength shl 8
+                dashCycle = lineLength + lineSpacing
+                dashOffset %= dashCycle
+                var slope: Int
+                var colorAlpha: Int
                 if (width + length < 0) {
-                    i_11 = (sqrt((width * width + length * length).toDouble()) * 256.0).toInt()
-                    i_12 = i_11 % i_10
-                    i_9 = i_10 + i_7 - i_9 - i_12
-                    i_9 %= i_10
-                    if (i_9 < 0) {
-                        i_9 += i_10
+                    slope = (sqrt((width * width + length * length).toDouble()) * 256.0).toInt()
+                    colorAlpha = slope % dashCycle
+                    dashOffset = dashCycle + lineSpacing - dashOffset - colorAlpha
+                    dashOffset %= dashCycle
+                    if (dashOffset < 0) {
+                        dashOffset += dashCycle
                     }
 
                     x += width
@@ -2595,88 +2595,88 @@ open class SafeModeToolkit : AbstractToolkit {
                     length = -length
                 }
 
-                var i_13: Int
-                var i_14: Int
-                var i_15: Int
-                var i_16: Int
-                var i_17: Int
-                var i_18: Int
+                var stepLength: Int
+                var invAlpha: Int
+                var pixelY: Int
+                var bufferIdx: Int
+                var existingColor: Int
+                var unused: Int
                 if (width > length) {
                     y = y shl 16
                     y += 32768
                     length = length shl 16
-                    i_11 = floor(length.toDouble() / width + 0.5).toInt()
+                    slope = floor(length.toDouble() / width + 0.5).toInt()
                     width += x
-                    i_12 = color ushr 24
-                    i_13 = sqrt(((i_11 shr 8) * (i_11 shr 8) + 65536).toDouble()).toInt()
-                    if (i_12 == 255) {
+                    colorAlpha = color ushr 24
+                    stepLength = sqrt(((slope shr 8) * (slope shr 8) + 65536).toDouble()).toInt()
+                    if (colorAlpha == 255) {
                         while (x <= width) {
-                            i_14 = y shr 16
-                            if (x >= this.clipLeft && x < this.clipRight && i_14 >= this.clipTop && i_14 < this.clipBottom && i_9 < i_7) {
-                                this.colourBuffer!![i_14 * this.viewportWidth + x] = color
+                            invAlpha = y shr 16
+                            if (x >= this.clipLeft && x < this.clipRight && invAlpha >= this.clipTop && invAlpha < this.clipBottom && dashOffset < lineSpacing) {
+                                this.colourBuffer!![invAlpha * this.viewportWidth + x] = color
                             }
 
-                            y += i_11
+                            y += slope
                             ++x
-                            i_9 += i_13
-                            i_9 %= i_10
+                            dashOffset += stepLength
+                            dashOffset %= dashCycle
                         }
                     } else {
-                        color = (i_12 * (color and 0xff00ff) shr 8 and 0xff00ff) + (i_12 * (color and 0xff00) shr 8 and 0xff00) + (i_12 shl 24)
+                        color = (colorAlpha * (color and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha * (color and 0xff00) shr 8 and 0xff00) + (colorAlpha shl 24)
 
-                        i_14 = 256 - i_12
+                        invAlpha = 256 - colorAlpha
                         while (x <= width) {
-                            i_15 = y shr 16
-                            if (x >= this.clipLeft && x < this.clipRight && i_15 >= this.clipTop && i_15 < this.clipBottom && i_9 < i_7) {
-                                i_16 = i_15 * this.viewportWidth + x
-                                i_17 = this.colourBuffer!![i_16]
-                                i_17 = ((i_17 and 0xff00ff) * i_14 shr 8 and 0xff00ff) + (i_14 * (i_17 and 0xff00) shr 8 and 0xff00)
-                                this.colourBuffer!![i_16] = color + i_17
+                            pixelY = y shr 16
+                            if (x >= this.clipLeft && x < this.clipRight && pixelY >= this.clipTop && pixelY < this.clipBottom && dashOffset < lineSpacing) {
+                                bufferIdx = pixelY * this.viewportWidth + x
+                                existingColor = this.colourBuffer!![bufferIdx]
+                                existingColor = ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff) + (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00)
+                                this.colourBuffer!![bufferIdx] = color + existingColor
                             }
 
-                            y += i_11
+                            y += slope
                             ++x
-                            i_9 += i_13
-                            i_9 %= i_10
+                            dashOffset += stepLength
+                            dashOffset %= dashCycle
                         }
                     }
                 } else {
                     x = x shl 16
                     x += 32768
                     width = width shl 16
-                    i_11 = floor(width.toDouble() / length + 0.5).toInt()
+                    slope = floor(width.toDouble() / length + 0.5).toInt()
                     length += y
-                    i_12 = color ushr 24
-                    i_13 = sqrt(((i_11 shr 8) * (i_11 shr 8) + 65536).toDouble()).toInt()
-                    if ((i_12 != 255)) {
-                        color = (i_12 * (color and 0xff00ff) shr 8 and 0xff00ff) + (i_12 * (color and 0xff00) shr 8 and 0xff00) + (i_12 shl 24)
+                    colorAlpha = color ushr 24
+                    stepLength = sqrt(((slope shr 8) * (slope shr 8) + 65536).toDouble()).toInt()
+                    if ((colorAlpha != 255)) {
+                        color = (colorAlpha * (color and 0xff00ff) shr 8 and 0xff00ff) + (colorAlpha * (color and 0xff00) shr 8 and 0xff00) + (colorAlpha shl 24)
 
-                        i_14 = 256 - i_12
+                        invAlpha = 256 - colorAlpha
                         while (y <= length) {
-                            i_15 = x shr 16
-                            if (y >= this.clipTop && y < this.clipBottom && i_15 >= this.clipLeft && i_15 < this.clipRight && i_9 < i_7) {
-                                i_16 = y * this.viewportWidth + i_15
-                                i_17 = this.colourBuffer!![i_16]
-                                i_17 = (i_14 * (i_17 and 0xff00) shr 8 and 0xff00) + ((i_17 and 0xff00ff) * i_14 shr 8 and 0xff00ff)
-                                this.colourBuffer!![y * this.viewportWidth + i_15] = color + i_17
+                            pixelY = x shr 16
+                            if (y >= this.clipTop && y < this.clipBottom && pixelY >= this.clipLeft && pixelY < this.clipRight && dashOffset < lineSpacing) {
+                                bufferIdx = y * this.viewportWidth + pixelY
+                                existingColor = this.colourBuffer!![bufferIdx]
+                                existingColor = (invAlpha * (existingColor and 0xff00) shr 8 and 0xff00) + ((existingColor and 0xff00ff) * invAlpha shr 8 and 0xff00ff)
+                                this.colourBuffer!![y * this.viewportWidth + pixelY] = color + existingColor
                             }
 
-                            x += i_11
+                            x += slope
                             ++y
-                            i_9 += i_13
-                            i_9 %= i_10
+                            dashOffset += stepLength
+                            dashOffset %= dashCycle
                         }
                     } else {
                         while (y <= length) {
-                            i_14 = x shr 16
-                            if (y >= this.clipTop && y < this.clipBottom && i_14 >= this.clipLeft && i_14 < this.clipRight && i_9 < i_7) {
-                                this.colourBuffer!![y * this.viewportWidth + i_14] = color
+                            invAlpha = x shr 16
+                            if (y >= this.clipTop && y < this.clipBottom && invAlpha >= this.clipLeft && invAlpha < this.clipRight && dashOffset < lineSpacing) {
+                                this.colourBuffer!![y * this.viewportWidth + invAlpha] = color
                             }
 
-                            x += i_11
+                            x += slope
                             ++y
-                            i_9 += i_13
-                            i_9 %= i_10
+                            dashOffset += stepLength
+                            dashOffset %= dashCycle
                         }
                     }
                 }
@@ -2687,7 +2687,7 @@ open class SafeModeToolkit : AbstractToolkit {
 
 
 
-    override fun createPointLight(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int): PointLight? {
+    override fun createPointLight(x: Int, y: Int, z: Int, radius: Int, color: Int): PointLight? {
         return null
     }
 
@@ -2720,9 +2720,9 @@ open class SafeModeToolkit : AbstractToolkit {
         }
 
         @JvmStatic
-        fun createImageProducer(hardwarerenderer0: SafeModeToolkit, canvas1: Canvas, i_2: Int, i_3: Int): AbstractImageProducerSM {
-            val class158Sub2Sub3Sub15 = BufferedImageProducerSM(hardwarerenderer0, canvas1, i_2, i_3)
-            return class158Sub2Sub3Sub15
+        fun createImageProducer(hardwarerenderer0: SafeModeToolkit, canvas: Canvas, width: Int, height: Int): AbstractImageProducerSM {
+            val imageProducer = BufferedImageProducerSM(hardwarerenderer0, canvas, width, height)
+            return imageProducer
         }
     }
 }
