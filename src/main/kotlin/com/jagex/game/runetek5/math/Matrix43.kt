@@ -24,8 +24,8 @@ class Matrix43 {
     var yB: Float = 0.0f
     var zC: Float = 0.0f
 
-    constructor(matrix44var1: Matrix43) {
-        copyFrom(matrix44var1)
+    constructor(source: Matrix43) {
+        copyFrom(source)
     }
 
     constructor() {
@@ -35,15 +35,15 @@ class Matrix43 {
     fun updateIdentitiyMatrix() {
         val originalX = this.xD
         val originalY = this.yD
-        val f_3 = this.xB
+        val swapXB = this.xB
         this.xB = this.yA
-        this.yA = f_3
-        val f_4 = this.xC
+        this.yA = swapXB
+        val swapXC = this.xC
         this.xC = this.zA
-        this.zA = f_4
-        val f_5 = this.yC
+        this.zA = swapXC
+        val swapYC = this.yC
         this.yC = this.zB
-        this.zB = f_5
+        this.zB = swapYC
         this.xD = -(originalX * this.xA + originalY * this.xB + this.zD * this.xC)
         this.yD = -(originalX * this.yA + originalY * this.yB + this.zD * this.yC)
         this.zD = -(originalX * this.zA + originalY * this.zB + this.zD * this.zC)
@@ -76,19 +76,19 @@ class Matrix43 {
         this.zD = oldXD * otherMatrix.zA + oldYD * otherMatrix.zB + oldZD * otherMatrix.zC + otherMatrix.zD
     }
 
-    fun copyFrom(matrix44var1: Matrix43) {
-        this.xA = matrix44var1.xA
-        this.xB = matrix44var1.xB
-        this.xC = matrix44var1.xC
-        this.xD = matrix44var1.xD
-        this.yA = matrix44var1.yA
-        this.yB = matrix44var1.yB
-        this.yC = matrix44var1.yC
-        this.yD = matrix44var1.yD
-        this.zA = matrix44var1.zA
-        this.zB = matrix44var1.zB
-        this.zC = matrix44var1.zC
-        this.zD = matrix44var1.zD
+    fun copyFrom(source: Matrix43) {
+        this.xA = source.xA
+        this.xB = source.xB
+        this.xC = source.xC
+        this.xD = source.xD
+        this.yA = source.yA
+        this.yB = source.yB
+        this.yC = source.yC
+        this.yD = source.yD
+        this.zA = source.zA
+        this.zB = source.zB
+        this.zC = source.zC
+        this.zD = source.zD
     }
 
     fun translateFromCoordspace(coordinateSpace: CoordinateSpace) {
@@ -111,21 +111,21 @@ class Matrix43 {
         this.xA = 1.0f
     }
 
-    fun setTextureCoordTransform(rotation: Int, i_2: Int, i_3: Int, translateX: Float, translateY: Float, translateZ: Float) {
+    fun setTextureCoordTransform(rotation: Int, scaleU: Int, scaleV: Int, translateX: Float, translateY: Float, translateZ: Float) {
         if (rotation != 0) {
-            val f_7 = MatrixRotations.COS[rotation and 0x3fff]
-            val f_8 = MatrixRotations.SIN[rotation and 0x3fff]
+            val cosAngle = MatrixRotations.COS[rotation and 0x3fff]
+            val sinAngle = MatrixRotations.SIN[rotation and 0x3fff]
             this.zC = 1.0f
             this.yC = 0.0f
             this.xC = 0.0f
             this.zB = 0.0f
             this.zA = 0.0f
-            this.xA = 2.0f * f_7 * i_2
-            this.yB = 2.0f * f_7 * i_3
-            this.yA = 2.0f * f_8 * i_2
-            this.xB = -2.0f * f_8 * i_3
-            this.xD = (i_2 * 2) * (0.5f * f_8 - 0.5f * f_7) + translateX
-            this.yD = (i_3 * 2) * (-0.5f * f_8 - 0.5f * f_7) + translateY
+            this.xA = 2.0f * cosAngle * scaleU
+            this.yB = 2.0f * cosAngle * scaleV
+            this.yA = 2.0f * sinAngle * scaleU
+            this.xB = -2.0f * sinAngle * scaleV
+            this.xD = (scaleU * 2) * (0.5f * sinAngle - 0.5f * cosAngle) + translateX
+            this.yD = (scaleV * 2) * (-0.5f * sinAngle - 0.5f * cosAngle) + translateY
         } else {
             this.yC = 0.0f
             this.xC = 0.0f
@@ -133,11 +133,11 @@ class Matrix43 {
             this.xB = 0.0f
             this.zA = 0.0f
             this.yA = 0.0f
-            this.xA = (i_2 * 2).toFloat()
-            this.yB = (i_3 * 2).toFloat()
+            this.xA = (scaleU * 2).toFloat()
+            this.yB = (scaleV * 2).toFloat()
             this.zC = 1.0f
-            this.xD = translateX - i_2
-            this.yD = translateY - i_3
+            this.xD = translateX - scaleU
+            this.yD = translateY - scaleV
         }
         this.zD = translateZ
     }
@@ -157,22 +157,22 @@ class Matrix43 {
         this.zD = 0.0f
     }
 
-    fun updateMatrix(matrix4x4var: Matrix43) {
-        if (this === matrix4x4var) {
+    fun updateMatrix(source: Matrix43) {
+        if (this === source) {
             updateIdentitiyMatrix()
         } else {
-            this.xA = matrix4x4var.xA
-            this.xB = matrix4x4var.yA
-            this.xC = matrix4x4var.zA
-            this.yA = matrix4x4var.xB
-            this.yB = matrix4x4var.yB
-            this.yC = matrix4x4var.zB
-            this.zA = matrix4x4var.xC
-            this.zB = matrix4x4var.yC
-            this.zC = matrix4x4var.zC
-            this.xD = -(matrix4x4var.xD * this.xA + matrix4x4var.yD * this.xB + matrix4x4var.zD * this.xC)
-            this.yD = -(matrix4x4var.xD * this.yA + matrix4x4var.yD * this.yB + matrix4x4var.zD * this.yC)
-            this.zD = -(matrix4x4var.xD * this.zA + matrix4x4var.yD * this.zB + matrix4x4var.zD * this.zC)
+            this.xA = source.xA
+            this.xB = source.yA
+            this.xC = source.zA
+            this.yA = source.xB
+            this.yB = source.yB
+            this.yC = source.zB
+            this.zA = source.xC
+            this.zB = source.yC
+            this.zC = source.zC
+            this.xD = -(source.xD * this.xA + source.yD * this.xB + source.zD * this.xC)
+            this.yD = -(source.xD * this.yA + source.yD * this.yB + source.zD * this.yC)
+            this.zD = -(source.xD * this.zA + source.yD * this.zB + source.zD * this.zC)
         }
     }
 
@@ -272,10 +272,10 @@ class Matrix43 {
         return "$xA,$xB,$xC,$xD - $yA,$yB,$yC,$yD - $zA,$zB,$zC,$zD"
     }
 
-    fun calculatePerspective(f_1: Float, f_2: Float, f_3: Float, perspective: FloatArray) {
-        perspective[0] = this.xA * f_1 + this.xB * f_2 + this.xC * f_3 + this.xD
-        perspective[1] = this.yA * f_1 + this.yB * f_2 + this.yC * f_3 + this.yD
-        perspective[2] = this.zA * f_1 + this.zB * f_2 + this.zC * f_3 + this.zD
+    fun calculatePerspective(inputX: Float, inputY: Float, inputZ: Float, perspective: FloatArray) {
+        perspective[0] = this.xA * inputX + this.xB * inputY + this.xC * inputZ + this.xD
+        perspective[1] = this.yA * inputX + this.yB * inputY + this.yC * inputZ + this.yD
+        perspective[2] = this.zA * inputX + this.zB * inputY + this.zC * inputZ + this.zD
     }
 
     fun calculateEyePosition(x: Float, y: Float, z: Float, eyePosition: FloatArray) {
@@ -290,20 +290,20 @@ class Matrix43 {
         eyePosition[2] = (this.xC * x + this.yC * y + this.zC * z).toInt().toFloat()
     }
 
-    fun transformDirection(floats_1: FloatArray) {
-        val f_2 = floats_1[0]
-        val f_3 = floats_1[1]
-        val f_4 = floats_1[2]
-        floats_1[0] = this.xA * f_2 + this.yA * f_3 + this.zA * f_4
-        floats_1[1] = this.xB * f_2 + this.yB * f_3 + this.zB * f_4
-        floats_1[2] = this.xC * f_2 + this.yC * f_3 + this.zC * f_4
+    fun transformDirection(direction: FloatArray) {
+        val inputX = direction[0]
+        val inputY = direction[1]
+        val inputZ = direction[2]
+        direction[0] = this.xA * inputX + this.yA * inputY + this.zA * inputZ
+        direction[1] = this.xB * inputX + this.yB * inputY + this.zB * inputZ
+        direction[2] = this.xC * inputX + this.yC * inputY + this.zC * inputZ
     }
 
-    fun cacheInto(floats_1: FloatArray): FloatArray {
-        floats_1[0] = this.xD
-        floats_1[1] = this.yD
-        floats_1[2] = this.zD
-        return floats_1
+    fun cacheInto(output: FloatArray): FloatArray {
+        output[0] = this.xD
+        output[1] = this.yD
+        output[2] = this.zD
+        return output
     }
 
     fun setFromQuaternion(q: Quaternion) {
@@ -334,13 +334,13 @@ class Matrix43 {
         this.xD = 0.0f
     }
 
-    fun transformPointToInteger(floats_1: FloatArray) {
-        val f_2 = floats_1[0] - this.xD
-        val f_3 = floats_1[1] - this.yD
-        val f_4 = floats_1[2] - this.zD
-        floats_1[0] = (this.xA * f_2 + this.yA * f_3 + this.zA * f_4).toInt().toFloat()
-        floats_1[1] = (this.xB * f_2 + this.yB * f_3 + this.zB * f_4).toInt().toFloat()
-        floats_1[2] = (this.xC * f_2 + this.yC * f_3 + this.zC * f_4).toInt().toFloat()
+    fun transformPointToInteger(point: FloatArray) {
+        val relativeX = point[0] - this.xD
+        val relativeY = point[1] - this.yD
+        val relativeZ = point[2] - this.zD
+        point[0] = (this.xA * relativeX + this.yA * relativeY + this.zA * relativeZ).toInt().toFloat()
+        point[1] = (this.xB * relativeX + this.yB * relativeY + this.zB * relativeZ).toInt().toFloat()
+        point[2] = (this.xC * relativeX + this.yC * relativeY + this.zC * relativeZ).toInt().toFloat()
     }
 
     fun scale(scaleX: Float, scaleY: Float) {
@@ -392,29 +392,29 @@ class Matrix43 {
         translate(vector3.x, vector3.y, vector3.z)
     }
 
-    fun fromCoordinateSpace(class3051: CoordinateSpace) {
-        val f_2 = class3051.quaternion.w * class3051.quaternion.w
-        val f_3 = class3051.quaternion.w * class3051.quaternion.x
-        val f_4 = class3051.quaternion.w * class3051.quaternion.y
-        val f_5 = class3051.quaternion.w * class3051.quaternion.z
-        val f_6 = class3051.quaternion.x * class3051.quaternion.x
-        val f_7 = class3051.quaternion.x * class3051.quaternion.y
-        val f_8 = class3051.quaternion.x * class3051.quaternion.z
-        val f_9 = class3051.quaternion.y * class3051.quaternion.y
-        val f_10 = class3051.quaternion.y * class3051.quaternion.z
-        val f_11 = class3051.quaternion.z * class3051.quaternion.z
-        this.xA = f_6 + f_2 - f_11 - f_9
-        this.yA = f_7 + f_5 + f_7 + f_5
-        this.zA = f_8 - f_4 - f_4 + f_8
-        this.xB = f_7 - f_5 - f_5 + f_7
-        this.yB = f_9 + f_2 - f_6 - f_11
-        this.zB = f_10 + f_3 + f_10 + f_3
-        this.xC = f_8 + f_4 + f_8 + f_4
-        this.yC = f_10 - f_3 - f_3 + f_10
-        this.zC = f_11 + f_2 - f_9 - f_6
-        this.xD = class3051.coords.x
-        this.yD = class3051.coords.y
-        this.zD = class3051.coords.z
+    fun fromCoordinateSpace(coordSpace: CoordinateSpace) {
+        val ww = coordSpace.quaternion.w * coordSpace.quaternion.w
+        val wx = coordSpace.quaternion.w * coordSpace.quaternion.x
+        val wy = coordSpace.quaternion.w * coordSpace.quaternion.y
+        val wz = coordSpace.quaternion.w * coordSpace.quaternion.z
+        val xx = coordSpace.quaternion.x * coordSpace.quaternion.x
+        val xy = coordSpace.quaternion.x * coordSpace.quaternion.y
+        val xz = coordSpace.quaternion.x * coordSpace.quaternion.z
+        val yy = coordSpace.quaternion.y * coordSpace.quaternion.y
+        val yz = coordSpace.quaternion.y * coordSpace.quaternion.z
+        val zz = coordSpace.quaternion.z * coordSpace.quaternion.z
+        this.xA = xx + ww - zz - yy
+        this.yA = xy + wz + xy + wz
+        this.zA = xz - wy - wy + xz
+        this.xB = xy - wz - wz + xy
+        this.yB = yy + ww - xx - zz
+        this.zB = yz + wx + yz + wx
+        this.xC = xz + wy + xz + wy
+        this.yC = yz - wx - wx + yz
+        this.zC = zz + ww - yy - xx
+        this.xD = coordSpace.coords.x
+        this.yD = coordSpace.coords.y
+        this.zD = coordSpace.coords.z
     }
 
     companion object {
