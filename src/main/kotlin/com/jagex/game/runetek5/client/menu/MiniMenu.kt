@@ -56,30 +56,30 @@ object MiniMenu {
         if (entry != null) {
             entryList.addFirst(entry)
             entryCount++
-            var c: ColoredMiniMenuEntry?
+            var coloredEntry: ColoredMiniMenuEntry?
             if (!entry.isUncategorized && entry.coloredName != null && !entry.coloredName.isEmpty()) {
                 val hash = entry.bitpacked
-                c = coloredEntryMap.get(hash) as? ColoredMiniMenuEntry
-                while (c != null && !c.tagStart.equals(entry.coloredName)) {
-                    c = coloredEntryMap.nextInBucket() as? ColoredMiniMenuEntry
+                coloredEntry = coloredEntryMap.get(hash) as? ColoredMiniMenuEntry
+                while (coloredEntry != null && !coloredEntry.tagStart.equals(entry.coloredName)) {
+                    coloredEntry = coloredEntryMap.nextInBucket() as? ColoredMiniMenuEntry
                 }
-                if (c == null) {
-                    c = coloredEntryCache.get(hash) as? ColoredMiniMenuEntry
-                    if (c != null && !c.tagStart.equals(entry.coloredName)) {
-                        c = null
+                if (coloredEntry == null) {
+                    coloredEntry = coloredEntryCache.get(hash) as? ColoredMiniMenuEntry
+                    if (coloredEntry != null && !coloredEntry.tagStart.equals(entry.coloredName)) {
+                        coloredEntry = null
                     }
-                    if (c == null) {
-                        c = ColoredMiniMenuEntry(entry.coloredName)
+                    if (coloredEntry == null) {
+                        coloredEntry = ColoredMiniMenuEntry(entry.coloredName)
                     }
-                    coloredEntryMap.put(c, hash)
+                    coloredEntryMap.put(coloredEntry, hash)
                     ++coloredEntryCount
                 }
             } else {
-                c = ColoredMiniMenuEntry(entry.coloredName)
+                coloredEntry = ColoredMiniMenuEntry(entry.coloredName)
                 ++coloredEntryCount
             }
-            if (c.addEntry(entry)) {
-                insertSortedEntry(c)
+            if (coloredEntry.addEntry(entry)) {
+                insertSortedEntry(coloredEntry)
             }
         }
     }
@@ -100,52 +100,52 @@ object MiniMenu {
     }
 
     @JvmStatic
-    fun getActionText(class282Sub50Sub70: MiniMenuEntry?): String {
-        return if (!isOpen && class282Sub50Sub70 != null) class282Sub50Sub70.action else ""
+    fun getActionText(entry: MiniMenuEntry?): String {
+        return if (!isOpen && entry != null) entry.action else ""
     }
 
     @JvmStatic
-    fun openSubmenu(class282Sub50Sub150: ColoredMiniMenuEntry, i_1: Int) {
+    fun openSubmenu(coloredEntry: ColoredMiniMenuEntry, screenY: Int) {
         if (isOpen) {
-            val fontmetrics3 = FontMetrics.getForMinimenu()
-            var i_4 = 0
+            val fontMetrics = FontMetrics.getForMinimenu()
+            var maxEntryWidth = 0
 
-            var i_6: Int
-            var class282Sub50Sub75: MiniMenuEntry? = class282Sub50Sub150.nodeQueue.getNext() as? MiniMenuEntry
-            while (class282Sub50Sub75 != null) {
-                i_6 = getWidthForEntryWithQuests(class282Sub50Sub75, fontmetrics3)
-                if (i_6 > i_4) {
-                    i_4 = i_6
+            var entryWidth: Int
+            var entry: MiniMenuEntry? = coloredEntry.nodeQueue.getNext() as? MiniMenuEntry
+            while (entry != null) {
+                entryWidth = getWidthForEntryWithQuests(entry, fontMetrics)
+                if (entryWidth > maxEntryWidth) {
+                    maxEntryWidth = entryWidth
                 }
-                class282Sub50Sub75 = class282Sub50Sub150.nodeQueue.getDirectNext() as? MiniMenuEntry
+                entry = coloredEntry.nodeQueue.getDirectNext() as? MiniMenuEntry
             }
 
-            i_4 += 8
-            val i_9 = class282Sub50Sub150.queueSize * entryRowHeight + 21
-            StationaryWall.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + entryRowHeight * class282Sub50Sub150.queueSize
-            i_6 = StaticMethods.menuOpenX + menuWidth
-            if (i_4 + i_6 > GameShell.screenCanvasWidth) {
-                i_6 = StaticMethods.menuOpenX - i_4
+            maxEntryWidth += 8
+            val submenuHeight = coloredEntry.queueSize * entryRowHeight + 21
+            StationaryWall.menuHeight = (if (FontMetrics.useBoldFont) 26 else 22) + entryRowHeight * coloredEntry.queueSize
+            entryWidth = StaticMethods.menuOpenX + menuWidth
+            if (maxEntryWidth + entryWidth > GameShell.screenCanvasWidth) {
+                entryWidth = StaticMethods.menuOpenX - maxEntryWidth
             }
 
-            if (i_6 < 0) {
-                i_6 = 0
+            if (entryWidth < 0) {
+                entryWidth = 0
             }
 
-            val i_7 = if (FontMetrics.useBoldFont) fontmetrics3.topPadding + 1 + 20 else 31
-            var i_8 = i_1 - i_7 + fontmetrics3.topPadding + 1
-            if (i_9 + i_8 > GameShell.screenCanvasHeight * -969250379) {
-                i_8 = GameShell.screenCanvasHeight * -969250379 - i_9
+            val headerHeight = if (FontMetrics.useBoldFont) fontMetrics.topPadding + 1 + 20 else 31
+            var submenuStartY = screenY - headerHeight + fontMetrics.topPadding + 1
+            if (submenuHeight + submenuStartY > GameShell.screenCanvasHeight * -969250379) {
+                submenuStartY = GameShell.screenCanvasHeight * -969250379 - submenuHeight
             }
 
-            if (i_8 < 0) {
-                i_8 = 0
+            if (submenuStartY < 0) {
+                submenuStartY = 0
             }
 
-            submenuX = i_6
-            submenuY = i_8
-            submenuWidth = i_4
-            activeSubmenu = class282Sub50Sub150
+            submenuX = entryWidth
+            submenuY = submenuStartY
+            submenuWidth = maxEntryWidth
+            activeSubmenu = coloredEntry
         }
 
     }
@@ -188,9 +188,9 @@ object MiniMenu {
     @JvmStatic
     fun getColoredNameText(entry: MiniMenuEntry?): String {
         if (!isOpen && entry != null) {
-            val aString = entry.targetName
+            val targetName = entry.targetName
             val colorName = entry.coloredName
-            return if ((colorName == null || colorName.isEmpty()) && aString != null && !aString.isEmpty()) aString else (colorName ?: "")
+            return if ((colorName == null || colorName.isEmpty()) && targetName != null && !targetName.isEmpty()) targetName else (colorName ?: "")
         }
         return ""
     }
@@ -232,14 +232,14 @@ object MiniMenu {
 
     @JvmStatic
     fun resetEntries() {
-        var class282Sub50Sub151: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
-        while (class282Sub50Sub151 != null) {
-            if (class282Sub50Sub151.queueSize > 1) {
-                class282Sub50Sub151.queueSize = 0
-                coloredEntryCache.put(class282Sub50Sub151, ((class282Sub50Sub151.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
-                class282Sub50Sub151.nodeQueue.reset()
+        var coloredEntry: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
+        while (coloredEntry != null) {
+            if (coloredEntry.queueSize > 1) {
+                coloredEntry.queueSize = 0
+                coloredEntryCache.put(coloredEntry, ((coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
+                coloredEntry.nodeQueue.reset()
             }
-            class282Sub50Sub151 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
+            coloredEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
         }
 
         coloredEntryCount = 0
@@ -287,13 +287,13 @@ object MiniMenu {
 
     @JvmStatic
     fun getTextFrom(menuEntry: MiniMenuEntry): String {
-        val aString = menuEntry.targetName
+        val targetName = menuEntry.targetName
         val colorName = menuEntry.coloredName
-        return if (aString != null && !aString.isEmpty())
+        return if (targetName != null && !targetName.isEmpty())
             if (colorName != null && !colorName.isEmpty())
-                menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + colorName + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + aString
+                menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + colorName + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + targetName
             else
-                menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + aString
+                menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + targetName
         else
             if (colorName != null && !colorName.isEmpty())
                 menuEntry.action + LocalizedText.DELIMITER.translate(Client.CURRENT_LANGUAGE!!) + colorName
@@ -346,10 +346,10 @@ object MiniMenu {
     var isOpen = false
 
     @JvmStatic
-    fun addEntry(action: String, coloredName: String?, cursor: Int, clickType: Int, id: Int, long_5: Long, i_7: Int, i_8: Int, bool9: Boolean, bool10: Boolean, bitpacked: Long, bool13: Boolean) {
+    fun addEntry(action: String, coloredName: String?, cursor: Int, clickType: Int, id: Int, entityUid: Long, param0: Int, param1: Int, isSelectable: Boolean, showOtherLevelIcon: Boolean, bitpacked: Long, isUncategorized: Boolean) {
         if (!isOpen && entryCount < 520) {
             val resolvedCursor = if (cursor != -1) cursor else Client.defaultMenuCursor
-            val menuEntry = MiniMenuEntry(action ?: "", coloredName ?: "", resolvedCursor, clickType, id, long_5, i_7, i_8, bool9, bool10, bitpacked, bool13)
+            val menuEntry = MiniMenuEntry(action ?: "", coloredName ?: "", resolvedCursor, clickType, id, entityUid, param0, param1, isSelectable, showOtherLevelIcon, bitpacked, isUncategorized)
             addEntry(menuEntry)
         }
     }
@@ -360,35 +360,35 @@ object MiniMenu {
             entry.unlink()
             --entryCount
             if (!entry.isUncategorized) {
-                val long_2 = entry.bitpacked
-                var class282Sub50Sub154: ColoredMiniMenuEntry? = coloredEntryMap.get(long_2) as? ColoredMiniMenuEntry
-                while (class282Sub50Sub154 != null && !class282Sub50Sub154.tagStart.equals(entry.coloredName)) {
-                    class282Sub50Sub154 = coloredEntryMap.nextInBucket() as? ColoredMiniMenuEntry
+                val bitpacked = entry.bitpacked
+                var coloredEntry: ColoredMiniMenuEntry? = coloredEntryMap.get(bitpacked) as? ColoredMiniMenuEntry
+                while (coloredEntry != null && !coloredEntry.tagStart.equals(entry.coloredName)) {
+                    coloredEntry = coloredEntryMap.nextInBucket() as? ColoredMiniMenuEntry
                 }
-                if (class282Sub50Sub154 != null && class282Sub50Sub154.removeEntry(entry)) {
-                    insertSortedEntry(class282Sub50Sub154)
+                if (coloredEntry != null && coloredEntry.removeEntry(entry)) {
+                    insertSortedEntry(coloredEntry)
                 }
             } else {
-                var class282Sub50Sub155: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
-                while (class282Sub50Sub155 != null) {
-                    if (class282Sub50Sub155.tagStart.equals(entry.coloredName)) {
-                        var bool3 = false
-                        var class282Sub50Sub76: MiniMenuEntry? = class282Sub50Sub155.nodeQueue.getNext() as? MiniMenuEntry
-                        while (class282Sub50Sub76 != null) {
-                            if (class282Sub50Sub76 == entry) {
-                                if (class282Sub50Sub155.removeEntry(entry)) {
-                                    insertSortedEntry(class282Sub50Sub155)
+                var sortedEntry: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
+                while (sortedEntry != null) {
+                    if (sortedEntry.tagStart.equals(entry.coloredName)) {
+                        var found = false
+                        var currentEntry: MiniMenuEntry? = sortedEntry.nodeQueue.getNext() as? MiniMenuEntry
+                        while (currentEntry != null) {
+                            if (currentEntry == entry) {
+                                if (sortedEntry.removeEntry(entry)) {
+                                    insertSortedEntry(sortedEntry)
                                 }
-                                bool3 = true
+                                found = true
                                 break
                             }
-                            class282Sub50Sub76 = class282Sub50Sub155.nodeQueue.getDirectNext() as? MiniMenuEntry
+                            currentEntry = sortedEntry.nodeQueue.getDirectNext() as? MiniMenuEntry
                         }
-                        if (bool3) {
+                        if (found) {
                             break
                         }
                     }
-                    class282Sub50Sub155 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
+                    sortedEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
                 }
             }
         }
@@ -409,14 +409,14 @@ object MiniMenu {
 
     @JvmStatic
     fun reset() {
-        var class282Sub50Sub151: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
-        while (class282Sub50Sub151 != null) {
-            if (class282Sub50Sub151.queueSize > 1) {
-                class282Sub50Sub151.queueSize = 0
-                coloredEntryCache.put(class282Sub50Sub151, ((class282Sub50Sub151.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
-                class282Sub50Sub151.nodeQueue.reset()
+        var coloredEntry: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
+        while (coloredEntry != null) {
+            if (coloredEntry.queueSize > 1) {
+                coloredEntry.queueSize = 0
+                coloredEntryCache.put(coloredEntry, ((coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry).bitpacked))
+                coloredEntry.nodeQueue.reset()
             }
-            class282Sub50Sub151 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
+            coloredEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
         }
         coloredEntryCount = 0
         entryCount = 0
@@ -442,39 +442,39 @@ object MiniMenu {
     }
 
     @JvmStatic
-    fun insertSortedEntry(class282Sub50Sub150: ColoredMiniMenuEntry) {
-        var bool2 = false
-        class282Sub50Sub150.unlinkSub()
-        var class282Sub50Sub153: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
-        while (class282Sub50Sub153 != null) {
-            if (hasHigherPriority(class282Sub50Sub150.getClickType(), class282Sub50Sub153.getClickType())) {
-                CacheableNode.rebuild(class282Sub50Sub150, class282Sub50Sub153)
-                bool2 = true
+    fun insertSortedEntry(coloredEntry: ColoredMiniMenuEntry) {
+        var inserted = false
+        coloredEntry.unlinkSub()
+        var existingEntry: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
+        while (existingEntry != null) {
+            if (hasHigherPriority(coloredEntry.getClickType(), existingEntry.getClickType())) {
+                CacheableNode.rebuild(coloredEntry, existingEntry)
+                inserted = true
                 break
             }
-            class282Sub50Sub153 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
+            existingEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
         }
-        if (!bool2) {
-            sortedColoredEntries.insert(class282Sub50Sub150)
+        if (!inserted) {
+            sortedColoredEntries.insert(coloredEntry)
         }
     }
 
     @JvmStatic
-    fun raycastTerrainIntersection(deltaX: Float, deltaY: Float, deltaZ: Float, x: Float, y: Float, z: Float, i_6: Int): Float {
-        var f_8 = 0.0F
-        val f_9 = x - deltaX
-        val f_10 = y - deltaY
-        val f_11 = z - deltaZ
-        var f_12 = 0.0F
-        var f_13 = 0.0F
-        var f_14 = 0.0F
+    fun raycastTerrainIntersection(deltaX: Float, deltaY: Float, deltaZ: Float, x: Float, y: Float, z: Float, recursionDepth: Int): Float {
+        var interpolation = 0.0F
+        val directionX = x - deltaX
+        val directionY = y - deltaY
+        val directionZ = z - deltaZ
+        var prevAbsX = 0.0F
+        var prevAbsY = 0.0F
+        var prevAbsZ = 0.0F
         val mapRegion = Resource.mapRegion
         if (mapRegion != null) {
             val scene = mapRegion.getScene()!!
-            while (f_8 < 1.1F) {
-                val absX = f_8 * f_9 + deltaX
-                val absY = f_10 * f_8 + deltaY
-                val absZ = deltaZ + f_8 * f_11
+            while (interpolation < 1.1F) {
+                val absX = interpolation * directionX + deltaX
+                val absY = directionY * interpolation + deltaY
+                val absZ = deltaZ + interpolation * directionZ
                 val sceneX = (absX.toInt()) shr 9
                 val sceneZ = (absZ.toInt()) shr 9
                 if (sceneX > 0 && sceneZ > 0 && sceneX < mapRegion.sceneSizeX && sceneZ < mapRegion.sceneSizeY) {
@@ -484,16 +484,16 @@ object MiniMenu {
                     }
                     val height = scene.surfaceHeightmap!![plane]!!.getAverageHeight(absX.toInt(), absZ.toInt())
                     if (height < absY) {
-                        if (i_6 >= 2) {
-                            return f_8 - 0.1F + raycastTerrainIntersection(f_12, f_13, f_14, absX, absY, absZ, i_6 - 1) * 0.1F
+                        if (recursionDepth >= 2) {
+                            return interpolation - 0.1F + raycastTerrainIntersection(prevAbsX, prevAbsY, prevAbsZ, absX, absY, absZ, recursionDepth - 1) * 0.1F
                         }
-                        return f_8
+                        return interpolation
                     }
                 }
-                f_12 = absX
-                f_13 = absY
-                f_14 = absZ
-                f_8 += 0.1F
+                prevAbsX = absX
+                prevAbsY = absY
+                prevAbsZ = absZ
+                interpolation += 0.1F
             }
         }
         return -1.0f
@@ -512,42 +512,42 @@ object MiniMenu {
         minimenuHeader!!.renderPlain(LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!), StaticMethods.menuOpenX + 3, StaticMethods.menuOpenY + 14, fillColor, -1)
         val mouseX = MouseRecord.recorder!!.getMouseX()
         val mouseY = MouseRecord.recorder!!.getMouseY()
-        var i_5: Int
-        var class282Sub50Sub76: MiniMenuEntry?
-        var i_7: Int
+        var entryIndex: Int
+        var entry: MiniMenuEntry?
+        var entryY: Int
         if (!isCollapsed) {
-            i_5 = 0
-            var class282Sub50Sub76Temp: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
-            while (class282Sub50Sub76Temp != null) {
-                class282Sub50Sub76 = class282Sub50Sub76Temp
-                i_7 = (entryCount - 1 - i_5) * entryRowHeight + StaticMethods.menuOpenY + 31
-                drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
-                ++i_5
-                class282Sub50Sub76Temp = entryList.next() as? MiniMenuEntry
+            entryIndex = 0
+            var currentEntry: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
+            while (currentEntry != null) {
+                entry = currentEntry
+                entryY = (entryCount - 1 - entryIndex) * entryRowHeight + StaticMethods.menuOpenY + 31
+                drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, entry, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
+                ++entryIndex
+                currentEntry = entryList.next() as? MiniMenuEntry
             }
         } else {
-            i_5 = 0
-            var class282Sub50Sub158: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
-            while (class282Sub50Sub158 != null) {
-                i_7 = i_5 * entryRowHeight + StaticMethods.menuOpenY + 31
-                if (class282Sub50Sub158.queueSize == 1) {
-                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, (class282Sub50Sub158.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
+            entryIndex = 0
+            var coloredEntry: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
+            while (coloredEntry != null) {
+                entryY = entryIndex * entryRowHeight + StaticMethods.menuOpenY + 31
+                if (coloredEntry.queueSize == 1) {
+                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                 } else {
-                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, i_7, class282Sub50Sub158, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
+                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, coloredEntry, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                 }
-                ++i_5
-                class282Sub50Sub158 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
+                ++entryIndex
+                coloredEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (activeSubmenu != null) {
                 AbstractToolkit.drawOutlinedFilledOpaqueRectangle(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, fillColor)
                 minimenuHeader!!.renderPlain(activeSubmenu!!.tagStart, submenuX + 3, submenuY + 14, fillColor, -1)
-                i_5 = 0
-                class282Sub50Sub76 = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
-                while (class282Sub50Sub76 != null) {
-                    i_7 = i_5 * entryRowHeight + submenuY + 31
-                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, i_7, class282Sub50Sub76, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
-                    ++i_5
-                    class282Sub50Sub76 = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
+                entryIndex = 0
+                entry = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
+                while (entry != null) {
+                    entryY = entryIndex * entryRowHeight + submenuY + 31
+                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, entryY, entry, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
+                    ++entryIndex
+                    entry = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
             }
         }
@@ -628,87 +628,87 @@ object MiniMenu {
                 val minimenuFont = FontMetrics.getForMinimenu()
                 val mouseX = MouseRecord.recorder!!.getMouseX()
                 val mouseY = MouseRecord.recorder!!.getMouseY()
-                var i_4: Int
-                var i_5: Int
-                var class282Sub50Sub77: MiniMenuEntry?
-                var i_8: Int
+                var hoveredIndex: Int
+                var entryIndex: Int
+                var entry: MiniMenuEntry?
+                var entryY: Int
                 if (!isCollapsed) {
                     if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + menuWidth) {
-                        i_4 = -1
-                        i_5 = 0
-                        while (i_5 < entryCount) {
+                        hoveredIndex = -1
+                        entryIndex = 0
+                        while (entryIndex < entryCount) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = (entryCount - 1 - i_5) * entryRowHeight + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
+                                entryY = (entryCount - 1 - entryIndex) * entryRowHeight + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
                             } else {
-                                i_8 = (entryCount - 1 - i_5) * entryRowHeight + StaticMethods.menuOpenY + 31
+                                entryY = (entryCount - 1 - entryIndex) * entryRowHeight + StaticMethods.menuOpenY + 31
                             }
-                            if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
-                                i_4 = i_5
+                            if (mouseY > entryY - minimenuFont.topPadding - 1 && mouseY < entryY + minimenuFont.bottomPadding) {
+                                hoveredIndex = entryIndex
                             }
-                            i_5++
+                            entryIndex++
                         }
-                        if (i_4 != -1) {
-                            i_5 = 0
-                            val nodeiterator6 = NodeIterator(entryList)
-                            class282Sub50Sub77 = nodeiterator6.nextAndReset() as? MiniMenuEntry
-                            while (class282Sub50Sub77 != null) {
-                                if (i_5++ == i_4) {
-                                    return class282Sub50Sub77.cursor
+                        if (hoveredIndex != -1) {
+                            entryIndex = 0
+                            val nodeIterator = NodeIterator(entryList)
+                            entry = nodeIterator.nextAndReset() as? MiniMenuEntry
+                            while (entry != null) {
+                                if (entryIndex++ == hoveredIndex) {
+                                    return entry.cursor
                                 }
-                                class282Sub50Sub77 = nodeiterator6.next() as? MiniMenuEntry
+                                entry = nodeIterator.next() as? MiniMenuEntry
                             }
                         }
                     }
                 } else {
-                    var class4699: QueueIterator
+                    var queueIterator: QueueIterator
                     if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + menuWidth) {
-                        i_4 = -1
-                        i_5 = 0
-                        while (i_5 < coloredEntryCount) {
+                        hoveredIndex = -1
+                        entryIndex = 0
+                        while (entryIndex < coloredEntryCount) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = i_5 * entryRowHeight + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
+                                entryY = entryIndex * entryRowHeight + minimenuFont.topPadding + StaticMethods.menuOpenY + 1 + 20
                             } else {
-                                i_8 = i_5 * entryRowHeight + StaticMethods.menuOpenY + 31
+                                entryY = entryIndex * entryRowHeight + StaticMethods.menuOpenY + 31
                             }
-                            if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
-                                i_4 = i_5
+                            if (mouseY > entryY - minimenuFont.topPadding - 1 && mouseY < entryY + minimenuFont.bottomPadding) {
+                                hoveredIndex = entryIndex
                             }
-                            i_5++
+                            entryIndex++
                         }
-                        if (i_4 != -1) {
-                            i_5 = 0
-                            class4699 = QueueIterator(sortedColoredEntries)
-                            var class282Sub50Sub1510: ColoredMiniMenuEntry? = class4699.nextAndReset() as? ColoredMiniMenuEntry
-                            while (class282Sub50Sub1510 != null) {
-                                if (i_5++ == i_4) {
-                                    return ((class282Sub50Sub1510.nodeQueue.current.nextCache as MiniMenuEntry).cursor)
+                        if (hoveredIndex != -1) {
+                            entryIndex = 0
+                            queueIterator = QueueIterator(sortedColoredEntries)
+                            var coloredEntry: ColoredMiniMenuEntry? = queueIterator.nextAndReset() as? ColoredMiniMenuEntry
+                            while (coloredEntry != null) {
+                                if (entryIndex++ == hoveredIndex) {
+                                    return ((coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry).cursor)
                                 }
-                                class282Sub50Sub1510 = class4699.next() as? ColoredMiniMenuEntry
+                                coloredEntry = queueIterator.next() as? ColoredMiniMenuEntry
                             }
                         }
                     } else if (activeSubmenu != null && mouseX > submenuX && mouseX < submenuWidth + submenuX) {
-                        i_4 = -1
-                        i_5 = 0
-                        while (i_5 < activeSubmenu!!.queueSize) {
+                        hoveredIndex = -1
+                        entryIndex = 0
+                        while (entryIndex < activeSubmenu!!.queueSize) {
                             if (FontMetrics.useBoldFont) {
-                                i_8 = i_5 * entryRowHeight + minimenuFont.topPadding + submenuY + 1 + 20
+                                entryY = entryIndex * entryRowHeight + minimenuFont.topPadding + submenuY + 1 + 20
                             } else {
-                                i_8 = i_5 * entryRowHeight + submenuY + 31
+                                entryY = entryIndex * entryRowHeight + submenuY + 31
                             }
-                            if (mouseY > i_8 - minimenuFont.topPadding - 1 && mouseY < i_8 + minimenuFont.bottomPadding) {
-                                i_4 = i_5
+                            if (mouseY > entryY - minimenuFont.topPadding - 1 && mouseY < entryY + minimenuFont.bottomPadding) {
+                                hoveredIndex = entryIndex
                             }
-                            i_5++
+                            entryIndex++
                         }
-                        if (i_4 != -1) {
-                            i_5 = 0
-                            class4699 = QueueIterator(activeSubmenu!!.nodeQueue)
-                            class282Sub50Sub77 = class4699.nextAndReset() as? MiniMenuEntry
-                            while (class282Sub50Sub77 != null) {
-                                if (i_5++ == i_4) {
-                                    return class282Sub50Sub77.cursor
+                        if (hoveredIndex != -1) {
+                            entryIndex = 0
+                            queueIterator = QueueIterator(activeSubmenu!!.nodeQueue)
+                            entry = queueIterator.nextAndReset() as? MiniMenuEntry
+                            while (entry != null) {
+                                if (entryIndex++ == hoveredIndex) {
+                                    return entry.cursor
                                 }
-                                class282Sub50Sub77 = class4699.next() as? MiniMenuEntry
+                                entry = queueIterator.next() as? MiniMenuEntry
                             }
                         }
                     }
@@ -732,117 +732,117 @@ object MiniMenu {
 
     @JvmStatic
     fun renderOpenMenuStyled(toolkit: AbstractToolkit) {
-        val i_2 = StaticMethods.menuOpenX
-        val i_3 = StaticMethods.menuOpenY
-        val i_4 = menuWidth
-        val i_5 = menuHeight - 3
-        val b_6 = 20
+        val menuX = StaticMethods.menuOpenX
+        val menuY = StaticMethods.menuOpenY
+        val menuW = menuWidth
+        val menuH = menuHeight - 3
+        val headerSize = 20
         if (FontMetrics.boldFontRenderer == null || StaticMedia.boldFontMetrics == null) {
             FontMetrics.boldFontRenderer = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex, true, true) as? AbstractFontRenderer
             StaticMedia.boldFontMetrics = StaticMethods.initializedFontcombos!!.list(Client.FONT_PROVIDER, StaticMethods.menuFontIndex)
             if (FontMetrics.boldFontRenderer != null && StaticMedia.boldFontMetrics != null) {
                 close()
-                var i_15 = i_4 / 2 + i_2
-                if (i_15 + i_4 > GameShell.screenCanvasWidth) {
-                    i_15 = GameShell.screenCanvasWidth - i_4
+                var centeredX = menuW / 2 + menuX
+                if (centeredX + menuW > GameShell.screenCanvasWidth) {
+                    centeredX = GameShell.screenCanvasWidth - menuW
                 }
-                if (i_15 < 0) {
-                    i_15 = 0
+                if (centeredX < 0) {
+                    centeredX = 0
                 }
-                StaticMethods.openContextMenu(i_15, StaticMethods.menuOpenY)
+                StaticMethods.openContextMenu(centeredX, StaticMethods.menuOpenY)
                 return
             }
         }
-        val fontrenderer7: AbstractFontRenderer?
+        val fontRenderer: AbstractFontRenderer?
         if (FontMetrics.boldFontRenderer != null && StaticMedia.boldFontMetrics != null) {
-            fontrenderer7 = FontMetrics.boldFontRenderer
+            fontRenderer = FontMetrics.boldFontRenderer
         } else {
-            fontrenderer7 = minimenuHeader
+            fontRenderer = minimenuHeader
         }
-        val fontmetrics8 = FontMetrics.getForMinimenu()
-        NativeSprite.drawLoadingBarBackground(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, b_6, fontrenderer7!!, fontmetrics8!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
+        val fontMetrics = FontMetrics.getForMinimenu()
+        NativeSprite.drawLoadingBarBackground(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, headerSize, fontRenderer!!, fontMetrics!!, LocalizedText.CHOOSE_OPTION.translate(Client.CURRENT_LANGUAGE!!)!!)
         var alpha = 255 - StaticMethods.menuBackgroundAlpha - NativeSprite.alphaJitter
         if (alpha < 0) {
             alpha = 0
         }
-        val i_10 = MouseRecord.recorder!!.getMouseX()
-        val i_11 = MouseRecord.recorder!!.getMouseY()
-        var i_12: Int
-        var class282Sub50Sub713: MiniMenuEntry?
-        var i_14: Int
-        var class282Sub50Sub1516: ColoredMiniMenuEntry?
+        val mouseX = MouseRecord.recorder!!.getMouseX()
+        val mouseY = MouseRecord.recorder!!.getMouseY()
+        var entryIndex: Int
+        var entry: MiniMenuEntry?
+        var entryY: Int
+        var coloredEntry: ColoredMiniMenuEntry?
         if (!isCollapsed) {
-            i_12 = 0
-            var class282Sub50Sub713Temp: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
-            while (class282Sub50Sub713Temp != null) {
-                class282Sub50Sub713 = class282Sub50Sub713Temp
-                i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * entryRowHeight + fontmetrics8.topPadding + 1
-                if (i_10 > StaticMethods.menuOpenX && i_10 < StaticMethods.menuOpenX + menuWidth && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.isSelectable) {
-                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, menuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
+            entryIndex = 0
+            var currentEntry: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
+            while (currentEntry != null) {
+                entry = currentEntry
+                entryY = menuY + headerSize + (entryCount - 1 - entryIndex) * entryRowHeight + fontMetrics.topPadding + 1
+                if (mouseX > StaticMethods.menuOpenX && mouseX < StaticMethods.menuOpenX + menuWidth && mouseY > entryY - fontMetrics.topPadding - 1 && mouseY < entryY + fontMetrics.bottomPadding && entry.isSelectable) {
+                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, entryY - fontMetrics.topPadding, menuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
                 }
-                ++i_12
-                class282Sub50Sub713Temp = entryList.next() as? MiniMenuEntry
+                ++entryIndex
+                currentEntry = entryList.next() as? MiniMenuEntry
             }
         } else {
-            i_12 = 0
-            var class282Sub50Sub1516Temp: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
-            while (class282Sub50Sub1516Temp != null) {
-                class282Sub50Sub1516 = class282Sub50Sub1516Temp
-                i_14 = i_3 + b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + 1
-                if (i_10 > StaticMethods.menuOpenX && i_10 < menuWidth + StaticMethods.menuOpenX && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && (class282Sub50Sub1516.queueSize > 1 || ((class282Sub50Sub1516.nodeQueue.current.nextCache as MiniMenuEntry).isSelectable))) {
-                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, i_14 - fontmetrics8.topPadding, menuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
+            entryIndex = 0
+            var currentColoredEntry: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
+            while (currentColoredEntry != null) {
+                coloredEntry = currentColoredEntry
+                entryY = menuY + headerSize + entryIndex * entryRowHeight + fontMetrics.topPadding + 1
+                if (mouseX > StaticMethods.menuOpenX && mouseX < menuWidth + StaticMethods.menuOpenX && mouseY > entryY - fontMetrics.topPadding - 1 && mouseY < entryY + fontMetrics.bottomPadding && (coloredEntry.queueSize > 1 || ((coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry).isSelectable))) {
+                    toolkit.drawFilledRectangle(StaticMethods.menuOpenX, entryY - fontMetrics.topPadding, menuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
                 }
-                ++i_12
-                class282Sub50Sub1516Temp = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
+                ++entryIndex
+                currentColoredEntry = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (activeSubmenu != null) {
-                NativeSprite.drawLoadingBarBackground(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, b_6, fontrenderer7, fontmetrics8, activeSubmenu!!.tagStart)
-                i_12 = 0
-                class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
-                while (class282Sub50Sub713 != null) {
-                    i_14 = b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + submenuY + 1
-                    if (i_10 > submenuX && i_10 < submenuWidth + submenuX && i_11 > i_14 - fontmetrics8.topPadding - 1 && i_11 < i_14 + fontmetrics8.bottomPadding && class282Sub50Sub713.isSelectable) {
-                        toolkit.drawFilledRectangle(submenuX, i_14 - fontmetrics8.topPadding, submenuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
+                NativeSprite.drawLoadingBarBackground(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, headerSize, fontRenderer, fontMetrics, activeSubmenu!!.tagStart)
+                entryIndex = 0
+                entry = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
+                while (entry != null) {
+                    entryY = headerSize + entryIndex * entryRowHeight + fontMetrics.topPadding + submenuY + 1
+                    if (mouseX > submenuX && mouseX < submenuWidth + submenuX && mouseY > entryY - fontMetrics.topPadding - 1 && mouseY < entryY + fontMetrics.bottomPadding && entry.isSelectable) {
+                        toolkit.drawFilledRectangle(submenuX, entryY - fontMetrics.topPadding, submenuWidth, entryRowHeight, alpha shl 24 or menuHoverHighlightColor, 1)
                     }
-                    ++i_12
-                    class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
+                    ++entryIndex
+                    entry = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
-                StaticMethods.drawMenuBorderSprites(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, b_6)
+                StaticMethods.drawMenuBorderSprites(toolkit, submenuX, submenuY, submenuWidth, StationaryWall.menuHeight, headerSize)
             }
         }
-        StaticMethods.drawMenuBorderSprites(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, b_6)
+        StaticMethods.drawMenuBorderSprites(toolkit, StaticMethods.menuOpenX, StaticMethods.menuOpenY, menuWidth, menuHeight, headerSize)
         if (!isCollapsed) {
-            i_12 = 0
-            var class282Sub50Sub713Temp2: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
-            while (class282Sub50Sub713Temp2 != null) {
-                class282Sub50Sub713 = class282Sub50Sub713Temp2
-                i_14 = i_3 + b_6 + (entryCount - 1 - i_12) * entryRowHeight + fontmetrics8.topPadding + 1
-                drawMenuEntry(i_10, i_11, i_2, i_4, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
-                ++i_12
-                class282Sub50Sub713Temp2 = entryList.next() as? MiniMenuEntry
+            entryIndex = 0
+            var currentEntry2: MiniMenuEntry? = entryList.getFirst() as? MiniMenuEntry
+            while (currentEntry2 != null) {
+                entry = currentEntry2
+                entryY = menuY + headerSize + (entryCount - 1 - entryIndex) * entryRowHeight + fontMetrics.topPadding + 1
+                drawMenuEntry(mouseX, mouseY, menuX, menuW, entryY, entry, fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                ++entryIndex
+                currentEntry2 = entryList.next() as? MiniMenuEntry
             }
         } else {
-            i_12 = 0
-            var class282Sub50Sub1516Temp2: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
-            while (class282Sub50Sub1516Temp2 != null) {
-                class282Sub50Sub1516 = class282Sub50Sub1516Temp2
-                i_14 = b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + StaticMethods.menuOpenY + 1
-                if (class282Sub50Sub1516.queueSize == 1) {
-                    drawMenuEntry(i_10, i_11, StaticMethods.menuOpenX, menuWidth, i_14, (class282Sub50Sub1516.nodeQueue.current.next as MiniMenuEntry), fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+            entryIndex = 0
+            var currentColoredEntry2: ColoredMiniMenuEntry? = sortedColoredEntries.getNext() as? ColoredMiniMenuEntry
+            while (currentColoredEntry2 != null) {
+                coloredEntry = currentColoredEntry2
+                entryY = headerSize + entryIndex * entryRowHeight + fontMetrics.topPadding + StaticMethods.menuOpenY + 1
+                if (coloredEntry.queueSize == 1) {
+                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.next as MiniMenuEntry), fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 } else {
-                    StaticMethods.drawColoredMenuEntry(i_10, i_11, StaticMethods.menuOpenX, menuWidth, i_14, class282Sub50Sub1516, fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, coloredEntry, fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 }
-                ++i_12
-                class282Sub50Sub1516Temp2 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
+                ++entryIndex
+                currentColoredEntry2 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
             }
             if (activeSubmenu != null) {
-                i_12 = 0
-                class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
-                while (class282Sub50Sub713 != null) {
-                    i_14 = b_6 + i_12 * entryRowHeight + fontmetrics8.topPadding + submenuY + 1
-                    drawMenuEntry(i_10, i_11, submenuX, submenuWidth, i_14, class282Sub50Sub713, fontrenderer7, fontmetrics8, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
-                    ++i_12
-                    class282Sub50Sub713 = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
+                entryIndex = 0
+                entry = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
+                while (entry != null) {
+                    entryY = headerSize + entryIndex * entryRowHeight + fontMetrics.topPadding + submenuY + 1
+                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, entryY, entry, fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    ++entryIndex
+                    entry = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
             }
         }
@@ -885,9 +885,9 @@ object MiniMenu {
     val interfaceEntries = NodeCollection()
 
     @JvmStatic
-    fun setViewportOrigin(i_0: Int, i_1: Int) {
-        viewportX = i_0
-        viewportY = i_1
+    fun setViewportOrigin(x: Int, y: Int) {
+        viewportX = x
+        viewportY = y
     }
 
     @JvmStatic
@@ -899,10 +899,10 @@ object MiniMenu {
     var menuTextColor = 0
 
     @JvmStatic
-    fun drawMenuEntry(i_0: Int, i_1: Int, i_2: Int, i_4: Int, i_6: Int, entry: MiniMenuEntry, fontRenderer: AbstractFontRenderer?, fontmetrics9: FontMetrics, i_10: Int, i_11: Int) {
-        var i_101 = i_10
-        if (i_0 > i_2 && i_0 < i_2 + i_4 && i_1 > i_6 - fontmetrics9.topPadding - 1 && i_1 < fontmetrics9.bottomPadding + i_6 && entry.isSelectable) {
-            i_101 = i_11
+    fun drawMenuEntry(mouseX: Int, mouseY: Int, menuX: Int, menuW: Int, entryY: Int, entry: MiniMenuEntry, fontRenderer: AbstractFontRenderer?, fontMetrics: FontMetrics, textColor: Int, hoverColor: Int) {
+        var activeColor = textColor
+        if (mouseX > menuX && mouseX < menuX + menuW && mouseY > entryY - fontMetrics.topPadding - 1 && mouseY < fontMetrics.bottomPadding + entryY && entry.isSelectable) {
+            activeColor = hoverColor
         }
         val questIds = getQuestsFrom(entry)
         var text = getTextFrom(entry)
@@ -910,9 +910,9 @@ object MiniMenu {
             text += ChatBox.addQuestChatIcons(questIds)
         }
         @Suppress("UNCHECKED_CAST")
-        fontRenderer?.renderAntiMacroText(text, i_2 + 3, i_6, i_101, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+        fontRenderer?.renderAntiMacroText(text, menuX + 3, entryY, activeColor, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
         if (entry.showOtherLevelIcon) {
-            StaticMedia.otherLevelSprite!!.draw(5 + i_2 + fontmetrics9.getWidthNoSprites(text), i_6 - fontmetrics9.topPadding)
+            StaticMedia.otherLevelSprite!!.draw(5 + menuX + fontMetrics.getWidthNoSprites(text), entryY - fontMetrics.topPadding)
         }
     }
 
