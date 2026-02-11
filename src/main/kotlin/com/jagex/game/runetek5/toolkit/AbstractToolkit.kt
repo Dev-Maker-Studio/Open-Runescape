@@ -175,7 +175,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         }
     }
 
-    abstract fun createDelegatingDisplay(var1: Canvas, var2: Int, var3: Int): DelegatingDisplay
+    abstract fun createDelegatingDisplay(canvas: Canvas, width: Int, height: Int): DelegatingDisplay
 
     abstract fun getImageProducer(): DirectDisplay
 
@@ -197,7 +197,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun applyClearFlags(functionMask: Int, backgroundColorArgb: Int)
 
-    abstract fun setModelMatrix(var1: Matrix44)
+    abstract fun setModelMatrix(matrix: Matrix44)
 
     open fun clearPixels(x: Int, y: Int, width: Int, height: Int, color: Int) {
         drawFilledRectangle(x, y, width, height, color, 1)
@@ -223,9 +223,9 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun drawLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, lineSpacing: Int, lineLength: Int, offset: Int)
 
-    abstract fun isOnScreen(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var6: Int): Int
+    abstract fun isOnScreen(minX: Int, minY: Int, minZ: Int, maxX: Int, maxY: Int, maxZ: Int): Int
 
-    abstract fun getNativeMemory(var1: Int): NativeMemoryNode?
+    abstract fun getNativeMemory(capacity: Int): NativeMemoryNode?
 
     abstract fun setNativeHeap(nativeMemoryNode: NativeMemoryNode)
 
@@ -233,11 +233,11 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         return generateEmptySprite(width, height, true, false)
     }
 
-    abstract fun createNativeSprite(pixels: IntArray, defaultBackgroundColor: Int, width: Int, useWidth: Int, useHeight: Int, var6: Boolean): NativeSprite
+    abstract fun createNativeSprite(pixels: IntArray, defaultBackgroundColor: Int, width: Int, useWidth: Int, useHeight: Int, hasAlpha: Boolean): NativeSprite
 
     abstract fun generateSprite(spriteType: SpriteType?, hasPalette: Boolean): NativeSprite
 
-    abstract fun createFontRenderer(var1: FontMetrics?, var2: Array<SpriteType>?, var3: Boolean): AbstractFontRenderer
+    abstract fun createFontRenderer(fontMetrics: FontMetrics?, spriteTypes: Array<SpriteType>?, isPlain: Boolean): AbstractFontRenderer
 
     abstract fun getScratchMatrix(): Matrix44
 
@@ -261,13 +261,13 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         return true
     }
 
-    abstract fun renderParticles(var1: ParticleWrapper)
+    abstract fun renderParticles(particleWrapper: ParticleWrapper)
 
-    abstract fun setSunPosition(var1: Matrix43)
+    abstract fun setSunPosition(viewMatrix: Matrix43)
 
     abstract fun copySunPosition(): Matrix43
 
-    abstract fun setDepthBuffering(var1: Boolean)
+    abstract fun setDepthBuffering(enabled: Boolean)
 
     abstract fun initialize()
 
@@ -281,7 +281,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
      */
     abstract fun updateSun(brightness: Float)
 
-    abstract fun applyLighting(color: Int, intensity: Float, f_3: Float, positionX: Float, positionY: Float, positionZ: Float)
+    abstract fun applyLighting(color: Int, intensity: Float, antiIntensity: Float, positionX: Float, positionY: Float, positionZ: Float)
 
     abstract fun generateFlags()
 
@@ -291,7 +291,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun createCubeTexture(materialAtPositiveX: Int, materialAtNegativeX: Int, materialAtPositiveY: Int, materialAtNegativeY: Int, materialAtPositiveZ: Int, materialAtNegativeZ: Int): AbstractCubeTextureGenerator?
 
-    abstract fun drawQuad(var1: AbstractCubeTextureGenerator?, var2: AbstractCubeTextureGenerator?, var3: Float, var4: AbstractCubeTextureGenerator?): AbstractCubeTextureGenerator?
+    abstract fun drawQuad(sourceA: AbstractCubeTextureGenerator?, sourceB: AbstractCubeTextureGenerator?, alpha: Float, existing: AbstractCubeTextureGenerator?): AbstractCubeTextureGenerator?
 
     open fun drawMapCategory(x: Int, y: Int, radius: Int, colorArgb: Int) {
         drawCircle(x, y, radius, colorArgb)
@@ -311,7 +311,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun addWaterTile(waterColor: Int, waterTile: WaterTile)
 
-    abstract fun setSunCubeTexture(var1: AbstractCubeTextureGenerator?)
+    abstract fun setSunCubeTexture(cubeTexture: AbstractCubeTextureGenerator?)
 
     abstract fun createGround(regionSizeX: Int, regionSizeY: Int, tileheightsCurrentLvl: Array<IntArray>, tileheightsNextLvl: Array<IntArray>, floorFunctionMask: Int, waterFunctionMask: Int): Ground
 
@@ -329,7 +329,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun computeWorldToScreen(x: Float, y: Float, z: Float, screenCoords: FloatArray)
 
-    abstract fun calculateFog(color: Int, density: Int, var3: Int)
+    abstract fun calculateFog(color: Int, density: Int, offset: Int)
 
     fun getDisplay(): AbstractDisplay? {
         return this.display
@@ -361,7 +361,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         drawRectangleOutline(x, y, width, height, color, 1)
     }
 
-    abstract fun drawTexturedLine(var1: Int, var2: Int, var3: Int, var4: Int, color: Int, dimension: ComponentSurface, clipLeft: Int, clipTop: Int, var10: Int, var11: Int, var12: Int)
+    abstract fun drawTexturedLine(startX: Int, startY: Int, endX: Int, endY: Int, color: Int, surface: ComponentSurface, clipLeft: Int, clipTop: Int, lineSpacing: Int, lineLength: Int, offset: Int)
 
     abstract fun resetTextureState()
 
@@ -390,7 +390,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         activeDisplay.reload()
     }
 
-    abstract fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, var4: Boolean): NativeSprite
+    abstract fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, mipmapped: Boolean): NativeSprite
 
     /**
      * Benchmarks the performance of given toolkit in order
@@ -407,11 +407,11 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
     /**
      * Give this a better name (?), currently only used for worldmap tiles
      */
-    abstract fun renderWorldmapTile(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var6: Int, var7: ByteArray, var8: Int, var9: Int)
+    abstract fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, pixels: ByteArray, pixelOffset: Int, blendMode: Int)
 
-    abstract fun createNativeSprite(var1: Int, var2: Int, var3: Int, var4: Int, var5: Boolean): NativeSprite
+    abstract fun createNativeSprite(width: Int, height: Int, textureWidth: Int, textureHeight: Int, hasAlpha: Boolean): NativeSprite
 
-    abstract fun drawSurfaceLine(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, var7: ComponentSurface, clipLeft: Int, clipTop: Int)
+    abstract fun drawSurfaceLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, clipLeft: Int, clipTop: Int)
 
     companion object {
         @JvmField
@@ -512,49 +512,49 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
             if (h < 1) {
                 h = 1
             }
-            var i_6 = h - 334
-            if (i_6 < 0) {
-                i_6 = 0
-            } else if (i_6 > 100) {
-                i_6 = 100
+            var heightScaleFactor = h - 334
+            if (heightScaleFactor < 0) {
+                heightScaleFactor = 0
+            } else if (heightScaleFactor > 100) {
+                heightScaleFactor = 100
             }
-            var i_7 = (Client.viewportFovMax - Client.viewportFovMin) * i_6 / 100 + Client.viewportFovMin
-            val i_8 = h * i_7 * 512 / (w * 334)
-            val i_9: Int
-            val i_10: Int
-            val s_11: Short
-            if (i_8 < Client.aspectFovMin) {
-                s_11 = Client.aspectFovMin
-                i_7 = s_11.toInt() * w * 334 / (h * 512)
-                if (i_7 > Client.fovScaleMax) {
-                    i_7 = Client.fovScaleMax.toInt()
-                    i_9 = h * i_7 * 512 / (s_11 * 334)
-                    i_10 = (w - i_9) / 2
+            var fovScale = (Client.viewportFovMax - Client.viewportFovMin) * heightScaleFactor / 100 + Client.viewportFovMin
+            val aspectFov = h * fovScale * 512 / (w * 334)
+            val adjustedDimension: Int
+            val padding: Int
+            val aspectFovLimit: Short
+            if (aspectFov < Client.aspectFovMin) {
+                aspectFovLimit = Client.aspectFovMin
+                fovScale = aspectFovLimit.toInt() * w * 334 / (h * 512)
+                if (fovScale > Client.fovScaleMax) {
+                    fovScale = Client.fovScaleMax.toInt()
+                    adjustedDimension = h * fovScale * 512 / (aspectFovLimit * 334)
+                    padding = (w - adjustedDimension) / 2
                     if (resetPixels) {
                         Renderers.activeToolkit!!.resetClipping()
-                        Renderers.activeToolkit!!.clearPixels(x, y, i_10, h, 0xffffff.inv())
-                        Renderers.activeToolkit!!.clearPixels(x + w - i_10, y, i_10, h, 0xffffff.inv())
+                        Renderers.activeToolkit!!.clearPixels(x, y, padding, h, 0xffffff.inv())
+                        Renderers.activeToolkit!!.clearPixels(x + w - padding, y, padding, h, 0xffffff.inv())
                     }
-                    x += i_10
-                    w -= i_10 * 2
+                    x += padding
+                    w -= padding * 2
                 }
-            } else if (i_8 > Client.aspectFovMax) {
-                s_11 = Client.aspectFovMax
-                i_7 = s_11.toInt() * w * 334 / (h * 512)
-                if (i_7 < Client.fovScaleMin) {
-                    i_7 = Client.fovScaleMin.toInt()
-                    i_9 = s_11 * w * 334 / (i_7 * 512)
-                    i_10 = (h - i_9) / 2
+            } else if (aspectFov > Client.aspectFovMax) {
+                aspectFovLimit = Client.aspectFovMax
+                fovScale = aspectFovLimit.toInt() * w * 334 / (h * 512)
+                if (fovScale < Client.fovScaleMin) {
+                    fovScale = Client.fovScaleMin.toInt()
+                    adjustedDimension = aspectFovLimit * w * 334 / (fovScale * 512)
+                    padding = (h - adjustedDimension) / 2
                     if (resetPixels) {
                         Renderers.activeToolkit!!.resetClipping()
-                        Renderers.activeToolkit!!.clearPixels(x, y, w, i_10, 0xffffff.inv())
-                        Renderers.activeToolkit!!.clearPixels(x, h + y - i_10, w, i_10, 0xffffff.inv())
+                        Renderers.activeToolkit!!.clearPixels(x, y, w, padding, 0xffffff.inv())
+                        Renderers.activeToolkit!!.clearPixels(x, h + y - padding, w, padding, 0xffffff.inv())
                     }
-                    y += i_10
-                    h -= i_10 * 2
+                    y += padding
+                    h -= padding * 2
                 }
             }
-            Client.viewportScaledFov = h * i_7 / 334
+            Client.viewportScaledFov = h * fovScale / 334
             Client.hintArrowOffsetX = x
             Client.hintArrowOffsetY = y
             Client.gameAreaWidth = w

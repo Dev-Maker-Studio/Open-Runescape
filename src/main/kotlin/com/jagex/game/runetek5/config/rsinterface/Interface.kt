@@ -37,8 +37,8 @@ class Interface(
 
     fun getOrCreateMutableComponents(): Array<Component?> {
         if (subComponents == null) {
-            val i2 = components.size
-            subComponents = Array(i2) { null }
+            val componentCount = components.size
+            subComponents = Array(componentCount) { null }
             System.arraycopy(components, 0, subComponents!!, 0, components.size)
         }
         return subComponents!!
@@ -105,9 +105,9 @@ class Interface(
 
         @JvmStatic
         @JvmName("open_sub")
-        fun openSub(interfaceId: Int, i1: Int) {
+        fun openSub(interfaceId: Int, scriptMode: Int) {
             if (interfaceLoaded(interfaceId, null)) {
-                runInterfaceScripts(INTERFACES!![interfaceId]!!.components, i1)
+                runInterfaceScripts(INTERFACES!![interfaceId]!!.components, scriptMode)
             }
         }
 
@@ -133,7 +133,7 @@ class Interface(
         }
 
         @JvmStatic
-        fun closeChildInterface(parentInterface: SubInterface, unload: Boolean, bool2: Boolean) {
+        fun closeChildInterface(parentInterface: SubInterface, unload: Boolean, suppressScripts: Boolean) {
             val parentInterfaceId = parentInterface.subInterfaceId
             val interfaceHash = parentInterface.pointer.toInt()
             parentInterface.unlink()
@@ -146,7 +146,7 @@ class Interface(
                 Component.redrawComponent(component)
             }
             MiniMenu.removeMatchingEntries()
-            if (!bool2 && Client.BASE_WINDOW_ID != -1) {
+            if (!suppressScripts && Client.BASE_WINDOW_ID != -1) {
                 openSub(Client.BASE_WINDOW_ID, 1)
             }
             val openInterfaceIt = HashTableIterator<SubInterface>(Client.OPEN_INTERFACES!!)
@@ -161,7 +161,7 @@ class Interface(
                 if (child.overlay == 3) {
                     val uid = child.pointer.toInt()
                     if (uid ushr 16 == parentInterfaceId) {
-                        closeChildInterface(child, true, bool2)
+                        closeChildInterface(child, true, suppressScripts)
                     }
                 }
                 child = openInterfaceIt.next() as SubInterface?
@@ -172,19 +172,19 @@ class Interface(
         fun openSub(
             parentId: Int,
             subInterface: SubInterface,
-            ints2: IntArray?,
-            bool3: Boolean
+            xteas: IntArray?,
+            suppressScripts: Boolean
         ): SubInterface {
             val currentSubInterface = Client.OPEN_INTERFACES!!.get(parentId.toLong()) as SubInterface?
             if (currentSubInterface != null) {
                 closeChildInterface(
                     currentSubInterface,
                     currentSubInterface.subInterfaceId != subInterface.subInterfaceId,
-                    bool3
+                    suppressScripts
                 )
             }
             Client.OPEN_INTERFACES!!.put(subInterface, parentId.toLong())
-            resetComponentSequences(subInterface.subInterfaceId, ints2)
+            resetComponentSequences(subInterface.subInterfaceId, xteas)
             val parentComponent = Component.fromHash(parentId)
             if (parentComponent != null) {
                 Component.redrawComponent(parentComponent)
@@ -195,12 +195,12 @@ class Interface(
             }
             MiniMenu.removeMatchingEntries()
             if (parentComponent != null) {
-                Component.updateEntityLayout(INTERFACES!![parentComponent.idHash ushr 16]!!, parentComponent, !bool3)
+                Component.updateEntityLayout(INTERFACES!![parentComponent.idHash ushr 16]!!, parentComponent, !suppressScripts)
             }
-            if (!bool3) {
-                Component.runScriptsIfLoaded(subInterface.subInterfaceId, ints2)
+            if (!suppressScripts) {
+                Component.runScriptsIfLoaded(subInterface.subInterfaceId, xteas)
             }
-            if (!bool3 && Client.BASE_WINDOW_ID != -1) {
+            if (!suppressScripts && Client.BASE_WINDOW_ID != -1) {
                 openSub(Client.BASE_WINDOW_ID, 1)
             }
             return subInterface
@@ -211,7 +211,7 @@ class Interface(
             interfaceId: Int,
             xteas: IntArray?,
             rsInterface: Interface?,
-            bool3: Boolean
+            preventInteraction: Boolean
         ): Interface? {
             if (!interfaceResource!!.loadArchive(interfaceId)) {
                 return null
@@ -226,10 +226,10 @@ class Interface(
             }
             var mutableRsInterface = rsInterface
             if (mutableRsInterface == null) {
-                mutableRsInterface = Interface(bool3, interfaceComponents)
+                mutableRsInterface = Interface(preventInteraction, interfaceComponents)
             } else {
                 mutableRsInterface.components = interfaceComponents
-                mutableRsInterface.preventInteraction = bool3
+                mutableRsInterface.preventInteraction = preventInteraction
             }
             for (componentIndex in 0 until componentCount) {
                 if (mutableRsInterface.components[componentIndex] == null) {
@@ -263,10 +263,10 @@ class Interface(
                 if (subInterface != null && !subInterface.executeTrigger()) {
                     closeChildInterface(subInterface, true, false)
                 } else {
-                    val interface11 = INTERFACES!![subInterfaceId]!!
+                    val loadedInterface = INTERFACES!![subInterfaceId]!!
                     InterfaceRenderer.processInterfaceCycle(
-                        interface11,
-                        interface11.getComponents(),
+                        loadedInterface,
+                        loadedInterface.getComponents(),
                         -1,
                         startX,
                         startY,
@@ -282,10 +282,10 @@ class Interface(
         }
 
         @JvmStatic
-        fun removeComponentSettings(i0: Int) {
+        fun removeComponentSettings(interfaceId: Int) {
             var node = Client.ICOMPONENT_SETTINGS_SLOTS.first()
             while (node != null) {
-                if (i0 == (node.pointer shr 48 and 0xffffL).toInt()) {
+                if (interfaceId == (node.pointer shr 48 and 0xffffL).toInt()) {
                     node.unlink()
                 }
                 node = Client.ICOMPONENT_SETTINGS_SLOTS.next()
@@ -293,7 +293,7 @@ class Interface(
         }
 
         @JvmStatic
-        fun hasActiveMenuEntry(interfaceAndComponent: Int, i1: Int): Boolean {
+        fun hasActiveMenuEntry(interfaceAndComponent: Int, slotId: Int): Boolean {
             if (!MiniMenu.isOpen) {
                 return false
             }
@@ -301,7 +301,7 @@ class Interface(
             val compId = interfaceAndComponent and 0xffff
             if (INTERFACES!![interId] != null && INTERFACES!![interId]!!.components[compId] != null) {
                 val component = INTERFACES!![interId]!!.components[compId]!!
-                if (i1 == -1 && component.type == ComponentType.CONTAINER) {
+                if (slotId == -1 && component.type == ComponentType.CONTAINER) {
                     var menuEntry = MiniMenu.entryList.first() as MiniMenuEntry?
                     while (menuEntry != null) {
                         if (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30) {
@@ -318,7 +318,7 @@ class Interface(
                 } else {
                     var menuEntry = MiniMenu.entryList.first() as MiniMenuEntry?
                     while (menuEntry != null) {
-                        if (menuEntry.param0 == i1 && component.idHash == menuEntry.param1 && (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30)) {
+                        if (menuEntry.param0 == slotId && component.idHash == menuEntry.param1 && (menuEntry.clickType == 58 || menuEntry.clickType == 1007 || menuEntry.clickType == 25 || menuEntry.clickType == 57 || menuEntry.clickType == 30)) {
                             return true
                         }
                         menuEntry = MiniMenu.entryList.next() as MiniMenuEntry?
@@ -470,29 +470,29 @@ class Interface(
         }
 
         @JvmStatic
-        fun runInterfaceScripts(components: Array<Component?>, i1: Int) {
+        fun runInterfaceScripts(components: Array<Component?>, scriptMode: Int) {
             for (index in components.indices) {
                 val component = components[index]
                 if (component != null) {
                     if (component.type == ComponentType.CONTAINER) {
                         if (component.itemSlots != null) {
-                            runInterfaceScripts(component.itemSlots!!, i1)
+                            runInterfaceScripts(component.itemSlots!!, scriptMode)
                         }
                         val subInterface = Client.OPEN_INTERFACES!!.get(component.idHash.toLong()) as SubInterface?
                         if (subInterface != null) {
-                            openSub(subInterface.subInterfaceId, i1)
+                            openSub(subInterface.subInterfaceId, scriptMode)
                         }
                     }
-                    if (i1 == 0 && component.onSubClose != null) {
+                    if (scriptMode == 0 && component.onSubClose != null) {
                         val hookRequest = HookRequest()
                         hookRequest.source = component
                         hookRequest.params = component.onSubClose
                         CS2Executor.executeHookInner(hookRequest)
                     }
-                    if (i1 == 1 && component.onSubChange != null) {
+                    if (scriptMode == 1 && component.onSubChange != null) {
                         if (component.slotId >= 0) {
-                            val icomponentdefinitions7 = Component.fromHash(component.idHash)
-                            if (icomponentdefinitions7 == null || icomponentdefinitions7.slotChildren == null || component.slotId >= icomponentdefinitions7.slotChildren!!.size || component != icomponentdefinitions7.slotChildren!![component.slotId]) {
+                            val parentComponent = Component.fromHash(component.idHash)
+                            if (parentComponent == null || parentComponent.slotChildren == null || component.slotId >= parentComponent.slotChildren!!.size || component != parentComponent.slotChildren!![component.slotId]) {
                                 continue
                             }
                         }
@@ -506,88 +506,88 @@ class Interface(
         }
 
         @JvmStatic
-        fun moveComponentToBack(inter: Interface, defs: Component?) {
-            if (defs != null) {
-                var i4: Int
-                if (defs.slotId != -1) {
-                    val interfaceComponent = inter.getComponent(defs.parentId)
+        fun moveComponentToBack(inter: Interface, targetComponent: Component?) {
+            if (targetComponent != null) {
+                var searchIndex: Int
+                if (targetComponent.slotId != -1) {
+                    val interfaceComponent = inter.getComponent(targetComponent.parentId)
                     if (interfaceComponent != null) {
                         if (interfaceComponent.itemSlots === interfaceComponent.slotChildren) {
                             interfaceComponent.itemSlots = Array(interfaceComponent.slotChildren!!.size) { null }
-                            interfaceComponent.itemSlots!![interfaceComponent.itemSlots!!.size - 1] = defs
-                            ArrayUtils.arrayCopy(interfaceComponent.slotChildren!!, 0, interfaceComponent.itemSlots!!, 0, defs.slotId)
+                            interfaceComponent.itemSlots!![interfaceComponent.itemSlots!!.size - 1] = targetComponent
+                            ArrayUtils.arrayCopy(interfaceComponent.slotChildren!!, 0, interfaceComponent.itemSlots!!, 0, targetComponent.slotId)
                             ArrayUtils.arrayCopy(
                                 interfaceComponent.slotChildren!!,
-                                defs.slotId + 1,
+                                targetComponent.slotId + 1,
                                 interfaceComponent.itemSlots!!,
-                                defs.slotId,
-                                interfaceComponent.slotChildren!!.size - defs.slotId - 1
+                                targetComponent.slotId,
+                                interfaceComponent.slotChildren!!.size - targetComponent.slotId - 1
                             )
                         } else {
-                            i4 = 0
-                            val arr5 = interfaceComponent.itemSlots!!
-                            while (i4 < arr5.size && arr5[i4] != defs) {
-                                i4++
+                            searchIndex = 0
+                            val itemSlots = interfaceComponent.itemSlots!!
+                            while (searchIndex < itemSlots.size && itemSlots[searchIndex] != targetComponent) {
+                                searchIndex++
                             }
-                            if (i4 < arr5.size) {
-                                ArrayUtils.arrayCopy(arr5, i4 + 1, arr5, i4, arr5.size - i4 - 1)
-                                arr5[interfaceComponent.itemSlots!!.size - 1] = defs
+                            if (searchIndex < itemSlots.size) {
+                                ArrayUtils.arrayCopy(itemSlots, searchIndex + 1, itemSlots, searchIndex, itemSlots.size - searchIndex - 1)
+                                itemSlots[interfaceComponent.itemSlots!!.size - 1] = targetComponent
                             }
                         }
                     }
                 } else {
-                    val arr6 = inter.getOrCreateMutableComponents()
-                    i4 = 0
-                    while (i4 < arr6.size && arr6[i4] != defs) {
-                        i4++
+                    val mutableComponents = inter.getOrCreateMutableComponents()
+                    searchIndex = 0
+                    while (searchIndex < mutableComponents.size && mutableComponents[searchIndex] != targetComponent) {
+                        searchIndex++
                     }
-                    if (i4 < arr6.size) {
-                        ArrayUtils.arrayCopy(arr6, i4 + 1, arr6, i4, arr6.size - i4 - 1)
-                        arr6[arr6.size - 1] = defs
+                    if (searchIndex < mutableComponents.size) {
+                        ArrayUtils.arrayCopy(mutableComponents, searchIndex + 1, mutableComponents, searchIndex, mutableComponents.size - searchIndex - 1)
+                        mutableComponents[mutableComponents.size - 1] = targetComponent
                     }
                 }
             }
         }
 
         @JvmStatic
-        fun moveComponentToFront(inter: Interface, defs: Component?) {
-            if (defs != null) {
-                var i4: Int
-                if (defs.slotId != -1) {
-                    val interfaceComponent = inter.components[defs.parentId and 0xffff]
+        fun moveComponentToFront(inter: Interface, targetComponent: Component?) {
+            if (targetComponent != null) {
+                var searchIndex: Int
+                if (targetComponent.slotId != -1) {
+                    val interfaceComponent = inter.components[targetComponent.parentId and 0xffff]
                     if (interfaceComponent != null) {
                         if (interfaceComponent.slotChildren === interfaceComponent.itemSlots) {
                             interfaceComponent.itemSlots = Array(interfaceComponent.slotChildren!!.size) { null }
-                            interfaceComponent.itemSlots!![0] = defs
-                            ArrayUtils.arrayCopy(interfaceComponent.slotChildren!!, 0, interfaceComponent.itemSlots!!, 1, defs.slotId)
+                            interfaceComponent.itemSlots!![0] = targetComponent
+                            ArrayUtils.arrayCopy(interfaceComponent.slotChildren!!, 0, interfaceComponent.itemSlots!!, 1, targetComponent.slotId)
                             ArrayUtils.arrayCopy(
                                 interfaceComponent.slotChildren!!,
-                                defs.slotId + 1,
+                                targetComponent.slotId + 1,
                                 interfaceComponent.itemSlots!!,
-                                defs.slotId + 1,
-                                interfaceComponent.slotChildren!!.size - defs.slotId - 1
+                                targetComponent.slotId + 1,
+                                interfaceComponent.slotChildren!!.size - targetComponent.slotId - 1
                             )
                         } else {
-                            i4 = 0
+                            searchIndex = 0
                             val itemSlotComponents = interfaceComponent.itemSlots!!
-                            while (i4 < itemSlotComponents.size && itemSlotComponents[i4] != defs) {
-                                i4++
+                            while (searchIndex < itemSlotComponents.size && itemSlotComponents[searchIndex] != targetComponent) {
+                                searchIndex++
                             }
-                            if (i4 < itemSlotComponents.size) {
-                                ArrayUtils.arrayCopy(itemSlotComponents, 0, itemSlotComponents, 1, i4)
-                                itemSlotComponents[0] = defs
+                            if (searchIndex < itemSlotComponents.size) {
+                                ArrayUtils.arrayCopy(itemSlotComponents, 0, itemSlotComponents, 1, searchIndex)
+                                itemSlotComponents[0] = targetComponent
                             }
                         }
                     }
                 } else {
-                    val arr6 = inter.getOrCreateMutableComponents()
-                    i4 = 0
-                    while (i4 < arr6.size && arr6[i4] != defs) {
-                        i4++
+                    val mutableComponents = inter.getOrCreateMutableComponents()
+                    searchIndex = 0
+                    while (searchIndex < mutableComponents.size && mutableComponents[searchIndex] != targetComponent) {
+                        searchIndex++
                     }
-                    if (i4 < arr6.size) {
-                        ArrayUtils.arrayCopy(arr6, 0, arr6, 1, i4)
-                        arr6[0] = defs
+                    if (searchIndex < mutableComponents.size) {
+                        ArrayUtils.arrayCopy(mutableComponents, 0, mutableComponents, 1, searchIndex)
+                        mutableComponents[0] = targetComponent
                     }
                 }
             }
