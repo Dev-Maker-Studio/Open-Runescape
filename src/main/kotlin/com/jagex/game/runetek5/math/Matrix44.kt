@@ -39,8 +39,8 @@ class Matrix44 {
      */
     val elements = FloatArray(16)
 
-    constructor(matrix441: Matrix44) {
-        copyFrom(matrix441)
+    constructor(source: Matrix44) {
+        copyFrom(source)
     }
 
     constructor() {
@@ -102,94 +102,94 @@ class Matrix44 {
         this.elements[14] = zFarC
     }
 
-    fun fromMatrix(matrix4Var: Matrix43) {
-        this.elements[0] = matrix4Var.xA
-        this.elements[1] = matrix4Var.yA
-        this.elements[2] = matrix4Var.zA
+    fun fromMatrix(source: Matrix43) {
+        this.elements[0] = source.xA
+        this.elements[1] = source.yA
+        this.elements[2] = source.zA
         this.elements[3] = 0.0f
-        this.elements[4] = matrix4Var.xB
-        this.elements[5] = matrix4Var.yB
-        this.elements[6] = matrix4Var.zB
+        this.elements[4] = source.xB
+        this.elements[5] = source.yB
+        this.elements[6] = source.zB
         this.elements[7] = 0.0f
-        this.elements[8] = matrix4Var.xC
-        this.elements[9] = matrix4Var.yC
-        this.elements[10] = matrix4Var.zC
+        this.elements[8] = source.xC
+        this.elements[9] = source.yC
+        this.elements[10] = source.zC
         this.elements[11] = 0.0f
-        this.elements[12] = matrix4Var.xD
-        this.elements[13] = matrix4Var.yD
-        this.elements[14] = matrix4Var.zD
+        this.elements[12] = source.xD
+        this.elements[13] = source.yD
+        this.elements[14] = source.zD
         this.elements[15] = 1.0f
     }
 
-    fun multiplyBy(matrix441: Matrix44) {
-        val f_2 = this.elements[0] * matrix441.elements[0] + this.elements[1] * matrix441.elements[4] + this.elements[2] * matrix441.elements[8] + this.elements[3] * matrix441.elements[12]
-        val f_3 = this.elements[0] * matrix441.elements[1] + this.elements[1] * matrix441.elements[5] + this.elements[2] * matrix441.elements[9] + this.elements[3] * matrix441.elements[13]
-        val f_4 = this.elements[0] * matrix441.elements[2] + this.elements[1] * matrix441.elements[6] + this.elements[2] * matrix441.elements[10] + this.elements[3] * matrix441.elements[14]
-        val f_5 = this.elements[0] * matrix441.elements[3] + this.elements[1] * matrix441.elements[7] + this.elements[2] * matrix441.elements[11] + this.elements[3] * matrix441.elements[15]
-        val f_6 = this.elements[4] * matrix441.elements[0] + this.elements[5] * matrix441.elements[4] + this.elements[6] * matrix441.elements[8] + this.elements[7] * matrix441.elements[12]
-        val f_7 = this.elements[4] * matrix441.elements[1] + this.elements[5] * matrix441.elements[5] + this.elements[6] * matrix441.elements[9] + this.elements[7] * matrix441.elements[13]
-        val f_8 = this.elements[4] * matrix441.elements[2] + this.elements[5] * matrix441.elements[6] + this.elements[6] * matrix441.elements[10] + this.elements[7] * matrix441.elements[14]
-        val f_9 = this.elements[4] * matrix441.elements[3] + this.elements[5] * matrix441.elements[7] + this.elements[6] * matrix441.elements[11] + this.elements[7] * matrix441.elements[15]
-        val f_10 = this.elements[8] * matrix441.elements[0] + this.elements[9] * matrix441.elements[4] + this.elements[10] * matrix441.elements[8] + this.elements[11] * matrix441.elements[12]
-        val f_11 = this.elements[8] * matrix441.elements[1] + this.elements[9] * matrix441.elements[5] + this.elements[10] * matrix441.elements[9] + this.elements[11] * matrix441.elements[13]
-        val f_12 = this.elements[8] * matrix441.elements[2] + this.elements[9] * matrix441.elements[6] + this.elements[10] * matrix441.elements[10] + this.elements[11] * matrix441.elements[14]
-        val f_13 = this.elements[8] * matrix441.elements[3] + this.elements[9] * matrix441.elements[7] + this.elements[10] * matrix441.elements[11] + this.elements[11] * matrix441.elements[15]
-        val f_14 = this.elements[12] * matrix441.elements[0] + this.elements[13] * matrix441.elements[4] + this.elements[14] * matrix441.elements[8] + this.elements[15] * matrix441.elements[12]
-        val f_15 = this.elements[12] * matrix441.elements[1] + this.elements[13] * matrix441.elements[5] + this.elements[14] * matrix441.elements[9] + this.elements[15] * matrix441.elements[13]
-        val f_16 = this.elements[12] * matrix441.elements[2] + this.elements[13] * matrix441.elements[6] + this.elements[14] * matrix441.elements[10] + this.elements[15] * matrix441.elements[14]
-        val f_17 = this.elements[12] * matrix441.elements[3] + this.elements[13] * matrix441.elements[7] + this.elements[14] * matrix441.elements[11] + this.elements[15] * matrix441.elements[15]
-        this.elements[0] = f_2
-        this.elements[1] = f_3
-        this.elements[2] = f_4
-        this.elements[3] = f_5
-        this.elements[4] = f_6
-        this.elements[5] = f_7
-        this.elements[6] = f_8
-        this.elements[7] = f_9
-        this.elements[8] = f_10
-        this.elements[9] = f_11
-        this.elements[10] = f_12
-        this.elements[11] = f_13
-        this.elements[12] = f_14
-        this.elements[13] = f_15
-        this.elements[14] = f_16
-        this.elements[15] = f_17
+    fun multiplyBy(other: Matrix44) {
+        val r00 = this.elements[0] * other.elements[0] + this.elements[1] * other.elements[4] + this.elements[2] * other.elements[8] + this.elements[3] * other.elements[12]
+        val r01 = this.elements[0] * other.elements[1] + this.elements[1] * other.elements[5] + this.elements[2] * other.elements[9] + this.elements[3] * other.elements[13]
+        val r02 = this.elements[0] * other.elements[2] + this.elements[1] * other.elements[6] + this.elements[2] * other.elements[10] + this.elements[3] * other.elements[14]
+        val r03 = this.elements[0] * other.elements[3] + this.elements[1] * other.elements[7] + this.elements[2] * other.elements[11] + this.elements[3] * other.elements[15]
+        val r10 = this.elements[4] * other.elements[0] + this.elements[5] * other.elements[4] + this.elements[6] * other.elements[8] + this.elements[7] * other.elements[12]
+        val r11 = this.elements[4] * other.elements[1] + this.elements[5] * other.elements[5] + this.elements[6] * other.elements[9] + this.elements[7] * other.elements[13]
+        val r12 = this.elements[4] * other.elements[2] + this.elements[5] * other.elements[6] + this.elements[6] * other.elements[10] + this.elements[7] * other.elements[14]
+        val r13 = this.elements[4] * other.elements[3] + this.elements[5] * other.elements[7] + this.elements[6] * other.elements[11] + this.elements[7] * other.elements[15]
+        val r20 = this.elements[8] * other.elements[0] + this.elements[9] * other.elements[4] + this.elements[10] * other.elements[8] + this.elements[11] * other.elements[12]
+        val r21 = this.elements[8] * other.elements[1] + this.elements[9] * other.elements[5] + this.elements[10] * other.elements[9] + this.elements[11] * other.elements[13]
+        val r22 = this.elements[8] * other.elements[2] + this.elements[9] * other.elements[6] + this.elements[10] * other.elements[10] + this.elements[11] * other.elements[14]
+        val r23 = this.elements[8] * other.elements[3] + this.elements[9] * other.elements[7] + this.elements[10] * other.elements[11] + this.elements[11] * other.elements[15]
+        val r30 = this.elements[12] * other.elements[0] + this.elements[13] * other.elements[4] + this.elements[14] * other.elements[8] + this.elements[15] * other.elements[12]
+        val r31 = this.elements[12] * other.elements[1] + this.elements[13] * other.elements[5] + this.elements[14] * other.elements[9] + this.elements[15] * other.elements[13]
+        val r32 = this.elements[12] * other.elements[2] + this.elements[13] * other.elements[6] + this.elements[14] * other.elements[10] + this.elements[15] * other.elements[14]
+        val r33 = this.elements[12] * other.elements[3] + this.elements[13] * other.elements[7] + this.elements[14] * other.elements[11] + this.elements[15] * other.elements[15]
+        this.elements[0] = r00
+        this.elements[1] = r01
+        this.elements[2] = r02
+        this.elements[3] = r03
+        this.elements[4] = r10
+        this.elements[5] = r11
+        this.elements[6] = r12
+        this.elements[7] = r13
+        this.elements[8] = r20
+        this.elements[9] = r21
+        this.elements[10] = r22
+        this.elements[11] = r23
+        this.elements[12] = r30
+        this.elements[13] = r31
+        this.elements[14] = r32
+        this.elements[15] = r33
     }
 
     fun invert() {
-        val f_1 = 1.0f / determinant()
-        val f_2 = (this.elements[5] * this.elements[10] * this.elements[15] - this.elements[5] * this.elements[11] * this.elements[14] - this.elements[6] * this.elements[9] * this.elements[15] + this.elements[6] * this.elements[11] * this.elements[13] + this.elements[7] * this.elements[9] * this.elements[14] - this.elements[7] * this.elements[10] * this.elements[13]) * f_1
-        val f_3 = (-this.elements[1] * this.elements[10] * this.elements[15] + this.elements[1] * this.elements[11] * this.elements[14] + this.elements[2] * this.elements[9] * this.elements[15] - this.elements[2] * this.elements[11] * this.elements[13] - this.elements[3] * this.elements[9] * this.elements[14] + this.elements[3] * this.elements[10] * this.elements[13]) * f_1
-        val f_4 = (this.elements[1] * this.elements[6] * this.elements[15] - this.elements[1] * this.elements[7] * this.elements[14] - this.elements[2] * this.elements[5] * this.elements[15] + this.elements[2] * this.elements[7] * this.elements[13] + this.elements[3] * this.elements[5] * this.elements[14] - this.elements[3] * this.elements[6] * this.elements[13]) * f_1
-        val f_5 = (-this.elements[1] * this.elements[6] * this.elements[11] + this.elements[1] * this.elements[7] * this.elements[10] + this.elements[2] * this.elements[5] * this.elements[11] - this.elements[2] * this.elements[7] * this.elements[9] - this.elements[3] * this.elements[5] * this.elements[10] + this.elements[3] * this.elements[6] * this.elements[9]) * f_1
-        val f_6 = (-this.elements[4] * this.elements[10] * this.elements[15] + this.elements[4] * this.elements[11] * this.elements[14] + this.elements[6] * this.elements[8] * this.elements[15] - this.elements[6] * this.elements[11] * this.elements[12] - this.elements[7] * this.elements[8] * this.elements[14] + this.elements[7] * this.elements[10] * this.elements[12]) * f_1
-        val f_7 = (this.elements[0] * this.elements[10] * this.elements[15] - this.elements[0] * this.elements[11] * this.elements[14] - this.elements[2] * this.elements[8] * this.elements[15] + this.elements[2] * this.elements[11] * this.elements[12] + this.elements[3] * this.elements[8] * this.elements[14] - this.elements[3] * this.elements[10] * this.elements[12]) * f_1
-        val f_8 = (-this.elements[0] * this.elements[6] * this.elements[15] + this.elements[0] * this.elements[7] * this.elements[14] + this.elements[2] * this.elements[4] * this.elements[15] - this.elements[2] * this.elements[7] * this.elements[12] - this.elements[3] * this.elements[4] * this.elements[14] + this.elements[3] * this.elements[6] * this.elements[12]) * f_1
-        val f_9 = (this.elements[0] * this.elements[6] * this.elements[11] - this.elements[0] * this.elements[7] * this.elements[10] - this.elements[2] * this.elements[4] * this.elements[11] + this.elements[2] * this.elements[7] * this.elements[8] + this.elements[3] * this.elements[4] * this.elements[10] - this.elements[3] * this.elements[6] * this.elements[8]) * f_1
-        val f_10 = (this.elements[4] * this.elements[9] * this.elements[15] - this.elements[4] * this.elements[11] * this.elements[13] - this.elements[5] * this.elements[8] * this.elements[15] + this.elements[5] * this.elements[11] * this.elements[12] + this.elements[7] * this.elements[8] * this.elements[13] - this.elements[7] * this.elements[9] * this.elements[12]) * f_1
-        val f_11 = (-this.elements[0] * this.elements[9] * this.elements[15] + this.elements[0] * this.elements[11] * this.elements[13] + this.elements[1] * this.elements[8] * this.elements[15] - this.elements[1] * this.elements[11] * this.elements[12] - this.elements[3] * this.elements[8] * this.elements[13] + this.elements[3] * this.elements[9] * this.elements[12]) * f_1
-        val f_12 = (this.elements[0] * this.elements[5] * this.elements[15] - this.elements[0] * this.elements[7] * this.elements[13] - this.elements[1] * this.elements[4] * this.elements[15] + this.elements[1] * this.elements[7] * this.elements[12] + this.elements[3] * this.elements[4] * this.elements[13] - this.elements[3] * this.elements[5] * this.elements[12]) * f_1
-        val f_13 = (-this.elements[0] * this.elements[5] * this.elements[11] + this.elements[0] * this.elements[7] * this.elements[9] + this.elements[1] * this.elements[4] * this.elements[11] - this.elements[1] * this.elements[7] * this.elements[8] - this.elements[3] * this.elements[4] * this.elements[9] + this.elements[3] * this.elements[5] * this.elements[8]) * f_1
-        val f_14 = (-this.elements[4] * this.elements[9] * this.elements[14] + this.elements[4] * this.elements[10] * this.elements[13] + this.elements[5] * this.elements[8] * this.elements[14] - this.elements[5] * this.elements[10] * this.elements[12] - this.elements[6] * this.elements[8] * this.elements[13] + this.elements[6] * this.elements[9] * this.elements[12]) * f_1
-        val f_15 = (this.elements[0] * this.elements[9] * this.elements[14] - this.elements[0] * this.elements[10] * this.elements[13] - this.elements[1] * this.elements[8] * this.elements[14] + this.elements[1] * this.elements[10] * this.elements[12] + this.elements[2] * this.elements[8] * this.elements[13] - this.elements[2] * this.elements[9] * this.elements[12]) * f_1
-        val f_16 = (-this.elements[0] * this.elements[5] * this.elements[14] + this.elements[0] * this.elements[6] * this.elements[13] + this.elements[1] * this.elements[4] * this.elements[14] - this.elements[1] * this.elements[6] * this.elements[12] - this.elements[2] * this.elements[4] * this.elements[13] + this.elements[2] * this.elements[5] * this.elements[12]) * f_1
-        val f_17 = (this.elements[0] * this.elements[5] * this.elements[10] - this.elements[0] * this.elements[6] * this.elements[9] - this.elements[1] * this.elements[4] * this.elements[10] + this.elements[1] * this.elements[6] * this.elements[8] + this.elements[2] * this.elements[4] * this.elements[9] - this.elements[2] * this.elements[5] * this.elements[8]) * f_1
-        this.elements[0] = f_2
-        this.elements[1] = f_3
-        this.elements[2] = f_4
-        this.elements[3] = f_5
-        this.elements[4] = f_6
-        this.elements[5] = f_7
-        this.elements[6] = f_8
-        this.elements[7] = f_9
-        this.elements[8] = f_10
-        this.elements[9] = f_11
-        this.elements[10] = f_12
-        this.elements[11] = f_13
-        this.elements[12] = f_14
-        this.elements[13] = f_15
-        this.elements[14] = f_16
-        this.elements[15] = f_17
+        val inverseDet = 1.0f / determinant()
+        val c00 = (this.elements[5] * this.elements[10] * this.elements[15] - this.elements[5] * this.elements[11] * this.elements[14] - this.elements[6] * this.elements[9] * this.elements[15] + this.elements[6] * this.elements[11] * this.elements[13] + this.elements[7] * this.elements[9] * this.elements[14] - this.elements[7] * this.elements[10] * this.elements[13]) * inverseDet
+        val c01 = (-this.elements[1] * this.elements[10] * this.elements[15] + this.elements[1] * this.elements[11] * this.elements[14] + this.elements[2] * this.elements[9] * this.elements[15] - this.elements[2] * this.elements[11] * this.elements[13] - this.elements[3] * this.elements[9] * this.elements[14] + this.elements[3] * this.elements[10] * this.elements[13]) * inverseDet
+        val c02 = (this.elements[1] * this.elements[6] * this.elements[15] - this.elements[1] * this.elements[7] * this.elements[14] - this.elements[2] * this.elements[5] * this.elements[15] + this.elements[2] * this.elements[7] * this.elements[13] + this.elements[3] * this.elements[5] * this.elements[14] - this.elements[3] * this.elements[6] * this.elements[13]) * inverseDet
+        val c03 = (-this.elements[1] * this.elements[6] * this.elements[11] + this.elements[1] * this.elements[7] * this.elements[10] + this.elements[2] * this.elements[5] * this.elements[11] - this.elements[2] * this.elements[7] * this.elements[9] - this.elements[3] * this.elements[5] * this.elements[10] + this.elements[3] * this.elements[6] * this.elements[9]) * inverseDet
+        val c10 = (-this.elements[4] * this.elements[10] * this.elements[15] + this.elements[4] * this.elements[11] * this.elements[14] + this.elements[6] * this.elements[8] * this.elements[15] - this.elements[6] * this.elements[11] * this.elements[12] - this.elements[7] * this.elements[8] * this.elements[14] + this.elements[7] * this.elements[10] * this.elements[12]) * inverseDet
+        val c11 = (this.elements[0] * this.elements[10] * this.elements[15] - this.elements[0] * this.elements[11] * this.elements[14] - this.elements[2] * this.elements[8] * this.elements[15] + this.elements[2] * this.elements[11] * this.elements[12] + this.elements[3] * this.elements[8] * this.elements[14] - this.elements[3] * this.elements[10] * this.elements[12]) * inverseDet
+        val c12 = (-this.elements[0] * this.elements[6] * this.elements[15] + this.elements[0] * this.elements[7] * this.elements[14] + this.elements[2] * this.elements[4] * this.elements[15] - this.elements[2] * this.elements[7] * this.elements[12] - this.elements[3] * this.elements[4] * this.elements[14] + this.elements[3] * this.elements[6] * this.elements[12]) * inverseDet
+        val c13 = (this.elements[0] * this.elements[6] * this.elements[11] - this.elements[0] * this.elements[7] * this.elements[10] - this.elements[2] * this.elements[4] * this.elements[11] + this.elements[2] * this.elements[7] * this.elements[8] + this.elements[3] * this.elements[4] * this.elements[10] - this.elements[3] * this.elements[6] * this.elements[8]) * inverseDet
+        val c20 = (this.elements[4] * this.elements[9] * this.elements[15] - this.elements[4] * this.elements[11] * this.elements[13] - this.elements[5] * this.elements[8] * this.elements[15] + this.elements[5] * this.elements[11] * this.elements[12] + this.elements[7] * this.elements[8] * this.elements[13] - this.elements[7] * this.elements[9] * this.elements[12]) * inverseDet
+        val c21 = (-this.elements[0] * this.elements[9] * this.elements[15] + this.elements[0] * this.elements[11] * this.elements[13] + this.elements[1] * this.elements[8] * this.elements[15] - this.elements[1] * this.elements[11] * this.elements[12] - this.elements[3] * this.elements[8] * this.elements[13] + this.elements[3] * this.elements[9] * this.elements[12]) * inverseDet
+        val c22 = (this.elements[0] * this.elements[5] * this.elements[15] - this.elements[0] * this.elements[7] * this.elements[13] - this.elements[1] * this.elements[4] * this.elements[15] + this.elements[1] * this.elements[7] * this.elements[12] + this.elements[3] * this.elements[4] * this.elements[13] - this.elements[3] * this.elements[5] * this.elements[12]) * inverseDet
+        val c23 = (-this.elements[0] * this.elements[5] * this.elements[11] + this.elements[0] * this.elements[7] * this.elements[9] + this.elements[1] * this.elements[4] * this.elements[11] - this.elements[1] * this.elements[7] * this.elements[8] - this.elements[3] * this.elements[4] * this.elements[9] + this.elements[3] * this.elements[5] * this.elements[8]) * inverseDet
+        val c30 = (-this.elements[4] * this.elements[9] * this.elements[14] + this.elements[4] * this.elements[10] * this.elements[13] + this.elements[5] * this.elements[8] * this.elements[14] - this.elements[5] * this.elements[10] * this.elements[12] - this.elements[6] * this.elements[8] * this.elements[13] + this.elements[6] * this.elements[9] * this.elements[12]) * inverseDet
+        val c31 = (this.elements[0] * this.elements[9] * this.elements[14] - this.elements[0] * this.elements[10] * this.elements[13] - this.elements[1] * this.elements[8] * this.elements[14] + this.elements[1] * this.elements[10] * this.elements[12] + this.elements[2] * this.elements[8] * this.elements[13] - this.elements[2] * this.elements[9] * this.elements[12]) * inverseDet
+        val c32 = (-this.elements[0] * this.elements[5] * this.elements[14] + this.elements[0] * this.elements[6] * this.elements[13] + this.elements[1] * this.elements[4] * this.elements[14] - this.elements[1] * this.elements[6] * this.elements[12] - this.elements[2] * this.elements[4] * this.elements[13] + this.elements[2] * this.elements[5] * this.elements[12]) * inverseDet
+        val c33 = (this.elements[0] * this.elements[5] * this.elements[10] - this.elements[0] * this.elements[6] * this.elements[9] - this.elements[1] * this.elements[4] * this.elements[10] + this.elements[1] * this.elements[6] * this.elements[8] + this.elements[2] * this.elements[4] * this.elements[9] - this.elements[2] * this.elements[5] * this.elements[8]) * inverseDet
+        this.elements[0] = c00
+        this.elements[1] = c01
+        this.elements[2] = c02
+        this.elements[3] = c03
+        this.elements[4] = c10
+        this.elements[5] = c11
+        this.elements[6] = c12
+        this.elements[7] = c13
+        this.elements[8] = c20
+        this.elements[9] = c21
+        this.elements[10] = c22
+        this.elements[11] = c23
+        this.elements[12] = c30
+        this.elements[13] = c31
+        this.elements[14] = c32
+        this.elements[15] = c33
     }
 
     fun setDiagonal(x: Float, y: Float, zNear: Float, zFar: Float) {
@@ -215,22 +215,22 @@ class Matrix44 {
         return this.elements[0] == 1.0f && this.elements[1] == 0.0f && this.elements[2] == 0.0f && this.elements[3] == 0.0f && this.elements[4] == 0.0f && this.elements[5] == 1.0f && this.elements[6] == 0.0f && this.elements[7] == 0.0f && this.elements[8] == 0.0f && this.elements[9] == 0.0f && this.elements[10] == 1.0f && this.elements[11] == 0.0f && this.elements[12] == 0.0f && this.elements[13] == 0.0f && this.elements[14] == 0.0f && this.elements[15] == 1.0f
     }
 
-    fun scale(scaleFaceA: Float, scaleFaceB: Float, scaleFaceC: Float, matrix: FloatArray) {
-        matrix[0] = this.elements[0] * scaleFaceA + this.elements[4] * scaleFaceB + this.elements[8] * scaleFaceC + this.elements[12]
-        matrix[1] = this.elements[1] * scaleFaceA + this.elements[5] * scaleFaceB + this.elements[9] * scaleFaceC + this.elements[13]
-        matrix[2] = this.elements[2] * scaleFaceA + this.elements[6] * scaleFaceB + this.elements[10] * scaleFaceC + this.elements[14]
-        if (matrix.size > 3) {
-            matrix[3] = this.elements[3] * scaleFaceA + this.elements[7] * scaleFaceB + this.elements[11] * scaleFaceC + this.elements[15]
+    fun scale(x: Float, y: Float, z: Float, output: FloatArray) {
+        output[0] = this.elements[0] * x + this.elements[4] * y + this.elements[8] * z + this.elements[12]
+        output[1] = this.elements[1] * x + this.elements[5] * y + this.elements[9] * z + this.elements[13]
+        output[2] = this.elements[2] * x + this.elements[6] * y + this.elements[10] * z + this.elements[14]
+        if (output.size > 3) {
+            output[3] = this.elements[3] * x + this.elements[7] * y + this.elements[11] * z + this.elements[15]
         }
     }
 
-    fun transformPoint(floats_1: FloatArray) {
-        val f_2 = floats_1[0]
-        val f_3 = floats_1[1]
-        val f_4 = floats_1[2]
-        floats_1[0] = this.elements[0] * f_2 + this.elements[4] * f_3 + this.elements[8] * f_4 + this.elements[12]
-        floats_1[1] = this.elements[1] * f_2 + this.elements[5] * f_3 + this.elements[9] * f_4 + this.elements[13]
-        floats_1[2] = this.elements[2] * f_2 + this.elements[6] * f_3 + this.elements[10] * f_4 + this.elements[14]
+    fun transformPoint(point: FloatArray) {
+        val x = point[0]
+        val y = point[1]
+        val z = point[2]
+        point[0] = this.elements[0] * x + this.elements[4] * y + this.elements[8] * z + this.elements[12]
+        point[1] = this.elements[1] * x + this.elements[5] * y + this.elements[9] * z + this.elements[13]
+        point[2] = this.elements[2] * x + this.elements[6] * y + this.elements[10] * z + this.elements[14]
     }
 
     fun setOrtho(x: Float, width: Float, y: Float, height: Float, viewRangeStart: Float, viewRangeEnd: Float) {
@@ -252,13 +252,13 @@ class Matrix44 {
         this.elements[15] = 1.0f
     }
 
-    fun setPerspective(centerX: Float, centerY: Float, f_3: Float, f_4: Float, viewRangeStart: Float, viewRangeEnd: Float, width: Float, height: Float) {
-        this.elements[0] = f_3 * 2.0f / width
+    fun setPerspective(centerX: Float, centerY: Float, focalX: Float, focalY: Float, viewRangeStart: Float, viewRangeEnd: Float, width: Float, height: Float) {
+        this.elements[0] = focalX * 2.0f / width
         this.elements[1] = 0.0f
         this.elements[2] = 0.0f
         this.elements[3] = 0.0f
         this.elements[4] = 0.0f
-        this.elements[5] = f_4 * 2.0f / height
+        this.elements[5] = focalY * 2.0f / height
         this.elements[6] = 0.0f
         this.elements[7] = 0.0f
         this.elements[8] = 2.0f * centerX / width - 1.0f
@@ -271,84 +271,84 @@ class Matrix44 {
         this.elements[15] = 0.0f
     }
 
-    fun setPerspectiveFromViewport(f_1: Float, f_2: Float, f_3: Float, f_4: Float, viewRangeStart: Float, viewRangeEnd: Float, f_7: Float, f_8: Float, f_9: Float) {
-        setOrtho(-(f_1 * f_9) / f_3, f_9 * (f_7 - f_1) / f_3, -(f_2 * f_9) / f_4, f_9 * (f_8 - f_2) / f_4, viewRangeStart, viewRangeEnd)
+    fun setPerspectiveFromViewport(originX: Float, originY: Float, focalX: Float, focalY: Float, viewRangeStart: Float, viewRangeEnd: Float, viewportWidth: Float, viewportHeight: Float, scale: Float) {
+        setOrtho(-(originX * scale) / focalX, scale * (viewportWidth - originX) / focalX, -(originY * scale) / focalY, scale * (viewportHeight - originY) / focalY, viewRangeStart, viewRangeEnd)
     }
 
     fun getNearClipDistance(): Float {
         return -(this.elements[15] + this.elements[14]) / (this.elements[11] + this.elements[10])
     }
 
-    fun extractRotationInto(floats_1: FloatArray): FloatArray {
-        System.arraycopy(this.elements, 0, floats_1, 0, 16)
-        floats_1[3] = 0.0f
-        floats_1[7] = 0.0f
-        floats_1[11] = 0.0f
-        floats_1[12] = 0.0f
-        floats_1[13] = 0.0f
-        floats_1[14] = 0.0f
-        floats_1[15] = 1.0f
-        return floats_1
+    fun extractRotationInto(output: FloatArray): FloatArray {
+        System.arraycopy(this.elements, 0, output, 0, 16)
+        output[3] = 0.0f
+        output[7] = 0.0f
+        output[11] = 0.0f
+        output[12] = 0.0f
+        output[13] = 0.0f
+        output[14] = 0.0f
+        output[15] = 1.0f
+        return output
     }
 
-    fun extractLeftPlane(floats_1: FloatArray): FloatArray {
-        val f_2 = this.elements[3] + this.elements[0]
-        val f_3 = this.elements[7] + this.elements[4]
-        val f_4 = this.elements[11] + this.elements[8]
-        val d_5 = sqrt(f_2 * f_2 + f_3 * f_3 + f_4 * f_4)
-        floats_1[0] = (f_2 / d_5).toFloat()
-        floats_1[1] = (f_3 / d_5).toFloat()
-        floats_1[2] = (f_4 / d_5).toFloat()
-        floats_1[3] = ((this.elements[15] + this.elements[12]) / d_5).toFloat()
-        return floats_1
+    fun extractLeftPlane(plane: FloatArray): FloatArray {
+        val nx = this.elements[3] + this.elements[0]
+        val ny = this.elements[7] + this.elements[4]
+        val nz = this.elements[11] + this.elements[8]
+        val length = sqrt(nx * nx + ny * ny + nz * nz)
+        plane[0] = (nx / length).toFloat()
+        plane[1] = (ny / length).toFloat()
+        plane[2] = (nz / length).toFloat()
+        plane[3] = ((this.elements[15] + this.elements[12]) / length).toFloat()
+        return plane
     }
 
-    fun extractRightPlane(floats_1: FloatArray): FloatArray {
-        val f_2 = this.elements[3] - this.elements[0]
-        val f_3 = this.elements[7] - this.elements[4]
-        val f_4 = this.elements[11] - this.elements[8]
-        val d_5 = sqrt(f_2 * f_2 + f_3 * f_3 + f_4 * f_4)
-        floats_1[0] = (f_2 / d_5).toFloat()
-        floats_1[1] = (f_3 / d_5).toFloat()
-        floats_1[2] = (f_4 / d_5).toFloat()
-        floats_1[3] = ((this.elements[15] - this.elements[12]) / d_5).toFloat()
-        return floats_1
+    fun extractRightPlane(plane: FloatArray): FloatArray {
+        val nx = this.elements[3] - this.elements[0]
+        val ny = this.elements[7] - this.elements[4]
+        val nz = this.elements[11] - this.elements[8]
+        val length = sqrt(nx * nx + ny * ny + nz * nz)
+        plane[0] = (nx / length).toFloat()
+        plane[1] = (ny / length).toFloat()
+        plane[2] = (nz / length).toFloat()
+        plane[3] = ((this.elements[15] - this.elements[12]) / length).toFloat()
+        return plane
     }
 
-    fun extractTopPlane(floats_1: FloatArray): FloatArray {
-        val f_2 = this.elements[3] - this.elements[1]
-        val f_3 = this.elements[7] - this.elements[5]
-        val f_4 = this.elements[11] - this.elements[9]
-        val d_5 = sqrt(f_2 * f_2 + f_3 * f_3 + f_4 * f_4)
-        floats_1[0] = (f_2 / d_5).toFloat()
-        floats_1[1] = (f_3 / d_5).toFloat()
-        floats_1[2] = (f_4 / d_5).toFloat()
-        floats_1[3] = ((this.elements[15] - this.elements[13]) / d_5).toFloat()
-        return floats_1
+    fun extractTopPlane(plane: FloatArray): FloatArray {
+        val nx = this.elements[3] - this.elements[1]
+        val ny = this.elements[7] - this.elements[5]
+        val nz = this.elements[11] - this.elements[9]
+        val length = sqrt(nx * nx + ny * ny + nz * nz)
+        plane[0] = (nx / length).toFloat()
+        plane[1] = (ny / length).toFloat()
+        plane[2] = (nz / length).toFloat()
+        plane[3] = ((this.elements[15] - this.elements[13]) / length).toFloat()
+        return plane
     }
 
-    fun extractNearPlane(floats_1: FloatArray): FloatArray {
-        val f_2 = this.elements[3] + this.elements[2]
-        val f_3 = this.elements[7] + this.elements[6]
-        val f_4 = this.elements[11] + this.elements[10]
-        val d_5 = sqrt(f_2 * f_2 + f_3 * f_3 + f_4 * f_4)
-        floats_1[0] = (f_2 / d_5).toFloat()
-        floats_1[1] = (f_3 / d_5).toFloat()
-        floats_1[2] = (f_4 / d_5).toFloat()
-        floats_1[3] = ((this.elements[15] + this.elements[14]) / d_5).toFloat()
-        return floats_1
+    fun extractNearPlane(plane: FloatArray): FloatArray {
+        val nx = this.elements[3] + this.elements[2]
+        val ny = this.elements[7] + this.elements[6]
+        val nz = this.elements[11] + this.elements[10]
+        val length = sqrt(nx * nx + ny * ny + nz * nz)
+        plane[0] = (nx / length).toFloat()
+        plane[1] = (ny / length).toFloat()
+        plane[2] = (nz / length).toFloat()
+        plane[3] = ((this.elements[15] + this.elements[14]) / length).toFloat()
+        return plane
     }
 
-    fun extractFarPlane(floats_1: FloatArray): FloatArray {
-        val f_2 = this.elements[3] - this.elements[2]
-        val f_3 = this.elements[7] - this.elements[6]
-        val f_4 = this.elements[11] - this.elements[10]
-        val d_5 = sqrt(f_2 * f_2 + f_3 * f_3 + f_4 * f_4)
-        floats_1[0] = (f_2 / d_5).toFloat()
-        floats_1[1] = (f_3 / d_5).toFloat()
-        floats_1[2] = (f_4 / d_5).toFloat()
-        floats_1[3] = ((this.elements[15] - this.elements[14]) / d_5).toFloat()
-        return floats_1
+    fun extractFarPlane(plane: FloatArray): FloatArray {
+        val nx = this.elements[3] - this.elements[2]
+        val ny = this.elements[7] - this.elements[6]
+        val nz = this.elements[11] - this.elements[10]
+        val length = sqrt(nx * nx + ny * ny + nz * nz)
+        plane[0] = (nx / length).toFloat()
+        plane[1] = (ny / length).toFloat()
+        plane[2] = (nz / length).toFloat()
+        plane[3] = ((this.elements[15] - this.elements[14]) / length).toFloat()
+        return plane
     }
 
     fun copy3x3NearMatrixInto(matrix: FloatArray): FloatArray {
@@ -405,59 +405,59 @@ class Matrix44 {
         return copyInto
     }
 
-    fun setRotatedTranslation(rotation: Int, i_2: Int, i_3: Int, f_4: Float, f_5: Float, f_6: Float) {
-        var floats_9: FloatArray
-        var floats_10: FloatArray
-        var floats_11: FloatArray
-        var floats_12: FloatArray
-        var floats_13: FloatArray
+    fun setRotatedTranslation(rotation: Int, scaleX: Int, scaleY: Int, translateX: Float, translateY: Float, translateZ: Float) {
+        var elementsRef: FloatArray
+        var elementsRef2: FloatArray
+        var elementsRef3: FloatArray
+        var elementsRef4: FloatArray
+        var elementsRef5: FloatArray
         if (rotation != 0) {
-            val f_7 = MatrixRotations.COS[rotation and 0x3fff]
-            val f_8 = MatrixRotations.SIN[rotation and 0x3fff]
-            this.elements[0] = f_7 * i_2
-            this.elements[5] = f_7 * i_3
-            this.elements[1] = f_8 * i_2
-            this.elements[4] = -f_8 * i_3
+            val cosAngle = MatrixRotations.COS[rotation and 0x3fff]
+            val sinAngle = MatrixRotations.SIN[rotation and 0x3fff]
+            this.elements[0] = cosAngle * scaleX
+            this.elements[5] = cosAngle * scaleY
+            this.elements[1] = sinAngle * scaleX
+            this.elements[4] = -sinAngle * scaleY
             this.elements[10] = 1.0f
-            floats_9 = this.elements
-            floats_10 = this.elements
-            floats_11 = this.elements
+            elementsRef = this.elements
+            elementsRef2 = this.elements
+            elementsRef3 = this.elements
             this.elements[9] = 0.0f
-            floats_11[8] = 0.0f
-            floats_10[6] = 0.0f
-            floats_9[2] = 0.0f
+            elementsRef3[8] = 0.0f
+            elementsRef2[6] = 0.0f
+            elementsRef[2] = 0.0f
         } else {
-            this.elements[0] = i_2.toFloat()
-            this.elements[5] = i_3.toFloat()
+            this.elements[0] = scaleX.toFloat()
+            this.elements[5] = scaleY.toFloat()
             this.elements[10] = 1.0f
-            floats_12 = this.elements
-            floats_13 = this.elements
-            floats_9 = this.elements
-            floats_10 = this.elements
-            floats_11 = this.elements
+            elementsRef4 = this.elements
+            elementsRef5 = this.elements
+            elementsRef = this.elements
+            elementsRef2 = this.elements
+            elementsRef3 = this.elements
             this.elements[9] = 0.0f
-            floats_11[8] = 0.0f
-            floats_10[6] = 0.0f
-            floats_9[4] = 0.0f
-            floats_13[2] = 0.0f
-            floats_12[1] = 0.0f
+            elementsRef3[8] = 0.0f
+            elementsRef2[6] = 0.0f
+            elementsRef[4] = 0.0f
+            elementsRef5[2] = 0.0f
+            elementsRef4[1] = 0.0f
         }
 
-        floats_12 = this.elements
-        floats_13 = this.elements
+        elementsRef4 = this.elements
+        elementsRef5 = this.elements
         this.elements[11] = 0.0f
-        floats_13[7] = 0.0f
-        floats_12[3] = 0.0f
+        elementsRef5[7] = 0.0f
+        elementsRef4[3] = 0.0f
         this.elements[15] = 1.0f
-        this.elements[12] = f_4
-        this.elements[13] = f_5
-        this.elements[14] = f_6
+        this.elements[12] = translateX
+        this.elements[13] = translateY
+        this.elements[14] = translateZ
     }
 
     override fun hashCode(): Int {
-        val b_1 = 1
-        val i_2 = 31 * b_1 + elements.contentHashCode()
-        return i_2
+        val prime = 1
+        val result = 31 * prime + elements.contentHashCode()
+        return result
     }
 
     fun getComponentsXY(matrixXY: FloatArray): FloatArray {
@@ -525,12 +525,12 @@ class Matrix44 {
 
     override fun toString(): String {
         val stringBuilder = StringBuilder()
-        for (x in 0 until 4) {
-            for (y in 0 until 4) {
-                if (y > 0) {
+        for (row in 0 until 4) {
+            for (col in 0 until 4) {
+                if (col > 0) {
                     stringBuilder.append("\t")
                 }
-                stringBuilder.append(this.elements[y + x * 4])
+                stringBuilder.append(this.elements[col + row * 4])
             }
             stringBuilder.append("\n")
         }
@@ -557,24 +557,24 @@ class Matrix44 {
         return this.elements[0] * this.elements[5] * this.elements[10] * this.elements[15] - this.elements[0] * this.elements[5] * this.elements[11] * this.elements[14] - this.elements[0] * this.elements[6] * this.elements[9] * this.elements[15] + this.elements[0] * this.elements[6] * this.elements[11] * this.elements[13] + this.elements[0] * this.elements[7] * this.elements[9] * this.elements[14] - this.elements[0] * this.elements[7] * this.elements[10] * this.elements[13] - this.elements[1] * this.elements[4] * this.elements[10] * this.elements[15] + this.elements[1] * this.elements[4] * this.elements[11] * this.elements[14] + this.elements[1] * this.elements[6] * this.elements[8] * this.elements[15] - this.elements[1] * this.elements[6] * this.elements[11] * this.elements[12] - this.elements[1] * this.elements[7] * this.elements[8] * this.elements[14] + this.elements[1] * this.elements[7] * this.elements[10] * this.elements[12] + this.elements[2] * this.elements[4] * this.elements[9] * this.elements[15] - this.elements[2] * this.elements[4] * this.elements[11] * this.elements[13] - this.elements[2] * this.elements[5] * this.elements[8] * this.elements[15] + this.elements[2] * this.elements[5] * this.elements[11] * this.elements[12] + this.elements[2] * this.elements[7] * this.elements[8] * this.elements[13] - this.elements[2] * this.elements[7] * this.elements[9] * this.elements[12] - this.elements[3] * this.elements[4] * this.elements[9] * this.elements[14] + this.elements[3] * this.elements[4] * this.elements[10] * this.elements[13] + this.elements[3] * this.elements[5] * this.elements[8] * this.elements[14] - this.elements[3] * this.elements[5] * this.elements[10] * this.elements[12] - this.elements[3] * this.elements[6] * this.elements[8] * this.elements[13] + this.elements[3] * this.elements[6] * this.elements[9] * this.elements[12]
     }
 
-    fun extractBottomPlane(floats_1: FloatArray): FloatArray {
-        val f_2 = this.elements[3] + this.elements[1]
-        val f_3 = this.elements[7] + this.elements[5]
-        val f_4 = this.elements[11] + this.elements[9]
-        val d_5 = sqrt(f_2 * f_2 + f_3 * f_3 + f_4 * f_4)
-        floats_1[0] = (f_2 / d_5).toFloat()
-        floats_1[1] = (f_3 / d_5).toFloat()
-        floats_1[2] = (f_4 / d_5).toFloat()
-        floats_1[3] = ((this.elements[15] + this.elements[13]) / d_5).toFloat()
-        return floats_1
+    fun extractBottomPlane(plane: FloatArray): FloatArray {
+        val nx = this.elements[3] + this.elements[1]
+        val ny = this.elements[7] + this.elements[5]
+        val nz = this.elements[11] + this.elements[9]
+        val length = sqrt(nx * nx + ny * ny + nz * nz)
+        plane[0] = (nx / length).toFloat()
+        plane[1] = (ny / length).toFloat()
+        plane[2] = (nz / length).toFloat()
+        plane[3] = ((this.elements[15] + this.elements[13]) / length).toFloat()
+        return plane
     }
 
-    fun multiply(multiplierA: Float, multiplierB: Float, multiplierC: Float, maxtrix: FloatArray) {
-        maxtrix[0] = this.elements[0] * multiplierA + this.elements[4] * multiplierB + this.elements[8] * multiplierC
-        maxtrix[1] = this.elements[1] * multiplierA + this.elements[5] * multiplierB + this.elements[9] * multiplierC
-        maxtrix[2] = this.elements[2] * multiplierA + this.elements[6] * multiplierB + this.elements[10] * multiplierC
-        if (maxtrix.size > 3) {
-            maxtrix[3] = this.elements[3] * multiplierA + this.elements[7] * multiplierB + this.elements[11] * multiplierC
+    fun multiply(x: Float, y: Float, z: Float, output: FloatArray) {
+        output[0] = this.elements[0] * x + this.elements[4] * y + this.elements[8] * z
+        output[1] = this.elements[1] * x + this.elements[5] * y + this.elements[9] * z
+        output[2] = this.elements[2] * x + this.elements[6] * y + this.elements[10] * z
+        if (output.size > 3) {
+            output[3] = this.elements[3] * x + this.elements[7] * y + this.elements[11] * z
         }
     }
 }
