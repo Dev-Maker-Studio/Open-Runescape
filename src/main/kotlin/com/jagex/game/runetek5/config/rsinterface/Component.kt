@@ -221,12 +221,12 @@ class Component {
         }
 
         @JvmStatic
-        fun getDepthChild(icomponentdefinitions0: Component): Component? {
-            var icomponentdefinitions2 = Client.getDragTarget(icomponentdefinitions0)
-            if (icomponentdefinitions2 == null) {
-                icomponentdefinitions2 = icomponentdefinitions0.depthChildOverride
+        fun getDepthChild(component: Component): Component? {
+            var depthChild = Client.getDragTarget(component)
+            if (depthChild == null) {
+                depthChild = component.depthChildOverride
             }
-            return icomponentdefinitions2
+            return depthChild
         }
 
         @JvmStatic
@@ -250,23 +250,23 @@ class Component {
         }
 
         @JvmStatic
-        fun drawInterface(i_0: Int, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
-            if (!Interface.interfaceLoaded(i_0, null)) {
-                if (i_7 != -1) {
-                    Client.IS_COMPONENT_ON_TOP[i_7] = true
+        fun drawInterface(interfaceId: Int, startX: Int, startY: Int, endX: Int, endY: Int, offsetX: Int, offsetY: Int, layerIndex: Int) {
+            if (!Interface.interfaceLoaded(interfaceId, null)) {
+                if (layerIndex != -1) {
+                    Client.IS_COMPONENT_ON_TOP[layerIndex] = true
                 } else {
-                    for (i_9 in 0 until 107) {
-                        Client.IS_COMPONENT_ON_TOP[i_9] = true
+                    for (componentIndex in 0 until 107) {
+                        Client.IS_COMPONENT_ON_TOP[componentIndex] = true
                     }
                 }
             } else {
-                InterfaceComponentRenderer.drawComponents(Interface.INTERFACES!![i_0]!!.getComponents(), -1, i_1, i_2, i_3, i_4, i_5, i_6, i_7, i_7 < 0)
+                InterfaceComponentRenderer.drawComponents(Interface.INTERFACES!![interfaceId]!!.getComponents(), -1, startX, startY, endX, endY, offsetX, offsetY, layerIndex, layerIndex < 0)
             }
         }
 
         @JvmStatic
-        fun updateEntityLayout(interface0: Interface, icomponentdefinitions1: Component, bool2: Boolean) {
-            InterfaceComponentRenderer.updateEntityOnInterface(interface0.components!!, icomponentdefinitions1, bool2)
+        fun updateEntityLayout(rsInterface: Interface, component: Component, updateLayout: Boolean) {
+            InterfaceComponentRenderer.updateEntityOnInterface(rsInterface.components!!, component, updateLayout)
         }
 
         @JvmStatic
@@ -283,8 +283,8 @@ class Component {
         }
 
         @JvmStatic
-        fun resetCache(i_0: Int) {
-            Interface.preferenceMask = i_0
+        fun resetCache(preferenceMask: Int) {
+            Interface.preferenceMask = preferenceMask
             MODEL_CACHE.reset()
         }
 
@@ -1008,9 +1008,9 @@ class Component {
     }
 
     fun decode(buffer: Packet) {
-        var i_3 = buffer.readUByte()
-        if (i_3 == 255) {
-            i_3 = -1
+        var formatVersion = buffer.readUByte()
+        if (formatVersion == 255) {
+            formatVersion = -1
         }
         var typeId = buffer.readUByte()
         if ((typeId and 0x80) != 0) {
@@ -1035,13 +1035,13 @@ class Component {
         }
         val interationMask = buffer.readUByte()
         this.hidden = (interationMask and 0x1) != 0
-        if (i_3 >= 0) {
+        if (formatVersion >= 0) {
             this.preventClickThrough = (interationMask and 0x2) != 0
         }
         if (this.type == ComponentType.CONTAINER) {
             this.scrollWidth = buffer.readUShort()
             this.scrollHeight = buffer.readUShort()
-            if (i_3 < 0) {
+            if (formatVersion < 0) {
                 this.preventClickThrough = buffer.readUByte() == 1
             }
         }
@@ -1057,19 +1057,19 @@ class Component {
             this.flipVertical = buffer.readUByte() == 1
             this.flipHorizontal = buffer.readUByte() == 1
             this.color = buffer.readInt()
-            if (i_3 >= 3) {
+            if (formatVersion >= 3) {
                 this.clickMask = buffer.readUByte() == 1
             }
         }
         if (this.type == ComponentType.MODEL) {
             this.mediaType = MediaType.RAW_MODEL
             this.primaryMediaId = buffer.readBigSmart()
-            val flag2 = buffer.readUByte()
-            val bool6 = (flag2 and 0x1) == 1
-            this.hasOrigin = (flag2 and 0x2) == 2
-            this.usesOrthogonal = (flag2 and 0x4) == 4
-            this.priorityRender = (flag2 and 0x8) == 8
-            if (bool6) {
+            val modelFlags = buffer.readUByte()
+            val hasTransform = (modelFlags and 0x1) == 1
+            this.hasOrigin = (modelFlags and 0x2) == 2
+            this.usesOrthogonal = (modelFlags and 0x4) == 4
+            this.priorityRender = (modelFlags and 0x8) == 8
+            if (hasTransform) {
                 this.originX = buffer.readShort()
                 this.originY = buffer.readShort()
                 this.spritePitch = buffer.readUShort()
@@ -1095,7 +1095,7 @@ class Component {
         }
         if (this.type == ComponentType.TEXT) {
             this.fontId = buffer.readBigSmart()
-            if (i_3 >= 2) {
+            if (formatVersion >= 2) {
                 this.monospaced = buffer.readUByte() == 1
             }
             this.text = buffer.readString()
@@ -1110,7 +1110,7 @@ class Component {
             this.shadow = buffer.readUByte() == 1
             this.color = buffer.readInt()
             this.transparency = buffer.readUByte()
-            if (i_3 >= 0) {
+            if (formatVersion >= 0) {
                 this.maxTextLines = buffer.readUByte()
             }
         }
@@ -1125,60 +1125,60 @@ class Component {
             this.lineDirection = buffer.readUByte() == 1
         }
         val optionMask = buffer.readUMedium()
-        var i_16 = buffer.readUByte()
-        var i_7: Int
-        if (i_16 != 0) {
+        var keyTriggerData = buffer.readUByte()
+        var decodeTempInt: Int
+        if (keyTriggerData != 0) {
             this.keyTriggeringAction = Array(11) { ByteArray(0) }
             this.keyTriggerParams = Array(11) { ByteArray(0) }
             this.cycleSteps = IntArray(11)
             this.keyCharCodes = IntArray(11)
-            while (i_16 != 0) {
-                i_7 = (i_16 shr 4) - 1
-                i_16 = i_16 shl 8 or buffer.readUByte()
-                i_16 = i_16 and 0xfff
-                if (i_16 == 4095) {
-                    i_16 = -1
+            while (keyTriggerData != 0) {
+                decodeTempInt = (keyTriggerData shr 4) - 1
+                keyTriggerData = keyTriggerData shl 8 or buffer.readUByte()
+                keyTriggerData = keyTriggerData and 0xfff
+                if (keyTriggerData == 4095) {
+                    keyTriggerData = -1
                 }
-                val b_8 = buffer.readByte()
-                if (b_8.toInt() != 0) {
+                val triggerAction = buffer.readByte()
+                if (triggerAction.toInt() != 0) {
                     this.hasInteraction = true
                 }
-                val b_9 = buffer.readByte()
-                this.cycleSteps!![i_7] = i_16
-                this.keyTriggeringAction!![i_7] = byteArrayOf(b_8)
-                this.keyTriggerParams!![i_7] = byteArrayOf(b_9)
-                i_16 = buffer.readUByte()
+                val triggerParam = buffer.readByte()
+                this.cycleSteps!![decodeTempInt] = keyTriggerData
+                this.keyTriggeringAction!![decodeTempInt] = byteArrayOf(triggerAction)
+                this.keyTriggerParams!![decodeTempInt] = byteArrayOf(triggerParam)
+                keyTriggerData = buffer.readUByte()
             }
         }
         this.opBase = buffer.readString()
         if (Loader.DEBUG_IF_OPS)
             this.opBase += "(opBase)"
-        i_7 = buffer.readUByte()
-        val i_17 = i_7 and 0xf
-        val i_18 = i_7 shr 4
-        var i_10: Int
-        if (i_17 > 0) {
-            this.options = Array(i_17) { "" }
-            i_10 = 0
-            while (i_10 < i_17) {
-                this.options!![i_10] = buffer.readString()
-                i_10++
+        decodeTempInt = buffer.readUByte()
+        val optionCount = decodeTempInt and 0xf
+        val cursorCount = decodeTempInt shr 4
+        var tempIndex: Int
+        if (optionCount > 0) {
+            this.options = Array(optionCount) { "" }
+            tempIndex = 0
+            while (tempIndex < optionCount) {
+                this.options!![tempIndex] = buffer.readString()
+                tempIndex++
             }
         }
-        var i_11: Int
-        if (i_18 > 0) {
-            i_10 = buffer.readUByte()
-            this.opCursors = IntArray(i_10 + 1)
-            i_11 = 0
-            while (i_11 < this.opCursors!!.size) {
-                this.opCursors!![i_11] = -1
-                i_11++
+        var paramCount: Int
+        if (cursorCount > 0) {
+            tempIndex = buffer.readUByte()
+            this.opCursors = IntArray(tempIndex + 1)
+            paramCount = 0
+            while (paramCount < this.opCursors!!.size) {
+                this.opCursors!![paramCount] = -1
+                paramCount++
             }
-            this.opCursors!![i_10] = buffer.readUShort()
+            this.opCursors!![tempIndex] = buffer.readUShort()
         }
-        if (i_18 > 1) {
-            i_10 = buffer.readUByte()
-            this.opCursors!![i_10] = buffer.readUShort()
+        if (cursorCount > 1) {
+            tempIndex = buffer.readUByte()
+            this.opCursors!![tempIndex] = buffer.readUShort()
         }
         this.resumeText = buffer.readString()
         if (Loader.DEBUG_IF_OPS)
@@ -1192,11 +1192,11 @@ class Component {
         this.targetVerb = buffer.readString()
         if (Loader.DEBUG_IF_OPS)
             this.targetVerb += "(targetVerb)"
-        i_10 = -1
+        tempIndex = -1
         if (getUseOptionFlags(optionMask) != 0) {
-            i_10 = buffer.readUShort()
-            if (i_10 == 65535) {
-                i_10 = -1
+            tempIndex = buffer.readUShort()
+            if (tempIndex == 65535) {
+                tempIndex = -1
             }
             this.targetOverCursor = buffer.readUShort()
             if (this.targetOverCursor == 65535) {
@@ -1207,32 +1207,32 @@ class Component {
                 this.targetLeaveCursor = -1
             }
         }
-        if (i_3 >= 0) {
+        if (formatVersion >= 0) {
             this.moveOverCursor = buffer.readUShort()
             if (this.moveOverCursor == 65535) {
                 this.moveOverCursor = -1
             }
         }
-        this.targetParams = IFEvents(optionMask, i_10)
-        if (i_3 >= 0) {
-            i_11 = buffer.readUByte()
-            var i_12: Int
-            var i_13: Int
-            var i_14: Int
-            i_12 = 0
-            while (i_12 < i_11) {
-                i_13 = buffer.readUMedium()
-                i_14 = buffer.readInt()
-                this.clientParams!!.put(IntNode(i_14), i_13.toLong())
-                i_12++
+        this.targetParams = IFEvents(optionMask, tempIndex)
+        if (formatVersion >= 0) {
+            paramCount = buffer.readUByte()
+            var paramIndex: Int
+            var paramKey: Int
+            var paramValue: Int
+            paramIndex = 0
+            while (paramIndex < paramCount) {
+                paramKey = buffer.readUMedium()
+                paramValue = buffer.readInt()
+                this.clientParams!!.put(IntNode(paramValue), paramKey.toLong())
+                paramIndex++
             }
-            i_12 = buffer.readUByte()
-            i_13 = 0
-            while (i_13 < i_12) {
-                i_14 = buffer.readUMedium()
-                val string_15 = buffer.readJagString()
-                this.clientParams!!.put(ObjectNode(string_15), i_14.toLong())
-                i_13++
+            paramIndex = buffer.readUByte()
+            paramKey = 0
+            while (paramKey < paramIndex) {
+                paramValue = buffer.readUMedium()
+                val paramString = buffer.readJagString()
+                this.clientParams!!.put(ObjectNode(paramString), paramValue.toLong())
+                paramKey++
             }
         }
         this.onLoadScript = decodeScript(buffer)
@@ -1245,7 +1245,7 @@ class Component {
         this.onStatTransmit = decodeScript(buffer)
         this.onTimer = decodeScript(buffer)
         this.params = decodeScript(buffer)
-        if (i_3 >= 0) {
+        if (formatVersion >= 0) {
             this.onTargetLeave = decodeScript(buffer)
         }
         this.popupScript = decodeScript(buffer)
@@ -1340,11 +1340,11 @@ class Component {
         if (count == 0) {
             return null
         }
-        val ints_4 = IntArray(count)
-        for (i_5 in 0 until count) {
-            ints_4[i_5] = buffer.readInt()
+        val values = IntArray(count)
+        for (valueIndex in 0 until count) {
+            values[valueIndex] = buffer.readInt()
         }
-        return ints_4
+        return values
     }
 
     fun cycleParticles(toolkit: AbstractToolkit, model: Model, matrix4x4: Matrix43, cycle: Int) {
@@ -1370,54 +1370,54 @@ class Component {
         this.options!![index] = optionName
     }
 
-    fun removeParam(i_1: Int) {
+    fun removeParam(paramKey: Int) {
         if (this.clientParams != null) {
-            val node3 = this.clientParams!!.get(i_1.toLong())
-            node3?.unlink()
+            val existingNode = this.clientParams!!.get(paramKey.toLong())
+            existingNode?.unlink()
         }
     }
 
-    fun getIntParam(i_1: Int, i_2: Int): Int {
+    fun getIntParam(paramKey: Int, defaultValue: Int): Int {
         return if (this.clientParams == null) {
-            i_2
+            defaultValue
         } else {
-            val class282Sub384 = this.clientParams!!.get(i_1.toLong()) as? IntNode
-            if (class282Sub384 == null) i_2 else class282Sub384.value
+            val intNode = this.clientParams!!.get(paramKey.toLong()) as? IntNode
+            if (intNode == null) defaultValue else intNode.value
         }
     }
 
-    fun getStringParam(i_1: Int, string_2: String): String {
+    fun getStringParam(paramKey: Int, defaultValue: String): String {
         if (this.clientParams == null) {
-            return string_2
+            return defaultValue
         }
-        val class282Sub474 = this.clientParams!!.get(i_1.toLong()) as? ObjectNode
-        return if (class282Sub474 == null) string_2 else class282Sub474.value as String
+        val objectNode = this.clientParams!!.get(paramKey.toLong()) as? ObjectNode
+        return if (objectNode == null) defaultValue else objectNode.value as String
     }
 
-    fun setIntParam(i_1: Int, i_2: Int) {
+    fun setIntParam(paramKey: Int, paramValue: Int) {
         if (this.clientParams == null) {
             this.clientParams = IterableNodeMap(16)
-            this.clientParams!!.put(IntNode(i_2), i_1.toLong())
+            this.clientParams!!.put(IntNode(paramValue), paramKey.toLong())
         } else {
-            val class282Sub384 = this.clientParams!!.get(i_1.toLong()) as? IntNode
-            if (class282Sub384 == null) {
-                this.clientParams!!.put(IntNode(i_2), i_1.toLong())
+            val existingNode = this.clientParams!!.get(paramKey.toLong()) as? IntNode
+            if (existingNode == null) {
+                this.clientParams!!.put(IntNode(paramValue), paramKey.toLong())
             } else {
-                class282Sub384.value = i_2
+                existingNode.value = paramValue
             }
         }
     }
 
-    fun setStringParam(i_1: Int, string_2: String) {
+    fun setStringParam(paramKey: Int, paramValue: String) {
         if (this.clientParams == null) {
             this.clientParams = IterableNodeMap(16)
         } else {
-            val class282Sub474 = this.clientParams!!.get(i_1.toLong()) as? ObjectNode
-            if (class282Sub474 != null) {
-                class282Sub474.unlink()
+            val existingNode = this.clientParams!!.get(paramKey.toLong()) as? ObjectNode
+            if (existingNode != null) {
+                existingNode.unlink()
             }
         }
-        this.clientParams!!.put(ObjectNode(string_2), i_1.toLong())
+        this.clientParams!!.put(ObjectNode(paramValue), paramKey.toLong())
     }
 
     fun calculateLighting(skyboxtypelist: SkyboxTypeList, suntypelist: SunTypeList): Skybox? {
