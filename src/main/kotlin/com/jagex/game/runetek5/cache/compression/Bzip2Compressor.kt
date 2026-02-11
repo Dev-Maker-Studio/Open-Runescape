@@ -27,161 +27,161 @@ object Bzip2Compressor {
     }
 
     @JvmStatic
-    fun readByte(class4590: Bzip2BlockEntry): Byte {
-        return readBits(8, class4590).toByte()
+    fun readByte(entry: Bzip2BlockEntry): Byte {
+        return readBits(8, entry).toByte()
     }
 
     @JvmStatic
-    fun readBit(class4590: Bzip2BlockEntry): Byte {
-        return readBits(1, class4590).toByte()
+    fun readBit(entry: Bzip2BlockEntry): Byte {
+        return readBits(1, entry).toByte()
     }
 
     @JvmStatic
-    fun readBits(i_0: Int, class4591: Bzip2BlockEntry): Int {
-        while (class4591.bitBufferLength < i_0) {
-            class4591.bitBuffer = class4591.bitBuffer shl 8 or (class4591.compressed!![class4591.startOffset].toInt() and 0xff)
-            class4591.bitBufferLength += 8
-            ++class4591.startOffset
-            class4591.bytesRead += 1564222761
-            val i_10000 = class4591.bytesRead
+    fun readBits(numBits: Int, entry: Bzip2BlockEntry): Int {
+        while (entry.bitBufferLength < numBits) {
+            entry.bitBuffer = entry.bitBuffer shl 8 or (entry.compressed!![entry.startOffset].toInt() and 0xff)
+            entry.bitBufferLength += 8
+            ++entry.startOffset
+            entry.bytesRead += 1564222761
+            val bytesReadSnapshot = entry.bytesRead
         }
 
-        val i_2 = class4591.bitBuffer shr class4591.bitBufferLength - i_0 and (1 shl i_0) - 1
-        class4591.bitBufferLength -= i_0
-        return i_2
+        val result = entry.bitBuffer shr entry.bitBufferLength - numBits and (1 shl numBits) - 1
+        entry.bitBufferLength -= numBits
+        return result
     }
 
     @JvmStatic
-    fun buildHuffmanTable(ints_0: IntArray, ints_1: IntArray, ints_2: IntArray, bytes_3: ByteArray, i_4: Int, i_5: Int, i_6: Int) {
-        var i_7 = 0
+    fun buildHuffmanTable(limitTable: IntArray, baseTable: IntArray, permTable: IntArray, lengthTable: ByteArray, minLength: Int, maxLength: Int, symbolCount: Int) {
+        var permIndex = 0
 
-        var i_8: Int
-        var i_9: Int
-        i_8 = i_4
-        while (i_8 <= i_5) {
-            i_9 = 0
-            while (i_9 < i_6) {
-                if (i_8.toByte() == bytes_3[i_9]) {
-                    ints_2[i_7] = i_9
-                    ++i_7
+        var bitLength: Int
+        var symbolIndex: Int
+        bitLength = minLength
+        while (bitLength <= maxLength) {
+            symbolIndex = 0
+            while (symbolIndex < symbolCount) {
+                if (bitLength.toByte() == lengthTable[symbolIndex]) {
+                    permTable[permIndex] = symbolIndex
+                    ++permIndex
                 }
-                i_9++
+                symbolIndex++
             }
-            i_8++
+            bitLength++
         }
 
-        i_8 = 0
-        while (i_8 < 23) {
-            ints_1[i_8] = 0
-            i_8++
+        bitLength = 0
+        while (bitLength < 23) {
+            baseTable[bitLength] = 0
+            bitLength++
         }
 
-        i_8 = 0
-        while (i_8 < i_6) {
-            ++ints_1[bytes_3[i_8].toInt() + 1]
-            i_8++
+        bitLength = 0
+        while (bitLength < symbolCount) {
+            ++baseTable[lengthTable[bitLength].toInt() + 1]
+            bitLength++
         }
 
-        i_8 = 1
-        while (i_8 < 23) {
-            ints_1[i_8] += ints_1[i_8 - 1]
-            i_8++
+        bitLength = 1
+        while (bitLength < 23) {
+            baseTable[bitLength] += baseTable[bitLength - 1]
+            bitLength++
         }
 
-        i_8 = 0
-        while (i_8 < 23) {
-            ints_0[i_8] = 0
-            i_8++
+        bitLength = 0
+        while (bitLength < 23) {
+            limitTable[bitLength] = 0
+            bitLength++
         }
 
-        i_8 = 0
+        bitLength = 0
 
-        i_9 = i_4
-        while (i_9 <= i_5) {
-            i_8 += ints_1[i_9 + 1] - ints_1[i_9]
-            ints_0[i_9] = i_8 - 1
-            i_8 = i_8 shl 1
-            i_9++
+        symbolIndex = minLength
+        while (symbolIndex <= maxLength) {
+            bitLength += baseTable[symbolIndex + 1] - baseTable[symbolIndex]
+            limitTable[symbolIndex] = bitLength - 1
+            bitLength = bitLength shl 1
+            symbolIndex++
         }
 
-        i_9 = i_4 + 1
-        while (i_9 <= i_5) {
-            ints_1[i_9] = (ints_0[i_9 - 1] + 1 shl 1) - ints_1[i_9]
-            i_9++
+        symbolIndex = minLength + 1
+        while (symbolIndex <= maxLength) {
+            baseTable[symbolIndex] = (limitTable[symbolIndex - 1] + 1 shl 1) - baseTable[symbolIndex]
+            symbolIndex++
         }
     }
 
     @JvmStatic
-    fun decodeBlock(class4590: Bzip2BlockEntry) {
-        var b_1 = class4590.currentByte
-        var i_2 = class4590.runCount
-        var i_3 = class4590.blockPosition
-        var i_4 = class4590.lastByte
-        val ints_5 = transformTable!!
-        var i_6 = class4590.bwtPointer
-        val bytes_7 = class4590.decompressed!!
-        var i_8 = class4590.outputPosition
-        var i_9 = class4590.decompressedLength
-        val i_11 = class4590.blockSize + 1
+    fun decodeBlock(entry: Bzip2BlockEntry) {
+        var currentByte = entry.currentByte
+        var runCount = entry.runCount
+        var blockPosition = entry.blockPosition
+        var lastByte = entry.lastByte
+        val table = transformTable!!
+        var bwtPointer = entry.bwtPointer
+        val output = entry.decompressed!!
+        var outputPos = entry.outputPosition
+        var remaining = entry.decompressedLength
+        val blockEnd = entry.blockSize + 1
 
         label56@ while (true) {
-            if (i_2 > 0) {
+            if (runCount > 0) {
                 while (true) {
-                    if (i_9 == 0) {
+                    if (remaining == 0) {
                         break@label56
                     }
 
-                    if (i_2 == 1) {
-                        bytes_7[i_8] = b_1
-                        ++i_8
-                        --i_9
+                    if (runCount == 1) {
+                        output[outputPos] = currentByte
+                        ++outputPos
+                        --remaining
                         break
                     }
 
-                    bytes_7[i_8] = b_1
-                    --i_2
-                    ++i_8
-                    --i_9
+                    output[outputPos] = currentByte
+                    --runCount
+                    ++outputPos
+                    --remaining
                 }
             }
 
-            while (i_3 != i_11) {
-                b_1 = i_4.toByte()
-                i_6 = ints_5[i_6]
-                var b_12 = i_6.toByte()
-                i_6 = i_6 shr 8
-                ++i_3
-                if (b_12 != i_4.toByte()) {
-                    i_4 = b_12.toInt()
+            while (blockPosition != blockEnd) {
+                currentByte = lastByte.toByte()
+                bwtPointer = table[bwtPointer]
+                var transformedByte = bwtPointer.toByte()
+                bwtPointer = bwtPointer shr 8
+                ++blockPosition
+                if (transformedByte != lastByte.toByte()) {
+                    lastByte = transformedByte.toInt()
                 } else {
-                    if (i_3 != i_11) {
-                        i_2 = 2
-                        i_6 = ints_5[i_6]
-                        b_12 = i_6.toByte()
-                        i_6 = i_6 shr 8
-                        ++i_3
-                        if (i_3 != i_11) {
-                            if (b_12 != i_4.toByte()) {
-                                i_4 = b_12.toInt()
+                    if (blockPosition != blockEnd) {
+                        runCount = 2
+                        bwtPointer = table[bwtPointer]
+                        transformedByte = bwtPointer.toByte()
+                        bwtPointer = bwtPointer shr 8
+                        ++blockPosition
+                        if (blockPosition != blockEnd) {
+                            if (transformedByte != lastByte.toByte()) {
+                                lastByte = transformedByte.toInt()
                             } else {
-                                i_2 = 3
-                                i_6 = ints_5[i_6]
-                                b_12 = i_6.toByte()
-                                i_6 = i_6 shr 8
-                                ++i_3
-                                if (i_3 != i_11) {
-                                    if (b_12 != i_4.toByte()) {
-                                        i_4 = b_12.toInt()
+                                runCount = 3
+                                bwtPointer = table[bwtPointer]
+                                transformedByte = bwtPointer.toByte()
+                                bwtPointer = bwtPointer shr 8
+                                ++blockPosition
+                                if (blockPosition != blockEnd) {
+                                    if (transformedByte != lastByte.toByte()) {
+                                        lastByte = transformedByte.toInt()
                                     } else {
-                                        i_6 = ints_5[i_6]
-                                        b_12 = i_6.toByte()
-                                        i_6 = i_6 shr 8
-                                        ++i_3
-                                        i_2 = (b_12.toInt() and 0xff) + 4
-                                        i_6 = ints_5[i_6]
-                                        i_4 = i_6.toByte().toInt()
-                                        i_6 = i_6 shr 8
-                                        ++i_3
+                                        bwtPointer = table[bwtPointer]
+                                        transformedByte = bwtPointer.toByte()
+                                        bwtPointer = bwtPointer shr 8
+                                        ++blockPosition
+                                        runCount = (transformedByte.toInt() and 0xff) + 4
+                                        bwtPointer = table[bwtPointer]
+                                        lastByte = bwtPointer.toByte().toInt()
+                                        bwtPointer = bwtPointer shr 8
+                                        ++blockPosition
                                     }
                                 }
                             }
@@ -189,432 +189,432 @@ object Bzip2Compressor {
                         continue@label56
                     }
                 }
-                if (i_9 == 0) {
-                    i_2 = 1
+                if (remaining == 0) {
+                    runCount = 1
                     break@label56
                 }
-                bytes_7[i_8] = b_1
-                ++i_8
-                --i_9
+                output[outputPos] = currentByte
+                ++outputPos
+                --remaining
             }
 
-            i_2 = 0
+            runCount = 0
             break
         }
 
-        val i_13 = class4590.blockCrc
-        val i_10000 = class4590.blockCrc * -1541698763
-        class4590.currentByte = b_1
-        class4590.runCount = i_2
-        class4590.blockPosition = i_3
-        class4590.lastByte = i_4
-        transformTable = ints_5
-        class4590.bwtPointer = i_6
-        class4590.decompressed = bytes_7
-        class4590.outputPosition = i_8
-        class4590.decompressedLength = i_9
+        val crcSnapshot = entry.blockCrc
+        val crcCheck = entry.blockCrc * -1541698763
+        entry.currentByte = currentByte
+        entry.runCount = runCount
+        entry.blockPosition = blockPosition
+        entry.lastByte = lastByte
+        transformTable = table
+        entry.bwtPointer = bwtPointer
+        entry.decompressed = output
+        entry.outputPosition = outputPos
+        entry.decompressedLength = remaining
     }
 
     @JvmStatic
-    fun buildSymbolMap(class4590: Bzip2BlockEntry) {
-        class4590.symbolCount = 0
+    fun buildSymbolMap(entry: Bzip2BlockEntry) {
+        entry.symbolCount = 0
 
-        for (i_1 in 0 until 256) {
-            if (class4590.inUse[i_1]) {
-                class4590.seqToUnseq[class4590.symbolCount] = i_1.toByte()
-                ++class4590.symbolCount
+        for (symbol in 0 until 256) {
+            if (entry.inUse[symbol]) {
+                entry.seqToUnseq[entry.symbolCount] = symbol.toByte()
+                ++entry.symbolCount
             }
         }
     }
 
     @JvmStatic
-    fun decompress(class4590: Bzip2BlockEntry) {
-        var i_19 = 0
-        var ints_20: IntArray? = null
-        var ints_21: IntArray? = null
-        var ints_22: IntArray? = null
-        class4590.blockSizeMultiplier = 1
+    fun decompress(entry: Bzip2BlockEntry) {
+        var minLen = 0
+        var huffmanLimits: IntArray? = null
+        var huffmanBase: IntArray? = null
+        var huffmanPerm: IntArray? = null
+        entry.blockSizeMultiplier = 1
         if (transformTable == null) {
-            transformTable = IntArray(class4590.blockSizeMultiplier * 100000)
+            transformTable = IntArray(entry.blockSizeMultiplier * 100000)
         }
 
-        var bool23 = true
+        var hasMoreBlocks = true
 
-        while (bool23) {
-            var b_24 = readByte(class4590)
-            if (b_24 == 23.toByte()) {
+        while (hasMoreBlocks) {
+            var headerByte = readByte(entry)
+            if (headerByte == 23.toByte()) {
                 break
             }
 
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readByte(class4590)
-            b_24 = readBit(class4590)
-            class4590.origPtr = 0
-            var b_25 = readByte(class4590)
-            class4590.origPtr = class4590.origPtr shl 8 or (b_25.toInt() and 0xff)
-            b_25 = readByte(class4590)
-            class4590.origPtr = class4590.origPtr shl 8 or (b_25.toInt() and 0xff)
-            b_25 = readByte(class4590)
-            class4590.origPtr = class4590.origPtr shl 8 or (b_25.toInt() and 0xff)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readByte(entry)
+            headerByte = readBit(entry)
+            entry.origPtr = 0
+            var origPtrByte = readByte(entry)
+            entry.origPtr = entry.origPtr shl 8 or (origPtrByte.toInt() and 0xff)
+            origPtrByte = readByte(entry)
+            entry.origPtr = entry.origPtr shl 8 or (origPtrByte.toInt() and 0xff)
+            origPtrByte = readByte(entry)
+            entry.origPtr = entry.origPtr shl 8 or (origPtrByte.toInt() and 0xff)
 
-            var i_26: Int
-            i_26 = 0
-            while (i_26 < 16) {
-                b_24 = readBit(class4590)
-                class4590.inUse16[i_26] = b_24 == 1.toByte()
-                i_26++
+            var groupIndex: Int
+            groupIndex = 0
+            while (groupIndex < 16) {
+                headerByte = readBit(entry)
+                entry.inUse16[groupIndex] = headerByte == 1.toByte()
+                groupIndex++
             }
 
-            i_26 = 0
-            while (i_26 < 256) {
-                class4590.inUse[i_26] = false
-                i_26++
+            groupIndex = 0
+            while (groupIndex < 256) {
+                entry.inUse[groupIndex] = false
+                groupIndex++
             }
 
-            var i_27: Int
-            i_26 = 0
-            while (i_26 < 16) {
-                if (class4590.inUse16[i_26]) {
-                    i_27 = 0
-                    while (i_27 < 16) {
-                        b_24 = readBit(class4590)
-                        if (b_24 == 1.toByte()) {
-                            class4590.inUse[i_27 + i_26 * 16] = true
+            var symbolIndex: Int
+            groupIndex = 0
+            while (groupIndex < 16) {
+                if (entry.inUse16[groupIndex]) {
+                    symbolIndex = 0
+                    while (symbolIndex < 16) {
+                        headerByte = readBit(entry)
+                        if (headerByte == 1.toByte()) {
+                            entry.inUse[symbolIndex + groupIndex * 16] = true
                         }
-                        i_27++
+                        symbolIndex++
                     }
                 }
-                i_26++
+                groupIndex++
             }
 
-            buildSymbolMap(class4590)
-            i_26 = class4590.symbolCount + 2
-            i_27 = readBits(3, class4590)
-            val i_28 = readBits(15, class4590)
+            buildSymbolMap(entry)
+            groupIndex = entry.symbolCount + 2
+            symbolIndex = readBits(3, entry)
+            val numSelectors = readBits(15, entry)
 
-            var i_30: Int
-            var i_29 = 0
-            while (i_29 < i_28) {
-                i_30 = 0
+            var selectorMtfLen: Int
+            var selectorIndex = 0
+            while (selectorIndex < numSelectors) {
+                selectorMtfLen = 0
 
                 while (true) {
-                    b_24 = readBit(class4590)
-                    if (b_24 == 0.toByte()) {
-                        class4590.selectorMtf[i_29] = i_30.toByte()
+                    headerByte = readBit(entry)
+                    if (headerByte == 0.toByte()) {
+                        entry.selectorMtf[selectorIndex] = selectorMtfLen.toByte()
                         break
                     }
 
-                    ++i_30
+                    ++selectorMtfLen
                 }
-                i_29++
+                selectorIndex++
             }
 
-            val bytes_45 = ByteArray(6)
+            val mtfOrder = ByteArray(6)
 
-            var b_47: Byte = 0
-            while (b_47 < i_27) {
-                bytes_45[b_47.toInt()] = b_47
-                b_47++
+            var mtfPosition: Byte = 0
+            while (mtfPosition < symbolIndex) {
+                mtfOrder[mtfPosition.toInt()] = mtfPosition
+                mtfPosition++
             }
 
-            var b_31: Byte
-            var b_32: Byte
-            i_30 = 0
-            while (i_30 < i_28) {
-                b_31 = class4590.selectorMtf[i_30]
+            var mtfValue: Byte
+            var mtfLength: Byte
+            selectorMtfLen = 0
+            while (selectorMtfLen < numSelectors) {
+                mtfValue = entry.selectorMtf[selectorMtfLen]
 
-                b_32 = bytes_45[b_31.toInt()]
-                while (b_31 > 0) {
-                    bytes_45[b_31.toInt()] = bytes_45[b_31 - 1]
-                    --b_31
+                mtfLength = mtfOrder[mtfValue.toInt()]
+                while (mtfValue > 0) {
+                    mtfOrder[mtfValue.toInt()] = mtfOrder[mtfValue - 1]
+                    --mtfValue
                 }
 
-                bytes_45[0] = b_32
-                class4590.selector[i_30] = b_32
-                i_30++
+                mtfOrder[0] = mtfLength
+                entry.selector[selectorMtfLen] = mtfLength
+                selectorMtfLen++
             }
 
-            var i_48: Int
-            var i_49: Int
-            i_30 = 0
-            while (i_30 < i_27) {
-                i_48 = readBits(5, class4590)
+            var currentLength: Int
+            var alphaIndex: Int
+            selectorMtfLen = 0
+            while (selectorMtfLen < symbolIndex) {
+                currentLength = readBits(5, entry)
 
-                i_49 = 0
-                while (i_49 < i_26) {
+                alphaIndex = 0
+                while (alphaIndex < groupIndex) {
                     while (true) {
-                        b_24 = readBit(class4590)
-                        if (b_24 == 0.toByte()) {
-                            class4590.len[i_30][i_49] = i_48.toByte()
+                        headerByte = readBit(entry)
+                        if (headerByte == 0.toByte()) {
+                            entry.len[selectorMtfLen][alphaIndex] = currentLength.toByte()
                             break
                         }
 
-                        b_24 = readBit(class4590)
-                        if (b_24 == 0.toByte()) {
-                            ++i_48
+                        headerByte = readBit(entry)
+                        if (headerByte == 0.toByte()) {
+                            ++currentLength
                         } else {
-                            --i_48
+                            --currentLength
                         }
                     }
-                    i_49++
+                    alphaIndex++
                 }
-                i_30++
+                selectorMtfLen++
             }
 
-            var i_33: Int
-            i_30 = 0
-            while (i_30 < i_27) {
-                b_31 = 32
-                b_32 = 0
+            var alphaIdx: Int
+            selectorMtfLen = 0
+            while (selectorMtfLen < symbolIndex) {
+                mtfValue = 32
+                mtfLength = 0
 
-                i_33 = 0
-                while (i_33 < i_26) {
-                    if (class4590.len[i_30][i_33] > b_32) {
-                        b_32 = class4590.len[i_30][i_33]
+                alphaIdx = 0
+                while (alphaIdx < groupIndex) {
+                    if (entry.len[selectorMtfLen][alphaIdx] > mtfLength) {
+                        mtfLength = entry.len[selectorMtfLen][alphaIdx]
                     }
 
-                    if (class4590.len[i_30][i_33] < b_31) {
-                        b_31 = class4590.len[i_30][i_33]
+                    if (entry.len[selectorMtfLen][alphaIdx] < mtfValue) {
+                        mtfValue = entry.len[selectorMtfLen][alphaIdx]
                     }
-                    i_33++
+                    alphaIdx++
                 }
 
-                buildHuffmanTable(class4590.limit[i_30], class4590.base[i_30], class4590.perm[i_30], class4590.len[i_30], b_31.toInt(), b_32.toInt(), i_26)
-                class4590.minLens[i_30] = b_31.toInt()
-                i_30++
+                buildHuffmanTable(entry.limit[selectorMtfLen], entry.base[selectorMtfLen], entry.perm[selectorMtfLen], entry.len[selectorMtfLen], mtfValue.toInt(), mtfLength.toInt(), groupIndex)
+                entry.minLens[selectorMtfLen] = mtfValue.toInt()
+                selectorMtfLen++
             }
 
-            i_30 = class4590.symbolCount + 1
-            i_48 = -1
-            var b_50: Byte = 0
+            selectorMtfLen = entry.symbolCount + 1
+            currentLength = -1
+            var groupSelector: Byte = 0
 
-            i_33 = 0
-            while (i_33 <= 255) {
-                class4590.unzftab[i_33] = 0
-                i_33++
+            alphaIdx = 0
+            while (alphaIdx <= 255) {
+                entry.unzftab[alphaIdx] = 0
+                alphaIdx++
             }
 
-            i_33 = 4095
+            alphaIdx = 4095
 
-            var i_34: Int
-            var i_35: Int
-            i_34 = 15
-            while (i_34 >= 0) {
-                i_35 = 15
-                while (i_35 >= 0) {
-                    class4590.yy[i_33] = (i_35 + i_34 * 16).toByte()
-                    --i_33
-                    --i_35
+            var yyBlockIdx: Int
+            var yySymIdx: Int
+            yyBlockIdx = 15
+            while (yyBlockIdx >= 0) {
+                yySymIdx = 15
+                while (yySymIdx >= 0) {
+                    entry.yy[alphaIdx] = (yySymIdx + yyBlockIdx * 16).toByte()
+                    --alphaIdx
+                    --yySymIdx
                 }
 
-                class4590.mtfmBase[i_34] = i_33 + 1
-                --i_34
+                entry.mtfmBase[yyBlockIdx] = alphaIdx + 1
+                --yyBlockIdx
             }
 
-            i_34 = 0
-            ++i_48
-            b_50 = 50
-            val b_51 = class4590.selector[i_48]
-            i_19 = class4590.minLens[b_51.toInt()].toInt()
-            ints_20 = class4590.limit[b_51.toInt()]
-            ints_22 = class4590.perm[b_51.toInt()]
-            ints_21 = class4590.base[b_51.toInt()]
+            yyBlockIdx = 0
+            ++currentLength
+            groupSelector = 50
+            val activeSelector = entry.selector[currentLength]
+            minLen = entry.minLens[activeSelector.toInt()].toInt()
+            huffmanLimits = entry.limit[activeSelector.toInt()]
+            huffmanPerm = entry.perm[activeSelector.toInt()]
+            huffmanBase = entry.base[activeSelector.toInt()]
 
-            i_49 = b_50 - 1
-            i_35 = i_19
+            alphaIndex = groupSelector - 1
+            yySymIdx = minLen
 
-            var b_36: Byte
-            var i_37: Int
-            i_37 = readBits(i_19, class4590)
-            while (i_37 > ints_20!![i_35]) {
-                ++i_35
-                b_36 = readBit(class4590)
-                i_37 = i_37 shl 1 or b_36.toInt()
+            var decodedBit: Byte
+            var codeValue: Int
+            codeValue = readBits(minLen, entry)
+            while (codeValue > huffmanLimits!![yySymIdx]) {
+                ++yySymIdx
+                decodedBit = readBit(entry)
+                codeValue = codeValue shl 1 or decodedBit.toInt()
             }
 
-            var i_38 = ints_22!![i_37 - ints_21!![i_35]]
+            var decodedSymbol = huffmanPerm!![codeValue - huffmanBase!![yySymIdx]]
 
             while (true) {
-                var i_39: Int
-                while (i_38 != i_30) {
-                    var i_40: Int
-                    if (i_38 != 0 && i_38 != 1) {
-                        i_39 = i_38 - 1
-                        var i_52: Int
-                        if (i_39 < 16) {
-                            i_40 = class4590.mtfmBase[0]
+                var mtfIndex: Int
+                while (decodedSymbol != selectorMtfLen) {
+                    var mtfBaseIdx: Int
+                    if (decodedSymbol != 0 && decodedSymbol != 1) {
+                        mtfIndex = decodedSymbol - 1
+                        var mtfSubIdx: Int
+                        if (mtfIndex < 16) {
+                            mtfBaseIdx = entry.mtfmBase[0]
 
-                            b_24 = class4590.yy[i_40 + i_39]
-                            while (i_39 > 3) {
-                                i_52 = i_40 + i_39
-                                class4590.yy[i_52] = class4590.yy[i_52 - 1]
-                                class4590.yy[i_52 - 1] = class4590.yy[i_52 - 2]
-                                class4590.yy[i_52 - 2] = class4590.yy[i_52 - 3]
-                                class4590.yy[i_52 - 3] = class4590.yy[i_52 - 4]
-                                i_39 -= 4
+                            headerByte = entry.yy[mtfBaseIdx + mtfIndex]
+                            while (mtfIndex > 3) {
+                                mtfSubIdx = mtfBaseIdx + mtfIndex
+                                entry.yy[mtfSubIdx] = entry.yy[mtfSubIdx - 1]
+                                entry.yy[mtfSubIdx - 1] = entry.yy[mtfSubIdx - 2]
+                                entry.yy[mtfSubIdx - 2] = entry.yy[mtfSubIdx - 3]
+                                entry.yy[mtfSubIdx - 3] = entry.yy[mtfSubIdx - 4]
+                                mtfIndex -= 4
                             }
 
-                            while (i_39 > 0) {
-                                class4590.yy[i_40 + i_39] = class4590.yy[i_40 + i_39 - 1]
-                                --i_39
+                            while (mtfIndex > 0) {
+                                entry.yy[mtfBaseIdx + mtfIndex] = entry.yy[mtfBaseIdx + mtfIndex - 1]
+                                --mtfIndex
                             }
 
-                            class4590.yy[i_40] = b_24
+                            entry.yy[mtfBaseIdx] = headerByte
                         } else {
-                            i_40 = i_39 / 16
-                            i_52 = i_39 % 16
-                            var i_42 = class4590.mtfmBase[i_40] + i_52
+                            mtfBaseIdx = mtfIndex / 16
+                            mtfSubIdx = mtfIndex % 16
+                            var yyOffset = entry.mtfmBase[mtfBaseIdx] + mtfSubIdx
 
-                            b_24 = class4590.yy[i_42]
-                            while (i_42 > class4590.mtfmBase[i_40]) {
-                                class4590.yy[i_42] = class4590.yy[i_42 - 1]
-                                --i_42
+                            headerByte = entry.yy[yyOffset]
+                            while (yyOffset > entry.mtfmBase[mtfBaseIdx]) {
+                                entry.yy[yyOffset] = entry.yy[yyOffset - 1]
+                                --yyOffset
                             }
 
-                            ++class4590.mtfmBase[i_40]
+                            ++entry.mtfmBase[mtfBaseIdx]
 
-                            while (i_40 > 0) {
-                                --class4590.mtfmBase[i_40]
-                                class4590.yy[class4590.mtfmBase[i_40]] = class4590.yy[class4590.mtfmBase[i_40 - 1] + 16 - 1]
-                                --i_40
+                            while (mtfBaseIdx > 0) {
+                                --entry.mtfmBase[mtfBaseIdx]
+                                entry.yy[entry.mtfmBase[mtfBaseIdx]] = entry.yy[entry.mtfmBase[mtfBaseIdx - 1] + 16 - 1]
+                                --mtfBaseIdx
                             }
 
-                            --class4590.mtfmBase[0]
-                            class4590.yy[class4590.mtfmBase[0]] = b_24
-                            if (class4590.mtfmBase[0] == 0) {
-                                i_33 = 4095
+                            --entry.mtfmBase[0]
+                            entry.yy[entry.mtfmBase[0]] = headerByte
+                            if (entry.mtfmBase[0] == 0) {
+                                alphaIdx = 4095
 
-                                var i_43 = 15
-                                while (i_43 >= 0) {
-                                    var i_44 = 15
-                                    while (i_44 >= 0) {
-                                        class4590.yy[i_33] = class4590.yy[class4590.mtfmBase[i_43] + i_44]
-                                        --i_33
-                                        --i_44
+                                var blockIdx = 15
+                                while (blockIdx >= 0) {
+                                    var symIdx = 15
+                                    while (symIdx >= 0) {
+                                        entry.yy[alphaIdx] = entry.yy[entry.mtfmBase[blockIdx] + symIdx]
+                                        --alphaIdx
+                                        --symIdx
                                     }
 
-                                    class4590.mtfmBase[i_43] = i_33 + 1
-                                    --i_43
+                                    entry.mtfmBase[blockIdx] = alphaIdx + 1
+                                    --blockIdx
                                 }
                             }
                         }
 
-                        ++class4590.unzftab[class4590.seqToUnseq[b_24.toInt() and 0xff].toInt() and 0xff]
-                        transformTable!![i_34] = class4590.seqToUnseq[b_24.toInt() and 0xff].toInt() and 0xff
-                        ++i_34
-                        if (i_49 == 0) {
-                            ++i_48
-                            i_49 = 50
-                            val b_53 = class4590.selector[i_48]
-                            i_19 = class4590.minLens[b_53.toInt()].toInt()
-                            ints_20 = class4590.limit[b_53.toInt()]
-                            ints_22 = class4590.perm[b_53.toInt()]
-                            ints_21 = class4590.base[b_53.toInt()]
+                        ++entry.unzftab[entry.seqToUnseq[headerByte.toInt() and 0xff].toInt() and 0xff]
+                        transformTable!![yyBlockIdx] = entry.seqToUnseq[headerByte.toInt() and 0xff].toInt() and 0xff
+                        ++yyBlockIdx
+                        if (alphaIndex == 0) {
+                            ++currentLength
+                            alphaIndex = 50
+                            val nextSelector = entry.selector[currentLength]
+                            minLen = entry.minLens[nextSelector.toInt()].toInt()
+                            huffmanLimits = entry.limit[nextSelector.toInt()]
+                            huffmanPerm = entry.perm[nextSelector.toInt()]
+                            huffmanBase = entry.base[nextSelector.toInt()]
                         }
 
-                        --i_49
-                        i_35 = i_19
+                        --alphaIndex
+                        yySymIdx = minLen
 
-                        i_37 = readBits(i_19, class4590)
-                        while (i_37 > ints_20!![i_35]) {
-                            ++i_35
-                            b_36 = readBit(class4590)
-                            i_37 = i_37 shl 1 or b_36.toInt()
+                        codeValue = readBits(minLen, entry)
+                        while (codeValue > huffmanLimits!![yySymIdx]) {
+                            ++yySymIdx
+                            decodedBit = readBit(entry)
+                            codeValue = codeValue shl 1 or decodedBit.toInt()
                         }
 
-                        i_38 = ints_22!![i_37 - ints_21!![i_35]]
+                        decodedSymbol = huffmanPerm!![codeValue - huffmanBase!![yySymIdx]]
                     } else {
-                        i_39 = -1
-                        i_40 = 1
+                        mtfIndex = -1
+                        mtfBaseIdx = 1
 
                         do {
-                            if (i_38 == 0) {
-                                i_39 += i_40
+                            if (decodedSymbol == 0) {
+                                mtfIndex += mtfBaseIdx
                             } else {
-                                i_39 += i_40 * 2
+                                mtfIndex += mtfBaseIdx * 2
                             }
 
-                            i_40 *= 2
-                            if (i_49 == 0) {
-                                ++i_48
-                                i_49 = 50
-                                val b_41 = class4590.selector[i_48]
-                                i_19 = class4590.minLens[b_41.toInt()].toInt()
-                                ints_20 = class4590.limit[b_41.toInt()]
-                                ints_22 = class4590.perm[b_41.toInt()]
-                                ints_21 = class4590.base[b_41.toInt()]
+                            mtfBaseIdx *= 2
+                            if (alphaIndex == 0) {
+                                ++currentLength
+                                alphaIndex = 50
+                                val runSelector = entry.selector[currentLength]
+                                minLen = entry.minLens[runSelector.toInt()].toInt()
+                                huffmanLimits = entry.limit[runSelector.toInt()]
+                                huffmanPerm = entry.perm[runSelector.toInt()]
+                                huffmanBase = entry.base[runSelector.toInt()]
                             }
 
-                            --i_49
-                            i_35 = i_19
+                            --alphaIndex
+                            yySymIdx = minLen
 
-                            i_37 = readBits(i_19, class4590)
-                            while (i_37 > ints_20!![i_35]) {
-                                ++i_35
-                                b_36 = readBit(class4590)
-                                i_37 = i_37 shl 1 or b_36.toInt()
+                            codeValue = readBits(minLen, entry)
+                            while (codeValue > huffmanLimits!![yySymIdx]) {
+                                ++yySymIdx
+                                decodedBit = readBit(entry)
+                                codeValue = codeValue shl 1 or decodedBit.toInt()
                             }
 
-                            i_38 = ints_22!![i_37 - ints_21!![i_35]]
-                        } while (i_38 == 0 || i_38 == 1)
+                            decodedSymbol = huffmanPerm!![codeValue - huffmanBase!![yySymIdx]]
+                        } while (decodedSymbol == 0 || decodedSymbol == 1)
 
-                        ++i_39
-                        b_25 = class4590.seqToUnseq[class4590.yy[class4590.mtfmBase[0]].toInt() and 0xff]
+                        ++mtfIndex
+                        origPtrByte = entry.seqToUnseq[entry.yy[entry.mtfmBase[0]].toInt() and 0xff]
 
-                        class4590.unzftab[b_25.toInt() and 0xff] += i_39
-                        while (i_39 > 0) {
-                            transformTable!![i_34] = b_25.toInt() and 0xff
-                            ++i_34
-                            --i_39
+                        entry.unzftab[origPtrByte.toInt() and 0xff] += mtfIndex
+                        while (mtfIndex > 0) {
+                            transformTable!![yyBlockIdx] = origPtrByte.toInt() and 0xff
+                            ++yyBlockIdx
+                            --mtfIndex
                         }
                     }
                 }
 
-                class4590.runCount = 0
-                class4590.currentByte = 0
-                class4590.cftab[0] = 0
+                entry.runCount = 0
+                entry.currentByte = 0
+                entry.cftab[0] = 0
 
-                i_39 = 1
-                while (i_39 <= 256) {
-                    class4590.cftab[i_39] = class4590.unzftab[i_39 - 1]
-                    i_39++
+                mtfIndex = 1
+                while (mtfIndex <= 256) {
+                    entry.cftab[mtfIndex] = entry.unzftab[mtfIndex - 1]
+                    mtfIndex++
                 }
 
-                i_39 = 1
-                while (i_39 <= 256) {
-                    class4590.cftab[i_39] += class4590.cftab[i_39 - 1]
-                    i_39++
+                mtfIndex = 1
+                while (mtfIndex <= 256) {
+                    entry.cftab[mtfIndex] += entry.cftab[mtfIndex - 1]
+                    mtfIndex++
                 }
 
-                i_39 = 0
-                while (i_39 < i_34) {
-                    b_25 = (transformTable!![i_39] and 0xff).toByte()
-                    transformTable!![class4590.cftab[b_25.toInt() and 0xff]] = transformTable!![class4590.cftab[b_25.toInt() and 0xff]] or (i_39 shl 8)
-                    ++class4590.cftab[b_25.toInt() and 0xff]
-                    i_39++
+                mtfIndex = 0
+                while (mtfIndex < yyBlockIdx) {
+                    origPtrByte = (transformTable!![mtfIndex] and 0xff).toByte()
+                    transformTable!![entry.cftab[origPtrByte.toInt() and 0xff]] = transformTable!![entry.cftab[origPtrByte.toInt() and 0xff]] or (mtfIndex shl 8)
+                    ++entry.cftab[origPtrByte.toInt() and 0xff]
+                    mtfIndex++
                 }
 
-                class4590.bwtPointer = transformTable!![class4590.origPtr] shr 8
-                class4590.blockPosition = 0
-                class4590.bwtPointer = transformTable!![class4590.bwtPointer]
-                class4590.lastByte = (class4590.bwtPointer and 0xff)
-                class4590.bwtPointer = class4590.bwtPointer shr 8
-                ++class4590.blockPosition
-                class4590.blockSize = i_34
-                decodeBlock(class4590)
-                if (class4590.blockSize + 1 == class4590.blockPosition && class4590.runCount == 0) {
-                    bool23 = true
+                entry.bwtPointer = transformTable!![entry.origPtr] shr 8
+                entry.blockPosition = 0
+                entry.bwtPointer = transformTable!![entry.bwtPointer]
+                entry.lastByte = (entry.bwtPointer and 0xff)
+                entry.bwtPointer = entry.bwtPointer shr 8
+                ++entry.blockPosition
+                entry.blockSize = yyBlockIdx
+                decodeBlock(entry)
+                if (entry.blockSize + 1 == entry.blockPosition && entry.runCount == 0) {
+                    hasMoreBlocks = true
                     break
                 }
 
-                bool23 = false
+                hasMoreBlocks = false
                 break
             }
         }
