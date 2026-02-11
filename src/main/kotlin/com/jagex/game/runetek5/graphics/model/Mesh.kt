@@ -405,41 +405,41 @@ class Mesh {
         }
         val faceIndexTypesOffset = index
         index += numFaces
-        val i_31 = index
+        val facePriorityOffset = index
         if (modelPriority == 255) {
             index += numFaces
         }
-        val i_32 = index
+        val faceSkinsOffset = index
         if (hasFaceSkins == 1) {
             index += numFaces
         }
-        val i_33 = index
+        val vertexSkinsOffset = index
         if (hasVertexSkins == 1) {
             index += numVertices
         }
-        val i_34 = index
+        val faceAlphaOffset = index
         if (hasFaceAlpha == 1) {
             index += numFaces
         }
-        val i_35 = index
+        val faceIndicesDataOffset = index
         index += faceIndices
-        val i_36 = index
+        val faceMaterialOffset = index
         if (hasFaceTextures == 1) {
             index += numFaces * 2
         }
-        val i_37 = index
+        val textureIndexDataOffset = index
         index += textureIndices
-        val i_38 = index
+        val faceColorOffset = index
         index += numFaces * 2
-        val i_39 = index
+        val verticesXOffset = index
         index += modelVerticesX
-        val i_40 = index
+        val verticesYOffset = index
         index += modelVerticesY
-        val i_41 = index
+        val verticesZOffset = index
         index += modelVerticesZ
         val simpleTexPmnOffset = index
         index += simpleTextureFaceCount * 6
-        val i_43 = index
+        val complexTextureVertOffset = index
         index += complexTextureFaceCount * 6
         var textureBytes: Byte = 6
         if (version == 14) {
@@ -447,13 +447,13 @@ class Mesh {
         } else if (version >= 15) {
             textureBytes = 9
         }
-        val i_45 = index
+        val complexTextureScaleOffset = index
         index += complexTextureFaceCount * textureBytes
-        val i_46 = index
+        val complexTextureRotOffset = index
         index += complexTextureFaceCount
-        val i_47 = index
+        val complexTextureDirOffset = index
         index += complexTextureFaceCount
-        val i_48 = index
+        val complexTextureSpeedOffset = index
         index = cubeTextureFaceCount * 2 + index + complexTextureFaceCount
         verticesX = IntArray(numVertices)
         verticesY = IntArray(numVertices)
@@ -503,10 +503,10 @@ class Mesh {
             }
         }
         first.currentPosition = vertexFlagsOffset
-        second.currentPosition = i_39
-        third.currentPosition = i_40
-        fourth.currentPosition = i_41
-        fifth.currentPosition = i_33
+        second.currentPosition = verticesXOffset
+        third.currentPosition = verticesYOffset
+        fourth.currentPosition = verticesZOffset
+        fifth.currentPosition = vertexSkinsOffset
         var lastVerticeX = 0
         var lastVerticeY = 0
         var lastVerticeZ = 0
@@ -534,13 +534,13 @@ class Mesh {
                 vertexGroups!![verticeIndex] = fifth.readUByte()
             }
         }
-        first.currentPosition = i_38
+        first.currentPosition = faceColorOffset
         second.currentPosition = faceTypesOffset
-        third.currentPosition = i_31
-        fourth.currentPosition = i_34
-        fifth.currentPosition = i_32
-        seventh.currentPosition = i_36
-        eight.currentPosition = i_37
+        third.currentPosition = facePriorityOffset
+        fourth.currentPosition = faceAlphaOffset
+        fifth.currentPosition = faceSkinsOffset
+        seventh.currentPosition = faceMaterialOffset
+        eight.currentPosition = textureIndexDataOffset
         for (faceIndex in 0 until numFaces) {
             facesColor!![faceIndex] = first.readUShort().toShort()
             if (hasFaceTypes) {
@@ -567,15 +567,15 @@ class Mesh {
             }
         }
         maxDepth = -1
-        first.currentPosition = i_35
+        first.currentPosition = faceIndicesDataOffset
         second.currentPosition = faceIndexTypesOffset
         calculateMaxDepth(first, second)
         first.currentPosition = simpleTexPmnOffset
-        second.currentPosition = i_43
-        third.currentPosition = i_45
-        fourth.currentPosition = i_46
-        fifth.currentPosition = i_47
-        seventh.currentPosition = i_48
+        second.currentPosition = complexTextureVertOffset
+        third.currentPosition = complexTextureScaleOffset
+        fourth.currentPosition = complexTextureRotOffset
+        fifth.currentPosition = complexTextureDirOffset
+        seventh.currentPosition = complexTextureSpeedOffset
         decodeTexturedTriangles(first, second, third, fourth, fifth, seventh)
         first.currentPosition = index
         if (hasParticleEffects) {
@@ -666,13 +666,13 @@ class Mesh {
                 }
             }
             if (mappingType == 4) {
-                val s_9 = a
+                val prevA = a
                 a = b
-                b = s_9
+                b = prevA
                 c = (first.readSmart() + tmp).toShort()
                 tmp = c
                 facesA!![faceIndex] = a
-                facesB!![faceIndex] = s_9
+                facesB!![faceIndex] = prevA
                 facesC!![faceIndex] = c
                 if (c > maxDepth) {
                     maxDepth = c.toInt()
@@ -682,78 +682,78 @@ class Mesh {
         maxDepth++
     }
 
-    fun decodeTexturedTriangles(rsbytebuffer1: Packet, rsbytebuffer2: Packet, rsbytebuffer3: Packet, rsbytebuffer4: Packet, rsbytebuffer5: Packet, rsbytebuffer6: Packet) {
+    fun decodeTexturedTriangles(simpleTexBuf: Packet, complexTexVertBuf: Packet, complexTexScaleBuf: Packet, complexTexRotBuf: Packet, complexTexDirBuf: Packet, complexTexSpeedBuf: Packet) {
         for (textureIndex in 0 until numTextures) {
             val mappingType = texturesMapping!![textureIndex].toInt() and 0xff
             if (mappingType == 0) {
-                textureFaceX!![textureIndex] = rsbytebuffer1.readUShort().toShort()
-                textureFaceY!![textureIndex] = rsbytebuffer1.readUShort().toShort()
-                textureFaceZ!![textureIndex] = rsbytebuffer1.readUShort().toShort()
+                textureFaceX!![textureIndex] = simpleTexBuf.readUShort().toShort()
+                textureFaceY!![textureIndex] = simpleTexBuf.readUShort().toShort()
+                textureFaceZ!![textureIndex] = simpleTexBuf.readUShort().toShort()
             }
             if (mappingType == 1) {
-                textureFaceX!![textureIndex] = rsbytebuffer2.readUShort().toShort()
-                textureFaceY!![textureIndex] = rsbytebuffer2.readUShort().toShort()
-                textureFaceZ!![textureIndex] = rsbytebuffer2.readUShort().toShort()
+                textureFaceX!![textureIndex] = complexTexVertBuf.readUShort().toShort()
+                textureFaceY!![textureIndex] = complexTexVertBuf.readUShort().toShort()
+                textureFaceZ!![textureIndex] = complexTexVertBuf.readUShort().toShort()
                 if (version < 15) {
-                    texturesScaleX!![textureIndex] = rsbytebuffer3.readUShort()
+                    texturesScaleX!![textureIndex] = complexTexScaleBuf.readUShort()
                     if (version < 14) {
-                        texturesScaleY!![textureIndex] = rsbytebuffer3.readUShort()
+                        texturesScaleY!![textureIndex] = complexTexScaleBuf.readUShort()
                     } else {
-                        texturesScaleY!![textureIndex] = rsbytebuffer3.readUMedium()
+                        texturesScaleY!![textureIndex] = complexTexScaleBuf.readUMedium()
                     }
-                    texturesScaleZ!![textureIndex] = rsbytebuffer3.readUShort()
+                    texturesScaleZ!![textureIndex] = complexTexScaleBuf.readUShort()
                 } else {
-                    texturesScaleX!![textureIndex] = rsbytebuffer3.readUMedium()
-                    texturesScaleY!![textureIndex] = rsbytebuffer3.readUMedium()
-                    texturesScaleZ!![textureIndex] = rsbytebuffer3.readUMedium()
+                    texturesScaleX!![textureIndex] = complexTexScaleBuf.readUMedium()
+                    texturesScaleY!![textureIndex] = complexTexScaleBuf.readUMedium()
+                    texturesScaleZ!![textureIndex] = complexTexScaleBuf.readUMedium()
                 }
-                texturesRotation!![textureIndex] = rsbytebuffer4.readByte()
-                texturesDirection!![textureIndex] = rsbytebuffer5.readByte()
-                texturesSpeed!![textureIndex] = rsbytebuffer6.readByte().toInt()
+                texturesRotation!![textureIndex] = complexTexRotBuf.readByte()
+                texturesDirection!![textureIndex] = complexTexDirBuf.readByte()
+                texturesSpeed!![textureIndex] = complexTexSpeedBuf.readByte().toInt()
             }
             if (mappingType == 2) {
-                textureFaceX!![textureIndex] = rsbytebuffer2.readUShort().toShort()
-                textureFaceY!![textureIndex] = rsbytebuffer2.readUShort().toShort()
-                textureFaceZ!![textureIndex] = rsbytebuffer2.readUShort().toShort()
+                textureFaceX!![textureIndex] = complexTexVertBuf.readUShort().toShort()
+                textureFaceY!![textureIndex] = complexTexVertBuf.readUShort().toShort()
+                textureFaceZ!![textureIndex] = complexTexVertBuf.readUShort().toShort()
                 if (version < 15) {
-                    texturesScaleX!![textureIndex] = rsbytebuffer3.readUShort()
+                    texturesScaleX!![textureIndex] = complexTexScaleBuf.readUShort()
                     if (version < 14) {
-                        texturesScaleY!![textureIndex] = rsbytebuffer3.readUShort()
+                        texturesScaleY!![textureIndex] = complexTexScaleBuf.readUShort()
                     } else {
-                        texturesScaleY!![textureIndex] = rsbytebuffer3.readUMedium()
+                        texturesScaleY!![textureIndex] = complexTexScaleBuf.readUMedium()
                     }
-                    texturesScaleZ!![textureIndex] = rsbytebuffer3.readUShort()
+                    texturesScaleZ!![textureIndex] = complexTexScaleBuf.readUShort()
                 } else {
-                    texturesScaleX!![textureIndex] = rsbytebuffer3.readUMedium()
-                    texturesScaleY!![textureIndex] = rsbytebuffer3.readUMedium()
-                    texturesScaleZ!![textureIndex] = rsbytebuffer3.readUMedium()
+                    texturesScaleX!![textureIndex] = complexTexScaleBuf.readUMedium()
+                    texturesScaleY!![textureIndex] = complexTexScaleBuf.readUMedium()
+                    texturesScaleZ!![textureIndex] = complexTexScaleBuf.readUMedium()
                 }
-                texturesRotation!![textureIndex] = rsbytebuffer4.readByte()
-                texturesDirection!![textureIndex] = rsbytebuffer5.readByte()
-                texturesSpeed!![textureIndex] = rsbytebuffer6.readByte().toInt()
-                texturesUtrans!![textureIndex] = rsbytebuffer6.readByte().toInt()
-                texturesVtrans!![textureIndex] = rsbytebuffer6.readByte().toInt()
+                texturesRotation!![textureIndex] = complexTexRotBuf.readByte()
+                texturesDirection!![textureIndex] = complexTexDirBuf.readByte()
+                texturesSpeed!![textureIndex] = complexTexSpeedBuf.readByte().toInt()
+                texturesUtrans!![textureIndex] = complexTexSpeedBuf.readByte().toInt()
+                texturesVtrans!![textureIndex] = complexTexSpeedBuf.readByte().toInt()
             }
             if (mappingType == 3) {
-                textureFaceX!![textureIndex] = rsbytebuffer2.readUShort().toShort()
-                textureFaceY!![textureIndex] = rsbytebuffer2.readUShort().toShort()
-                textureFaceZ!![textureIndex] = rsbytebuffer2.readUShort().toShort()
+                textureFaceX!![textureIndex] = complexTexVertBuf.readUShort().toShort()
+                textureFaceY!![textureIndex] = complexTexVertBuf.readUShort().toShort()
+                textureFaceZ!![textureIndex] = complexTexVertBuf.readUShort().toShort()
                 if (version < 15) {
-                    texturesScaleX!![textureIndex] = rsbytebuffer3.readUShort()
+                    texturesScaleX!![textureIndex] = complexTexScaleBuf.readUShort()
                     if (version < 14) {
-                        texturesScaleY!![textureIndex] = rsbytebuffer3.readUShort()
+                        texturesScaleY!![textureIndex] = complexTexScaleBuf.readUShort()
                     } else {
-                        texturesScaleY!![textureIndex] = rsbytebuffer3.readUMedium()
+                        texturesScaleY!![textureIndex] = complexTexScaleBuf.readUMedium()
                     }
-                    texturesScaleZ!![textureIndex] = rsbytebuffer3.readUShort()
+                    texturesScaleZ!![textureIndex] = complexTexScaleBuf.readUShort()
                 } else {
-                    texturesScaleX!![textureIndex] = rsbytebuffer3.readUMedium()
-                    texturesScaleY!![textureIndex] = rsbytebuffer3.readUMedium()
-                    texturesScaleZ!![textureIndex] = rsbytebuffer3.readUMedium()
+                    texturesScaleX!![textureIndex] = complexTexScaleBuf.readUMedium()
+                    texturesScaleY!![textureIndex] = complexTexScaleBuf.readUMedium()
+                    texturesScaleZ!![textureIndex] = complexTexScaleBuf.readUMedium()
                 }
-                texturesRotation!![textureIndex] = rsbytebuffer4.readByte()
-                texturesDirection!![textureIndex] = rsbytebuffer5.readByte()
-                texturesSpeed!![textureIndex] = rsbytebuffer6.readByte().toInt()
+                texturesRotation!![textureIndex] = complexTexRotBuf.readByte()
+                texturesDirection!![textureIndex] = complexTexDirBuf.readByte()
+                texturesSpeed!![textureIndex] = complexTexSpeedBuf.readByte().toInt()
             }
         }
     }
@@ -907,90 +907,90 @@ class Mesh {
 
     fun rotateWithoutNormals(x: Int, y: Int, z: Int) {
         if (z != 0) {
-            val i_4 = MathUtils.SINE[z]
-            val i_5 = MathUtils.COSINE[z]
+            val sin = MathUtils.SINE[z]
+            val cos = MathUtils.COSINE[z]
             for (v in 0 until numVertices) {
-                val i_7 = i_4 * verticesY!![v] + i_5 * verticesX!![v] shr 14
-                verticesY!![v] = i_5 * verticesY!![v] - i_4 * verticesX!![v] shr 14
-                verticesX!![v] = i_7
+                val rotated = sin * verticesY!![v] + cos * verticesX!![v] shr 14
+                verticesY!![v] = cos * verticesY!![v] - sin * verticesX!![v] shr 14
+                verticesX!![v] = rotated
             }
         }
         if (x != 0) {
-            val i_4 = MathUtils.SINE[x]
-            val i_5 = MathUtils.COSINE[x]
+            val sin = MathUtils.SINE[x]
+            val cos = MathUtils.COSINE[x]
             for (v in 0 until numVertices) {
-                val i_7 = i_5 * verticesY!![v] - i_4 * verticesZ!![v] shr 14
-                verticesZ!![v] = i_4 * verticesY!![v] + i_5 * verticesZ!![v] shr 14
-                verticesY!![v] = i_7
+                val rotated = cos * verticesY!![v] - sin * verticesZ!![v] shr 14
+                verticesZ!![v] = sin * verticesY!![v] + cos * verticesZ!![v] shr 14
+                verticesY!![v] = rotated
             }
         }
         if (y != 0) {
-            val i_4 = MathUtils.SINE[y]
-            val i_5 = MathUtils.COSINE[y]
+            val sin = MathUtils.SINE[y]
+            val cos = MathUtils.COSINE[y]
             for (v in 0 until numVertices) {
-                val i_7 = i_4 * verticesZ!![v] + i_5 * verticesX!![v] shr 14
-                verticesZ!![v] = i_5 * verticesZ!![v] - i_4 * verticesX!![v] shr 14
-                verticesX!![v] = i_7
+                val rotated = sin * verticesZ!![v] + cos * verticesX!![v] shr 14
+                verticesZ!![v] = cos * verticesZ!![v] - sin * verticesX!![v] shr 14
+                verticesX!![v] = rotated
             }
         }
     }
 
-    fun decodeOldFormat(bytes_1: ByteArray) {
+    fun decodeOldFormat(data: ByteArray) {
         var hasFaceTypes = false
         var hasMaterials = false
-        val rsbytebuffer4 = Packet(bytes_1)
-        val rsbytebuffer5 = Packet(bytes_1)
-        val rsbytebuffer6 = Packet(bytes_1)
-        val rsbytebuffer7 = Packet(bytes_1)
-        val rsbytebuffer8 = Packet(bytes_1)
-        rsbytebuffer4.currentPosition = bytes_1.size - 18
-        numVertices = rsbytebuffer4.readUShort()
-        numFaces = rsbytebuffer4.readUShort()
-        numTextures = rsbytebuffer4.readUByte()
-        val i_9 = rsbytebuffer4.readUByte()
-        val i_10 = rsbytebuffer4.readUByte()
-        val i_11 = rsbytebuffer4.readUByte()
-        val i_12 = rsbytebuffer4.readUByte()
-        val i_13 = rsbytebuffer4.readUByte()
-        val i_14 = rsbytebuffer4.readUShort()
-        val i_15 = rsbytebuffer4.readUShort()
-        val i_16 = rsbytebuffer4.readUShort()
-        val i_17 = rsbytebuffer4.readUShort()
-        val b_18: Byte = 0
-        var i_42 = b_18 + numVertices
-        val i_20 = i_42
-        i_42 += numFaces
-        val i_21 = i_42
-        if (i_10 == 255) {
-            i_42 += numFaces
+        val headerBuf = Packet(data)
+        val vertexXBuf = Packet(data)
+        val vertexYBuf = Packet(data)
+        val vertexZBuf = Packet(data)
+        val vertexSkinBuf = Packet(data)
+        headerBuf.currentPosition = data.size - 18
+        numVertices = headerBuf.readUShort()
+        numFaces = headerBuf.readUShort()
+        numTextures = headerBuf.readUByte()
+        val hasFaceTypeFlag = headerBuf.readUByte()
+        val modelPriority = headerBuf.readUByte()
+        val hasFaceAlpha = headerBuf.readUByte()
+        val hasFaceSkins = headerBuf.readUByte()
+        val hasVertexSkins = headerBuf.readUByte()
+        val verticesXSize = headerBuf.readUShort()
+        val verticesYSize = headerBuf.readUShort()
+        val verticesZSize = headerBuf.readUShort()
+        val faceIndicesSize = headerBuf.readUShort()
+        val startOffset: Byte = 0
+        var offset = startOffset + numVertices
+        val faceIndexTypesOffset = offset
+        offset += numFaces
+        val facePriorityOffset = offset
+        if (modelPriority == 255) {
+            offset += numFaces
         }
-        val i_22 = i_42
-        if (i_12 == 1) {
-            i_42 += numFaces
+        val faceSkinsOffset = offset
+        if (hasFaceSkins == 1) {
+            offset += numFaces
         }
-        val i_23 = i_42
-        if (i_9 == 1) {
-            i_42 += numFaces
+        val faceTypeOffset = offset
+        if (hasFaceTypeFlag == 1) {
+            offset += numFaces
         }
-        val i_24 = i_42
-        if (i_13 == 1) {
-            i_42 += numVertices
+        val vertexSkinsOffset = offset
+        if (hasVertexSkins == 1) {
+            offset += numVertices
         }
-        val i_25 = i_42
-        if (i_11 == 1) {
-            i_42 += numFaces
+        val faceAlphaOffset = offset
+        if (hasFaceAlpha == 1) {
+            offset += numFaces
         }
-        val i_26 = i_42
-        i_42 += i_17
-        val i_27 = i_42
-        i_42 += numFaces * 2
-        val i_28 = i_42
-        i_42 += numTextures * 6
-        val i_29 = i_42
-        i_42 += i_14
-        val i_30 = i_42
-        i_42 += i_15
-        val i_10000 = i_42 + i_16
+        val faceIndicesDataOffset = offset
+        offset += faceIndicesSize
+        val faceColorOffset = offset
+        offset += numFaces * 2
+        val textureTriOffset = offset
+        offset += numTextures * 6
+        val verticesXDataOffset = offset
+        offset += verticesXSize
+        val verticesYDataOffset = offset
+        offset += verticesYSize
+        val totalDataSize = offset + verticesZSize
         verticesX = IntArray(numVertices)
         verticesY = IntArray(numVertices)
         verticesZ = IntArray(numVertices)
@@ -1003,191 +1003,191 @@ class Mesh {
             textureFaceY = ShortArray(numTextures)
             textureFaceZ = ShortArray(numTextures)
         }
-        if (i_13 == 1) {
+        if (hasVertexSkins == 1) {
             vertexGroups = IntArray(numVertices)
         }
-        if (i_9 == 1) {
+        if (hasFaceTypeFlag == 1) {
             faceRenderType = ByteArray(numFaces)
             facesTexture = ByteArray(numFaces)
             facesMaterial = ShortArray(numFaces)
         }
-        if (i_10 == 255) {
+        if (modelPriority == 255) {
             facesLayer = ByteArray(numFaces)
         } else {
-            priority = i_10.toByte()
+            priority = modelPriority.toByte()
         }
-        if (i_11 == 1) {
+        if (hasFaceAlpha == 1) {
             facesAlpha = ByteArray(numFaces)
         }
-        if (i_12 == 1) {
+        if (hasFaceSkins == 1) {
             faceGroups = IntArray(numFaces)
         }
         facesColor = ShortArray(numFaces)
-        rsbytebuffer4.currentPosition = b_18.toInt()
-        rsbytebuffer5.currentPosition = i_29
-        rsbytebuffer6.currentPosition = i_30
-        rsbytebuffer7.currentPosition = i_42
-        rsbytebuffer8.currentPosition = i_24
-        var i_32 = 0
-        var i_33 = 0
-        var i_34 = 0
-        var i_35: Int
-        var i_36: Int
-        var i_39: Int
-        i_35 = 0
-        while (i_35 < numVertices) {
-            i_36 = rsbytebuffer4.readUByte()
-            var i_37 = 0
-            if ((i_36 and 0x1) != 0) {
-                i_37 = rsbytebuffer5.readSmart()
+        headerBuf.currentPosition = startOffset.toInt()
+        vertexXBuf.currentPosition = verticesXDataOffset
+        vertexYBuf.currentPosition = verticesYDataOffset
+        vertexZBuf.currentPosition = offset
+        vertexSkinBuf.currentPosition = vertexSkinsOffset
+        var lastVertexX = 0
+        var lastVertexY = 0
+        var lastVertexZ = 0
+        var vertexIndex: Int
+        var offsetFlags: Int
+        var faceIndex: Int
+        vertexIndex = 0
+        while (vertexIndex < numVertices) {
+            offsetFlags = headerBuf.readUByte()
+            var vertexXOffset = 0
+            if ((offsetFlags and 0x1) != 0) {
+                vertexXOffset = vertexXBuf.readSmart()
             }
-            var i_38 = 0
-            if ((i_36 and 0x2) != 0) {
-                i_38 = rsbytebuffer6.readSmart()
+            var vertexYOffset = 0
+            if ((offsetFlags and 0x2) != 0) {
+                vertexYOffset = vertexYBuf.readSmart()
             }
-            i_39 = 0
-            if ((i_36 and 0x4) != 0) {
-                i_39 = rsbytebuffer7.readSmart()
+            faceIndex = 0
+            if ((offsetFlags and 0x4) != 0) {
+                faceIndex = vertexZBuf.readSmart()
             }
-            verticesX!![i_35] = i_32 + i_37
-            verticesY!![i_35] = i_33 + i_38
-            verticesZ!![i_35] = i_34 + i_39
-            i_32 = verticesX!![i_35]
-            i_33 = verticesY!![i_35]
-            i_34 = verticesZ!![i_35]
-            if (i_13 == 1) {
-                vertexGroups!![i_35] = rsbytebuffer8.readUByte()
+            verticesX!![vertexIndex] = lastVertexX + vertexXOffset
+            verticesY!![vertexIndex] = lastVertexY + vertexYOffset
+            verticesZ!![vertexIndex] = lastVertexZ + faceIndex
+            lastVertexX = verticesX!![vertexIndex]
+            lastVertexY = verticesY!![vertexIndex]
+            lastVertexZ = verticesZ!![vertexIndex]
+            if (hasVertexSkins == 1) {
+                vertexGroups!![vertexIndex] = vertexSkinBuf.readUByte()
             }
-            i_35++
+            vertexIndex++
         }
-        rsbytebuffer4.currentPosition = i_27
-        rsbytebuffer5.currentPosition = i_23
-        rsbytebuffer6.currentPosition = i_21
-        rsbytebuffer7.currentPosition = i_25
-        rsbytebuffer8.currentPosition = i_22
-        i_35 = 0
-        while (i_35 < numFaces) {
-            facesColor!![i_35] = rsbytebuffer4.readUShort().toShort()
-            if (i_9 == 1) {
-                i_36 = rsbytebuffer5.readUByte()
-                if ((i_36 and 0x1) == 1) {
-                    faceRenderType!![i_35] = 1
+        headerBuf.currentPosition = faceColorOffset
+        vertexXBuf.currentPosition = faceTypeOffset
+        vertexYBuf.currentPosition = facePriorityOffset
+        vertexZBuf.currentPosition = faceAlphaOffset
+        vertexSkinBuf.currentPosition = faceSkinsOffset
+        vertexIndex = 0
+        while (vertexIndex < numFaces) {
+            facesColor!![vertexIndex] = headerBuf.readUShort().toShort()
+            if (hasFaceTypeFlag == 1) {
+                offsetFlags = vertexXBuf.readUByte()
+                if ((offsetFlags and 0x1) == 1) {
+                    faceRenderType!![vertexIndex] = 1
                     hasFaceTypes = true
                 } else {
-                    faceRenderType!![i_35] = 0
+                    faceRenderType!![vertexIndex] = 0
                 }
-                if ((i_36 and 0x2) == 2) {
-                    facesTexture!![i_35] = (i_36 shr 2).toByte()
-                    facesMaterial!![i_35] = facesColor!![i_35]
-                    facesColor!![i_35] = 127
-                    if (facesMaterial!![i_35] != (-1).toShort()) {
+                if ((offsetFlags and 0x2) == 2) {
+                    facesTexture!![vertexIndex] = (offsetFlags shr 2).toByte()
+                    facesMaterial!![vertexIndex] = facesColor!![vertexIndex]
+                    facesColor!![vertexIndex] = 127
+                    if (facesMaterial!![vertexIndex] != (-1).toShort()) {
                         hasMaterials = true
                     }
                 } else {
-                    facesTexture!![i_35] = -1
-                    facesMaterial!![i_35] = -1
+                    facesTexture!![vertexIndex] = -1
+                    facesMaterial!![vertexIndex] = -1
                 }
             }
-            if (i_10 == 255) {
-                facesLayer!![i_35] = rsbytebuffer6.readByte()
+            if (modelPriority == 255) {
+                facesLayer!![vertexIndex] = vertexYBuf.readByte()
             }
-            if (i_11 == 1) {
-                facesAlpha!![i_35] = rsbytebuffer7.readByte()
+            if (hasFaceAlpha == 1) {
+                facesAlpha!![vertexIndex] = vertexZBuf.readByte()
             }
-            if (i_12 == 1) {
-                faceGroups!![i_35] = rsbytebuffer8.readUByte()
+            if (hasFaceSkins == 1) {
+                faceGroups!![vertexIndex] = vertexSkinBuf.readUByte()
             }
-            i_35++
+            vertexIndex++
         }
         maxDepth = -1
-        rsbytebuffer4.currentPosition = i_26
-        rsbytebuffer5.currentPosition = i_20
-        var s_43: Short = 0
-        var s_44: Short = 0
-        var s_45: Short = 0
-        var s_46: Short = 0
-        var i_40: Int
-        i_39 = 0
-        while (i_39 < numFaces) {
-            i_40 = rsbytebuffer5.readUByte()
-            if (i_40 == 1) {
-                s_43 = (rsbytebuffer4.readSmart() + s_46).toShort()
-                s_44 = (rsbytebuffer4.readSmart() + s_43).toShort()
-                s_45 = (rsbytebuffer4.readSmart() + s_44).toShort()
-                s_46 = s_45
-                facesA!![i_39] = s_43
-                facesB!![i_39] = s_44
-                facesC!![i_39] = s_45
-                if (s_43 > maxDepth) {
-                    maxDepth = s_43.toInt()
+        headerBuf.currentPosition = faceIndicesDataOffset
+        vertexXBuf.currentPosition = faceIndexTypesOffset
+        var a: Short = 0
+        var b: Short = 0
+        var c: Short = 0
+        var lastVertex: Short = 0
+        var mappingType: Int
+        faceIndex = 0
+        while (faceIndex < numFaces) {
+            mappingType = vertexXBuf.readUByte()
+            if (mappingType == 1) {
+                a = (headerBuf.readSmart() + lastVertex).toShort()
+                b = (headerBuf.readSmart() + a).toShort()
+                c = (headerBuf.readSmart() + b).toShort()
+                lastVertex = c
+                facesA!![faceIndex] = a
+                facesB!![faceIndex] = b
+                facesC!![faceIndex] = c
+                if (a > maxDepth) {
+                    maxDepth = a.toInt()
                 }
-                if (s_44 > maxDepth) {
-                    maxDepth = s_44.toInt()
+                if (b > maxDepth) {
+                    maxDepth = b.toInt()
                 }
-                if (s_45 > maxDepth) {
-                    maxDepth = s_45.toInt()
-                }
-            }
-            if (i_40 == 2) {
-                s_44 = s_45
-                s_45 = (rsbytebuffer4.readSmart() + s_46).toShort()
-                s_46 = s_45
-                facesA!![i_39] = s_43
-                facesB!![i_39] = s_44
-                facesC!![i_39] = s_45
-                if (s_45 > maxDepth) {
-                    maxDepth = s_45.toInt()
+                if (c > maxDepth) {
+                    maxDepth = c.toInt()
                 }
             }
-            if (i_40 == 3) {
-                s_43 = s_45
-                s_45 = (rsbytebuffer4.readSmart() + s_46).toShort()
-                s_46 = s_45
-                facesA!![i_39] = s_43
-                facesB!![i_39] = s_44
-                facesC!![i_39] = s_45
-                if (s_45 > maxDepth) {
-                    maxDepth = s_45.toInt()
+            if (mappingType == 2) {
+                b = c
+                c = (headerBuf.readSmart() + lastVertex).toShort()
+                lastVertex = c
+                facesA!![faceIndex] = a
+                facesB!![faceIndex] = b
+                facesC!![faceIndex] = c
+                if (c > maxDepth) {
+                    maxDepth = c.toInt()
                 }
             }
-            if (i_40 == 4) {
-                val s_41 = s_43
-                s_43 = s_44
-                s_44 = s_41
-                s_45 = (rsbytebuffer4.readSmart() + s_46).toShort()
-                s_46 = s_45
-                facesA!![i_39] = s_43
-                facesB!![i_39] = s_41
-                facesC!![i_39] = s_45
-                if (s_45 > maxDepth) {
-                    maxDepth = s_45.toInt()
+            if (mappingType == 3) {
+                a = c
+                c = (headerBuf.readSmart() + lastVertex).toShort()
+                lastVertex = c
+                facesA!![faceIndex] = a
+                facesB!![faceIndex] = b
+                facesC!![faceIndex] = c
+                if (c > maxDepth) {
+                    maxDepth = c.toInt()
                 }
             }
-            i_39++
+            if (mappingType == 4) {
+                val prevA = a
+                a = b
+                b = prevA
+                c = (headerBuf.readSmart() + lastVertex).toShort()
+                lastVertex = c
+                facesA!![faceIndex] = a
+                facesB!![faceIndex] = prevA
+                facesC!![faceIndex] = c
+                if (c > maxDepth) {
+                    maxDepth = c.toInt()
+                }
+            }
+            faceIndex++
         }
         maxDepth++
-        rsbytebuffer4.currentPosition = i_28
-        i_39 = 0
-        while (i_39 < numTextures) {
-            texturesMapping!![i_39] = 0
-            textureFaceX!![i_39] = rsbytebuffer4.readUShort().toShort()
-            textureFaceY!![i_39] = rsbytebuffer4.readUShort().toShort()
-            textureFaceZ!![i_39] = rsbytebuffer4.readUShort().toShort()
-            i_39++
+        headerBuf.currentPosition = textureTriOffset
+        faceIndex = 0
+        while (faceIndex < numTextures) {
+            texturesMapping!![faceIndex] = 0
+            textureFaceX!![faceIndex] = headerBuf.readUShort().toShort()
+            textureFaceY!![faceIndex] = headerBuf.readUShort().toShort()
+            textureFaceZ!![faceIndex] = headerBuf.readUShort().toShort()
+            faceIndex++
         }
         if (facesTexture != null) {
             var hasTextures = false
-            i_40 = 0
-            while (i_40 < numFaces) {
-                val textureIndex = facesTexture!![i_40].toInt() and 0xff
+            mappingType = 0
+            while (mappingType < numFaces) {
+                val textureIndex = facesTexture!![mappingType].toInt() and 0xff
                 if (textureIndex != 255) {
-                    if (facesA!![i_40] == (textureFaceX!![textureIndex].toInt() and 0xffff).toShort() && facesB!![i_40] == (textureFaceY!![textureIndex].toInt() and 0xffff).toShort() && facesC!![i_40] == (textureFaceZ!![textureIndex].toInt() and 0xffff).toShort()) {
-                        facesTexture!![i_40] = -1
+                    if (facesA!![mappingType] == (textureFaceX!![textureIndex].toInt() and 0xffff).toShort() && facesB!![mappingType] == (textureFaceY!![textureIndex].toInt() and 0xffff).toShort() && facesC!![mappingType] == (textureFaceZ!![textureIndex].toInt() and 0xffff).toShort()) {
+                        facesTexture!![mappingType] = -1
                     } else {
                         hasTextures = true
                     }
                 }
-                i_40++
+                mappingType++
             }
             if (!hasTextures) {
                 facesTexture = null
