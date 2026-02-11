@@ -28,320 +28,320 @@ class OpaqueFontRendererSM(
         }
     }
 
-    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean) {
-        var y = i_3
-        var x = i_2
+    override fun drawChar(glyphIndex: Int, drawX: Int, drawY: Int, color: Int, useAlpha: Boolean) {
+        var y = drawY
+        var x = drawX
         if (this.toolkit.colourBuffer != null) {
-            x += this.spriteMinX[var_1]
-            y += this.spriteMinY[var_1]
-            var i_6 = this.glyphWidths[var_1]
-            var i_7 = this.glyphHeights[var_1]
-            val i_8 = this.toolkit.viewportWidth
-            var i_9 = y * i_8 + x
-            var i_10 = i_8 - i_6
-            var i_11 = 0
-            var i_12 = 0
-            var i_13: Int
+            x += this.spriteMinX[glyphIndex]
+            y += this.spriteMinY[glyphIndex]
+            var glyphWidth = this.glyphWidths[glyphIndex]
+            var glyphHeight = this.glyphHeights[glyphIndex]
+            val viewportWidth = this.toolkit.viewportWidth
+            var pixelIndex = y * viewportWidth + x
+            var dstRowPadding = viewportWidth - glyphWidth
+            var srcRowPadding = 0
+            var srcOffset = 0
+            var clippedAmount: Int
             if (y < this.toolkit.clipTop) {
-                i_13 = this.toolkit.clipTop - y
-                i_7 -= i_13
+                clippedAmount = this.toolkit.clipTop - y
+                glyphHeight -= clippedAmount
                 y = this.toolkit.clipTop
-                i_12 += i_6 * i_13
-                i_9 += i_8 * i_13
+                srcOffset += glyphWidth * clippedAmount
+                pixelIndex += viewportWidth * clippedAmount
             }
 
-            if (y + i_7 > this.toolkit.clipBottom) {
-                i_7 -= y + i_7 - this.toolkit.clipBottom
+            if (y + glyphHeight > this.toolkit.clipBottom) {
+                glyphHeight -= y + glyphHeight - this.toolkit.clipBottom
             }
 
             if (x < this.toolkit.clipLeft) {
-                i_13 = this.toolkit.clipLeft - x
-                i_6 -= i_13
+                clippedAmount = this.toolkit.clipLeft - x
+                glyphWidth -= clippedAmount
                 x = this.toolkit.clipLeft
-                i_12 += i_13
-                i_9 += i_13
-                i_11 += i_13
-                i_10 += i_13
+                srcOffset += clippedAmount
+                pixelIndex += clippedAmount
+                srcRowPadding += clippedAmount
+                dstRowPadding += clippedAmount
             }
 
-            if (i_6 + x > this.toolkit.clipRight) {
-                i_13 = i_6 + x - this.toolkit.clipRight
-                i_6 -= i_13
-                i_11 += i_13
-                i_10 += i_13
+            if (glyphWidth + x > this.toolkit.clipRight) {
+                clippedAmount = glyphWidth + x - this.toolkit.clipRight
+                glyphWidth -= clippedAmount
+                srcRowPadding += clippedAmount
+                dstRowPadding += clippedAmount
             }
 
-            if (i_6 > 0 && i_7 > 0) {
-                if ((i_4 and 0xffffff.inv()) == 0xffffff.inv()) {
-                    drawGlyphOpaque(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
-                } else if ((i_4 and 0xffffff.inv()) != 0) {
-                    blendImage(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_12, i_9, i_6, i_7, i_10, i_11)
+            if (glyphWidth > 0 && glyphHeight > 0) {
+                if ((color and 0xffffff.inv()) == 0xffffff.inv()) {
+                    drawGlyphOpaque(this.spritePixels[glyphIndex]!!, this.toolkit.colourBuffer!!, color, srcOffset, pixelIndex, glyphWidth, glyphHeight, dstRowPadding, srcRowPadding)
+                } else if ((color and 0xffffff.inv()) != 0) {
+                    blendImage(this.spritePixels[glyphIndex]!!, this.toolkit.colourBuffer!!, color, srcOffset, pixelIndex, glyphWidth, glyphHeight, dstRowPadding, srcRowPadding)
                 }
             }
         }
     }
 
-    override fun drawChar(var_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean, dimension: ComponentSurface, i_7: Int, i_8: Int) {
-        var i_31 = i_3
-        var i_21 = i_2
+    override fun drawChar(glyphIndex: Int, drawX: Int, drawY: Int, color: Int, useAlpha: Boolean, dimension: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
+        var y = drawY
+        var x = drawX
         if (this.toolkit.colourBuffer != null) {
             if (dimension == null) {
-                drawChar(var_1, i_21, i_31, i_4, bool5)
+                drawChar(glyphIndex, x, y, color, useAlpha)
             } else {
-                i_21 += this.spriteMinX[var_1]
-                i_31 += this.spriteMinY[var_1]
-                var i_9 = this.glyphWidths[var_1]
-                var i_10 = this.glyphHeights[var_1]
-                val i_11 = this.toolkit.viewportWidth
-                var i_12 = i_31 * i_11 + i_21
-                var i_13 = i_11 - i_9
-                var i_14 = 0
-                var i_15 = 0
-                var i_16: Int
-                if (i_31 < this.toolkit.clipTop) {
-                    i_16 = this.toolkit.clipTop - i_31
-                    i_10 -= i_16
-                    i_31 = this.toolkit.clipTop
-                    i_15 += i_9 * i_16
-                    i_12 += i_11 * i_16
+                x += this.spriteMinX[glyphIndex]
+                y += this.spriteMinY[glyphIndex]
+                var glyphWidth = this.glyphWidths[glyphIndex]
+                var glyphHeight = this.glyphHeights[glyphIndex]
+                val viewportWidth = this.toolkit.viewportWidth
+                var pixelIndex = y * viewportWidth + x
+                var dstRowPadding = viewportWidth - glyphWidth
+                var srcRowPadding = 0
+                var srcOffset = 0
+                var clippedAmount: Int
+                if (y < this.toolkit.clipTop) {
+                    clippedAmount = this.toolkit.clipTop - y
+                    glyphHeight -= clippedAmount
+                    y = this.toolkit.clipTop
+                    srcOffset += glyphWidth * clippedAmount
+                    pixelIndex += viewportWidth * clippedAmount
                 }
 
-                if (i_31 + i_10 > this.toolkit.clipBottom) {
-                    i_10 -= i_31 + i_10 - this.toolkit.clipBottom
+                if (y + glyphHeight > this.toolkit.clipBottom) {
+                    glyphHeight -= y + glyphHeight - this.toolkit.clipBottom
                 }
 
-                if (i_21 < this.toolkit.clipLeft) {
-                    i_16 = this.toolkit.clipLeft - i_21
-                    i_9 -= i_16
-                    i_21 = this.toolkit.clipLeft
-                    i_15 += i_16
-                    i_12 += i_16
-                    i_14 += i_16
-                    i_13 += i_16
+                if (x < this.toolkit.clipLeft) {
+                    clippedAmount = this.toolkit.clipLeft - x
+                    glyphWidth -= clippedAmount
+                    x = this.toolkit.clipLeft
+                    srcOffset += clippedAmount
+                    pixelIndex += clippedAmount
+                    srcRowPadding += clippedAmount
+                    dstRowPadding += clippedAmount
                 }
 
-                if (i_9 + i_21 > this.toolkit.clipRight) {
-                    i_16 = i_9 + i_21 - this.toolkit.clipRight
-                    i_9 -= i_16
-                    i_14 += i_16
-                    i_13 += i_16
+                if (glyphWidth + x > this.toolkit.clipRight) {
+                    clippedAmount = glyphWidth + x - this.toolkit.clipRight
+                    glyphWidth -= clippedAmount
+                    srcRowPadding += clippedAmount
+                    dstRowPadding += clippedAmount
                 }
 
-                if (i_9 > 0 && i_10 > 0) {
-                    if ((i_4 and 0xffffff.inv()) == 0xffffff.inv()) {
-                        drawImage(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.glyphWidths[var_1], dimension, i_7, i_8)
+                if (glyphWidth > 0 && glyphHeight > 0) {
+                    if ((color and 0xffffff.inv()) == 0xffffff.inv()) {
+                        drawImage(this.spritePixels[glyphIndex]!!, this.toolkit.colourBuffer!!, color, srcOffset, pixelIndex, glyphWidth, glyphHeight, dstRowPadding, srcRowPadding, x, y, this.glyphWidths[glyphIndex], dimension, surfaceOffsetX, surfaceOffsetY)
                     } else {
-                        drawGlyphBlendedMasked(this.spritePixels[var_1]!!, this.toolkit.colourBuffer!!, i_4, i_15, i_12, i_9, i_10, i_13, i_14, i_21, i_31, this.glyphWidths[var_1], dimension, i_7, i_8)
+                        drawGlyphBlendedMasked(this.spritePixels[glyphIndex]!!, this.toolkit.colourBuffer!!, color, srcOffset, pixelIndex, glyphWidth, glyphHeight, dstRowPadding, srcRowPadding, x, y, this.glyphWidths[glyphIndex], dimension, surfaceOffsetX, surfaceOffsetY)
                     }
                 }
             }
         }
     }
 
-    fun drawGlyphOpaque(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int) {
-        var dstPos = i_4
-        var srcPos = i_5
-        val i_10 = -(i_6 shr 2)
-        val negWidth = -(i_6 and 0x3)
+    fun drawGlyphOpaque(glyphData: ByteArray, pixels: IntArray, color: Int, glyphOffset: Int, pixelOffset: Int, width: Int, height: Int, dstRowPadding: Int, srcRowPadding: Int) {
+        var glyphPos = glyphOffset
+        var pixelPos = pixelOffset
+        val unrolledCount = -(width shr 2)
+        val remainderCount = -(width and 0x3)
 
-        for (i_11 in -i_7 until 0) {
-            var i_12: Int
-            i_12 = i_10
-            while (i_12 < 0) {
-                if (bytes_1[dstPos++] != 0.toByte()) {
-                    ints_2[srcPos++] = i_3
+        for (row in -height until 0) {
+            var col: Int
+            col = unrolledCount
+            while (col < 0) {
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    pixels[pixelPos++] = color
                 } else {
-                    ++srcPos
+                    ++pixelPos
                 }
 
-                if (bytes_1[dstPos++] != 0.toByte()) {
-                    ints_2[srcPos++] = i_3
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    pixels[pixelPos++] = color
                 } else {
-                    ++srcPos
+                    ++pixelPos
                 }
 
-                if (bytes_1[dstPos++] != 0.toByte()) {
-                    ints_2[srcPos++] = i_3
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    pixels[pixelPos++] = color
                 } else {
-                    ++srcPos
+                    ++pixelPos
                 }
 
-                if (bytes_1[dstPos++] != 0.toByte()) {
-                    ints_2[srcPos++] = i_3
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    pixels[pixelPos++] = color
                 } else {
-                    ++srcPos
+                    ++pixelPos
                 }
-                i_12++
+                col++
             }
 
-            i_12 = negWidth
-            while (i_12 < 0) {
-                if (bytes_1[dstPos++] != 0.toByte()) {
-                    ints_2[srcPos++] = i_3
+            col = remainderCount
+            while (col < 0) {
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    pixels[pixelPos++] = color
                 } else {
-                    ++srcPos
+                    ++pixelPos
                 }
-                i_12++
+                col++
             }
 
-            srcPos += i_8
-            dstPos += i_9
+            pixelPos += dstRowPadding
+            glyphPos += srcRowPadding
         }
     }
 
     /**
      * Applies an alpha-blended color transformation to a rectangular region
      */
-    fun blendImage(palette: ByteArray, pixels: IntArray, color: Int, dstPos: Int, srcPos: Int, width: Int, height: Int, srcScanSize: Int, dstScanSize: Int) {
-        var currentDstPos = dstPos
-        var currentSrcPos = srcPos
+    fun blendImage(glyphData: ByteArray, pixels: IntArray, color: Int, glyphOffset: Int, pixelOffset: Int, width: Int, height: Int, dstRowPadding: Int, srcRowPadding: Int) {
+        var glyphPos = glyphOffset
+        var pixelPos = pixelOffset
         val alpha = color ushr 24
         val invAlpha = 255 - alpha
 
-        for (y in -height until 0) {
-            for (x in -width until 0) {
-                if (palette[currentDstPos++] != 0.toByte()) {
-                    val blendedPixel = (alpha * (color and 0xff00) and 0xff0000) + ((color and 0xff00ff) * alpha and -16711936) shr 8
-                    val dstPixel = pixels[currentSrcPos]
-                    pixels[currentSrcPos++] = blendedPixel + ((invAlpha * (dstPixel and 0xff00) and 0xff0000) + ((dstPixel and 0xff00ff) * invAlpha and -16711936) shr 8)
+        for (row in -height until 0) {
+            for (col in -width until 0) {
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    val blendedSrc = (alpha * (color and 0xff00) and 0xff0000) + ((color and 0xff00ff) * alpha and -16711936) shr 8
+                    val dstPixel = pixels[pixelPos]
+                    pixels[pixelPos++] = blendedSrc + ((invAlpha * (dstPixel and 0xff00) and 0xff0000) + ((dstPixel and 0xff00ff) * invAlpha and -16711936) shr 8)
                 } else {
-                    currentSrcPos++
+                    pixelPos++
                 }
             }
 
-            currentSrcPos += srcScanSize
-            currentDstPos += dstScanSize
+            pixelPos += dstRowPadding
+            glyphPos += srcRowPadding
         }
     }
 
-    fun drawImage(palette: ByteArray, pixels: IntArray, color: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, class45513: ComponentSurface, i_14: Int, i_15: Int) {
-        var dstPos = i_4
-        var srcPos = i_5
-        val packetsdecoder16 = class45513 as ComponentDimensionSM
-        val offsetsX = packetsdecoder16.rowStartX
-        val offsetsY = packetsdecoder16.rowWidth
-        var i_19 = i_11
-        if (i_15 > i_11) {
-            i_19 = i_15
-            srcPos += this.toolkit.viewportWidth * (i_15 - i_11)
-            dstPos += (i_15 - i_11) * i_12
+    fun drawImage(glyphData: ByteArray, pixels: IntArray, color: Int, glyphOffset: Int, pixelOffset: Int, clippedWidth: Int, clippedHeight: Int, dstRowPadding: Int, srcRowPadding: Int, drawX: Int, drawY: Int, fullGlyphWidth: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
+        var glyphPos = glyphOffset
+        var pixelPos = pixelOffset
+        val dimensionSM = surface as ComponentDimensionSM
+        val rowStartXArr = dimensionSM.rowStartX
+        val rowWidthArr = dimensionSM.rowWidth
+        var currentY = drawY
+        if (surfaceOffsetY > drawY) {
+            currentY = surfaceOffsetY
+            pixelPos += this.toolkit.viewportWidth * (surfaceOffsetY - drawY)
+            glyphPos += (surfaceOffsetY - drawY) * fullGlyphWidth
         }
 
-        val i_20 = Math.min(offsetsX.size + i_15, i_11 + i_7)
+        val maxY = Math.min(rowStartXArr.size + surfaceOffsetY, drawY + clippedHeight)
 
-        for (i_21 in i_19 until i_20) {
-            var offX = offsetsX[i_21 - i_15] + i_14
-            var offY = offsetsY[i_21 - i_15]
-            var i_24 = i_6
-            val i_25: Int
-            if (i_10 > offX) {
-                i_25 = i_10 - offX
-                if (i_25 >= offY) {
-                    dstPos += i_9 + i_6
-                    srcPos += i_8 + i_6
+        for (scanlineY in currentY until maxY) {
+            var rowStartX = rowStartXArr[scanlineY - surfaceOffsetY] + surfaceOffsetX
+            var rowWidth = rowWidthArr[scanlineY - surfaceOffsetY]
+            var remainingWidth = clippedWidth
+            val adjustAmount: Int
+            if (drawX > rowStartX) {
+                adjustAmount = drawX - rowStartX
+                if (adjustAmount >= rowWidth) {
+                    glyphPos += srcRowPadding + clippedWidth
+                    pixelPos += dstRowPadding + clippedWidth
                     continue
                 }
 
-                offY -= i_25
+                rowWidth -= adjustAmount
             } else {
-                i_25 = offX - i_10
-                if (i_25 >= i_6) {
-                    dstPos += i_9 + i_6
-                    srcPos += i_8 + i_6
+                adjustAmount = rowStartX - drawX
+                if (adjustAmount >= clippedWidth) {
+                    glyphPos += srcRowPadding + clippedWidth
+                    pixelPos += dstRowPadding + clippedWidth
                     continue
                 }
 
-                dstPos += i_25
-                i_24 = i_6 - i_25
-                srcPos += i_25
+                glyphPos += adjustAmount
+                remainingWidth = clippedWidth - adjustAmount
+                pixelPos += adjustAmount
             }
 
             val skipCount: Int
-            if (i_24 < offY) {
-                offY = i_24
+            if (remainingWidth < rowWidth) {
+                rowWidth = remainingWidth
                 skipCount = 0
             } else {
-                skipCount = i_24 - offY
+                skipCount = remainingWidth - rowWidth
             }
 
-            for (i_26 in 0 until offY) {
-                if (palette[dstPos++] != 0.toByte()) {
-                    pixels[srcPos++] = color
+            for (col in 0 until rowWidth) {
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    pixels[pixelPos++] = color
                 } else {
-                    srcPos++
+                    pixelPos++
                 }
             }
 
-            dstPos = skipCount + dstPos + i_9
-            srcPos += skipCount + i_8
+            glyphPos = skipCount + glyphPos + srcRowPadding
+            pixelPos += skipCount + dstRowPadding
         }
     }
 
-    fun drawGlyphBlendedMasked(bytes_1: ByteArray, ints_2: IntArray, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int, class45513: ComponentSurface, i_14: Int, i_15: Int) {
-        var dstPos = i_4
-        var srcPos = i_5
-        val packetsdecoder16 = class45513 as ComponentDimensionSM
-        val ints_17 = packetsdecoder16.rowStartX
-        val ints_18 = packetsdecoder16.rowWidth
-        val i_19 = i_10 - this.toolkit.clipLeft
-        var i_20 = i_11
-        if (i_15 > i_11) {
-            i_20 = i_15
-            srcPos += this.toolkit.viewportWidth * (i_15 - i_11)
-            dstPos += (i_15 - i_11) * i_12
+    fun drawGlyphBlendedMasked(glyphData: ByteArray, pixels: IntArray, color: Int, glyphOffset: Int, pixelOffset: Int, clippedWidth: Int, clippedHeight: Int, dstRowPadding: Int, srcRowPadding: Int, drawX: Int, drawY: Int, fullGlyphWidth: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
+        var glyphPos = glyphOffset
+        var pixelPos = pixelOffset
+        val dimensionSM = surface as ComponentDimensionSM
+        val rowStartXArr = dimensionSM.rowStartX
+        val rowWidthArr = dimensionSM.rowWidth
+        val relativeDrawX = drawX - this.toolkit.clipLeft
+        var currentY = drawY
+        if (surfaceOffsetY > drawY) {
+            currentY = surfaceOffsetY
+            pixelPos += this.toolkit.viewportWidth * (surfaceOffsetY - drawY)
+            glyphPos += (surfaceOffsetY - drawY) * fullGlyphWidth
         }
 
-        val i_21 = Math.min(ints_17.size + i_15, i_11 + i_7)
-        val i_22 = i_3 ushr 24
-        val i_23 = 255 - i_22
+        val maxY = Math.min(rowStartXArr.size + surfaceOffsetY, drawY + clippedHeight)
+        val alpha = color ushr 24
+        val invAlpha = 255 - alpha
 
-        for (i_24 in i_20 until i_21) {
-            var i_25 = ints_17[i_24 - i_15] + i_14
-            var i_26 = ints_18[i_24 - i_15]
-            var i_27 = i_6
-            val i_28: Int
-            if (i_19 > i_25) {
-                i_28 = i_19 - i_25
-                if (i_28 >= i_26) {
-                    dstPos += i_9 + i_6
-                    srcPos += i_8 + i_6
+        for (scanlineY in currentY until maxY) {
+            var rowStartX = rowStartXArr[scanlineY - surfaceOffsetY] + surfaceOffsetX
+            var rowWidth = rowWidthArr[scanlineY - surfaceOffsetY]
+            var remainingWidth = clippedWidth
+            val adjustAmount: Int
+            if (relativeDrawX > rowStartX) {
+                adjustAmount = relativeDrawX - rowStartX
+                if (adjustAmount >= rowWidth) {
+                    glyphPos += srcRowPadding + clippedWidth
+                    pixelPos += dstRowPadding + clippedWidth
                     continue
                 }
 
-                i_26 -= i_28
+                rowWidth -= adjustAmount
             } else {
-                i_28 = i_25 - i_19
-                if (i_28 >= i_6) {
-                    dstPos += i_9 + i_6
-                    srcPos += i_8 + i_6
+                adjustAmount = rowStartX - relativeDrawX
+                if (adjustAmount >= clippedWidth) {
+                    glyphPos += srcRowPadding + clippedWidth
+                    pixelPos += dstRowPadding + clippedWidth
                     continue
                 }
 
-                dstPos += i_28
-                i_27 = i_6 - i_28
-                srcPos += i_28
+                glyphPos += adjustAmount
+                remainingWidth = clippedWidth - adjustAmount
+                pixelPos += adjustAmount
             }
 
             val skipCount: Int
-            if (i_27 < i_26) {
-                i_26 = i_27
+            if (remainingWidth < rowWidth) {
+                rowWidth = remainingWidth
                 skipCount = 0
             } else {
-                skipCount = i_27 - i_26
+                skipCount = remainingWidth - rowWidth
             }
 
-            for (i_29 in -i_26 until 0) {
-                if (bytes_1[dstPos++] != 0.toByte()) {
-                    val i_30 = (i_22 * (i_3 and 0xff00) and 0xff0000) + ((i_3 and 0xff00ff) * i_22 and -16711936) shr 8
-                    val i_31 = ints_2[srcPos]
-                    ints_2[srcPos++] = (((i_31 and 0xff00ff) * i_23 and -16711936) + (i_23 * (i_31 and 0xff00) and 0xff0000) shr 8) + i_30
+            for (col in -rowWidth until 0) {
+                if (glyphData[glyphPos++] != 0.toByte()) {
+                    val blendedSrc = (alpha * (color and 0xff00) and 0xff0000) + ((color and 0xff00ff) * alpha and -16711936) shr 8
+                    val dstPixel = pixels[pixelPos]
+                    pixels[pixelPos++] = (((dstPixel and 0xff00ff) * invAlpha and -16711936) + (invAlpha * (dstPixel and 0xff00) and 0xff0000) shr 8) + blendedSrc
                 } else {
-                    ++srcPos
+                    ++pixelPos
                 }
             }
 
-            dstPos = skipCount + dstPos + i_9
-            srcPos += skipCount + i_8
+            glyphPos = skipCount + glyphPos + srcRowPadding
+            pixelPos += skipCount + dstRowPadding
         }
     }
 }

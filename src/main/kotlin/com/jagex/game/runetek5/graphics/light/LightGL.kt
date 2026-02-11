@@ -17,7 +17,7 @@ class LightGL(
     val toolkit: OpenGlToolkit,
     val ground: GroundGL,
     val pointLight: PointLight,
-    ints_4: IntArray
+    tileMask: IntArray
 ) : Node<LightGL>() {
     var vertexCount: Int = 0
     val minTileX: Int
@@ -37,60 +37,60 @@ class LightGL(
     var totalIndexCount: Int = 0
 
     init {
-        val i_5 = this.pointLight.getSize2d() - (ground.tileUnits shr 1)
-        this.minTileX = this.pointLight.getX() - i_5 shr ground.tileScale
-        this.maxTileX = this.pointLight.getX() + i_5 shr ground.tileScale
-        this.minTileZ = this.pointLight.getZ() - i_5 shr ground.tileScale
-        this.maxTileZ = this.pointLight.getZ() + i_5 shr ground.tileScale
-        val i_6 = this.maxTileX - this.minTileX + 1
-        val i_7 = this.maxTileZ - this.minTileZ + 1
-        this.tileNormalsX = Array(i_6 + 1) { FloatArray(i_7 + 1) }
-        this.tileNormalsY = Array(i_6 + 1) { FloatArray(i_7 + 1) }
-        this.tileNormalsZ = Array(i_6 + 1) { FloatArray(i_7 + 1) }
+        val lightRadius = this.pointLight.getSize2d() - (ground.tileUnits shr 1)
+        this.minTileX = this.pointLight.getX() - lightRadius shr ground.tileScale
+        this.maxTileX = this.pointLight.getX() + lightRadius shr ground.tileScale
+        this.minTileZ = this.pointLight.getZ() - lightRadius shr ground.tileScale
+        this.maxTileZ = this.pointLight.getZ() + lightRadius shr ground.tileScale
+        val tileRangeX = this.maxTileX - this.minTileX + 1
+        val tileRangeZ = this.maxTileZ - this.minTileZ + 1
+        this.tileNormalsX = Array(tileRangeX + 1) { FloatArray(tileRangeZ + 1) }
+        this.tileNormalsY = Array(tileRangeX + 1) { FloatArray(tileRangeZ + 1) }
+        this.tileNormalsZ = Array(tileRangeX + 1) { FloatArray(tileRangeZ + 1) }
 
-        var i_8: Int
-        var i_9: Int
-        var i_10: Int
-        var i_11: Int
-        var i_12: Int
-        var i_13: Int
-        i_8 = 0
-        while (i_8 <= i_7) {
-            i_9 = i_8 + this.minTileZ
-            if (i_9 > 0 && i_9 < this.ground.length - 1) {
-                i_10 = 0
-                while (i_10 <= i_6) {
-                    i_11 = i_10 + this.minTileX
-                    if (i_11 > 0 && i_11 < this.ground.width - 1) {
-                        i_12 = ground.getHeight(i_11 + 1, i_9) - ground.getHeight(i_11 - 1, i_9)
-                        i_13 = ground.getHeight(i_11, i_9 + 1) - ground.getHeight(i_11, i_9 - 1)
-                        val f_14 = (1.0 / sqrt((i_12 * i_12 + i_13 * i_13 + 65536).toDouble())).toFloat()
-                        this.tileNormalsX!![i_10][i_8] = i_12 * f_14
-                        this.tileNormalsY!![i_10][i_8] = -256.0f * f_14
-                        this.tileNormalsZ!![i_10][i_8] = i_13 * f_14
+        var tileZ: Int
+        var tileAbsZ: Int
+        var tileX: Int
+        var tileAbsX: Int
+        var heightDeltaX: Int
+        var heightDeltaZ: Int
+        tileZ = 0
+        while (tileZ <= tileRangeZ) {
+            tileAbsZ = tileZ + this.minTileZ
+            if (tileAbsZ > 0 && tileAbsZ < this.ground.length - 1) {
+                tileX = 0
+                while (tileX <= tileRangeX) {
+                    tileAbsX = tileX + this.minTileX
+                    if (tileAbsX > 0 && tileAbsX < this.ground.width - 1) {
+                        heightDeltaX = ground.getHeight(tileAbsX + 1, tileAbsZ) - ground.getHeight(tileAbsX - 1, tileAbsZ)
+                        heightDeltaZ = ground.getHeight(tileAbsX, tileAbsZ + 1) - ground.getHeight(tileAbsX, tileAbsZ - 1)
+                        val invMagnitude = (1.0 / sqrt((heightDeltaX * heightDeltaX + heightDeltaZ * heightDeltaZ + 65536).toDouble())).toFloat()
+                        this.tileNormalsX!![tileX][tileZ] = heightDeltaX * invMagnitude
+                        this.tileNormalsY!![tileX][tileZ] = -256.0f * invMagnitude
+                        this.tileNormalsZ!![tileX][tileZ] = heightDeltaZ * invMagnitude
                     }
-                    i_10++
+                    tileX++
                 }
             }
-            i_8++
+            tileZ++
         }
 
-        i_8 = 0
+        tileZ = 0
 
-        i_9 = this.minTileZ
-        while (i_9 <= this.maxTileZ) {
-            if (i_9 >= 0 && i_9 < ground.length) {
-                i_10 = this.minTileX
-                while (i_10 <= this.maxTileX) {
-                    if (i_10 >= 0 && i_10 < ground.width) {
-                        i_11 = ints_4[i_8]
-                        val ints_19 = ground.tileColors!![i_10][i_9]
-                        if (ints_19 != null && i_11 != 0) {
-                            if (i_11 == 1) {
-                                i_13 = 0
+        tileAbsZ = this.minTileZ
+        while (tileAbsZ <= this.maxTileZ) {
+            if (tileAbsZ >= 0 && tileAbsZ < ground.length) {
+                tileX = this.minTileX
+                while (tileX <= this.maxTileX) {
+                    if (tileX >= 0 && tileX < ground.width) {
+                        tileAbsX = tileMask[tileZ]
+                        val tileColors = ground.tileColors!![tileX][tileAbsZ]
+                        if (tileColors != null && tileAbsX != 0) {
+                            if (tileAbsX == 1) {
+                                heightDeltaZ = 0
 
-                                while (i_13 < ints_19.size) {
-                                    if (ints_19[i_13++] != -1 && ints_19[i_13++] != -1 && ints_19[i_13++] != -1) {
+                                while (heightDeltaZ < tileColors.size) {
+                                    if (tileColors[heightDeltaZ++] != -1 && tileColors[heightDeltaZ++] != -1 && tileColors[heightDeltaZ++] != -1) {
                                         this.totalIndexCount += 3
                                     }
                                 }
@@ -100,71 +100,71 @@ class LightGL(
                         }
                     }
 
-                    ++i_8
-                    i_10++
+                    ++tileZ
+                    tileX++
                 }
             } else {
-                i_8 += this.maxTileX - this.minTileX
+                tileZ += this.maxTileX - this.minTileX
             }
-            i_9++
+            tileAbsZ++
         }
 
         if (this.totalIndexCount > 0) {
             this.indexPacket = Packet(this.totalIndexCount * 2)
             this.bitBuffer = GlBitBuffer(this.totalIndexCount * 16)
             this.vertexHashTable = HashTable(MathUtils.nextPowerOfTwo(this.totalIndexCount))
-            i_9 = 0
-            i_8 = 0
+            tileAbsZ = 0
+            tileZ = 0
 
-            i_10 = this.minTileZ
-            while (i_10 <= this.maxTileZ) {
-                if (i_10 >= 0 && i_10 < ground.length) {
-                    i_11 = 0
+            tileX = this.minTileZ
+            while (tileX <= this.maxTileZ) {
+                if (tileX >= 0 && tileX < ground.length) {
+                    tileAbsX = 0
 
-                    i_12 = this.minTileX
-                    while (i_12 <= this.maxTileX) {
-                        if (i_12 >= 0 && i_12 < ground.width) {
-                            i_13 = ints_4[i_8]
-                            val ints_18 = ground.tileColors!![i_12][i_10]
-                            if (ints_18 != null && i_13 != 0) {
-                                if (i_13 != 1) {
-                                    if (i_13 == 3) {
-                                        addVertex(i_11, i_9, i_12, i_10, 0, 0)
-                                        addVertex(i_11, i_9, i_12, i_10, ground.tileUnits, 0)
-                                        addVertex(i_11, i_9, i_12, i_10, 0, ground.tileUnits)
-                                    } else if (i_13 == 2) {
-                                        addVertex(i_11, i_9, i_12, i_10, ground.tileUnits, 0)
-                                        addVertex(i_11, i_9, i_12, i_10, ground.tileUnits, ground.tileUnits)
-                                        addVertex(i_11, i_9, i_12, i_10, 0, 0)
-                                    } else if (i_13 == 5) {
-                                        addVertex(i_11, i_9, i_12, i_10, ground.tileUnits, ground.tileUnits)
-                                        addVertex(i_11, i_9, i_12, i_10, 0, ground.tileUnits)
-                                        addVertex(i_11, i_9, i_12, i_10, ground.tileUnits, 0)
-                                    } else if (i_13 == 4) {
-                                        addVertex(i_11, i_9, i_12, i_10, 0, ground.tileUnits)
-                                        addVertex(i_11, i_9, i_12, i_10, 0, 0)
-                                        addVertex(i_11, i_9, i_12, i_10, ground.tileUnits, ground.tileUnits)
+                    heightDeltaX = this.minTileX
+                    while (heightDeltaX <= this.maxTileX) {
+                        if (heightDeltaX >= 0 && heightDeltaX < ground.width) {
+                            heightDeltaZ = tileMask[tileZ]
+                            val tileColors = ground.tileColors!![heightDeltaX][tileX]
+                            if (tileColors != null && heightDeltaZ != 0) {
+                                if (heightDeltaZ != 1) {
+                                    if (heightDeltaZ == 3) {
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, 0, 0)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, ground.tileUnits, 0)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, 0, ground.tileUnits)
+                                    } else if (heightDeltaZ == 2) {
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, ground.tileUnits, 0)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, ground.tileUnits, ground.tileUnits)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, 0, 0)
+                                    } else if (heightDeltaZ == 5) {
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, ground.tileUnits, ground.tileUnits)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, 0, ground.tileUnits)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, ground.tileUnits, 0)
+                                    } else if (heightDeltaZ == 4) {
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, 0, ground.tileUnits)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, 0, 0)
+                                        addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, ground.tileUnits, ground.tileUnits)
                                     }
                                 } else {
-                                    val ints_15 = ground.tileOffsetsX!![i_12][i_10]
-                                    val ints_16 = ground.tileOffsetsZ!![i_12][i_10]
-                                    var i_17 = 0
+                                    val tileOffsetsX = ground.tileOffsetsX!![heightDeltaX][tileX]
+                                    val tileOffsetsZ = ground.tileOffsetsZ!![heightDeltaX][tileX]
+                                    var colorIndex = 0
 
                                     label108@ while (true) {
                                         while (true) {
-                                            if (i_17 >= ints_18.size) {
+                                            if (colorIndex >= tileColors.size) {
                                                 break@label108
                                             }
 
-                                            if (ints_18[i_17] != -1 && ints_18[i_17 + 1] != -1 && ints_18[i_17 + 2] != -1) {
-                                                addVertex(i_11, i_9, i_12, i_10, ints_15!![i_17], ints_16!![i_17])
-                                                ++i_17
-                                                addVertex(i_11, i_9, i_12, i_10, ints_15!![i_17], ints_16!![i_17])
-                                                ++i_17
-                                                addVertex(i_11, i_9, i_12, i_10, ints_15!![i_17], ints_16!![i_17])
-                                                ++i_17
+                                            if (tileColors[colorIndex] != -1 && tileColors[colorIndex + 1] != -1 && tileColors[colorIndex + 2] != -1) {
+                                                addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, tileOffsetsX!![colorIndex], tileOffsetsZ!![colorIndex])
+                                                ++colorIndex
+                                                addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, tileOffsetsX!![colorIndex], tileOffsetsZ!![colorIndex])
+                                                ++colorIndex
+                                                addVertex(tileAbsX, tileAbsZ, heightDeltaX, tileX, tileOffsetsX!![colorIndex], tileOffsetsZ!![colorIndex])
+                                                ++colorIndex
                                             } else {
-                                                i_17 += 3
+                                                colorIndex += 3
                                             }
                                         }
                                     }
@@ -172,16 +172,16 @@ class LightGL(
                             }
                         }
 
-                        ++i_8
-                        ++i_11
-                        i_12++
+                        ++tileZ
+                        ++tileAbsX
+                        heightDeltaX++
                     }
                 } else {
-                    i_8 += this.maxTileX - this.minTileX
+                    tileZ += this.maxTileX - this.minTileX
                 }
 
-                ++i_9
-                i_10++
+                ++tileAbsZ
+                tileX++
             }
 
             this.indexBuffer = this.toolkit.createElementsArrayBuffer(this.indexPacket!!.buffer, this.indexPacket!!.currentPosition, false)
@@ -203,89 +203,89 @@ class LightGL(
         this.tileNormalsX = null
     }
 
-    fun writeIndex(s_1: Short) {
+    fun writeIndex(index: Short) {
         if (this.toolkit.bigEndianess) {
-            this.indexPacket!!.writeShort(s_1.toInt())
+            this.indexPacket!!.writeShort(index.toInt())
         } else {
-            this.indexPacket!!.writeShortLittle(s_1.toInt())
+            this.indexPacket!!.writeShortLittle(index.toInt())
         }
     }
 
-    fun addVertex(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-        var long_7 = -1L
-        val i_9 = i_5 + (i_3 shl this.ground.tileScale)
-        val i_10 = (i_4 shl this.ground.tileScale) + i_6
-        val i_11 = this.ground.getAverageHeight(i_9, i_10)
-        if ((i_5 and 0x7f) == 0 || (i_6 and 0x7f) == 0) {
-            long_7 = (i_10.toLong() and 0xffffL) shl 16 or (i_9.toLong() and 0xffffL)
-            val node29 = this.vertexHashTable!!.get(long_7)
-            if (node29 != null) {
-                writeIndex((node29 as ShortNode).value)
+    fun addVertex(localTileX: Int, localTileZ: Int, tileX: Int, tileZ: Int, offsetX: Int, offsetZ: Int) {
+        var hashKey = -1L
+        val sceneX = offsetX + (tileX shl this.ground.tileScale)
+        val sceneZ = (tileZ shl this.ground.tileScale) + offsetZ
+        val sceneY = this.ground.getAverageHeight(sceneX, sceneZ)
+        if ((offsetX and 0x7f) == 0 || (offsetZ and 0x7f) == 0) {
+            hashKey = (sceneZ.toLong() and 0xffffL) shl 16 or (sceneX.toLong() and 0xffffL)
+            val existingNode = this.vertexHashTable!!.get(hashKey)
+            if (existingNode != null) {
+                writeIndex((existingNode as ShortNode).value)
                 return
             }
         }
 
-        val s_12 = (this.vertexCount++).toShort()
-        if (long_7 != -1L) {
-            this.vertexHashTable!!.put(ShortNode(s_12), long_7)
+        val vertexIndex = (this.vertexCount++).toShort()
+        if (hashKey != -1L) {
+            this.vertexHashTable!!.put(ShortNode(vertexIndex), hashKey)
         }
 
-        val f_13: Float
-        val f_14: Float
-        val f_15: Float
-        val f_16: Float
-        val f_17: Float
-        val f_18: Float
-        val f_19: Float
-        val f_20: Float
-        val f_21: Float
-        val f_22: Float
-        val f_23: Float
+        val normalX: Float
+        val normalY: Float
+        val normalZ: Float
+        val interpFracX: Float
+        val interpFracZ: Float
+        val normalTopLeftX: Float
+        val normalTopLeftY: Float
+        val normalTopLeftZ: Float
+        val normalTopRightX: Float
+        val normalTopRightY: Float
+        val normalTopRightZ: Float
         when {
-            i_5 == 0 && i_6 == 0 -> {
-                f_13 = this.tileNormalsX!![i_1][i_2]
-                f_14 = this.tileNormalsY!![i_1][i_2]
-                f_15 = this.tileNormalsZ!![i_1][i_2]
+            offsetX == 0 && offsetZ == 0 -> {
+                normalX = this.tileNormalsX!![localTileX][localTileZ]
+                normalY = this.tileNormalsY!![localTileX][localTileZ]
+                normalZ = this.tileNormalsZ!![localTileX][localTileZ]
             }
-            i_5 == this.ground.tileUnits && i_6 == 0 -> {
-                f_13 = this.tileNormalsX!![i_1 + 1][i_2]
-                f_14 = this.tileNormalsY!![i_1 + 1][i_2]
-                f_15 = this.tileNormalsZ!![i_1 + 1][i_2]
+            offsetX == this.ground.tileUnits && offsetZ == 0 -> {
+                normalX = this.tileNormalsX!![localTileX + 1][localTileZ]
+                normalY = this.tileNormalsY!![localTileX + 1][localTileZ]
+                normalZ = this.tileNormalsZ!![localTileX + 1][localTileZ]
             }
-            i_5 == this.ground.tileUnits && this.ground.tileUnits == i_6 -> {
-                f_13 = this.tileNormalsX!![i_1 + 1][i_2 + 1]
-                f_14 = this.tileNormalsY!![i_1 + 1][i_2 + 1]
-                f_15 = this.tileNormalsZ!![i_1 + 1][i_2 + 1]
+            offsetX == this.ground.tileUnits && this.ground.tileUnits == offsetZ -> {
+                normalX = this.tileNormalsX!![localTileX + 1][localTileZ + 1]
+                normalY = this.tileNormalsY!![localTileX + 1][localTileZ + 1]
+                normalZ = this.tileNormalsZ!![localTileX + 1][localTileZ + 1]
             }
-            i_5 == 0 && this.ground.tileUnits == i_6 -> {
-                f_13 = this.tileNormalsX!![i_1][i_2 + 1]
-                f_14 = this.tileNormalsY!![i_1][i_2 + 1]
-                f_15 = this.tileNormalsZ!![i_1][i_2 + 1]
+            offsetX == 0 && this.ground.tileUnits == offsetZ -> {
+                normalX = this.tileNormalsX!![localTileX][localTileZ + 1]
+                normalY = this.tileNormalsY!![localTileX][localTileZ + 1]
+                normalZ = this.tileNormalsZ!![localTileX][localTileZ + 1]
             }
             else -> {
-                f_16 = i_5.toFloat() / this.ground.tileUnits
-                f_17 = i_6.toFloat() / this.ground.tileUnits
-                var f_18_var = this.tileNormalsX!![i_1][i_2]
-                var f_19_var = this.tileNormalsY!![i_1][i_2]
-                var f_20_var = this.tileNormalsZ!![i_1][i_2]
-                var f_21_var = this.tileNormalsX!![i_1 + 1][i_2]
-                var f_22_var = this.tileNormalsY!![i_1 + 1][i_2]
-                var f_23_var = this.tileNormalsZ!![i_1 + 1][i_2]
-                f_18_var += (this.tileNormalsX!![i_1][i_2 + 1] - f_18_var) * f_16
-                f_19_var += (this.tileNormalsY!![i_1][i_2 + 1] - f_19_var) * f_16
-                f_20_var += (this.tileNormalsZ!![i_1][i_2 + 1] - f_20_var) * f_16
-                f_21_var += (this.tileNormalsX!![i_1 + 1][i_2 + 1] - f_21_var) * f_16
-                f_22_var += (this.tileNormalsY!![i_1 + 1][i_2 + 1] - f_22_var) * f_16
-                f_23_var += (this.tileNormalsZ!![i_1 + 1][i_2 + 1] - f_23_var) * f_16
-                f_13 = f_18_var + (f_21_var - f_18_var) * f_17
-                f_14 = f_19_var + (f_22_var - f_19_var) * f_17
-                f_15 = f_20_var + (f_23_var - f_20_var) * f_17
+                interpFracX = offsetX.toFloat() / this.ground.tileUnits
+                interpFracZ = offsetZ.toFloat() / this.ground.tileUnits
+                var normalTopLeftXVar = this.tileNormalsX!![localTileX][localTileZ]
+                var normalTopLeftYVar = this.tileNormalsY!![localTileX][localTileZ]
+                var normalTopLeftZVar = this.tileNormalsZ!![localTileX][localTileZ]
+                var normalTopRightXVar = this.tileNormalsX!![localTileX + 1][localTileZ]
+                var normalTopRightYVar = this.tileNormalsY!![localTileX + 1][localTileZ]
+                var normalTopRightZVar = this.tileNormalsZ!![localTileX + 1][localTileZ]
+                normalTopLeftXVar += (this.tileNormalsX!![localTileX][localTileZ + 1] - normalTopLeftXVar) * interpFracX
+                normalTopLeftYVar += (this.tileNormalsY!![localTileX][localTileZ + 1] - normalTopLeftYVar) * interpFracX
+                normalTopLeftZVar += (this.tileNormalsZ!![localTileX][localTileZ + 1] - normalTopLeftZVar) * interpFracX
+                normalTopRightXVar += (this.tileNormalsX!![localTileX + 1][localTileZ + 1] - normalTopRightXVar) * interpFracX
+                normalTopRightYVar += (this.tileNormalsY!![localTileX + 1][localTileZ + 1] - normalTopRightYVar) * interpFracX
+                normalTopRightZVar += (this.tileNormalsZ!![localTileX + 1][localTileZ + 1] - normalTopRightZVar) * interpFracX
+                normalX = normalTopLeftXVar + (normalTopRightXVar - normalTopLeftXVar) * interpFracZ
+                normalY = normalTopLeftYVar + (normalTopRightYVar - normalTopLeftYVar) * interpFracZ
+                normalZ = normalTopLeftZVar + (normalTopRightZVar - normalTopLeftZVar) * interpFracZ
             }
         }
 
-        var deltaX = (this.pointLight.getX() - i_9).toFloat()
-        var deltaY = (this.pointLight.getY() - i_11).toFloat()
-        var deltaZ = (this.pointLight.getZ() - i_10).toFloat()
+        var deltaX = (this.pointLight.getX() - sceneX).toFloat()
+        var deltaY = (this.pointLight.getY() - sceneY).toFloat()
+        var deltaZ = (this.pointLight.getZ() - sceneZ).toFloat()
         val distance = sqrt((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ).toDouble()).toFloat()
         val invDistance = 1.0F / distance
         deltaX *= invDistance
@@ -297,7 +297,7 @@ class LightGL(
             intensity = 0.0F
         }
 
-        var dotProduct = deltaX * f_13 + deltaY * f_14 + deltaZ * f_15
+        var dotProduct = deltaX * normalX + deltaY * normalY + deltaZ * normalZ
         if (dotProduct < 0.0F) {
             dotProduct = 0.0F
         }
@@ -307,46 +307,46 @@ class LightGL(
             lightFactor = 1.0F
         }
 
-        val i_25 = this.pointLight.getColor()
-        var i_26 = (lightFactor * (i_25 shr 16 and 0xff)).toInt()
-        if (i_26 > 255) {
-            i_26 = 255
+        val lightColor = this.pointLight.getColor()
+        var red = (lightFactor * (lightColor shr 16 and 0xff)).toInt()
+        if (red > 255) {
+            red = 255
         }
 
-        var i_27 = (lightFactor * (i_25 shr 8 and 0xff)).toInt()
-        if (i_27 > 255) {
-            i_27 = 255
+        var green = (lightFactor * (lightColor shr 8 and 0xff)).toInt()
+        if (green > 255) {
+            green = 255
         }
 
-        var i_28 = (lightFactor * (i_25 and 0xff)).toInt()
-        if (i_28 > 255) {
-            i_28 = 255
+        var blue = (lightFactor * (lightColor and 0xff)).toInt()
+        if (blue > 255) {
+            blue = 255
         }
 
         if (this.toolkit.bigEndianess) {
-            this.bitBuffer!!.writeFloatBigEndian(i_9.toFloat())
-            this.bitBuffer!!.writeFloatBigEndian(i_11.toFloat())
-            this.bitBuffer!!.writeFloatBigEndian(i_10.toFloat())
+            this.bitBuffer!!.writeFloatBigEndian(sceneX.toFloat())
+            this.bitBuffer!!.writeFloatBigEndian(sceneY.toFloat())
+            this.bitBuffer!!.writeFloatBigEndian(sceneZ.toFloat())
         } else {
-            this.bitBuffer!!.writeFloatLittleEndian(i_9.toFloat())
-            this.bitBuffer!!.writeFloatLittleEndian(i_11.toFloat())
-            this.bitBuffer!!.writeFloatLittleEndian(i_10.toFloat())
+            this.bitBuffer!!.writeFloatLittleEndian(sceneX.toFloat())
+            this.bitBuffer!!.writeFloatLittleEndian(sceneY.toFloat())
+            this.bitBuffer!!.writeFloatLittleEndian(sceneZ.toFloat())
         }
 
-        this.bitBuffer!!.writeByte(i_26)
-        this.bitBuffer!!.writeByte(i_27)
-        this.bitBuffer!!.writeByte(i_28)
+        this.bitBuffer!!.writeByte(red)
+        this.bitBuffer!!.writeByte(green)
+        this.bitBuffer!!.writeByte(blue)
         this.bitBuffer!!.writeByte(255)
-        writeIndex(s_12)
+        writeIndex(vertexIndex)
     }
 
-    fun drawLightMesh(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>) {
-        if (this.indexBuffer != null && this.minTileX <= i_3 + i_1 && this.maxTileX >= i_1 - i_3 && this.minTileZ <= i_3 + i_2 && this.maxTileZ >= i_2 - i_3) {
-            for (i_5 in this.minTileZ..this.maxTileZ) {
-                for (i_6 in this.minTileX..this.maxTileX) {
-                    val i_7 = i_6 - i_1
-                    val i_8 = i_5 - i_2
-                    if (i_7 > -i_3 && i_7 < i_3 && i_8 > -i_3 && i_8 < i_3 && bools_4[i_3 + i_7][i_3 + i_8]) {
+    fun drawLightMesh(cameraGridX: Int, cameraGridZ: Int, visibleRange: Int, tilesOnScreen: Array<BooleanArray>) {
+        if (this.indexBuffer != null && this.minTileX <= visibleRange + cameraGridX && this.maxTileX >= cameraGridX - visibleRange && this.minTileZ <= visibleRange + cameraGridZ && this.maxTileZ >= cameraGridZ - visibleRange) {
+            for (tileZ in this.minTileZ..this.maxTileZ) {
+                for (tileX in this.minTileX..this.maxTileX) {
+                    val relativeX = tileX - cameraGridX
+                    val relativeZ = tileZ - cameraGridZ
+                    if (relativeX > -visibleRange && relativeX < visibleRange && relativeZ > -visibleRange && relativeZ < visibleRange && tilesOnScreen[visibleRange + relativeX][visibleRange + relativeZ]) {
                         this.toolkit.setTextureEnvColor((this.pointLight.getAlpha() * 255.0F).toInt() shl 24)
                         this.toolkit.toggleDrawingClientstates(this.positionDrawBuffer, null, this.colorDrawBuffer, null)
                         this.toolkit.drawElements(this.indexBuffer!!, 0, this.totalIndexCount)

@@ -21,11 +21,11 @@ abstract class SpriteSM(
     @JvmField
     var cachedClipping: IntArray? = null
 
-    override fun setSize(minX: Int, minY: Int, i_3: Int, i_4: Int) {
+    override fun setSize(minX: Int, minY: Int, maxX: Int, maxY: Int) {
         offsetX = minX
         offsetY = minY
-        trimRight = i_3
-        trimBottom = i_4
+        trimRight = maxX
+        trimBottom = maxY
     }
 
     override fun getWidth(): Int {
@@ -70,209 +70,209 @@ abstract class SpriteSM(
         }
         toolkit.getClipping(cachedClipping!!)
         toolkit.expandClipping(toolkit.clipLeft, toolkit.clipTop, width + x, y + height)
-        val i_8 = getSpriteWidth()
-        val i_9 = getSpriteHeight()
-        val i_10 = (width + i_8 - 1) / i_8
-        val i_11 = (i_9 + height - 1) / i_9
+        val spriteWidth = getSpriteWidth()
+        val spriteHeight = getSpriteHeight()
+        val tilesX = (width + spriteWidth - 1) / spriteWidth
+        val tilesY = (spriteHeight + height - 1) / spriteHeight
 
-        for (i_12 in 0 until i_11) {
-            val i_13 = i_12 * i_9
+        for (tileY in 0 until tilesY) {
+            val drawY = tileY * spriteHeight
 
-            for (i_14 in 0 until i_10) {
-                draw(i_14 * i_8 + x, i_13 + y, combineMode, colorArgb, blendMode)
+            for (tileX in 0 until tilesX) {
+                draw(tileX * spriteWidth + x, drawY + y, combineMode, colorArgb, blendMode)
             }
         }
 
         toolkit.setClipping(cachedClipping!![0], cachedClipping!![1], cachedClipping!![2], cachedClipping!![3])
     }
 
-    fun computeAffineTransform(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float): Boolean {
-        val i_7 = offsetX + imageWidth + trimRight
-        val i_8 = offsetY + imageHeight + trimBottom
-        var f_9: Float
-        var f_10: Float
-        var f_11: Float
-        var f_12: Float
-        var f_13: Float
-        var f_14: Float
-        var f_15: Float
-        var f_16: Float
-        var f_1Var = f_1
-        var f_2Var = f_2
-        var f_3Var = f_3
-        var f_4Var = f_4
-        var f_5Var = f_5
-        var f_6Var = f_6
-        if (i_7 != imageWidth || i_8 != imageHeight) {
-            f_9 = (f_3Var - f_1Var) / i_7
-            f_10 = (f_4Var - f_2Var) / i_7
-            f_11 = (f_5Var - f_1Var) / i_8
-            f_12 = (f_6Var - f_2Var) / i_8
-            f_13 = f_11 * offsetY
-            f_14 = f_12 * offsetY
-            f_15 = f_9 * offsetX
-            f_16 = f_10 * offsetX
-            val f_17 = -f_9 * trimRight
-            val f_18 = -f_10 * trimRight
-            val f_19 = -f_11 * trimBottom
-            val f_20 = -f_12 * trimBottom
-            f_1Var += f_15 + f_13
-            f_2Var += f_16 + f_14
-            f_3Var += f_17 + f_13
-            f_4Var += f_18 + f_14
-            f_5Var += f_15 + f_19
-            f_6Var += f_16 + f_20
+    fun computeAffineTransform(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float): Boolean {
+        val fullWidth = offsetX + imageWidth + trimRight
+        val fullHeight = offsetY + imageHeight + trimBottom
+        var dxRight: Float
+        var dyRight: Float
+        var minX: Float
+        var maxX: Float
+        var minY: Float
+        var maxY: Float
+        var crossProductA: Float
+        var crossProductB: Float
+        var topLeftXVar = topLeftX
+        var topLeftYVar = topLeftY
+        var topRightXVar = topRightX
+        var topRightYVar = topRightY
+        var bottomLeftXVar = bottomLeftX
+        var bottomLeftYVar = bottomLeftY
+        if (fullWidth != imageWidth || fullHeight != imageHeight) {
+            dxRight = (topRightXVar - topLeftXVar) / fullWidth
+            dyRight = (topRightYVar - topLeftYVar) / fullWidth
+            val dxDown = (bottomLeftXVar - topLeftXVar) / fullHeight
+            val dyDown = (bottomLeftYVar - topLeftYVar) / fullHeight
+            val offsetYDx = dxDown * offsetY
+            val offsetYDy = dyDown * offsetY
+            val offsetXDx = dxRight * offsetX
+            val offsetXDy = dyRight * offsetX
+            val trimRightDx = -dxRight * trimRight
+            val trimRightDy = -dyRight * trimRight
+            val trimBottomDx = -dxDown * trimBottom
+            val trimBottomDy = -dyDown * trimBottom
+            topLeftXVar += offsetXDx + offsetYDx
+            topLeftYVar += offsetXDy + offsetYDy
+            topRightXVar += trimRightDx + offsetYDx
+            topRightYVar += trimRightDy + offsetYDy
+            bottomLeftXVar += offsetXDx + trimBottomDx
+            bottomLeftYVar += offsetXDy + trimBottomDy
         }
 
-        f_9 = f_5Var + (f_3Var - f_1Var)
-        f_10 = f_4Var + (f_6Var - f_2Var)
-        if (f_1Var < f_3Var) {
-            f_11 = f_1Var
-            f_12 = f_3Var
+        dxRight = bottomLeftXVar + (topRightXVar - topLeftXVar)
+        dyRight = topRightYVar + (bottomLeftYVar - topLeftYVar)
+        if (topLeftXVar < topRightXVar) {
+            minX = topLeftXVar
+            maxX = topRightXVar
         } else {
-            f_11 = f_3Var
-            f_12 = f_1Var
+            minX = topRightXVar
+            maxX = topLeftXVar
         }
 
-        if (f_5Var < f_11) {
-            f_11 = f_5Var
+        if (bottomLeftXVar < minX) {
+            minX = bottomLeftXVar
         }
 
-        if (f_9 < f_11) {
-            f_11 = f_9
+        if (dxRight < minX) {
+            minX = dxRight
         }
 
-        if (f_5Var > f_12) {
-            f_12 = f_5Var
+        if (bottomLeftXVar > maxX) {
+            maxX = bottomLeftXVar
         }
 
-        if (f_9 > f_12) {
-            f_12 = f_9
+        if (dxRight > maxX) {
+            maxX = dxRight
         }
 
-        if (f_2Var < f_4Var) {
-            f_13 = f_2Var
-            f_14 = f_4Var
+        if (topLeftYVar < topRightYVar) {
+            minY = topLeftYVar
+            maxY = topRightYVar
         } else {
-            f_13 = f_4Var
-            f_14 = f_2Var
+            minY = topRightYVar
+            maxY = topLeftYVar
         }
 
-        if (f_6Var < f_13) {
-            f_13 = f_6Var
+        if (bottomLeftYVar < minY) {
+            minY = bottomLeftYVar
         }
 
-        if (f_10 < f_13) {
-            f_13 = f_10
+        if (dyRight < minY) {
+            minY = dyRight
         }
 
-        if (f_6Var > f_14) {
-            f_14 = f_6Var
+        if (bottomLeftYVar > maxY) {
+            maxY = bottomLeftYVar
         }
 
-        if (f_10 > f_14) {
-            f_14 = f_10
+        if (dyRight > maxY) {
+            maxY = dyRight
         }
 
-        if (f_11 < toolkit.clipLeft) {
-            f_11 = toolkit.clipLeft.toFloat()
+        if (minX < toolkit.clipLeft) {
+            minX = toolkit.clipLeft.toFloat()
         }
 
-        if (f_12 > toolkit.clipRight) {
-            f_12 = toolkit.clipRight.toFloat()
+        if (maxX > toolkit.clipRight) {
+            maxX = toolkit.clipRight.toFloat()
         }
 
-        if (f_13 < toolkit.clipTop) {
-            f_13 = toolkit.clipTop.toFloat()
+        if (minY < toolkit.clipTop) {
+            minY = toolkit.clipTop.toFloat()
         }
 
-        if (f_14 > toolkit.clipBottom) {
-            f_14 = toolkit.clipBottom.toFloat()
+        if (maxY > toolkit.clipBottom) {
+            maxY = toolkit.clipBottom.toFloat()
         }
 
-        f_12 = f_11 - f_12
-        if (f_12 >= 0.0f) {
+        maxX = minX - maxX
+        if (maxX >= 0.0f) {
             return false
         } else {
-            f_14 = f_13 - f_14
-            if (f_14 >= 0.0f) {
+            maxY = minY - maxY
+            if (maxY >= 0.0f) {
                 return false
             } else {
                 viewportStride = toolkit.viewportWidth
-                pixelOffset = (f_13.toInt() * viewportStride + f_11).toInt()
-                f_15 = (f_3Var - f_1Var) * (f_6Var - f_2Var) - (f_4Var - f_2Var) * (f_5Var - f_1Var)
-                f_16 = (f_5Var - f_1Var) * (f_4Var - f_2Var) - (f_6Var - f_2Var) * (f_3Var - f_1Var)
-                dudx = ((f_6Var - f_2Var) * 4096.0f * imageWidth / f_15).toInt()
-                dvdx = ((f_4Var - f_2Var) * 4096.0f * imageHeight / f_16).toInt()
-                dudy = ((f_5Var - f_1Var) * 4096.0f * imageWidth / f_16).toInt()
-                dvdy = ((f_3Var - f_1Var) * 4096.0f * imageHeight / f_15).toInt()
-                subpixelOffsetX = (f_11 * 16.0f + 8.0f - (f_1Var + f_3Var + f_5Var + f_9) / 4.0f * 16.0f).toInt()
-                subpixelOffsetY = (f_13 * 16.0f + 8.0f - (f_2Var + f_4Var + f_6Var + f_10) / 4.0f * 16.0f).toInt()
+                pixelOffset = (minY.toInt() * viewportStride + minX).toInt()
+                crossProductA = (topRightXVar - topLeftXVar) * (bottomLeftYVar - topLeftYVar) - (topRightYVar - topLeftYVar) * (bottomLeftXVar - topLeftXVar)
+                crossProductB = (bottomLeftXVar - topLeftXVar) * (topRightYVar - topLeftYVar) - (bottomLeftYVar - topLeftYVar) * (topRightXVar - topLeftXVar)
+                dudx = ((bottomLeftYVar - topLeftYVar) * 4096.0f * imageWidth / crossProductA).toInt()
+                dvdx = ((topRightYVar - topLeftYVar) * 4096.0f * imageHeight / crossProductB).toInt()
+                dudy = ((bottomLeftXVar - topLeftXVar) * 4096.0f * imageWidth / crossProductB).toInt()
+                dvdy = ((topRightXVar - topLeftXVar) * 4096.0f * imageHeight / crossProductA).toInt()
+                subpixelOffsetX = (minX * 16.0f + 8.0f - (topLeftXVar + topRightXVar + bottomLeftXVar + dxRight) / 4.0f * 16.0f).toInt()
+                subpixelOffsetY = (minY * 16.0f + 8.0f - (topLeftYVar + topRightYVar + bottomLeftYVar + dyRight) / 4.0f * 16.0f).toInt()
                 uBase = (imageWidth shr 1 shl 12) + (subpixelOffsetY * dudy shr 4)
                 vBase = (imageHeight shr 1 shl 12) + (subpixelOffsetY * dvdy shr 4)
                 uOffsetX = subpixelOffsetX * dudx shr 4
                 vOffsetX = subpixelOffsetX * dvdx shr 4
-                drawMinX = f_11.toInt()
-                drawWidth = f_12.toInt()
-                drawMinY = f_13.toInt()
-                drawHeight = f_14.toInt()
+                drawMinX = minX.toInt()
+                drawWidth = maxX.toInt()
+                drawMinY = minY.toInt()
+                drawHeight = maxY.toInt()
                 return true
             }
         }
     }
 
-    override fun drawAffine(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, i_8: Int, i_9: Int) {
+    override fun drawAffine(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, colorArgb: Int, blendMode: Int) {
         if (toolkit.hasBeenShutdown()) {
             throw IllegalStateException()
         } else {
-            if (computeAffineTransform(f_1, f_2, f_3, f_4, f_5, f_6)) {
-                blendColor = i_8
-                if (i_7 != 1) {
-                    colorAlpha = i_8 ushr 24
+            if (computeAffineTransform(topLeftX, topLeftY, topRightX, topRightY, bottomLeftX, bottomLeftY)) {
+                blendColor = colorArgb
+                if (combineMode != 1) {
+                    colorAlpha = colorArgb ushr 24
                     colorInverseAlpha = 256 - colorAlpha
-                    if (i_7 == 0) {
-                        colorRed = (i_8 and 0xff0000) shr 16
-                        colorGreen = (i_8 and 0xff00) shr 8
-                        colorBlue = i_8 and 0xff
-                    } else if (i_7 == 2) {
-                        overlayAlpha = i_8 ushr 24
+                    if (combineMode == 0) {
+                        colorRed = (colorArgb and 0xff0000) shr 16
+                        colorGreen = (colorArgb and 0xff00) shr 8
+                        colorBlue = colorArgb and 0xff
+                    } else if (combineMode == 2) {
+                        overlayAlpha = colorArgb ushr 24
                         overlayInverseAlpha = 256 - overlayAlpha
-                        val i_11 = (i_8 and 0xff00ff) * overlayInverseAlpha and -16711936
-                        val i_12 = (i_8 and 0xff00) * overlayInverseAlpha and 0xff0000
-                        overlayPrecomputed = (i_11 or i_12) ushr 8
+                        val rbComponents = (colorArgb and 0xff00ff) * overlayInverseAlpha and -16711936
+                        val gComponent = (colorArgb and 0xff00) * overlayInverseAlpha and 0xff0000
+                        overlayPrecomputed = (rbComponents or gComponent) ushr 8
                     }
                 }
 
-                if (i_7 == 1) {
-                    if (i_9 == 0) {
+                if (combineMode == 1) {
+                    if (blendMode == 0) {
                         drawAffineTransformed(1, 0)
-                    } else if (i_9 == 1) {
+                    } else if (blendMode == 1) {
                         drawAffineTransformed(1, 1)
-                    } else if (i_9 == 2) {
+                    } else if (blendMode == 2) {
                         drawAffineTransformed(1, 2)
                     }
-                } else if (i_7 == 0) {
-                    if (i_9 == 0) {
+                } else if (combineMode == 0) {
+                    if (blendMode == 0) {
                         drawAffineTransformed(0, 0)
-                    } else if (i_9 == 1) {
+                    } else if (blendMode == 1) {
                         drawAffineTransformed(0, 1)
-                    } else if (i_9 == 2) {
+                    } else if (blendMode == 2) {
                         drawAffineTransformed(0, 2)
                     }
-                } else if (i_7 == 3) {
-                    if (i_9 == 0) {
+                } else if (combineMode == 3) {
+                    if (blendMode == 0) {
                         drawAffineTransformed(3, 0)
-                    } else if (i_9 == 1) {
+                    } else if (blendMode == 1) {
                         drawAffineTransformed(3, 1)
-                    } else if (i_9 == 2) {
+                    } else if (blendMode == 2) {
                         drawAffineTransformed(3, 2)
                     }
-                } else if (i_7 == 2) {
-                    if (i_9 == 0) {
+                } else if (combineMode == 2) {
+                    if (blendMode == 0) {
                         drawAffineTransformed(2, 0)
-                    } else if (i_9 == 1) {
+                    } else if (blendMode == 1) {
                         drawAffineTransformed(2, 1)
-                    } else if (i_9 == 2) {
+                    } else if (blendMode == 2) {
                         drawAffineTransformed(2, 2)
                     }
                 }
@@ -286,22 +286,22 @@ abstract class SpriteSM(
 
     abstract fun drawMasked(var1: IntArray, var2: IntArray, var3: Int, var4: Int)
 
-    override fun cacheSizeInto(ints_1: IntArray) {
-        ints_1[0] = offsetX
-        ints_1[1] = offsetY
-        ints_1[2] = trimRight
-        ints_1[3] = trimBottom
+    override fun cacheSizeInto(sizeOut: IntArray) {
+        sizeOut[0] = offsetX
+        sizeOut[1] = offsetY
+        sizeOut[2] = trimRight
+        sizeOut[3] = trimBottom
     }
 
     override abstract fun drawColoredCircle(var1: Int, var2: Int, var3: Int, var4: Int, var5: Int, colorArgb: Int, blendMode: Int)
 
-    override fun drawAffineMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, class4558: ComponentSurface, i_9: Int, i_10: Int) {
+    override fun drawAffineMasked(topLeftX: Float, topLeftY: Float, topRightX: Float, topRightY: Float, bottomLeftX: Float, bottomLeftY: Float, combineMode: Int, surface: ComponentSurface, surfaceOffsetX: Int, surfaceOffsetY: Int) {
         if (toolkit.hasBeenShutdown()) {
             throw IllegalStateException()
         }
-        if (computeAffineTransform(f_1, f_2, f_3, f_4, f_5, f_6)) {
-            val packetsdecoder11 = class4558 as ComponentDimensionSM
-            drawMasked(packetsdecoder11.rowStartX, packetsdecoder11.rowWidth, drawMinX - i_9, -i_10 - (drawHeight - drawMinY))
+        if (computeAffineTransform(topLeftX, topLeftY, topRightX, topRightY, bottomLeftX, bottomLeftY)) {
+            val dimensionSM = surface as ComponentDimensionSM
+            drawMasked(dimensionSM.rowStartX, dimensionSM.rowWidth, drawMinX - surfaceOffsetX, -surfaceOffsetY - (drawHeight - drawMinY))
         }
     }
 

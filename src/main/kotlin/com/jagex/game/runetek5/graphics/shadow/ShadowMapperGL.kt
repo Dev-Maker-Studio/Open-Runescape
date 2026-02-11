@@ -27,103 +27,103 @@ class ShadowMapperGL(
         sizeY = ground.length shr sizeShift
     }
 
-    fun renderShadowOverlay(i_1: Int, i_2: Int, i_3: Int, bools_4: Array<BooleanArray>, bool5: Boolean) {
+    fun renderShadowOverlay(cameraGridX: Int, cameraGridY: Int, visibleRange: Int, tilesOnScreen: Array<BooleanArray>, belowLowestPlane: Boolean) {
         toolkit.setLightingEnabled(false)
         toolkit.setDepthMask(false)
         toolkit.renderTexture(-2)
         toolkit.loadTextureCombineMode(1)
         toolkit.setBlendMode(1)
-        val f_6 = 1.0f / (toolkit.openglFlags * 128)
-        var i_7: Int
-        var i_8: Int
-        var i_9: Int
-        var i_10: Int
-        var i_11: Int
-        var i_12: Int
-        var i_13: Int
-        if (bool5) {
-            i_7 = 0
-            while (i_7 < sizeY) {
-                i_8 = i_7 shl sizeShift
-                i_9 = (i_7 + 1) shl sizeShift
+        val texCoordScale = 1.0f / (toolkit.openglFlags * 128)
+        var chunkY: Int
+        var chunkStartY: Int
+        var chunkEndY: Int
+        var chunkX: Int
+        var chunkStartX: Int
+        var chunkEndX: Int
+        var indexCount: Int
+        if (belowLowestPlane) {
+            chunkY = 0
+            while (chunkY < sizeY) {
+                chunkStartY = chunkY shl sizeShift
+                chunkEndY = (chunkY + 1) shl sizeShift
 
-                label136@ for (i_10 in 0 until sizeX) {
-                    i_11 = i_10 shl sizeShift
-                    i_12 = (i_10 + 1) shl sizeShift
+                label136@ for (chunkX in 0 until sizeX) {
+                    chunkStartX = chunkX shl sizeShift
+                    chunkEndX = (chunkX + 1) shl sizeShift
 
-                    for (i_13 in i_11 until i_12) {
-                        if (i_13 - i_1 >= -i_3 && i_13 - i_1 <= i_3) {
-                            for (i_20 in i_8 until i_9) {
-                                if (i_20 - i_2 >= -i_3 && i_20 - i_2 <= i_3 && bools_4[i_3 + (i_13 - i_1)][i_20 - i_2 + i_3]) {
+                    for (tileX in chunkStartX until chunkEndX) {
+                        if (tileX - cameraGridX >= -visibleRange && tileX - cameraGridX <= visibleRange) {
+                            for (tileY in chunkStartY until chunkEndY) {
+                                if (tileY - cameraGridY >= -visibleRange && tileY - cameraGridY <= visibleRange && tilesOnScreen[visibleRange + (tileX - cameraGridX)][tileY - cameraGridY + visibleRange]) {
                                     OpenGL.glMatrixMode(5890)
                                     OpenGL.glLoadIdentity()
-                                    OpenGL.glScalef(f_6, f_6, 1.0f)
-                                    OpenGL.glTranslatef((-i_10) / f_6, (-i_7) / f_6, 1.0f)
+                                    OpenGL.glScalef(texCoordScale, texCoordScale, 1.0f)
+                                    OpenGL.glTranslatef((-chunkX) / texCoordScale, (-chunkY) / texCoordScale, 1.0f)
                                     OpenGL.glMatrixMode(5888)
-                                    shadowTiles!![i_10][i_7]!!.drawShadow()
+                                    shadowTiles!![chunkX][chunkY]!!.drawShadow()
                                     continue@label136
                                 }
                             }
                         }
                     }
                 }
-                i_7++
+                chunkY++
             }
         } else {
-            i_7 = 0
-            while (i_7 < sizeY) {
-                i_8 = i_7 shl sizeShift
-                i_9 = (i_7 + 1) shl sizeShift
+            chunkY = 0
+            while (chunkY < sizeY) {
+                chunkStartY = chunkY shl sizeShift
+                chunkEndY = (chunkY + 1) shl sizeShift
 
-                for (i_10 in 0 until sizeX) {
-                    i_11 = 0
-                    i_12 = i_10 shl sizeShift
-                    i_13 = (i_10 + 1) shl sizeShift
-                    val class282Sub35Sub114 = toolkit.textureBuffer
-                    class282Sub35Sub114.currentPosition = 0
+                for (chunkX in 0 until sizeX) {
+                    indexCount = 0
+                    chunkStartX = chunkX shl sizeShift
+                    chunkEndX = (chunkX + 1) shl sizeShift
+                    val textureBuffer = toolkit.textureBuffer
+                    textureBuffer.currentPosition = 0
 
-                    for (i_15 in i_8 until i_9) {
-                        if (i_15 - i_2 >= -i_3 && i_15 - i_2 <= i_3) {
-                            var i_16 = i_12 + ground.width * i_15
+                    for (tileY in chunkStartY until chunkEndY) {
+                        if (tileY - cameraGridY >= -visibleRange && tileY - cameraGridY <= visibleRange) {
+                            var materialOffset = chunkStartX + ground.width * tileY
 
-                            for (i_17 in i_12 until i_13) {
-                                if (i_17 - i_1 >= -i_3 && i_17 - i_1 <= i_3 && bools_4[i_3 + (i_17 - i_1)][i_15 - i_2 + i_3]) {
-                                    val shorts_18 = ground.materialIndices[i_16]
-                                    if (shorts_18 != null) {
-                                        var i_19: Int
+                            for (tileX in chunkStartX until chunkEndX) {
+                                if (tileX - cameraGridX >= -visibleRange && tileX - cameraGridX <= visibleRange && tilesOnScreen[visibleRange + (tileX - cameraGridX)][tileY - cameraGridY + visibleRange]) {
+                                    val materialIndices = ground.materialIndices[materialOffset]
+                                    if (materialIndices != null) {
+                                        var matIdx: Int
                                         if (toolkit.bigEndianess) {
-                                            i_19 = 0
-                                            while (i_19 < shorts_18.size) {
-                                                class282Sub35Sub114.writeShort(shorts_18[i_19].toInt() and 0xffff)
-                                                ++i_11
-                                                i_19++
+                                            matIdx = 0
+                                            while (matIdx < materialIndices.size) {
+                                                textureBuffer.writeShort(materialIndices[matIdx].toInt() and 0xffff)
+                                                ++indexCount
+                                                matIdx++
                                             }
                                         } else {
-                                            i_19 = 0
-                                            while (i_19 < shorts_18.size) {
-                                                class282Sub35Sub114.writeShortLittle(shorts_18[i_19].toInt() and 0xffff)
-                                                ++i_11
-                                                i_19++
+                                            matIdx = 0
+                                            while (matIdx < materialIndices.size) {
+                                                textureBuffer.writeShortLittle(materialIndices[matIdx].toInt() and 0xffff)
+                                                ++indexCount
+                                                matIdx++
                                             }
                                         }
                                     }
                                 }
 
-                                ++i_16
+                                ++materialOffset
                             }
                         }
                     }
 
-                    if (i_11 > 0) {
+                    if (indexCount > 0) {
                         OpenGL.glMatrixMode(5890)
                         OpenGL.glLoadIdentity()
-                        OpenGL.glScalef(f_6, f_6, 1.0f)
-                        OpenGL.glTranslatef((-i_10) / f_6, (-i_7) / f_6, 1.0f)
+                        OpenGL.glScalef(texCoordScale, texCoordScale, 1.0f)
+                        OpenGL.glTranslatef((-chunkX) / texCoordScale, (-chunkY) / texCoordScale, 1.0f)
                         OpenGL.glMatrixMode(5888)
-                        shadowTiles!![i_10][i_7]!!.drawShadowWithIndices(class282Sub35Sub114.buffer, i_11)
+                        shadowTiles!![chunkX][chunkY]!!.drawShadowWithIndices(textureBuffer.buffer, indexCount)
                     }
                 }
-                i_7++
+                chunkY++
             }
         }
 
@@ -132,64 +132,64 @@ class ShadowMapperGL(
         OpenGL.glMatrixMode(5888) //GL_MODELVIEW
     }
 
-    fun applyShadow(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int): Boolean {
-        var i_31 = i_3
-        var i_21 = i_2
-        val class282Sub50Sub17Sub14 = class282Sub50Sub171 as ShadowGL
-        i_21 += class282Sub50Sub17Sub14.startX + 1
-        i_31 += class282Sub50Sub17Sub14.startY + 1
-        var i_5 = i_21 + i_31 * width
-        var i_6 = class282Sub50Sub17Sub14.sizeY
-        var i_7 = class282Sub50Sub17Sub14.sizeX
-        var i_8 = width - i_7
-        var i_9: Int
-        if (i_31 <= 0) {
-            i_9 = 1 - i_31
-            i_6 -= i_9
-            i_5 += i_9 * width
-            i_31 = 1
+    fun applyShadow(shadow: Shadow, shadowX: Int, shadowY: Int): Boolean {
+        var adjustedY = shadowY
+        var adjustedX = shadowX
+        val shadowGL = shadow as ShadowGL
+        adjustedX += shadowGL.startX + 1
+        adjustedY += shadowGL.startY + 1
+        var dataOffset = adjustedX + adjustedY * width
+        var clippedHeight = shadowGL.sizeY
+        var clippedWidth = shadowGL.sizeX
+        var rowStride = width - clippedWidth
+        var clippedAmount: Int
+        if (adjustedY <= 0) {
+            clippedAmount = 1 - adjustedY
+            clippedHeight -= clippedAmount
+            dataOffset += clippedAmount * width
+            adjustedY = 1
         }
 
-        if (i_31 + i_6 >= length) {
-            i_9 = i_31 + i_6 + 1 - length
-            i_6 -= i_9
+        if (adjustedY + clippedHeight >= length) {
+            clippedAmount = adjustedY + clippedHeight + 1 - length
+            clippedHeight -= clippedAmount
         }
 
-        if (i_21 <= 0) {
-            i_9 = 1 - i_21
-            i_7 -= i_9
-            i_5 += i_9
-            i_8 += i_9
-            i_21 = 1
+        if (adjustedX <= 0) {
+            clippedAmount = 1 - adjustedX
+            clippedWidth -= clippedAmount
+            dataOffset += clippedAmount
+            rowStride += clippedAmount
+            adjustedX = 1
         }
 
-        if (i_7 + i_21 >= width) {
-            i_9 = i_7 + i_21 + 1 - width
-            i_7 -= i_9
-            i_8 += i_9
+        if (clippedWidth + adjustedX >= width) {
+            clippedAmount = clippedWidth + adjustedX + 1 - width
+            clippedWidth -= clippedAmount
+            rowStride += clippedAmount
         }
 
-        if (i_7 > 0 && i_6 > 0) {
-            val b_10: Byte = 8
-            i_8 += (b_10 - 1) * width
-            return hasShadowData(shadowMapperData, i_5, i_7, i_6, i_8, b_10.toInt())
+        if (clippedWidth > 0 && clippedHeight > 0) {
+            val sampleStep: Byte = 8
+            rowStride += (sampleStep - 1) * width
+            return hasShadowData(shadowMapperData, dataOffset, clippedWidth, clippedHeight, rowStride, sampleStep.toInt())
         } else {
             return false
         }
     }
 
-    fun invalidateShadowTiles(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+    fun invalidateShadowTiles(startX: Int, startY: Int, regionWidth: Int, regionHeight: Int) {
         if (shadowTiles != null) {
-            val i_5 = (i_1 - 1) shr 7
-            val i_6 = (i_3 + (i_1 - 1) - 1) shr 7
-            val i_7 = (i_2 - 1) shr 7
-            val i_8 = (i_2 - 1 + i_4 - 1) shr 7
+            val minChunkX = (startX - 1) shr 7
+            val maxChunkX = (regionWidth + (startX - 1) - 1) shr 7
+            val minChunkY = (startY - 1) shr 7
+            val maxChunkY = (startY - 1 + regionHeight - 1) shr 7
 
-            for (i_9 in i_5..i_6) {
-                val arr_10 = shadowTiles!![i_9]
+            for (chunkX in minChunkX..maxChunkX) {
+                val chunkColumn = shadowTiles!![chunkX]
 
-                for (i_11 in i_7..i_8) {
-                    arr_10[i_11]!!.needsTextureRegeneration = true
+                for (chunkY in minChunkY..maxChunkY) {
+                    chunkColumn[chunkY]!!.needsTextureRegeneration = true
                 }
             }
         }
@@ -205,199 +205,199 @@ class ShadowMapperGL(
         }
     }
 
-    fun addShadow(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int) {
-        var i_31 = i_3
-        var i_21 = i_2
-        val shadow = class282Sub50Sub171 as ShadowGL
-        i_21 += shadow.startX + 1
-        i_31 += shadow.startY + 1
-        var i_5 = i_21 + i_31 * width
-        var i_6 = 0
-        var i_7 = shadow.sizeY
-        var i_8 = shadow.sizeX
-        var i_9 = width - i_8
-        var i_10 = 0
-        var i_11: Int
-        if (i_31 <= 0) {
-            i_11 = 1 - i_31
-            i_7 -= i_11
-            i_6 += i_11 * i_8
-            i_5 += i_11 * width
-            i_31 = 1
+    fun addShadow(shadow: Shadow, shadowX: Int, shadowY: Int) {
+        var adjustedY = shadowY
+        var adjustedX = shadowX
+        val shadowGL = shadow as ShadowGL
+        adjustedX += shadowGL.startX + 1
+        adjustedY += shadowGL.startY + 1
+        var dataOffset = adjustedX + adjustedY * width
+        var srcOffset = 0
+        var clippedHeight = shadowGL.sizeY
+        var clippedWidth = shadowGL.sizeX
+        var dstRowStride = width - clippedWidth
+        var srcRowStride = 0
+        var clippedAmount: Int
+        if (adjustedY <= 0) {
+            clippedAmount = 1 - adjustedY
+            clippedHeight -= clippedAmount
+            srcOffset += clippedAmount * clippedWidth
+            dataOffset += clippedAmount * width
+            adjustedY = 1
         }
 
-        if (i_31 + i_7 >= length) {
-            i_11 = i_31 + i_7 + 1 - length
-            i_7 -= i_11
+        if (adjustedY + clippedHeight >= length) {
+            clippedAmount = adjustedY + clippedHeight + 1 - length
+            clippedHeight -= clippedAmount
         }
 
-        if (i_21 <= 0) {
-            i_11 = 1 - i_21
-            i_8 -= i_11
-            i_6 += i_11
-            i_5 += i_11
-            i_10 += i_11
-            i_9 += i_11
-            i_21 = 1
+        if (adjustedX <= 0) {
+            clippedAmount = 1 - adjustedX
+            clippedWidth -= clippedAmount
+            srcOffset += clippedAmount
+            dataOffset += clippedAmount
+            srcRowStride += clippedAmount
+            dstRowStride += clippedAmount
+            adjustedX = 1
         }
 
-        if (i_8 + i_21 >= width) {
-            i_11 = i_8 + i_21 + 1 - width
-            i_8 -= i_11
-            i_10 += i_11
-            i_9 += i_11
+        if (clippedWidth + adjustedX >= width) {
+            clippedAmount = clippedWidth + adjustedX + 1 - width
+            clippedWidth -= clippedAmount
+            srcRowStride += clippedAmount
+            dstRowStride += clippedAmount
         }
 
-        if (i_8 > 0 && i_7 > 0) {
-            addShadowData(shadowMapperData, shadow.shade, i_6, i_5, i_8, i_7, i_9, i_10)
-            invalidateShadowTiles(i_21, i_31, i_8, i_7)
+        if (clippedWidth > 0 && clippedHeight > 0) {
+            addShadowData(shadowMapperData, shadowGL.shade, srcOffset, dataOffset, clippedWidth, clippedHeight, dstRowStride, srcRowStride)
+            invalidateShadowTiles(adjustedX, adjustedY, clippedWidth, clippedHeight)
         }
     }
 
-    fun removeShadow(class282Sub50Sub171: Shadow, i_2: Int, i_3: Int) {
-        var i_31 = i_3
-        var i_21 = i_2
-        val class282Sub50Sub17Sub14 = class282Sub50Sub171 as ShadowGL
-        i_21 += class282Sub50Sub17Sub14.startX + 1
-        i_31 += class282Sub50Sub17Sub14.startY + 1
-        var i_5 = i_21 + i_31 * width
-        var i_6 = 0
-        var i_7 = class282Sub50Sub17Sub14.sizeY
-        var i_8 = class282Sub50Sub17Sub14.sizeX
-        var i_9 = width - i_8
-        var i_10 = 0
-        var i_11: Int
-        if (i_31 <= 0) {
-            i_11 = 1 - i_31
-            i_7 -= i_11
-            i_6 += i_11 * i_8
-            i_5 += i_11 * width
-            i_31 = 1
+    fun removeShadow(shadow: Shadow, shadowX: Int, shadowY: Int) {
+        var adjustedY = shadowY
+        var adjustedX = shadowX
+        val shadowGL = shadow as ShadowGL
+        adjustedX += shadowGL.startX + 1
+        adjustedY += shadowGL.startY + 1
+        var dataOffset = adjustedX + adjustedY * width
+        var srcOffset = 0
+        var clippedHeight = shadowGL.sizeY
+        var clippedWidth = shadowGL.sizeX
+        var dstRowStride = width - clippedWidth
+        var srcRowStride = 0
+        var clippedAmount: Int
+        if (adjustedY <= 0) {
+            clippedAmount = 1 - adjustedY
+            clippedHeight -= clippedAmount
+            srcOffset += clippedAmount * clippedWidth
+            dataOffset += clippedAmount * width
+            adjustedY = 1
         }
 
-        if (i_31 + i_7 >= length) {
-            i_11 = i_31 + i_7 + 1 - length
-            i_7 -= i_11
+        if (adjustedY + clippedHeight >= length) {
+            clippedAmount = adjustedY + clippedHeight + 1 - length
+            clippedHeight -= clippedAmount
         }
 
-        if (i_21 <= 0) {
-            i_11 = 1 - i_21
-            i_8 -= i_11
-            i_6 += i_11
-            i_5 += i_11
-            i_10 += i_11
-            i_9 += i_11
-            i_21 = 1
+        if (adjustedX <= 0) {
+            clippedAmount = 1 - adjustedX
+            clippedWidth -= clippedAmount
+            srcOffset += clippedAmount
+            dataOffset += clippedAmount
+            srcRowStride += clippedAmount
+            dstRowStride += clippedAmount
+            adjustedX = 1
         }
 
-        if (i_8 + i_21 >= width) {
-            i_11 = i_8 + i_21 + 1 - width
-            i_8 -= i_11
-            i_10 += i_11
-            i_9 += i_11
+        if (clippedWidth + adjustedX >= width) {
+            clippedAmount = clippedWidth + adjustedX + 1 - width
+            clippedWidth -= clippedAmount
+            srcRowStride += clippedAmount
+            dstRowStride += clippedAmount
         }
 
-        if (i_8 > 0 && i_7 > 0) {
-            subtractShadowData(shadowMapperData, class282Sub50Sub17Sub14.shade, i_6, i_5, i_8, i_7, i_9, i_10)
-            invalidateShadowTiles(i_21, i_31, i_8, i_7)
+        if (clippedWidth > 0 && clippedHeight > 0) {
+            subtractShadowData(shadowMapperData, shadowGL.shade, srcOffset, dataOffset, clippedWidth, clippedHeight, dstRowStride, srcRowStride)
+            invalidateShadowTiles(adjustedX, adjustedY, clippedWidth, clippedHeight)
         }
     }
 
     companion object {
         @JvmStatic
-        fun subtractShadowData(bytes_0: ByteArray, bytes_1: ByteArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
-            var dstPos = i_3
-            var srcPos = i_2
-            val i_8 = -(i_4 shr 2)
-            val negWidth = -(i_4 and 0x3)
+        fun subtractShadowData(dstData: ByteArray, srcData: ByteArray, srcOffset: Int, dstOffset: Int, width: Int, height: Int, dstRowStride: Int, srcRowStride: Int) {
+            var dstPos = dstOffset
+            var srcPos = srcOffset
+            val unrolledCount = -(width shr 2)
+            val remainderCount = -(width and 0x3)
 
-            for (i_9 in -i_5 until 0) {
-                var i_10 = i_8
-                while (i_10 < 0) {
-                    val i_10001 = dstPos++
-                    bytes_0[i_10001] = (bytes_0[i_10001] + bytes_1[srcPos++]).toByte()
-                    val i_10002 = dstPos++
-                    bytes_0[i_10002] = (bytes_0[i_10002] + bytes_1[srcPos++]).toByte()
-                    val i_10003 = dstPos++
-                    bytes_0[i_10003] = (bytes_0[i_10003] + bytes_1[srcPos++]).toByte()
-                    val i_10004 = dstPos++
-                    bytes_0[i_10004] = (bytes_0[i_10004] + bytes_1[srcPos++]).toByte()
-                    i_10++
+            for (row in -height until 0) {
+                var col = unrolledCount
+                while (col < 0) {
+                    val idx0 = dstPos++
+                    dstData[idx0] = (dstData[idx0] + srcData[srcPos++]).toByte()
+                    val idx1 = dstPos++
+                    dstData[idx1] = (dstData[idx1] + srcData[srcPos++]).toByte()
+                    val idx2 = dstPos++
+                    dstData[idx2] = (dstData[idx2] + srcData[srcPos++]).toByte()
+                    val idx3 = dstPos++
+                    dstData[idx3] = (dstData[idx3] + srcData[srcPos++]).toByte()
+                    col++
                 }
 
-                i_10 = negWidth
-                while (i_10 < 0) {
-                    val i_10001 = dstPos++
-                    bytes_0[i_10001] = (bytes_0[i_10001] + bytes_1[srcPos++]).toByte()
-                    i_10++
+                col = remainderCount
+                while (col < 0) {
+                    val idx = dstPos++
+                    dstData[idx] = (dstData[idx] + srcData[srcPos++]).toByte()
+                    col++
                 }
 
-                dstPos += i_6
-                srcPos += i_7
+                dstPos += dstRowStride
+                srcPos += srcRowStride
             }
         }
 
         @JvmStatic
-        fun addShadowData(dst: ByteArray, shade: ByteArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
-            var dstPos = i_3
-            var srcPos = i_2
-            val i_8 = -(i_4 shr 2)
-            val negWidth = -(i_4 and 0x3)
+        fun addShadowData(dst: ByteArray, shade: ByteArray, srcOffset: Int, dstOffset: Int, width: Int, height: Int, dstRowStride: Int, srcRowStride: Int) {
+            var dstPos = dstOffset
+            var srcPos = srcOffset
+            val unrolledCount = -(width shr 2)
+            val remainderCount = -(width and 0x3)
 
-            for (i_9 in -i_5 until 0) {
-                var i_10 = i_8
-                while (i_10 < 0) {
-                    val i_10001 = dstPos++
-                    dst[i_10001] = (dst[i_10001] - shade[srcPos++]).toByte()
-                    val i_10002 = dstPos++
-                    dst[i_10002] = (dst[i_10002] - shade[srcPos++]).toByte()
-                    val i_10003 = dstPos++
-                    dst[i_10003] = (dst[i_10003] - shade[srcPos++]).toByte()
-                    val i_10004 = dstPos++
-                    dst[i_10004] = (dst[i_10004] - shade[srcPos++]).toByte()
-                    i_10++
+            for (row in -height until 0) {
+                var col = unrolledCount
+                while (col < 0) {
+                    val idx0 = dstPos++
+                    dst[idx0] = (dst[idx0] - shade[srcPos++]).toByte()
+                    val idx1 = dstPos++
+                    dst[idx1] = (dst[idx1] - shade[srcPos++]).toByte()
+                    val idx2 = dstPos++
+                    dst[idx2] = (dst[idx2] - shade[srcPos++]).toByte()
+                    val idx3 = dstPos++
+                    dst[idx3] = (dst[idx3] - shade[srcPos++]).toByte()
+                    col++
                 }
 
-                i_10 = negWidth
-                while (i_10 < 0) {
-                    val i_10001 = dstPos++
-                    dst[i_10001] = (dst[i_10001] - shade[srcPos++]).toByte()
-                    i_10++
+                col = remainderCount
+                while (col < 0) {
+                    val idx = dstPos++
+                    dst[idx] = (dst[idx] - shade[srcPos++]).toByte()
+                    col++
                 }
 
-                dstPos += i_6
-                srcPos += i_7
+                dstPos += dstRowStride
+                srcPos += srcRowStride
             }
         }
 
         @JvmStatic
-        fun hasShadowData(bytes_0: ByteArray, i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Boolean {
-            var pos = i_1
-            val i_6 = i_2 % i_5
-            val i_7 = if (i_6 != 0) {
-                i_5 - i_6
+        fun hasShadowData(shadowData: ByteArray, startPos: Int, width: Int, height: Int, rowStride: Int, sampleStep: Int): Boolean {
+            var pos = startPos
+            val widthRemainder = width % sampleStep
+            val widthAdjust = if (widthRemainder != 0) {
+                sampleStep - widthRemainder
             } else {
                 0
             }
 
-            val i_8 = -((i_3 + i_5 - 1) / i_5)
-            val i_9 = -((i_5 + i_2 - 1) / i_5)
+            val rowCount = -((height + sampleStep - 1) / sampleStep)
+            val colCount = -((sampleStep + width - 1) / sampleStep)
 
-            for (i_10 in i_8 until 0) {
-                for (i_11 in i_9 until 0) {
-                    if (bytes_0[pos] == 0.toByte()) {
+            for (row in rowCount until 0) {
+                for (col in colCount until 0) {
+                    if (shadowData[pos] == 0.toByte()) {
                         return true
                     }
 
-                    pos += i_5
+                    pos += sampleStep
                 }
 
-                pos -= i_7
-                if (bytes_0[pos - 1] == 0.toByte()) {
+                pos -= widthAdjust
+                if (shadowData[pos - 1] == 0.toByte()) {
                     return true
                 }
 
-                pos += i_4
+                pos += rowStride
             }
 
             return false
