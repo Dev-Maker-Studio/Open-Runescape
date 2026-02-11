@@ -321,10 +321,10 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARCSTR_SMALL) {
-            val string_63 = buffer.readString()
+            val varcString = buffer.readString()
             val flags = buffer.readUShortAddLittle()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityVarcstringUpdate(flags, string_63)
+            PulseEventQueue.priorityVarcstringUpdate(flags, varcString)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETSCROLLPOS) {
@@ -345,19 +345,19 @@ object PacketDecoder {
             val qcMsgId = buffer.readUShort()
             val messageUniqueHash = hashIdk2 + (hashIdk1 shl 32)
             var ignore = false
-            var i_81 = 0
+            var hashIndex = 0
             while (true) {
-                if (i_81 >= 100) {
+                if (hashIndex >= 100) {
                     if (rights <= 1 && IgnoreList.contains(name)) {
                         ignore = true
                     }
                     break
                 }
-                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_81] == messageUniqueHash) {
+                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[hashIndex] == messageUniqueHash) {
                     ignore = true
                     break
                 }
-                ++i_81
+                ++hashIndex
             }
             if (!ignore) {
                 Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = messageUniqueHash
@@ -400,9 +400,9 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_SETPLAYERHEAD_OTHER) {
             val key = buffer.readInt()
             val flags = buffer.readUShortAddLittle()
-            val i_6 = buffer.readUIntMiddle()
+            val componentHash = buffer.readUIntMiddle()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityIfcontentUpdate(i_6, 3, flags, key)
+            PulseEventQueue.priorityIfcontentUpdate(componentHash, 3, flags, key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SPOT_ANIM_SPECIFIC) {
@@ -497,54 +497,54 @@ object PacketDecoder {
                     }
                 }
             } else if (targetHash shr 28 != 0) {
-                val i_35 = targetHash and 0xffff
+                val playerIndex = targetHash and 0xffff
                 val targetPlayer: PlayerEntity?
-                if (i_35 == PlayerUpdate.myPlayerIndex) {
+                if (playerIndex == PlayerUpdate.myPlayerIndex) {
                     targetPlayer = PlayerUpdate.MY_PLAYER!!
                 } else {
-                    targetPlayer = PlayerUpdate.players[i_35]
+                    targetPlayer = PlayerUpdate.players[playerIndex]
                 }
                 if (targetPlayer != null) {
                     val spotAnimation = targetPlayer.spotAnimations[idk]
-                    var bool16 = true
-                    val i_34 = spotAnimation.spotAnimationId
-                    if (reqGfxId != -1 && i_34 != -1) {
-                        if (i_34 == reqGfxId) {
+                    var shouldOverwrite = true
+                    val currentGfxId = spotAnimation.spotAnimationId
+                    if (reqGfxId != -1 && currentGfxId != -1) {
+                        if (currentGfxId == reqGfxId) {
                             val spotAnimType = TypeLists.SPOT_ANIM!!.list(reqGfxId)
                             if (spotAnimType.replay && spotAnimType.sequenceId != -1) {
                                 val spotAnimSequence = TypeLists.SEQ!!.list(spotAnimType.sequenceId)
-                                val i_40 = spotAnimSequence.loopType
-                                if (i_40 != 0 && i_40 != 2) {
-                                    if (i_40 == 1) {
+                                val loopType = spotAnimSequence.loopType
+                                if (loopType != 0 && loopType != 2) {
+                                    if (loopType == 1) {
                                     }
                                 } else {
-                                    bool16 = false
+                                    shouldOverwrite = false
                                 }
                             }
                         } else {
                             val spotAnimType = TypeLists.SPOT_ANIM!!.list(reqGfxId)
-                            val existingSpotAnimType = TypeLists.SPOT_ANIM!!.list(i_34)
+                            val existingSpotAnimType = TypeLists.SPOT_ANIM!!.list(currentGfxId)
                             if (spotAnimType.sequenceId != -1 && existingSpotAnimType.sequenceId != -1) {
                                 val newSequence = TypeLists.SEQ!!.list(spotAnimType.sequenceId)
                                 val existingSequence = TypeLists.SEQ!!.list(existingSpotAnimType.sequenceId)
                                 if (newSequence.priority < existingSequence.priority) {
-                                    bool16 = false
+                                    shouldOverwrite = false
                                 }
                             }
                         }
                     }
-                    if (bool16) {
+                    if (shouldOverwrite) {
                         spotAnimation.spotAnimationId = reqGfxId
                         spotAnimation.height = height
                         spotAnimation.adjustmentType = setting1
                         spotAnimation.rotation = rotation
                         if (reqGfxId != -1) {
                             val spotAnimType = TypeLists.SPOT_ANIM!!.list(reqGfxId)
-                            var i_83 = if (spotAnimType.replay) 0 else 2
+                            var replayMode = if (spotAnimType.replay) 0 else 2
                             if (setting2) {
-                                i_83 = 1
+                                replayMode = 1
                             }
-                            spotAnimation.sequence.animateSequence(spotAnimType.sequenceId, speed, i_83, false)
+                            spotAnimation.sequence.animateSequence(spotAnimType.sequenceId, speed, replayMode, false)
                         } else {
                             spotAnimation.sequence.update(-1)
                         }
@@ -557,10 +557,10 @@ object PacketDecoder {
             val viewX = buffer.readUByte()
             val viewY = buffer.readUShortAdd() shl 2
             val viewZ = buffer.readUByteAdd()
-            val i_7 = buffer.readUByteInverse()
-            val i_8 = buffer.readUByteSubtract()
+            val constantSpeed = buffer.readUByteInverse()
+            val variableSpeed = buffer.readUByteSubtract()
             Client.requestVarVerifyid()
-            Camera.lookat(viewX, viewZ, viewY, i_8, i_7)
+            Camera.lookat(viewX, viewZ, viewY, variableSpeed, constantSpeed)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VORBIS_PRELOAD_SOUND) {
@@ -605,11 +605,11 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.OPEN_URL) {
             if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
             val bytes = ByteArray(context.currentPacketSize - 1)
-            val bool66 = buffer.readUByte() == 1
+            val hasFallback = buffer.readUByte() == 1
             buffer.readBytes(bytes, context.currentPacketSize - 1)
             val urlPacket = Packet(bytes)
             val url = urlPacket.readString()
-            if (bool66) {
+            if (hasFallback) {
                 var fallbackUrl = urlPacket.readString()
                 if (fallbackUrl.isEmpty()) fallbackUrl = url
                 if (!Client.isApplet || SystemInfo.operatingSystemLowercase.startsWith("mac") || !Browser.openBrowser(url, 1, JSObjectManager.SERVER_PACKET_URL.getCallName())) Browser.openOpenjs(fallbackUrl, true, Client.useBrowserAppletMode)
@@ -619,29 +619,29 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.CAM_SHAKE) {
             val key = buffer.readUByteSubtract()
             val flags = buffer.readUShort()
-            val i_6 = buffer.readUByteInverse()
-            val i_7 = buffer.readUByteInverse()
-            val i_8 = buffer.readUByteSubtract()
+            val shakeType = buffer.readUByteInverse()
+            val jitter = buffer.readUByteInverse()
+            val frequency = buffer.readUByteSubtract()
             Client.requestVarVerifyid()
-            Client.CAM_SHAKING[i_6] = true
-            Client.CAM_SHAKE_JITTER[i_6] = i_7
-            Client.CUSTOM_LOWEST_YAW[i_6] = key
-            Client.CAM_SHAKE_FREQUENCY[i_6] = i_8
-            Client.CAM_SHAKE_PHASE[i_6] = flags
+            Client.CAM_SHAKING[shakeType] = true
+            Client.CAM_SHAKE_JITTER[shakeType] = jitter
+            Client.CUSTOM_LOWEST_YAW[shakeType] = key
+            Client.CAM_SHAKE_FREQUENCY[shakeType] = frequency
+            Client.CAM_SHAKE_PHASE[shakeType] = flags
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_PLAYER_GROUP) {
-            val bool91 = buffer.readUByte() == 1
-            val string_88 = buffer.readString()
-            var str92 = string_88
-            if (bool91) {
-                str92 = buffer.readString()
+            val hasDisplayName = buffer.readUByte() == 1
+            val username = buffer.readString()
+            var displayName = username
+            if (hasDisplayName) {
+                displayName = buffer.readString()
             }
-            val i_7 = buffer.readUByte()
+            val rights = buffer.readUByte()
             var ignore = false
-            if (i_7 <= 1) {
+            if (rights <= 1) {
                 if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
-                    if (IgnoreList.contains(str92)) {
+                    if (IgnoreList.contains(displayName)) {
                         ignore = true
                     }
                 } else {
@@ -650,12 +650,12 @@ object PacketDecoder {
             }
             if (!ignore) {
                 val message = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
-                if (i_7 == 2) {
-                    ChatBox.writeMessage(ChatMessageType.GROUP_CHAT, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + str92, string_88, message, null, -1)
-                } else if (i_7 == 1) {
-                    ChatBox.writeMessage(ChatMessageType.GROUP_CHAT, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + str92, string_88, message, null, -1)
+                if (rights == 2) {
+                    ChatBox.writeMessage(ChatMessageType.GROUP_CHAT, 0, TextUtils.getCrown(1) + username, TextUtils.getCrown(1) + displayName, username, message, null, -1)
+                } else if (rights == 1) {
+                    ChatBox.writeMessage(ChatMessageType.GROUP_CHAT, 0, TextUtils.getCrown(0) + username, TextUtils.getCrown(0) + displayName, username, message, null, -1)
                 } else {
-                    ChatBox.writeMessage(ChatMessageType.GROUP_CHAT, 0, string_88, str92, string_88, message, null, -1)
+                    ChatBox.writeMessage(ChatMessageType.GROUP_CHAT, 0, username, displayName, username, message, null, -1)
                 }
             }
             context.currentPacket = null
@@ -689,8 +689,8 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.ANIMATE_NPC) {
             val npcIndex = buffer.readUShortAddLittle()
             val animationIds = IntArray(MovementType.entries.size)
-            for (i_6 in MovementType.entries.toTypedArray().indices) {
-                animationIds[i_6] = buffer.readUIntLittle()
+            for (movementIndex in MovementType.entries.toTypedArray().indices) {
+                animationIds[movementIndex] = buffer.readUIntLittle()
             }
             val speed = buffer.readUByte()
             val npcObjectNode = Client.NPC_MAP.get(npcIndex.toLong())
@@ -745,15 +745,15 @@ object PacketDecoder {
                 val icon = buffer.readUByte()
                 val isQuickchat = (chatEffects and 0x8000) != 0
                 if (player.displayName != null && player.playerAppearance != null) {
-                    var bool69 = false
+                    var isIgnored = false
                     if (icon <= 1) {
                         if (!isQuickchat && (Client.USERDETAIL_QUICKCHAT && !Client.VERIFIED_EMAIL_ADDRESS || Client.IS_QUICKCHAT_ONLY)) {
-                            bool69 = true
+                            isIgnored = true
                         } else if (IgnoreList.contains(player.displayName)) {
-                            bool69 = true
+                            isIgnored = true
                         }
                     }
-                    if (!bool69) {
+                    if (!isIgnored) {
                         var qcMessageId = -1
                         val message: String
                         if (isQuickchat) {
@@ -857,20 +857,20 @@ object PacketDecoder {
                             FriendsChat.MY_PLAYER_FC_RANK = friendsChatPlayers[index]!!.rank
                         }
                     }
-                    var bool69 = false
+                    var sorted = false
                     var total = FriendsChat.FC_PLAYER_COUNT
                     while (total > 0) {
-                        bool69 = true
+                        sorted = true
                         --total
                         for (index in 0..<total) {
                             if (friendsChatPlayers[index]!!.textName!!.compareTo(friendsChatPlayers[index + 1]!!.textName!!) > 0) {
                                 val tmp = friendsChatPlayers[index]
                                 friendsChatPlayers[index] = friendsChatPlayers[index + 1]
                                 friendsChatPlayers[index + 1] = tmp
-                                bool69 = false
+                                sorted = false
                             }
                         }
-                        if (bool69) {
+                        if (sorted) {
                             break
                         }
                     }
@@ -886,39 +886,39 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.SET_CLAN_STRING) {
             val key = buffer.readUShort()
-            val string_88 = buffer.readString()
+            val clanString = buffer.readString()
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
-            ClanVarTypeList.CLAN_VARS!![key] = string_88
+            ClanVarTypeList.CLAN_VARS!![key] = clanString
             Client.CLAN_VAR_KEYS[++Client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MUSIC_TRACK) {
             val key = buffer.readUByteAdd()
             val flags = buffer.readUByteAdd()
-            var i_6 = buffer.readUShortAdd()
-            if (i_6 == 65535) {
-                i_6 = -1
+            var songId = buffer.readUShortAdd()
+            if (songId == 65535) {
+                songId = -1
             }
-            SongPlayer.playSong(i_6, flags, key)
+            SongPlayer.playSong(songId, flags, key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETCLICKMASK) {
-            val bool91 = buffer.readUByteSubtract() == 1
+            val enabled = buffer.readUByteSubtract() == 1
             val flags = buffer.readUIntLittle()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityIfclickmaskUpdate(flags, bool91)
+            PulseEventQueue.priorityIfclickmaskUpdate(flags, enabled)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MUSIC_EFFECT) {
             val key = buffer.readUMediumAlternateOrder()
             val flags = buffer.readUByteSubtract()
-            var i_6 = buffer.readUShortLittle()
-            if (i_6 == 65535) {
-                i_6 = -1
+            var jingleId = buffer.readUShortLittle()
+            if (jingleId == 65535) {
+                jingleId = -1
             }
-            SoundEffectPlayer.playSoundJingle(i_6, flags)
+            SoundEffectPlayer.playSoundJingle(jingleId, flags)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CHAT_FILTER_SETTINGS) {
@@ -948,22 +948,22 @@ object PacketDecoder {
                 StaticMethods.cameraTargetAbsY = -1
             } else {
                 val baseCoords = Resource.mapRegion!!.getBaseCoordinates()
-                var i_6 = key shr 14 and 0x3fff
-                var i_7 = key and 0x3fff
-                i_6 -= baseCoords.x
-                if (i_6 < 0) {
-                    i_6 = 0
-                } else if (i_6 >= Resource.mapRegion!!.sceneSizeX) {
-                    i_6 = Resource.mapRegion!!.sceneSizeX
+                var localX = key shr 14 and 0x3fff
+                var localY = key and 0x3fff
+                localX -= baseCoords.x
+                if (localX < 0) {
+                    localX = 0
+                } else if (localX >= Resource.mapRegion!!.sceneSizeX) {
+                    localX = Resource.mapRegion!!.sceneSizeX
                 }
-                i_7 -= baseCoords.y
-                if (i_7 < 0) {
-                    i_7 = 0
-                } else if (i_7 >= Resource.mapRegion!!.sceneSizeY) {
-                    i_7 = Resource.mapRegion!!.sceneSizeY
+                localY -= baseCoords.y
+                if (localY < 0) {
+                    localY = 0
+                } else if (localY >= Resource.mapRegion!!.sceneSizeY) {
+                    localY = Resource.mapRegion!!.sceneSizeY
                 }
-                PingRequester.cameraTargetAbsX = (i_6 shl 9) + 256
-                StaticMethods.cameraTargetAbsY = (i_7 shl 9) + 256
+                PingRequester.cameraTargetAbsX = (localX shl 9) + 256
+                StaticMethods.cameraTargetAbsY = (localY shl 9) + 256
             }
             context.currentPacket = null
             return true
@@ -982,99 +982,99 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_CLANCHANNEL) {
             val nonGuest = buffer.readUByte() == 1
-            val string_88 = buffer.readString()
-            val long_49 = buffer.readUShort().toLong()
-            val long_51 = buffer.readUMedium().toLong()
-            val i_10 = buffer.readUByte()
-            val i_11 = buffer.readUShort()
-            val long_53 = long_51 + (long_49 shl 32)
-            var bool14 = false
+            val senderName = buffer.readString()
+            val hashHigh = buffer.readUShort().toLong()
+            val hashLow = buffer.readUMedium().toLong()
+            val rights = buffer.readUByte()
+            val qcMsgId = buffer.readUShort()
+            val messageHash = hashLow + (hashHigh shl 32)
+            var ignore = false
             val clanChannel = if (nonGuest) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
             if (clanChannel == null) {
-                bool14 = true
+                ignore = true
             } else {
-                for (i_34 in 0..99) {
-                    if (long_53 == Client.CHAT_MESSAGE_UNIQUE_HASHES[i_34]) {
-                        bool14 = true
+                for (hashIndex in 0..99) {
+                    if (messageHash == Client.CHAT_MESSAGE_UNIQUE_HASHES[hashIndex]) {
+                        ignore = true
                         break
                     }
                 }
-                if (i_10 <= 1 && IgnoreList.contains(string_88)) bool14 = true
+                if (rights <= 1 && IgnoreList.contains(senderName)) ignore = true
             }
-            if (!bool14) {
-                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = long_53
+            if (!ignore) {
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = messageHash
                 Client.chatMessageHashIndex = (Client.chatMessageHashIndex + 1) % 100
-                val string_17 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_11).fillDynamicValues(buffer)
+                val qcMessage = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(qcMsgId).fillDynamicValues(buffer)
                 val messageType = if (nonGuest) ChatMessageType.CLAN_QUICKCHAT else ChatMessageType.GUEST_CLAN_QUICKCHAT
-                if (i_10 != 2 && i_10 != 3) {
-                    if (i_10 == 1) {
-                        ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + string_88, string_88, string_17, clanChannel!!.clanName, i_11)
+                if (rights != 2 && rights != 3) {
+                    if (rights == 1) {
+                        ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(0) + senderName, TextUtils.getCrown(0) + senderName, senderName, qcMessage, clanChannel!!.clanName, qcMsgId)
                     } else {
-                        ChatBox.writeMessage(messageType, 0, string_88, string_88, string_88, string_17, clanChannel!!.clanName, i_11)
+                        ChatBox.writeMessage(messageType, 0, senderName, senderName, senderName, qcMessage, clanChannel!!.clanName, qcMsgId)
                     }
                 } else {
-                    ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + string_88, string_88, string_17, clanChannel!!.clanName, i_11)
+                    ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(1) + senderName, TextUtils.getCrown(1) + senderName, senderName, qcMessage, clanChannel!!.clanName, qcMsgId)
                 }
             }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARCLAN_SET_LONG) {
             val key = buffer.readUShort()
-            val long_47 = buffer.readLong()
+            val value = buffer.readLong()
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
-            ClanVarTypeList.CLAN_VARS!![key] = long_47
+            ClanVarTypeList.CLAN_VARS!![key] = value
             Client.CLAN_VAR_KEYS[++Client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_FRIENDS_CHAT) {
-            val bool91 = buffer.readUByte() == 1
-            val string_88 = buffer.readString()
-            var str92 = string_88
-            if (bool91) {
-                str92 = buffer.readString()
+            val hasDisplayName = buffer.readUByte() == 1
+            val username = buffer.readString()
+            var displayName = username
+            if (hasDisplayName) {
+                displayName = buffer.readString()
             }
-            val long_28 = buffer.readLong()
-            val long_30 = buffer.readUShort().toLong()
-            val long_55 = buffer.readUMedium().toLong()
-            val i_35 = buffer.readUByte()
-            val i_77 = buffer.readUShort()
-            val long_57 = (long_30 shl 32) + long_55
-            var bool115 = false
-            var i_82 = 0
+            val fcOwnerEncoded = buffer.readLong()
+            val hashHigh = buffer.readUShort().toLong()
+            val hashLow = buffer.readUMedium().toLong()
+            val rights = buffer.readUByte()
+            val qcMsgId = buffer.readUShort()
+            val messageHash = (hashHigh shl 32) + hashLow
+            var ignore = false
+            var hashIndex = 0
             while (true) {
-                if (i_82 >= 100) {
-                    if (i_35 <= 1 && IgnoreList.contains(str92)) {
-                        bool115 = true
+                if (hashIndex >= 100) {
+                    if (rights <= 1 && IgnoreList.contains(displayName)) {
+                        ignore = true
                     }
                     break
                 }
-                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_82] == long_57) {
-                    bool115 = true
+                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[hashIndex] == messageHash) {
+                    ignore = true
                     break
                 }
-                ++i_82
+                ++hashIndex
             }
-            if (!bool115) {
-                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = long_57
+            if (!ignore) {
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = messageHash
                 Client.chatMessageHashIndex = (Client.chatMessageHashIndex + 1) % 100
-                val string_41 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(i_77).fillDynamicValues(buffer)
-                if (i_35 == 2) {
-                    ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + str92, string_88, string_41, TextUtils.decodeUidName(long_28), i_77)
-                } else if (i_35 == 1) {
-                    ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + str92, string_88, string_41, TextUtils.decodeUidName(long_28), i_77)
+                val qcMessage = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(qcMsgId).fillDynamicValues(buffer)
+                if (rights == 2) {
+                    ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, TextUtils.getCrown(1) + username, TextUtils.getCrown(1) + displayName, username, qcMessage, TextUtils.decodeUidName(fcOwnerEncoded), qcMsgId)
+                } else if (rights == 1) {
+                    ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, TextUtils.getCrown(0) + username, TextUtils.getCrown(0) + displayName, username, qcMessage, TextUtils.decodeUidName(fcOwnerEncoded), qcMsgId)
                 } else {
-                    ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, string_88, str92, string_88, string_41, TextUtils.decodeUidName(long_28), i_77)
+                    ChatBox.writeMessage(ChatMessageType.FC_QUICKCHAT, 0, username, displayName, username, qcMessage, TextUtils.decodeUidName(fcOwnerEncoded), qcMsgId)
                 }
             }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_QUICKCHAT_PRIVATE_ECHO) {
-            val string_63 = buffer.readString()
+            val recipientName = buffer.readString()
             val flags = buffer.readUShort()
-            val str92 = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(flags).fillDynamicValues(buffer)
-            ChatBox.writeMessage(ChatMessageType.PRIVATE_QUICKCHAT_ECHO, 0, string_63, string_63, string_63, str92, null, flags)
+            val qcMessage = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(flags).fillDynamicValues(buffer)
+            ChatBox.writeMessage(ChatMessageType.PRIVATE_QUICKCHAT_ECHO, 0, recipientName, recipientName, recipientName, qcMessage, null, flags)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARCLAN_SET_INT) {
@@ -1183,11 +1183,11 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.VARCLAN_SET_BYTE) {
             val key = buffer.readUShort()
-            val b_84 = buffer.readByte()
+            val value = buffer.readByte()
             if (ClanVarTypeList.CLAN_VARS == null) {
                 ClanVarTypeList.CLAN_VARS = arrayOfNulls<Any>(TypeLists.CLAN_VAR!!.size)
             }
-            ClanVarTypeList.CLAN_VARS!![key] = b_84.toInt()
+            ClanVarTypeList.CLAN_VARS!![key] = value.toInt()
             Client.CLAN_VAR_KEYS[++Client.CLAN_VAR_COUNTER - 1 and 0x1f] = key
             context.currentPacket = null
             return true
@@ -1275,10 +1275,10 @@ object PacketDecoder {
                 soundId = -1
             }
             val flags = buffer.readUByte()
-            val i_6 = buffer.readUShort()
+            val volume = buffer.readUShort()
             val delay = buffer.readUByte()
-            val i_8 = buffer.readUShort()
-            AreaSoundPlayer.playSoundSynth(soundId, flags, i_6, delay, i_8)
+            val sampleRate = buffer.readUShort()
+            AreaSoundPlayer.playSoundSynth(soundId, flags, volume, delay, sampleRate)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SHOW_FACE_HERE) {
@@ -1408,15 +1408,15 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.CLANSETTINGS_FULL) {
             Client.lastClanSettingsUpdateTick = Client.serverTick
-            val bool91 = buffer.readUByte() == 1
+            val nonGuest = buffer.readUByte() == 1
             if (context.currentPacketSize == 1) {
-                if (bool91) {
+                if (nonGuest) {
                     Client.CLAN_SETTINGS = null
                 } else {
                     Client.GUEST_CLAN_SETTINGS = null
                 }
             } else {
-                if (bool91) {
+                if (nonGuest) {
                     Client.CLAN_SETTINGS = ClanSettings(buffer)!!
                 } else {
                     Client.GUEST_CLAN_SETTINGS = ClanSettings(buffer)!!
@@ -1433,21 +1433,21 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.UPDATE_INV_PARTIAL) {
             val key = buffer.readUShort()
             val flags = buffer.readUByte()
-            var i_7: Int
-            var i_8: Int
-            var i_9: Int
+            var slot: Int
+            var itemId: Int
+            var amount: Int
             val isNegativeKey = (flags and 0x1) == 1
             while (buffer.currentPosition < context.currentPacketSize) {
-                i_7 = buffer.readUSmart()
-                i_8 = buffer.readUShort()
-                i_9 = 0
-                if (i_8 != 0) {
-                    i_9 = buffer.readUByte()
-                    if (i_9 == 255) {
-                        i_9 = buffer.readInt()
+                slot = buffer.readUSmart()
+                itemId = buffer.readUShort()
+                amount = 0
+                if (itemId != 0) {
+                    amount = buffer.readUByte()
+                    if (amount == 255) {
+                        amount = buffer.readInt()
                     }
                 }
-                ItemContainer.setItemInContainer(key, i_7, i_8 - 1, i_9, isNegativeKey)
+                ItemContainer.setItemInContainer(key, slot, itemId - 1, amount, isNegativeKey)
             }
             Client.RECENTLY_USED_ITEM_CONTAINERS[++Client.RECENTLY_USED_ITEM_CONTAINERS_CURSOR_POS - 1 and 0x1f] = key
             context.currentPacket = null
@@ -1466,10 +1466,10 @@ object PacketDecoder {
             val volume = buffer.readUByte()
             val far = buffer.readUByteInverse()
             val musicArchive = buffer.readInt()
-            val i_8 = buffer.readUIntMiddle()
-            val plane = i_8 shr 28
-            val x = i_8 shr 14 and 0x3fff
-            val y = i_8 and 0x3fff
+            val coordinateHash = buffer.readUIntMiddle()
+            val plane = coordinateHash shr 28
+            val x = coordinateHash shr 14 and 0x3fff
+            val y = coordinateHash and 0x3fff
             SongPlayer.playSongAtPosition(x, y, near, far, musicArchive, volume)
             context.currentPacket = null
             return true
@@ -1490,21 +1490,21 @@ object PacketDecoder {
             }
             val worldId = buffer.readUShort()
             val rank = buffer.readByte()
-            val bool69 = rank.toInt() == -128
-            var i_11: Int
-            if (bool69) {
+            val isRemoving = rank.toInt() == -128
+            var searchIndex: Int
+            if (isRemoving) {
                 if (FriendsChat.FC_PLAYER_COUNT == 0) {
                     context.currentPacket = null
                     return true
                 }
-                i_11 = 0
-                while (i_11 < FriendsChat.FC_PLAYER_COUNT && (FriendsChat.FC_PLAYERS!![i_11]!!.username != username || worldId != FriendsChat.FC_PLAYERS!![i_11]!!.worldId)) {
-                    i_11++
+                searchIndex = 0
+                while (searchIndex < FriendsChat.FC_PLAYER_COUNT && (FriendsChat.FC_PLAYERS!![searchIndex]!!.username != username || worldId != FriendsChat.FC_PLAYERS!![searchIndex]!!.worldId)) {
+                    searchIndex++
                 }
-                if (i_11 < FriendsChat.FC_PLAYER_COUNT) {
-                    while (i_11 < FriendsChat.FC_PLAYER_COUNT - 1) {
-                        FriendsChat.FC_PLAYERS!![i_11] = FriendsChat.FC_PLAYERS!![i_11 + 1]
-                        ++i_11
+                if (searchIndex < FriendsChat.FC_PLAYER_COUNT) {
+                    while (searchIndex < FriendsChat.FC_PLAYER_COUNT - 1) {
+                        FriendsChat.FC_PLAYERS!![searchIndex] = FriendsChat.FC_PLAYERS!![searchIndex + 1]
+                        ++searchIndex
                     }
                     FriendsChat.FC_PLAYERS!![--FriendsChat.FC_PLAYER_COUNT] = null
                 }
@@ -1517,14 +1517,14 @@ object PacketDecoder {
                 fcPlayer.worldId = worldId
                 fcPlayer.rank = rank
                 fcPlayer.worldName = worldName
-                var i_12: Int
-                i_12 = FriendsChat.FC_PLAYER_COUNT - 1
-                while (i_12 >= 0) {
-                    val i_35 = FriendsChat.FC_PLAYERS!![i_12]!!.textName!!.compareTo(fcPlayer.textName!!)
-                    if (i_35 == 0) {
-                        FriendsChat.FC_PLAYERS!![i_12]!!.worldId = worldId
-                        FriendsChat.FC_PLAYERS!![i_12]!!.rank = rank
-                        FriendsChat.FC_PLAYERS!![i_12]!!.worldName = worldName
+                var insertIndex: Int
+                insertIndex = FriendsChat.FC_PLAYER_COUNT - 1
+                while (insertIndex >= 0) {
+                    val compareResult = FriendsChat.FC_PLAYERS!![insertIndex]!!.textName!!.compareTo(fcPlayer.textName!!)
+                    if (compareResult == 0) {
+                        FriendsChat.FC_PLAYERS!![insertIndex]!!.worldId = worldId
+                        FriendsChat.FC_PLAYERS!![insertIndex]!!.rank = rank
+                        FriendsChat.FC_PLAYERS!![insertIndex]!!.worldName = worldName
                         if (username == PlayerUpdate.MY_PLAYER!!.displayName) {
                             FriendsChat.MY_PLAYER_FC_RANK = rank
                         }
@@ -1532,20 +1532,20 @@ object PacketDecoder {
                         context.currentPacket = null
                         return true
                     }
-                    if (i_35 < 0) {
+                    if (compareResult < 0) {
                         break
                     }
-                    --i_12
+                    --insertIndex
                 }
                 if (FriendsChat.FC_PLAYER_COUNT >= FriendsChat.FC_PLAYERS!!.size) {
                     context.currentPacket = null
                     return true
                 }
-                if (FriendsChat.FC_PLAYER_COUNT - 1 - i_12 >= 0) System.arraycopy(FriendsChat.FC_PLAYERS, i_12 + 1, FriendsChat.FC_PLAYERS, i_12 + 1 + 1, FriendsChat.FC_PLAYER_COUNT - 1 - i_12)
+                if (FriendsChat.FC_PLAYER_COUNT - 1 - insertIndex >= 0) System.arraycopy(FriendsChat.FC_PLAYERS, insertIndex + 1, FriendsChat.FC_PLAYERS, insertIndex + 1 + 1, FriendsChat.FC_PLAYER_COUNT - 1 - insertIndex)
                 if (FriendsChat.FC_PLAYER_COUNT == 0) {
                     FriendsChat.FC_PLAYERS = arrayOfNulls<FriendsChatPlayer>(100)
                 }
-                FriendsChat.FC_PLAYERS!![i_12 + 1] = fcPlayer
+                FriendsChat.FC_PLAYERS!![insertIndex + 1] = fcPlayer
                 FriendsChat.FC_PLAYER_COUNT++
                 if (username == PlayerUpdate.MY_PLAYER!!.displayName) {
                     FriendsChat.MY_PLAYER_FC_RANK = rank
@@ -1563,9 +1563,9 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.CLANCHANNEL_DELTA) {
             Client.lastClanChannelUpdateTick = Client.serverTick
-            val bool91 = buffer.readUByte() == 1
+            val nonGuest = buffer.readUByte() == 1
             val delta = ClanChannelDelta(buffer)
-            val clanChannel: ClanChannel? = if (bool91) {
+            val clanChannel: ClanChannel? = if (nonGuest) {
                 Client.CLAN_CHANNEL
             } else {
                 Client.LISTENED_CLAN_CHANNEL
@@ -1643,10 +1643,10 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SET_SONG_VOLUME) {
-            val b_100 = buffer.readByte()
+            val songVolume = buffer.readByte()
             val flags = buffer.readUByteInverse()
             Client.requestVarVerifyid()
-            StaticMethods.setSongVolume(b_100.toInt(), flags)
+            StaticMethods.setSongVolume(songVolume.toInt(), flags)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.VARCLAN_ENABLE) {
@@ -1656,10 +1656,10 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_SETRECOL) {
             val key = buffer.readUIntInverseMiddle()
             val flags = buffer.readUShortLittle()
-            val i_6 = buffer.readUShortLittle()
-            val i_7 = buffer.readUByte()
+            val destColor = buffer.readUShortLittle()
+            val colorIndex = buffer.readUByte()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityIfrecol(key, i_7, flags, i_6)
+            PulseEventQueue.priorityIfrecol(key, colorIndex, flags, destColor)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETTEXTANTIMACRO) {
@@ -1686,14 +1686,14 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_OPENSUB_ACTIVE_PLAYER) {
             val key = buffer.readUIntLittle()
             val overlay = buffer.readUByte()
-            val i_6 = buffer.readUIntMiddle()
+            val xtea1 = buffer.readUIntMiddle()
             val subInterfaceId = buffer.readUShort()
-            val i_8 = buffer.readInt()
+            val xtea2 = buffer.readInt()
             val interfaceId = buffer.readUIntMiddle()
-            val i_10 = buffer.readUIntMiddle()
+            val xtea3 = buffer.readUIntMiddle()
             val playerIndex = buffer.readUShortLittle()
             Client.requestVarVerifyid()
-            Interface.openSub(interfaceId, IFSubActivePlayer(subInterfaceId, overlay, playerIndex), intArrayOf(i_6, i_8, i_10, key), false)
+            Interface.openSub(interfaceId, IFSubActivePlayer(subInterfaceId, overlay, playerIndex), intArrayOf(xtea1, xtea2, xtea3, key), false)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLANSETTINGS_DELTA) {
@@ -1732,13 +1732,13 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_OPENSUB) {
             val key = buffer.readInt()
             val flags = buffer.readUIntInverseMiddle()
-            val i_6 = buffer.readUIntInverseMiddle()
+            val xtea2 = buffer.readUIntInverseMiddle()
             val subId = buffer.readUShortAddLittle()
-            val i_8 = buffer.readUIntLittle()
+            val xtea4 = buffer.readUIntLittle()
             val topUid = buffer.readInt()
             val overlay = buffer.readUByteInverse()
             Client.requestVarVerifyid()
-            Interface.openSub(topUid, SubInterface(subId, overlay), intArrayOf(key, i_6, flags, i_8), false)
+            Interface.openSub(topUid, SubInterface(subId, overlay), intArrayOf(key, xtea2, flags, xtea4), false)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CREATE_ACCOUNT_REPLY) {
@@ -1819,9 +1819,9 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_PRIVATE_ECHO) {
-            val string_63 = buffer.readString()
-            val string_88 = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
-            ChatBox.writeMessage(ChatMessageType.PRIVATE_MESSAGE_ECHO, 0, string_63, string_63, string_63, string_88)
+            val recipientName = buffer.readString()
+            val message = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
+            ChatBox.writeMessage(ChatMessageType.PRIVATE_MESSAGE_ECHO, 0, recipientName, recipientName, recipientName, message)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CREATE_GROUND_ITEM) {
@@ -1858,56 +1858,56 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_PRIVATE) {
-            val bool91 = buffer.readUByte() == 1
-            val string_88 = buffer.readString()
-            var str92 = string_88
-            if (bool91) {
-                str92 = buffer.readString()
+            val hasDisplayName = buffer.readUByte() == 1
+            val username = buffer.readString()
+            var displayName = username
+            if (hasDisplayName) {
+                displayName = buffer.readString()
             }
-            val long_28 = buffer.readUShort().toLong()
-            val long_30 = buffer.readUMedium().toLong()
-            val i_11 = buffer.readUByte()
-            val long_53 = (long_28 shl 32) + long_30
-            var bool14 = false
-            var i_15 = 0
+            val hashHigh = buffer.readUShort().toLong()
+            val hashLow = buffer.readUMedium().toLong()
+            val rights = buffer.readUByte()
+            val messageHash = (hashHigh shl 32) + hashLow
+            var ignore = false
+            var hashIndex = 0
             while (true) {
-                if (i_15 >= 100) {
-                    if (i_11 <= 1) {
+                if (hashIndex >= 100) {
+                    if (rights <= 1) {
                         if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
-                            if (IgnoreList.contains(str92)) {
-                                bool14 = true
+                            if (IgnoreList.contains(displayName)) {
+                                ignore = true
                             }
                         } else {
-                            bool14 = true
+                            ignore = true
                         }
                     }
                     break
                 }
-                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_15] == long_53) {
-                    bool14 = true
+                if (Client.CHAT_MESSAGE_UNIQUE_HASHES[hashIndex] == messageHash) {
+                    ignore = true
                     break
                 }
-                ++i_15
+                ++hashIndex
             }
-            if (!bool14) {
-                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = long_53
+            if (!ignore) {
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = messageHash
                 Client.chatMessageHashIndex = (Client.chatMessageHashIndex + 1) % 100
-                val string_118 = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
-                if (i_11 == 2) {
-                    ChatBox.writeMessage(ChatMessageType.PRIVATE_STAFF, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + str92, string_88, string_118, null, -1)
-                } else if (i_11 == 1) {
-                    ChatBox.writeMessage(ChatMessageType.PRIVATE_STAFF, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + str92, string_88, string_118, null, -1)
+                val decodedMessage = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
+                if (rights == 2) {
+                    ChatBox.writeMessage(ChatMessageType.PRIVATE_STAFF, 0, TextUtils.getCrown(1) + username, TextUtils.getCrown(1) + displayName, username, decodedMessage, null, -1)
+                } else if (rights == 1) {
+                    ChatBox.writeMessage(ChatMessageType.PRIVATE_STAFF, 0, TextUtils.getCrown(0) + username, TextUtils.getCrown(0) + displayName, username, decodedMessage, null, -1)
                 } else {
-                    ChatBox.writeMessage(ChatMessageType.PRIVATE_MESSAGE, 0, string_88, str92, string_88, string_118, null, -1)
+                    ChatBox.writeMessage(ChatMessageType.PRIVATE_MESSAGE, 0, username, displayName, username, decodedMessage, null, -1)
                 }
             }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARC_SMALL) {
-            val b_100 = buffer.readByteSubtract()
+            val varcValue = buffer.readByteSubtract()
             val flags = buffer.readUShortLittle()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityClientvarcUpdate(flags, b_100.toInt())
+            PulseEventQueue.priorityClientvarcUpdate(flags, varcValue.toInt())
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.IF_SETTEXTFONT) {
@@ -1927,14 +1927,14 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.DEBUG_SERVER_TRIGGERS) {
             val key = buffer.readUShort()
             val flags = buffer.readUShort()
-            val i_6 = buffer.readUShort()
+            val endComponent = buffer.readUShort()
             Client.requestVarVerifyid()
-            var i_8: Int
+            var serverTriggerValue: Int
             if (Interface.INTERFACES!![key] != null) {
-                for (i_7 in flags..<i_6) {
-                    i_8 = buffer.readUMedium()
-                    if (i_7 < Interface.INTERFACES!![key]!!.components.size && Interface.INTERFACES!![key]!!.components[i_7] != null) {
-                        Interface.INTERFACES!![key]!!.components[i_7]!!.serverTriggers = i_8
+                for (componentIndex in flags..<endComponent) {
+                    serverTriggerValue = buffer.readUMedium()
+                    if (componentIndex < Interface.INTERFACES!![key]!!.components.size && Interface.INTERFACES!![key]!!.components[componentIndex] != null) {
+                        Interface.INTERFACES!![key]!!.components[componentIndex]!!.serverTriggers = serverTriggerValue
                     }
                 }
             }
@@ -1959,42 +1959,42 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_CLANCHANNEL) {
-            val bool91 = buffer.readUByte() == 1
-            val string_88 = buffer.readString()
-            val long_49 = buffer.readUShort().toLong()
-            val long_51 = buffer.readUMedium().toLong()
-            val i_10 = buffer.readUByte()
-            val long_55 = long_51 + (long_49 shl 32)
-            var bool112 = false
-            val clanChannel = if (bool91) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
+            val nonGuest = buffer.readUByte() == 1
+            val senderName = buffer.readString()
+            val hashHigh = buffer.readUShort().toLong()
+            val hashLow = buffer.readUMedium().toLong()
+            val rights = buffer.readUByte()
+            val messageHash = hashLow + (hashHigh shl 32)
+            var ignore = false
+            val clanChannel = if (nonGuest) Client.CLAN_CHANNEL else Client.LISTENED_CLAN_CHANNEL
             if (clanChannel == null) {
-                bool112 = true
+                ignore = true
             } else {
-                for (i_81 in 0..99) { //TODO validate this logic
-                    if (Client.CHAT_MESSAGE_UNIQUE_HASHES[i_81] == long_55) {
-                        bool112 = true
+                for (hashIndex in 0..99) { //TODO validate this logic
+                    if (Client.CHAT_MESSAGE_UNIQUE_HASHES[hashIndex] == messageHash) {
+                        ignore = true
                         break
                     }
                 }
-                if (i_10 <= 1) {
+                if (rights <= 1) {
                     if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
-                        if (IgnoreList.contains(string_88)) bool112 = true
-                    } else bool112 = true
+                        if (IgnoreList.contains(senderName)) ignore = true
+                    } else ignore = true
                 }
             }
-            if (!bool112) {
-                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = long_55
+            if (!ignore) {
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = messageHash
                 Client.chatMessageHashIndex = (Client.chatMessageHashIndex + 1) % 100
-                val string_101 = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
-                val i_34 = if (bool91) ChatMessageType.CLAN_CHAT else ChatMessageType.GUEST_CLAN_CHAT
-                if (i_10 != 2 && i_10 != 3) {
-                    if (i_10 == 1) {
-                        ChatBox.writeMessage(i_34, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + string_88, string_88, string_101, clanChannel!!.clanName, -1)
+                val decodedMessage = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
+                val messageType = if (nonGuest) ChatMessageType.CLAN_CHAT else ChatMessageType.GUEST_CLAN_CHAT
+                if (rights != 2 && rights != 3) {
+                    if (rights == 1) {
+                        ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(0) + senderName, TextUtils.getCrown(0) + senderName, senderName, decodedMessage, clanChannel!!.clanName, -1)
                     } else {
-                        ChatBox.writeMessage(i_34, 0, string_88, string_88, string_88, string_101, clanChannel!!.clanName, -1)
+                        ChatBox.writeMessage(messageType, 0, senderName, senderName, senderName, decodedMessage, clanChannel!!.clanName, -1)
                     }
                 } else {
-                    ChatBox.writeMessage(i_34, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + string_88, string_88, string_101, clanChannel!!.clanName, -1)
+                    ChatBox.writeMessage(messageType, 0, TextUtils.getCrown(1) + senderName, TextUtils.getCrown(1) + senderName, senderName, decodedMessage, clanChannel!!.clanName, -1)
                 }
             }
             context.currentPacket = null
@@ -2089,32 +2089,32 @@ object PacketDecoder {
             }
             FriendList.LOADED = 2
             Client.lastFriendIgnoreUpdateTick = Client.serverTick
-            var bool91 = false
+            var sorted = false
             var flags = FriendList.FRIEND_COUNT
             while (flags > 0) {
-                bool91 = true
+                sorted = true
                 --flags
-                for (i_6 in 0..<flags) {
-                    var bool70 = false
-                    val friend = FriendList.FRIENDS[i_6]
-                    val nextFriend = FriendList.FRIENDS[i_6 + 1]
+                for (friendIndex in 0..<flags) {
+                    var shouldSwap = false
+                    val friend = FriendList.FRIENDS[friendIndex]
+                    val nextFriend = FriendList.FRIENDS[friendIndex + 1]
                     if (friend!!.worldId != LoginManager.GAME_CONNECTION_INFO!!.worldId && nextFriend!!.worldId == LoginManager.GAME_CONNECTION_INFO!!.worldId) {
-                        bool70 = true
+                        shouldSwap = true
                     }
-                    if (!bool70 && friend!!.worldId == 0 && nextFriend!!.worldId != 0) {
-                        bool70 = true
+                    if (!shouldSwap && friend!!.worldId == 0 && nextFriend!!.worldId != 0) {
+                        shouldSwap = true
                     }
-                    if (!bool70 && !friend!!.referrer && nextFriend!!.referrer) {
-                        bool70 = true
+                    if (!shouldSwap && !friend!!.referrer && nextFriend!!.referrer) {
+                        shouldSwap = true
                     }
-                    if (bool70) {
-                        val swapFriend = FriendList.FRIENDS[i_6]
-                        FriendList.FRIENDS[i_6] = FriendList.FRIENDS[i_6 + 1]
-                        FriendList.FRIENDS[i_6 + 1] = swapFriend
-                        bool91 = false
+                    if (shouldSwap) {
+                        val swapFriend = FriendList.FRIENDS[friendIndex]
+                        FriendList.FRIENDS[friendIndex] = FriendList.FRIENDS[friendIndex + 1]
+                        FriendList.FRIENDS[friendIndex + 1] = swapFriend
+                        sorted = false
                     }
                 }
-                if (bool91) {
+                if (sorted) {
                     break
                 }
             }
@@ -2165,15 +2165,15 @@ object PacketDecoder {
             MiniMenu.resetEntries()
             val flags = buffer.readUShort()
             MapRegion.CUTSCENE_MAP_XTEAS = Array<IntArray>(flags) { IntArray(4) }
-            for (i_6 in 0..<flags) {
-                for (i_7 in 0..3) {
-                    MapRegion.CUTSCENE_MAP_XTEAS!![i_6][i_7] = buffer.readInt()
+            for (xteaIndex in 0..<flags) {
+                for (keyIndex in 0..3) {
+                    MapRegion.CUTSCENE_MAP_XTEAS!![xteaIndex][keyIndex] = buffer.readInt()
                 }
             }
-            val i_6 = buffer.readUByte()
-            CutsceneTypeList.CUTSCENE_BUFFER = Packet(i_6)
-            CutsceneTypeList.CUTSCENE_BUFFER!!.writeBytes(buffer.buffer, buffer.currentPosition, i_6)
-            buffer.currentPosition += i_6
+            val bufferSize = buffer.readUByte()
+            CutsceneTypeList.CUTSCENE_BUFFER = Packet(bufferSize)
+            CutsceneTypeList.CUTSCENE_BUFFER!!.writeBytes(buffer.buffer, buffer.currentPosition, bufferSize)
+            buffer.currentPosition += bufferSize
             context.currentPacket = null
             return false
         } else if (context.currentPacket == ServerProt.DESTROY_OBJECT) {
@@ -2182,9 +2182,9 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.LOYALTY_UPDATE) {
             val key = buffer.readInt()
-            val bool66 = buffer.readUByteInverse() == 1
-            if (bool66 != QueueIterator.LOYALTY_ENABLED || key != LoginManager.LOYALTY_BALANCE) {
-                QueueIterator.LOYALTY_ENABLED = bool66
+            val loyaltyEnabled = buffer.readUByteInverse() == 1
+            if (loyaltyEnabled != QueueIterator.LOYALTY_ENABLED || key != LoginManager.LOYALTY_BALANCE) {
+                QueueIterator.LOYALTY_ENABLED = loyaltyEnabled
                 LoginManager.LOYALTY_BALANCE = key
                 CS2Executor.executeTrigger(ClientTriggerType.LOYALTY_UPDATED, -1, -1)
             }
@@ -2195,12 +2195,12 @@ object PacketDecoder {
             val flags = buffer.readUIntLittle()
             val overlay = buffer.readUByteInverse()
             val interfaceId = buffer.readInt()
-            val i_8 = buffer.readUIntLittle()
+            val xtea4 = buffer.readUIntLittle()
             val subInterfaceId = buffer.readUShortAddLittle()
-            val i_10 = buffer.readInt()
-            val i_11 = buffer.readInt()
+            val xtea3 = buffer.readInt()
+            val xtea1 = buffer.readInt()
             Client.requestVarVerifyid()
-            Interface.openSub(interfaceId, IFSubActiveNpc(subInterfaceId, overlay, npcIndex), intArrayOf(i_11, flags, i_10, i_8), false)
+            Interface.openSub(interfaceId, IFSubActiveNpc(subInterfaceId, overlay, npcIndex), intArrayOf(xtea1, flags, xtea3, xtea4), false)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.ADD_IGNORE) {
@@ -2229,9 +2229,9 @@ object PacketDecoder {
             return true
         } else if (context.currentPacket == ServerProt.CLIENT_SETVARCSTR_LARGE) {
             val key = buffer.readUShortLittle()
-            val string_88 = buffer.readString()
+            val varcString = buffer.readString()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityVarcstringUpdate(key, string_88)
+            PulseEventQueue.priorityVarcstringUpdate(key, varcString)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.NPC_UPDATE) {
@@ -2239,50 +2239,50 @@ object PacketDecoder {
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.MESSAGE_FRIENDS_CHAT) {
-            val bool91 = buffer.readUByte() == 1
-            val string_88 = buffer.readString()
-            var str92 = string_88
-            if (bool91) {
-                str92 = buffer.readString()
+            val hasDisplayName = buffer.readUByte() == 1
+            val username = buffer.readString()
+            var displayName = username
+            if (hasDisplayName) {
+                displayName = buffer.readString()
             }
-            val long_28 = buffer.readLong()
-            val long_30 = buffer.readUShort().toLong()
-            val long_55 = buffer.readUMedium().toLong()
-            val i_35 = buffer.readUByte()
-            val long_60 = (long_30 shl 32) + long_55
-            var bool16 = false
-            var i_34 = 0
+            val fcOwnerEncoded = buffer.readLong()
+            val hashHigh = buffer.readUShort().toLong()
+            val hashLow = buffer.readUMedium().toLong()
+            val rights = buffer.readUByte()
+            val messageHash = (hashHigh shl 32) + hashLow
+            var ignore = false
+            var hashIndex = 0
             while (true) {
-                if (i_34 >= 100) {
-                    if (i_35 <= 1) {
+                if (hashIndex >= 100) {
+                    if (rights <= 1) {
                         if ((!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
-                            if (IgnoreList.contains(str92)) {
-                                bool16 = true
+                            if (IgnoreList.contains(displayName)) {
+                                ignore = true
                             }
                         } else {
-                            bool16 = true
+                            ignore = true
                         }
                     }
                     break
                 }
-                if (long_60 == Client.CHAT_MESSAGE_UNIQUE_HASHES[i_34]) {
-                    bool16 = true
+                if (messageHash == Client.CHAT_MESSAGE_UNIQUE_HASHES[hashIndex]) {
+                    ignore = true
                     break
                 }
-                ++i_34
+                ++hashIndex
             }
-            if (!bool16) {
-                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = long_60
+            if (!ignore) {
+                Client.CHAT_MESSAGE_UNIQUE_HASHES[Client.chatMessageHashIndex] = messageHash
                 Client.chatMessageHashIndex = (Client.chatMessageHashIndex + 1) % 100
-                val string_17 = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
-                if (i_35 != 2 && i_35 != 3) {
-                    if (i_35 == 1) {
-                        ChatBox.writeMessage(ChatMessageType.FC_CHAT, 0, TextUtils.getCrown(0) + string_88, TextUtils.getCrown(0) + str92, string_88, string_17, TextUtils.decodeUidName(long_28), -1)
+                val decodedMessage = TextUtils.atLtGtTags(HuffmanList.decode(buffer))
+                if (rights != 2 && rights != 3) {
+                    if (rights == 1) {
+                        ChatBox.writeMessage(ChatMessageType.FC_CHAT, 0, TextUtils.getCrown(0) + username, TextUtils.getCrown(0) + displayName, username, decodedMessage, TextUtils.decodeUidName(fcOwnerEncoded), -1)
                     } else {
-                        ChatBox.writeMessage(ChatMessageType.FC_CHAT, 0, string_88, str92, string_88, string_17, TextUtils.decodeUidName(long_28), -1)
+                        ChatBox.writeMessage(ChatMessageType.FC_CHAT, 0, username, displayName, username, decodedMessage, TextUtils.decodeUidName(fcOwnerEncoded), -1)
                     }
                 } else {
-                    ChatBox.writeMessage(ChatMessageType.FC_CHAT, 0, TextUtils.getCrown(1) + string_88, TextUtils.getCrown(1) + str92, string_88, string_17, TextUtils.decodeUidName(long_28), -1)
+                    ChatBox.writeMessage(ChatMessageType.FC_CHAT, 0, TextUtils.getCrown(1) + username, TextUtils.getCrown(1) + displayName, username, decodedMessage, TextUtils.decodeUidName(fcOwnerEncoded), -1)
                 }
             }
             context.currentPacket = null
@@ -2310,8 +2310,8 @@ object PacketDecoder {
             }
             val soundType = buffer.readUByte()
             val delay = buffer.readUShort()
-            val i_7 = buffer.readUByte()
-            AreaSoundPlayer.playSoundVorbis(id, soundType, delay, i_7, true, 256)
+            val volume = buffer.readUByte()
+            AreaSoundPlayer.playSoundVorbis(id, soundType, delay, volume, true, 256)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_IGNORE_LIST) {
@@ -2329,10 +2329,10 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.IF_SETRETEX) {
             val key = buffer.readUShortLittle()
             val flags = buffer.readUShort()
-            val i_6 = buffer.readUByteSubtract()
-            val i_7 = buffer.readUIntLittle()
+            val textureIndex = buffer.readUByteSubtract()
+            val componentHash = buffer.readUIntLittle()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityIfretex(i_7, i_6, flags, key)
+            PulseEventQueue.priorityIfretex(componentHash, textureIndex, flags, key)
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.SET_TARGET) {
@@ -2364,37 +2364,37 @@ object PacketDecoder {
             if (WindowMode.fullScreenSupported && WindowMode.fullScreenFrame != null) {
                 WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
             }
-            val bytes_64 = ByteArray(context.currentPacketSize)
-            buffer.readBytes(bytes_64, context.currentPacketSize)
-            val string_88 = Utils.readString(bytes_64, 0, context.currentPacketSize)
-            val str92 = "opensn"
-            if (!Client.isApplet || !Browser.openBrowser(string_88, 1, str92)) {
-                Browser.openBrowser(string_88, true, str92, Client.useBrowserAppletMode)
+            val urlBytes = ByteArray(context.currentPacketSize)
+            buffer.readBytes(urlBytes, context.currentPacketSize)
+            val url = Utils.readString(urlBytes, 0, context.currentPacketSize)
+            val openMethod = "opensn"
+            if (!Client.isApplet || !Browser.openBrowser(url, 1, openMethod)) {
+                Browser.openBrowser(url, true, openMethod, Client.useBrowserAppletMode)
             }
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.OUTDATED_INTERFACE_PULSE_EVENT) {
             val key = buffer.readUShortAdd()
             val flags = buffer.readUIntInverseMiddle()
-            val i_6 = buffer.readUShortLittle()
+            val componentId = buffer.readUShortLittle()
             Client.requestVarVerifyid()
-            PulseEventQueue.priorityT13Update(flags, key + (i_6 shl 16))
+            PulseEventQueue.priorityT13Update(flags, key + (componentId shl 16))
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.RUN_CS2_SCRIPT) {
-            val string_63 = buffer.readString()
-            val arr_26 = arrayOfNulls<Any>(string_63.length + 1)
-            for (i_6 in string_63.length - 1 downTo 0) {
-                if (string_63.get(i_6).code == 115) {
-                    arr_26[i_6 + 1] = buffer.readString()
+            val paramTypes = buffer.readString()
+            val scriptArgs = arrayOfNulls<Any>(paramTypes.length + 1)
+            for (paramIndex in paramTypes.length - 1 downTo 0) {
+                if (paramTypes.get(paramIndex).code == 115) {
+                    scriptArgs[paramIndex + 1] = buffer.readString()
                 } else {
-                    arr_26[i_6 + 1] = buffer.readInt()
+                    scriptArgs[paramIndex + 1] = buffer.readInt()
                 }
             }
-            arr_26[0] = buffer.readInt()
+            scriptArgs[0] = buffer.readInt()
             Client.requestVarVerifyid()
             val hookRequest = HookRequest()
-            hookRequest.params = arr_26
+            hookRequest.params = scriptArgs
             CS2Executor.executeHookInner(hookRequest)
             context.currentPacket = null
             return true
