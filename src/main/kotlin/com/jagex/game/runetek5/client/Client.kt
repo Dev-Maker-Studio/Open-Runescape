@@ -426,8 +426,8 @@ class Client : GameShell() {
         if (gameState != GameState.UNK_16) {
             val long_2: Long = currentCycle / 1000000L - lastRedrawTimeMillis
             lastRedrawTimeMillis = currentCycle / 1000000L
-            val bool4 = SoundResourceManager.loadPendingSong()
-            if (bool4 && SoundEffectPlayer.soundJinglePlaying && SoundEffectPlayer.jinglePlayer != null) {
+            val songLoaded = SoundResourceManager.loadPendingSong()
+            if (songLoaded && SoundEffectPlayer.soundJinglePlaying && SoundEffectPlayer.jinglePlayer != null) {
                 SoundEffectPlayer.jinglePlayer!!.start()
             }
 
@@ -1625,8 +1625,8 @@ class Client : GameShell() {
             PREV_COMPONENT_ON_TOP = BooleanArray(107)
             INTERFACE_BG_COMPONENTS = arrayOfNulls<Rectangle>(107)
 
-            for (i_0 in 0..106) {
-                INTERFACE_BG_COMPONENTS[i_0] = Rectangle()
+            for (index in 0..106) {
+                INTERFACE_BG_COMPONENTS[index] = Rectangle()
             }
 
             interfaceDebugMode = 0
@@ -1685,7 +1685,7 @@ class Client : GameShell() {
             if (depthFlags == 0) {
                 return null
             }
-            for (i_3 in 0..<depthFlags) {
+            for (depth in 0..<depthFlags) {
                 component = Interface.getSub(Interface.getInterface(component!!.idHash)!!, component)
                 if (component == null) {
                     return frameComponent
@@ -1867,12 +1867,12 @@ class Client : GameShell() {
             }
         }
 
-        fun isInLobbyOrCreation(i_0: GameState?): Boolean {
-            return i_0 == GameState.UNK_5 || i_0 == GameState.UNK_14 || i_0 == GameState.UNK_19 || i_0 == GameState.IN_ACCOUNT_CREATION || i_0 == GameState.UNK_8 || i_0 == GameState.UNK_9
+        fun isInLobbyOrCreation(state: GameState?): Boolean {
+            return state == GameState.UNK_5 || state == GameState.UNK_14 || state == GameState.UNK_19 || state == GameState.IN_ACCOUNT_CREATION || state == GameState.UNK_8 || state == GameState.UNK_9
         }
 
-        fun isInLobbyConnection(i_0: GameState?): Boolean {
-            return i_0 == GameState.UNK_0 || i_0 == GameState.UNK_7
+        fun isInLobbyConnection(state: GameState?): Boolean {
+            return state == GameState.UNK_0 || state == GameState.UNK_7
         }
 
         fun disableTitlescreenMusic() {
@@ -1905,9 +1905,9 @@ class Client : GameShell() {
                 if (!MiniMenu.isOpen) {
                     MiniMenu.resetEntries()
                 }
-                var i_1 = 0
-                while (i_1 < 100 && PacketDecoder.decodePacketFromStream(GAME_CONNECTION_CONTEXT)) {
-                    i_1++
+                var packetCount = 0
+                while (packetCount < 100 && PacketDecoder.decodePacketFromStream(GAME_CONNECTION_CONTEXT)) {
+                    packetCount++
                 }
                 if (gameState == GameState.LOGGED_INGAME) {
                     while (ReflectionCheckManager.hasPendingChecks()) {
@@ -2121,11 +2121,11 @@ class Client : GameShell() {
                                                                 ++minimapRandomizationCycle
                                                                 if (minimapRandomizationCycle > 508) {
                                                                     minimapRandomizationCycle = 0
-                                                                    val i_2 = (Math.random() * 8.0).toInt()
-                                                                    if ((i_2 and 0x1) == 1) {
+                                                                    val randomBits = (Math.random() * 8.0).toInt()
+                                                                    if ((randomBits and 0x1) == 1) {
                                                                         minimapRotation += minimapRotationStep
                                                                     }
-                                                                    if ((i_2 and 0x2) == 2) {
+                                                                    if ((randomBits and 0x2) == 2) {
                                                                         minimapZoom += minimapZoomStep
                                                                     }
                                                                 }
@@ -2213,7 +2213,7 @@ class Client : GameShell() {
         @JvmField
         var JCOINS: Int = 0
 
-        fun drawGameArea(x: Int, y: Int, gameAreaWidth: Int, gameAreaHeight: Int, bool4: Boolean) {
+        fun drawGameArea(x: Int, y: Int, gameAreaWidth: Int, gameAreaHeight: Int, skipProjectiles: Boolean) {
             var x = x
             var y = y
             var gameAreaWidth = gameAreaWidth
@@ -2240,7 +2240,7 @@ class Client : GameShell() {
                         PulseEventQueue.delayedClearMinimapFlagUpdate()
                     }
                     EntityUpdating.positionAllEntities()
-                    if (!bool4) {
+                    if (!skipProjectiles) {
                         MapRegion.addProjectileSpawnsToScene()
                     }
                     MapRegion.addGfxsToScene()
@@ -2464,30 +2464,30 @@ class Client : GameShell() {
             Component.redrawComponent(draggingComponent!!)
             ++InterfaceRenderer.dragTickCount
             if (isDraggingComponent && isComponentSelected) {
-                var i_1 = MouseRecord.recorder!!.getMouseX()
-                var i_2 = MouseRecord.recorder!!.getMouseY()
-                i_1 -= mouseX
-                i_2 -= mouseY
-                if (i_1 < selectedComponentX) {
-                    i_1 = selectedComponentX
+                var dragX = MouseRecord.recorder!!.getMouseX()
+                var dragY = MouseRecord.recorder!!.getMouseY()
+                dragX -= mouseX
+                dragY -= mouseY
+                if (dragX < selectedComponentX) {
+                    dragX = selectedComponentX
                 }
-                if (i_1 + draggingComponent!!.width > selectedComponentWidth + selectedComponentX) {
-                    i_1 = selectedComponentWidth + selectedComponentX - draggingComponent!!.width
+                if (dragX + draggingComponent!!.width > selectedComponentWidth + selectedComponentX) {
+                    dragX = selectedComponentWidth + selectedComponentX - draggingComponent!!.width
                 }
-                if (i_2 < selectedComponentY) {
-                    i_2 = selectedComponentY
+                if (dragY < selectedComponentY) {
+                    dragY = selectedComponentY
                 }
-                if (i_2 + draggingComponent!!.height > selectedComponentY + selectedComponentHeight) {
-                    i_2 = selectedComponentHeight + selectedComponentY - draggingComponent!!.height
+                if (dragY + draggingComponent!!.height > selectedComponentY + selectedComponentHeight) {
+                    dragY = selectedComponentHeight + selectedComponentY - draggingComponent!!.height
                 }
-                val i_3: Int
-                val i_4: Int
+                val scrollX: Int
+                val scrollY: Int
                 if (selectedComponent == frameComponent) {
-                    i_3 = i_1
-                    i_4 = i_2
+                    scrollX = dragX
+                    scrollY = dragY
                 } else {
-                    i_3 = i_1 - selectedComponentX + selectedComponent!!.scrollX
-                    i_4 = i_2 - selectedComponentY + selectedComponent!!.scrollY
+                    scrollX = dragX - selectedComponentX + selectedComponent!!.scrollX
+                    scrollY = dragY - selectedComponentY + selectedComponent!!.scrollY
                 }
                 val hookrequest5: HookRequest?
                 if (!MouseRecord.recorder!!.isMouseButtonPressed()) {
@@ -2496,8 +2496,8 @@ class Client : GameShell() {
                         if (draggingComponent!!.onDragComplete != null) {
                             hookrequest5 = HookRequest()
                             hookrequest5.source = draggingComponent
-                            hookrequest5.mouseX = i_3
-                            hookrequest5.mouseY = i_4
+                            hookrequest5.mouseX = scrollX
+                            hookrequest5.mouseY = scrollY
                             hookrequest5.targetComponent = hoveredComponent
                             hookrequest5.params = draggingComponent!!.onDragComplete
                             CS2Executor.executeHookInner(hookrequest5)
@@ -2514,17 +2514,17 @@ class Client : GameShell() {
                     selectedComponent = null
                 } else {
                     if (InterfaceRenderer.dragTickCount > draggingComponent!!.dragDeadTime) {
-                        val i_7: Int = i_1 - dragStartX
-                        val i_6: Int = i_2 - dragStartY
-                        if (i_7 > draggingComponent!!.dragDeadzone || i_7 < -draggingComponent!!.dragDeadzone || i_6 > draggingComponent!!.dragDeadzone || i_6 < -draggingComponent!!.dragDeadzone) {
+                        val dragDeltaX: Int = dragX - dragStartX
+                        val dragDeltaY: Int = dragY - dragStartY
+                        if (dragDeltaX > draggingComponent!!.dragDeadzone || dragDeltaX < -draggingComponent!!.dragDeadzone || dragDeltaY > draggingComponent!!.dragDeadzone || dragDeltaY < -draggingComponent!!.dragDeadzone) {
                             isDragThresholdMet = true
                         }
                     }
                     if (draggingComponent!!.onDrag != null && isDragThresholdMet) {
                         hookrequest5 = HookRequest()
                         hookrequest5.source = draggingComponent
-                        hookrequest5.mouseX = i_3
-                        hookrequest5.mouseY = i_4
+                        hookrequest5.mouseX = scrollX
+                        hookrequest5.mouseY = scrollY
                         hookrequest5.params = draggingComponent!!.onDrag
                         CS2Executor.executeHookInner(hookrequest5)
                     }
