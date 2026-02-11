@@ -76,7 +76,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int) : AbstractToolkit(materials) {
+open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSamples: Int) : AbstractToolkit(materials) {
 
     @JvmField var openglTextures: Array<OpenGlTexture?>? = null
     @JvmField var texture2d: OpenGl2DTexture? = null
@@ -243,7 +243,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     init {
         try {
-            this.multiSamplesPreference = i_3
+            this.multiSamplesPreference = multiSamples
             if (!getNativeLibraryLoader().loadIntoMemory("jaclib")) {
                 println("Missing jaclib")
                 throw RuntimeException("")
@@ -253,28 +253,28 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
                 throw RuntimeException("")
             }
             this.activeOpenglInstance = OpenGL()
-            val generatedUid = this.activeOpenglInstance!!.init(canvas1, 8, 8, 8, 24, 0, this.multiSamplesPreference)
+            val generatedUid = this.activeOpenglInstance!!.init(canvas, 8, 8, 8, 24, 0, this.multiSamplesPreference)
             if (generatedUid == 0L) {
                 throw RuntimeException("")
             }
             attach()
-            val i_6 = accumulateCapabilities()
-            if (i_6 != 0) {
+            val capabilityFlags = accumulateCapabilities()
+            if (capabilityFlags != 0) {
                 throw RuntimeException("")
             }
             this.pixelType = if (this.bigEndianess) GL_UNSIGNED_INT_8_8_8_8_REV else GL_UNSIGNED_BYTE
             if (this.gpuNameString!!.indexOf("radeon") != -1) {
                 var gpuVersion = 0
                 var hasHdPrefix = false
-                var bool9 = false
+                var hasCrossPrefix = false
                 val namePieces = Utils.split(this.gpuNameString!!.replace('/', ' '), ' ')
-                for (i_11 in namePieces.indices) {
-                    var name = namePieces[i_11]
+                for (nameIndex in namePieces.indices) {
+                    var name = namePieces[nameIndex]
                     try {
                         if (name.isNotEmpty()) {
                             if (name[0].code == 120 && name.length >= 3 && Utils.isWrongJava(name.substring(1, 3))) {
                                 name = name.substring(1)
-                                bool9 = true
+                                hasCrossPrefix = true
                             }
                             if ("hd" == name) {
                                 hasHdPrefix = true
@@ -293,7 +293,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
                         exception.printStackTrace()
                     }
                 }
-                if (!bool9 && !hasHdPrefix) {
+                if (!hasCrossPrefix && !hasHdPrefix) {
                     if (gpuVersion in 7000..7999) {
                         this.vertexbufferSupported = false
                     }
@@ -337,8 +337,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
                     this.rectangularTexture = null
                 }
             }
-            addImageProducer(canvas1, ImageProducerGL2(this, canvas1, generatedUid))
-            setActiveCanvas(canvas1)
+            addImageProducer(canvas, ImageProducerGL2(this, canvas, generatedUid))
+            setActiveCanvas(canvas)
             this.effectManager = EffectManagerGL(this)
             prepareForRendering()
             renderLastFrame()
@@ -505,10 +505,10 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             val top = this.clipTop
             val bottom = this.clipBottom
             resetClipping()
-            val i_5 = this.drawableX
-            val i_6 = this.drawableY
-            val i_7 = this.imageProducerWidth
-            val i_8 = this.imageProducerHeight
+            val savedDrawableX = this.drawableX
+            val savedDrawableY = this.drawableY
+            val savedWidth = this.imageProducerWidth
+            val savedHeight = this.imageProducerHeight
             calculateViewportCenter()
             OpenGL.glReadBuffer(GL_FRONT)
             OpenGL.glDrawBuffer(GL_BACK)
@@ -532,7 +532,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             OpenGL.glReadBuffer(GL_BACK)
             OpenGL.glDrawBuffer(GL_BACK)
             setClipping(left, top, right, bottom)
-            setDrawableArea(i_5, i_6, i_7, i_8)
+            setDrawableArea(savedDrawableX, savedDrawableY, savedWidth, savedHeight)
         }
     }
 
@@ -636,9 +636,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             setBlendMode(1)
             var deltaX = (endX - startX).toFloat()
             var deltaY = (endY - startY).toFloat()
-            val f_12 = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
-            deltaX *= f_12
-            deltaY *= f_12
+            val inverseMagnitude = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
+            deltaX *= inverseMagnitude
+            deltaY *= inverseMagnitude
             OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
             offset %= lineLength + lineSpacing
             val dx1 = deltaX * lineSpacing
@@ -706,111 +706,111 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     override fun drawSurfaceLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
-        val class455Sub210 = dimension as SpriteSurfaceGL
-        val class137Sub1Sub111 = class455Sub210.surface
+        val spriteSurface = dimension as SpriteSurfaceGL
+        val texture = spriteSurface.surface
         setupSpriteRendering()
-        setActiveTexture(class455Sub210.surface)
+        setActiveTexture(spriteSurface.surface)
         setBlendMode(1)
         loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
         setTexture(0, GL_PRIMARY_COLOR, GL_SRC_COLOR)
-        val f_12 = class137Sub1Sub111!!.s / class137Sub1Sub111.singleWidth
-        val f_13 = class137Sub1Sub111.t / class137Sub1Sub111.singleLength
-        var f_14 = (rightX - leftX).toFloat()
-        var f_15 = (bottomY - topY).toFloat()
-        val f_16 = (1.0 / sqrt((f_14 * f_14 + f_15 * f_15).toDouble())).toFloat()
-        f_14 *= f_16
-        f_15 *= f_16
+        val textureScaleU = texture!!.s / texture.singleWidth
+        val textureScaleV = texture.t / texture.singleLength
+        var deltaX = (rightX - leftX).toFloat()
+        var deltaY = (bottomY - topY).toFloat()
+        val inverseMagnitude = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
+        deltaX *= inverseMagnitude
+        deltaY *= inverseMagnitude
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
         OpenGL.glBegin(GL_LINES)
-        OpenGL.glTexCoord2f(f_12 * (leftX - clipLeft), f_13 * (topY - clipTop))
+        OpenGL.glTexCoord2f(textureScaleU * (leftX - clipLeft), textureScaleV * (topY - clipTop))
         OpenGL.glVertex2f(leftX + 0.35f, topY + 0.35f)
-        OpenGL.glTexCoord2f(f_12 * (rightX - clipLeft), f_13 * (bottomY - clipTop))
-        OpenGL.glVertex2f(rightX + f_14 + 0.35f, bottomY + f_15 + 0.35f)
+        OpenGL.glTexCoord2f(textureScaleU * (rightX - clipLeft), textureScaleV * (bottomY - clipTop))
+        OpenGL.glVertex2f(rightX + deltaX + 0.35f, bottomY + deltaY + 0.35f)
         OpenGL.glEnd()
         setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
     }
 
-    override fun drawTexturedLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, colorArgb: Int, class4557: ComponentSurface, clipLeft: Int, clipTop: Int, i_10: Int, i_11: Int, i_12: Int) {
-        var i_12 = i_12
-        if (i_3 != i_1 || i_2 != i_4) {
-            val class455Sub213 = class4557 as SpriteSurfaceGL
-            val class137Sub1Sub114 = class455Sub213.surface
+    override fun drawTexturedLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, clipLeft: Int, clipTop: Int, lineSpacing: Int, lineLength: Int, offset: Int) {
+        var offset = offset
+        if (endX != startX || startY != endY) {
+            val spriteSurface = surface as SpriteSurfaceGL
+            val texture = spriteSurface.surface
             setupSpriteRendering()
-            setActiveTexture(class455Sub213.surface)
+            setActiveTexture(spriteSurface.surface)
             setBlendMode(1)
             loadTextureCombineMode(7681, 8448)
             setTexture(0, 34167, 768)
-            val f_15 = class137Sub1Sub114!!.s / class137Sub1Sub114.singleWidth
-            val f_16 = class137Sub1Sub114.t / class137Sub1Sub114.singleLength
-            var f_17 = (i_3 - i_1).toFloat()
-            var f_18 = (i_4 - i_2).toFloat()
-            val f_19 = (1.0 / sqrt((f_17 * f_17 + f_18 * f_18).toDouble())).toFloat()
-            f_17 *= f_19
-            f_18 *= f_19
+            val textureScaleU = texture!!.s / texture.singleWidth
+            val textureScaleV = texture.t / texture.singleLength
+            var deltaX = (endX - startX).toFloat()
+            var deltaY = (endY - startY).toFloat()
+            val inverseMagnitude = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
+            deltaX *= inverseMagnitude
+            deltaY *= inverseMagnitude
             OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
-            i_12 %= i_11 + i_10
-            val f_20 = f_17 * i_10
-            val f_21 = f_18 * i_10
-            var f_22 = 0.0f
-            var f_23 = 0.0f
-            var f_24 = f_20
-            var f_25 = f_21
-            if (i_12 > i_10) {
-                f_22 = f_17 * (i_11 + i_10 - i_12)
-                f_23 = f_18 * (i_11 + i_10 - i_12)
+            offset %= lineLength + lineSpacing
+            val dashSpacingX = deltaX * lineSpacing
+            val dashSpacingY = deltaY * lineSpacing
+            var segStartOffsetX = 0.0f
+            var segStartOffsetY = 0.0f
+            var segLengthX = dashSpacingX
+            var segLengthY = dashSpacingY
+            if (offset > lineSpacing) {
+                segStartOffsetX = deltaX * (lineLength + lineSpacing - offset)
+                segStartOffsetY = deltaY * (lineLength + lineSpacing - offset)
             } else {
-                f_24 = f_17 * (i_10 - i_12)
-                f_25 = f_18 * (i_10 - i_12)
+                segLengthX = deltaX * (lineSpacing - offset)
+                segLengthY = deltaY * (lineSpacing - offset)
             }
 
-            var f_26 = i_1 + 0.35f + f_22
-            var f_27 = i_2 + 0.35f + f_23
-            val f_28 = f_17 * i_11
-            val f_29 = f_18 * i_11
+            var curX = startX + 0.35f + segStartOffsetX
+            var curY = startY + 0.35f + segStartOffsetY
+            val dashLengthX = deltaX * lineLength
+            val dashLengthY = deltaY * lineLength
 
             while (true) {
-                if (i_3 > i_1) {
-                    if (f_26 > i_3 + 0.35f) {
+                if (endX > startX) {
+                    if (curX > endX + 0.35f) {
                         break
                     }
-                    if (f_26 + f_24 > i_3) {
-                        f_24 = i_3 - f_26
+                    if (curX + segLengthX > endX) {
+                        segLengthX = endX - curX
                     }
                 } else {
-                    if (f_26 < i_3 + 0.35f) {
+                    if (curX < endX + 0.35f) {
                         break
                     }
-                    if (f_26 + f_24 < i_3) {
-                        f_24 = i_3 - f_26
+                    if (curX + segLengthX < endX) {
+                        segLengthX = endX - curX
                     }
                 }
 
-                if (i_4 > i_2) {
-                    if (f_27 > i_4 + 0.35f) {
+                if (endY > startY) {
+                    if (curY > endY + 0.35f) {
                         break
                     }
-                    if (f_27 + f_25 > i_4) {
-                        f_25 = i_4 - f_27
+                    if (curY + segLengthY > endY) {
+                        segLengthY = endY - curY
                     }
                 } else {
-                    if (f_27 < i_4 + 0.35f) {
+                    if (curY < endY + 0.35f) {
                         break
                     }
-                    if (f_27 + f_25 < i_4) {
-                        f_25 = i_4 - f_27
+                    if (curY + segLengthY < endY) {
+                        segLengthY = endY - curY
                     }
                 }
 
                 OpenGL.glBegin(GL_LINES)
-                OpenGL.glTexCoord2f(f_15 * (f_26 - clipLeft), f_16 * (f_27 - clipTop))
-                OpenGL.glVertex2f(f_26, f_27)
-                OpenGL.glTexCoord2f(f_15 * (f_26 + f_24 - clipLeft), f_16 * (f_27 + f_25 - clipTop))
-                OpenGL.glVertex2f(f_26 + f_24, f_27 + f_25)
+                OpenGL.glTexCoord2f(textureScaleU * (curX - clipLeft), textureScaleV * (curY - clipTop))
+                OpenGL.glVertex2f(curX, curY)
+                OpenGL.glTexCoord2f(textureScaleU * (curX + segLengthX - clipLeft), textureScaleV * (curY + segLengthY - clipTop))
+                OpenGL.glVertex2f(curX + segLengthX, curY + segLengthY)
                 OpenGL.glEnd()
-                f_26 += f_28 + f_24
-                f_27 += f_29 + f_25
-                f_24 = f_20
-                f_25 = f_21
+                curX += dashLengthX + segLengthX
+                curY += dashLengthY + segLengthY
+                segLengthX = dashSpacingX
+                segLengthY = dashSpacingY
             }
 
             setTexture(0, 5890, 768)
@@ -823,42 +823,42 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         OpenGL.glLineWidth(1.0f)
     }
 
-    override fun calculateProjection(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * f_1 + this.viewProjectionMatrix.elements[7] * f_2 + this.viewProjectionMatrix.elements[11] * f_3
-        val f_6 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * f_1 + this.viewProjectionMatrix.elements[4] * f_2 + this.viewProjectionMatrix.elements[8] * f_3
-        val f_7 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * f_1 + this.viewProjectionMatrix.elements[5] * f_2 + this.viewProjectionMatrix.elements[9] * f_3
-        val f_8 = this.viewMatrix44.elements[14] + this.viewMatrix44.elements[2] * f_1 + this.viewMatrix44.elements[6] * f_2 + this.viewMatrix44.elements[10] * f_3
-        floats_4[0] = this.viewportOriginX + this.imageProducerCenterX * f_6 / f_5
-        floats_4[1] = this.viewportOriginY + this.imageProducerCenterY * f_7 / f_5
-        floats_4[2] = f_8
+    override fun calculateProjection(worldX: Float, worldY: Float, worldZ: Float, screenCoords: FloatArray) {
+        val clipW = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * worldX + this.viewProjectionMatrix.elements[7] * worldY + this.viewProjectionMatrix.elements[11] * worldZ
+        val clipX = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * worldX + this.viewProjectionMatrix.elements[4] * worldY + this.viewProjectionMatrix.elements[8] * worldZ
+        val clipY = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * worldX + this.viewProjectionMatrix.elements[5] * worldY + this.viewProjectionMatrix.elements[9] * worldZ
+        val viewZ = this.viewMatrix44.elements[14] + this.viewMatrix44.elements[2] * worldX + this.viewMatrix44.elements[6] * worldY + this.viewMatrix44.elements[10] * worldZ
+        screenCoords[0] = this.viewportOriginX + this.imageProducerCenterX * clipX / clipW
+        screenCoords[1] = this.viewportOriginY + this.imageProducerCenterY * clipY / clipW
+        screenCoords[2] = viewZ
     }
 
-    override fun computeWorldToScreen(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * f_1 + this.viewProjectionMatrix.elements[6] * f_2 + this.viewProjectionMatrix.elements[10] * f_3
-        val f_6 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * f_1 + this.viewProjectionMatrix.elements[7] * f_2 + this.viewProjectionMatrix.elements[11] * f_3
-        if (f_5 >= -f_6 && f_5 <= f_6) {
-            val f_7 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * f_1 + this.viewProjectionMatrix.elements[4] * f_2 + this.viewProjectionMatrix.elements[8] * f_3
-            if (f_7 >= -f_6 && f_7 <= f_6) {
-                val f_8 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * f_1 + this.viewProjectionMatrix.elements[5] * f_2 + this.viewProjectionMatrix.elements[9] * f_3
-                if (f_8 >= -f_6 && f_8 <= f_6) {
-                    val f_9 = this.viewMatrix44.elements[14] + this.viewMatrix44.elements[2] * f_1 + this.viewMatrix44.elements[6] * f_2 + this.viewMatrix44.elements[10] * f_3
-                    floats_4[0] = this.viewportOriginX + this.imageProducerCenterX * f_7 / f_6
-                    floats_4[1] = this.viewportOriginY + this.imageProducerCenterY * f_8 / f_6
-                    floats_4[2] = f_9
+    override fun computeWorldToScreen(worldX: Float, worldY: Float, worldZ: Float, screenCoords: FloatArray) {
+        val clipZ = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * worldX + this.viewProjectionMatrix.elements[6] * worldY + this.viewProjectionMatrix.elements[10] * worldZ
+        val clipW = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * worldX + this.viewProjectionMatrix.elements[7] * worldY + this.viewProjectionMatrix.elements[11] * worldZ
+        if (clipZ >= -clipW && clipZ <= clipW) {
+            val clipX = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * worldX + this.viewProjectionMatrix.elements[4] * worldY + this.viewProjectionMatrix.elements[8] * worldZ
+            if (clipX >= -clipW && clipX <= clipW) {
+                val clipY = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * worldX + this.viewProjectionMatrix.elements[5] * worldY + this.viewProjectionMatrix.elements[9] * worldZ
+                if (clipY >= -clipW && clipY <= clipW) {
+                    val viewZ = this.viewMatrix44.elements[14] + this.viewMatrix44.elements[2] * worldX + this.viewMatrix44.elements[6] * worldY + this.viewMatrix44.elements[10] * worldZ
+                    screenCoords[0] = this.viewportOriginX + this.imageProducerCenterX * clipX / clipW
+                    screenCoords[1] = this.viewportOriginY + this.imageProducerCenterY * clipY / clipW
+                    screenCoords[2] = viewZ
                 } else {
-                    floats_4[2] = Float.NaN
-                    floats_4[1] = Float.NaN
-                    floats_4[0] = Float.NaN
+                    screenCoords[2] = Float.NaN
+                    screenCoords[1] = Float.NaN
+                    screenCoords[0] = Float.NaN
                 }
             } else {
-                floats_4[2] = Float.NaN
-                floats_4[1] = Float.NaN
-                floats_4[0] = Float.NaN
+                screenCoords[2] = Float.NaN
+                screenCoords[1] = Float.NaN
+                screenCoords[0] = Float.NaN
             }
         } else {
-            floats_4[2] = Float.NaN
-            floats_4[1] = Float.NaN
-            floats_4[0] = Float.NaN
+            screenCoords[2] = Float.NaN
+            screenCoords[1] = Float.NaN
+            screenCoords[0] = Float.NaN
         }
     }
 
@@ -888,8 +888,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         return nativeMemory
     }
 
-    override fun setNativeHeap(class282Sub11: NativeMemoryNode) {
-        this.nativeHeap = (class282Sub11 as NativeMemoryGL).nativeHeap
+    override fun setNativeHeap(nativeMemoryNode: NativeMemoryNode) {
+        this.nativeHeap = (nativeMemoryNode as NativeMemoryGL).nativeHeap
         if (this.screenQuadArrayBuffer == null) {
             val textureBuffer = GlBitBuffer(80)
             if (this.bigEndianess) {
@@ -943,8 +943,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    override fun generateEmptySprite(i_1: Int, i_2: Int, bool3: Boolean, bool4: Boolean): NativeSprite {
-        return SpriteGL(this, i_1, i_2, bool3)
+    override fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, bool4: Boolean): NativeSprite {
+        return SpriteGL(this, width, height, transparent)
     }
 
     override fun generateSprite(spriteType: SpriteType?, bool2: Boolean): NativeSprite {
@@ -970,37 +970,37 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         return nativeSprite
     }
 
-    override fun createNativeSprite(ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean): NativeSprite {
-        return SpriteGL(this, i_4, i_5, ints_1, i_2, i_3)
+    override fun createNativeSprite(pixels: IntArray, defaultBackgroundColor: Int, width: Int, useWidth: Int, useHeight: Int, hasAlpha: Boolean): NativeSprite {
+        return SpriteGL(this, useWidth, useHeight, pixels, defaultBackgroundColor, width)
     }
 
-    override fun createNativeSprite(i_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean): NativeSprite {
-        return SpriteGL(this, i_1, i_2, i_3, i_4)
+    override fun createNativeSprite(width: Int, height: Int, textureWidth: Int, textureHeight: Int, hasAlpha: Boolean): NativeSprite {
+        return SpriteGL(this, width, height, textureWidth, textureHeight)
     }
 
     override fun createComponentSurface(sizeX: Int, sizeY: Int, rowStartX: IntArray, rowWidth: IntArray): ComponentSurface {
         return SpriteSurfaceGL.create(this, sizeX, sizeY, rowStartX, rowWidth)
     }
 
-    override fun clearRectangle(class4552: ComponentSurface, i_3: Int, i_4: Int) {
-        val class455Sub25 = class4552 as SpriteSurfaceGL
-        val class137Sub1Sub16 = class455Sub25.surface
+    override fun clearRectangle(dimension: ComponentSurface, offsetX: Int, offsetY: Int) {
+        val spriteSurface = dimension as SpriteSurfaceGL
+        val texture = spriteSurface.surface
         setupSpriteRendering()
-        setActiveTexture(class455Sub25.surface)
+        setActiveTexture(spriteSurface.surface)
         setBlendMode(1)
         loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
         setTexture(0, 34167, 768)
-        val f_7 = class137Sub1Sub16!!.s / class137Sub1Sub16.singleWidth
-        val f_8 = class137Sub1Sub16.t / class137Sub1Sub16.singleLength
+        val textureScaleU = texture!!.s / texture.singleWidth
+        val textureScaleV = texture.t / texture.singleLength
         OpenGL.glColor4ub((0xffffff.inv() shr 16).toByte(), (0xffffff.inv() shr 8).toByte(), (0xffffff.inv()).toByte(), (0xffffff.inv() shr 24).toByte())
         OpenGL.glBegin(GL_QUADS)
-        OpenGL.glTexCoord2f(f_7 * (this.clipLeft - i_3), f_8 * (this.clipTop - i_4))
+        OpenGL.glTexCoord2f(textureScaleU * (this.clipLeft - offsetX), textureScaleV * (this.clipTop - offsetY))
         OpenGL.glVertex2i(this.clipLeft, this.clipTop)
-        OpenGL.glTexCoord2f(f_7 * (this.clipLeft - i_3), f_8 * (this.clipBottom - i_4))
+        OpenGL.glTexCoord2f(textureScaleU * (this.clipLeft - offsetX), textureScaleV * (this.clipBottom - offsetY))
         OpenGL.glVertex2i(this.clipLeft, this.clipBottom)
-        OpenGL.glTexCoord2f(f_7 * (this.clipRight - i_3), f_8 * (this.clipBottom - i_4))
+        OpenGL.glTexCoord2f(textureScaleU * (this.clipRight - offsetX), textureScaleV * (this.clipBottom - offsetY))
         OpenGL.glVertex2i(this.clipRight, this.clipBottom)
-        OpenGL.glTexCoord2f(f_7 * (this.clipRight - i_3), f_8 * (this.clipTop - i_4))
+        OpenGL.glTexCoord2f(textureScaleU * (this.clipRight - offsetX), textureScaleV * (this.clipTop - offsetY))
         OpenGL.glVertex2i(this.clipRight, this.clipTop)
         OpenGL.glEnd()
         setTexture(0, 5890, 768)
@@ -1009,19 +1009,19 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     override fun initialize() {
     }
 
-    override fun createModel(rsmesh1: Mesh, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Model {
-        return ModelGL(this, rsmesh1, i_2, i_4, i_5, i_3)
+    override fun createModel(mesh: Mesh, functionMask: Int, preferenceMask: Int, ambient: Int, contrast: Int): Model {
+        return ModelGL(this, mesh, functionMask, ambient, contrast, preferenceMask)
     }
 
-    override fun mismatchingFunctionMask(i_1: Int, i_2: Int): Int {
-        return i_1 and i_2 xor i_2
+    override fun mismatchingFunctionMask(functionMaskA: Int, functionMaskB: Int): Int {
+        return functionMaskA and functionMaskB xor functionMaskB
     }
 
-    override fun calculateFog(color: Int, density: Int, i_3: Int) {
-        if (this.fogColor != color || density != this.fogDensity || i_3 != this.fogOffset) {
+    override fun calculateFog(color: Int, density: Int, offset: Int) {
+        if (this.fogColor != color || density != this.fogDensity || offset != this.fogOffset) {
             this.fogColor = color
             this.fogDensity = density
-            this.fogOffset = i_3
+            this.fogOffset = offset
             setFogRange()
             toggleFog()
         }
@@ -1053,8 +1053,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    override fun getRenderBuffer(i_1: Int, i_2: Int): RenderBuffer {
-        return OpenGlRenderBuffer(this, GLFormat.DEPTH, GLActionFormat.DEPTH_COMPONENT_24, i_1, i_2)
+    override fun getRenderBuffer(width: Int, height: Int): RenderBuffer {
+        return OpenGlRenderBuffer(this, GLFormat.DEPTH, GLActionFormat.DEPTH_COMPONENT_24, width, height)
     }
 
     override fun calculateViewportCenter() {
@@ -1068,11 +1068,11 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         updateViewportAndCenter()
     }
 
-    override fun setDrawableArea(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
-        this.drawableX = i_1
-        this.drawableY = i_2
-        this.imageProducerWidth = i_3
-        this.imageProducerHeight = i_4
+    override fun setDrawableArea(x: Int, y: Int, width: Int, height: Int) {
+        this.drawableX = x
+        this.drawableY = y
+        this.imageProducerWidth = width
+        this.imageProducerHeight = height
         updateViewportAndCenter()
     }
 
@@ -1143,24 +1143,24 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     fun updateViewportAndCenter() {
         if (display == null) return
-        val i_1: Int
-        val i_2: Int
-        val i_3: Int
-        val i_4: Int
+        val viewX: Int
+        val viewY: Int
+        val viewWidth: Int
+        val viewHeight: Int
         if (this.depthClippingMode == 2) {
-            i_1 = this.drawableX
-            i_2 = this.drawableY
-            i_3 = this.imageProducerWidth
-            i_4 = this.imageProducerHeight
+            viewX = this.drawableX
+            viewY = this.drawableY
+            viewWidth = this.imageProducerWidth
+            viewHeight = this.imageProducerHeight
         } else {
-            i_1 = 0
-            i_2 = 0
-            i_3 = display!!.getWidth()
-            i_4 = display!!.getHeight()
+            viewX = 0
+            viewY = 0
+            viewWidth = display!!.getWidth()
+            viewHeight = display!!.getHeight()
         }
 
-        var width = i_3
-        var height = i_4
+        var width = viewWidth
+        var height = viewHeight
         if (width < 1) {
             width = 1
         }
@@ -1168,7 +1168,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             height = 1
         }
 
-        OpenGL.glViewport(i_1 + this.viewportOffsetX, this.viewportOffsetY + display!!.getHeight() - i_2 - height, width, height)
+        OpenGL.glViewport(viewX + this.viewportOffsetX, this.viewportOffsetY + display!!.getHeight() - viewY - height, width, height)
         this.imageProducerCenterX = this.imageProducerWidth / 2.0f
         this.imageProducerCenterY = this.imageProducerHeight / 2.0f
         this.viewportOriginX = this.drawableX + this.imageProducerCenterX
@@ -1176,9 +1176,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     @Synchronized
-    override fun animateTextures(i_1: Int) {
+    override fun animateTextures(delta: Int) {
         var handleCount = 0
-        val i_1 = i_1 and 0x7fffffff
+        val maskedDelta = delta and 0x7fffffff
         while (!this.vboBuffersAwaitingDeallocation.isEmpty()) {
             val handle = this.vboBuffersAwaitingDeallocation.popTail() as IntNode
             HANDLE_BUFFER[handleCount++] = handle.pointer.toInt()
@@ -1218,9 +1218,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             handleCount = 0
         }
         while (!this.renderBuffersAwaitingRemoval.isEmpty()) {
-            val class282Sub384 = this.renderBuffersAwaitingRemoval.popTail() as IntNode
-            HANDLE_BUFFER[handleCount++] = class282Sub384.pointer.toInt()
-            this.renderBuffersSize -= class282Sub384.value
+            val renderBufferNode = this.renderBuffersAwaitingRemoval.popTail() as IntNode
+            HANDLE_BUFFER[handleCount++] = renderBufferNode.pointer.toInt()
+            this.renderBuffersSize -= renderBufferNode.value
             if (handleCount == 1000) {
                 OpenGL.glDeleteRenderbuffersEXT(1000, HANDLE_BUFFER, 0)
                 handleCount = 0
@@ -1250,7 +1250,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
             System.gc()
             this.lastGcCycle = Utils.time()
         }
-        this.textureAnimatingProgression = i_1
+        this.textureAnimatingProgression = maskedDelta
     }
 
     override fun drawCircle(x: Int, y: Int, radius: Int, colorArgb: Int) {
@@ -1362,8 +1362,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
 
     override fun utilisesNativeHeap(): Boolean = true
 
-    override fun beginBloomCapture(i_3: Int, i_4: Int) {
-        this.framebufferCompositor?.prepareForRendering(i_3, i_4)
+    override fun beginBloomCapture(screenCanvasWidth: Int, screenCanvasHeight: Int) {
+        this.framebufferCompositor?.prepareForRendering(screenCanvasWidth, screenCanvasHeight)
     }
 
     override fun updateSun(sunBrightness: Float) {
@@ -1373,12 +1373,12 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    override fun applyLighting(sunColor: Int, f_2: Float, f_3: Float, x: Float, y: Float, z: Float) {
+    override fun applyLighting(sunColor: Int, intensity: Float, antiIntensity: Float, x: Float, y: Float, z: Float) {
         val calculateSunColor = this.sunColorRgb != sunColor
-        if (calculateSunColor || this.sunColorIntensity != f_2 || this.antiSunColorIntensity != f_3) {
+        if (calculateSunColor || this.sunColorIntensity != intensity || this.antiSunColorIntensity != antiIntensity) {
             this.sunColorRgb = sunColor
-            this.sunColorIntensity = f_2
-            this.antiSunColorIntensity = f_3
+            this.sunColorIntensity = intensity
+            this.antiSunColorIntensity = antiIntensity
             if (calculateSunColor) {
                 this.sunColorRed = (this.sunColorRgb and 0xff0000) / 1.671168E7f
                 this.sunColorGreen = (this.sunColorRgb and 0xff00) / 65280.0f
@@ -1408,48 +1408,48 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    override fun isOnScreen(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
-        var i_7 = 0
-        val f_8 = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * i_1 + this.viewProjectionMatrix.elements[6] * i_2 + this.viewProjectionMatrix.elements[10] * i_3
-        val f_9 = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * i_4 + this.viewProjectionMatrix.elements[6] * i_5 + this.viewProjectionMatrix.elements[10] * i_6
-        val f_10 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * i_1 + this.viewProjectionMatrix.elements[7] * i_2 + this.viewProjectionMatrix.elements[11] * i_3
-        val f_11 = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * i_4 + this.viewProjectionMatrix.elements[7] * i_5 + this.viewProjectionMatrix.elements[11] * i_6
-        if (f_8 < -f_10 && f_9 < -f_11) {
-            i_7 = i_7 or 0x10
-        } else if (f_8 > f_10 && f_9 > f_11) {
-            i_7 = i_7 or 0x20
+    override fun isOnScreen(minX: Int, minY: Int, minZ: Int, maxX: Int, maxY: Int, maxZ: Int): Int {
+        var clipFlags = 0
+        val clipZMin = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * minX + this.viewProjectionMatrix.elements[6] * minY + this.viewProjectionMatrix.elements[10] * minZ
+        val clipZMax = this.viewProjectionMatrix.elements[14] + this.viewProjectionMatrix.elements[2] * maxX + this.viewProjectionMatrix.elements[6] * maxY + this.viewProjectionMatrix.elements[10] * maxZ
+        val clipWMin = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * minX + this.viewProjectionMatrix.elements[7] * minY + this.viewProjectionMatrix.elements[11] * minZ
+        val clipWMax = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * maxX + this.viewProjectionMatrix.elements[7] * maxY + this.viewProjectionMatrix.elements[11] * maxZ
+        if (clipZMin < -clipWMin && clipZMax < -clipWMax) {
+            clipFlags = clipFlags or 0x10
+        } else if (clipZMin > clipWMin && clipZMax > clipWMax) {
+            clipFlags = clipFlags or 0x20
         }
 
-        val f_12 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * i_1 + this.viewProjectionMatrix.elements[4] * i_2 + this.viewProjectionMatrix.elements[8] * i_3
-        val f_13 = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * i_4 + this.viewProjectionMatrix.elements[4] * i_5 + this.viewProjectionMatrix.elements[8] * i_6
-        if (f_12 < -f_10 && f_13 < -f_11) {
-            i_7 = i_7 or 0x1
+        val clipXMin = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * minX + this.viewProjectionMatrix.elements[4] * minY + this.viewProjectionMatrix.elements[8] * minZ
+        val clipXMax = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * maxX + this.viewProjectionMatrix.elements[4] * maxY + this.viewProjectionMatrix.elements[8] * maxZ
+        if (clipXMin < -clipWMin && clipXMax < -clipWMax) {
+            clipFlags = clipFlags or 0x1
         }
 
-        if (f_12 > f_10 && f_13 > f_11) {
-            i_7 = i_7 or 0x2
+        if (clipXMin > clipWMin && clipXMax > clipWMax) {
+            clipFlags = clipFlags or 0x2
         }
 
-        val f_14 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * i_1 + this.viewProjectionMatrix.elements[5] * i_2 + this.viewProjectionMatrix.elements[9] * i_3
-        val f_15 = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * i_4 + this.viewProjectionMatrix.elements[5] * i_5 + this.viewProjectionMatrix.elements[9] * i_6
-        if (f_14 < -f_10 && f_15 < -f_11) {
-            i_7 = i_7 or 0x4
+        val clipYMin = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * minX + this.viewProjectionMatrix.elements[5] * minY + this.viewProjectionMatrix.elements[9] * minZ
+        val clipYMax = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * maxX + this.viewProjectionMatrix.elements[5] * maxY + this.viewProjectionMatrix.elements[9] * maxZ
+        if (clipYMin < -clipWMin && clipYMax < -clipWMax) {
+            clipFlags = clipFlags or 0x4
         }
 
-        if (f_14 > f_10 && f_15 > f_11) {
-            i_7 = i_7 or 0x8
+        if (clipYMin > clipWMin && clipYMax > clipWMax) {
+            clipFlags = clipFlags or 0x8
         }
 
-        return i_7
+        return clipFlags
     }
 
-    override fun createFontRenderer(fontmetrics1: FontMetrics?, arr_2: Array<SpriteType>?, bool3: Boolean): AbstractFontRenderer {
-        return FontRendererGL(this, fontmetrics1!!, arr_2!!, bool3)
+    override fun createFontRenderer(fontMetrics: FontMetrics?, spriteTypes: Array<SpriteType>?, isPlain: Boolean): AbstractFontRenderer {
+        return FontRendererGL(this, fontMetrics!!, spriteTypes!!, isPlain)
     }
 
-    fun configureFog(densityFactor: Float, f_2: Float) {
+    fun configureFog(densityFactor: Float, fogMinDistance: Float) {
         this.densityFactor = densityFactor // 0.5
-        this.fogMin = f_2 // fog_density
+        this.fogMin = fogMinDistance // fog_density
         setFogRange()
     }
 
@@ -1488,27 +1488,27 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         OpenGL.glFogfv(GL_FOG_COLOR, BUFFER_4F, 0)
     }
 
-    fun setTexture(activeUnit: Int, i_2: Int, i_3: Int) {
-        OpenGL.glTexEnvi(GL_TEXTURE_ENV, activeUnit + GL_SOURCE0_RGB, i_2)
-        OpenGL.glTexEnvi(GL_TEXTURE_ENV, activeUnit + GL_OPERAND0_RGB, i_3)
+    fun setTexture(activeUnit: Int, source: Int, operand: Int) {
+        OpenGL.glTexEnvi(GL_TEXTURE_ENV, activeUnit + GL_SOURCE0_RGB, source)
+        OpenGL.glTexEnvi(GL_TEXTURE_ENV, activeUnit + GL_OPERAND0_RGB, operand)
     }
 
     override fun createCubeTexture(materialAtPositiveX: Int, materialAtNegativeX: Int, materialAtPositiveY: Int, materialAtNegativeY: Int, materialAtPositiveZ: Int, materialAtNegativeZ: Int): AbstractCubeTextureGenerator {
         return if (this.arbTextureCubeMap) OpenGLArbTextureCubeMapGenerator(this, materialAtPositiveX, materialAtNegativeX, materialAtPositiveY, materialAtNegativeY, materialAtPositiveZ, materialAtNegativeZ) else throw UnsupportedOperationException("Cube map not supported")
     }
 
-    override fun drawQuad(class1521: AbstractCubeTextureGenerator?, class1522: AbstractCubeTextureGenerator?, alpha: Float, class1524: AbstractCubeTextureGenerator?): AbstractCubeTextureGenerator? {
-        if (class1521 != null && class1522 != null && this.arbTextureCubeMap && this.intelGpu) {
+    override fun drawQuad(cubeTexA: AbstractCubeTextureGenerator?, cubeTexB: AbstractCubeTextureGenerator?, alpha: Float, previousResult: AbstractCubeTextureGenerator?): AbstractCubeTextureGenerator? {
+        if (cubeTexA != null && cubeTexB != null && this.arbTextureCubeMap && this.intelGpu) {
             var cubeTextureGenerator: OpenGlCubeTextureGenerator? = null
-            val class152Sub16 = class1521 as AbstractOpenGlCubeTextureGenerator
-            val class152Sub17 = class1522 as AbstractOpenGlCubeTextureGenerator
-            val class137Sub28 = class152Sub16.getCubeTexture()
-            val class137Sub29 = class152Sub17.getCubeTexture()
-            if (class137Sub28 != null && class137Sub29 != null) {
-                val largestMaterialSize = Math.max(class137Sub28.largestMaterialSize, class137Sub29.largestMaterialSize)
-                if (class1521 !== class1524 && class1522 !== class1524 && class1524 is OpenGlCubeTextureGenerator) {
-                    if (class1524.getLargestMaterialSize() == largestMaterialSize) {
-                        cubeTextureGenerator = class1524
+            val cubeGenA = cubeTexA as AbstractOpenGlCubeTextureGenerator
+            val cubeGenB = cubeTexB as AbstractOpenGlCubeTextureGenerator
+            val cubeTextureA = cubeGenA.getCubeTexture()
+            val cubeTextureB = cubeGenB.getCubeTexture()
+            if (cubeTextureA != null && cubeTextureB != null) {
+                val largestMaterialSize = Math.max(cubeTextureA.largestMaterialSize, cubeTextureB.largestMaterialSize)
+                if (cubeTexA !== previousResult && cubeTexB !== previousResult && previousResult is OpenGlCubeTextureGenerator) {
+                    if (previousResult.getLargestMaterialSize() == largestMaterialSize) {
+                        cubeTextureGenerator = previousResult
                     }
                 }
 
@@ -1516,13 +1516,13 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
                     cubeTextureGenerator = OpenGlCubeTextureGenerator(this, largestMaterialSize)
                 }
 
-                if (cubeTextureGenerator.drawQuad(class137Sub28, class137Sub29, alpha)) {
+                if (cubeTextureGenerator.drawQuad(cubeTextureA, cubeTextureB, alpha)) {
                     return cubeTextureGenerator
                 }
             }
         }
 
-        return if (alpha < 0.5f) class1521 else class1522
+        return if (alpha < 0.5f) cubeTexA else cubeTexB
     }
 
     fun getCubeMap(): OpenGlArbCubeMapTexture? {
@@ -1578,16 +1578,16 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         this.viewProjectionMatrix.extractTopPlane(this.frustumPlanes[5])
     }
 
-    fun createElementsArrayBuffer(bytes_2: ByteArray, i_3: Int, bool4: Boolean): ElementsBufferGL {
-        return if (!this.vertexbufferSupported || bool4 && !this.shouldUseArbVbo) GlElementsArrayBuffer(this, bytes_2, i_3) else GlVboElementsArrayBuffer(this, bytes_2, i_3, bool4)
+    fun createElementsArrayBuffer(data: ByteArray, size: Int, isDynamic: Boolean): ElementsBufferGL {
+        return if (!this.vertexbufferSupported || isDynamic && !this.shouldUseArbVbo) GlElementsArrayBuffer(this, data, size) else GlVboElementsArrayBuffer(this, data, size, isDynamic)
     }
 
-    fun createArrayBuffer(size: Int, buffer: ByteArray?, position: Int, bool4: Boolean): ArrayBufferGL {
-        return if (!this.vertexbufferSupported || bool4 && !this.shouldUseArbVbo) GlArrayBuffer(this, size, buffer, position) else GlVboArrayBuffer(this, size, buffer ?: ByteArray(position), position, bool4)
+    fun createArrayBuffer(size: Int, buffer: ByteArray?, position: Int, isDynamic: Boolean): ArrayBufferGL {
+        return if (!this.vertexbufferSupported || isDynamic && !this.shouldUseArbVbo) GlArrayBuffer(this, size, buffer, position) else GlVboArrayBuffer(this, size, buffer ?: ByteArray(position), position, isDynamic)
     }
 
-    fun createDataArrayBuffer(i_1: Int, buffer2: Buffer, i_3: Int): ArrayBufferGL {
-        return if (!this.vertexbufferSupported) GlArrayBuffer(this, i_1, buffer2) else GlVboArrayBuffer(this, i_1, buffer2, i_3)
+    fun createDataArrayBuffer(stride: Int, buffer: Buffer, size: Int): ArrayBufferGL {
+        return if (!this.vertexbufferSupported) GlArrayBuffer(this, stride, buffer) else GlVboArrayBuffer(this, stride, buffer, size)
     }
 
     fun setArrayBuffer(arrayBuffer: ArrayBufferGL) {
@@ -1715,9 +1715,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
     }
 
-    fun drawElements(elementsBuffer: ElementsBufferGL, i_3: Int, i_4: Int) {
+    fun drawElements(elementsBuffer: ElementsBufferGL, startIndex: Int, indexCount: Int) {
         setElementsBuffer(elementsBuffer)
-        OpenGL.glDrawElements(GL_TRIANGLES, i_4, GL_UNSIGNED_SHORT, elementsBuffer.getBufferAddress() + (i_3 * 2L))
+        OpenGL.glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, elementsBuffer.getBufferAddress() + (startIndex * 2L))
     }
 
     fun loadTextureCombineMode(mode: Int) {
@@ -1945,9 +1945,9 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         resetClipping()
     }
 
-    fun setViewportOffset(i_1: Int, i_2: Int) {
-        this.viewportOffsetX = i_1
-        this.viewportOffsetY = i_2
+    fun setViewportOffset(offsetX: Int, offsetY: Int) {
+        this.viewportOffsetX = offsetX
+        this.viewportOffsetY = offsetY
         updateViewportAndCenter()
         defineScissorBox()
     }
@@ -2167,8 +2167,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         return GroundGL(this, floorFunctionMask, waterFunctionMask, regionSizeX, regionSizeY, heightsCurrentLvl, heightsNextLvl)
     }
 
-    override fun createDelegatingDisplay(canvas1: Canvas, i_2: Int, i_3: Int): DelegatingDisplay {
-        return ImageProducerGL2(this, canvas1)
+    override fun createDelegatingDisplay(canvas: Canvas, i_2: Int, i_3: Int): DelegatingDisplay {
+        return ImageProducerGL2(this, canvas)
     }
 
     fun updateDepthRange() {
@@ -2199,18 +2199,18 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         OpenGL.glLightModelfv(GL_LIGHT_MODEL_AMBIENT, BUFFER_4F, 0)
     }
 
-    override fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, bytes_7: ByteArray, i_8: Int, textureBlendColor: Int) {
-        val f_10: Float
-        val f_11: Float
+    override fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, pixelData: ByteArray, i_8: Int, textureBlendColor: Int) {
+        val textureCoordV: Float
+        val textureCoordU: Float
         if (this.worldMapTexture != null && this.worldMapTexture!!.width >= width && this.worldMapTexture!!.length >= height) {
-            this.worldMapTexture!!.uploadTextureData(0, width, height, bytes_7, GLFormat.RGBA, false)
-            f_10 = this.worldMapTexture!!.t * height / this.worldMapTexture!!.length
-            f_11 = this.worldMapTexture!!.s * width / this.worldMapTexture!!.width
+            this.worldMapTexture!!.uploadTextureData(0, width, height, pixelData, GLFormat.RGBA, false)
+            textureCoordV = this.worldMapTexture!!.t * height / this.worldMapTexture!!.length
+            textureCoordU = this.worldMapTexture!!.s * width / this.worldMapTexture!!.width
         } else {
-            this.worldMapTexture = OpenGl2DTexture_Sub1.createSurface(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, height, bytes_7, GLFormat.RGBA)
+            this.worldMapTexture = OpenGl2DTexture_Sub1.createSurface(this, GLFormat.RGBA, GLActionFormat.PIXEL_FORMAT, width, height, pixelData, GLFormat.RGBA)
             this.worldMapTexture!!.setRepeat(false, false)
-            f_10 = this.worldMapTexture!!.t
-            f_11 = this.worldMapTexture!!.s
+            textureCoordV = this.worldMapTexture!!.t
+            textureCoordU = this.worldMapTexture!!.s
         }
         setupSpriteRendering()
         setActiveTexture(this.worldMapTexture)
@@ -2229,11 +2229,11 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         OpenGL.glBegin(7)
         OpenGL.glTexCoord2f(0.0f, 0.0f)
         OpenGL.glVertex2f(xA, yA)
-        OpenGL.glTexCoord2f(0.0f, f_11)
+        OpenGL.glTexCoord2f(0.0f, textureCoordU)
         OpenGL.glVertex2f(xA, yB)
-        OpenGL.glTexCoord2f(f_10, f_11)
+        OpenGL.glTexCoord2f(textureCoordV, textureCoordU)
         OpenGL.glVertex2f(xB, yB)
-        OpenGL.glTexCoord2f(f_10, 0.0f)
+        OpenGL.glTexCoord2f(textureCoordV, 0.0f)
         OpenGL.glVertex2f(xB, yA)
         OpenGL.glEnd()
         setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
@@ -2255,14 +2255,14 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
     }
 
     @Synchronized
-    fun requestRenderBufferCleanup(handle: Int, i_2: Int) {
-        val handleAwaitingRemoval = IntNode(i_2)
+    fun requestRenderBufferCleanup(handle: Int, bufferSize: Int) {
+        val handleAwaitingRemoval = IntNode(bufferSize)
         handleAwaitingRemoval.pointer = handle.toLong()
         this.renderBuffersAwaitingRemoval.insertTail(handleAwaitingRemoval)
     }
 
-    override fun setSunCubeTexture(class1521: AbstractCubeTextureGenerator?) {
-        this.sunCubeTextureGenerator = class1521 as AbstractOpenGlCubeTextureGenerator?
+    override fun setSunCubeTexture(cubeTextureGenerator: AbstractCubeTextureGenerator?) {
+        this.sunCubeTextureGenerator = cubeTextureGenerator as AbstractOpenGlCubeTextureGenerator?
     }
 
     fun loadTextureCombineMode(combineRgb: Int, combineAlpha: Int) {
@@ -2351,7 +2351,7 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
 
         @JvmStatic
-        fun createToolkitHd(gameCanvas: Canvas?, interface221: MaterialProvider?, index2: Js5ResourceProvider?, i_3: Int): AbstractToolkit {
+        fun createToolkitHd(gameCanvas: Canvas?, materialProvider: MaterialProvider?, resourceProvider: Js5ResourceProvider?, multiSamples: Int): AbstractToolkit {
             try {
                 val jaclibLoaded = isJaclibLoaded()
                 if (!jaclibLoaded) {
@@ -2362,11 +2362,11 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
                 }
                 setIgnoreRepaint(gameCanvas!!)
                 val opengl = OpenGL()
-                val createdUid = opengl.init(gameCanvas, 8, 8, 8, 24, 0, i_3)
+                val createdUid = opengl.init(gameCanvas, 8, 8, 8, 24, 0, multiSamples)
                 if (createdUid == 0L) {
                     throw RuntimeException("")
                 }
-                val toolkit = OpenGLNativeToolkit(opengl, gameCanvas, createdUid, interface221!!, index2!!, i_3)
+                val toolkit = OpenGLNativeToolkit(opengl, gameCanvas, createdUid, materialProvider!!, resourceProvider!!, multiSamples)
                 toolkit.initializeTables()
                 return toolkit
             } catch (throwable: Throwable) {
@@ -2376,8 +2376,8 @@ open class OpenGlToolkit(canvas1: Canvas, materials: MaterialProvider, i_3: Int)
         }
 
         @JvmStatic
-        fun createToolkitLd(canvas0: Canvas?, interface221: MaterialProvider?, i_2: Int): AbstractToolkit {
-            return OpenGlToolkit(canvas0!!, interface221!!, i_2)
+        fun createToolkitLd(canvas: Canvas?, materialProvider: MaterialProvider?, multiSamples: Int): AbstractToolkit {
+            return OpenGlToolkit(canvas!!, materialProvider!!, multiSamples)
         }
 
         @JvmStatic
