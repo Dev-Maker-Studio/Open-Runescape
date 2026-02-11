@@ -58,8 +58,8 @@ import kotlin.math.sqrt
 abstract class AbstractNativeToolkit(
     materials: MaterialProvider?,
     shaders: Js5ResourceProvider?,
-    i_3: Int,
-    i_4: Int
+    multiSampleCount: Int,
+    endiannessType: Int
 ) : AbstractToolkit(materials) {
 
     @JvmField var texturesSizeOccupied: Int = 0
@@ -220,8 +220,8 @@ abstract class AbstractNativeToolkit(
 
         try {
             shaderResource = shaders
-            multiSampleCount = i_3
-            endiannessType = i_4
+            this.multiSampleCount = multiSampleCount
+            this.endiannessType = endiannessType
             ColorUtil.initializeTables(false, true)
             materialCache = if (materialProvider != null) {
                 NativeMaterialCache(this, materialProvider)
@@ -296,7 +296,7 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    abstract fun setMatrixTransform(var1: Matrix44, var2: Matrix44, projectionMatrix: Matrix44)
+    abstract fun setMatrixTransform(modelMatrix: Matrix44, viewMatrix: Matrix44, projectionMatrix: Matrix44)
 
     internal abstract fun blendDrawBuffer()
 
@@ -360,9 +360,9 @@ abstract class AbstractNativeToolkit(
     fun initializeRenderers() {
         bloomRenderer!!.getFormat()
 
-        for (i_1 in bloomManager.indices) {
-            if (bloomManager[i_1] != null && bloomManager[i_1]!!.isLinked()) {
-                bloomManager[i_1]!!.reloadShader()
+        for (index in bloomManager.indices) {
+            if (bloomManager[index] != null && bloomManager[index]!!.isLinked()) {
+                bloomManager[index]!!.reloadShader()
             }
         }
 
@@ -379,7 +379,7 @@ abstract class AbstractNativeToolkit(
         vertexStream!!.deallocate()
         circleVertexStream!!.deallocate()
 
-        for (i_1 in 0 until 7) {
+        for (index in 0 until 7) {
             // Model deallocation removed (deallocate not in base Model class)
         }
 
@@ -387,7 +387,7 @@ abstract class AbstractNativeToolkit(
         indexBuffer!!.deallocate()
     }
 
-    override fun createNativeSprite(i_1: Int, i_2: Int, i_3: Int, i_4: Int, bool5: Boolean): NativeSprite {
+    override fun createNativeSprite(width: Int, height: Int, textureWidth: Int, textureHeight: Int, hasAlpha: Boolean): NativeSprite {
         throw UnsupportedOperationException("createNativeSprite not implemented for this toolkit")
     }
 
@@ -557,13 +557,13 @@ abstract class AbstractNativeToolkit(
         NativeFilterBloomShader.baseBlur = 1.0f
     }
 
-    fun uploadLineVertices(f_1: Float, f_2: Float, f_4: Float, f_5: Float): Boolean {
+    fun uploadLineVertices(startX: Float, startY: Float, endX: Float, endY: Float): Boolean {
         directBuffer.clear()
-        directBuffer.putFloat(f_1)
-        directBuffer.putFloat(f_2)
+        directBuffer.putFloat(startX)
+        directBuffer.putFloat(startY)
         directBuffer.putFloat(0.0f)
-        directBuffer.putFloat(f_4)
-        directBuffer.putFloat(f_5)
+        directBuffer.putFloat(endX)
+        directBuffer.putFloat(endY)
         directBuffer.putFloat(0.0f)
         return vertexStream!!.upload(0, directBuffer.position(), directBufferAddress)
     }
@@ -586,9 +586,9 @@ abstract class AbstractNativeToolkit(
         return nativeHeap!!.createBuffer(initialCapacity, allocateDirect)
     }
 
-    fun getOrResizeIndexBuffer(i_1: Int): NativeToolkitBuffer {
-        if (indexBuffer!!.getCapacity() < i_1 * 2) {
-            indexBuffer!!.create(i_1)
+    fun getOrResizeIndexBuffer(requiredCapacity: Int): NativeToolkitBuffer {
+        if (indexBuffer!!.getCapacity() < requiredCapacity * 2) {
+            indexBuffer!!.create(requiredCapacity)
         }
         return indexBuffer!!
     }
@@ -597,7 +597,7 @@ abstract class AbstractNativeToolkit(
         return textureBuffersSizeOccupied + texturesSizeOccupied + renderBufferSizeOccupied
     }
 
-    override fun generateSprite(spriteType: SpriteType?, bool2: Boolean): NativeSprite {
+    override fun generateSprite(spriteType: SpriteType?, hasPalette: Boolean): NativeSprite {
         val nativeSprite: NativeSprite
         if (spriteType != null && spriteType.width != 0 && spriteType.height != 0) {
             val spritePixels = IntArray(spriteType.width * spriteType.height)
@@ -626,7 +626,7 @@ abstract class AbstractNativeToolkit(
         return nativeSprite
     }
 
-    override fun createNativeSprite(ints_1: IntArray, i_2: Int, i_3: Int, i_4: Int, i_5: Int, bool6: Boolean): NativeSprite {
+    override fun createNativeSprite(pixels: IntArray, defaultBackgroundColor: Int, scanlineWidth: Int, useWidth: Int, useHeight: Int, hasAlpha: Boolean): NativeSprite {
         throw UnsupportedOperationException("createNativeSprite not implemented for this toolkit")
     }
 
@@ -634,13 +634,13 @@ abstract class AbstractNativeToolkit(
         return projectionMatrix
     }
 
-    override fun createComponentSurface(i_1: Int, i_2: Int, ints_3: IntArray, ints_4: IntArray): ComponentSurface {
-        return MaskedTextureSurface.createFromRowMask(this, i_1, i_2, ints_3, ints_4)
+    override fun createComponentSurface(sizeX: Int, sizeY: Int, rowStartX: IntArray, rowWidth: IntArray): ComponentSurface {
+        return MaskedTextureSurface.createFromRowMask(this, sizeX, sizeY, rowStartX, rowWidth)
     }
 
     internal abstract fun toggleBlending()
 
-    override fun createModel(rsmesh1: Mesh, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Model {
+    override fun createModel(mesh: Mesh, functionMask: Int, preferenceMask: Int, ambient: Int, contrast: Int): Model {
         throw UnsupportedOperationException("createModel must be implemented by subclass")
     }
 
@@ -648,7 +648,7 @@ abstract class AbstractNativeToolkit(
         return mask1 or mask2
     }
 
-    override fun createGround(i_1: Int, i_2: Int, ints_3: Array<IntArray>, ints_4: Array<IntArray>, i_6: Int, i_7: Int): Ground {
+    override fun createGround(regionSizeX: Int, regionSizeY: Int, tileheightsCurrentLvl: Array<IntArray>, tileheightsNextLvl: Array<IntArray>, floorFunctionMask: Int, waterFunctionMask: Int): Ground {
         throw UnsupportedOperationException("createGround not implemented for this toolkit")
     }
 
@@ -656,8 +656,8 @@ abstract class AbstractNativeToolkit(
         return renderingMatrix
     }
 
-    override fun setSunCubeTexture(class1521: AbstractCubeTextureGenerator?) {
-        sunCubeTextureGenerator = class1521 as? AbstractNativeCubeTextureGenerator
+    override fun setSunCubeTexture(cubeTexture: AbstractCubeTextureGenerator?) {
+        sunCubeTextureGenerator = cubeTexture as? AbstractNativeCubeTextureGenerator
     }
 
     override fun calculateViewportCenter() {
@@ -777,7 +777,7 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun toggleScissorTest()
 
-    abstract fun drawPrimitive(var1: PrimitiveDrawMode, var2: Int, var3: Int)
+    abstract fun drawPrimitive(drawMode: PrimitiveDrawMode, first: Int, primitiveCount: Int)
 
     fun updateFrustumMatrix() {
         transformMatrix.copyFrom(particleMatrix)
@@ -920,9 +920,9 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun setDepthMaskEnabled(bool1: Boolean) {
-        if (depthMaskEnabled != bool1) {
-            depthMaskEnabled = bool1
+    fun setDepthMaskEnabled(enabled: Boolean) {
+        if (depthMaskEnabled != enabled) {
+            depthMaskEnabled = enabled
             setDepthRenderState()
             nativeFunctionMask = nativeFunctionMask and -16
         }
@@ -930,8 +930,8 @@ abstract class AbstractNativeToolkit(
 
     fun initializeQuadStream() {
         quadVertexStream = createStream(false)
-        val s_1: Short = 160
-        quadVertexStream!!.create(s_1.toInt(), 32)
+        val vertexBufferSize: Short = 160
+        quadVertexStream!!.create(vertexBufferSize.toInt(), 32)
         directBuffer.clear()
         directBuffer.putFloat(0.0f)
         directBuffer.putFloat(0.0f)
@@ -977,14 +977,14 @@ abstract class AbstractNativeToolkit(
         quadVertexDeclaration = createVertexDeclaration(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.COLOR, VertexDeclarationAction.TEXCOORD, VertexDeclarationAction.TEXCOORD))))
     }
 
-    override fun calculateProjection(f_1: Float, f_2: Float, f_3: Float, floats_4: FloatArray) {
-        val f_5 = transformMatrix.elements[15] + transformMatrix.elements[3] * f_1 + transformMatrix.elements[7] * f_2 + transformMatrix.elements[11] * f_3
-        val f_6 = transformMatrix.elements[12] + transformMatrix.elements[0] * f_1 + transformMatrix.elements[4] * f_2 + transformMatrix.elements[8] * f_3
-        val f_7 = transformMatrix.elements[13] + transformMatrix.elements[1] * f_1 + transformMatrix.elements[5] * f_2 + transformMatrix.elements[9] * f_3
-        val f_8 = particleMatrix.elements[14] + particleMatrix.elements[2] * f_1 + particleMatrix.elements[6] * f_2 + particleMatrix.elements[10] * f_3
-        floats_4[0] = viewportOriginX + viewportCenterX * f_6 / f_5
-        floats_4[1] = viewportOriginY + viewportCenterY * f_7 / f_5
-        floats_4[2] = f_8
+    override fun calculateProjection(worldX: Float, worldY: Float, worldZ: Float, screenCoords: FloatArray) {
+        val clipW = transformMatrix.elements[15] + transformMatrix.elements[3] * worldX + transformMatrix.elements[7] * worldY + transformMatrix.elements[11] * worldZ
+        val clipX = transformMatrix.elements[12] + transformMatrix.elements[0] * worldX + transformMatrix.elements[4] * worldY + transformMatrix.elements[8] * worldZ
+        val clipY = transformMatrix.elements[13] + transformMatrix.elements[1] * worldX + transformMatrix.elements[5] * worldY + transformMatrix.elements[9] * worldZ
+        val viewZ = particleMatrix.elements[14] + particleMatrix.elements[2] * worldX + particleMatrix.elements[6] * worldY + particleMatrix.elements[10] * worldZ
+        screenCoords[0] = viewportOriginX + viewportCenterX * clipX / clipW
+        screenCoords[1] = viewportOriginY + viewportCenterY * clipY / clipW
+        screenCoords[2] = viewZ
     }
 
     override fun computeWorldToScreen(x: Float, y: Float, z: Float, screenCoords: FloatArray) {
@@ -993,11 +993,11 @@ abstract class AbstractNativeToolkit(
         if (wX >= -wY && wX <= wY) {
             val wZ = transformMatrix.elements[12] + transformMatrix.elements[0] * x + transformMatrix.elements[4] * y + transformMatrix.elements[8] * z
             if (wZ >= -wY && wZ <= wY) {
-                val f_8 = transformMatrix.elements[13] + transformMatrix.elements[1] * x + transformMatrix.elements[5] * y + transformMatrix.elements[9] * z
-                if (f_8 >= -wY && f_8 <= wY) {
+                val clipY = transformMatrix.elements[13] + transformMatrix.elements[1] * x + transformMatrix.elements[5] * y + transformMatrix.elements[9] * z
+                if (clipY >= -wY && clipY <= wY) {
                     val screenZ = particleMatrix.elements[14] + particleMatrix.elements[2] * x + particleMatrix.elements[6] * y + particleMatrix.elements[10] * z
                     screenCoords[0] = viewportOriginX + viewportCenterX * wZ / wY
-                    screenCoords[1] = viewportOriginY + viewportCenterY * f_8 / wY
+                    screenCoords[1] = viewportOriginY + viewportCenterY * clipY / wY
                     screenCoords[2] = screenZ
                 } else {
                     screenCoords[2] = Float.NaN
@@ -1016,9 +1016,9 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    fun toggleLights(bool1: Boolean) {
-        if (lightingEnabled != bool1) {
-            lightingEnabled = bool1
+    fun toggleLights(enabled: Boolean) {
+        if (lightingEnabled != enabled) {
+            lightingEnabled = enabled
             toggleLights()
             nativeFunctionMask = nativeFunctionMask and -8
         }
@@ -1042,12 +1042,12 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    override fun applyLighting(color: Int, intensity: Float, f_3: Float, positionX: Float, positionY: Float, positionZ: Float) {
+    override fun applyLighting(color: Int, intensity: Float, antiIntensity: Float, positionX: Float, positionY: Float, positionZ: Float) {
         val lightChanged = baseLightColor != color
-        if (lightChanged || sunColorIntensity != intensity || antiSunColorIntensity != f_3) {
+        if (lightChanged || sunColorIntensity != intensity || antiSunColorIntensity != antiIntensity) {
             baseLightColor = color
             sunColorIntensity = intensity
-            antiSunColorIntensity = f_3
+            antiSunColorIntensity = antiIntensity
             if (lightChanged) {
                 baseLightColorRed = (baseLightColor and 0xff0000) / 1.671168E7f
                 baseLightColorGreen = (baseLightColor and 0xff00) / 65280.0f
@@ -1081,8 +1081,8 @@ abstract class AbstractNativeToolkit(
         return maskA and maskB xor maskB
     }
 
-    fun setColourType(i_1: Int) {
-        when (i_1) {
+    fun setColourType(combineMode: Int) {
+        when (combineMode) {
             0 -> setTextureCombineModes(TextureCombineMode.MODULATE, TextureCombineMode.MODULATE)
             1 -> setTextureCombineModes(TextureCombineMode.REPLACE, TextureCombineMode.REPLACE)
             2 -> setTextureCombineModes(TextureCombineMode.INTERPOLATE, TextureCombineMode.REPLACE)
@@ -1107,14 +1107,14 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun configureLights()
 
-    abstract fun supportsTextureFormat(var1: GLFormat, var2: GLActionFormat): Boolean
+    abstract fun supportsTextureFormat(format: GLFormat, actionFormat: GLActionFormat): Boolean
 
-    abstract fun supports3DTextureFormat(var1: GLFormat, var2: GLActionFormat): Boolean
+    abstract fun supports3DTextureFormat(format: GLFormat, actionFormat: GLActionFormat): Boolean
 
     internal abstract fun toggleDepthTest()
 
-    fun createTextureSampler(class1501: GLFormat, i_2: Int, i_3: Int, bool4: Boolean, bytes_5: ByteArray?): NativeTextureSampler {
-        return createNativeTextureSampler(class1501, i_2, i_3, bool4, bytes_5)
+    fun createTextureSampler(format: GLFormat, width: Int, height: Int, mipmapped: Boolean, pixels: ByteArray?): NativeTextureSampler {
+        return createNativeTextureSampler(format, width, height, mipmapped, pixels)
     }
 
     fun createHdrTexture(format: GLFormat, width: Int, length: Int, pixels: FloatArray): NativeTextureSampler {
@@ -1135,7 +1135,7 @@ abstract class AbstractNativeToolkit(
         return viewMatrix43
     }
 
-    abstract fun create3DTexture(var1: GLFormat, var6: ByteArray): Texture3DSampler
+    abstract fun create3DTexture(format: GLFormat, data: ByteArray): Texture3DSampler
 
     override fun resetTextureState() {
     }
@@ -1154,40 +1154,40 @@ abstract class AbstractNativeToolkit(
         return sunCubeTextureGenerator?.getNativeCubeTexture()
     }
 
-    fun setTextureCombineModes(class681: TextureCombineMode, class682: TextureCombineMode) {
-        var bool3 = false
-        if (class681 != textureRgbCombineModes!![currentTextureSlot]) {
-            textureRgbCombineModes!![currentTextureSlot] = class681
+    fun setTextureCombineModes(rgbMode: TextureCombineMode, alphaMode: TextureCombineMode) {
+        var changed = false
+        if (rgbMode != textureRgbCombineModes!![currentTextureSlot]) {
+            textureRgbCombineModes!![currentTextureSlot] = rgbMode
             setTextureColorStage()
-            bool3 = true
+            changed = true
         }
 
-        if (class682 != textureAlphaCombineModes!![currentTextureSlot]) {
-            textureAlphaCombineModes!![currentTextureSlot] = class682
+        if (alphaMode != textureAlphaCombineModes!![currentTextureSlot]) {
+            textureAlphaCombineModes!![currentTextureSlot] = alphaMode
             setTextureAlphaStage()
-            bool3 = true
+            changed = true
         }
 
-        if (bool3) {
+        if (changed) {
             nativeFunctionMask = nativeFunctionMask and -14
         }
     }
 
-    fun setTextureRgbStageState(i_1: Int, class672: TextureStageState) {
-        setTextureStageState(i_1, class672)
+    fun setTextureRgbStageState(sourceIndex: Int, state: TextureStageState) {
+        setTextureStageState(sourceIndex, state)
     }
 
-    internal abstract fun setTextureStageState(var1: Int, var2: TextureStageState)
+    internal abstract fun setTextureStageState(sourceIndex: Int, state: TextureStageState)
 
-    fun setTextureAlphaStageState(i_1: Int, class672: TextureStageState) {
-        setTextureAlphaStage(i_1, class672)
+    fun setTextureAlphaStageState(sourceIndex: Int, state: TextureStageState) {
+        setTextureAlphaStage(sourceIndex, state)
     }
 
-    internal abstract fun setTextureAlphaStage(var1: Int, var2: TextureStageState)
+    internal abstract fun setTextureAlphaStage(sourceIndex: Int, state: TextureStageState)
 
-    fun setColourValue(i_1: Int) {
-        if (envColor != i_1) {
-            envColor = i_1
+    fun setColourValue(color: Int) {
+        if (envColor != color) {
+            envColor = color
             setTextureEnvironmentColor()
         }
     }
@@ -1247,7 +1247,7 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    abstract fun colorMask(var1: Int)
+    abstract fun colorMask(flags: Int)
 
     override fun resetClipping() {
         if (display != null) {
@@ -1278,20 +1278,20 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    override fun calculateFog(color: Int, distance: Int, i_3: Int) {
-        if (fogColorRgb != color || distance != fogDistance || i_3 != fogOffset) {
+    override fun calculateFog(color: Int, distance: Int, offset: Int) {
+        if (fogColorRgb != color || distance != fogDistance || offset != fogOffset) {
             fogColorRgb = color
             fogDistance = distance
-            fogOffset = i_3
+            fogOffset = offset
             updateFogAndWater()
             toggleFog()
         }
     }
 
-    override fun setSunPosition(matrix44var1: Matrix43) {
-        viewMatrix43 = matrix44var1
+    override fun setSunPosition(viewMatrix: Matrix43) {
+        viewMatrix43 = viewMatrix
         particleMatrix.fromMatrix(viewMatrix43)
-        inverseSunMatrix43.copyFrom(matrix44var1)
+        inverseSunMatrix43.copyFrom(viewMatrix)
         inverseSunMatrix43.updateIdentitiyMatrix()
         inverseSunMatrix44.fromMatrix(inverseSunMatrix43)
         updateFrustumMatrix()
@@ -1302,153 +1302,153 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun toggleFog()
 
-    internal abstract fun toggleMultisampling(var1: Boolean)
+    internal abstract fun toggleMultisampling(enabled: Boolean)
 
-    abstract fun createIndexBuffer(var1: Boolean): NativeToolkitBuffer
+    abstract fun createIndexBuffer(dynamic: Boolean): NativeToolkitBuffer
 
-    abstract fun createStream(var1: Boolean): NativeStream
+    abstract fun createStream(dynamic: Boolean): NativeStream
 
-    abstract fun createVertexDeclaration(var1: Array<VertexDeclarationComponent>): VertexDeclaration
+    abstract fun createVertexDeclaration(components: Array<VertexDeclarationComponent>): VertexDeclaration
 
-    abstract fun setVertexDeclaration(var1: VertexDeclaration)
+    abstract fun setVertexDeclaration(declaration: VertexDeclaration)
 
-    override fun clearRectangle(class4552: ComponentSurface, i_3: Int, i_4: Int) {
+    override fun clearRectangle(surface: ComponentSurface, clipLeft: Int, clipTop: Int) {
         setDepthBuffering(false)
-        blackPixelSprite!!.drawAffineMasked(0.0f, 0.0f, display!!.getWidth().toFloat(), 0.0f, 0.0f, display!!.getHeight().toFloat(), 0, class4552, i_3, i_4)
+        blackPixelSprite!!.drawAffineMasked(0.0f, 0.0f, display!!.getWidth().toFloat(), 0.0f, 0.0f, display!!.getHeight().toFloat(), 0, surface, clipLeft, clipTop)
         setDepthBuffering(true)
     }
 
-    abstract fun bindIndexBuffer(var1: NativeToolkitBuffer)
+    abstract fun bindIndexBuffer(buffer: NativeToolkitBuffer)
 
     fun getEyePositionOsMatrix(): Matrix44 {
         return if (matrixMode == MatrixMode.MODEL_VIEW) inverseSunMatrix44 else IDENTITY_MATRIX
     }
 
-    override fun drawRectangleOutline(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-        drawTransparentLine(i_1, i_2, i_3 + i_1, i_2, i_5, i_6)
-        drawTransparentLine(i_1, i_2 + i_4, i_3 + i_1, i_2 + i_4, i_5, i_6)
-        drawTransparentLine(i_1, i_2, i_1, i_2 + i_4, i_5, i_6)
-        drawTransparentLine(i_3 + i_1, i_2, i_3 + i_1, i_2 + i_4, i_5, i_6)
+    override fun drawRectangleOutline(x: Int, y: Int, width: Int, height: Int, color: Int, alpha: Int) {
+        drawTransparentLine(x, y, width + x, y, color, alpha)
+        drawTransparentLine(x, y + height, width + x, y + height, color, alpha)
+        drawTransparentLine(x, y, x, y + height, color, alpha)
+        drawTransparentLine(width + x, y, width + x, y + height, color, alpha)
     }
 
-    override fun renderWorldmapTile(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, bytes_7: ByteArray, i_8: Int, i_9: Int) {
+    override fun renderWorldmapTile(startX: Int, startY: Int, width: Int, height: Int, colorArgb: Int, textureEnvColor: Int, pixels: ByteArray, pixelOffset: Int, blendMode: Int) {
     }
 
     override fun benchmark() {
     }
 
-    override fun drawCircle(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+    override fun drawCircle(x: Int, y: Int, radius: Int, colorArgb: Int) {
     }
 
-    override fun drawTransparentLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int) {
-        drawThickLine(i_1, i_2, i_3, i_4, i_5, 1, i_6)
+    override fun drawTransparentLine(startX: Int, startY: Int, endX: Int, endY: Int, color: Int, alpha: Int) {
+        drawThickLine(startX, startY, endX, endY, color, 1, alpha)
     }
 
-    override fun drawLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_7: Int, i_8: Int, i_9: Int) {
-        var f_10 = (i_3 - i_1).toFloat()
-        var f_11 = (i_4 - i_2).toFloat()
-        if (f_10 == 0.0f && f_11 == 0.0f) {
-            f_10 = 1.0f
+    override fun drawLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, lineSpacing: Int, lineLength: Int, offset: Int) {
+        var deltaX = (endX - startX).toFloat()
+        var deltaY = (endY - startY).toFloat()
+        if (deltaX == 0.0f && deltaY == 0.0f) {
+            deltaX = 1.0f
         } else {
-            val f_23 = (1.0 / sqrt((f_10 * f_10 + f_11 * f_11).toDouble())).toFloat()
-            f_10 *= f_23
-            f_11 *= f_23
+            val invLength = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
+            deltaX *= invLength
+            deltaY *= invLength
         }
 
         setProjectionMatrixMode()
-        val class4112 = waterShadersByEffect[13]!!
-        class4112.activate()
-        class4112.prepareForRendering()
+        val lineShader = waterShadersByEffect[13]!!
+        lineShader.activate()
+        lineShader.prepareForRendering()
         toggleBlending(1)
-        class4112.loadDefaultModelMatrix()
+        lineShader.loadDefaultModelMatrix()
         toggleMultisampling(false)
-        var i_9 = i_9 % (i_8 + i_7)
-        val f_13 = f_10 * i_7
-        val f_14 = f_11 * i_7
-        var f_15 = 0.0f
-        var f_16 = 0.0f
-        var f_17 = f_13
-        var f_18 = f_14
-        if (i_9 > i_7) {
-            f_15 = f_10 * (i_8 + i_7 - i_9)
-            f_16 = f_11 * (i_8 + i_7 - i_9)
+        var offset = offset % (lineLength + lineSpacing)
+        val dashDeltaX = deltaX * lineSpacing
+        val dashDeltaY = deltaY * lineSpacing
+        var offsetX = 0.0f
+        var offsetY = 0.0f
+        var segDeltaX = dashDeltaX
+        var segDeltaY = dashDeltaY
+        if (offset > lineSpacing) {
+            offsetX = deltaX * (lineLength + lineSpacing - offset)
+            offsetY = deltaY * (lineLength + lineSpacing - offset)
         } else {
-            f_17 = f_10 * (i_7 - i_9)
-            f_18 = f_11 * (i_7 - i_9)
+            segDeltaX = deltaX * (lineSpacing - offset)
+            segDeltaY = deltaY * (lineSpacing - offset)
         }
 
-        var f_19 = i_1 + f_15
-        var f_20 = i_2 + f_16
-        val f_21 = f_10 * i_8
-        val f_22 = f_11 * i_8
+        var currentX = startX + offsetX
+        var currentY = startY + offsetY
+        val gapDeltaX = deltaX * lineLength
+        val gapDeltaY = deltaY * lineLength
 
         while (true) {
-            if (i_3 > i_1) {
-                if (f_19 > i_3) {
+            if (endX > startX) {
+                if (currentX > endX) {
                     break
                 }
-                if (f_19 + f_17 > i_3) {
-                    f_17 = i_3 - f_19
+                if (currentX + segDeltaX > endX) {
+                    segDeltaX = endX - currentX
                 }
             } else {
-                if (f_19 < i_3) {
+                if (currentX < endX) {
                     break
                 }
-                if (f_19 + f_17 < i_3) {
-                    f_17 = i_3 - f_19
+                if (currentX + segDeltaX < endX) {
+                    segDeltaX = endX - currentX
                 }
             }
 
-            if (i_4 > i_2) {
-                if (f_20 > i_4) {
+            if (endY > startY) {
+                if (currentY > endY) {
                     break
                 }
-                if (f_20 + f_18 > i_4) {
-                    f_18 = i_4 - f_20
+                if (currentY + segDeltaY > endY) {
+                    segDeltaY = endY - currentY
                 }
             } else {
-                if (f_20 < i_4) {
+                if (currentY < endY) {
                     break
                 }
-                if (f_20 + f_18 < i_4) {
-                    f_18 = i_4 - f_20
+                if (currentY + segDeltaY < endY) {
+                    segDeltaY = endY - currentY
                 }
             }
 
-            if (!uploadLineVertices(f_19, f_20, f_19 + f_17, f_20 + f_18)) {
+            if (!uploadLineVertices(currentX, currentY, currentX + segDeltaX, currentY + segDeltaY)) {
                 return
             }
 
             drawPrimitiveLines()
-            f_19 += f_21 + f_17
-            f_20 += f_22 + f_18
-            f_17 = f_13
-            f_18 = f_14
+            currentX += gapDeltaX + segDeltaX
+            currentY += gapDeltaY + segDeltaY
+            segDeltaX = dashDeltaX
+            segDeltaY = dashDeltaY
         }
 
         toggleMultisampling(true)
-        class4112.deactivate()
+        lineShader.deactivate()
     }
 
-    override fun drawTexturedLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int, i_10: Int, i_11: Int, i_12: Int) {
+    override fun drawTexturedLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, clipLeft: Int, clipTop: Int, lineSpacing: Int, lineLength: Int, offset: Int) {
     }
 
-    override fun drawThickLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int, i_7: Int) {
-        var i_1 = (i_1 + 1.0f).toInt()
-        var i_2 = (i_2 + 1.0f).toInt()
-        var i_3 = (i_3 + 1.0f).toInt()
-        var i_4 = (i_4 + 1.0f).toInt()
-        var f_8 = (i_3 - i_1).toFloat()
-        var f_9 = (i_4 - i_2).toFloat()
-        val f_10 = 1.0f / sqrt((f_8 * f_8 + f_9 * f_9).toDouble()).toFloat()
-        f_8 *= f_10
-        f_9 *= f_10
-        i_1 = (i_1 - f_8).toInt()
-        i_2 = (i_2 - f_9).toInt()
-        var f_11 = -f_9
-        f_11 *= 0.5f * i_6
-        val f_12 = f_8 * 0.5f * i_6
-        whitePixelSprite!!.drawAffineTransformed(i_1 - f_11, i_2 - f_12, i_3 - f_11, i_4 - f_12, i_1 + f_11, i_2 + f_12, 0, i_5, i_7)
+    override fun drawThickLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, lineWidth: Int, blendMode: Int) {
+        var startX = (startX + 1.0f).toInt()
+        var startY = (startY + 1.0f).toInt()
+        var endX = (endX + 1.0f).toInt()
+        var endY = (endY + 1.0f).toInt()
+        var dirX = (endX - startX).toFloat()
+        var dirY = (endY - startY).toFloat()
+        val invLength = 1.0f / sqrt((dirX * dirX + dirY * dirY).toDouble()).toFloat()
+        dirX *= invLength
+        dirY *= invLength
+        startX = (startX - dirX).toInt()
+        startY = (startY - dirY).toInt()
+        var perpX = -dirY
+        perpX *= 0.5f * lineWidth
+        val perpY = dirX * 0.5f * lineWidth
+        whitePixelSprite!!.drawAffineTransformed(startX - perpX, startY - perpY, endX - perpX, endY - perpY, startX + perpX, startY + perpY, 0, colorArgb, blendMode)
     }
 
     override fun renderParticles(particleWrapper: ParticleWrapper) {
@@ -1461,13 +1461,13 @@ abstract class AbstractNativeToolkit(
         drawPrimitive(PrimitiveDrawMode.LINES, 0, 1)
     }
 
-    fun drawQuadPrimitive(class3521: PrimitiveDrawMode) {
+    fun drawQuadPrimitive(drawMode: PrimitiveDrawMode) {
         setStreamSource(0, quadVertexStream!!)
         setVertexDeclaration(quadVertexDeclaration!!)
-        drawPrimitive(class3521, 0, 2)
+        drawPrimitive(drawMode, 0, 2)
     }
 
-    abstract fun drawIndexedPrimitive(var1: PrimitiveDrawMode, var2: Int, var3: Int, var4: Int, var5: Int)
+    abstract fun drawIndexedPrimitive(drawMode: PrimitiveDrawMode, startVertex: Int, vertexCount: Int, startIndex: Int, primitiveCount: Int)
 
     fun setupUiRenderState() {
         if (nativeFunctionMask != 2) {
@@ -1511,12 +1511,12 @@ abstract class AbstractNativeToolkit(
         return true
     }
 
-    override fun createCubeTexture(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): AbstractCubeTextureGenerator {
-        return NativeCubeTextureGenerator(this, i_1, i_2, i_3, i_4, i_5, i_6)
+    override fun createCubeTexture(materialAtPositiveX: Int, materialAtNegativeX: Int, materialAtPositiveY: Int, materialAtNegativeY: Int, materialAtPositiveZ: Int, materialAtNegativeZ: Int): AbstractCubeTextureGenerator {
+        return NativeCubeTextureGenerator(this, materialAtPositiveX, materialAtNegativeX, materialAtPositiveY, materialAtNegativeY, materialAtPositiveZ, materialAtNegativeZ)
     }
 
-    fun createTexture(width: Int, length: Int, bool3: Boolean, pixels: IntArray): NativeTextureSampler {
-        return createTextureSampler(width, length, bool3, pixels, 0, 0)
+    fun createTexture(width: Int, length: Int, mipmapped: Boolean, pixels: IntArray): NativeTextureSampler {
+        return createTextureSampler(width, length, mipmapped, pixels, 0, 0)
     }
 
     override fun resetDepthClippingMask() {
@@ -1569,7 +1569,7 @@ abstract class AbstractNativeToolkit(
         return modelMatrix
     }
 
-    override fun setClipping(i_1: Int, i_2: Int, i_3: Int, i_4: Int) {
+    override fun setClipping(left: Int, top: Int, right: Int, bottom: Int) {
         val displayHeight: Int
         val displayWidth: Int
         if (display != null) {
@@ -1580,13 +1580,13 @@ abstract class AbstractNativeToolkit(
             displayWidth = 0
         }
 
-        if (i_1 <= 0 && i_3 >= displayWidth - 1 && i_2 <= 0 && i_4 >= displayHeight - 1) {
+        if (left <= 0 && right >= displayWidth - 1 && top <= 0 && bottom >= displayHeight - 1) {
             resetClipping()
         } else {
-            cLeft = 0.coerceAtLeast(i_1)
-            cRight = i_3.coerceAtMost(displayWidth)
-            cTop = 0.coerceAtLeast(i_2)
-            cBottom = i_4.coerceAtMost(displayHeight)
+            cLeft = 0.coerceAtLeast(left)
+            cRight = right.coerceAtMost(displayWidth)
+            cTop = 0.coerceAtLeast(top)
+            cBottom = bottom.coerceAtMost(displayHeight)
             if (!boundsCalculated) {
                 boundsCalculated = true
                 toggleScissorTest()
@@ -1601,8 +1601,8 @@ abstract class AbstractNativeToolkit(
 
     internal abstract fun setDepthRenderState()
 
-    override fun beginBloomCapture(i_3: Int, i_4: Int) {
-        bloomRenderer!!.beginCapture(i_3, i_4)
+    override fun beginBloomCapture(screenWidth: Int, screenHeight: Int) {
+        bloomRenderer!!.beginCapture(screenWidth, screenHeight)
     }
 
     fun updateFogAndWater() {
@@ -1610,9 +1610,9 @@ abstract class AbstractNativeToolkit(
         configureFog()
     }
 
-    abstract fun createRectangleTexture(var1: GLFormat, var2: GLActionFormat, var3: Int, var4: Int): RectangleTextureSampler
+    abstract fun createRectangleTexture(format: GLFormat, actionFormat: GLActionFormat, width: Int, height: Int): RectangleTextureSampler
 
-    abstract fun createNativeTexture2D(var1: GLFormat, var2: GLActionFormat, var3: Int, var4: Int): NativeTextureSampler
+    abstract fun createNativeTexture2D(format: GLFormat, actionFormat: GLActionFormat, width: Int, height: Int): NativeTextureSampler
 
     fun fetchShader(archiveName: String, fileName: String): ByteArray? {
         return shaderResource!!.getNamedFile(archiveName, fileName)
@@ -1630,50 +1630,50 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    abstract fun createTextureSampler(var1: Int, var2: Int, var3: Boolean, var4: IntArray, var5: Int, var6: Int): NativeTextureSampler
+    abstract fun createTextureSampler(width: Int, height: Int, mipmapped: Boolean, pixels: IntArray, borderWidth: Int, borderHeight: Int): NativeTextureSampler
 
-    abstract fun setPolygonMode(var1: Int)
+    abstract fun setPolygonMode(mode: Int)
 
-    override fun drawSurfaceLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, class4557: ComponentSurface, i_8: Int, i_9: Int) {
+    override fun drawSurfaceLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, clipLeft: Int, clipTop: Int) {
     }
 
     override fun onTilesDrawn() {
         missingWaterColor = false
     }
 
-    override fun isOnScreen(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int, i_6: Int): Int {
-        var i_7 = 0
-        val f_8 = transformMatrix.elements[14] + transformMatrix.elements[2] * i_1 + transformMatrix.elements[6] * i_2 + transformMatrix.elements[10] * i_3
-        val f_9 = transformMatrix.elements[14] + transformMatrix.elements[2] * i_4 + transformMatrix.elements[6] * i_5 + transformMatrix.elements[10] * i_6
-        val f_10 = transformMatrix.elements[15] + transformMatrix.elements[3] * i_1 + transformMatrix.elements[7] * i_2 + transformMatrix.elements[11] * i_3
-        val f_11 = transformMatrix.elements[15] + transformMatrix.elements[3] * i_4 + transformMatrix.elements[7] * i_5 + transformMatrix.elements[11] * i_6
-        if (f_8 < -f_10 && f_9 < -f_11) {
-            i_7 = i_7 or 0x10
-        } else if (f_8 > f_10 && f_9 > f_11) {
-            i_7 = i_7 or 0x20
+    override fun isOnScreen(minX: Int, minY: Int, minZ: Int, maxX: Int, maxY: Int, maxZ: Int): Int {
+        var frustumFlags = 0
+        val minNdcZ = transformMatrix.elements[14] + transformMatrix.elements[2] * minX + transformMatrix.elements[6] * minY + transformMatrix.elements[10] * minZ
+        val maxNdcZ = transformMatrix.elements[14] + transformMatrix.elements[2] * maxX + transformMatrix.elements[6] * maxY + transformMatrix.elements[10] * maxZ
+        val minClipW = transformMatrix.elements[15] + transformMatrix.elements[3] * minX + transformMatrix.elements[7] * minY + transformMatrix.elements[11] * minZ
+        val maxClipW = transformMatrix.elements[15] + transformMatrix.elements[3] * maxX + transformMatrix.elements[7] * maxY + transformMatrix.elements[11] * maxZ
+        if (minNdcZ < -minClipW && maxNdcZ < -maxClipW) {
+            frustumFlags = frustumFlags or 0x10
+        } else if (minNdcZ > minClipW && maxNdcZ > maxClipW) {
+            frustumFlags = frustumFlags or 0x20
         }
 
-        val f_12 = transformMatrix.elements[12] + transformMatrix.elements[0] * i_1 + transformMatrix.elements[4] * i_2 + transformMatrix.elements[8] * i_3
-        val f_13 = transformMatrix.elements[12] + transformMatrix.elements[0] * i_4 + transformMatrix.elements[4] * i_5 + transformMatrix.elements[8] * i_6
-        if (f_12 < -f_10 && f_13 < -f_11) {
-            i_7 = i_7 or 0x1
+        val minClipX = transformMatrix.elements[12] + transformMatrix.elements[0] * minX + transformMatrix.elements[4] * minY + transformMatrix.elements[8] * minZ
+        val maxClipX = transformMatrix.elements[12] + transformMatrix.elements[0] * maxX + transformMatrix.elements[4] * maxY + transformMatrix.elements[8] * maxZ
+        if (minClipX < -minClipW && maxClipX < -maxClipW) {
+            frustumFlags = frustumFlags or 0x1
         }
 
-        if (f_12 > f_10 && f_13 > f_11) {
-            i_7 = i_7 or 0x2
+        if (minClipX > minClipW && maxClipX > maxClipW) {
+            frustumFlags = frustumFlags or 0x2
         }
 
-        val f_14 = transformMatrix.elements[13] + transformMatrix.elements[1] * i_1 + transformMatrix.elements[5] * i_2 + transformMatrix.elements[9] * i_3
-        val f_15 = transformMatrix.elements[13] + transformMatrix.elements[1] * i_4 + transformMatrix.elements[5] * i_5 + transformMatrix.elements[9] * i_6
-        if (f_14 < -f_10 && f_15 < -f_11) {
-            i_7 = i_7 or 0x4
+        val minClipY = transformMatrix.elements[13] + transformMatrix.elements[1] * minX + transformMatrix.elements[5] * minY + transformMatrix.elements[9] * minZ
+        val maxClipY = transformMatrix.elements[13] + transformMatrix.elements[1] * maxX + transformMatrix.elements[5] * maxY + transformMatrix.elements[9] * maxZ
+        if (minClipY < -minClipW && maxClipY < -maxClipW) {
+            frustumFlags = frustumFlags or 0x4
         }
 
-        if (f_14 > f_10 && f_15 > f_11) {
-            i_7 = i_7 or 0x8
+        if (minClipY > minClipW && maxClipY > maxClipW) {
+            frustumFlags = frustumFlags or 0x8
         }
 
-        return i_7
+        return frustumFlags
     }
 
     fun getViewMatrix(): Matrix44 {
@@ -1706,17 +1706,17 @@ abstract class AbstractNativeToolkit(
         setTextureMatrix()
     }
 
-    internal abstract fun createNativeTextureSampler(var1: GLFormat, var2: Int, var3: Int, var4: Boolean, var5: ByteArray?): NativeTextureSampler
+    internal abstract fun createNativeTextureSampler(format: GLFormat, width: Int, height: Int, mipmapped: Boolean, pixels: ByteArray?): NativeTextureSampler
 
     override fun supportsFullscreen(): Boolean {
         return true
     }
 
-    override fun generateEmptySprite(i_1: Int, i_2: Int, bool3: Boolean, bool4: Boolean): NativeSprite {
+    override fun generateEmptySprite(width: Int, height: Int, transparent: Boolean, mipmapped: Boolean): NativeSprite {
         throw UnsupportedOperationException("generateEmptySprite not implemented for this toolkit")
     }
 
-    protected abstract fun createModel(i_1: Int, i_2: Int, bool3: Boolean, bool4: Boolean): Model
+    protected abstract fun createModel(vertexCount: Int, triangleCount: Int, hasNormals: Boolean, hasTexCoords: Boolean): Model
 
     protected open fun createNativeSprite(sampler: TextureSampler): NativeSprite {
         throw UnsupportedOperationException("createNativeSprite with TextureSampler not implemented for this toolkit")
@@ -1731,10 +1731,10 @@ abstract class AbstractNativeToolkit(
 
         lightSources = arrayOfNulls(maxActiveLights - 2)
 
-        val ints_3 = intArrayOf(-1)
-        activeTextureSampler = createTextureSampler(1, 1, false, ints_3, 0, 0)
-        ints_3[0] = 0xffffff.inv()
-        blackTextureSampler = createTextureSampler(1, 1, false, ints_3, 0, 0)
+        val defaultPixels = intArrayOf(-1)
+        activeTextureSampler = createTextureSampler(1, 1, false, defaultPixels, 0, 0)
+        defaultPixels[0] = 0xffffff.inv()
+        blackTextureSampler = createTextureSampler(1, 1, false, defaultPixels, 0, 0)
         setNativeHeap(getNativeMemory(262144))
         positionTexCoordDeclaration = createVertexDeclaration(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.TEXCOORD))))
         createVertexDeclaration(arrayOf(VertexDeclarationComponent(arrayOf(VertexDeclarationAction.POSITION, VertexDeclarationAction.COLOR))))
@@ -1776,7 +1776,7 @@ abstract class AbstractNativeToolkit(
         drawQuadPrimitive(PrimitiveDrawMode.TRIANGLE_FAN)
     }
 
-    abstract fun setStreamSource(var1: Int, var2: NativeStream)
+    abstract fun setStreamSource(slot: Int, stream: NativeStream)
 
     fun setTextureSlot(textureSlot: Int) {
         if (currentTextureSlot != textureSlot) {
@@ -1793,12 +1793,12 @@ abstract class AbstractNativeToolkit(
         directBuffer.putFloat(0.0f)
         directBuffer.putFloat(0.0f)
 
-        for (i_1 in 0..256) {
-            val d_2 = (i_1 * 2) * Math.PI / 256.0
-            val f_4 = Math.cos(d_2).toFloat()
-            val f_5 = Math.sin(d_2).toFloat()
-            directBuffer.putFloat(f_5)
-            directBuffer.putFloat(f_4)
+        for (segment in 0..256) {
+            val angle = (segment * 2) * Math.PI / 256.0
+            val cosValue = Math.cos(angle).toFloat()
+            val sinValue = Math.sin(angle).toFloat()
+            directBuffer.putFloat(sinValue)
+            directBuffer.putFloat(cosValue)
             directBuffer.putFloat(0.0f)
         }
 
@@ -1815,8 +1815,8 @@ abstract class AbstractNativeToolkit(
         }
     }
 
-    override fun drawTransparentVerticalLine(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int) {
-        drawTransparentLine(i_1, i_2, i_1, i_3 + i_2, i_4, i_5)
+    override fun drawTransparentVerticalLine(x: Int, y: Int, height: Int, colorArgb: Int, blendMode: Int) {
+        drawTransparentLine(x, y, x, height + y, colorArgb, blendMode)
     }
 
     override fun compositeBloomEffects() {

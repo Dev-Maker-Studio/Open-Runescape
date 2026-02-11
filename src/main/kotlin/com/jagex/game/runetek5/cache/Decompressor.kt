@@ -57,10 +57,10 @@ class Decompressor(
                 buffer[5] = sector.toByte()
                 this.idxFile.setPosition(file * 6L)
                 this.idxFile.write(buffer, 0, 6)
-                var part = 0
-                var i_10 = 0
+                var bytesWritten = 0
+                var chunkIndex = 0
                 while (true) {
-                    if (part < size) {
+                    if (bytesWritten < size) {
                         var nextSector = 0
                         var currentIndex: Int
                         if (mutableSeek) {
@@ -88,7 +88,7 @@ class Decompressor(
                                 nextSector = ((buffer[5].toInt() and 0xff) shl 8) + ((buffer[4].toInt() and 0xff) shl 16) + (buffer[6].toInt() and 0xff)
                                 currentFile = buffer[7].toInt() and 0xff
                             }
-                            if (currentIndex != file || currentPart != i_10 || currentFile != this.index) {
+                            if (currentIndex != file || currentPart != chunkIndex || currentFile != this.index) {
                                 return false
                             }
                             if (nextSector < 0 || nextSector > this.dataFile.getInitialSize() / 520L) {
@@ -105,7 +105,7 @@ class Decompressor(
                                 nextSector++
                             }
                         }
-                        if (size - part <= 512) {
+                        if (size - bytesWritten <= 512) {
                             nextSector = 0
                         }
                         if (file > 65535) {
@@ -113,38 +113,38 @@ class Decompressor(
                             buffer[1] = (file shr 16).toByte()
                             buffer[2] = (file shr 8).toByte()
                             buffer[3] = file.toByte()
-                            buffer[4] = (i_10 shr 8).toByte()
-                            buffer[5] = i_10.toByte()
+                            buffer[4] = (chunkIndex shr 8).toByte()
+                            buffer[5] = chunkIndex.toByte()
                             buffer[6] = (nextSector shr 16).toByte()
                             buffer[7] = (nextSector shr 8).toByte()
                             buffer[8] = nextSector.toByte()
                             buffer[9] = this.index.toByte()
                             this.dataFile.setPosition(sector * 520L)
                             this.dataFile.write(buffer, 0, 10)
-                            currentIndex = size - part
+                            currentIndex = size - bytesWritten
                             if (currentIndex > 510) {
                                 currentIndex = 510
                             }
                         } else {
                             buffer[0] = (file shr 8).toByte()
                             buffer[1] = file.toByte()
-                            buffer[2] = (i_10 shr 8).toByte()
-                            buffer[3] = i_10.toByte()
+                            buffer[2] = (chunkIndex shr 8).toByte()
+                            buffer[3] = chunkIndex.toByte()
                             buffer[4] = (nextSector shr 16).toByte()
                             buffer[5] = (nextSector shr 8).toByte()
                             buffer[6] = nextSector.toByte()
                             buffer[7] = this.index.toByte()
                             this.dataFile.setPosition(sector * 520L)
                             this.dataFile.write(buffer, 0, 8)
-                            currentIndex = size - part
+                            currentIndex = size - bytesWritten
                             if (currentIndex > 512) {
                                 currentIndex = 512
                             }
                         }
-                        this.dataFile.write(data, part, currentIndex)
-                        part += currentIndex
+                        this.dataFile.write(data, bytesWritten, currentIndex)
+                        bytesWritten += currentIndex
                         sector = nextSector
-                        i_10++
+                        chunkIndex++
                         continue
                     }
                     return true
@@ -156,73 +156,72 @@ class Decompressor(
         }
     }
 
-    fun decompress(i_1: Int): ByteArray? {
+    fun decompress(fileId: Int): ByteArray? {
         synchronized(this.dataFile) {
             try {
-                if (this.idxFile.getInitialSize() < (i_1 * 6L + 6)) {
+                if (this.idxFile.getInitialSize() < (fileId * 6L + 6)) {
                     return null
                 }
-                this.idxFile.setPosition(i_1 * 6L)
+                this.idxFile.setPosition(fileId * 6L)
                 this.idxFile.load0(buffer, 0, 6)
-                val i_18 = ((buffer[0].toInt() and 0xff) shl 16) + (buffer[2].toInt() and 0xff) + ((buffer[1].toInt() and 0xff) shl 8)
-                var i_6 = (buffer[5].toInt() and 0xff) + ((buffer[3].toInt() and 0xff) shl 16) + ((buffer[4].toInt() and 0xff) shl 8)
-                if (i_18 > this.sizeCap) {
+                val dataSize = ((buffer[0].toInt() and 0xff) shl 16) + (buffer[2].toInt() and 0xff) + ((buffer[1].toInt() and 0xff) shl 8)
+                var currentSector = (buffer[5].toInt() and 0xff) + ((buffer[3].toInt() and 0xff) shl 16) + ((buffer[4].toInt() and 0xff) shl 8)
+                if (dataSize > this.sizeCap) {
                     return null
                 }
-                if (i_6 > 0 && i_6 <= this.dataFile.getInitialSize() / 520L) {
-                    val bytes_24 = ByteArray(i_18)
-                    var i_8 = 0
-                    var i_9 = 0
-                    while (i_8 < i_18) {
-                        if (i_6 == 0) {
+                if (currentSector > 0 && currentSector <= this.dataFile.getInitialSize() / 520L) {
+                    val outputData = ByteArray(dataSize)
+                    var bytesRead = 0
+                    var chunkIndex = 0
+                    while (bytesRead < dataSize) {
+                        if (currentSector == 0) {
                             return null
                         }
-                        this.dataFile.setPosition(i_6 * 520L)
-                        var i_19 = i_18 - i_8
-                        val b_11: Byte
-                        val i_12: Int
-                        val i_13: Int
-                        val i_14: Int
-                        val i_15: Int
-                        if (i_1 > 65535) {
-                            if (i_19 > 510) {
-                                i_19 = 510
+                        this.dataFile.setPosition(currentSector * 520L)
+                        var chunkSize = dataSize - bytesRead
+                        val headerSize: Byte
+                        val storedFileId: Int
+                        val storedChunkIndex: Int
+                        val nextSector: Int
+                        val storedIndex: Int
+                        if (fileId > 65535) {
+                            if (chunkSize > 510) {
+                                chunkSize = 510
                             }
-                            b_11 = 10
-                            this.dataFile.load0(buffer, 0, b_11 + i_19)
-                            i_12 = ((buffer[1].toInt() and 0xff) shl 16) + ((buffer[0].toInt() and 0xff) shl 24) + (buffer[3].toInt() and 0xff) + ((buffer[2].toInt() and 0xff) shl 8)
-                            i_13 = (buffer[5].toInt() and 0xff) + ((buffer[4].toInt() and 0xff) shl 8)
-                            i_14 = (buffer[8].toInt() and 0xff) + ((buffer[7].toInt() and 0xff) shl 8) + ((buffer[6].toInt() and 0xff) shl 16)
-                            i_15 = buffer[9].toInt() and 0xff
+                            headerSize = 10
+                            this.dataFile.load0(buffer, 0, headerSize + chunkSize)
+                            storedFileId = ((buffer[1].toInt() and 0xff) shl 16) + ((buffer[0].toInt() and 0xff) shl 24) + (buffer[3].toInt() and 0xff) + ((buffer[2].toInt() and 0xff) shl 8)
+                            storedChunkIndex = (buffer[5].toInt() and 0xff) + ((buffer[4].toInt() and 0xff) shl 8)
+                            nextSector = (buffer[8].toInt() and 0xff) + ((buffer[7].toInt() and 0xff) shl 8) + ((buffer[6].toInt() and 0xff) shl 16)
+                            storedIndex = buffer[9].toInt() and 0xff
                         } else {
-                            if (i_19 > 512) {
-                                i_19 = 512
+                            if (chunkSize > 512) {
+                                chunkSize = 512
                             }
-                            b_11 = 8
-                            this.dataFile.load0(buffer, 0, b_11 + i_19)
-                            i_12 = (buffer[1].toInt() and 0xff) + ((buffer[0].toInt() and 0xff) shl 8)
-                            i_13 = (buffer[3].toInt() and 0xff) + ((buffer[2].toInt() and 0xff) shl 8)
-                            i_14 = ((buffer[5].toInt() and 0xff) shl 8) + ((buffer[4].toInt() and 0xff) shl 16) + (buffer[6].toInt() and 0xff)
-                            i_15 = buffer[7].toInt() and 0xff
+                            headerSize = 8
+                            this.dataFile.load0(buffer, 0, headerSize + chunkSize)
+                            storedFileId = (buffer[1].toInt() and 0xff) + ((buffer[0].toInt() and 0xff) shl 8)
+                            storedChunkIndex = (buffer[3].toInt() and 0xff) + ((buffer[2].toInt() and 0xff) shl 8)
+                            nextSector = ((buffer[5].toInt() and 0xff) shl 8) + ((buffer[4].toInt() and 0xff) shl 16) + (buffer[6].toInt() and 0xff)
+                            storedIndex = buffer[7].toInt() and 0xff
                         }
-                        if (i_12 == i_1 && i_13 == i_9 && i_15 == this.index) {
-                            if (i_14 >= 0 && i_14 <= this.dataFile.getInitialSize() / 520L) {
-                                val i_20 = i_19 + b_11
-                                for (i_17 in b_11 until i_20) {
-                                    bytes_24[i_8++] = buffer[i_17]
+                        if (storedFileId == fileId && storedChunkIndex == chunkIndex && storedIndex == this.index) {
+                            if (nextSector >= 0 && nextSector <= this.dataFile.getInitialSize() / 520L) {
+                                val totalReadSize = chunkSize + headerSize
+                                for (bufferOffset in headerSize until totalReadSize) {
+                                    outputData[bytesRead++] = buffer[bufferOffset]
                                 }
-                                i_6 = i_14
-                                ++i_9
+                                currentSector = nextSector
+                                ++chunkIndex
                                 continue
                             }
                             return null
                         }
                         return null
                     }
-                    val bytes_4 = bytes_24
-                    return bytes_4
+                    return outputData
                 }
-            } catch (ioexception22: IOException) {
+            } catch (ioexception: IOException) {
                 return null
             }
             return null
