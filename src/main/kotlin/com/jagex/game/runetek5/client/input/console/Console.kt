@@ -282,23 +282,23 @@ object Console {
     fun renderConsole(toolkit: AbstractToolkit) {
         toolkit.setClipping(0, 0, GameShell.screenCanvasWidth, 350)
         toolkit.drawFilledRectangle(0, 0, GameShell.screenCanvasWidth, 350, backgroundAlpha shl 24 or 0x332277, 1)
-        val i_2 = 350 / outputLineHeight
+        val visibleLineCount = 350 / outputLineHeight
         if (consoleMessageCount > 0) {
-            val i_3 = 346 - outputLineHeight - 4
-            val i_4 = i_2 * i_3 / (i_2 + consoleMessageCount - 1)
-            var i_5 = 4
+            val scrollableHeight = 346 - outputLineHeight - 4
+            val scrollbarThumbHeight = visibleLineCount * scrollableHeight / (visibleLineCount + consoleMessageCount - 1)
+            var scrollbarThumbY = 4
             if (consoleMessageCount > 1) {
-                i_5 += (i_3 - i_4) * (consoleMessageCount - 1 - scrollOffset) / (consoleMessageCount - 1)
+                scrollbarThumbY += (scrollableHeight - scrollbarThumbHeight) * (consoleMessageCount - 1 - scrollOffset) / (consoleMessageCount - 1)
             }
-            toolkit.drawFilledRectangle(GameShell.screenCanvasWidth - 16, i_5, 12, i_4, backgroundAlpha shl 24 or 0x332277, 2)
-            for (i_6 in scrollOffset until i_2 + scrollOffset) {
-                if (i_6 >= consoleMessageCount) break
-                val arr_7 = Utils.split(displayedOutput!![i_6], '\b')
-                val i_8 = (GameShell.screenCanvasWidth - 8 - 16) / arr_7.size
-                for (i_9 in arr_7.indices) {
-                    val i_10 = i_9 * i_8 + 8
-                    toolkit.setClipping(i_10, 0, i_8 + i_10 - 8, 350)
-                    FontManager.debugOverlayFont!!.renderPlain(formatCommand(arr_7[i_9]), i_10, 350 - inputLineHeight - 2 - FontManager.messageboxFont!!.bottomPadding - (i_6 - scrollOffset) * outputLineHeight, -1, 0xffffff.inv())
+            toolkit.drawFilledRectangle(GameShell.screenCanvasWidth - 16, scrollbarThumbY, 12, scrollbarThumbHeight, backgroundAlpha shl 24 or 0x332277, 2)
+            for (lineIndex in scrollOffset until visibleLineCount + scrollOffset) {
+                if (lineIndex >= consoleMessageCount) break
+                val columnParts = Utils.split(displayedOutput!![lineIndex], '\b')
+                val columnWidth = (GameShell.screenCanvasWidth - 8 - 16) / columnParts.size
+                for (columnIndex in columnParts.indices) {
+                    val columnX = columnIndex * columnWidth + 8
+                    toolkit.setClipping(columnX, 0, columnWidth + columnX - 8, 350)
+                    FontManager.debugOverlayFont!!.renderPlain(formatCommand(columnParts[columnIndex]), columnX, 350 - inputLineHeight - 2 - FontManager.messageboxFont!!.bottomPadding - (lineIndex - scrollOffset) * outputLineHeight, -1, 0xffffff.inv())
                 }
             }
         }
@@ -307,18 +307,18 @@ object Console {
         toolkit.drawOpaqueHorizontalLine(0, 350 - inputLineHeight, GameShell.screenCanvasWidth, -1)
         MiniMenu.minimenuHeader!!.renderPlain("--> ${formatCommand(commandString)}", 10, 350 - FontMetrics.defaultFontMetrics!!.bottomPadding - 1, -1, 0xffffff.inv())
         if (GameShell.appletHasFocus) {
-            var lineColor = -1
+            var cursorColor = -1
             if (Client.cycles % 30 > 15) {
-                lineColor = 16777215
+                cursorColor = 16777215
             }
-            toolkit.drawOpaqueVerticalLine(10 + FontMetrics.defaultFontMetrics!!.getWidthNoSprites("--> ${formatCommand(commandString).substring(0, commandLength)}"), 350 - FontMetrics.defaultFontMetrics!!.bottomPadding - 11, 12, lineColor)
+            toolkit.drawOpaqueVerticalLine(10 + FontMetrics.defaultFontMetrics!!.getWidthNoSprites("--> ${formatCommand(commandString).substring(0, commandLength)}"), 350 - FontMetrics.defaultFontMetrics!!.bottomPadding - 11, 12, cursorColor)
         }
         toolkit.resetClipping()
     }
 
     @JvmStatic
-    fun setConsoleText(string_0: String) {
-        commandString = string_0
+    fun setConsoleText(text: String) {
+        commandString = text
         commandLength = commandString.length
     }
 
