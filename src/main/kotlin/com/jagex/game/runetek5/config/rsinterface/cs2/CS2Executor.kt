@@ -134,41 +134,41 @@ class CS2Executor {
         }
 
         @JvmStatic
-        fun execute_trigger(triggerType: ClientTriggerType, scriptId: Int, i_2: Int, cs2executor3: CS2Executor) {
-            val cs2script5 = CS2Script.getScript(triggerType, scriptId, i_2)
-            if (cs2script5 == null) {
+        fun execute_trigger(triggerType: ClientTriggerType, scriptId: Int, alternateId: Int, executor: CS2Executor) {
+            val script = CS2Script.getScript(triggerType, scriptId, alternateId)
+            if (script == null) {
                 decrementCS2ExecIdx()
             } else {
-                cs2executor3.intLocals = IntArray(cs2script5.intLocalsCount)
-                cs2executor3.objectLocals = arrayOfNulls(cs2script5.stringLocalsCount)
-                if (cs2script5.triggerType != ClientTriggerType.MEC_MOUSE_ENTER && cs2script5.triggerType != ClientTriggerType.MEC_MOUSE_OVER && cs2script5.triggerType != ClientTriggerType.MEC_MOUSE_LEAVE) {
-                    if (cs2script5.triggerType == ClientTriggerType.IF_PLAYER_CYCLE) {
-                        cs2executor3.intLocals!![0] = cs2executor3.playerIndex
+                executor.intLocals = IntArray(script.intLocalsCount)
+                executor.objectLocals = arrayOfNulls(script.stringLocalsCount)
+                if (script.triggerType != ClientTriggerType.MEC_MOUSE_ENTER && script.triggerType != ClientTriggerType.MEC_MOUSE_OVER && script.triggerType != ClientTriggerType.MEC_MOUSE_LEAVE) {
+                    if (script.triggerType == ClientTriggerType.IF_PLAYER_CYCLE) {
+                        executor.intLocals!![0] = executor.playerIndex
                     }
                 } else {
-                    var i_6 = 0
-                    var i_7 = 0
+                    var worldMapOffsetX = 0
+                    var worldMapOffsetY = 0
                     if (WorldMap.worldmapComponent != null) {
-                        i_6 = WorldMap.worldmapComponent!!.x
-                        i_7 = WorldMap.worldmapComponent!!.y
+                        worldMapOffsetX = WorldMap.worldmapComponent!!.x
+                        worldMapOffsetY = WorldMap.worldmapComponent!!.y
                     }
-                    cs2executor3.intLocals!![0] = MouseRecord.recorder!!.getMouseX() - i_6
-                    cs2executor3.intLocals!![1] = MouseRecord.recorder!!.getMouseY() - i_7
+                    executor.intLocals!![0] = MouseRecord.recorder!!.getMouseX() - worldMapOffsetX
+                    executor.intLocals!![1] = MouseRecord.recorder!!.getMouseY() - worldMapOffsetY
                 }
-                executeScript(cs2script5, 200000, cs2executor3)
+                executeScript(script, 200000, executor)
             }
         }
 
         @JvmStatic
-        fun executeScript(cs2script0: CS2Script, stackLimit: Int, cs2executor2: CS2Executor) {
-            cs2executor2.intStackPtr = 0
-            cs2executor2.stringStackPtr = 0
-            cs2executor2.instrPtr = -1
-            cs2executor2.current = cs2script0
-            cs2executor2.operations = cs2executor2.current!!.operations
-            cs2executor2.intOpValues = cs2executor2.current!!.intOpValues
-            var cs2opinfo4: ClientScriptOpCode? = null
-            cs2executor2.returnValuesPtr = 0
+        fun executeScript(script: CS2Script, stackLimit: Int, executor: CS2Executor) {
+            executor.intStackPtr = 0
+            executor.stringStackPtr = 0
+            executor.instrPtr = -1
+            executor.current = script
+            executor.operations = executor.current!!.operations
+            executor.intOpValues = executor.current!!.intOpValues
+            var currentOpcode: ClientScriptOpCode? = null
+            executor.returnValuesPtr = 0
             try {
                 try {
                     instructionCount = 0
@@ -177,29 +177,29 @@ class CS2Executor {
                         if (instructionCount > stackLimit) {
                             throw RuntimeException("")
                         }
-                        cs2opinfo4 = cs2executor2.operations!![++cs2executor2.instrPtr]
-                        if (isDebugTracing && (debugFilterScript == null || cs2executor2.current!!.scriptName != null && cs2executor2.current!!.scriptName!!.indexOf(debugFilterScript!!) != -1)) {
-                            println(cs2executor2.current!!.scriptName + ": " + cs2opinfo4)
+                        currentOpcode = executor.operations!![++executor.instrPtr]
+                        if (isDebugTracing && (debugFilterScript == null || executor.current!!.scriptName != null && executor.current!!.scriptName!!.indexOf(debugFilterScript!!) != -1)) {
+                            println(executor.current!!.scriptName + ": " + currentOpcode)
                         }
-                        cs2executor2.hasIntOperand = cs2executor2.intOpValues!![cs2executor2.instrPtr] == 1
-                        if (cs2opinfo4 == ClientScriptOpCode.RETURN && cs2executor2.returnValuesPtr == 0) {
+                        executor.hasIntOperand = executor.intOpValues!![executor.instrPtr] == 1
+                        if (currentOpcode == ClientScriptOpCode.RETURN && executor.returnValuesPtr == 0) {
                             decrementCS2ExecIdx()
                             break
                         }
-                        CS2Interpreter.executeOperation(cs2opinfo4, cs2executor2)
+                        CS2Interpreter.executeOperation(currentOpcode, executor)
                     }
-                } catch (exception8: Exception) {
-                    val stringbuilder6 = StringBuilder(30)
-                    stringbuilder6.append(cs2executor2.current!!.pointer).append(" ")
-                    for (i_7 in cs2executor2.returnValuesPtr - 1 downTo 0) {
-                        stringbuilder6.append(cs2executor2.returnValues[i_7]!!.savedScript!!.pointer).append(" ")
+                } catch (scriptException: Exception) {
+                    val errorBuilder = StringBuilder(30)
+                    errorBuilder.append(executor.current!!.pointer).append(" ")
+                    for (returnIdx in executor.returnValuesPtr - 1 downTo 0) {
+                        errorBuilder.append(executor.returnValues[returnIdx]!!.savedScript!!.pointer).append(" ")
                     }
-                    assert(cs2opinfo4 != null)
-                    stringbuilder6.append(cs2opinfo4!!.opcode)
-                    PacketEncoder.sendErrorToServer(stringbuilder6.toString(), exception8)
+                    assert(currentOpcode != null)
+                    errorBuilder.append(currentOpcode!!.opcode)
+                    PacketEncoder.sendErrorToServer(errorBuilder.toString(), scriptException)
                     decrementCS2ExecIdx()
                 }
-            } catch (exception9: Exception) {
+            } catch (fatalException: Exception) {
                 decrementCS2ExecIdx()
             }
         }
@@ -266,16 +266,16 @@ class CS2Executor {
                             executor.intLocals!![intLocalCount++] = intLocal
                         }
                         is String -> {
-                            var string_13 = params[paramIdx] as String
-                            if ("event_opbase" == string_13) {
-                                string_13 = hook.optionName ?: ""
+                            var stringParam = params[paramIdx] as String
+                            if ("event_opbase" == stringParam) {
+                                stringParam = hook.optionName ?: ""
                             }
 
-                            executor.objectLocals!![objectLocalCount++] = string_13
+                            executor.objectLocals!![objectLocalCount++] = stringParam
                         }
                         is Long -> {
-                            val long_14 = (params[paramIdx] as Long).toLong()
-                            executor.longLocals!![longLocalCount++] = long_14
+                            val longParam = (params[paramIdx] as Long).toLong()
+                            executor.longLocals!![longLocalCount++] = longParam
                         }
                     }
                 }
@@ -286,14 +286,14 @@ class CS2Executor {
         }
 
         @JvmStatic
-        fun executeCutsceneScript(cutsceneId: Int, string_1: String, i_2: Int) {
+        fun executeCutsceneScript(cutsceneId: Int, scriptParam: String, intParam: Int) {
             val script = CS2Script.getScript(ClientTriggerType.RUN_CUTSCENE_SCRIPT, cutsceneId, -1)
             if (script != null) {
                 val executor = getNextScriptExecutor()
                 executor.intLocals = IntArray(script.intLocalsCount)
                 executor.objectLocals = arrayOfNulls(script.stringLocalsCount)
-                executor.objectLocals!![0] = string_1
-                executor.intLocals!![0] = i_2
+                executor.objectLocals!![0] = scriptParam
+                executor.intLocals!![0] = intParam
                 executeScript(script, 200000, executor)
             }
         }
@@ -317,29 +317,29 @@ class CS2Executor {
         }
 
         @JvmStatic
-        fun executeIfTrigger(class3970: ClientTriggerType, i_1: Int, animable3: PathingEntity, i_4: Int) {
-            val cs2executor6 = getNextScriptExecutor()
-            cs2executor6.currentEntity = animable3
-            cs2executor6.playerIndex = i_4
-            execute_trigger(class3970, i_1, -1, cs2executor6)
-            cs2executor6.currentEntity = null
-            cs2executor6.playerIndex = -1
+        fun executeIfTrigger(triggerType: ClientTriggerType, scriptId: Int, entity: PathingEntity, playerIdx: Int) {
+            val executor = getNextScriptExecutor()
+            executor.currentEntity = entity
+            executor.playerIndex = playerIdx
+            execute_trigger(triggerType, scriptId, -1, executor)
+            executor.currentEntity = null
+            executor.playerIndex = -1
         }
 
         @JvmStatic
-        fun ifObjectTrigger(class3970: ClientTriggerType, i_1: Int, sceneobject3: GameObject) {
-            val cs2executor5 = getNextScriptExecutor()
-            cs2executor5.currentLocation = sceneobject3
-            execute_trigger(class3970, i_1, -1, cs2executor5)
-            cs2executor5.currentLocation = null
+        fun ifObjectTrigger(triggerType: ClientTriggerType, scriptId: Int, gameObject: GameObject) {
+            val executor = getNextScriptExecutor()
+            executor.currentLocation = gameObject
+            execute_trigger(triggerType, scriptId, -1, executor)
+            executor.currentLocation = null
         }
 
         @JvmStatic
         fun executeIfOnGitem(triggerType: ClientTriggerType, interfaceId: Int, groundItem: GroundItem) {
-            val cs2executor6 = getNextScriptExecutor()
-            cs2executor6.currentGroundItem = groundItem
-            execute_trigger(triggerType, interfaceId, -1, cs2executor6)
-            cs2executor6.currentGroundItem = null
+            val executor = getNextScriptExecutor()
+            executor.currentGroundItem = groundItem
+            execute_trigger(triggerType, interfaceId, -1, executor)
+            executor.currentGroundItem = null
         }
 
         @JvmStatic
@@ -348,9 +348,9 @@ class CS2Executor {
         }
 
         @JvmStatic
-        fun executeTrigger(triggerType: ClientTriggerType, i_1: Int, i_2: Int) {
+        fun executeTrigger(triggerType: ClientTriggerType, scriptId: Int, alternateId: Int) {
             val cs2Executor = getNextScriptExecutor()
-            execute_trigger(triggerType, i_1, i_2, cs2Executor)
+            execute_trigger(triggerType, scriptId, alternateId, cs2Executor)
         }
 
         @JvmStatic

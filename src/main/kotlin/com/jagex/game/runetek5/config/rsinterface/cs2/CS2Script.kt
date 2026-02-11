@@ -26,12 +26,12 @@ class CS2Script(buffer: Packet) : CacheableNode() {
 
     init {
         val end = decodeHeader(buffer)
-        var i_3 = 0
+        var instructionIndex = 0
 
         while (buffer.currentPosition < end) {
-            val cs2opinfo5 = getOpcode(buffer)
-            decodeInstruction(buffer, i_3, cs2opinfo5)
-            i_3++
+            val opcode = getOpcode(buffer)
+            decodeInstruction(buffer, instructionIndex, opcode)
+            instructionIndex++
         }
     }
 
@@ -46,37 +46,37 @@ class CS2Script(buffer: Packet) : CacheableNode() {
 
     fun decodeHeader(stream: Packet): Int {
         stream.currentPosition = stream.buffer.size - 2
-        val i_2 = stream.readUShort()
-        val i_3 = stream.buffer.size - 2 - i_2 - 16
-        stream.currentPosition = i_3
-        val i_4 = stream.readInt()
+        val switchBlockSize = stream.readUShort()
+        val headerStart = stream.buffer.size - 2 - switchBlockSize - 16
+        stream.currentPosition = headerStart
+        val instructionCount = stream.readInt()
         intLocalsCount = stream.readUShort()
         stringLocalsCount = stream.readUShort()
         longLocalsCount = stream.readUShort()
         intArgsCount = stream.readUShort()
         stringArgsCount = stream.readUShort()
         longArgsCount = stream.readUShort()
-        val i_5 = stream.readUByte()
-        if (i_5 > 0) {
-            switchMaps = arrayOfNulls(i_5)
+        val switchTableCount = stream.readUByte()
+        if (switchTableCount > 0) {
+            switchMaps = arrayOfNulls(switchTableCount)
 
-            for (i_6 in 0 until i_5) {
-                var i_7 = stream.readUShort()
-                val iterablenodemap8 = IterableNodeMap<IntNode>(MathUtils.nextPowerOfTwo(i_7))
-                switchMaps!![i_6] = iterablenodemap8
+            for (switchIndex in 0 until switchTableCount) {
+                var switchCaseCount = stream.readUShort()
+                val switchMap = IterableNodeMap<IntNode>(MathUtils.nextPowerOfTwo(switchCaseCount))
+                switchMaps!![switchIndex] = switchMap
 
-                while (i_7-- > 0) {
-                    val i_9 = stream.readInt()
-                    val i_10 = stream.readInt()
-                    iterablenodemap8.put(IntNode(i_10), i_9.toLong())
+                while (switchCaseCount-- > 0) {
+                    val caseKey = stream.readInt()
+                    val caseTarget = stream.readInt()
+                    switchMap.put(IntNode(caseTarget), caseKey.toLong())
                 }
             }
         }
 
         stream.currentPosition = 0
         scriptName = stream.readNullString()
-        operations = arrayOfNulls<ClientScriptOpCode>(i_4) as Array<ClientScriptOpCode>
-        return i_3
+        operations = arrayOfNulls<ClientScriptOpCode>(instructionCount) as Array<ClientScriptOpCode>
+        return headerStart
     }
 
     fun decodeInstruction(buffer: Packet, op: Int, instruction: ClientScriptOpCode) {
@@ -86,14 +86,14 @@ class CS2Script(buffer: Packet) : CacheableNode() {
                 stringOpValues = arrayOfNulls(operationsCount)
             }
 
-            var string_5 = buffer.readString()
-            if (string_5.lowercase().contains("runescape")) {
-                string_5 = string_5.replace("runescape", "darkan", ignoreCase = false)
-                string_5 = string_5.replace("RuneScape", "Darkan", ignoreCase = false)
-                string_5 = string_5.replace("Runescape", "Darkan", ignoreCase = false)
+            var stringValue = buffer.readString()
+            if (stringValue.lowercase().contains("runescape")) {
+                stringValue = stringValue.replace("runescape", "darkan", ignoreCase = false)
+                stringValue = stringValue.replace("RuneScape", "Darkan", ignoreCase = false)
+                stringValue = stringValue.replace("Runescape", "Darkan", ignoreCase = false)
             }
 
-            stringOpValues!![op] = string_5.intern()
+            stringOpValues!![op] = stringValue.intern()
         } else if (instruction == ClientScriptOpCode.PUSH_LONG) {
             if (longOpValues == null) {
                 longOpValues = LongArray(operationsCount)
@@ -141,7 +141,7 @@ class CS2Script(buffer: Packet) : CacheableNode() {
         }
 
         @JvmStatic
-        fun getScript(event: ClientTriggerType, scriptId: Int, i_2: Int): CS2Script? {
+        fun getScript(event: ClientTriggerType, scriptId: Int, alternateId: Int): CS2Script? {
             var scriptFileId = event.id or (scriptId shl 10)
             var script = CS2Executor.CS2_CACHE.get((scriptFileId.toLong() shl 16)) as CS2Script?
             if (script != null) {
@@ -162,7 +162,7 @@ class CS2Script(buffer: Packet) : CacheableNode() {
                 CS2Executor.CS2_CACHE.put(script, scriptFileId.toLong() shl 16)
                 return script
             }
-            scriptFileId = event.id or ((i_2 + 65536) shl 10)
+            scriptFileId = event.id or ((alternateId + 65536) shl 10)
             script = CS2Executor.CS2_CACHE.get((scriptFileId.toLong() shl 16)) as CS2Script?
             if (script != null) {
                 return script
