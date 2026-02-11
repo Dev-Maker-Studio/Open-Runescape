@@ -199,11 +199,11 @@ open class NPCType {
         functionMask: Int,
         basType: BasTypeList,
         varProvider: VarDomain,
-        animation5: Sequence?,
-        animation6: Sequence?,
-        arr_7: Array<Sequence?>?,
-        ints_8: IntArray?,
-        i_9: Int,
+        animationSequence: Sequence?,
+        idleSequence: Sequence?,
+        animatingSequence: Array<Sequence?>?,
+        submeshRotations: IntArray?,
+        submeshRotationOffset: Int,
         customisation: NPCTypeCustomisation?
     ): Model? {
         return getAnimatedBodymodel(
@@ -211,11 +211,11 @@ open class NPCType {
             functionMask,
             basType,
             varProvider,
-            animation5,
-            animation6,
-            arr_7,
-            ints_8,
-            i_9,
+            animationSequence,
+            idleSequence,
+            animatingSequence,
+            submeshRotations,
+            submeshRotationOffset,
             customisation,
             this.npcBasId,
             true
@@ -845,10 +845,10 @@ open class NPCType {
         } else if (opcode == 159) {
             this.gameType = 0
         } else if (opcode == 160) {
-            val i_4 = stream.readUByte()
-            this.quests = IntArray(i_4)
-            for (i_5 in 0 until i_4) {
-                this.quests!![i_5] = stream.readUShort()
+            val questCount = stream.readUByte()
+            this.quests = IntArray(questCount)
+            for (questIndex in 0 until questCount) {
+                this.quests!![questIndex] = stream.readUShort()
             }
         } else if (opcode == 162) {
             this.instrumentSoundEffect = true
