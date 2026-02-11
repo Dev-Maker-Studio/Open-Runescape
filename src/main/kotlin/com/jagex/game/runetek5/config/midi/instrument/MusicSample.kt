@@ -110,21 +110,21 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
                     trig3[time * 2] = cos((time * 4 + 2) * Math.PI / blockSize).toFloat()
                     trig3[time * 2 + 1] = -(sin((time * 4 + 2) * Math.PI / blockSize).toFloat())
                 }
-                val ints_15 = IntArray(eightBlock)
-                val i_10 = BufferUtils.ilog(eightBlock - 1)
-                for (i_11 in 0 until eightBlock) {
-                    ints_15[i_11] = reverseBits(i_11, i_10)
+                val bitReversedIndices = IntArray(eightBlock)
+                val logSize = BufferUtils.ilog(eightBlock - 1)
+                for (bitIndex in 0 until eightBlock) {
+                    bitReversedIndices[bitIndex] = reverseBits(bitIndex, logSize)
                 }
                 if (blockType != 0) {
                     CdAg = trig1
                     CdAq = trig2
                     CdAj = trig3
-                    CdAr = ints_15
+                    CdAr = bitReversedIndices
                 } else {
                     CdR = trig1
                     CdP = trig2
                     CdV = trig3
-                    CdAv = ints_15
+                    CdAv = bitReversedIndices
                 }
             }
             val codeBookCount = getBits(8) + 1
@@ -152,8 +152,8 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
         }
 
         @JvmStatic
-        fun setData(bytes_0: ByteArray) {
-            instrumentData = bytes_0
+        fun setData(data: ByteArray) {
+            instrumentData = data
             byteIndex = 0
             root = 0
         }
@@ -265,16 +265,16 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
         }
 
         @JvmStatic
-        fun reverseBits(i_0: Int, i_1: Int): Int {
-            var value = i_0
-            var bits = i_1
-            var i_3 = 0
+        fun reverseBits(input: Int, numBits: Int): Int {
+            var value = input
+            var bits = numBits
+            var reversed = 0
             while (bits > 0) {
-                i_3 = i_3 shl 1 or (value and 0x1)
+                reversed = reversed shl 1 or (value and 0x1)
                 value = value ushr 1
                 --bits
             }
-            return i_3
+            return reversed
         }
 
         @JvmStatic
@@ -393,108 +393,108 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
                 pcm[i] = -pcm[blocksize - i - 1]
             }
 
-            val floats_44 = if (blockSizeFlag) CdAg!! else CdR!!
-            val floats_23 = if (blockSizeFlag) CdAq!! else CdP!!
-            val floats_24 = if (blockSizeFlag) CdAj!! else CdV!!
-            val ints_25 = if (blockSizeFlag) CdAr!! else CdAv!!
+            val trigTable = if (blockSizeFlag) CdAg!! else CdR!!
+            val halfSinTable = if (blockSizeFlag) CdAq!! else CdP!!
+            val quarterTrigTable = if (blockSizeFlag) CdAj!! else CdV!!
+            val bitReversalTable = if (blockSizeFlag) CdAr!! else CdAv!!
 
             for (i in 0 until quarterBlocksize) {
-                val f_27 = pcm[i * 4] - pcm[blocksize - i * 4 - 1]
-                val f_28 = pcm[i * 4 + 2] - pcm[blocksize - i * 4 - 3]
-                val f_29 = floats_44[i * 2]
-                val f_30 = floats_44[i * 2 + 1]
-                pcm[blocksize - i * 4 - 1] = f_27 * f_29 - f_28 * f_30
-                pcm[blocksize - i * 4 - 3] = f_27 * f_30 + f_28 * f_29
+                val diffA = pcm[i * 4] - pcm[blocksize - i * 4 - 1]
+                val diffB = pcm[i * 4 + 2] - pcm[blocksize - i * 4 - 3]
+                val cosVal = trigTable[i * 2]
+                val sinVal = trigTable[i * 2 + 1]
+                pcm[blocksize - i * 4 - 1] = diffA * cosVal - diffB * sinVal
+                pcm[blocksize - i * 4 - 3] = diffA * sinVal + diffB * cosVal
             }
 
             for (i in 0 until eightBlocksize) {
-                val f_27 = pcm[halfBlocksize + i * 4 + 3]
-                val f_28 = pcm[halfBlocksize + i * 4 + 1]
-                val f_29 = pcm[i * 4 + 3]
-                val f_30 = pcm[i * 4 + 1]
-                pcm[halfBlocksize + i * 4 + 3] = f_27 + f_29
-                pcm[halfBlocksize + i * 4 + 1] = f_28 + f_30
-                val f_31 = floats_44[halfBlocksize - 4 - i * 4]
-                val f_32 = floats_44[halfBlocksize - 3 - i * 4]
-                pcm[i * 4 + 3] = (f_27 - f_29) * f_31 - (f_28 - f_30) * f_32
-                pcm[i * 4 + 1] = (f_28 - f_30) * f_31 + (f_27 - f_29) * f_32
+                val diffA = pcm[halfBlocksize + i * 4 + 3]
+                val diffB = pcm[halfBlocksize + i * 4 + 1]
+                val cosVal = pcm[i * 4 + 3]
+                val sinVal = pcm[i * 4 + 1]
+                pcm[halfBlocksize + i * 4 + 3] = diffA + cosVal
+                pcm[halfBlocksize + i * 4 + 1] = diffB + sinVal
+                val trigCosAlt = trigTable[halfBlocksize - 4 - i * 4]
+                val trigSinAlt = trigTable[halfBlocksize - 3 - i * 4]
+                pcm[i * 4 + 3] = (diffA - cosVal) * trigCosAlt - (diffB - sinVal) * trigSinAlt
+                pcm[i * 4 + 1] = (diffB - sinVal) * trigCosAlt + (diffA - cosVal) * trigSinAlt
             }
 
-            val i_26 = BufferUtils.ilog(blocksize - 1)
+            val logBlockSize = BufferUtils.ilog(blocksize - 1)
 
-            for (i_45 in 0 until i_26 - 3) {
-                val i_46 = blocksize shr i_45 + 2
-                val i_47 = 8 shl i_45
+            for (passIndex in 0 until logBlockSize - 3) {
+                val stride = blocksize shr passIndex + 2
+                val trigStep = 8 shl passIndex
 
-                for (i_48 in 0 until (2 shl i_45)) {
-                    val i_49 = blocksize - i_46 * i_48 * 2
-                    val i_50 = blocksize - i_46 * (i_48 * 2 + 1)
+                for (groupIndex in 0 until (2 shl passIndex)) {
+                    val upperIdx = blocksize - stride * groupIndex * 2
+                    val lowerIdx = blocksize - stride * (groupIndex * 2 + 1)
 
-                    for (i_33 in 0 until (blocksize shr i_45 + 4)) {
-                        val i_34 = i_33 * 4
-                        val f_35 = pcm[i_49 - 1 - i_34]
-                        val f_36 = pcm[i_49 - 3 - i_34]
-                        val f_37 = pcm[i_50 - 1 - i_34]
-                        val f_38 = pcm[i_50 - 3 - i_34]
-                        pcm[i_49 - 1 - i_34] = f_35 + f_37
-                        pcm[i_49 - 3 - i_34] = f_36 + f_38
-                        val f_39 = floats_44[i_33 * i_47]
-                        val f_40 = floats_44[i_33 * i_47 + 1]
-                        pcm[i_50 - 1 - i_34] = (f_35 - f_37) * f_39 - (f_36 - f_38) * f_40
-                        pcm[i_50 - 3 - i_34] = (f_36 - f_38) * f_39 + (f_35 - f_37) * f_40
+                    for (pairIndex in 0 until (blocksize shr passIndex + 4)) {
+                        val offset = pairIndex * 4
+                        val upperReal = pcm[upperIdx - 1 - offset]
+                        val upperImag = pcm[upperIdx - 3 - offset]
+                        val lowerReal = pcm[lowerIdx - 1 - offset]
+                        val lowerImag = pcm[lowerIdx - 3 - offset]
+                        pcm[upperIdx - 1 - offset] = upperReal + lowerReal
+                        pcm[upperIdx - 3 - offset] = upperImag + lowerImag
+                        val twiddleCos = trigTable[pairIndex * trigStep]
+                        val twiddleSin = trigTable[pairIndex * trigStep + 1]
+                        pcm[lowerIdx - 1 - offset] = (upperReal - lowerReal) * twiddleCos - (upperImag - lowerImag) * twiddleSin
+                        pcm[lowerIdx - 3 - offset] = (upperImag - lowerImag) * twiddleCos + (upperReal - lowerReal) * twiddleSin
                     }
                 }
             }
 
-            for (i_45 in 1 until eightBlocksize - 1) {
-                val i_46 = ints_25[i_45]
-                if (i_45 < i_46) {
-                    val i_47 = i_45 * 8
-                    val i_48 = i_46 * 8
-                    var tmp = pcm[i_47 + 1]
-                    pcm[i_47 + 1] = pcm[i_48 + 1]
-                    pcm[i_48 + 1] = tmp
-                    tmp = pcm[i_47 + 3]
-                    pcm[i_47 + 3] = pcm[i_48 + 3]
-                    pcm[i_48 + 3] = tmp
-                    tmp = pcm[i_47 + 5]
-                    pcm[i_47 + 5] = pcm[i_48 + 5]
-                    pcm[i_48 + 5] = tmp
-                    tmp = pcm[i_47 + 7]
-                    pcm[i_47 + 7] = pcm[i_48 + 7]
-                    pcm[i_48 + 7] = tmp
+            for (passIndex in 1 until eightBlocksize - 1) {
+                val stride = bitReversalTable[passIndex]
+                if (passIndex < stride) {
+                    val trigStep = passIndex * 8
+                    val groupIndex = stride * 8
+                    var tmp = pcm[trigStep + 1]
+                    pcm[trigStep + 1] = pcm[groupIndex + 1]
+                    pcm[groupIndex + 1] = tmp
+                    tmp = pcm[trigStep + 3]
+                    pcm[trigStep + 3] = pcm[groupIndex + 3]
+                    pcm[groupIndex + 3] = tmp
+                    tmp = pcm[trigStep + 5]
+                    pcm[trigStep + 5] = pcm[groupIndex + 5]
+                    pcm[groupIndex + 5] = tmp
+                    tmp = pcm[trigStep + 7]
+                    pcm[trigStep + 7] = pcm[groupIndex + 7]
+                    pcm[groupIndex + 7] = tmp
                 }
             }
 
-            for (i_45 in 0 until halfBlocksize) {
-                pcm[i_45] = pcm[i_45 * 2 + 1]
+            for (passIndex in 0 until halfBlocksize) {
+                pcm[passIndex] = pcm[passIndex * 2 + 1]
             }
 
-            for (i_45 in 0 until eightBlocksize) {
-                pcm[blocksize - 1 - i_45 * 2] = pcm[i_45 * 4]
-                pcm[blocksize - 2 - i_45 * 2] = pcm[i_45 * 4 + 1]
-                pcm[blocksize - quarterBlocksize - 1 - i_45 * 2] = pcm[i_45 * 4 + 2]
-                pcm[blocksize - quarterBlocksize - 2 - i_45 * 2] = pcm[i_45 * 4 + 3]
+            for (passIndex in 0 until eightBlocksize) {
+                pcm[blocksize - 1 - passIndex * 2] = pcm[passIndex * 4]
+                pcm[blocksize - 2 - passIndex * 2] = pcm[passIndex * 4 + 1]
+                pcm[blocksize - quarterBlocksize - 1 - passIndex * 2] = pcm[passIndex * 4 + 2]
+                pcm[blocksize - quarterBlocksize - 2 - passIndex * 2] = pcm[passIndex * 4 + 3]
             }
 
-            for (i_45 in 0 until eightBlocksize) {
-                val f_28 = floats_24[i_45 * 2]
-                val f_29 = floats_24[i_45 * 2 + 1]
-                val f_30 = pcm[halfBlocksize + i_45 * 2]
-                val f_31 = pcm[halfBlocksize + i_45 * 2 + 1]
-                val f_32 = pcm[blocksize - 2 - i_45 * 2]
-                val f_51 = pcm[blocksize - 1 - i_45 * 2]
-                var f_52 = f_29 * (f_30 - f_32) + f_28 * (f_31 + f_51)
-                pcm[halfBlocksize + i_45 * 2] = (f_30 + f_32 + f_52) * 0.5f
-                pcm[blocksize - 2 - i_45 * 2] = (f_30 + f_32 - f_52) * 0.5f
-                f_52 = f_29 * (f_31 + f_51) - f_28 * (f_30 - f_32)
-                pcm[halfBlocksize + i_45 * 2 + 1] = (f_31 - f_51 + f_52) * 0.5f
-                pcm[blocksize - 1 - i_45 * 2] = (-f_31 + f_51 + f_52) * 0.5f
+            for (passIndex in 0 until eightBlocksize) {
+                val diffB = quarterTrigTable[passIndex * 2]
+                val cosVal = quarterTrigTable[passIndex * 2 + 1]
+                val sinVal = pcm[halfBlocksize + passIndex * 2]
+                val trigCosAlt = pcm[halfBlocksize + passIndex * 2 + 1]
+                val trigSinAlt = pcm[blocksize - 2 - passIndex * 2]
+                val sampleB = pcm[blocksize - 1 - passIndex * 2]
+                var combined = cosVal * (sinVal - trigSinAlt) + diffB * (trigCosAlt + sampleB)
+                pcm[halfBlocksize + passIndex * 2] = (sinVal + trigSinAlt + combined) * 0.5f
+                pcm[blocksize - 2 - passIndex * 2] = (sinVal + trigSinAlt - combined) * 0.5f
+                combined = cosVal * (trigCosAlt + sampleB) - diffB * (sinVal - trigSinAlt)
+                pcm[halfBlocksize + passIndex * 2 + 1] = (trigCosAlt - sampleB + combined) * 0.5f
+                pcm[blocksize - 1 - passIndex * 2] = (-trigCosAlt + sampleB + combined) * 0.5f
             }
 
             for (pos in 0 until quarterBlocksize) {
-                pcm[pos] = pcm[halfBlocksize + pos * 2] * floats_23[pos * 2] + pcm[halfBlocksize + pos * 2 + 1] * floats_23[pos * 2 + 1]
-                pcm[halfBlocksize - 1 - pos] = pcm[halfBlocksize + pos * 2] * floats_23[pos * 2 + 1] - pcm[halfBlocksize + pos * 2 + 1] * floats_23[pos * 2]
+                pcm[pos] = pcm[halfBlocksize + pos * 2] * halfSinTable[pos * 2] + pcm[halfBlocksize + pos * 2 + 1] * halfSinTable[pos * 2 + 1]
+                pcm[halfBlocksize - 1 - pos] = pcm[halfBlocksize + pos * 2] * halfSinTable[pos * 2 + 1] - pcm[halfBlocksize + pos * 2 + 1] * halfSinTable[pos * 2]
             }
 
             for (pos in 0 until quarterBlocksize) {
@@ -514,36 +514,36 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
             }
 
             for (index in leftWindowStart until leftWindowEnd) {
-                val f_28 = sin(((index - leftWindowStart) + 0.5) / leftN * 0.5 * Math.PI).toFloat()
-                window!![index] *= sin(1.5707963267948966 * f_28 * f_28).toFloat()
+                val diffB = sin(((index - leftWindowStart) + 0.5) / leftN * 0.5 * Math.PI).toFloat()
+                window!![index] *= sin(1.5707963267948966 * diffB * diffB).toFloat()
             }
 
             for (index in rightWindowStart until rightWindowEnd) {
-                val f_28 = sin(((index - rightWindowStart) + 0.5) / rightN * 0.5 * Math.PI + 1.5707963267948966).toFloat()
-                window!![index] *= sin(1.5707963267948966 * f_28 * f_28).toFloat()
+                val diffB = sin(((index - rightWindowStart) + 0.5) / rightN * 0.5 * Math.PI + 1.5707963267948966).toFloat()
+                window!![index] *= sin(1.5707963267948966 * diffB * diffB).toFloat()
             }
         }
 
-        var floats_53: FloatArray? = null
+        var overlapBuffer: FloatArray? = null
         if (this.Y > 0) {
-            val i_20 = blocksize + this.Y shr 2
-            floats_53 = FloatArray(i_20)
-            var i_21: Int
+            val overlapSize = blocksize + this.Y shr 2
+            overlapBuffer = FloatArray(overlapSize)
+            var overlapIndex: Int
             if (!this.blockFlag) {
-                i_21 = 0
-                while (i_21 < this.H) {
-                    val i_22 = i_21 + (this.Y shr 1)
-                    floats_53[i_21] += this.T!![i_22]
-                    i_21++
+                overlapIndex = 0
+                while (overlapIndex < this.H) {
+                    val sourceIndex = overlapIndex + (this.Y shr 1)
+                    overlapBuffer[overlapIndex] += this.T!![sourceIndex]
+                    overlapIndex++
                 }
             }
 
             if (!allFloorsEmpty) {
-                i_21 = leftWindowStart
-                while (i_21 < blocksize shr 1) {
-                    val i_22 = floats_53.size - (blocksize shr 1) + i_21
-                    floats_53[i_22] += window!![i_21]
-                    i_21++
+                overlapIndex = leftWindowStart
+                while (overlapIndex < blocksize shr 1) {
+                    val sourceIndex = overlapBuffer.size - (blocksize shr 1) + overlapIndex
+                    overlapBuffer[sourceIndex] += window!![overlapIndex]
+                    overlapIndex++
                 }
             }
         }
@@ -554,7 +554,7 @@ class MusicSample @Throws(IOException::class) constructor(data: ByteArray) : Nod
         this.Y = blocksize
         this.H = rightWindowEnd - (blocksize shr 1)
         this.blockFlag = allFloorsEmpty
-        return floats_53
+        return overlapBuffer
     }
 
     fun getAudioBuffer(): AudioBuffer? {

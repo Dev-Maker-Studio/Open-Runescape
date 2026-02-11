@@ -82,32 +82,32 @@ class MusicSampleFloor {
         }
     }
 
-    fun predictPoint(i_1: Int, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Int {
-        val i_6 = i_4 - i_2
-        val i_7 = i_3 - i_1
-        val i_8 = if (i_6 < 0) -i_6 else i_6
-        val i_9 = (i_5 - i_1) * i_8
-        val i_10 = i_9 / i_7
-        return if (i_6 < 0) i_2 - i_10 else i_10 + i_2
+    fun predictPoint(x0: Int, y0: Int, x1: Int, y1: Int, targetX: Int): Int {
+        val dy = y1 - y0
+        val dx = x1 - x0
+        val absDy = if (dy < 0) -dy else dy
+        val scaledDist = (targetX - x0) * absDy
+        val interpolated = scaledDist / dx
+        return if (dy < 0) y0 - interpolated else interpolated + y0
     }
 
-    fun drawLine(lowX: Int, highX: Int, lowY: Int, highY: Int, output: FloatArray, i_6: Int) {
+    fun drawLine(lowX: Int, highX: Int, lowY: Int, highY: Int, output: FloatArray, limit: Int) {
         var x1 = lowY
         val deltaX = highY - highX
         val adx = x1 - lowX
-        var i_9 = if (deltaX < 0) -deltaX else deltaX
+        var absSlope = if (deltaX < 0) -deltaX else deltaX
         val base = deltaX / adx
         var y = highX
         var err = 0
         val sy = if (deltaX < 0) base - 1 else base + 1
-        i_9 -= (if (base < 0) -base else base) * adx
+        absSlope -= (if (base < 0) -base else base) * adx
         output[lowX] *= INVERSE_DB_TABLE[highX]
-        if (x1 > i_6) {
-            x1 = i_6
+        if (x1 > limit) {
+            x1 = limit
         }
 
         for (x in lowX + 1 until x1) {
-            err += i_9
+            err += absSlope
             if (err >= adx) {
                 err -= adx
                 y += sy
@@ -152,7 +152,7 @@ class MusicSampleFloor {
         return true
     }
 
-    fun computeFloor(target: FloatArray, b2: Int) {
+    fun computeFloor(target: FloatArray, halfBlockSize: Int) {
         val values = xList.size
         val range = RANGE_LIST[floor1Multiplier - 1]
         step2Flag!![1] = true
@@ -188,8 +188,8 @@ class MusicSampleFloor {
             if (step2Flag!![q]) {
                 val hx = finalX!![q]
                 val hy = finalY!![q] * floor1Multiplier
-                drawLine(lx, ly, hx, hy, target, b2)
-                if (hx >= b2) {
+                drawLine(lx, ly, hx, hy, target, halfBlockSize)
+                if (hx >= halfBlockSize) {
                     return
                 }
 
@@ -198,36 +198,36 @@ class MusicSampleFloor {
             }
         }
 
-        for (j in lx until b2) {
+        for (j in lx until halfBlockSize) {
             target[j] *= INVERSE_DB_TABLE[ly]
         }
     }
 
-    fun sortByX(i_1: Int, i_2: Int) {
-        if (i_1 < i_2) {
-            var i_3 = i_1
-            val i_4 = finalX!![i_1]
-            val i_5 = finalY!![i_1]
-            val bool6 = step2Flag!![i_1]
+    fun sortByX(low: Int, high: Int) {
+        if (low < high) {
+            var pivotIdx = low
+            val pivotX = finalX!![low]
+            val pivotY = finalY!![low]
+            val pivotFlag = step2Flag!![low]
 
-            for (i_7 in i_1 + 1..i_2) {
-                val i_8 = finalX!![i_7]
-                if (i_8 < i_4) {
-                    finalX!![i_3] = i_8
-                    finalY!![i_3] = finalY!![i_7]
-                    step2Flag!![i_3] = step2Flag!![i_7]
-                    ++i_3
-                    finalX!![i_7] = finalX!![i_3]
-                    finalY!![i_7] = finalY!![i_3]
-                    step2Flag!![i_7] = step2Flag!![i_3]
+            for (scanIdx in low + 1..high) {
+                val currentX = finalX!![scanIdx]
+                if (currentX < pivotX) {
+                    finalX!![pivotIdx] = currentX
+                    finalY!![pivotIdx] = finalY!![scanIdx]
+                    step2Flag!![pivotIdx] = step2Flag!![scanIdx]
+                    ++pivotIdx
+                    finalX!![scanIdx] = finalX!![pivotIdx]
+                    finalY!![scanIdx] = finalY!![pivotIdx]
+                    step2Flag!![scanIdx] = step2Flag!![pivotIdx]
                 }
             }
 
-            finalX!![i_3] = i_4
-            finalY!![i_3] = i_5
-            step2Flag!![i_3] = bool6
-            sortByX(i_1, i_3 - 1)
-            sortByX(i_3 + 1, i_2)
+            finalX!![pivotIdx] = pivotX
+            finalY!![pivotIdx] = pivotY
+            step2Flag!![pivotIdx] = pivotFlag
+            sortByX(low, pivotIdx - 1)
+            sortByX(pivotIdx + 1, high)
         }
     }
 
@@ -280,16 +280,16 @@ class MusicSampleFloor {
         var step2Flag: BooleanArray? = null
 
         @JvmStatic
-        fun highNeighbor(ints_0: IntArray, i_1: Int): Int {
-            val i_2 = ints_0[i_1]
+        fun highNeighbor(xValues: IntArray, targetIndex: Int): Int {
+            val targetValue = xValues[targetIndex]
             var highNeightbor = -1
-            var i_4 = Int.MAX_VALUE
+            var closestValue = Int.MAX_VALUE
 
-            for (i_5 in 0 until i_1) {
-                val i_6 = ints_0[i_5]
-                if (i_6 > i_2 && i_6 < i_4) {
-                    highNeightbor = i_5
-                    i_4 = i_6
+            for (searchIndex in 0 until targetIndex) {
+                val currentValue = xValues[searchIndex]
+                if (currentValue > targetValue && currentValue < closestValue) {
+                    highNeightbor = searchIndex
+                    closestValue = currentValue
                 }
             }
 
@@ -297,16 +297,16 @@ class MusicSampleFloor {
         }
 
         @JvmStatic
-        fun lowNeighbor(ints_0: IntArray, i_1: Int): Int {
-            val i_2 = ints_0[i_1]
+        fun lowNeighbor(xValues: IntArray, targetIndex: Int): Int {
+            val targetValue = xValues[targetIndex]
             var lowNeightbor = -1
-            var i_4 = Int.MIN_VALUE
+            var closestValue = Int.MIN_VALUE
 
-            for (i_5 in 0 until i_1) {
-                val i_6 = ints_0[i_5]
-                if (i_6 < i_2 && i_6 > i_4) {
-                    lowNeightbor = i_5
-                    i_4 = i_6
+            for (searchIndex in 0 until targetIndex) {
+                val currentValue = xValues[searchIndex]
+                if (currentValue < targetValue && currentValue > closestValue) {
+                    lowNeightbor = searchIndex
+                    closestValue = currentValue
                 }
             }
 

@@ -30,7 +30,7 @@ class MusicSampleCodebook {
             var currentLength = MusicSample.getBits(5) + 1
             while (lookupType < entries) {
                 val limit = MusicSample.getBits(BufferUtils.ilog(entries - lookupType))
-                for (i_5 in 0 until limit) {
+                for (entryIndex in 0 until limit) {
                     lengths[lookupType++] = currentLength
                 }
                 currentLength++
@@ -107,91 +107,91 @@ class MusicSampleCodebook {
 
     //buildhuffmantree
     fun computeAcceleratedHuffman() {
-        val ints_1 = IntArray(entries)
-        val ints_2 = IntArray(33)
+        val codewords = IntArray(entries)
+        val sortedCodes = IntArray(33)
 
-        var i_3: Int
-        var i_4: Int
-        var i_5: Int
-        var i_6: Int
-        var i_7: Int
-        var i_8: Int
-        var i_9: Int
-        for (i_3 in 0 until entries) {
-            i_4 = lengths[i_3]
-            if (i_4 != 0) {
-                i_5 = 1 shl 32 - i_4
-                i_6 = ints_2[i_4]
-                ints_1[i_3] = i_6
-                if ((i_6 and i_5) != 0) {
-                    i_7 = ints_2[i_4 - 1]
+        var entryIdx: Int
+        var codeLength: Int
+        var highBit: Int
+        var codeword: Int
+        var nextCode: Int
+        var parentIdx: Int
+        var parentCode: Int
+        for (entryIdx in 0 until entries) {
+            codeLength = lengths[entryIdx]
+            if (codeLength != 0) {
+                highBit = 1 shl 32 - codeLength
+                codeword = sortedCodes[codeLength]
+                codewords[entryIdx] = codeword
+                if ((codeword and highBit) != 0) {
+                    nextCode = sortedCodes[codeLength - 1]
                 } else {
-                    i_7 = i_6 or i_5
+                    nextCode = codeword or highBit
 
-                    i_8 = i_4 - 1
-                    while (i_8 >= 1) {
-                        i_9 = ints_2[i_8]
-                        if (i_9 != i_6) {
+                    parentIdx = codeLength - 1
+                    while (parentIdx >= 1) {
+                        parentCode = sortedCodes[parentIdx]
+                        if (parentCode != codeword) {
                             break
                         }
 
-                        val i_12 = 1 shl 32 - i_8
-                        if ((i_9 and i_12) != 0) {
-                            ints_2[i_8] = ints_2[i_8 - 1]
+                        val mask = 1 shl 32 - parentIdx
+                        if ((parentCode and mask) != 0) {
+                            sortedCodes[parentIdx] = sortedCodes[parentIdx - 1]
                             break
                         }
 
-                        ints_2[i_8] = i_9 or i_12
-                        --i_8
+                        sortedCodes[parentIdx] = parentCode or mask
+                        --parentIdx
                     }
                 }
 
-                ints_2[i_4] = i_7
+                sortedCodes[codeLength] = nextCode
 
-                for (i_8 in i_4 + 1..32) {
-                    i_9 = ints_2[i_8]
-                    if (i_9 == i_6) {
-                        ints_2[i_8] = i_7
+                for (parentIdx in codeLength + 1..32) {
+                    parentCode = sortedCodes[parentIdx]
+                    if (parentCode == codeword) {
+                        sortedCodes[parentIdx] = nextCode
                     }
                 }
             }
         }
 
         huffmanTree = IntArray(8)
-        i_3 = 0
+        entryIdx = 0
 
-        for (i_4 in 0 until entries) {
-            i_5 = lengths[i_4]
-            if (i_5 != 0) {
-                i_6 = ints_1[i_4]
-                i_7 = 0
+        for (codeLength in 0 until entries) {
+            highBit = lengths[codeLength]
+            if (highBit != 0) {
+                codeword = codewords[codeLength]
+                nextCode = 0
 
-                for (i_8 in 0 until i_5) {
-                    i_9 = Int.MIN_VALUE ushr i_8
-                    if ((i_6 and i_9) != 0) {
-                        if (huffmanTree!![i_7] == 0) {
-                            huffmanTree!![i_7] = i_3
+                for (parentIdx in 0 until highBit) {
+                    parentCode = Int.MIN_VALUE ushr parentIdx
+                    if ((codeword and parentCode) != 0) {
+                        if (huffmanTree!![nextCode] == 0) {
+                            huffmanTree!![nextCode] = entryIdx
                         }
 
-                        i_7 = huffmanTree!![i_7]
+                        nextCode = huffmanTree!![nextCode]
                     } else {
-                        ++i_7
+                        ++nextCode
                     }
 
-                    if (i_7 >= huffmanTree!!.size) {
-                        val ints_10 = IntArray(huffmanTree!!.size * 2)
+                    if (nextCode >= huffmanTree!!.size) {
+                        val codewords0 = IntArray(huffmanTree!!.size * 2)
 
-                        System.arraycopy(huffmanTree, 0, ints_10, 0, huffmanTree!!.size)
+                        System.arraycopy(huffmanTree, 0, codewords0, 0, huffmanTree!!.size)
 
-                        huffmanTree = ints_10
+                        huffmanTree = codewords0
                     }
 
-                    i_9 = i_9 ushr 1
+                    parentCode = parentCode ushr 1
                 }
 
-                huffmanTree!![i_7] = i_4.inv()
-                if (i_7 >= i_3) {
-                    i_3 = i_7 + 1
+                huffmanTree!![nextCode] = codeLength.inv()
+                if (nextCode >= entryIdx) {
+                    entryIdx = nextCode + 1
                 }
             }
         }
@@ -199,12 +199,12 @@ class MusicSampleCodebook {
     }
 
     fun decode(): Int {
-        var i_1 = 0
-        while (huffmanTree!![i_1] >= 0) {
-            i_1 = if (MusicSample.getBit() != 0) huffmanTree!![i_1] else i_1 + 1
+        var treeIndex = 0
+        while (huffmanTree!![treeIndex] >= 0) {
+            treeIndex = if (MusicSample.getBit() != 0) huffmanTree!![treeIndex] else treeIndex + 1
         }
 
-        return huffmanTree!![i_1].inv()
+        return huffmanTree!![treeIndex].inv()
     }
 
     companion object {
