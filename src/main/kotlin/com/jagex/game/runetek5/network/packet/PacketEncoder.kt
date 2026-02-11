@@ -63,20 +63,20 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun sendSignUpForm(string_0: String?, string_1: String?, i_2: Int, bool3: Boolean) {
+    fun sendSignUpForm(email: String?, password: String?, age: Int, agreedToTerms: Boolean) {
         if (Client.gameState == GameState.IN_ACCOUNT_CREATION) {
-            val tcpmessage5 = createPacket(ClientProt.SEND_SIGN_UP_FORM, Client.LOBBY_CONNECTION_CONTEXT.isaac)
-            tcpmessage5.buffer.writeShort(0)
-            val i_6 = tcpmessage5.buffer.currentPosition
-            tcpmessage5.buffer.writeString(string_0 ?: "")
-            tcpmessage5.buffer.writeString(string_1 ?: "")
-            tcpmessage5.buffer.writeByte(i_2)
-            tcpmessage5.buffer.writeByte(if (bool3) 1 else 0)
-            tcpmessage5.buffer.currentPosition += 7
-            tcpmessage5.buffer.encryptXtea(AccountCreationStage.LOGIN_XTEAS!!, i_6, tcpmessage5.buffer.currentPosition)
-            tcpmessage5.buffer.writeShortLength(tcpmessage5.buffer.currentPosition - i_6)
-            Client.LOBBY_CONNECTION_CONTEXT.queuePacket(tcpmessage5)
-            if (i_2 < 13) {
+            val packet = createPacket(ClientProt.SEND_SIGN_UP_FORM, Client.LOBBY_CONNECTION_CONTEXT.isaac)
+            packet.buffer.writeShort(0)
+            val encryptStart = packet.buffer.currentPosition
+            packet.buffer.writeString(email ?: "")
+            packet.buffer.writeString(password ?: "")
+            packet.buffer.writeByte(age)
+            packet.buffer.writeByte(if (agreedToTerms) 1 else 0)
+            packet.buffer.currentPosition += 7
+            packet.buffer.encryptXtea(AccountCreationStage.LOGIN_XTEAS!!, encryptStart, packet.buffer.currentPosition)
+            packet.buffer.writeShortLength(packet.buffer.currentPosition - encryptStart)
+            Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
+            if (age < 13) {
                 Client.hasJustCreatedAccount = true
             }
 
@@ -85,15 +85,15 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun sendPlayerOperation(i_0: Int, string_1: String?) {
-        val i_3 = PlayerUpdate.NUM_OUT_PLAYER_INDICES
-        val ints_4 = PlayerUpdate.OUT_PLAYER_INDICES
-        var bool5 = false
+    fun sendPlayerOperation(operationId: Int, playerName: String?) {
+        val playerCount = PlayerUpdate.NUM_OUT_PLAYER_INDICES
+        val playerIndices = PlayerUpdate.OUT_PLAYER_INDICES
+        var found = false
 
-        for (i_6 in 0 until i_3) {
-            val player7: PlayerEntity? = PlayerUpdate.players[ints_4[i_6]]
-            if (player7 != null && player7 !== PlayerUpdate.MY_PLAYER!! && player7.displayName != null && player7.displayName.equals(string_1, ignoreCase = true)) {
-                val outgoingpacket8: ClientProt? = when (i_0) {
+        for (index in 0 until playerCount) {
+            val player: PlayerEntity? = PlayerUpdate.players[playerIndices[index]]
+            if (player != null && player !== PlayerUpdate.MY_PLAYER!! && player.displayName != null && player.displayName.equals(playerName, ignoreCase = true)) {
+                val clientProt: ClientProt? = when (operationId) {
                     1 -> ClientProt.PLAYER_OP1
                     4 -> ClientProt.PLAYER_OP4
                     5 -> ClientProt.PLAYER_OP5
@@ -103,66 +103,66 @@ object PacketEncoder {
                     else -> null
                 }
 
-                if (outgoingpacket8 != null) {
-                    val tcpmessage9 = createPacket(outgoingpacket8, Client.GAME_CONNECTION_CONTEXT.isaac)
-                    tcpmessage9.buffer.writeShort(ints_4[i_6])
-                    tcpmessage9.buffer.writeByteSubtract(0)
-                    Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage9)
+                if (clientProt != null) {
+                    val packet = createPacket(clientProt, Client.GAME_CONNECTION_CONTEXT.isaac)
+                    packet.buffer.writeShort(playerIndices[index])
+                    packet.buffer.writeByteSubtract(0)
+                    Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
                 }
 
-                bool5 = true
+                found = true
                 break
             }
         }
 
-        if (!bool5) {
-            ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(Client.CURRENT_LANGUAGE!!) + string_1)
+        if (!found) {
+            ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(Client.CURRENT_LANGUAGE!!) + playerName)
         }
     }
 
     @JvmStatic
-    fun sendInterfaceDragOntoInterface(icomponentdefinitions0: Component?, icomponentdefinitions1: Component?) {
-        val tcpmessage3 = createPacket(ClientProt.IF_DRAG_ONTO_IF, Client.GAME_CONNECTION_CONTEXT.isaac)
-        tcpmessage3.buffer.writeShortAddLittle(icomponentdefinitions1!!.slotId)
-        tcpmessage3.buffer.writeShortLittle(icomponentdefinitions0!!.slotId)
-        tcpmessage3.buffer.writeShort(icomponentdefinitions1.containerItemId)
-        tcpmessage3.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId)
-        tcpmessage3.buffer.writeIntMiddle(icomponentdefinitions0.idHash)
-        tcpmessage3.buffer.writeIntLittle(icomponentdefinitions1.idHash)
-        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage3)
+    fun sendInterfaceDragOntoInterface(sourceComponent: Component?, targetComponent: Component?) {
+        val packet = createPacket(ClientProt.IF_DRAG_ONTO_IF, Client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeShortAddLittle(targetComponent!!.slotId)
+        packet.buffer.writeShortLittle(sourceComponent!!.slotId)
+        packet.buffer.writeShort(targetComponent.containerItemId)
+        packet.buffer.writeShortAddLittle(sourceComponent.containerItemId)
+        packet.buffer.writeIntMiddle(sourceComponent.idHash)
+        packet.buffer.writeIntLittle(targetComponent.idHash)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     @JvmStatic
-    fun sendInterfaceOnInterface(icomponentdefinitions0: Component?) {
+    fun sendInterfaceOnInterface(targetComponent: Component?) {
         if (Client.interfaceSelectionActive) {
-            if (icomponentdefinitions0!!.onTargetLeave != null) {
-                val icomponentdefinitions2 = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
-                if (icomponentdefinitions2 != null) {
-                    val hookrequest3 = HookRequest()
-                    hookrequest3.source = icomponentdefinitions0
-                    hookrequest3.targetComponent = icomponentdefinitions2
-                    hookrequest3.params = icomponentdefinitions0.onTargetLeave
-                    CS2Executor.executeHookInner(hookrequest3)
+            if (targetComponent!!.onTargetLeave != null) {
+                val selectedComponent = Component.listIcomponent(Client.selectedComponentHash, Client.selectedSlotId)
+                if (selectedComponent != null) {
+                    val hookRequest = HookRequest()
+                    hookRequest.source = targetComponent
+                    hookRequest.targetComponent = selectedComponent
+                    hookRequest.params = targetComponent.onTargetLeave
+                    CS2Executor.executeHookInner(hookRequest)
                 }
             }
-            val tcpmessage4 = createPacket(ClientProt.IF_ON_IF, Client.GAME_CONNECTION_CONTEXT.isaac)
-            Console.writeLine("IF_ON_IF: [" + interfaceIdFromHash(Client.selectedComponentHash) + ", " + componentIdFromHash(Client.selectedComponentHash) + ", " + Client.selectedSlotId + ", " + Client.selectedItemId + "] -> [" + interfaceIdFromHash(icomponentdefinitions0!!.idHash) + ", " + componentIdFromHash(icomponentdefinitions0.idHash) + ", " + icomponentdefinitions0.slotId + ", " + icomponentdefinitions0.containerItemId + "]")
-            tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.slotId)
-            tcpmessage4.buffer.writeShortLittle(Client.selectedSlotId)
-            tcpmessage4.buffer.writeShortAddLittle(icomponentdefinitions0.containerItemId)
-            tcpmessage4.buffer.writeIntLittle(icomponentdefinitions0.idHash)
-            tcpmessage4.buffer.writeIntInverseMiddle(Client.selectedComponentHash)
-            tcpmessage4.buffer.writeShortLittle(Client.selectedItemId)
-            Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage4)
+            val packet = createPacket(ClientProt.IF_ON_IF, Client.GAME_CONNECTION_CONTEXT.isaac)
+            Console.writeLine("IF_ON_IF: [" + interfaceIdFromHash(Client.selectedComponentHash) + ", " + componentIdFromHash(Client.selectedComponentHash) + ", " + Client.selectedSlotId + ", " + Client.selectedItemId + "] -> [" + interfaceIdFromHash(targetComponent!!.idHash) + ", " + componentIdFromHash(targetComponent.idHash) + ", " + targetComponent.slotId + ", " + targetComponent.containerItemId + "]")
+            packet.buffer.writeShortAddLittle(targetComponent.slotId)
+            packet.buffer.writeShortLittle(Client.selectedSlotId)
+            packet.buffer.writeShortAddLittle(targetComponent.containerItemId)
+            packet.buffer.writeIntLittle(targetComponent.idHash)
+            packet.buffer.writeIntInverseMiddle(Client.selectedComponentHash)
+            packet.buffer.writeShortLittle(Client.selectedItemId)
+            Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
         }
     }
 
     @JvmStatic
     fun checkSongLoaded() {
         if (SongPlayer.currentSong != null && !SongPlayer.currentSong!!.isLoaded() && SongPlayer.currentSong!!.initialize()) {
-            val tcpmessage1 = createPacket(ClientProt.SONG_LOADED, Client.GAME_CONNECTION_CONTEXT.isaac)
-            tcpmessage1.buffer.writeInt(SongPlayer.currentSong!!.musicId)
-            Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage1)
+            val packet = createPacket(ClientProt.SONG_LOADED, Client.GAME_CONNECTION_CONTEXT.isaac)
+            packet.buffer.writeInt(SongPlayer.currentSong!!.musicId)
+            Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
         }
     }
 
@@ -186,9 +186,9 @@ object PacketEncoder {
 
     @JvmStatic
     fun preloadSong(songId: Int) {
-        val tcpmessage2 = createPacket(ClientProt.SONG_LOADED, Client.GAME_CONNECTION_CONTEXT.isaac)
-        tcpmessage2.buffer.writeInt(-1)
-        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage2)
+        val packet = createPacket(ClientProt.SONG_LOADED, Client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeInt(-1)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
         SongPlayer.currentSong = SongReference(Resource.MUSIC!!, songId)
     }
 
@@ -201,10 +201,10 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun decodePlayerCounts(rsbytebuffer0: Packet?) {
-        for (i_2 in 0 until WorldMeta.WORLD_LIST_SIZE) {
-            val worldId = rsbytebuffer0!!.readUSmart()
-            var playerCount = rsbytebuffer0.readUShort()
+    fun decodePlayerCounts(buffer: Packet?) {
+        for (worldIndex in 0 until WorldMeta.WORLD_LIST_SIZE) {
+            val worldId = buffer!!.readUSmart()
+            var playerCount = buffer.readUShort()
             if (playerCount == 65535) {
                 playerCount = -1
             }
@@ -213,34 +213,34 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun sendClanOperation(i_0: Int) {
-        if (Client.CLAN_CHANNEL != null && i_0 >= 0 && i_0 < Client.CLAN_CHANNEL!!.numPlayers) {
-            val class572: ClanChannelPlayer? = Client.CLAN_CHANNEL!!.players?.get(i_0)
-            if (class572 != null && class572.rank.toInt() == -1) {
-                val class1843 = Client.connectionContext
-                val tcpmessage4 = createPacket(ClientProt.UNUSED_CLAN_OP, class1843.isaac)
-                tcpmessage4.buffer.writeByte(2 + TextUtils.getLength(class572.name ?: ""))
-                tcpmessage4.buffer.writeShort(i_0)
-                tcpmessage4.buffer.writeString(class572.name ?: "")
-                class1843.queuePacket(tcpmessage4)
+    fun sendClanOperation(playerIndex: Int) {
+        if (Client.CLAN_CHANNEL != null && playerIndex >= 0 && playerIndex < Client.CLAN_CHANNEL!!.numPlayers) {
+            val clanPlayer: ClanChannelPlayer? = Client.CLAN_CHANNEL!!.players?.get(playerIndex)
+            if (clanPlayer != null && clanPlayer.rank.toInt() == -1) {
+                val connectionContext = Client.connectionContext
+                val packet = createPacket(ClientProt.UNUSED_CLAN_OP, connectionContext.isaac)
+                packet.buffer.writeByte(2 + TextUtils.getLength(clanPlayer.name ?: ""))
+                packet.buffer.writeShort(playerIndex)
+                packet.buffer.writeString(clanPlayer.name ?: "")
+                connectionContext.queuePacket(packet)
             }
         }
     }
 
     @JvmStatic
     fun sendTransmitVarVerifyid() {
-        val tcpmessage1 = createPacket(ClientProt.TRANSMITVAR_VERIFYID, Client.GAME_CONNECTION_CONTEXT.isaac)
-        tcpmessage1.buffer.writeInt(Client.varVerifyId)
-        Client.GAME_CONNECTION_CONTEXT.queuePacket(tcpmessage1)
+        val packet = createPacket(ClientProt.TRANSMITVAR_VERIFYID, Client.GAME_CONNECTION_CONTEXT.isaac)
+        packet.buffer.writeInt(Client.varVerifyId)
+        Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     @JvmStatic
-    fun sendCheckEmailPacket(string_0: String?) {
+    fun sendCheckEmailPacket(email: String?) {
         if (Client.gameState == GameState.IN_ACCOUNT_CREATION) {
             val message = createPacket(ClientProt.CHECK_EMAIL_VALIDITY, Client.LOBBY_CONNECTION_CONTEXT.isaac)
             message.buffer.writeShort(0)
             val start = message.buffer.currentPosition
-            message.buffer.writeString(string_0 ?: "")
+            message.buffer.writeString(email ?: "")
             message.buffer.currentPosition += 7
             message.buffer.encryptXtea(AccountCreationStage.LOGIN_XTEAS!!, start, message.buffer.currentPosition)
             message.buffer.writeShortLength(message.buffer.currentPosition - start)
@@ -250,34 +250,34 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun sendLobbyHyperlink(string_0: String?, string_1: String?, string_2: String?, bool3: Boolean, bool4: Boolean) {
-        val class1846 = Client.connectionContext
-        if (class1846.getConnection() != null) {
-            val tcpmessage7 = createPacket(ClientProt.LOBBY_HYPERLINK, class1846.isaac)
-            tcpmessage7.buffer.writeShort(TextUtils.getLength(string_0 ?: "") + TextUtils.getLength(string_1 ?: "") + TextUtils.getLength(string_2 ?: "") + 1)
-            tcpmessage7.buffer.writeString(string_0 ?: "")
-            tcpmessage7.buffer.writeString(string_1 ?: "")
-            tcpmessage7.buffer.writeString(string_2 ?: "")
-            var i_8 = 0
-            if (bool3) {
-                i_8 = i_8 or 0x1
+    fun sendLobbyHyperlink(url: String?, displayText: String?, fallbackUrl: String?, isNewWindow: Boolean, isExternal: Boolean) {
+        val connectionContext = Client.connectionContext
+        if (connectionContext.getConnection() != null) {
+            val packet = createPacket(ClientProt.LOBBY_HYPERLINK, connectionContext.isaac)
+            packet.buffer.writeShort(TextUtils.getLength(url ?: "") + TextUtils.getLength(displayText ?: "") + TextUtils.getLength(fallbackUrl ?: "") + 1)
+            packet.buffer.writeString(url ?: "")
+            packet.buffer.writeString(displayText ?: "")
+            packet.buffer.writeString(fallbackUrl ?: "")
+            var flags = 0
+            if (isNewWindow) {
+                flags = flags or 0x1
             }
-            if (bool4) {
-                i_8 = i_8 or 0x2
+            if (isExternal) {
+                flags = flags or 0x2
             }
-            tcpmessage7.buffer.writeByte(i_8)
-            class1846.queuePacket(tcpmessage7)
+            packet.buffer.writeByte(flags)
+            connectionContext.queuePacket(packet)
         }
     }
 
     @JvmStatic
-    fun sendJoinFriendchat(string_0: String?) {
-        if (!string_0.isNullOrEmpty()) {
-            val class1842 = Client.connectionContext
-            val tcpmessage3 = createPacket(ClientProt.FC_JOIN, class1842.isaac)
-            tcpmessage3.buffer.writeByte(TextUtils.getLength(string_0 ?: ""))
-            tcpmessage3.buffer.writeString(string_0 ?: "")
-            class1842.queuePacket(tcpmessage3)
+    fun sendJoinFriendchat(channelName: String?) {
+        if (!channelName.isNullOrEmpty()) {
+            val connectionContext = Client.connectionContext
+            val packet = createPacket(ClientProt.FC_JOIN, connectionContext.isaac)
+            packet.buffer.writeByte(TextUtils.getLength(channelName ?: ""))
+            packet.buffer.writeString(channelName ?: "")
+            connectionContext.queuePacket(packet)
         }
     }
 
@@ -338,9 +338,9 @@ object PacketEncoder {
             }
             subInterface = Client.OPEN_INTERFACES!!.next()
         }
-        val comp1187352 = Client.activeDialogueContinue
-        if (comp1187352 != null) {
-            Component.redrawComponent(comp1187352)
+        val dialogueContinue = Client.activeDialogueContinue
+        if (dialogueContinue != null) {
+            Component.redrawComponent(dialogueContinue)
             Client.activeDialogueContinue = null
         }
     }
@@ -355,35 +355,35 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun reportBug(i_0: Int, string_1: String?, string_2: String?) {
+    fun reportBug(bugType: Int, title: String?, description: String?) {
         val packet = createPacket(ClientProt.BUG_REPORT, Client.GAME_CONNECTION_CONTEXT.isaac)
-        packet.buffer.writeShort(1 + Utils.stringLengthPlus2(string_1 ?: "") + Utils.stringLengthPlus2(string_2 ?: ""))
-        packet.buffer.writeByte(i_0)
-        packet.buffer.writeJagString(string_2 ?: "")
-        packet.buffer.writeJagString(string_1 ?: "")
+        packet.buffer.writeShort(1 + Utils.stringLengthPlus2(title ?: "") + Utils.stringLengthPlus2(description ?: ""))
+        packet.buffer.writeByte(bugType)
+        packet.buffer.writeJagString(description ?: "")
+        packet.buffer.writeJagString(title ?: "")
         Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     @JvmStatic
-    fun generateSeed(tcpmessage0: TcpPacket?): IntArray {
-        val rsbytebuffer2 = Packet(518)
-        val ints_3 = IntArray(4)
-        var i_4: Int
-        for (i_4 in 0..3) {
-            ints_3[i_4] = (Math.random() * 9.9999999E7).toInt()
+    fun generateSeed(loginPacket: TcpPacket?): IntArray {
+        val rsaBuffer = Packet(518)
+        val seeds = IntArray(4)
+        var seedIndex: Int
+        for (seedIndex in 0..3) {
+            seeds[seedIndex] = (Math.random() * 9.9999999E7).toInt()
         }
-        rsbytebuffer2.writeByte(10)
-        rsbytebuffer2.writeInt(ints_3[0])
-        rsbytebuffer2.writeInt(ints_3[1])
-        rsbytebuffer2.writeInt(ints_3[2])
-        rsbytebuffer2.writeInt(ints_3[3])
-        for (i_4 in 0..9) {
-            rsbytebuffer2.writeInt((Math.random() * 9.9999999E7).toInt())
+        rsaBuffer.writeByte(10)
+        rsaBuffer.writeInt(seeds[0])
+        rsaBuffer.writeInt(seeds[1])
+        rsaBuffer.writeInt(seeds[2])
+        rsaBuffer.writeInt(seeds[3])
+        for (seedIndex in 0..9) {
+            rsaBuffer.writeInt((Math.random() * 9.9999999E7).toInt())
         }
-        rsbytebuffer2.writeShort((Math.random() * 9.9999999E7).toInt())
-        rsbytebuffer2.applyRSA()
-        tcpmessage0!!.buffer.writeBytes(rsbytebuffer2.buffer, 0, rsbytebuffer2.currentPosition)
-        return ints_3
+        rsaBuffer.writeShort((Math.random() * 9.9999999E7).toInt())
+        rsaBuffer.applyRSA()
+        loginPacket!!.buffer.writeBytes(rsaBuffer.buffer, 0, rsaBuffer.currentPosition)
+        return seeds
     }
 
     @JvmStatic
@@ -404,10 +404,10 @@ object PacketEncoder {
             val buffer = Packet(Client.VARCS_BOOLS_LOADED * 6 + 3)
             buffer.writeByte(1)
             buffer.writeShort(Client.VARCS_BOOLS_LOADED)
-            for (i_3 in VarcTypeList.VARC_INT!!.indices) {
-                if (VarcTypeList.VARC_BOOL!![i_3]) {
-                    buffer.writeShort(i_3)
-                    buffer.writeInt(VarcTypeList.VARC_INT!![i_3])
+            for (varcIndex in VarcTypeList.VARC_INT!!.indices) {
+                if (VarcTypeList.VARC_BOOL!![varcIndex]) {
+                    buffer.writeShort(varcIndex)
+                    buffer.writeInt(VarcTypeList.VARC_INT!![varcIndex])
                 }
             }
             preferenceFile.write(buffer.buffer, 0, buffer.currentPosition)
@@ -481,23 +481,23 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun continueInterfacePressed(i_0: Int, i_1: Int) {
-        Console.writeLine("IF_CONTINUE interfaceId: " + interfaceIdFromHash(i_0) + " componentId: " + componentIdFromHash(i_0) + " slotId: " + i_1)
+    fun continueInterfacePressed(componentHash: Int, slotId: Int) {
+        Console.writeLine("IF_CONTINUE interfaceId: " + interfaceIdFromHash(componentHash) + " componentId: " + componentIdFromHash(componentHash) + " slotId: " + slotId)
         val packet = createPacket(ClientProt.IF_CONTINUE, Client.GAME_CONNECTION_CONTEXT.isaac)
-        packet.buffer.writeIntMiddle(i_0)
-        packet.buffer.writeShortAddLittle(i_1)
+        packet.buffer.writeIntMiddle(componentHash)
+        packet.buffer.writeShortAddLittle(slotId)
         Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
     }
 
     @JvmStatic
-    fun sendInterfaceOnPlayer(string_0: String?) {
+    fun sendInterfaceOnPlayer(playerName: String?) {
         if (Client.interfaceSelectionActive && (USE_OPTIONS_FLAGS and 0x18) != 0) {
-            var bool2 = false
+            var found = false
             val count = PlayerUpdate.NUM_OUT_PLAYER_INDICES
             val indices = PlayerUpdate.OUT_PLAYER_INDICES
             for (i in 0 until count) {
-                val player6: PlayerEntity? = PlayerUpdate.players[indices[i]]
-                if (player6 != null && player6.displayName != null && player6.displayName.equals(string_0, ignoreCase = true) && (player6 === PlayerUpdate.MY_PLAYER!! && (USE_OPTIONS_FLAGS and 0x10) != 0 || (USE_OPTIONS_FLAGS and 0x8) != 0)) {
+                val player: PlayerEntity? = PlayerUpdate.players[indices[i]]
+                if (player != null && player.displayName != null && player.displayName.equals(playerName, ignoreCase = true) && (player === PlayerUpdate.MY_PLAYER!! && (USE_OPTIONS_FLAGS and 0x10) != 0 || (USE_OPTIONS_FLAGS and 0x8) != 0)) {
                     val packet = createPacket(ClientProt.IF_ON_PLAYER, Client.GAME_CONNECTION_CONTEXT.isaac)
                     packet.buffer.writeShort(Client.selectedSlotId)
                     packet.buffer.writeShortLittle(indices[i])
@@ -505,14 +505,14 @@ object PacketEncoder {
                     packet.buffer.writeIntInverseMiddle(Client.selectedComponentHash)
                     packet.buffer.writeShortLittle(Client.selectedItemId)
                     Client.GAME_CONNECTION_CONTEXT.queuePacket(packet)
-                    val size = player6.getSize()
-                    RouteFinder.calculateRoute(player6.movementBaseX[0], player6.movementBaseY[0], true, RouteStrategies.forPlayer(player6.movementBaseX[0], player6.movementBaseY[0], size, size))
-                    bool2 = true
+                    val size = player.getSize()
+                    RouteFinder.calculateRoute(player.movementBaseX[0], player.movementBaseY[0], true, RouteStrategies.forPlayer(player.movementBaseX[0], player.movementBaseY[0], size, size))
+                    found = true
                     break
                 }
             }
-            if (!bool2) {
-                ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(Client.CURRENT_LANGUAGE!!) + string_0)
+            if (!found) {
+                ChatBox.writeGameMessage(LocalizedText.UNABLE_TO_FIND.translate(Client.CURRENT_LANGUAGE!!) + playerName)
             }
             if (Client.interfaceSelectionActive) {
                 InterfaceComponentRenderer.cancelInterfaceSelection()
@@ -556,24 +556,24 @@ object PacketEncoder {
     }
 
     @JvmStatic
-    fun sendAccountCreationStage(i_0: Int) {
+    fun sendAccountCreationStage(stage: Int) {
         if (Client.gameState == GameState.IN_ACCOUNT_CREATION) {
             val packet = createPacket(ClientProt.ACCOUNT_CREATION_STAGE, Client.LOBBY_CONNECTION_CONTEXT.isaac)
-            packet.buffer.writeByte(i_0)
+            packet.buffer.writeByte(stage)
             Client.LOBBY_CONNECTION_CONTEXT.queuePacket(packet)
         }
     }
 
     @JvmStatic
-    fun queueCutsceneExit(bool0: Boolean) {
+    fun queueCutsceneExit(forceExit: Boolean) {
         if (Client.MAP_LOADING_STAGE != 2 && Client.MAP_LOADING_STAGE != 1) {
-            if (!bool0) {
-                val arr_2 = CutsceneTypeList.CUTSCENE_MISC_ACTIONS
+            if (!forceExit) {
+                val actions = CutsceneTypeList.CUTSCENE_MISC_ACTIONS
 
-                if (arr_2 != null) {
-                    for (i_3 in arr_2.indices) {
-                        val class964: CutsceneAction? = arr_2[i_3]
-                        class964?.stopAction()
+                if (actions != null) {
+                    for (actionIndex in actions.indices) {
+                        val action: CutsceneAction? = actions[actionIndex]
+                        action?.stopAction()
                     }
                 }
             }
@@ -584,7 +584,7 @@ object PacketEncoder {
             Client.cutsceneCameraActive = false
             CutsceneTypeList.resetCutsceneConfigs()
             val cutsceneExitPacket = createPacket(ClientProt.CUTSCENE_FINISHED, Client.GAME_CONNECTION_CONTEXT.isaac)
-            cutsceneExitPacket.buffer.writeByte(if (bool0) 1 else 0)
+            cutsceneExitPacket.buffer.writeByte(if (forceExit) 1 else 0)
             Client.GAME_CONNECTION_CONTEXT.queuePacket(cutsceneExitPacket)
         }
     }
