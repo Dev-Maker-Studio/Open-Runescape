@@ -819,6 +819,7 @@ open class ObjectType {
 
 	@Synchronized
 	fun getAnimatedModel(toolkit: AbstractToolkit, functionMask: Int, type: Int, rotation: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int, sequence: Sequence?, locCustomisation: ObjectTypeCustomisation?): Model? {
+		val locTypeList = this.locTypeList ?: return null
 		var typeVar = type
 		if (ObjectShapes.isWallDecoration(typeVar)) {
 			typeVar = ObjectShapes.STRAIGHT_INSIDE_WALL_DEC.shape
@@ -826,7 +827,7 @@ open class ObjectType {
 		var uid = ((typeVar.toLong() shl 3) + rotation.toLong() + (this.id.toLong() shl 10))
 		uid = uid or (toolkit.renderId.toLong() shl 29)
 		if (locCustomisation != null) {
-			uid = uid or (locCustomisation.id.toLong() shl 32)
+			uid = uid or (locCustomisation.id shl 32)
 		}
 		var functionMaskVar = functionMask
 		if (sequence != null) {
@@ -849,8 +850,8 @@ open class ObjectType {
 			functionMaskVar = functionMaskVar or DISPLACE_X or DISPLACE_Z
 		}
 		var model: Model?
-		synchronized(this.locTypeList!!.uidToModelCache) {
-			model = this.locTypeList!!.uidToModelCache.get(uid) as Model?
+		synchronized(locTypeList.uidToModelCache) {
+			model = locTypeList.uidToModelCache[uid] as Model?
 		}
 		if (model == null || toolkit.mismatchingFunctionMask(model.getFunctionMask(), functionMaskVar) != 0) {
 			if (model != null) {
@@ -860,39 +861,39 @@ open class ObjectType {
 			if (model == null) {
 				return null
 			}
-			synchronized(this.locTypeList!!.uidToModelCache) {
-				this.locTypeList!!.uidToModelCache.put(model, uid)
+			synchronized(locTypeList.uidToModelCache) {
+				locTypeList.uidToModelCache.put(model, uid)
 			}
 		}
 		var applyShading = false
 		if (sequence != null) {
-			model = model!!.copy(1.toByte(), functionMaskVar, true)
+			model = model.copy(1.toByte(), functionMaskVar, true)
 			applyShading = true
 			sequence.animateRotatedModel(model!!, rotation and 0x3)
 		}
 		if (typeVar == ObjectShapes.SCENERY_INTERACT.shape && rotation > 3) {
 			if (!applyShading) {
-				model = model!!.copy(3.toByte(), functionMaskVar, true)
+				model = model.copy(3.toByte(), functionMaskVar, true)
 				applyShading = true
 			}
 			model!!.yaxisRotateWithoutNormals(2048)
 		}
 		if (this.groundContourType.toInt() != 0) {
 			if (!applyShading) {
-				model = model!!.copy(3.toByte(), functionMaskVar, true)
+				model = model.copy(3.toByte(), functionMaskVar, true)
 				applyShading = true
 			}
-			model!!.contourToGround(this.groundContourType.toInt(), this.goundContourModifier, currentLvl!!, nextLvl!!, sceneX, averageHeight, sceneY)
+			model!!.contourToGround(this.groundContourType.toInt(), this.goundContourModifier, currentLvl, nextLvl, sceneX, averageHeight, sceneY)
 		}
 		if (this.shadowOffsetX != 0 || this.shadowOffsetY != 0 || this.shadowOffsetZ != 0) {
 			if (!applyShading) {
-				model = model!!.copy(3.toByte(), functionMaskVar, true)
+				model = model.copy(3.toByte(), functionMaskVar, true)
 				applyShading = true
 			}
 			model!!.translate(this.shadowOffsetX, this.shadowOffsetY, this.shadowOffsetZ)
 		}
 		if (applyShading) {
-			model!!.applyShading(functionMaskVar)
+			model.applyShading(functionMaskVar)
 		}
 		return model
 	}

@@ -874,12 +874,13 @@ object EntityUpdating {
             if (current.faceX != -1 && (current.movementStepsLeft == 0 || current.stalledStepCount > 0)) {
                 val abs = current.getAbsolutePosition().coords
                 val base = Resource.mapRegion!!.getBaseCoordinates()
-                val deltaX = abs.x.toInt() - (current.faceX * 256 - base.x * 256 - base.x * 256)
-                val deltaZ = abs.z.toInt() - (current.faceY * 256 - base.y * 256 - base.y * 256)
+                val deltaX = abs.x.toInt() - (current.faceX * 256 - base.x * 512)
+                val deltaZ = abs.z.toInt() - (current.faceY * 256 - base.y * 512)
                 if (deltaX != 0 || deltaZ != 0) {
                     current.turn((Math.atan2(deltaX.toDouble(), deltaZ.toDouble()) * 2607.5945876176133).toInt() and 0x3fff)
                 }
                 current.faceX = -1
+                current.faceY = -1
             }
         }
 

@@ -464,10 +464,8 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 if (modelsWithEmissiveTriangles == 1) {
                     emissiveTriangles = emissiveTrianglesPerModel[lastEmissiveTriangle]!!
                 } else {
-                    emissiveTriangles = Array(emissiveTriangleCount) {
-                        // This will be filled by System.arraycopy
-                        emissiveTrianglesPerModel[0]!![0]
-                    }
+                    @Suppress("UNCHECKED_CAST")
+                    emissiveTriangles = arrayOfNulls<EmissiveTriangle>(emissiveTriangleCount) as Array<EmissiveTriangle>
                     var position = 0
 
                     for (index in models.indices) {
@@ -482,10 +480,8 @@ abstract class PathingEntity : AbstractInteractiveEntity {
                 if (modelsWithEffectiveVertices == 1) {
                     effectiveVertices = effectiveVerticesPerModel[lastEffectiveVertice]!!
                 } else {
-                    effectiveVertices = Array(effectiveVerticeCount) {
-                        // This will be filled by System.arraycopy
-                        effectiveVerticesPerModel[0]!![0]
-                    }
+                    @Suppress("UNCHECKED_CAST")
+                    effectiveVertices = arrayOfNulls<EffectiveVertex>(effectiveVerticeCount) as Array<EffectiveVertex>
                     var position = 0
 
                     for (index in models.indices) {

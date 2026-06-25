@@ -35,7 +35,7 @@ import kotlin.math.floor
 import kotlin.math.pow
 
 fun main(args: Array<String>) {
-    Bot.ENABLED = true
+    Bot.ENABLED = false
     ScriptExecutor.loadScripts()
     Loader.main(args)
 }

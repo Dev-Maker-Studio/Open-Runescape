@@ -1590,7 +1590,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method468(executor: CS2Executor) {
-        var class1842: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+        var class1842: BufferedConnectionContext? = Client.connectionContext
         var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
         tcpmessage3!!.buffer.writeByte(0)
         var i_4 = tcpmessage3!!.buffer.currentPosition
@@ -3179,9 +3179,9 @@ object CS2Interpreter {
         if (Utils.isWrongJava(string_2!!)) {
             i_3 = Utils.parseInt(string_2!!)
         }
-        var tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_COUNTDIALOG, Client.GAME_CONNECTION_CONTEXT!!.isaac)
+        var tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_COUNTDIALOG, Client.connectionContext!!.isaac)
         tcpmessage4!!.buffer.writeInt(i_3)
-        Client.GAME_CONNECTION_CONTEXT!!.queuePacket(tcpmessage4)
+        Client.connectionContext!!.queuePacket(tcpmessage4)
     }
 
     @JvmStatic
@@ -3237,10 +3237,10 @@ object CS2Interpreter {
     @JvmStatic
     fun resumeClanForumQFCDialog(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_CLANFORUMQFCDIALOG, Client.GAME_CONNECTION_CONTEXT!!.isaac)
+        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_CLANFORUMQFCDIALOG, Client.connectionContext!!.isaac)
         tcpmessage3!!.buffer.writeByte(string_2!!.length + 1)
         tcpmessage3!!.buffer.writeString(string_2!!)
-        Client.GAME_CONNECTION_CONTEXT!!.queuePacket(tcpmessage3)
+        Client.connectionContext!!.queuePacket(tcpmessage3)
     }
 
     @JvmStatic
@@ -3330,7 +3330,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method3921(executor: CS2Executor) {
-        var class1842: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+        var class1842: BufferedConnectionContext? = Client.connectionContext
         var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
         tcpmessage3!!.buffer.writeByte(0)
         var i_4 = tcpmessage3!!.buffer.currentPosition
@@ -3768,7 +3768,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method6315(executor: CS2Executor) {
-        var class1842: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+        var class1842: BufferedConnectionContext? = Client.connectionContext
         var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
         tcpmessage3!!.buffer.writeByte(0)
         var i_4 = tcpmessage3!!.buffer.currentPosition
@@ -6589,10 +6589,10 @@ object CS2Interpreter {
     @JvmStatic
     fun resumeStringDialog(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, Client.GAME_CONNECTION_CONTEXT!!.isaac)
+        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_TEXTDIALOG, Client.connectionContext!!.isaac)
         tcpmessage3!!.buffer.writeByte(string_2!!.length + 1)
         tcpmessage3!!.buffer.writeString(string_2!!)
-        Client.GAME_CONNECTION_CONTEXT!!.queuePacket(tcpmessage3)
+        Client.connectionContext!!.queuePacket(tcpmessage3)
     }
 
     @JvmStatic
@@ -6773,8 +6773,8 @@ object CS2Interpreter {
     @JvmStatic
     fun method6005(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var class1843: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
-        var tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.CHAT_TYPE, class1843!!.isaac)
+        var class1843: BufferedConnectionContext? = Client.connectionContext
+        var tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.CHAT_TYPE, class1843?.isaac)
         tcpmessage4!!.buffer.writeByte(i_2)
         class1843!!.queuePacket(tcpmessage4)
     }
@@ -6824,7 +6824,7 @@ object CS2Interpreter {
         if (string_3!!.length > 80) {
             string_3 = string_3!!.substring(0, 80)
         }
-        var class1846: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+        var class1846: BufferedConnectionContext? = Client.connectionContext
         var tcpmessage7: TcpPacket? = PacketEncoder.createPacket(ClientProt.REPORT_ABUSE, class1846!!.isaac)
         tcpmessage7!!.buffer.writeByte(TextUtils.getLength(string_2!!) + 2 + TextUtils.getLength(string_3!!))
         tcpmessage7!!.buffer.writeString(string_2!!)
@@ -7472,7 +7472,7 @@ object CS2Interpreter {
 
     @JvmStatic
     fun method1603(executor: CS2Executor) {
-        var class1842: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+        var class1842: BufferedConnectionContext? = Client.connectionContext
         var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PUBLIC, class1842!!.isaac)
         tcpmessage3!!.buffer.writeByte(0)
         var i_4 = tcpmessage3!!.buffer.currentPosition
@@ -7509,10 +7509,10 @@ object CS2Interpreter {
     @JvmStatic
     fun resumeNamedDialog(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_NAMEDIALOG, Client.GAME_CONNECTION_CONTEXT!!.isaac)
+        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_NAMEDIALOG, Client.connectionContext!!.isaac)
         tcpmessage3!!.buffer.writeByte(string_2!!.length + 1)
         tcpmessage3!!.buffer.writeString(string_2!!)
-        Client.GAME_CONNECTION_CONTEXT!!.queuePacket(tcpmessage3)
+        Client.connectionContext!!.queuePacket(tcpmessage3)
     }
 
     @JvmStatic
@@ -8347,7 +8347,7 @@ object CS2Interpreter {
     @JvmStatic
     fun method8296(executor: CS2Executor) {
         var string_2: String? = executor.stringStack[--executor.stringStackPtr] as String?
-        var class1843: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+        var class1843: BufferedConnectionContext? = Client.connectionContext
         var tcpmessage4: TcpPacket? = PacketEncoder.createPacket(ClientProt.QUICKCHAT_PRIVATE, class1843!!.isaac)
         tcpmessage4!!.buffer.writeByte(0)
         var i_5 = tcpmessage4!!.buffer.currentPosition
@@ -8510,9 +8510,9 @@ object CS2Interpreter {
     @JvmStatic
     fun method12841(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.GRAND_EXCHANGE_ITEM_SELECT, Client.GAME_CONNECTION_CONTEXT!!.isaac)
+        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.GRAND_EXCHANGE_ITEM_SELECT, Client.connectionContext!!.isaac)
         tcpmessage3!!.buffer.writeShort(i_2)
-        Client.GAME_CONNECTION_CONTEXT!!.queuePacket(tcpmessage3)
+        Client.connectionContext!!.queuePacket(tcpmessage3)
     }
 
     @JvmStatic
@@ -8596,7 +8596,7 @@ object CS2Interpreter {
         var string_2: String? = executor.stringStack[executor.stringStackPtr] as String?
         var string_3: String? = executor.stringStack[executor.stringStackPtr + 1] as String?
         if (Client.PLAYER_RIGHTS != 0 || (!Client.USERDETAIL_QUICKCHAT || Client.VERIFIED_EMAIL_ADDRESS) && !Client.IS_QUICKCHAT_ONLY) {
-            var class1844: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+            var class1844: BufferedConnectionContext? = Client.connectionContext
             var tcpmessage5: TcpPacket? = PacketEncoder.createPacket(ClientProt.SEND_PRIVATE_MESSAGE, class1844!!.isaac)
             tcpmessage5!!.buffer.writeShort(0)
             var i_6 = tcpmessage5!!.buffer.currentPosition
@@ -9102,7 +9102,7 @@ object CS2Interpreter {
                     string_2 = string_2!!.substring(LocalizedText.SLIDE.translate(Client.CURRENT_LANGUAGE!!).length)
                 }
             }
-            var class1846: BufferedConnectionContext? = Client.GAME_CONNECTION_CONTEXT
+            var class1846: BufferedConnectionContext? = Client.connectionContext
             var tcpmessage7: TcpPacket? = PacketEncoder.createPacket(ClientProt.CHAT, class1846!!.isaac)
             tcpmessage7!!.buffer.writeByte(0)
             var i_8 = tcpmessage7!!.buffer.currentPosition
@@ -9469,9 +9469,9 @@ object CS2Interpreter {
     @JvmStatic
     fun resumeHSLDialog(executor: CS2Executor) {
         var i_2 = executor.intStack[--executor.intStackPtr]
-        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_HSLDIALOG, Client.GAME_CONNECTION_CONTEXT!!.isaac)
+        var tcpmessage3: TcpPacket? = PacketEncoder.createPacket(ClientProt.RESUME_HSLDIALOG, Client.connectionContext!!.isaac)
         tcpmessage3!!.buffer.writeShort(i_2)
-        Client.GAME_CONNECTION_CONTEXT!!.queuePacket(tcpmessage3)
+        Client.connectionContext!!.queuePacket(tcpmessage3)
     }
 
     @JvmStatic

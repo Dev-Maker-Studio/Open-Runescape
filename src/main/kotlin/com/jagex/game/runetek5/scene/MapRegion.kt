@@ -594,6 +594,11 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         if (!this.asyncMaploading) {
             TypeLists.resetCachedData(true)
+            // DIAGNOSTIC (temporary): force loc-model caches to rebuild on every synchronous region
+            // build to work around stale cached loc models going empty after a scene teardown.
+            // Gated by !asyncMaploading like resetCachedData above: resetting these caches on the
+            // async loader thread races with the render thread still using them (missing models).
+            this.loctypeList!!.resetAll()
         }
         if (!this.asyncMaploading) {
             StaticMethods.resetAllVorbisStreams() // not in 910

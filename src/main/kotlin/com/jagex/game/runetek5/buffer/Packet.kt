@@ -505,24 +505,24 @@ open class Packet : Node<Packet> {
         }
 
         fun nextIsSmart(): Boolean {
-            val value = buffer[currentPosition] - isaac!!.nextKey() and 0xff
+            val value = buffer[currentPosition] - (isaac?.nextKey() ?: 0) and 0xff
             return value >= 128
         }
 
         fun readEncryptedSmart(): Int {
-            val value = buffer[currentPosition++] - isaac!!.getNextKey() and 0xff
+            val value = buffer[currentPosition++] - (isaac?.getNextKey() ?: 0) and 0xff
             return if (value < 128) value
-            else (value - 128 shl 8) + (buffer[currentPosition++] - isaac!!.getNextKey() and 0xff)
+            else (value - 128 shl 8) + (buffer[currentPosition++] - (isaac?.getNextKey() ?: 0) and 0xff)
         }
 
         fun readBytes(bytes: ByteArray, length: Int) {
             for (i in 0 until length) {
-                bytes[i] = (buffer[currentPosition++] - isaac!!.getNextKey()).toByte()
+                bytes[i] = (buffer[currentPosition++] - (isaac?.getNextKey() ?: 0)).toByte()
             }
         }
 
         fun writeIsaacByte(value: Int) {
-            buffer[currentPosition++] = (value + isaac!!.getNextKey()).toByte()
+            buffer[currentPosition++] = (value + (isaac?.getNextKey() ?: 0)).toByte()
         }
 
         fun initBitAccess() {

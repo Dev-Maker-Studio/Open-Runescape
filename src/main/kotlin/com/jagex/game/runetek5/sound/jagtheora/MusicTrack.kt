@@ -200,6 +200,11 @@ class MusicTrack(inputPacket: Packet) : Node<MusicTrack>() {
         var keyPressureAccum = 0
         var controllerValues = IntArray(128)
         controllerNumber = 0
+        // Opcode/status bytes live at the start of the buffer (read from offset 0 in the first
+        // pass); the conversion pass must re-read them from 0. This previously reused
+        // controllerIndex, left at controllerChangeCount, which corrupted the event stream and
+        // overran the output buffer.
+        var opcodeIndex = 0
 
         var currentTrack = 0
         outerLoop@ while (currentTrack < trackCount) {
@@ -212,7 +217,7 @@ class MusicTrack(inputPacket: Packet) : Node<MusicTrack>() {
                 while (true) {
                     val deltaTime = inputPacket.readVarInt()
                     midiOutput.writeFlags(deltaTime)
-                    val encodedEvent = inputPacket.buffer[controllerIndex++].toInt() and 0xff
+                    val encodedEvent = inputPacket.buffer[opcodeIndex++].toInt() and 0xff
                     val isNewEventType = encodedEvent != previousEventType
                     previousEventType = encodedEvent and 0xf
                     if (encodedEvent == 7) {

@@ -2369,6 +2369,29 @@ class ModelGL : Model {
             }
         }
 
+        // Negating a single axis above flips the model's handedness, which
+        // reverses the on-screen winding of every triangle. Reverse the winding
+        // back by swapping two corners per face, so hardware backface culling
+        // still treats the visible side as front-facing. Each face corner is a
+        // single index into the expanded vertex/normal/UV/colour arrays, so
+        // swapping the indices moves position, normal, UV and colour together
+        // and keeps them correctly associated. Only per-corner data (facesB and
+        // facesC) is affected; per-face data (colour/alpha/material) is not.
+        val facesBLocal = this.facesB
+        val facesCLocal = this.facesC
+        if (facesBLocal != null && facesCLocal != null) {
+            for (i in 0 until this.numFaces) {
+                val swap = facesBLocal[i]
+                facesBLocal[i] = facesCLocal[i]
+                facesCLocal[i] = swap
+            }
+
+            // The GL element (index) buffer is built from facesA/B/C and may
+            // have been shared from the cached source model during copy(). Drop
+            // it so it is rebuilt with the corrected winding on the next draw.
+            this.modelElementsBuffer?.openglElementsBuffer = null
+        }
+
         if (this.vertexBuffer != null) {
             this.vertexBuffer!!.buffer = null
         }
@@ -2789,21 +2812,45 @@ class ModelGL : Model {
         }
     }
 
-    override fun getSize2d(): Int = this.size2d
+    override fun getSize2d(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.size2d
+    }
 
-    override fun getSize3d(): Int = this.size3d
+    override fun getSize3d(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.size3d
+    }
 
-    override fun getMinX(): Int = this.minX.toInt()
+    override fun getMinX(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.minX.toInt()
+    }
 
-    override fun getMaxX(): Int = this.maxX.toInt()
+    override fun getMaxX(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.maxX.toInt()
+    }
 
-    override fun getMinY(): Int = this.minY.toInt()
+    override fun getMinY(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.minY.toInt()
+    }
 
-    override fun getMaxY(): Int = this.maxY.toInt()
+    override fun getMaxY(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.maxY.toInt()
+    }
 
-    override fun getMinZ(): Int = this.minZ.toInt()
+    override fun getMinZ(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.minZ.toInt()
+    }
 
-    override fun getMaxZ(): Int = this.maxZ.toInt()
+    override fun getMaxZ(): Int {
+        if (!this.boundsCalculated) calculateBounds()
+        return this.maxZ.toInt()
+    }
 
     override fun getFunctionMask(): Int = this.functionMask
 
@@ -3916,6 +3963,11 @@ class ModelGL : Model {
     }
 
     private fun calculateBounds() {
+        if (this.verticesX == null || this.verticesY == null || this.verticesZ == null) {
+            this.boundsCalculated = true
+            return
+        }
+
         var minXVal = 32767
         var minYVal = 32767
         var minZVal = 32767
@@ -3925,7 +3977,8 @@ class ModelGL : Model {
         var size2dSquared = 0
         var size3dSquared = 0
 
-        for (v in 0 until this.maxDepth) {
+        val depth = minOf(this.maxDepth, this.verticesX!!.size, this.verticesY!!.size, this.verticesZ!!.size)
+        for (v in 0 until depth) {
             val vertexX = this.verticesX!![v]
             val vertexY = this.verticesY!![v]
             val vertexZ = this.verticesZ!![v]
