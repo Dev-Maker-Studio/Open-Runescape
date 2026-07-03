@@ -31,6 +31,10 @@ abstract class Js5NetQueue {
     @JvmField protected var encryption: Byte = 0
     @JvmField protected val incoming: Packet = Packet(10)
 
+    // The request queues are intrusive linked lists shared between the game thread
+    // (pulse draining) and the async map loader thread (cache-miss inserts), so every
+    // structural access is guarded by this instance's monitor.
+    @Synchronized
     fun request(index: Int, fileId: Int, padding: Byte, hasPriority: Boolean): Js5NetQueueRequest {
         val indexReference = (index.toLong() shl 32) + fileId
         val request = Js5NetQueueRequest()
@@ -59,6 +63,7 @@ abstract class Js5NetQueue {
         return priorityRequestCount() >= 50
     }
 
+    @Synchronized
     protected fun regularRequestCount(): Int {
         return regularRequests.size() + waitingRegularRequests.size()
     }
@@ -75,6 +80,7 @@ abstract class Js5NetQueue {
 
     abstract fun dropConnection()
 
+    @Synchronized
     fun priorityRequestCount(): Int {
         return priorityRequests.size() + waitingPriorityRequests.size()
     }

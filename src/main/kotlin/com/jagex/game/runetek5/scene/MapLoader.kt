@@ -96,7 +96,7 @@ open class MapLoader(
         lowDetailShadows = true
     }
 
-    fun calculateUnderlayPalette(toolkit: AbstractToolkit, heightsCurrentLvl: Ground?, heightsNextLvl: Ground?) {
+    fun calculateUnderlayPalette(toolkit: AbstractToolkit, heightsCurrentLvl: Ground?, heightsNextLvl: Ground?, deferGl: Boolean = false) {
         val paletteIndices = Array(regionSizeX) { IntArray(regionSizeY) }
         if (underlayHue == null || underlayHue!!.size != regionSizeY) {
             underlayHue = IntArray(regionSizeY)
@@ -179,13 +179,24 @@ open class MapLoader(
             overlayPathShapes[z] = emptyArray()
             overlayRotations[z] = emptyArray()
         }
-        if (!overlayHidden) {
-            if (hdShadows != 0) {
-                scene.addHdShadow()
-            }
-            if (hdLight) {
-                scene.addHdLight()
-            }
+        if (!overlayHidden && hdShadows != 0) {
+            scene.addHdShadow()
+        }
+        if (!deferGl) {
+            finalizeUnderlayGl()
+        }
+    }
+
+    /**
+     * Applies HD point lights and uploads the ground geometry to the GPU. Creates GL
+     * resources ([LightGL]/VBOs via [Ground.resetLight]), so this must run on the render
+     * thread — async region builds defer it to [MapRegion.finalizeAsyncRegionSwap].
+     * addHdLight must precede resetLight: light construction reads ground arrays that
+     * resetLight consumes and nulls.
+     */
+    fun finalizeUnderlayGl() {
+        if (!overlayHidden && hdLight) {
+            scene.addHdLight()
         }
         for (z in 0 until regionSizeZ) {
             scene.localHeightmap[z]!!.resetLight()

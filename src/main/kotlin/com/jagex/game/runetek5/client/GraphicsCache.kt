@@ -13,6 +13,7 @@ import com.jagex.game.runetek5.graphics.map.worldmap.WorldMap
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapInteraction
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapSub1
 import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
+import com.jagex.game.runetek5.scene.AsyncMapLoader
 
 /**
  * Manages graphics cache reset operations.
@@ -37,7 +38,14 @@ object GraphicsCache {
         }
         Component.resetCache(preferenceMask)
         Resource.mapRegion!!.getLoctypeList().resetCaches(preferenceMask)
-        Resource.mapRegionLoaderTask!!.getMapRegion().getLoctypeList().resetCaches(preferenceMask)
+        val mapRegionLoader = Resource.mapRegionLoaderTask!!
+        synchronized(mapRegionLoader.stateLock) {
+            // Only touch the loader's loc-model caches while no background build is
+            // using them; a busy loader's list is fully reset at the next region swap.
+            if (mapRegionLoader.state == AsyncMapLoader.State.IDLE) {
+                mapRegionLoader.getMapRegion().getLoctypeList().resetCaches(preferenceMask)
+            }
+        }
         TypeLists.OBJ!!.resetCache(preferenceMask)
         TypeLists.NPC!!.setPreferenceFlags(preferenceMask)
         TypeLists.SPOT_ANIM!!.setPreferenceMask(preferenceMask)

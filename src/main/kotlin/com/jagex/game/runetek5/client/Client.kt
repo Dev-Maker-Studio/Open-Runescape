@@ -286,21 +286,21 @@ class Client : GameShell() {
     fun pulse() {
         if (gameState != GameState.UNK_16) {
             //System.out.println("[Client]GameState: "+client.gameState);
-            if (maploadingLockTaken) {
-                synchronized(ASYNC_MAPLOADING_LOCK) {
-                    (ASYNC_MAPLOADING_LOCK as Object).notify()
-                }
-                synchronized(MAP_REGION_LOADER_LOCK) {
-                    try {
-                        (MAP_REGION_LOADER_LOCK as Object).wait()
-                    } catch (ie: InterruptedException) {
-                        ie.printStackTrace()
+            val mapRegionLoader = Resource.mapRegionLoaderTask
+            if (mapRegionLoader != null && mapRegionLoader.state == AsyncMapLoader.State.READY) {
+                synchronized(mapRegionLoader.stateLock) {
+                    if (mapRegionLoader.state == AsyncMapLoader.State.READY) {
+                        mapRegionLoader.state = AsyncMapLoader.State.FINALIZING
+                        try {
+                            mapRegionLoader.pendingRegion!!.finalizeAsyncRegionSwap()
+                        } finally {
+                            mapRegionLoader.pendingRegion = null
+                            mapRegionLoader.state = AsyncMapLoader.State.IDLE
+                            (mapRegionLoader.stateLock as Object).notifyAll()
+                        }
                     }
                 }
-
-                maploadingLockTaken = false
             }
-
 
             ++cycles
             if (cycles % 1000 == 1) {
@@ -852,9 +852,6 @@ class Client : GameShell() {
         }
 
         PreferenceManager.preferences = PreferenceManager.getGamePreferences()
-        if (PreferenceManager.preferences!!.asyncMaploading!!.getValue() == 1) {
-            Scene.synchronousMaploading = false
-        }
 
         if (ServerEnvironment.SERVER_ENVIRONMENT == ServerEnvironment.LIVE) {
             WorldConnection.GAME_CONNECTION!!.host = suppliedApplet!!.getCodeBase()!!.getHost()
@@ -897,7 +894,10 @@ class Client : GameShell() {
 
         translatedLoadingText = LocalizedText.LOADING_PLEASE_WAIT.translate(CURRENT_LANGUAGE!!)
         Resource.mapRegionLoaderTask = AsyncMapLoader()
-        (Thread(Resource.mapRegionLoaderTask)).start()
+        val mapRegionLoaderThread = Thread(Resource.mapRegionLoaderTask, "AsyncMapLoader")
+        mapRegionLoaderThread.isDaemon = true
+        mapRegionLoaderThread.priority = Thread.NORM_PRIORITY - 1
+        mapRegionLoaderThread.start()
     }
 
     fun processLobbyTick() {
@@ -1116,8 +1116,6 @@ class Client : GameShell() {
         @JvmField
         val GAME_CONNECTION_CONTEXT: BufferedConnectionContext = BufferedConnectionContext()
         val connectionContexts: Array<BufferedConnectionContext>
-        val MAP_REGION_LOADER_LOCK: Any
-        val ASYNC_MAPLOADING_LOCK: Any
         val npcSpawnMaps: IntArray
         val OBJECT_TYPE_SLOTS: IntArray
         @JvmField
@@ -1243,9 +1241,6 @@ class Client : GameShell() {
         var npcCount: Int = 0
         var NPC_UPDATE_INDEX: Int = 0
         var PING_REQUESTER: PingRequester?
-
-        @Volatile
-        var maploadingLockTaken: Boolean
         var npcSpawnCursorPos: Int
         var CURRENT_CUTSCENE: Int
         var MAP_LOADING_STAGE: Int
@@ -1449,9 +1444,6 @@ class Client : GameShell() {
             sendTransmitVarVerifyid = false
             PING_REQUESTER = PingRequester()
             Resource.mapRegion = MapRegion(false)
-            maploadingLockTaken = false
-            MAP_REGION_LOADER_LOCK = Any()
-            ASYNC_MAPLOADING_LOCK = Any()
             npcSpawnMaps = IntArray(64)
             npcSpawnCursorPos = 0
             OBJECT_TYPE_SLOTS = intArrayOf(0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3)

@@ -56,6 +56,7 @@ object CommandExecutor {
                     Console.writeLine("renderer - Print graphics renderer information")
                     Console.writeLine("heap - Print java memory information")
                     Console.writeLine("getcamerapos - Print location and direction of camera for use in bug reports")
+                    Console.writeLine("asyncmap - Toggle asynchronous (seamless) map loading beta")
                     return
                 }
                 command.equals("cls", ignoreCase = true) -> {
@@ -80,6 +81,23 @@ object CommandExecutor {
                 }
                 command.equals("heap", ignoreCase = true) -> {
                     Console.writeLine("Heap: ${GameShell.maxMemory}MB")
+                    return
+                }
+                command.equals("asyncmap", ignoreCase = true) -> {
+                    if (Loader.MULTI_THREADED_MAPLOADING) {
+                        Console.writeLine("Async map loading is forced ON by Loader.MULTI_THREADED_MAPLOADING")
+                        return
+                    }
+                    val preference = PreferenceManager.preferences!!.asyncMaploading!!
+                    val newValue = if (preference.getValue() == 1) 0 else 1
+                    if (newValue == 1 && preference.canModify(1) != 1) {
+                        Console.writeLine("Async map loading unavailable: requires an OpenGL toolkit and 2+ CPU cores")
+                        return
+                    }
+                    PreferenceManager.preferences!!.setValue(preference, newValue)
+                    PreferenceManager.savePreferences()
+                    Client.preferencesSavedOnServer = false
+                    Console.writeLine("Async map loading: ${if (preference.getValue() == 1) "ON" else "OFF"} (takes effect next region load)")
                     return
                 }
                 command.equals("getcamerapos", ignoreCase = true) -> {

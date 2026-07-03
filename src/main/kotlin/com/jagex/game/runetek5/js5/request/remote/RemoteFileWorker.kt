@@ -64,11 +64,18 @@ class RemoteFileWorker(
         }
     }
 
+    // pendingRequests/prefetchEntries are mutated both by the game thread's pulse
+    // (processPrefetch/processGeneralRequests, cleanup pass) and by the async map loader
+    // thread's cache misses (request/requestArchive via Js5ResourceProvider.getFile), so
+    // all structural access is guarded by this worker's monitor. Lock order is always
+    // worker -> net queue; the requester's pulse never calls back into a worker.
+    @Synchronized
     override fun getProgress(fileId: Int): Int {
         val fileRequest = pendingRequests[fileId.toLong()]
         return fileRequest?.getCompletion() ?: 0
     }
 
+    @Synchronized
     override fun getMasterIndex(): Js5MasterIndex? {
         if (masterIndex != null) {
             return masterIndex
@@ -110,6 +117,7 @@ class RemoteFileWorker(
         return masterIndex
     }
 
+    @Synchronized
     override fun requestArchive(archiveId: Int): ByteArray? {
         val fileRequest = request(archiveId, 0)
         if (70291 == archiveId) {
@@ -123,6 +131,7 @@ class RemoteFileWorker(
         return archivePayload
     }
 
+    @Synchronized
     @Suppress("UNCHECKED_CAST")
     fun processPrefetch() {
         if (generalRequests != null && getMasterIndex() != null) {
@@ -147,6 +156,7 @@ class RemoteFileWorker(
         }
     }
 
+    @Synchronized
     @Suppress("UNCHECKED_CAST")
     override fun prefetch(fileId: Int) {
         if (cacheDataFile != null) {
@@ -179,6 +189,7 @@ class RemoteFileWorker(
         }
     }
 
+    @Synchronized
     fun reset() {
         if (cacheDataFile != null) {
             hasRegularRequests = true
@@ -196,6 +207,7 @@ class RemoteFileWorker(
      * [2 = standart requester regular request]
      *
      */
+    @Synchronized
     fun request(fileId: Int, actionType: Int): Js5WorkerRequestMessage? {
         var fileRequest: Js5WorkerRequestMessage? = pendingRequests[fileId.toLong()]
         if (fileRequest != null && actionType == 0 && !fileRequest.highPriority && fileRequest.waiting) {
@@ -320,6 +332,7 @@ class RemoteFileWorker(
         }
     }
 
+    @Synchronized
     @Suppress("UNCHECKED_CAST")
     fun processGeneralRequests() {
         if (generalRequests != null) {

@@ -145,9 +145,11 @@ class Loader : Panel() {
         var INSTANCE: Loader? = null
 
         /**
-         * Setting to play around with removing loading screens,
-         * haven't been able to make it work properly thus far
-         * (crashes game after several regions loaded)
+         * Force-enables asynchronous (seamless) map loading regardless of the saved
+         * preference. Normally left off — toggle the feature at runtime with the
+         * `asyncmap` console command instead. Regions build on the AsyncMapLoader
+         * thread; GL uploads and the region swap run on the game thread in
+         * MapRegion.finalizeAsyncRegionSwap().
          */
         const val MULTI_THREADED_MAPLOADING = false
 

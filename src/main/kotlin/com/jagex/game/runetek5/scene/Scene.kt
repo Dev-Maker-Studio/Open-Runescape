@@ -969,9 +969,7 @@ class Scene(
                     ++Y
                 }
                 this.lightSlotAvailable!![slotIndex] = true
-                if (synchronousMaploading) {
-                    this.localHeightmap[z]!!.addLight(lightSource, lightDisplacement)
-                }
+                this.localHeightmap[z]!!.addLight(lightSource, lightDisplacement)
             }
         }
     }
@@ -1448,9 +1446,6 @@ class Scene(
     }
 
     companion object {
-        @JvmField
-        var synchronousMaploading = true
-
         @JvmStatic
         fun setRoofOverride() {
             val roofToggle = PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue()

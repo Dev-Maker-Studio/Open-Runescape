@@ -93,11 +93,20 @@ class EnvironmentManager(
         }
         // Only perform GL-affecting operations on the render thread.
         if (!mapregion.asyncMaploading) {
-            transitionSceneEnvironment()
-            applySun()
-            setSceneBloomFilter()
-            calculateFog()
+            finalizeDeferredAtmosphere()
         }
+    }
+
+    /**
+     * Applies the GL-affecting environment transitions that [updateAtmosphere] skips
+     * during an async region build. Must run on the render thread after the region swap
+     * (applySun reads the live Resource.mapRegion).
+     */
+    fun finalizeDeferredAtmosphere() {
+        transitionSceneEnvironment()
+        applySun()
+        setSceneBloomFilter()
+        calculateFog()
     }
 
     fun getEnvironment(): Environment {

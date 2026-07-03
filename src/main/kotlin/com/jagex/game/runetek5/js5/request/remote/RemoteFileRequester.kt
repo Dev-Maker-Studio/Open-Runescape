@@ -32,6 +32,7 @@ class RemoteFileRequester : Js5NetQueue() {
         lastRemoteRequest = null
     }
 
+    @Synchronized
     override fun init(connection: Connection, loggedIn: Boolean) {
         if (this.updateServerConnection != null) {
             try {
@@ -167,7 +168,13 @@ class RemoteFileRequester : Js5NetQueue() {
     /**
      * Performs a cycle communicating with the update server
      * @return All requests processed
+     *
+     * Holds the queue monitor for the whole cycle: the drain loops interleave queue
+     * unlinks with socket writes, and the async map loader inserts requests (via
+     * [Js5NetQueue.request]) concurrently. Reads are bounded by the socket's available
+     * capacity, so the monitor is never held across a blocking read.
      */
+    @Synchronized
     override fun pulse(): Boolean {
         if (updateServerConnection != null) {
             val currentTime = Utils.time()

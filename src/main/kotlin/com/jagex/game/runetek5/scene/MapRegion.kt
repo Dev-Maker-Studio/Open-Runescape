@@ -643,14 +643,6 @@ class MapRegion(var asyncMaploading: Boolean) {
         if (this.asyncMaploading) {
             sleep(50)
         }
-        //ADDED
-        if (this.asyncMaploading) {
-            Utils.time()
-            while (!Renderers.activeToolkit!!.readyForRendering()) {
-                println("Waiting for renderer")
-                sleep(1)
-            }
-        }
         this.environmentManager!!.initializeEnvironment(this.sceneSizeX shr 4, this.sceneSizeY shr 4)
         this.environmentManager!!.updateAtmosphere(this)
         if (hasUnderwaterMap) {
@@ -687,6 +679,10 @@ class MapRegion(var asyncMaploading: Boolean) {
             }
             decodeLocMapsClient(this.surfaceSceneGraph!!, this.surfaceLocBuffer)
             if (this.npcSpawnBuffer != null) {
+                // NPC spawn data only exists on the animated-login-screen path, which
+                // always loads synchronously — decodeNpcSpawns mutates shared NPC state
+                // and must never run on the async loader thread.
+                check(!this.asyncMaploading || this.npcSpawnBuffer!!.all { it == null })
                 decodeNpcSpawns()
             }
         } else {
@@ -698,13 +694,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         if (!this.asyncMaploading) {
             PingRequester.keepalive(true)
         }
-        if (this.asyncMaploading) {
-            Utils.time()
-            while (!Renderers.activeToolkit!!.readyForRendering()) {
-                sleep(1)
-            }
-        }
-        this.surfaceSceneGraph!!.calculateUnderlayPalette(Renderers.activeToolkit!!, if (hasUnderwaterMap) this.scene!!.underwaterHeightmap!![0] else null, null)
+        this.surfaceSceneGraph!!.calculateUnderlayPalette(Renderers.activeToolkit!!, if (hasUnderwaterMap) this.scene!!.underwaterHeightmap!![0] else null, null, this.asyncMaploading)
         if (this.asyncMaploading) {
             sleep(75)
         }
@@ -728,14 +718,7 @@ class MapRegion(var asyncMaploading: Boolean) {
             if (!this.asyncMaploading) {
                 PingRequester.keepalive(true)
             }
-            //ADDED
-            if (this.asyncMaploading) {
-                Utils.time()
-                while (!Renderers.activeToolkit!!.readyForRendering()) {
-                    sleep(1)
-                }
-            }
-            this.underwaterMap!!.calculateUnderlayPalette(Renderers.activeToolkit!!, null, this.scene!!.surfaceHeightmap[0])
+            this.underwaterMap!!.calculateUnderlayPalette(Renderers.activeToolkit!!, null, this.scene!!.surfaceHeightmap[0], this.asyncMaploading)
             this.underwaterMap!!.calculateVisibility(true)
             if (!this.asyncMaploading) {
                 PingRequester.keepalive(true)
@@ -751,35 +734,69 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         this.scene!!.resetSurfaceTiles()
         if (this.asyncMaploading) {
-            Utils.time()
-            while (!Renderers.activeToolkit!!.readyForRendering()) {
-                sleep(1)
+            // CPU build complete. The game thread performs the GL uploads, cache resets,
+            // region swap and load completion in finalizeAsyncRegionSwap() once the
+            // loader thread parks in AsyncMapLoader.State.READY.
+            return true
+        }
+        SoundEffectPlayer.updatePlayers()
+        this.environmentManager!!.calculateFog()
+        GameShell.resetDrawCache()
+        completeRegionLoad()
+        return true
+    }
+
+    /**
+     * Finalizes an asynchronously built region on the game thread: uploads the ground
+     * geometry to the GPU, resets the caches backing the outgoing region, swaps this
+     * region in as the live one and completes the load. Runs while the loader thread is
+     * parked in AsyncMapLoader.State.READY, so this region is exclusively owned here.
+     */
+    fun finalizeAsyncRegionSwap() {
+        this.surfaceSceneGraph!!.finalizeUnderlayGl()
+        if (this.underwaterMap != null) {
+            this.scene!!.setUnderwater(true)
+            this.underwaterMap!!.finalizeUnderlayGl()
+            this.scene!!.setUnderwater(false)
+        }
+        for (index in 0..2047) {
+            val playerEntity: PlayerEntity? = PlayerUpdate.players[index]
+            if (playerEntity != null) {
+                playerEntity.scene = null
             }
         }
-        var async = false
-        if (this.asyncMaploading) {
-            val mapRegion = Resource.mapRegion
-            buildRegionBase(mapRegion!!)
-            Resource.mapRegionLoaderTask!!.setMapRegion(mapRegion)
-            async = true
-            Utils.time()
-            synchronized(Client.ASYNC_MAPLOADING_LOCK) {
-                Client.maploadingLockTaken = true
-                try {
-                    (Client.ASYNC_MAPLOADING_LOCK as Object).wait()
-                } catch (interruptedException: InterruptedException) {
-                    // NOOP
-                }
+        for (index in Client.NPC_ARRAY.indices) {
+            val npcObjectNode: ObjectNode? = Client.NPC_ARRAY[index]
+            if (npcObjectNode != null) {
+                (npcObjectNode.value as SceneGraphEntity).scene = null
             }
-            Resource.mapRegion = this
-            mapRegion.clear()
-            updateEntities(GameState.LOADING_PLEASE_WAIT)
-            resetNonCutsceneEntities()
-        } else {
-            SoundEffectPlayer.updatePlayers()
-            this.environmentManager!!.calculateFog()
-            GameShell.resetDrawCache()
         }
+        TypeLists.resetCachedData(true)
+        val outgoingRegion = Resource.mapRegion!!
+        // Reset the outgoing region's loc-model caches, not this region's: the new scene
+        // references models cached during the background build, while the outgoing list
+        // only backs the scene being torn down. It is handed back to the loader below.
+        outgoingRegion.getLoctypeList().resetAll()
+        buildRegionBase(outgoingRegion)
+        Resource.mapRegion = this
+        Resource.mapRegionLoaderTask!!.setMapRegion(outgoingRegion)
+        outgoingRegion.clear()
+        setLoadingRegion()
+        outgoingRegion.setLoadingRegion()
+        updateEntities(GameState.LOADING_PLEASE_WAIT)
+        resetNonCutsceneEntities()
+        this.environmentManager!!.finalizeDeferredAtmosphere()
+        SoundEffectPlayer.updatePlayers()
+        GameShell.resetDrawCache()
+        completeRegionLoad()
+    }
+
+    /**
+     * Shared tail of a region load: clears stale ground items, re-adds hint trails,
+     * refreshes roof/loc state, prefetches neighbouring regions and confirms the load to
+     * the server. Runs on the game thread in both the synchronous and async paths.
+     */
+    private fun completeRegionLoad() {
         for (plane in 0..3) {
             for (sceneX in 0..<this.sceneSizeX) {
                 for (sceneY in 0..<this.sceneSizeY) {
@@ -836,12 +853,6 @@ class MapRegion(var asyncMaploading: Boolean) {
             Console.writeLine((Utils.time() - this.debugRegionLoadtimeStart).toString())
             this.debugRegionLoadtime = false
         }
-        if (async) {
-            synchronized(Client.MAP_REGION_LOADER_LOCK) {
-                (Client.MAP_REGION_LOADER_LOCK as Object).notify()
-            }
-        }
-        return true
     }
 
     val completion: Int
@@ -1196,11 +1207,11 @@ class MapRegion(var asyncMaploading: Boolean) {
     }
 
     fun sleep(ms: Int) {
-//        try {
-//            Thread.sleep(ms);
-//        } catch (InterruptedException interruptedException) {
-//        	// NOOP
-//        }
+        try {
+            Thread.sleep(ms.toLong())
+        } catch (interruptedException: InterruptedException) {
+            // NOOP
+        }
     }
 
     fun decodeClientUnderlayMasks(sceneGraph: SceneGraph, mapDatas: Array<ByteArray?>) {
