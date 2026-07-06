@@ -1,5 +1,7 @@
 package com.jagex.game.runetek5.scene
 
+import com.jagex.game.runetek5.cache.node.NodeCollection
+import com.jagex.game.runetek5.sound.player.area.AmbientSound
 import java.util.LinkedList
 
 /**
@@ -83,15 +85,24 @@ class AsyncMapLoader : Runnable {
                 synchronized(stateLock) {
                     state = State.BUILDING
                 }
-                if (request.loadingType == RegionLoadingType.RELOAD) {
-                    region.reload()
-                } else {
-                    region.initialize(request)
-                }
-                while (!region.loadRegion()) {
-                    // Re-entrant: false means JS5 data is still downloading; the game
-                    // thread's file requester pumps it, so pace the retries.
-                    Thread.sleep(10)
+                // Buffer loc ambient sounds created during the build; the game thread
+                // iterates the live sound lists every tick, so they are drained into
+                // place by finalizeAsyncRegionSwap instead.
+                region.pendingAmbientSounds = NodeCollection()
+                AmbientSound.DEFERRED_LOC_SOUNDS.set(region.pendingAmbientSounds)
+                try {
+                    if (request.loadingType == RegionLoadingType.RELOAD) {
+                        region.reload()
+                    } else {
+                        region.initialize(request)
+                    }
+                    while (!region.loadRegion()) {
+                        // Re-entrant: false means JS5 data is still downloading; the game
+                        // thread's file requester pumps it, so pace the retries.
+                        Thread.sleep(10)
+                    }
+                } finally {
+                    AmbientSound.DEFERRED_LOC_SOUNDS.set(null)
                 }
                 synchronized(stateLock) {
                     pendingRegion = region

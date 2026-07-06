@@ -178,6 +178,16 @@ class AmbientSound : Node<AmbientSound>() {
         @JvmField
         val LOC_AMBIENT_SOUNDS = NodeCollection()
 
+        /**
+         * When set on the current thread, loc ambient sounds are buffered here instead
+         * of being linked into [LOC_AMBIENT_SOUNDS], whose intrusive cursor the game
+         * thread iterates every tick. The async map loader sets this for the duration
+         * of a background build; MapRegion.finalizeAsyncRegionSwap drains the buffer on
+         * the game thread after the outgoing region's sounds are unlinked.
+         */
+        @JvmField
+        val DEFERRED_LOC_SOUNDS: ThreadLocal<NodeCollection?> = ThreadLocal()
+
         @JvmField
         val NPC_AMBIENT_SOUNDS = NodeCollection()
 
@@ -340,7 +350,12 @@ class AmbientSound : Node<AmbientSound>() {
                 if (soundEffectNode.ambientSoundGroupIds != null) {
                     soundEffectNode.step = soundEffectNode.soundMinStep + (Math.random() * (soundEffectNode.soundMaxStep - soundEffectNode.soundMinStep)).toInt()
                 }
-                LOC_AMBIENT_SOUNDS.addFirst(soundEffectNode)
+                val deferredSounds = DEFERRED_LOC_SOUNDS.get()
+                if (deferredSounds != null) {
+                    deferredSounds.addFirst(soundEffectNode)
+                } else {
+                    LOC_AMBIENT_SOUNDS.addFirst(soundEffectNode)
+                }
             } else if (npc != null) {
                 soundEffectNode.npcEntity = npc
                 var npcType = npc.definitions

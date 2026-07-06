@@ -36,9 +36,9 @@ import kotlin.math.sqrt
 class ModelGL : Model {
 
     companion object {
-        @JvmField
-        val uvTypes = FloatArray(2)
-
+        // Picking scratch (calculateProjection) — game thread only. Construction-time
+        // scratch must NOT live here: models are built concurrently by the game thread
+        // (NPC/player/item models) and the async map loader (loc models).
         @JvmField
         val matrixX = IntArray(8)
 
@@ -47,9 +47,6 @@ class ModelGL : Model {
 
         @JvmField
         val matrixZ = IntArray(8)
-
-        @JvmField
-        var normalsUid: LongArray? = null
 
         @JvmField
         var originX: Int = 0
@@ -96,6 +93,13 @@ class ModelGL : Model {
             return (hsl and 0xff80) + adjustedLuminance
         }
     }
+
+    /**
+     * Normal-dedup scratch used only while constructing from a Mesh; nulled when
+     * construction completes. Instance-level (not static) because model construction
+     * runs concurrently on the game thread and the async map loader thread.
+     */
+    private var normalsUid: LongArray? = null
 
     @JvmField
     var boundsCalculated: Boolean = false
@@ -506,6 +510,8 @@ class ModelGL : Model {
         this.triangles!![mesh.maxDepth] = normalSlotOffset
         val transformMatrix = generateTextureMatrix(mesh, faces, this.numFaces)
         val faceNormals = arrayOfNulls<FaceNormalGL>(mesh.numFaces)
+        // UV scratch is local: constructions run concurrently across threads.
+        val uvTypes = FloatArray(2)
 
         var alphaAmt: Int
         var deltaY: Int
@@ -924,13 +930,9 @@ class ModelGL : Model {
     }
 
     fun projectShadow(shadowgl: ShadowGL) {
-        if (this.toolkit.projectedVerticesX.size < this.numNormals) {
-            this.toolkit.projectedVerticesX = IntArray(this.numNormals)
-            this.toolkit.projectedVerticesY = IntArray(this.numNormals)
-        }
-
-        val projectedVerticesX = this.toolkit.projectedVerticesX
-        val projectedVerticesY = this.toolkit.projectedVerticesY
+        val scratch = this.toolkit.projectionScratch(this.numNormals)
+        val projectedVerticesX = scratch.verticesX
+        val projectedVerticesY = scratch.verticesY
 
         for (v in 0 until this.maxDepth) {
             val x = ((this.verticesX!![v] - (this.toolkit.shadowOffsetX * this.verticesY!![v] shr 8)) shr this.toolkit.shadowScale) - shadowgl.startX
@@ -2165,13 +2167,9 @@ class ModelGL : Model {
                 return true
             }
 
-            if (this.toolkit.projectedVerticesX!!.size < this.numNormals) {
-                this.toolkit.projectedVerticesX = IntArray(this.numNormals)
-                this.toolkit.projectedVerticesY = IntArray(this.numNormals)
-            }
-
-            val projectedVerticesX = this.toolkit.projectedVerticesX!!
-            val projectedVerticesY = this.toolkit.projectedVerticesY!!
+            val scratch = this.toolkit.projectionScratch(this.numNormals)
+            val projectedVerticesX = scratch.verticesX
+            val projectedVerticesY = scratch.verticesY
 
             for (vertIdx in 0 until this.maxDepth) {
                 val vx = this.verticesX!![vertIdx]

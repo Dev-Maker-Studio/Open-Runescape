@@ -111,12 +111,9 @@ open class GroundGL(
         val offsetsX = tileOffsetsX!![offsetsXCount][offsetsYCount]!!
         val offsetsZ = tileOffsetsZ!![offsetsXCount][offsetsYCount]!!
         val totalOffsets = offsetsX.size
-        if (activeToolkit.projectedVerticesX.size < totalOffsets) {
-            activeToolkit.projectedVerticesX = IntArray(totalOffsets)
-            activeToolkit.projectedVerticesY = IntArray(totalOffsets)
-        }
-        val sceneShadowOffX = activeToolkit.projectedVerticesX
-        val sceneShadowOffZ = activeToolkit.projectedVerticesY
+        val scratch = activeToolkit.projectionScratch(totalOffsets)
+        val sceneShadowOffX = scratch.verticesX
+        val sceneShadowOffZ = scratch.verticesY
         for (index in 0 until totalOffsets) {
             sceneShadowOffX[index] = offsetsX[index] shr activeToolkit.shadowScale
             sceneShadowOffZ[index] = offsetsZ[index] shr activeToolkit.shadowScale

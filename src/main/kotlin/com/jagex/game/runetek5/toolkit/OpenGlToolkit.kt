@@ -162,9 +162,27 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @JvmField val copySrc: Array<ModelGL?> = arrayOfNulls(7)
     @JvmField val copyDst: Array<ModelGL?> = arrayOfNulls(7)
     @JvmField var textureBuffer: GlBitBuffer = GlBitBuffer(8192)
-    @JvmField var projectedVerticesX: IntArray = IntArray(1)
-    @JvmField var projectedVerticesY: IntArray = IntArray(1)
+    /**
+     * Per-thread vertex projection scratch: the game thread uses it for model picking
+     * and loc updates while the async map loader bakes loc/ground shadows during a
+     * background build, so it cannot be a single shared pair of arrays.
+     */
+    private val projectionScratch: ThreadLocal<ProjectionScratch> = ThreadLocal.withInitial { ProjectionScratch() }
     @JvmField var projectedVerticesZ: IntArray = IntArray(1)
+
+    class ProjectionScratch {
+        @JvmField var verticesX: IntArray = IntArray(1)
+        @JvmField var verticesY: IntArray = IntArray(1)
+    }
+
+    fun projectionScratch(capacity: Int): ProjectionScratch {
+        val scratch = projectionScratch.get()
+        if (scratch.verticesX.size < capacity) {
+            scratch.verticesX = IntArray(capacity)
+            scratch.verticesY = IntArray(capacity)
+        }
+        return scratch
+    }
     @JvmField val shadowTextureData: ByteArray = ByteArray(16384)
     @JvmField var multiSamplesPreference: Int = 0
     @JvmField var activeOpenglInstance: OpenGL? = null

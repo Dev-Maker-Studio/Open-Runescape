@@ -112,6 +112,13 @@ class MapRegion(var asyncMaploading: Boolean) {
     var totalLocsLoading: Int = 1
 
     @JvmField var environmentManager: EnvironmentManager? = null
+
+    /**
+     * Loc ambient sounds created during an async background build, buffered off-thread
+     * (see AmbientSound.DEFERRED_LOC_SOUNDS) and drained into the live sound list by
+     * finalizeAsyncRegionSwap on the game thread.
+     */
+    @JvmField var pendingAmbientSounds: NodeCollection? = null
     var viewRangeStart: Int = 0
     var viewRangeEnd: Int = 0
     @JvmField
@@ -594,12 +601,13 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
         if (!this.asyncMaploading) {
             TypeLists.resetCachedData(true)
-            // DIAGNOSTIC (temporary): force loc-model caches to rebuild on every synchronous region
-            // build to work around stale cached loc models going empty after a scene teardown.
-            // Gated by !asyncMaploading like resetCachedData above: resetting these caches on the
-            // async loader thread races with the render thread still using them (missing models).
-            this.loctypeList!!.resetAll()
         }
+        // Force loc-model caches to rebuild on every region build to work around stale
+        // cached loc models going empty after a scene teardown. Safe on both paths: the
+        // async build's ObjectTypeList is private to the loader until the finalize swap,
+        // so the render thread never reads it while this reset runs. Only the shared
+        // TypeLists/renderer caches stay deferred to finalizeAsyncRegionSwap.
+        this.loctypeList!!.resetAll()
         if (!this.asyncMaploading) {
             StaticMethods.resetAllVorbisStreams() // not in 910
         }
@@ -785,6 +793,17 @@ class MapRegion(var asyncMaploading: Boolean) {
         outgoingRegion.setLoadingRegion()
         updateEntities(GameState.LOADING_PLEASE_WAIT)
         resetNonCutsceneEntities()
+        // updateEntities unlinked the outgoing region's loc ambient sounds; register the
+        // ones buffered during the background build now that it is safe on this thread.
+        val pendingSounds = this.pendingAmbientSounds
+        if (pendingSounds != null) {
+            this.pendingAmbientSounds = null
+            var pendingSound = pendingSounds.popHead()
+            while (pendingSound != null) {
+                AmbientSound.LOC_AMBIENT_SOUNDS.addFirst(pendingSound)
+                pendingSound = pendingSounds.popHead()
+            }
+        }
         this.environmentManager!!.finalizeDeferredAtmosphere()
         SoundEffectPlayer.updatePlayers()
         GameShell.resetDrawCache()
@@ -1375,7 +1394,20 @@ class MapRegion(var asyncMaploading: Boolean) {
             setLoadingRegion()
             GraphicsCache.resetWorldmapCaches(true)
             val mapRegion = Resource.mapRegion
-            this.regionIds = mapRegion!!.regionIds
+            this.loadingType = mapRegion!!.loadingType
+            this.activeMapSize = mapRegion.activeMapSize
+            this.sceneSizeX = mapRegion.sceneSizeX
+            this.sceneSizeY = mapRegion.sceneSizeY
+            this.baseCoordinates = mapRegion.baseCoordinates
+            this.lastCoordgrid = mapRegion.lastCoordgrid
+            this.baseX = mapRegion.baseX
+            this.baseY = mapRegion.baseY
+            this.viewRangeStart = mapRegion.viewRangeStart
+            this.viewRangeEnd = mapRegion.viewRangeEnd
+            this.worldMapType = mapRegion.worldMapType
+            this.staticElements = mapRegion.staticElements
+            // Read-only build inputs — safe to share with the live region.
+            this.regionIds = mapRegion.regionIds
             this.surfaceMapArchives = mapRegion.surfaceMapArchives
             this.surfaceLocArchives = mapRegion.surfaceLocArchives
             this.npcSpawnArchives = mapRegion.npcSpawnArchives
@@ -1387,25 +1419,25 @@ class MapRegion(var asyncMaploading: Boolean) {
             this.npcSpawnBuffer = mapRegion.npcSpawnBuffer
             this.underwaterMapBuffer = mapRegion.underwaterMapBuffer
             this.underwaterLocBuffer = mapRegion.underwaterLocBuffer
-            this.collisionMaps = mapRegion.collisionMaps
-            this.tileSettingsBits = mapRegion.tileSettingsBits
-            this.environmentManager = mapRegion.environmentManager
-            this.chunkBitpackedPosition = mapRegion.chunkBitpackedPosition
-            this.viewRangeStart = mapRegion.viewRangeStart
-            this.viewRangeEnd = mapRegion.viewRangeEnd
-            this.worldMapType = mapRegion.worldMapType
-            this.staticElements = mapRegion.staticElements
-            this.drawPriority = mapRegion.drawPriority
-            this.drawPrioritySharedby = mapRegion.drawPrioritySharedby
-            this.bits = mapRegion.bits
-            this.loadingType = mapRegion.loadingType
-            this.activeMapSize = mapRegion.activeMapSize
-            this.baseCoordinates = mapRegion.baseCoordinates
-            this.lastCoordgrid = mapRegion.lastCoordgrid
-            this.baseX = mapRegion.baseX
-            this.baseY = mapRegion.baseY
-            this.sceneSizeX = mapRegion.sceneSizeX
-            this.sceneSizeY = mapRegion.sceneSizeY
+            this.chunkBitpackedPosition = Array<Array<IntArray?>?>(4) { plane ->
+                Array<IntArray?>(this.sceneSizeX shr 3) { x ->
+                    mapRegion.chunkBitpackedPosition[plane]!![x]!!.clone()
+                }
+            }
+            // Region-owned mutable structures must NOT be shared by reference: the
+            // outgoing region is clear()ed at the next finalize swap, which would wipe
+            // the live region's collision maps and tile flags through the alias, and
+            // every later build would mutate them mid-gameplay. Allocate fresh ones
+            // (mirrors setMapSize); the rebuild repopulates them.
+            for (heightLevel in 0..3) {
+                this.collisionMaps[heightLevel] = CollisionMap.createClipMap(this.sceneSizeX, this.sceneSizeY)
+            }
+            this.bits = Array<Array<ByteArray>>(4) { Array<ByteArray>(this.sceneSizeX) { ByteArray(this.sceneSizeY) } }
+            this.tileSettingsBits = SettingsBits(this.sceneSizeX, this.sceneSizeY)
+            this.drawPriority = Array<IntArray>(this.sceneSizeX) { IntArray(this.sceneSizeY) }
+            this.drawPrioritySharedby = Array<IntArray>(this.sceneSizeX) { IntArray(this.sceneSizeY) }
+            resetAtmosphere()
+            this.environmentManager!!.buildEnvironment(mapRegion.getEnvironmentManager())
         } else if (Client.gameState == GameState.UNK_5) {
             Client.setGameState(GameState.UNK_11)
         } else if (Client.gameState == GameState.UNK_0) {
