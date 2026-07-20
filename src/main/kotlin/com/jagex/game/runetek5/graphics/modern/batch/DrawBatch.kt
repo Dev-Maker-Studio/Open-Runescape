@@ -218,6 +218,7 @@ class DrawBatch(
         upload()
 
         vao.bind()
+        ibo.bind()
         GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
     }
 

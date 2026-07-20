@@ -1,0 +1,416 @@
+package com.jagex.game.runetek5.graphics.sprite
+
+import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
+import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
+import com.jagex.game.runetek5.toolkit.SpriteSurfaceGL
+
+/**
+ * Modern GL routing layer for sprite rendering.
+ *
+ * This class extends SpriteGL to intercept the draw methods that would normally
+ * call jaggl.OpenGL directly (glBegin, glVertex, glTexCoord, glEnd, etc.) and
+ * routes them through ModernSpriteRenderer when running under ModernGLToolkit.
+ *
+ * When the modern renderer is active, all draw calls are converted to batched
+ * textured quads via the ModernSpriteRenderer. When the modern renderer is not
+ * ready (e.g., during early startup), calls fall through to the legacy SpriteGL
+ * implementation via super.
+ *
+ * This class lives in graphics/sprite/ (not graphics/modern/) because it extends
+ * SpriteGL which imports jaggl. The anti-hack rule prohibits jaggl imports in
+ * graphics/modern/ files. This file acts as the bridge between the legacy sprite
+ * system and the modern renderer.
+ *
+ * SpriteGL methods that are overridden and their legacy GL usage:
+ * - draw(x, y, combineMode, color, blendMode) -- glBegin/glEnd, glTexCoord, glVertex, glColor4ub
+ * - drawScaledColored(x, y, w, h, combine, color, blend) -- tiled sprite drawing with glBegin/glEnd
+ * - drawColoredCircle(x, y, w, h, combine, color, blend) -- scaled sprite with glBegin/glEnd
+ * - drawAffine(6 floats, combine, color, blend) -- rotated quad with glBegin/glEnd
+ * - drawWithSurface(x, y, surface, ox, oy) -- multi-texture surface overlay (GL_TEXTURE1)
+ * - drawAffineMasked(6 floats, flags, surface, ox, oy) -- rotated multi-texture surface
+ */
+class ModernSpriteGL : SpriteGL {
+
+    constructor(toolkit: ModernGLToolkit, width: Int, height: Int, pixels: IntArray, stride: Int, srcWidth: Int)
+        : super(toolkit, width, height, pixels, stride, srcWidth)
+
+    constructor(toolkit: ModernGLToolkit, x: Int, y: Int, width: Int, height: Int)
+        : super(toolkit, x, y, width, height)
+
+    constructor(toolkit: ModernGLToolkit, width: Int, height: Int, hasAlpha: Boolean)
+        : super(toolkit, width, height, hasAlpha)
+
+    /**
+     * Returns the ModernGLToolkit instance cast from the parent's toolkit field.
+     * Safe because ModernSpriteGL is only constructed from ModernGLToolkit.
+     */
+    private val modernToolkit: ModernGLToolkit
+        get() = toolkit as ModernGLToolkit
+
+    /**
+     * Returns true if the modern sprite renderer is available and we should use it
+     * instead of falling through to the legacy SpriteGL draw methods.
+     */
+    private fun useModernPath(): Boolean {
+        val mt = modernToolkit
+        val sr = mt.getSpriteRenderer() ?: return false
+        return sr.isReady() && mt.isModernRenderingActive()
+    }
+
+    /**
+     * Maps the legacy (combineMode, colorArgb) pair to the vertex color for the
+     * modern sprite shader (finalColor = texture * vertexColor).
+     *
+     * Legacy fixed-function reference — SpriteGL.draw sets glColor4ub(colorArgb) and
+     * then loadTextureCombineMode(combineMode) (SpriteGL.kt:216-221), where mode 1 is
+     * GL_REPLACE/GL_REPLACE (OpenGlToolkit.kt:1935-1937): the primary color is
+     * IGNORED and the texture passes through unchanged. The default sprite wrappers
+     * (NativeSprite.draw(x,y) at NativeSprite.kt:39-41, drawTiled at :49-51,
+     * drawRotatedCenter at :53-55) all pass combineMode=1 with colorArgb=0 — feeding
+     * that 0 into the multiply shader rendered every default sprite draw BLACK with
+     * alpha 0. REPLACE maps to opaque white; mode 0 (GL_MODULATE/GL_MODULATE) is the
+     * shader's native behavior. Modes 2/3/4 are unused by sprite draws and treated
+     * as MODULATE.
+     */
+    private fun shaderColor(combineMode: Int, colorArgb: Int): Int =
+        if (combineMode == 1) -1 else colorArgb
+
+    // ===== Basic textured sprite drawing =====
+
+    /**
+     * Draws a textured sprite at (x, y) with optional color tinting and blend mode.
+     *
+     * Legacy: calls toolkit.setupSpriteRendering(), toolkit.setActiveTexture(),
+     * toolkit.loadTextureCombineMode(), toolkit.setBlendMode(), then
+     * OpenGL.glColor4ub, OpenGL.glBegin(GL_QUADS), glTexCoord2f/glVertex2i x4, glEnd.
+     *
+     * Modern: draws a textured quad through ModernSpriteRenderer batch.
+     *
+     * Note: channelMaskTexture multi-texture path (GL_DOT3_RGBA) is not supported
+     * in the modern path. Normal-mapped sprites fall through to legacy rendering.
+     */
+    override fun draw(x: Int, y: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        // Normal-map (GL_DOT3_RGBA channel mask) sprites need a dedicated shader
+        // variant; until then draw the base sprite without the mask (approximation,
+        // counted as a parity gap — NO legacy fallback under the modern toolkit).
+        if (channelMaskTexture != null) {
+            modernToolkit.countLegacySkip("SpriteGL.channelMask(approx)")
+        }
+
+        if (!useModernPath()) {
+            modernToolkit.countLegacySkip("SpriteGL.draw(skipped)")
+            return
+        }
+
+        val sr = modernToolkit.getSpriteRenderer()!!
+        modernToolkit.ensureSpriteBatchForFont() // Ensures sprite batch is active
+
+        val drawX = x + translateX
+        val drawY = y + translateY
+        val textureHandle = texture2d.activeHandle
+        if (textureHandle <= 0) return
+
+        sr.drawSprite(
+            textureId = textureHandle,
+            x0 = drawX.toFloat(),
+            y0 = drawY.toFloat(),
+            x1 = (drawX + texture2d.singleWidth).toFloat(),
+            y1 = (drawY + texture2d.singleLength).toFloat(),
+            u0 = 0.0f,
+            v0 = texture2d.t,
+            u1 = texture2d.s,
+            v1 = 0.0f,
+            colorArgb = shaderColor(combineMode, colorArgb),
+            blendMode = blendMode
+        )
+    }
+
+    // ===== Tiled sprite drawing =====
+
+    /**
+     * Draws a tiled/repeated sprite filling the given rectangle.
+     *
+     * Legacy: Uses glBegin/glEnd with multiple quads for tiling when the sprite
+     * needs to be repeated. Single quad for simple cases.
+     *
+     * Modern: Emits multiple quads through the sprite batch for tiling, or a
+     * single quad for simple cases.
+     */
+    override fun drawScaledColored(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        if (!useModernPath()) {
+            modernToolkit.countLegacySkip("SpriteGL.drawScaledColored(skipped)")
+            return
+        }
+
+        val sr = modernToolkit.getSpriteRenderer()!!
+        modernToolkit.ensureSpriteBatchForFont()
+
+        val textureHandle = texture2d.activeHandle
+        if (textureHandle <= 0) return
+
+        val endX = x + width
+        val endY = y + height
+
+        if (texture2d.tiled && !stretched) {
+            // Simple tiled case -- scale UVs to cover the area
+            val t = texture2d.t * height / texture2d.singleLength
+            val s = texture2d.s * width / texture2d.singleWidth
+
+            sr.drawSprite(
+                textureId = textureHandle,
+                x0 = x.toFloat(), y0 = y.toFloat(),
+                x1 = endX.toFloat(), y1 = endY.toFloat(),
+                u0 = 0.0f, v0 = t,
+                u1 = s, v1 = 0.0f,
+                colorArgb = shaderColor(combineMode, colorArgb),
+                blendMode = blendMode
+            )
+        } else {
+            // Tiled repeating -- emit multiple quads
+            val spriteWidth = getSpriteWidth()
+            val spriteHeight = getSpriteHeight()
+
+            var startY = y
+            var tileEndY = texture2d.singleLength + y
+
+            while (tileEndY <= endY) {
+                var startX = x
+                var tileEndX = texture2d.singleWidth + x
+
+                while (tileEndX <= endX) {
+                    sr.drawSprite(
+                        textureId = textureHandle,
+                        x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
+                        x1 = (tileEndX + translateX).toFloat(), y1 = (tileEndY + translateY).toFloat(),
+                        u0 = 0.0f, v0 = texture2d.t,
+                        u1 = texture2d.s, v1 = 0.0f,
+                        colorArgb = shaderColor(combineMode, colorArgb),
+                        blendMode = blendMode
+                    )
+                    tileEndX += spriteWidth
+                    startX += spriteWidth
+                }
+
+                // Partial column at right edge
+                if (startX < endX) {
+                    val partialS = texture2d.s * (endX - startX) / texture2d.singleWidth
+                    sr.drawSprite(
+                        textureId = textureHandle,
+                        x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
+                        x1 = (endX + translateX).toFloat(), y1 = (tileEndY + translateY).toFloat(),
+                        u0 = 0.0f, v0 = texture2d.t,
+                        u1 = partialS, v1 = 0.0f,
+                        colorArgb = shaderColor(combineMode, colorArgb),
+                        blendMode = blendMode
+                    )
+                }
+
+                startY += spriteHeight
+                tileEndY += spriteHeight
+            }
+
+            // Partial row at bottom
+            if (startY < endY) {
+                val partialT = texture2d.t * (texture2d.singleLength - (endY - startY)) / texture2d.singleLength
+                var startX = x
+                var tileEndX = texture2d.singleWidth + x
+
+                while (tileEndX <= endX) {
+                    sr.drawSprite(
+                        textureId = textureHandle,
+                        x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
+                        x1 = (tileEndX + translateX).toFloat(), y1 = (endY + translateY).toFloat(),
+                        u0 = 0.0f, v0 = texture2d.t,
+                        u1 = texture2d.s, v1 = partialT,
+                        colorArgb = shaderColor(combineMode, colorArgb),
+                        blendMode = blendMode
+                    )
+                    tileEndX += spriteWidth
+                    startX += spriteWidth
+                }
+
+                // Bottom-right corner partial
+                if (startX < endX) {
+                    val partialS = texture2d.s * (endX - startX) / texture2d.singleWidth
+                    sr.drawSprite(
+                        textureId = textureHandle,
+                        x0 = (startX + translateX).toFloat(), y0 = (startY + translateY).toFloat(),
+                        x1 = (endX + translateX).toFloat(), y1 = (endY + translateY).toFloat(),
+                        u0 = 0.0f, v0 = texture2d.t,
+                        u1 = partialS, v1 = partialT,
+                        colorArgb = shaderColor(combineMode, colorArgb),
+                        blendMode = blendMode
+                    )
+                }
+            }
+        }
+    }
+
+    // ===== Scaled sprite drawing =====
+
+    /**
+     * Draws a sprite scaled to fit a rectangle, with optional color tinting.
+     *
+     * Legacy: calls glBegin(GL_QUADS) with scaled vertex positions.
+     * Modern: draws a single textured quad through the sprite batch.
+     */
+    override fun drawColoredCircle(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        // Channel-mask variant approximated without the mask (counted parity gap)
+        if (channelMaskTexture != null) {
+            modernToolkit.countLegacySkip("SpriteGL.channelMask(approx)")
+        }
+
+        if (!useModernPath()) {
+            modernToolkit.countLegacySkip("SpriteGL.drawColoredCircle(skipped)")
+            return
+        }
+
+        val sr = modernToolkit.getSpriteRenderer()!!
+        modernToolkit.ensureSpriteBatchForFont()
+
+        val textureHandle = texture2d.activeHandle
+        if (textureHandle <= 0) return
+
+        if (stretched) {
+            // Stretched sprites need per-component scaling
+            val scaleX = width.toFloat() / getSpriteWidth()
+            val scaleY = height.toFloat() / getSpriteHeight()
+            val drawX = x + translateX * scaleX
+            val drawY = y + translateY * scaleY
+            val drawEndX = drawX + texture2d.singleWidth * scaleX
+            val drawEndY = drawY + texture2d.singleLength * scaleY
+
+            sr.drawSprite(
+                textureId = textureHandle,
+                x0 = drawX, y0 = drawY,
+                x1 = drawEndX, y1 = drawEndY,
+                u0 = 0.0f, v0 = texture2d.t,
+                u1 = texture2d.s, v1 = 0.0f,
+                colorArgb = shaderColor(combineMode, colorArgb),
+                blendMode = blendMode
+            )
+        } else {
+            sr.drawSprite(
+                textureId = textureHandle,
+                x0 = x.toFloat(), y0 = y.toFloat(),
+                x1 = (x + width).toFloat(), y1 = (y + height).toFloat(),
+                u0 = 0.0f, v0 = texture2d.t,
+                u1 = texture2d.s, v1 = 0.0f,
+                colorArgb = shaderColor(combineMode, colorArgb),
+                blendMode = blendMode
+            )
+        }
+    }
+
+    // ===== Rotated sprite drawing =====
+
+    /**
+     * Draws a rotated/transformed sprite as an arbitrary quad.
+     *
+     * Legacy: calls glBegin(7) [GL_QUADS] with transformed float vertex positions.
+     * Modern: uses drawQuad to emit an arbitrary quad.
+     *
+     * The 6 float parameters define 3 corners of a parallelogram:
+     * (f_1, f_2) = top-left, (f_3, f_4) = top-right, (f_5, f_6) = bottom-left
+     * The 4th corner (bottom-right) is computed as: bottom-left + (top-right - top-left)
+     */
+    override fun drawAffine(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        if (!useModernPath()) {
+            modernToolkit.countLegacySkip("SpriteGL.drawAffine(skipped)")
+            return
+        }
+
+        val sr = modernToolkit.getSpriteRenderer()!!
+        modernToolkit.ensureSpriteBatchForFont()
+
+        val textureHandle = texture2d.activeHandle
+        if (textureHandle <= 0) return
+
+        // Apply stretch/translate transforms matching legacy drawAffine
+        var x1 = f_1
+        var y1 = f_2
+        var x2 = f_3
+        var y2 = f_4
+        var x3 = f_5
+        var y3 = f_6
+
+        if (stretched) {
+            val spriteW = getSpriteWidth().toFloat()
+            val spriteH = getSpriteHeight().toFloat()
+            val scaleXx = (x2 - x1) / spriteW
+            val scaleXy = (y2 - y1) / spriteW
+            val scaleYx = (x3 - x1) / spriteH
+            val scaleYy = (y3 - y1) / spriteH
+            val transYx = scaleYx * translateY
+            val transYy = scaleYy * translateY
+            val transXx = scaleXx * translateX
+            val transXy = scaleXy * translateX
+            val borderXx = -scaleXx * trimRight
+            val borderXy = -scaleXy * trimRight
+            val borderYx = -scaleYx * trimBottom
+            val borderYy = -scaleYy * trimBottom
+            x1 = x1 + transXx + transYx
+            y1 = y1 + transXy + transYy
+            x2 = x2 + borderXx + transYx
+            y2 = y2 + borderXy + transYy
+            x3 = x3 + transXx + borderYx
+            y3 = y3 + transXy + borderYy
+        }
+
+        // 4th corner = bottom-left + (top-right - top-left)
+        val x4 = x3 + (x2 - x1)
+        val y4 = y2 + (y3 - y1)
+
+        sr.drawQuad(
+            textureId = textureHandle,
+            x0 = x1, y0 = y1, u0 = 0.0f, v0 = texture2d.t,
+            x1 = x3, y1 = y3, u1 = 0.0f, v1 = 0.0f,
+            x2 = x4, y2 = y4, u2 = texture2d.s, v2 = 0.0f,
+            x3 = x2, y3 = y2, u3 = texture2d.s, v3 = texture2d.t,
+            colorArgb = shaderColor(combineMode, colorArgb),
+            blendMode = blendMode
+        )
+    }
+
+    // ===== Multi-texture surface overlay methods =====
+    // These use GL_TEXTURE1 with complex combine modes (GL_REPLACE, GL_MODULATE,
+    // GL_DOT3_RGBA). They require dedicated shader variants that are not yet available.
+    // For now, they fall through to the legacy SpriteGL implementation.
+    //
+    // drawWithSurface: surface overlay for axis-aligned sprites
+    // drawAffineMasked: surface overlay for rotated/transformed sprites
+    //
+    // These are used by InterfaceComponentRenderer for drawing sprites with
+    // ComponentSurface backgrounds. The visual difference is that the surface
+    // texture overlay will be missing, but the sprite itself renders correctly.
+    // Full support requires WP-23 (Material Effects Migration) shader variants.
+
+    /**
+     * Screen-capture update: legacy copies framebuffer pixels into this sprite's
+     * texture (SpriteGL.captureScreenRegion → OpenGl2DTexture.copyTextureSubImage,
+     * OpenGl2DTexture.kt:162-167, glCopyTexSubImage2D). The modern batch defers
+     * draws, so the pending quads must reach the framebuffer BEFORE the copy —
+     * otherwise the captured region is stale/black (this fed the black minimap).
+     * The copy itself is a resource operation and remains the legacy call.
+     */
+    override fun captureScreenRegion(offsetX: Int, offsetY: Int, width: Int, height: Int, x: Int, y: Int) {
+        modernToolkit.flushAllPendingDraws()
+        super.captureScreenRegion(offsetX, offsetY, width, height, x, y)
+    }
+
+    override fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, offsetX: Int, offsetY: Int) {
+        // Multi-texture surface overlay requires a dedicated shader variant. Until
+        // then, draw the base sprite without the surface mask (approximation, counted
+        // as a parity gap — NO legacy fallback under the modern toolkit).
+        modernToolkit.countLegacySkip("SpriteGL.drawWithSurface(approx)")
+        draw(x, y, 1, -1, 1)
+    }
+
+    override fun drawAffineMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, flags: Int, surface: ComponentSurface, offsetX: Int, offsetY: Int) {
+        // Multi-texture surface overlay requires a dedicated shader variant. Until
+        // then, draw the transformed sprite without the surface mask (approximation).
+        modernToolkit.countLegacySkip("SpriteGL.drawAffineMasked(approx)")
+        drawAffine(f_1, f_2, f_3, f_4, f_5, f_6, 1, -1, 1)
+    }
+}

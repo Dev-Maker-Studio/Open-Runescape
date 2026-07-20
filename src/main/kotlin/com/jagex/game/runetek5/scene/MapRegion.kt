@@ -624,6 +624,16 @@ class MapRegion(var asyncMaploading: Boolean) {
         if (Renderers.activeToolkit!!.extendBuildArea()) {
             buildAreaChunks++
         }
+        // The legacy visible-tile radius (65 with the original build area) was tuned to
+        // sit past the stock fog start (~34 tiles), so the terrain draw limit was never
+        // visible. With FOG_DISTANCE_MULTIPLIER pushing visibility to ~88 tiles the edge
+        // shows as a hard terrain cutoff with locs floating beyond it. Clamp the radius
+        // up to the full scene dimension so every loaded tile is inside the visibility
+        // window from any camera position; the far plane and fog bound the rest.
+        val fullSceneRadius = maxOf(this.sceneSizeX, this.sceneSizeY)
+        if (buildAreaChunks < fullSceneRadius) {
+            buildAreaChunks = fullSceneRadius
+        }
         calculateViewRange()
         clear()
         this.scene = Scene(Renderers.activeToolkit!!, this.sceneSizeX, this.sceneSizeY, buildAreaChunks, hasUnderwaterMap, Renderers.activeToolkit!!.getMaxLights() > 0)

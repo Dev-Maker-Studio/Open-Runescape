@@ -8,9 +8,11 @@ import com.jagex.game.runetek5.graphics.modern.core.VertexFormats
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TRIANGLES
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED_SHORT
+import com.jagex.game.runetek5.math.Matrix44
 import org.joml.Matrix3f
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import org.lwjgl.opengl.GL33.*
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 
@@ -36,11 +38,60 @@ class ModernGroundRenderer {
         private const val DEFAULT_INDEX_CAPACITY = 131072
     }
 
-    // GPU resources
+    // GPU resources for self-managed rendering
     private var vao: VertexArray? = null
     private var vbo: VertexBuffer? = null
     private var ibo: IndexBuffer? = null
     private var shader: ShaderProgram? = null
+
+    // Textured ground shader (for rendering with external legacy VBOs)
+    private var texturedShader: ShaderProgram? = null
+    private var externalVao: VertexArray? = null
+    private var externalIbo: IndexBuffer? = null
+
+    // Uniform locations for textured shader
+    private var uTexViewProjectionLocation = -1
+    private var uTexTextureScaleLocation = -1
+    private var uTexHasNormalsLocation = -1
+    private var uTexSunDirectionLocation = -1
+    private var uTexSunColorLocation = -1
+    private var uTexAmbientLocation = -1
+    private var uTexContrastLocation = -1
+    private var uTexFogStartLocation = -1
+    private var uTexFogEndLocation = -1
+    private var uTexFogEnabledLocation = -1
+    private var uTexFogColorLocation = -1
+    private var uTexTextureLocation = -1
+    private var uTexHasTextureLocation = -1
+    private var uTexCombineModeLocation = -1
+    private var uTexSunBrightnessLocation = -1
+    private var uTexContrastPosLocation = -1
+    private var uTexContrastNegLocation = -1
+
+    // Legacy sun parameters for HD_LIGHT grounds (raw, unnormalized values from
+    // OpenGlToolkit.sunDirection / sunBrightness / sunColorIntensity / antiSunColorIntensity)
+    private var legacySunDirX = 0f
+    private var legacySunDirY = -1f
+    private var legacySunDirZ = 0f
+    private var legacySunBrightness = 1f
+    private var legacyContrastPos = 0f
+    private var legacyContrastNeg = 0f
+
+    /**
+     * Sets the raw legacy sun parameters used by the HD_LIGHT ground lighting formula
+     * (GroundGL.kt:458-459). Values must be passed UNNORMALIZED, matching legacy.
+     */
+    fun setLegacySunParams(
+        dirX: Float, dirY: Float, dirZ: Float,
+        brightness: Float, contrastPos: Float, contrastNeg: Float
+    ) {
+        legacySunDirX = dirX
+        legacySunDirY = dirY
+        legacySunDirZ = dirZ
+        legacySunBrightness = brightness
+        legacyContrastPos = contrastPos
+        legacyContrastNeg = contrastNeg
+    }
 
     // CPU staging buffer
     private var vertexData: ByteBuffer? = null
@@ -73,6 +124,7 @@ class ModernGroundRenderer {
     private var shadowMapTextureId = 0
     private var shadowBias = 0.005f
     private var shadowIntensity = 0.5f
+    private var shadowMapSize = 2048f  // Shadow map dimensions for PCF texel size calculation
 
     // Uniform locations
     private var uMVPLocation = -1
@@ -91,6 +143,7 @@ class ModernGroundRenderer {
     private var uShadowMapLocation = -1
     private var uShadowBiasLocation = -1
     private var uShadowIntensityLocation = -1
+    private var uShadowMapSizeLocation = -1
 
     private var isInitialized = false
 
@@ -104,6 +157,7 @@ class ModernGroundRenderer {
     fun initialize() {
         if (isInitialized) return
 
+        // Initialize the standard ground shader (for self-managed vertex data)
         shader = ShaderProgram.createFromResources("/shaders/ground.vert", "/shaders/ground.frag")
 
         vao = VertexArray()
@@ -120,6 +174,13 @@ class ModernGroundRenderer {
         indexData = MemoryUtil.memAllocShort(DEFAULT_INDEX_CAPACITY)
 
         cacheUniformLocations()
+
+        // Initialize textured ground shader (for external legacy VBOs)
+        texturedShader = ShaderProgram.createFromResources("/shaders/groundTextured.vert", "/shaders/groundTextured.frag")
+        externalVao = VertexArray()
+        externalIbo = IndexBuffer(IndexBuffer.BufferUsage.DYNAMIC, IndexBuffer.IndexType.UNSIGNED_SHORT)
+
+        cacheTexturedUniformLocations()
 
         isInitialized = true
     }
@@ -143,6 +204,30 @@ class ModernGroundRenderer {
         uShadowMapLocation = s.getUniformLocation("uShadowMap")
         uShadowBiasLocation = s.getUniformLocation("uShadowBias")
         uShadowIntensityLocation = s.getUniformLocation("uShadowIntensity")
+        uShadowMapSizeLocation = s.getUniformLocation("uShadowMapSize")
+        s.unbind()
+    }
+
+    private fun cacheTexturedUniformLocations() {
+        val s = texturedShader ?: return
+        s.bind()
+        uTexViewProjectionLocation = s.getUniformLocation("uViewProjection")
+        uTexTextureScaleLocation = s.getUniformLocation("uTextureScale")
+        uTexHasNormalsLocation = s.getUniformLocation("uHasNormals")
+        uTexSunDirectionLocation = s.getUniformLocation("uSunDirection")
+        uTexSunColorLocation = s.getUniformLocation("uSunColor")
+        uTexAmbientLocation = s.getUniformLocation("uAmbient")
+        uTexContrastLocation = s.getUniformLocation("uContrast")
+        uTexFogStartLocation = s.getUniformLocation("uFogStart")
+        uTexFogEndLocation = s.getUniformLocation("uFogEnd")
+        uTexFogEnabledLocation = s.getUniformLocation("uFogEnabled")
+        uTexFogColorLocation = s.getUniformLocation("uFogColor")
+        uTexTextureLocation = s.getUniformLocation("uTexture")
+        uTexHasTextureLocation = s.getUniformLocation("uHasTexture")
+        uTexCombineModeLocation = s.getUniformLocation("uCombineMode")
+        uTexSunBrightnessLocation = s.getUniformLocation("uSunBrightness")
+        uTexContrastPosLocation = s.getUniformLocation("uContrastPos")
+        uTexContrastNegLocation = s.getUniformLocation("uContrastNeg")
         s.unbind()
     }
 
@@ -185,12 +270,13 @@ class ModernGroundRenderer {
     /**
      * Configures shadow mapping.
      */
-    fun setShadowMapping(enabled: Boolean, shadowMap: Int, matrix: Matrix4f, bias: Float = 0.005f, intensity: Float = 0.5f) {
+    fun setShadowMapping(enabled: Boolean, shadowMap: Int, matrix: Matrix4f, bias: Float = 0.005f, intensity: Float = 0.5f, mapSize: Int = 2048) {
         shadowEnabled = enabled
         shadowMapTextureId = shadowMap
         shadowMatrix.set(matrix)
         shadowBias = bias
         shadowIntensity = intensity
+        shadowMapSize = mapSize.toFloat()
     }
 
     /**
@@ -237,6 +323,7 @@ class ModernGroundRenderer {
         ibo!!.upload(indices)
 
         vao!!.bind()
+        ibo!!.bind()
         GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
 
         drawCallsThisFrame++
@@ -307,13 +394,399 @@ class ModernGroundRenderer {
     }
 
     /**
+     * Renders ground geometry using external legacy VBOs.
+     *
+     * This method binds to pre-existing VBOs created by the legacy GroundGL system
+     * and renders them through the modern shader pipeline. The legacy VBO has
+     * the following interleaved layout (from GroundGL.resetLight):
+     *
+     * Standard (24 bytes per vertex):
+     * - Position: vec3 (12 bytes) at offset 0
+     * - Color: RGBA (4 bytes) at offset 12
+     * - TexCoord: vec2 (8 bytes) at offset 16
+     *
+     * With 3D texcoords (28 bytes per vertex):
+     * - Position: vec3 (12 bytes) at offset 0
+     * - Color: RGBA (4 bytes) at offset 12
+     * - TexCoord: vec3 (12 bytes) at offset 16
+     *
+     * With HD_LIGHT normals (add 12 bytes):
+     * - Normal: vec3 (12 bytes) at offset 24 or 28
+     *
+     * @param interleavedVboId GL buffer ID containing all vertex data (position, color, texcoord, normal)
+     * @param stride Stride between vertices in the interleaved buffer
+     * @param texCoordSize Size of texture coordinates (2 for vec2, 3 for vec3)
+     * @param indexData Raw index data as byte array
+     * @param indexByteCount Number of bytes in indexData that contain valid index data
+     * @param indexCount Number of indices to draw
+     * @param textureHandle GL texture handle (0 for no texture)
+     * @param textureScale Scale factor for texture coordinates
+     * @param hasNormals Whether HD lighting normals are available
+     * @param viewProjection The combined view-projection matrix (Matrix44 from legacy)
+     * @param isBigEndian Whether the index data is big-endian
+     */
+    fun renderWithExternalVBOs(
+        interleavedVboId: Int,
+        stride: Int,
+        texCoordSize: Int,
+        indexData: ByteArray,
+        indexByteCount: Int,
+        indexCount: Int,
+        textureHandle: Int,
+        textureScale: Float,
+        hasNormals: Boolean,
+        viewProjection: Matrix44,
+        isBigEndian: Boolean
+    ) {
+        if (indexCount == 0) return
+
+        val s = texturedShader ?: return
+        val vao = externalVao ?: return
+        val ibo = externalIbo ?: return
+
+        // Bind shader
+        s.bind()
+
+        // Set view-projection matrix: RS elements is row-major, upload straight through
+        // for GLSL column-vector trick. Negate Y row for OpenGL Y-up convention.
+        val vp = viewProjection.elements ?: return
+        val colMajor = FloatArray(16)
+        for (i in 0..15) colMajor[i] = vp[i]
+        colMajor[1] = -colMajor[1]
+        colMajor[5] = -colMajor[5]
+        colMajor[9] = -colMajor[9]
+        colMajor[13] = -colMajor[13]
+        glUniformMatrix4fv(uTexViewProjectionLocation, false, colMajor)
+
+        // Set texture scaling
+        s.setUniform(uTexTextureScaleLocation, textureScale)
+
+        // Set lighting parameters
+        s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
+        s.setUniform(uTexSunDirectionLocation, sunDirection.x, sunDirection.y, sunDirection.z)
+        s.setUniform("uSunColor", sunColor)
+        s.setUniform(uTexAmbientLocation, ambient)
+        s.setUniform(uTexContrastLocation, contrast)
+
+        // Set fog parameters
+        s.setUniform(uTexFogEnabledLocation, if (fogEnabled) 1 else 0)
+        s.setUniform(uTexFogStartLocation, fogStart)
+        s.setUniform(uTexFogEndLocation, fogEnd)
+        s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
+
+        // Set texture parameters
+        val hasTexture = textureHandle > 0
+        s.setUniform(uTexHasTextureLocation, if (hasTexture) 1 else 0)
+        if (hasTexture) {
+            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
+            // Ensure texture tiles properly with world-space texture coordinates
+            GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_S, GLWrapper.Constants.REPEAT)
+            GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_T, GLWrapper.Constants.REPEAT)
+            s.setUniform(uTexTextureLocation, 0)
+        }
+
+
+        // Setup VAO with external VBO
+        vao.bind()
+
+        // Bind the single interleaved VBO
+        GLWrapper.bindBuffer(GLWrapper.Constants.ARRAY_BUFFER, interleavedVboId)
+
+        // Position: vec3 at offset 0
+        glEnableVertexAttribArray(0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L)
+
+        // Color: vec4 ubyte at offset 12
+        glEnableVertexAttribArray(1)
+        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, stride, 12L)
+
+        // TexCoord: vec2 or vec3 at offset 16
+        glEnableVertexAttribArray(2)
+        glVertexAttribPointer(2, texCoordSize, GL_FLOAT, false, stride, 16L)
+
+        // Calculate texture coordinate byte size (for normal offset calculation)
+        val texCoordBytes = texCoordSize * 4  // 8 for vec2, 12 for vec3
+
+        // Normal: vec3 at offset 16 + texCoordBytes (if HD_LIGHT)
+        if (hasNormals) {
+            val normalOffset = 16L + texCoordBytes
+            glEnableVertexAttribArray(3)
+            glVertexAttribPointer(3, 3, GL_FLOAT, false, stride, normalOffset)
+        } else {
+            glDisableVertexAttribArray(3)
+        }
+
+        // Upload index data - convert byte array to short buffer with correct endianness
+        ensureIndexCapacity(indexCount)
+        val shortBuffer = this.indexData!!
+        shortBuffer.clear()
+        for (i in 0 until indexCount) {
+            val byteOffset = i * 2
+            val idx = if (isBigEndian) {
+                // Big-endian: MSB first
+                ((indexData[byteOffset].toInt() and 0xFF) shl 8) or (indexData[byteOffset + 1].toInt() and 0xFF)
+            } else {
+                // Little-endian: LSB first
+                (indexData[byteOffset].toInt() and 0xFF) or ((indexData[byteOffset + 1].toInt() and 0xFF) shl 8)
+            }
+            shortBuffer.put(idx.toShort())
+        }
+        shortBuffer.flip()
+        ibo.upload(shortBuffer)
+
+        // Draw
+        GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
+
+        // Cleanup
+        glDisableVertexAttribArray(0)
+        glDisableVertexAttribArray(1)
+        glDisableVertexAttribArray(2)
+        glDisableVertexAttribArray(3)
+        vao.unbind()
+
+        if (hasTexture) {
+            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, 0)
+        }
+
+        drawCallsThisFrame++
+        trianglesThisFrame += indexCount / 3
+    }
+
+    // VBO for modern-only rendering (no legacy dependency)
+    private var modernVbo: Int = 0
+
+    // Scratch VBO for per-material color data when the legacy color buffer is not a VBO
+    private var modernColorVbo: Int = 0
+
+    // Reused matrix upload scratch (avoid per-draw allocation)
+    private val vpScratch = FloatArray(16)
+
+    /**
+     * Renders ground using a ByteBuffer directly (no legacy VBO involvement).
+     * This is the pure LWJGL path with zero legacy dependency.
+     *
+     * Color source parity with legacy: GroundMaterialGL.drawMaterialTriangles draws with
+     * toggleDrawingClientstates(ground.vertexBuffer, ground.normalsBuffer,
+     * material.arrayBufferPointer, ground.textureBuffer) (GroundMaterialGL.kt:189/199) —
+     * i.e. vertex COLORS come from the PER-MATERIAL color VBO (baked light/shadow written
+     * by writeVertexColor, alpha mask via appendToNativeStream), NOT from the interleaved
+     * ground buffer (whose color at offset 12 is black for textured vertices).
+     *
+     * @param colorVboId GL buffer id of the per-material color VBO (4 ubytes RGBA per
+     *        vertex, same vertex indexing as the interleaved buffer), or 0 when unavailable
+     * @param colorData client-memory copy of the per-material colors when colorVboId == 0
+     * @param combineMode legacy MaterialType.combineMode (see groundTextured.frag)
+     */
+    fun renderWithModernData(
+        vertexData: java.nio.ByteBuffer,
+        stride: Int,
+        texCoordSize: Int,
+        indexData: ByteArray,
+        indexByteCount: Int,
+        indexCount: Int,
+        textureHandle: Int,
+        textureScale: Float,
+        hasNormals: Boolean,
+        viewProjection: Matrix44,
+        isBigEndian: Boolean,
+        colorVboId: Int = 0,
+        colorData: java.nio.ByteBuffer? = null,
+        combineMode: Int = 0
+    ) {
+        if (indexCount == 0) return
+
+        val s = texturedShader ?: return
+        val vao = externalVao ?: return
+        val ibo = externalIbo ?: return
+
+        // Create VBO if needed
+        if (modernVbo == 0) {
+            modernVbo = glGenBuffers()
+        }
+
+        // Upload vertex data to our own VBO
+        vertexData.position(0)
+        glBindBuffer(GL_ARRAY_BUFFER, modernVbo)
+        glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW)
+
+        // Bind shader
+        s.bind()
+
+        // Set view-projection matrix: RS elements is row-major, upload straight through
+        // for GLSL column-vector trick (row-major + M*v = row-vector convention result).
+        // Negate Y row (indices 1,5,9,13) for OpenGL Y-up convention (RS VP has Y-down).
+        val vp = viewProjection.elements ?: return
+        val colMajor = vpScratch
+        for (i in 0..15) colMajor[i] = vp[i]
+        colMajor[1] = -colMajor[1]
+        colMajor[5] = -colMajor[5]
+        colMajor[9] = -colMajor[9]
+        colMajor[13] = -colMajor[13]
+        glUniformMatrix4fv(uTexViewProjectionLocation, false, colMajor)
+
+        // Set texture scaling
+        s.setUniform(uTexTextureScaleLocation, textureScale)
+
+        // Set lighting parameters. HD_LIGHT grounds bake sunDotProduct = 1.0 into the
+        // vertex colors and expect runtime sun lighting (GroundGL.kt:457-460), so pass
+        // the RAW legacy sun parameters for the shader's legacy-formula lighting.
+        s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
+        s.setUniform(uTexSunDirectionLocation, legacySunDirX, legacySunDirY, legacySunDirZ)
+        s.setUniform("uSunColor", sunColor)
+        s.setUniform(uTexAmbientLocation, ambient)
+        s.setUniform(uTexContrastLocation, contrast)
+        s.setUniform(uTexSunBrightnessLocation, legacySunBrightness)
+        s.setUniform(uTexContrastPosLocation, legacyContrastPos)
+        s.setUniform(uTexContrastNegLocation, legacyContrastNeg)
+
+        // Set fog parameters
+        s.setUniform(uTexFogEnabledLocation, if (fogEnabled) 1 else 0)
+        s.setUniform(uTexFogStartLocation, fogStart)
+        s.setUniform(uTexFogEndLocation, fogEnd)
+        s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
+
+        // Set texture parameters
+        val hasTexture = textureHandle > 0
+        s.setUniform(uTexHasTextureLocation, if (hasTexture) 1 else 0)
+        s.setUniform(uTexCombineModeLocation, combineMode)
+        if (hasTexture) {
+            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
+            GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_S, GLWrapper.Constants.REPEAT)
+            GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_T, GLWrapper.Constants.REPEAT)
+            s.setUniform(uTexTextureLocation, 0)
+        }
+
+        // Clear depth buffer on the CURRENT FBO before first ground draw call.
+        // The depth buffer on this FBO has stale values (0.0) because the initial
+        // glClear(GL_DEPTH_BUFFER_BIT) in setModelMatrix() runs on a different FBO.
+        // Ground renders inline during scene traversal before batched models flush,
+        // so this clear is safe — no valid depth data has been written yet.
+        if (drawCallsThisFrame == 0) {
+            glClearDepth(1.0)
+            glDepthMask(true)
+            glClear(GL_DEPTH_BUFFER_BIT)
+        }
+
+        // Ensure proper GL state for ground rendering.
+        // Blend must be on: the per-material color VBO carries a per-vertex alpha MASK
+        // (0 for vertices not owned by this material, 255 for owned — written by
+        // GroundMaterialGL.appendToNativeStream), and legacy draws ground with
+        // setBlendMode(1) (alpha blend) via setupMatrixRendering. Without blending the
+        // cross-material tile edges lose their legacy feathering.
+        glEnable(GL_DEPTH_TEST)
+        glDepthFunc(GL_LEQUAL)
+        glDepthMask(true)
+        glDisable(GL_CULL_FACE)
+        glColorMask(true, true, true, true)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        // Setup VAO with vertex attributes
+        vao.bind()
+        glBindBuffer(GL_ARRAY_BUFFER, modernVbo)
+
+        // Position: vec3 at offset 0
+        glEnableVertexAttribArray(0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L)
+
+        // TexCoord: vec2 or vec3 at offset 16
+        glEnableVertexAttribArray(2)
+        glVertexAttribPointer(2, texCoordSize, GL_FLOAT, false, stride, 16L)
+
+        // Normal: vec3 at offset 16 + texCoordBytes (if hasNormals)
+        val texCoordBytes = texCoordSize * 4
+        if (hasNormals) {
+            val normalOffset = 16L + texCoordBytes
+            glEnableVertexAttribArray(3)
+            glVertexAttribPointer(3, 3, GL_FLOAT, false, stride, normalOffset)
+        } else {
+            glDisableVertexAttribArray(3)
+        }
+
+        // Color: from the per-material color VBO (legacy parity — see kdoc above).
+        // Attribute pointers latch the ARRAY_BUFFER binding at specification time,
+        // so this must come after the interleaved attributes are specified.
+        glEnableVertexAttribArray(1)
+        when {
+            colorVboId != 0 -> {
+                glBindBuffer(GL_ARRAY_BUFFER, colorVboId)
+                glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, 4, 0L)
+            }
+            colorData != null -> {
+                if (modernColorVbo == 0) modernColorVbo = glGenBuffers()
+                colorData.position(0)
+                glBindBuffer(GL_ARRAY_BUFFER, modernColorVbo)
+                glBufferData(GL_ARRAY_BUFFER, colorData, GL_DYNAMIC_DRAW)
+                glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, 4, 0L)
+            }
+            else -> {
+                // Fallback: interleaved color at offset 12 (black for textured vertices)
+                glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, true, stride, 12L)
+            }
+        }
+
+        // Upload index data
+        ensureIndexCapacity(indexCount)
+        val shortBuffer = this.indexData!!
+        shortBuffer.clear()
+        for (i in 0 until indexCount) {
+            val byteOffset = i * 2
+            val idx = if (isBigEndian) {
+                ((indexData[byteOffset].toInt() and 0xFF) shl 8) or (indexData[byteOffset + 1].toInt() and 0xFF)
+            } else {
+                (indexData[byteOffset].toInt() and 0xFF) or ((indexData[byteOffset + 1].toInt() and 0xFF) shl 8)
+            }
+            shortBuffer.put(idx.toShort())
+        }
+        shortBuffer.flip()
+        ibo.upload(shortBuffer)
+        ibo.bind()
+
+        // Draw
+        GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
+
+        // Cleanup
+        glDisableVertexAttribArray(0)
+        glDisableVertexAttribArray(1)
+        glDisableVertexAttribArray(2)
+        glDisableVertexAttribArray(3)
+        vao.unbind()
+
+        if (hasTexture) {
+            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, 0)
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+        // Unbind the program: legacy fixed-function draws interleave with this path
+        // (lights, UI, fallbacks), and a bound program hijacks their vertex processing.
+        s.unbind()
+
+        drawCallsThisFrame++
+        trianglesThisFrame += indexCount / 3
+    }
+
+    /**
      * Releases resources.
      */
     fun destroy() {
+        if (modernVbo != 0) {
+            glDeleteBuffers(modernVbo)
+            modernVbo = 0
+        }
+        if (modernColorVbo != 0) {
+            glDeleteBuffers(modernColorVbo)
+            modernColorVbo = 0
+        }
         shader?.destroy()
         vao?.destroy()
         vbo?.destroy()
         ibo?.destroy()
+
+        texturedShader?.destroy()
+        externalVao?.destroy()
+        externalIbo?.destroy()
 
         vertexData?.let { MemoryUtil.memFree(it) }
         indexData?.let { MemoryUtil.memFree(it) }
@@ -322,6 +795,9 @@ class ModernGroundRenderer {
         vao = null
         vbo = null
         ibo = null
+        texturedShader = null
+        externalVao = null
+        externalIbo = null
         vertexData = null
         indexData = null
 
@@ -352,6 +828,7 @@ class ModernGroundRenderer {
             s.setUniform(uShadowMapLocation, 1) // Texture unit 1
             s.setUniform(uShadowBiasLocation, shadowBias)
             s.setUniform(uShadowIntensityLocation, shadowIntensity)
+            GLWrapper.uniform2f(uShadowMapSizeLocation, shadowMapSize, shadowMapSize)
 
             // Bind shadow map to texture unit 1
             GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + 1)

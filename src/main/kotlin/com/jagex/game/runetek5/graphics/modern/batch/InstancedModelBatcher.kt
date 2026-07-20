@@ -1,0 +1,719 @@
+package com.jagex.game.runetek5.graphics.modern.batch
+
+import com.jagex.game.runetek5.graphics.modern.core.IndexBuffer
+import com.jagex.game.runetek5.graphics.modern.core.ShaderProgram
+import com.jagex.game.runetek5.graphics.modern.core.VertexArray
+import com.jagex.game.runetek5.graphics.modern.core.VertexBuffer
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.FLOAT
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TEXTURE_2D
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.TRIANGLES
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED_BYTE
+import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED_INT
+import com.jagex.game.runetek5.math.Matrix43
+import org.lwjgl.opengl.GL33.*
+import org.lwjgl.system.MemoryUtil
+import java.nio.ByteBuffer
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
+
+/**
+ * Instanced model batcher that uses glDrawElementsInstanced for repeated models.
+ *
+ * When multiple instances of the same mesh (identified by content hash from ModelCache)
+ * appear in a frame, this batcher uploads the mesh geometry ONCE and draws all instances
+ * with a single instanced draw call per material batch.
+ *
+ * Architecture:
+ * - Mesh geometry is uploaded once per unique mesh (vertices + indices)
+ * - Per-instance data (model matrix as mat4) is stored in a separate instance buffer
+ * - The vertex shader reads the instance matrix via per-instance attributes (divisor = 1)
+ * - Each material batch within a mesh gets one glDrawElementsInstanced call
+ *
+ * Per-instance data layout (64 bytes per instance):
+ * - mat4 model matrix: 4 x vec4 (64 bytes) at locations 5, 6, 7, 8
+ *
+ * Vertex format (36 bytes per vertex, no modelIndex needed):
+ * - position: vec3 float (12 bytes) at location 0
+ * - normal: vec3 float (12 bytes) at location 1
+ * - texcoord: vec2 float (8 bytes) at location 2
+ * - color: vec4 ubyte (4 bytes) at location 3
+ */
+class InstancedModelBatcher {
+
+    companion object {
+        /**
+         * Vertex stride: position(12) + normal(12) + texcoord(8) + color(4) + 4 bytes
+         * padding (the ModelCache 40-byte format's modelIndex slot, ignored by the
+         * instanced VAO). Keeping the cache's native stride lets addInstance bulk-copy
+         * cached vertex data with a single ByteBuffer.put instead of a per-byte
+         * strip-copy loop.
+         */
+        const val VERTEX_STRIDE = 40
+
+        /** Per-instance data: mat4 = 16 floats = 64 bytes */
+        const val INSTANCE_STRIDE = 64
+
+        /** Maximum instances per instanced draw call */
+        private const val MAX_INSTANCES_PER_MESH = 1024
+
+        /** Maximum unique meshes tracked per frame */
+        private const val MAX_UNIQUE_MESHES = 256
+
+        /** Maximum total vertices across all unique meshes */
+        private const val MAX_TOTAL_VERTICES = 500000
+
+        /** Maximum total indices across all unique meshes */
+        private const val MAX_TOTAL_INDICES = 1000000
+
+        /** Minimum instance count to use instancing (below this, falls through to regular batcher) */
+        const val INSTANCING_THRESHOLD = 2
+    }
+
+    // GPU resources
+    private var vao: VertexArray? = null
+    private var vbo: VertexBuffer? = null
+    private var ibo: IndexBuffer? = null
+    private var instanceVbo: VertexBuffer? = null
+    private var shader: ShaderProgram? = null
+
+    // Uniform locations
+    private var uTextureLocation = -1
+    private var uTextureEnabledLocation = -1
+    private var uAlphaThresholdLocation = -1
+    private var uViewProjectionLocation = -1
+    private var uSunDirectionLocation = -1
+    private var uSunBrightnessLocation = -1
+    private var uSunColorLocation = -1
+    private var uContrastPosLocation = -1
+    private var uContrastNegLocation = -1
+
+    // Per-frame lighting parameters (set once per frame)
+    private var sunDirX = 0f
+    private var sunDirY = 1f
+    private var sunDirZ = 0f
+    private var sunBrightness = 0.5f
+    private var sunColorR = 1f
+    private var sunColorG = 1f
+    private var sunColorB = 1f
+    private var contrastPos = 1f
+    private var contrastNeg = 1f
+
+    // View-projection matrix from legacy system
+    private var vpMatrix: FloatArray? = null
+
+    // CPU staging buffers
+    private var vertexBuffer: ByteBuffer? = null
+    private var indexBuffer: IntBuffer? = null
+    private var instanceBuffer: FloatBuffer? = null
+
+    /**
+     * Tracks a unique mesh (persistent across frames) and its instances (per frame).
+     */
+    class MeshEntry(
+        /** Content hash identifying this unique mesh */
+        val modelId: Int,
+        /** Offset into the shared vertex buffer (in vertices) */
+        var vertexOffset: Int = 0,
+        /** Number of vertices for this mesh */
+        var vertexCount: Int = 0,
+        /** Material batches with index offsets into the shared index buffer */
+        val materialBatches: MutableList<MaterialBatchEntry> = mutableListOf()
+    ) {
+        /** Per-instance model matrices for the CURRENT frame (16 floats each, in place — no per-instance allocation) */
+        var instanceData: FloatArray = FloatArray(16 * 16)
+        var instanceCount: Int = 0
+
+        fun resetInstances() {
+            instanceCount = 0
+        }
+
+        /** Reserves space for one more instance and returns its base offset into [instanceData]. */
+        fun reserveInstanceSlot(): Int {
+            val base = instanceCount * 16
+            if (base + 16 > instanceData.size) {
+                instanceData = instanceData.copyOf(instanceData.size * 2)
+            }
+            instanceCount++
+            return base
+        }
+    }
+
+    /**
+     * Tracks a material batch within a mesh, with its index range in the shared IBO.
+     */
+    class MaterialBatchEntry(
+        val materialId: Int,
+        /** Offset into the shared index buffer (in indices, not bytes) */
+        var indexOffset: Int = 0,
+        /** Number of indices for this material batch */
+        var indexCount: Int = 0
+    )
+
+    // PERSISTENT mesh tracking: geometry appended once per unique mesh and kept across
+    // frames (per-frame re-copy + re-upload of all mesh geometry was the dominant CPU
+    // cost). Only the per-entry instance matrices are per-frame state.
+    private val meshEntries = LinkedHashMap<Int, MeshEntry>(MAX_UNIQUE_MESHES)
+    private var totalVertexCount = 0
+    private var totalIndexCount = 0
+
+    /** True when new mesh geometry was appended since the last GPU upload. */
+    private var geometryDirty = false
+
+    /** Set when capacity was exhausted; the geometry store is rebuilt at next beginFrame. */
+    private var pendingGeometryReset = false
+
+    // State
+    private var isInitialized = false
+    private var isFrameActive = false
+
+    // Statistics
+    private var instancedDrawCalls = 0
+    private var instancedTriangles = 0
+    private var instancedModels = 0
+    private var instancedMeshesReused = 0
+
+    // Timing (nanoseconds, per endFrame)
+    private var timeGeomUpload = 0L
+    private var timeInstanceUpload = 0L
+    private var timeDraw = 0L
+
+    /**
+     * Initializes GPU resources. Must be called on GL thread.
+     */
+    fun initialize() {
+        if (isInitialized) return
+
+        shader = createInstancedShader()
+
+        // Cache uniform locations
+        shader!!.bind()
+        uTextureLocation = shader!!.getUniformLocation("uTexture")
+        uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
+        uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
+        uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
+        uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
+        uSunBrightnessLocation = shader!!.getUniformLocation("uSunBrightness")
+        uSunColorLocation = shader!!.getUniformLocation("uSunColor")
+        uContrastPosLocation = shader!!.getUniformLocation("uContrastPos")
+        uContrastNegLocation = shader!!.getUniformLocation("uContrastNeg")
+        shader!!.unbind()
+
+        // Create GPU resources
+        vao = VertexArray()
+        vbo = VertexBuffer(VertexBuffer.BufferUsage.STREAM)
+        ibo = IndexBuffer(IndexBuffer.BufferUsage.STREAM, IndexBuffer.IndexType.UNSIGNED_INT)
+        instanceVbo = VertexBuffer(VertexBuffer.BufferUsage.STREAM)
+
+        // Setup VAO with vertex format + instanced attributes
+        setupVAO()
+
+        // Allocate CPU staging buffers
+        vertexBuffer = MemoryUtil.memAlloc(MAX_TOTAL_VERTICES * VERTEX_STRIDE)
+        indexBuffer = MemoryUtil.memAllocInt(MAX_TOTAL_INDICES)
+        instanceBuffer = MemoryUtil.memAllocFloat(MAX_INSTANCES_PER_MESH * 16)
+
+        isInitialized = true
+    }
+
+    private fun setupVAO() {
+        val va = vao!!
+
+        va.bind()
+
+        // Bind mesh VBO and set per-vertex attributes
+        vbo!!.bind()
+        // Position: vec3 float at location 0
+        GLWrapper.vertexAttribPointer(0, 3, FLOAT, false, VERTEX_STRIDE, 0)
+        GLWrapper.enableVertexAttribArray(0)
+        // Normal: vec3 float at location 1
+        GLWrapper.vertexAttribPointer(1, 3, FLOAT, false, VERTEX_STRIDE, 12)
+        GLWrapper.enableVertexAttribArray(1)
+        // TexCoord: vec2 float at location 2
+        GLWrapper.vertexAttribPointer(2, 2, FLOAT, false, VERTEX_STRIDE, 24)
+        GLWrapper.enableVertexAttribArray(2)
+        // Color: vec4 ubyte normalized at location 3
+        GLWrapper.vertexAttribPointer(3, 4, UNSIGNED_BYTE, true, VERTEX_STRIDE, 32)
+        GLWrapper.enableVertexAttribArray(3)
+
+        // Bind instance VBO and set per-instance attributes (mat4 = 4 x vec4)
+        instanceVbo!!.bind()
+        // mat4 column 0 at location 5
+        GLWrapper.vertexAttribPointer(5, 4, FLOAT, false, INSTANCE_STRIDE, 0)
+        GLWrapper.enableVertexAttribArray(5)
+        GLWrapper.vertexAttribDivisor(5, 1)
+        // mat4 column 1 at location 6
+        GLWrapper.vertexAttribPointer(6, 4, FLOAT, false, INSTANCE_STRIDE, 16)
+        GLWrapper.enableVertexAttribArray(6)
+        GLWrapper.vertexAttribDivisor(6, 1)
+        // mat4 column 2 at location 7
+        GLWrapper.vertexAttribPointer(7, 4, FLOAT, false, INSTANCE_STRIDE, 32)
+        GLWrapper.enableVertexAttribArray(7)
+        GLWrapper.vertexAttribDivisor(7, 1)
+        // mat4 column 3 at location 8
+        GLWrapper.vertexAttribPointer(8, 4, FLOAT, false, INSTANCE_STRIDE, 48)
+        GLWrapper.enableVertexAttribArray(8)
+        GLWrapper.vertexAttribDivisor(8, 1)
+
+        // Bind IBO
+        ibo!!.bind()
+
+        va.unbind()
+    }
+
+    /**
+     * Creates the instanced rendering shader.
+     * Uses per-instance attributes (mat4 at locations 5-8) instead of UBO + modelIndex.
+     */
+    private fun createInstancedShader(): ShaderProgram {
+        val vertexSource = """
+            #version 330 core
+
+            // Per-vertex attributes
+            layout(location = 0) in vec3 aPosition;
+            layout(location = 1) in vec3 aNormal;
+            layout(location = 2) in vec2 aTexCoord;
+            layout(location = 3) in vec4 aColor;
+
+            // Per-instance attributes (mat4 = 4 x vec4, divisor = 1)
+            layout(location = 5) in vec4 aModelMatCol0;
+            layout(location = 6) in vec4 aModelMatCol1;
+            layout(location = 7) in vec4 aModelMatCol2;
+            layout(location = 8) in vec4 aModelMatCol3;
+
+            uniform mat4 uViewProjection;
+
+            // Lighting uniforms
+            uniform vec3 uSunDirection;
+            uniform float uSunBrightness;
+            uniform vec3 uSunColor;
+            uniform float uContrastPos;
+            uniform float uContrastNeg;
+
+            out vec2 vTexCoord;
+            out vec4 vColor;
+
+            void main() {
+                // Reconstruct model matrix from per-instance attributes
+                mat4 modelMat = mat4(aModelMatCol0, aModelMatCol1, aModelMatCol2, aModelMatCol3);
+
+                vec4 worldPos = modelMat * vec4(aPosition, 1.0);
+                gl_Position = uViewProjection * worldPos;
+
+                vTexCoord = aTexCoord;
+
+                // GPU-side lighting calculation matching legacy formula exactly
+                mat3 normalMat = mat3(modelMat);
+                vec3 worldNormal = normalize(normalMat * aNormal);
+
+                float dotProduct = dot(uSunDirection, worldNormal);
+                float lightIntensity = uSunBrightness + dotProduct * (dotProduct < 0.0 ? uContrastNeg : uContrastPos);
+
+                vec3 litRGB = aColor.rgb * uSunColor * lightIntensity;
+                litRGB = clamp(litRGB, 0.0, 1.0);
+
+                vColor = vec4(litRGB, aColor.a);
+            }
+        """.trimIndent()
+
+        val fragmentSource = """
+            #version 330 core
+
+            in vec2 vTexCoord;
+            in vec4 vColor;
+
+            uniform sampler2D uTexture;
+            uniform bool uTextureEnabled;
+            uniform float uAlphaThreshold;
+
+            out vec4 fragColor;
+
+            void main() {
+                vec4 color;
+                if (uTextureEnabled) {
+                    vec4 texColor = texture(uTexture, vTexCoord);
+                    color = texColor * vColor;
+                } else {
+                    color = vColor;
+                }
+
+                if (color.a <= uAlphaThreshold) {
+                    discard;
+                }
+
+                fragColor = color;
+            }
+        """.trimIndent()
+
+        return ShaderProgram.createFromSource(vertexSource, fragmentSource)
+    }
+
+    /**
+     * Sets the view-projection matrix for this frame.
+     */
+    fun setViewProjection(vp: FloatArray) {
+        // Copy VP and negate Y row: RS VP has Y-down clip space, OpenGL expects Y-up.
+        val flipped = vp.copyOf()
+        flipped[1] = -flipped[1]
+        flipped[5] = -flipped[5]
+        flipped[9] = -flipped[9]
+        flipped[13] = -flipped[13]
+        this.vpMatrix = flipped
+    }
+
+    /**
+     * Sets the lighting parameters for this frame.
+     */
+    fun setLighting(
+        sunDirX: Float, sunDirY: Float, sunDirZ: Float,
+        brightness: Float,
+        colorR: Float, colorG: Float, colorB: Float,
+        contrastPositive: Float, contrastNegative: Float
+    ) {
+        this.sunDirX = sunDirX
+        this.sunDirY = sunDirY
+        this.sunDirZ = sunDirZ
+        this.sunBrightness = brightness
+        this.sunColorR = colorR
+        this.sunColorG = colorG
+        this.sunColorB = colorB
+        this.contrastPos = contrastPositive
+        this.contrastNeg = contrastNegative
+    }
+
+    /**
+     * Begins a new frame.
+     */
+    fun beginFrame() {
+        check(isInitialized) { "InstancedModelBatcher not initialized" }
+        check(!isFrameActive) { "Frame already active" }
+
+        // Rebuild the geometry store if capacity ran out last frame (rare — e.g.
+        // after roaming across many regions accumulates stale meshes).
+        if (pendingGeometryReset) {
+            pendingGeometryReset = false
+            meshEntries.clear()
+            totalVertexCount = 0
+            totalIndexCount = 0
+            vertexBuffer!!.clear()
+            indexBuffer!!.clear()
+            geometryDirty = true
+            println("[InstancedModelBatcher] Geometry store reset (capacity exceeded); rebuilding from live meshes")
+        }
+
+        // Geometry persists across frames — only reset the per-frame instance lists.
+        for (entry in meshEntries.values) {
+            entry.resetInstances()
+        }
+
+        instancedDrawCalls = 0
+        instancedTriangles = 0
+        instancedModels = 0
+        instancedMeshesReused = 0
+        timeGeomUpload = 0L
+        timeInstanceUpload = 0L
+        timeDraw = 0L
+
+        isFrameActive = true
+    }
+
+    /**
+     * Adds an instance of a cached model to the batch.
+     *
+     * If this is the first instance of this mesh (identified by modelId),
+     * the geometry is recorded. Subsequent instances of the same mesh
+     * only record the model matrix -- no geometry duplication.
+     *
+     * @param cachedModel Pre-processed model data from ModelCache
+     * @param modelId Content hash identifying this unique mesh
+     * @param modelMatrix The instance's world transform
+     * @return true if the instance was added, false if capacity exceeded
+     */
+    fun addInstance(
+        cachedModel: ModelCache.CachedModel,
+        modelId: Int,
+        modelMatrix: Matrix43
+    ): Boolean {
+        if (!isFrameActive) return false
+
+        var entry = meshEntries[modelId]
+
+        if (entry == null) {
+            // First time this mesh is EVER seen -- append its geometry to the
+            // persistent store (kept across frames; uploaded only when dirty).
+            val vertexCount = cachedModel.vertexCount
+            if (totalVertexCount + vertexCount > MAX_TOTAL_VERTICES) {
+                pendingGeometryReset = true
+                return false
+            }
+
+            // Calculate index count needed
+            var meshIndexCount = 0
+            for (batch in cachedModel.materialBatches) {
+                meshIndexCount += batch.indexCount
+            }
+            if (totalIndexCount + meshIndexCount > MAX_TOTAL_INDICES) {
+                pendingGeometryReset = true
+                return false
+            }
+
+            entry = MeshEntry(
+                modelId = modelId,
+                vertexOffset = totalVertexCount,
+                vertexCount = vertexCount
+            )
+
+            // Bulk copy vertex data: staging stride is the cache's native 40-byte
+            // format (the 4-byte modelIndex slot is padding the VAO ignores), so a
+            // single ByteBuffer.put replaces the old per-byte strip-copy loop.
+            val vb = vertexBuffer!!
+            val srcData = cachedModel.vertexData
+            srcData.position(0)
+            srcData.limit(vertexCount * VERTEX_STRIDE)
+            vb.position(entry.vertexOffset * VERTEX_STRIDE)
+            vb.put(srcData)
+            srcData.clear()
+
+            // Record material batches with index offsets
+            for (batch in cachedModel.materialBatches) {
+                val matEntry = MaterialBatchEntry(
+                    materialId = batch.materialId,
+                    indexOffset = totalIndexCount,
+                    indexCount = batch.indexCount
+                )
+
+                // Copy indices, adjusting by vertex offset
+                val ib = indexBuffer!!
+                val baseVertex = entry.vertexOffset
+                for (i in 0 until batch.indexCount) {
+                    ib.put(totalIndexCount + i, baseVertex + batch.indices[i])
+                }
+
+                entry.materialBatches.add(matEntry)
+                totalIndexCount += batch.indexCount
+            }
+
+            totalVertexCount += vertexCount
+            meshEntries[modelId] = entry
+            geometryDirty = true
+        } else {
+            instancedMeshesReused++
+        }
+
+        // Check instance limit
+        if (entry.instanceCount >= MAX_INSTANCES_PER_MESH) return false
+
+        // Record instance matrix in place (convert Matrix43 to column-major mat4);
+        // no per-instance allocation.
+        val base = entry.reserveInstanceSlot()
+        val data = entry.instanceData
+        // Column 0
+        data[base] = modelMatrix.xA
+        data[base + 1] = modelMatrix.yA
+        data[base + 2] = modelMatrix.zA
+        data[base + 3] = 0f
+        // Column 1
+        data[base + 4] = modelMatrix.xB
+        data[base + 5] = modelMatrix.yB
+        data[base + 6] = modelMatrix.zB
+        data[base + 7] = 0f
+        // Column 2
+        data[base + 8] = modelMatrix.xC
+        data[base + 9] = modelMatrix.yC
+        data[base + 10] = modelMatrix.zC
+        data[base + 11] = 0f
+        // Column 3
+        data[base + 12] = modelMatrix.xD
+        data[base + 13] = modelMatrix.yD
+        data[base + 14] = modelMatrix.zD
+        data[base + 15] = 1f
+
+        instancedModels++
+
+        return true
+    }
+
+    /**
+     * Returns the set of mesh entries that have enough instances to benefit from instancing.
+     * Entries below the threshold should be rendered by the regular batcher.
+     */
+    fun getInstancedEntries(): Collection<MeshEntry> {
+        return meshEntries.values.filter { it.instanceCount >= INSTANCING_THRESHOLD }
+    }
+
+    /**
+     * Returns mesh entries that do NOT meet the instancing threshold.
+     * These should fall through to the regular OptimizedFrameBatcher path.
+     */
+    fun getNonInstancedEntries(): Collection<MeshEntry> {
+        return meshEntries.values.filter { it.instanceCount < INSTANCING_THRESHOLD }
+    }
+
+    /**
+     * Ends the frame and renders all instanced geometry.
+     *
+     * @param textureCache Lambda to resolve material IDs to GL texture handles
+     */
+    fun endFrame(textureCache: (Int) -> Int) {
+        check(isFrameActive) { "No active frame" }
+
+        // Render ALL meshes, whether they have 1 or many instances.
+        // glDrawElementsInstanced with instanceCount=1 is equivalent to a regular draw.
+        // This is simpler than routing single-instance meshes back to the regular batcher.
+        val allEntries = meshEntries.values
+        if (allEntries.isEmpty() || vpMatrix == null) {
+            isFrameActive = false
+            return
+        }
+
+        val sh = shader ?: run {
+            isFrameActive = false
+            return
+        }
+        val vp = vpMatrix ?: run {
+            isFrameActive = false
+            return
+        }
+
+        // Upload mesh geometry ONLY when new meshes were appended since the last
+        // upload — the persistent store makes steady-state frames upload nothing here.
+        if (geometryDirty) {
+            val t0 = System.nanoTime()
+            val vbView = vertexBuffer!!.duplicate()
+            vbView.position(0)
+            vbView.limit(totalVertexCount * VERTEX_STRIDE)
+            vbo!!.upload(vbView)
+
+            val ibView = indexBuffer!!.duplicate()
+            ibView.position(0)
+            ibView.limit(totalIndexCount)
+            ibo!!.upload(ibView)
+            geometryDirty = false
+            timeGeomUpload += System.nanoTime() - t0
+        }
+
+        // Bind shader and set per-frame uniforms
+        sh.bind()
+        sh.setUniform(uTextureLocation, 0)
+        sh.setUniform(uAlphaThresholdLocation, 0f)
+
+        // Set VP matrix (already in column-major format for GLSL)
+        glUniformMatrix4fv(uViewProjectionLocation, false, vp)
+
+        // Set lighting uniforms
+        sh.setUniform(uSunDirectionLocation, sunDirX, sunDirY, sunDirZ)
+        sh.setUniform(uSunBrightnessLocation, sunBrightness)
+        sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)
+        sh.setUniform(uContrastPosLocation, contrastPos)
+        sh.setUniform(uContrastNegLocation, contrastNeg)
+
+        // Bind VAO (has both vertex and instance attribute pointers configured)
+        vao!!.bind()
+        ibo!!.bind()
+
+        var lastTextureHandle = -1
+
+        // Render each mesh (instanced or not)
+        for (entry in allEntries) {
+            val count = entry.instanceCount
+            if (count == 0) continue
+
+            // Upload instance matrices for this mesh (bulk copy from the flat array)
+            val t1 = System.nanoTime()
+            val instBuf = instanceBuffer!!
+            instBuf.clear()
+            instBuf.put(entry.instanceData, 0, count * 16)
+            instBuf.flip()
+            instanceVbo!!.upload(instBuf)
+            timeInstanceUpload += System.nanoTime() - t1
+
+            // Render each material batch with instancing
+            for (matBatch in entry.materialBatches) {
+                val texId = matBatch.materialId
+                val textureHandle = if (texId > 0) textureCache(texId) else 0
+
+                if (textureHandle != lastTextureHandle) {
+                    if (textureHandle > 0) {
+                        GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+                        GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
+                        sh.setUniform(uTextureEnabledLocation, 1)
+                    } else {
+                        sh.setUniform(uTextureEnabledLocation, 0)
+                    }
+                    lastTextureHandle = textureHandle
+                }
+
+                val t2 = System.nanoTime()
+                GLWrapper.drawElementsInstanced(
+                    TRIANGLES,
+                    matBatch.indexCount,
+                    UNSIGNED_INT,
+                    matBatch.indexOffset.toLong() * 4,
+                    count
+                )
+                timeDraw += System.nanoTime() - t2
+
+                instancedDrawCalls++
+                instancedTriangles += (matBatch.indexCount / 3) * count
+            }
+        }
+
+        vao!!.unbind()
+        sh.unbind()
+
+        isFrameActive = false
+    }
+
+    fun isActive(): Boolean = isFrameActive
+
+    /** True when the open frame has collected INSTANCES that have not been flushed yet.
+     *  (Mesh geometry persists across frames, so totalVertexCount is not the signal.) */
+    fun hasPendingGeometry(): Boolean = isFrameActive && instancedModels > 0
+
+    fun getStats(): InstanceStats = InstanceStats(
+        drawCalls = instancedDrawCalls,
+        triangles = instancedTriangles,
+        totalInstances = instancedModels,
+        uniqueMeshes = meshEntries.size,
+        instancedMeshes = meshEntries.values.count { it.instanceCount >= INSTANCING_THRESHOLD },
+        meshesReused = instancedMeshesReused,
+        geomUploadMs = timeGeomUpload / 1_000_000f,
+        instanceUploadMs = timeInstanceUpload / 1_000_000f,
+        drawMs = timeDraw / 1_000_000f
+    )
+
+    fun destroy() {
+        shader?.destroy()
+        vao?.destroy()
+        vbo?.destroy()
+        ibo?.destroy()
+        instanceVbo?.destroy()
+
+        vertexBuffer?.let { MemoryUtil.memFree(it) }
+        indexBuffer?.let { MemoryUtil.memFree(it) }
+        instanceBuffer?.let { MemoryUtil.memFree(it) }
+
+        shader = null
+        vao = null
+        vbo = null
+        ibo = null
+        instanceVbo = null
+        vertexBuffer = null
+        indexBuffer = null
+        instanceBuffer = null
+
+        isInitialized = false
+    }
+
+    data class InstanceStats(
+        val drawCalls: Int,
+        val triangles: Int,
+        val totalInstances: Int,
+        val uniqueMeshes: Int,
+        val instancedMeshes: Int,
+        val meshesReused: Int,
+        val geomUploadMs: Float = 0f,
+        val instanceUploadMs: Float = 0f,
+        val drawMs: Float = 0f
+    )
+}

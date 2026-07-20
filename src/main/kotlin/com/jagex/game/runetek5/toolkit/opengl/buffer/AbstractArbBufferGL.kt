@@ -54,6 +54,17 @@ internal abstract class AbstractArbBufferGL : AutoCloseable {
         }
     }
 
+    /**
+     * GL buffer handles are released through the toolkit's deallocation queue, which is
+     * drained on the GL thread. Nothing in the render path calls [close] for buffers owned
+     * by models that drop out of the model caches, so reclaim the handle when the wrapper
+     * is collected. [OpenGlToolkit.requestArbBufferCleanup] is synchronized and only
+     * enqueues, making it safe to call from the finalizer thread.
+     */
+    protected fun finalize() {
+        close()
+    }
+
     abstract fun setAsActiveBuffer()
 
     open fun put(data: ByteArray, size: Int) {
@@ -69,6 +80,15 @@ internal abstract class AbstractArbBufferGL : AutoCloseable {
             toolkit.vboBuffersSize += size - bufferSize
             bufferSize = size
         } else {
+            if (streamDraw) {
+                // Orphan the buffer store before overwriting it. Dynamic (STREAM_DRAW)
+                // buffers are shared toolkit-wide (the seven model copy slots and other
+                // per-frame geometry), so the GPU may still be reading the previous
+                // contents when the next entity rewrites them. Re-specifying the store
+                // with a NULL data pointer lets the driver hand back fresh memory
+                // instead of stalling on an implicit synchronization.
+                OpenGL.glBufferDataARBa(bufferTarget, bufferSize, 0L, GL_STREAM_DRAW)
+            }
             OpenGL.glBufferSubDataARBub(bufferTarget, 0, size, data, 0)
         }
     }

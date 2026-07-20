@@ -27,7 +27,9 @@ import com.jagex.game.runetek5.graphics.model.ModelFunctionMask
 import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
 import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
 import com.jagex.game.runetek5.graphics.model.particle.ParticleSystem
+import com.jagex.game.runetek5.client.GameShell
 import com.jagex.game.runetek5.math.Matrix43
+import com.jagex.game.runetek5.movement.CoordinateSpace
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.utils.MathUtils
@@ -133,6 +135,29 @@ abstract class PathingEntity : AbstractInteractiveEntity {
      */
     @JvmField
     var worldPriority: Int = 0
+
+    /**
+     * Base position at the start of the last logic pulse, captured by
+     * [EntityUpdating.move]. The render path lerps between this and the current
+     * position by [GameShell.renderPulseAlpha] so movement stays smooth when the
+     * frame rate exceeds the 50Hz logic rate.
+     */
+    @JvmField
+    var interpPrevX: Float = 0.0f
+    @JvmField
+    var interpPrevY: Float = 0.0f
+    @JvmField
+    var interpPrevZ: Float = 0.0f
+    /** [Client.cycles] value at which [interpPrevX] was captured; -1 = never. */
+    @JvmField
+    var interpCaptureCycle: Int = -1
+    private val interpolatedSpace = CoordinateSpace()
+    private val interpolatedMatrix = Matrix43()
+    // Memo key for interpolatedMatrix: within one render frame (same alpha and
+    // pulse) the entity's positions cannot change, so the matrix is built once
+    // per frame no matter how many callers ask for it (draw, picking, particles).
+    private var interpMatrixAlpha = Float.NaN
+    private var interpMatrixCycle = -1
 
     @JvmField
     val activeHitsplatIds: IntArray
@@ -715,6 +740,58 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
     override fun disregardTextureMovement(): Boolean {
         return false
+    }
+
+    /**
+     * Snapshots the current base position at the start of a logic pulse, before
+     * movement integration runs. Must be called exactly once per pulse from
+     * [EntityUpdating.move].
+     */
+    fun captureInterpolationSnapshot() {
+        val coords = basePosition.coords
+        interpPrevX = coords.x
+        interpPrevY = coords.y
+        interpPrevZ = coords.z
+        interpCaptureCycle = Client.cycles
+    }
+
+    /**
+     * Render-only interpolation: the world transform used for drawing lerps
+     * between the previous and current pulse positions. Game logic reads
+     * [getAbsolutePosition] and never sees interpolated (non tile-aligned)
+     * coordinates.
+     */
+    override fun getProjectionMatrix(): Matrix43 {
+        val alpha = GameShell.renderPulseAlpha
+        if (!Client.smoothEntityMovement || alpha >= 1.0f || interpCaptureCycle != Client.cycles) {
+            return super.getProjectionMatrix()
+        }
+        val coords = basePosition.coords
+        val deltaX = coords.x - interpPrevX
+        val deltaY = coords.y - interpPrevY
+        val deltaZ = coords.z - interpPrevZ
+        if (deltaX == 0.0f && deltaY == 0.0f && deltaZ == 0.0f) {
+            return super.getProjectionMatrix()
+        }
+        // More than 2 tiles (1024 units) in one pulse is a teleport - snap.
+        if (deltaX * deltaX + deltaZ * deltaZ > 1048576.0f) {
+            return super.getProjectionMatrix()
+        }
+        if (alpha == interpMatrixAlpha && Client.cycles == interpMatrixCycle) {
+            return interpolatedMatrix
+        }
+        interpMatrixAlpha = alpha
+        interpMatrixCycle = Client.cycles
+        val abs = getAbsolutePosition()
+        interpolatedSpace.copy(abs)
+        val backtrack = 1.0f - alpha
+        interpolatedSpace.coords.set(
+            abs.coords.x - deltaX * backtrack,
+            abs.coords.y - deltaY * backtrack,
+            abs.coords.z - deltaZ * backtrack
+        )
+        interpolatedMatrix.fromCoordinateSpace(interpolatedSpace)
+        return interpolatedMatrix
     }
 
     abstract fun getCurrentRenderAnimation(): Int

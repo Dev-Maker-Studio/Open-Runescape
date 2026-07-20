@@ -10,7 +10,7 @@ import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.framebuffer.FrameBuffer
 import jaggl.OpenGL
 
-class SpriteGL : NativeSprite {
+open class SpriteGL : NativeSprite {
 
     @JvmField var translateX: Int = 0
     @JvmField var translateY: Int = 0
@@ -21,6 +21,22 @@ class SpriteGL : NativeSprite {
     @JvmField val toolkit: OpenGlToolkit
     @JvmField val texture2d: OpenGl2DTexture_Sub1
     @JvmField var channelMaskTexture: OpenGl2DTexture_Sub1? = null
+
+    /**
+     * Legacy immediate-mode sprite drawing is forbidden under ModernGLToolkit
+     * (standalone modern renderer — no fixed-function detours). Plain SpriteGL
+     * instances only exist under the modern toolkit when they were created before
+     * the modern renderer's lazy init; their draws are dropped and counted in the
+     * [ModernDiag] legacySkips map. ModernSpriteGL overrides never reach these.
+     */
+    protected fun blockedUnderModernToolkit(callsite: String): Boolean {
+        val t = toolkit
+        if (t is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+            t.countLegacySkip(callsite)
+            return true
+        }
+        return false
+    }
 
     constructor(class505Sub11: OpenGlToolkit, i_2: Int, i_3: Int, ints_4: IntArray, i_5: Int, i_6: Int) {
         toolkit = class505Sub11
@@ -99,6 +115,7 @@ class SpriteGL : NativeSprite {
     }
 
     override fun drawScaledColored(x: Int, y: Int, width: Int, height: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        if (blockedUnderModernToolkit("legacy SpriteGL.drawScaledColored")) return
         val endX = x + width
         val endY = y + height
         texture2d.setLinearTextureFilter(false)
@@ -210,6 +227,7 @@ class SpriteGL : NativeSprite {
     }
 
     override fun draw(x: Int, y: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        if (blockedUnderModernToolkit("legacy SpriteGL.draw")) return
         texture2d.setLinearTextureFilter(false)
         toolkit.setupSpriteRendering()
         toolkit.setBlendMode(blendMode)
@@ -251,6 +269,7 @@ class SpriteGL : NativeSprite {
     }
 
     override fun drawWithSurface(i_1: Int, i_2: Int, class4553: ComponentSurface, i_4: Int, i_5: Int) {
+        if (blockedUnderModernToolkit("legacy SpriteGL.drawWithSurface")) return
         val class455Sub26 = class4553 as SpriteSurfaceGL
         val class137Sub1Sub17 = class455Sub26.surface
         texture2d.setLinearTextureFilter(false)
@@ -294,6 +313,7 @@ class SpriteGL : NativeSprite {
     }
 
     override fun drawColoredCircle(i_1: Int, i_2: Int, i_3: Int, i_4: Int, combineMode: Int, colorArgb: Int, blendMode: Int) {
+        if (blockedUnderModernToolkit("legacy SpriteGL.drawColoredCircle")) return
         texture2d.setLinearTextureFilter(true)
         toolkit.setupSpriteRendering()
         toolkit.setBlendMode(blendMode)
@@ -372,6 +392,7 @@ class SpriteGL : NativeSprite {
     }
 
     override fun drawAffine(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, i_8: Int, i_9: Int) {
+        if (blockedUnderModernToolkit("legacy SpriteGL.drawAffine")) return
         var x1 = f_1
         var y1 = f_2
         var x2 = f_3
@@ -428,6 +449,7 @@ class SpriteGL : NativeSprite {
     }
 
     override fun drawAffineMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, i_7: Int, class4558: ComponentSurface, i_9: Int, i_10: Int) {
+        if (blockedUnderModernToolkit("legacy SpriteGL.drawAffineMasked")) return
         val class137Sub1Sub111 = (class4558 as SpriteSurfaceGL).surface
         var x1 = f_1
         var y1 = f_2

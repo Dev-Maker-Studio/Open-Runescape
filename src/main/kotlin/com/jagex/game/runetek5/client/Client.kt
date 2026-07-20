@@ -126,7 +126,6 @@ import com.jagex.game.runetek5.toolkit.AbstractToolkit
 import com.jagex.game.runetek5.tools.Browser
 import com.jagex.game.runetek5.tools.Language
 import com.jagex.game.runetek5.tools.LocalizedText
-import com.jagex.game.runetek5.tools.TimeTools
 import com.jagex.game.runetek5.utils.ArrayUtils
 import com.jagex.game.runetek5.utils.Base64
 import com.jagex.game.runetek5.utils.MathUtils
@@ -532,16 +531,9 @@ class Client : GameShell() {
             }
 
             VorbisNode.cleanupStaleStreams()
-            val cpuUsagePreference = PreferenceManager.preferences!!.cpu!!.getValue()
-            if (cpuUsagePreference == 0) {
-                TimeTools.sleep(15L)
-            } else if (cpuUsagePreference == 1) {
-                TimeTools.sleep(10L)
-            } else if (cpuUsagePreference == 2) {
-                TimeTools.sleep(5L)
-            } else if (cpuUsagePreference == 3) {
-                TimeTools.sleep(2L)
-            }
+            // The legacy per-frame CPU-preference sleep (15/10/5/2ms) capped the
+            // frame rate on top of the 50Hz cycle. Frame pacing is now owned by
+            // FrameLimiter in the main loop; lower the fps target to reduce CPU.
 
             if (typelistCycleUpdate) {
                 TypeLists.clean()
@@ -1344,6 +1336,14 @@ class Client : GameShell() {
         var lastRedrawTimeMillis: Long = 0
         var awaitingPriorityRequests: Boolean = true
         var DRAW_DEBUG: Boolean = false
+
+        /**
+         * When true (default), pathing entities lerp between logic pulses at
+         * render time so movement stays smooth above 50fps. Toggled with the
+         * "smoothentities" console command.
+         */
+        @JvmField
+        var smoothEntityMovement: Boolean = true
         var DEBUG_MODE: Boolean = false
         var hideNpcs: Boolean = false
         var playingAltGame: Boolean = true
@@ -2332,7 +2332,10 @@ class Client : GameShell() {
                     Resource.mapRegion!!.getScene()!!.drawScene(
                         cycles, Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteZ, Camera.cameraPositionAbsoluteY, Resource.mapRegion!!.bits, visibleBelowDrawheight, visibleAboveX, visibleBelowX, visibleBelowY, visibleAboveY, PlayerUpdate.MY_PLAYER!!.plane + 1, roofPreference, PreferenceManager.preferences!!.flickeringEffects!!.getValue() == 0
                     )
-                    drawsSinceLastPacket++
+                    // Advance at pulse rate, not frame rate: animatingStep holds the
+                    // number of 50Hz pulses since the last rendered frame, so the
+                    // idle-detection gate in processGameTick keeps its 200ms timing.
+                    drawsSinceLastPacket += animatingStep
                     SoundEffectPlayer.updatePlayers()
                     if (gameState == GameState.LOGGED_INGAME) {
                         StaticMethods.drawTileMessages(x, y)

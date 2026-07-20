@@ -22,6 +22,14 @@ class FontRendererGL(
     @JvmField val isAlphaOnlyTexture: Boolean
     @JvmField val listUtils: GlListUtils
 
+    /**
+     * Scratch buffers for the eye-plane texgen coefficients used by the
+     * component-surface [drawChar] variant, so no per-glyph allocations occur.
+     * Only indices 0/3 (S plane) and 1/3 (T plane) are ever non-zero.
+     */
+    private val texGenPlaneS = FloatArray(4)
+    private val texGenPlaneT = FloatArray(4)
+
     init {
         var maxDimension = 0
 
@@ -150,15 +158,25 @@ class FontRendererGL(
     }
 
     override fun drawChar(charToDraw: Int, translateX: Int, translateY: Int, colorArgb: Int, bool5: Boolean, surface: ComponentSurface, i_7: Int, i_8: Int) {
+        // Legacy display-list glyph rendering is forbidden under ModernGLToolkit
+        // (standalone modern renderer). This only triggers for fonts created before
+        // the modern renderer's lazy init; counted in [ModernDiag] legacySkips.
+        val tk = this.toolkit
+        if (tk is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+            tk.countLegacySkip("legacy FontRendererGL.drawChar")
+            return
+        }
         val spriteSurface = surface as SpriteSurfaceGL
         val class137Sub1Sub110 = spriteSurface.surface
         this.toolkit.setupTextRendering()
         this.toolkit.setActiveTexture(this.texture)
         if (!this.isAlphaOnlyTexture && !bool5) {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_REPLACE)
+            this.toolkit.restoreGlyphCombinerSource()
         } else {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
-            this.toolkit.setTexture(0, GL_PREVIOUS, GL_SRC_COLOR)
+            // Held until the next non-glyph draw instead of being restored per glyph.
+            this.toolkit.applyGlyphCombinerSource()
         }
 
         this.toolkit.activateTexture(1)
@@ -169,11 +187,15 @@ class FontRendererGL(
         OpenGL.glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR)
         val f_11 = class137Sub1Sub110.s / class137Sub1Sub110.singleWidth
         val f_12 = class137Sub1Sub110.t / class137Sub1Sub110.singleLength
-        OpenGL.glTexGenfv(GL_S, GL_EYE_PLANE, floatArrayOf(f_11, 0.0F, 0.0F, (-i_7) * f_11), 0)
-        OpenGL.glTexGenfv(GL_T, GL_EYE_PLANE, floatArrayOf(0.0F, f_12, 0.0F, (-i_8) * f_12), 0)
+        this.texGenPlaneS[0] = f_11
+        this.texGenPlaneS[3] = (-i_7) * f_11
+        this.texGenPlaneT[1] = f_12
+        this.texGenPlaneT[3] = (-i_8) * f_12
+        OpenGL.glTexGenfv(GL_S, GL_EYE_PLANE, this.texGenPlaneS, 0)
+        OpenGL.glTexGenfv(GL_T, GL_EYE_PLANE, this.texGenPlaneT, 0)
         OpenGL.glEnable(GL_TEXTURE_GEN_S)
         OpenGL.glEnable(GL_TEXTURE_GEN_T)
-        OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+        this.toolkit.setGlyphColor(colorArgb)
         OpenGL.glTranslatef(translateX.toFloat(), translateY.toFloat(), 0.0F)
         this.listUtils.callList(charToDraw)
         OpenGL.glLoadIdentity()
@@ -183,27 +205,31 @@ class FontRendererGL(
         this.toolkit.loadTextureCombineMode(GL_MODULATE, GL_MODULATE)
         this.toolkit.setActiveTexture(null)
         this.toolkit.activateTexture(0)
-        if (this.isAlphaOnlyTexture || bool5) {
-            this.toolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
-        }
     }
 
     override fun drawChar(character: Int, translateX: Int, translateY: Int, colorArgb: Int, bool5: Boolean) {
+        // Legacy display-list glyph rendering is forbidden under ModernGLToolkit
+        // (standalone modern renderer). This only triggers for fonts created before
+        // the modern renderer's lazy init; counted in [ModernDiag] legacySkips.
+        val tk = this.toolkit
+        if (tk is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+            tk.countLegacySkip("legacy FontRendererGL.drawChar")
+            return
+        }
         this.toolkit.setupTextRendering()
         this.toolkit.setActiveTexture(this.texture)
         if (!this.isAlphaOnlyTexture && !bool5) {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_REPLACE)
+            this.toolkit.restoreGlyphCombinerSource()
         } else {
             this.toolkit.loadTextureCombineMode(GL_REPLACE, GL_MODULATE)
-            this.toolkit.setTexture(0, GL_PREVIOUS, GL_SRC_COLOR)
+            // Held until the next non-glyph draw instead of being restored per glyph.
+            this.toolkit.applyGlyphCombinerSource()
         }
 
-        OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+        this.toolkit.setGlyphColor(colorArgb)
         OpenGL.glTranslatef(translateX.toFloat(), translateY.toFloat(), 0.0F)
         this.listUtils.callList(character)
         OpenGL.glLoadIdentity()
-        if (this.isAlphaOnlyTexture || bool5) {
-            this.toolkit.setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
-        }
     }
 }

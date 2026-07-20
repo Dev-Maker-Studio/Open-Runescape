@@ -865,9 +865,23 @@ open class ObjectType {
 				locTypeList.uidToModelCache.put(model, uid)
 			}
 		}
+		val baseModel: Model = model
+		val animatedCacheKey = if (sequence != null) createAnimatedModelCacheKey(uid, functionMaskVar, sequence) else null
+		if (animatedCacheKey != null) {
+			val cached = lookupCachedAnimatedModel(animatedCacheKey, baseModel)
+			if (cached != null) {
+				return cached
+			}
+		}
 		var applyShading = false
 		if (sequence != null) {
-			model = model.copy(1.toByte(), functionMaskVar, true)
+			// Cacheable animation frames are built into a dedicated copy (copy type 0) so
+			// the result — including its GL buffers — survives across render frames and is
+			// shared by identical locs on the same frame. Uncacheable ones keep using the
+			// shared toolkit copy slot, which the next animated entity overwrites and which
+			// therefore has to be rebuilt every render frame.
+			val copyType: Byte = if (animatedCacheKey != null) 0 else 1
+			model = baseModel.copy(copyType, functionMaskVar, true)
 			applyShading = true
 			sequence.animateRotatedModel(model!!, rotation and 0x3)
 		}
@@ -895,7 +909,41 @@ open class ObjectType {
 		if (applyShading) {
 			model.applyShading(functionMaskVar)
 		}
+		if (animatedCacheKey != null) {
+			storeCachedAnimatedModel(animatedCacheKey, baseModel, model)
+		}
 		return model
+	}
+
+	/**
+	 * Decides whether the animated model produced by [getAnimatedModel] for [sequence]'s
+	 * current state is a pure function of the returned key, and can therefore be cached
+	 * and reused across render frames (and across identical locs, e.g. rows of torches).
+	 * Returns null when the result depends on state the key cannot capture; those calls
+	 * fall back to the per-frame shared-copy-slot rebuild.
+	 */
+	private fun createAnimatedModelCacheKey(uid: Long, functionMask: Int, sequence: Sequence): AnimatedModelCacheKey? {
+		if (this.groundContourType.toInt() != 0) {
+			// Ground-contoured geometry depends on the surrounding heightmap, which is not
+			// captured by the key and changes whenever the scene is rebuilt.
+			return null
+		}
+		val seqType = sequence.type ?: return null
+		if (seqType.frames == null || seqType.tweened) {
+			// Tweened sequences interpolate towards the next frame by elapsed time, so the
+			// output changes every client cycle; caching per-cycle results would only churn
+			// GL buffers instead of saving work.
+			return null
+		}
+		if (sequence.tweening && seqType.interfaceFrames != null) {
+			return null
+		}
+		if (!sequence.isMaskCalculated()) {
+			// Framesets are not loaded yet: animateRotatedModel would be a no-op, and caching
+			// the unanimated result would keep this frame frozen after they load.
+			return null
+		}
+		return AnimatedModelCacheKey(uid, functionMask, seqType.id, sequence.currentFrameId)
 	}
 
 	/**
@@ -1020,9 +1068,68 @@ open class ObjectType {
 		return this.animations
 	}
 
+	/**
+	 * Identifies one cacheable animated-loc build: [uid] already encodes loc id, shape,
+	 * rotation, customisation and renderer; the sequence id and frame index pin the pose.
+	 * Only non-tweened sequences are cached (see [createAnimatedModelCacheKey]), so the
+	 * frame index fully determines the vertex data.
+	 */
+	private data class AnimatedModelCacheKey(
+		val uid: Long,
+		val functionMask: Int,
+		val sequenceId: Int,
+		val frameId: Int
+	)
+
+	/**
+	 * A cached animated build together with the stationary model it was derived from.
+	 * The base reference doubles as the validity check: when the stationary-model cache
+	 * is reset or the entry is rebuilt (mask merge, toolkit change, customisation), the
+	 * base instance changes and everything derived from the old instance is stale.
+	 */
+	private class CachedAnimatedModel(val base: Model, val model: Model)
+
 	companion object {
 		@JvmField
 		var locRecolorPalette: ShortArray = ShortArray(256)
+
+		// Sized for extended render distance: entries ~ (distinct animated loc
+		// uids visible) x (frames of their sequences held hot). A 3x-distance map
+		// shows ~9x the area of the legacy 104 map; too-small capacity thrashes
+		// and degrades to a full rebuild per render frame, worse than no cache.
+		private const val ANIMATED_MODEL_CACHE_CAPACITY = 2048
+
+		/**
+		 * LRU cache of fully built animated-loc models. Animated locs (torches, fires,
+		 * fountains, ...) previously re-ran copy + skeletal transform + shading and
+		 * re-uploaded their geometry on every render frame even though the animation
+		 * only advances a few times per second; entries here are rebuilt once per
+		 * animation frame and drawn from their own retained GL buffers in between.
+		 * Access is guarded by synchronizing on the map itself.
+		 */
+		private val animatedModelCache =
+			object : LinkedHashMap<AnimatedModelCacheKey, CachedAnimatedModel>(64, 0.75f, true) {
+				override fun removeEldestEntry(eldest: MutableMap.MutableEntry<AnimatedModelCacheKey, CachedAnimatedModel>): Boolean {
+					return size > ANIMATED_MODEL_CACHE_CAPACITY
+				}
+			}
+
+		private fun lookupCachedAnimatedModel(key: AnimatedModelCacheKey, base: Model): Model? {
+			synchronized(animatedModelCache) {
+				val entry = animatedModelCache[key] ?: return null
+				if (entry.base !== base) {
+					animatedModelCache.remove(key)
+					return null
+				}
+				return entry.model
+			}
+		}
+
+		private fun storeCachedAnimatedModel(key: AnimatedModelCacheKey, base: Model, model: Model) {
+			synchronized(animatedModelCache) {
+				animatedModelCache[key] = CachedAnimatedModel(base, model)
+			}
+		}
 
 		@JvmStatic
 		fun isTypeCached(loctypelist: ObjectTypeList, id: Int, type: Int): Boolean {

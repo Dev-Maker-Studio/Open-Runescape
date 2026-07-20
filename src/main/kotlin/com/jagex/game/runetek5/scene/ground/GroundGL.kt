@@ -56,6 +56,10 @@ open class GroundGL(
     @JvmField var lightingX: Array<FloatArray>? = null
     @JvmField var goundMaterialNodes: Array<Node<*>?>? = null
     @JvmField var dataArrayBuffer: ArrayBufferGL? = null
+    // Modern rendering: raw vertex data stored for LWJGL-only rendering (no legacy VBO dependency)
+    @JvmField var modernVertexData: java.nio.ByteBuffer? = null
+    @JvmField var modernVertexStride: Int = 0
+    @JvmField var modernVertexCount: Int = 0
     @JvmField var vertexBuffer: OpenGlArrayDrawBuffer? = null
     @JvmField var colorBuffer: OpenGlArrayDrawBuffer? = null
     @JvmField var textureBuffer: OpenGlArrayDrawBuffer? = null
@@ -258,7 +262,10 @@ open class GroundGL(
                 (goundMaterialNodes!![tileX] as GroundMaterialGL).drawMaterialTriangles(visibleTileIndices, visibleTileCount)
             }
 
-            if (!activeLights.isEmpty()) {
+            // Point lights are not part of the modern pipeline yet; their fixed-function
+            // light meshes draw client-memory arrays against modern-reconfigured GL
+            // state (same native-crash class as the shadow overlay below).
+            if (!activeLights.isEmpty() && activeToolkit !is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
                 val fogColor = activeToolkit.fogColor
                 val fogDensity = activeToolkit.fogDensity
                 activeToolkit.calculateFog(0, fogDensity, activeToolkit.fogOffset)
@@ -286,7 +293,11 @@ open class GroundGL(
                 activeToolkit.calculateFog(fogColor, fogDensity, activeToolkit.fogOffset)
             }
 
-            if (shadowMapper != null) {
+            // The fixed-function shadow overlay is skipped under the modern toolkit:
+            // it draws client-memory index arrays against GL state the modern ground
+            // pass has reconfigured (native crash), and the modern pipeline replaces it
+            // with the shader ShadowPass.
+            if (shadowMapper != null && activeToolkit !is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
                 OpenGL.glPushMatrix()
                 OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
@@ -611,7 +622,37 @@ open class GroundGL(
                 }
             }
             nativeStream.flush()
-            dataArrayBuffer = activeToolkit.createDataArrayBuffer(bufferEntrySize, nativeHeapBuffer, nativeStream.written())
+
+            // For modern rendering: copy vertex data to a ByteBuffer we own (no legacy VBO
+            // dependency). This is a pure CPU-side capture — it must run whenever the
+            // active toolkit is ModernGLToolkit, regardless of whether the modern
+            // renderer has lazily initialized yet (init happens after the first render;
+            // the map can be built before that). Without this snapshot the modern ground
+            // path cannot draw AT ALL (no legacy fallback exists under toolkit 6), so
+            // failures here must be loud.
+            val dataSize = nativeStream.written()
+            if (activeToolkit is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+                try {
+                    val nativeAddr = nativeHeapBuffer.getBufferAddress()
+                    if (nativeAddr != 0L && dataSize > 0) {
+                        // Free old buffer if exists
+                        modernVertexData?.let { org.lwjgl.system.MemoryUtil.memFree(it) }
+                        // Create new buffer and copy data
+                        modernVertexData = org.lwjgl.system.MemoryUtil.memAlloc(dataSize)
+                        org.lwjgl.system.MemoryUtil.memCopy(nativeAddr, org.lwjgl.system.MemoryUtil.memAddress(modernVertexData!!), dataSize.toLong())
+                        modernVertexStride = bufferEntrySize
+                        modernVertexCount = totalMaterializedTiles
+                    } else {
+                        println("[GroundGL] MODERN SNAPSHOT MISSING: nativeAddr=$nativeAddr dataSize=$dataSize — terrain for this ground will not render under toolkit 6")
+                    }
+                } catch (e: Exception) {
+                    modernVertexData = null
+                    println("[GroundGL] MODERN SNAPSHOT FAILED: ${e.message} — terrain for this ground will not render under toolkit 6")
+                    e.printStackTrace()
+                }
+            }
+
+            dataArrayBuffer = activeToolkit.createDataArrayBuffer(bufferEntrySize, nativeHeapBuffer, dataSize)
             if (dataArrayBuffer is GlVboArrayBuffer) {
                 nativeHeapBuffer.deallocateBuffer()
             }

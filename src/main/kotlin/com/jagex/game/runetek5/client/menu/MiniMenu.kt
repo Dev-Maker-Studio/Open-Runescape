@@ -531,7 +531,7 @@ object MiniMenu {
             while (coloredEntry != null) {
                 entryY = entryIndex * entryRowHeight + StaticMethods.menuOpenY + 31
                 if (coloredEntry.queueSize == 1) {
-                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.next as MiniMenuEntry), minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
+                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry), minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                 } else {
                     StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, coloredEntry, minimenuHeader!!, FontMetrics.defaultFontMetrics!!, -1, -256)
                 }
@@ -828,7 +828,7 @@ object MiniMenu {
                 coloredEntry = currentColoredEntry2
                 entryY = headerSize + entryIndex * entryRowHeight + fontMetrics.topPadding + StaticMethods.menuOpenY + 1
                 if (coloredEntry.queueSize == 1) {
-                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.next as MiniMenuEntry), fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry), fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 } else {
                     StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, coloredEntry, fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
                 }

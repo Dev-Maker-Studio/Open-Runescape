@@ -561,7 +561,7 @@ object StaticMethods {
                 var menuEntry = MiniMenu.sortedColoredEntries!!.getNext() as ColoredMiniMenuEntry?
                 while (menuEntry != null) {
                     entryWidth = if (menuEntry.queueSize == 1) {
-                        MiniMenu.getWidthForEntryWithQuests(menuEntry.nodeQueue!!.current!!.next as MiniMenuEntry, fontMetrics)
+                        MiniMenu.getWidthForEntryWithQuests(menuEntry.nodeQueue!!.current!!.nextCache as MiniMenuEntry, fontMetrics)
                     } else {
                         MiniMenu.getPrefixTextWidth(menuEntry, fontMetrics)
                     }

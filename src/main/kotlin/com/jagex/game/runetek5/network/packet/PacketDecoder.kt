@@ -1173,7 +1173,8 @@ object PacketDecoder {
             val fpsResponse = PacketEncoder.createPacket(ClientProt.SEND_FPS, context.isaac)
             fpsResponse.buffer.writeIntInverseMiddle(key)
             fpsResponse.buffer.writeIntMiddle(flags)
-            fpsResponse.buffer.writeByteSubtract(GameShell.FPS)
+            // Uncapped rendering can exceed a byte; clamp so the value doesn't wrap
+            fpsResponse.buffer.writeByteSubtract(GameShell.FPS.coerceAtMost(255))
             context.queuePacket(fpsResponse)
             context.currentPacket = null
             return true

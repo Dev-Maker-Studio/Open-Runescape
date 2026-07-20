@@ -90,10 +90,15 @@ class ModernModelRenderer {
     private var uTextureLocation = -1
     private var uTextureEnabledLocation = -1
     private var uAlphaThresholdLocation = -1
+    private var uPreLitColorsLocation = -1
+
+    // State: whether to use pre-lit colors (skip shader lighting)
+    private var preLitColors = false
 
     // State tracking
     private var isInitialized = false
     private var currentTextureId = -1
+    private var isShaderBound = false
 
     // Statistics
     private var drawCallsThisFrame = 0
@@ -148,6 +153,7 @@ class ModernModelRenderer {
         uTextureLocation = s.getUniformLocation("uTexture")
         uTextureEnabledLocation = s.getUniformLocation("uTextureEnabled")
         uAlphaThresholdLocation = s.getUniformLocation("uAlphaThreshold")
+        uPreLitColorsLocation = s.getUniformLocation("uPreLitColors")
         s.unbind()
     }
 
@@ -195,6 +201,31 @@ class ModernModelRenderer {
     }
 
     /**
+     * Sets whether colors passed to the renderer are pre-lit.
+     * When true, the shader will skip lighting calculations and use vertex colors directly.
+     */
+    fun setPreLitColors(preLit: Boolean) {
+        this.preLitColors = preLit
+    }
+
+    /**
+     * Ensures the shader is bound and ready for drawing.
+     * Called automatically by draw methods when needed.
+     */
+    fun ensureReady() {
+        if (!isInitialized) return
+        if (!isShaderBound) {
+            shader!!.bind()
+            setLightingUniforms()
+            setFogUniforms()
+            shader!!.setUniform(uTextureLocation, 0)
+            shader!!.setUniform(uTextureEnabledLocation, 0) // Textures disabled by default
+            shader!!.setUniform(uAlphaThresholdLocation, 0f)
+            isShaderBound = true
+        }
+    }
+
+    /**
      * Begins a render frame.
      * Must be called before any draw calls.
      */
@@ -210,7 +241,9 @@ class ModernModelRenderer {
         setLightingUniforms()
         setFogUniforms()
         shader!!.setUniform(uTextureLocation, 0) // Texture unit 0
+        shader!!.setUniform(uTextureEnabledLocation, 0) // Textures disabled by default
         shader!!.setUniform(uAlphaThresholdLocation, 0f)
+        isShaderBound = true
     }
 
     /**
@@ -218,6 +251,7 @@ class ModernModelRenderer {
      */
     fun endFrame() {
         shader?.unbind()
+        isShaderBound = false
     }
 
     /**
@@ -251,6 +285,9 @@ class ModernModelRenderer {
     fun drawIndexed(vertices: ByteBuffer, indices: java.nio.ShortBuffer, indexCount: Int) {
         if (indexCount == 0) return
 
+        // Ensure shader is bound (in case beginFrame wasn't called)
+        ensureReady()
+
         // Calculate matrices
         viewMatrix.mul(modelMatrix, modelViewMatrix)
         projectionMatrix.mul(modelViewMatrix, modelViewProjectionMatrix)
@@ -261,6 +298,9 @@ class ModernModelRenderer {
         shader!!.setUniformMatrix4(uMVLocation, modelViewMatrix)
         shader!!.setUniform("uNormalMatrix", normalMatrix)
 
+        // Set pre-lit colors mode (must be set per-draw since it can change)
+        shader!!.setUniform(uPreLitColorsLocation, if (preLitColors) 1 else 0)
+
         // Upload vertex data
         vbo!!.upload(vertices)
 
@@ -269,6 +309,7 @@ class ModernModelRenderer {
 
         // Draw
         vao!!.bind()
+        ibo!!.bind()
         GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
 
         drawCallsThisFrame++
@@ -370,6 +411,18 @@ class ModernModelRenderer {
     }
 
     /**
+     * Gets the uniform location for the texture enabled flag.
+     * Used by FrameBatcher to set this uniform when rendering batched geometry.
+     */
+    fun getTextureEnabledUniformLocation(): Int = uTextureEnabledLocation
+
+    /**
+     * Gets the shader program used by this renderer.
+     * Used by FrameBatcher to set uniforms when rendering batched geometry.
+     */
+    fun getShader(): ShaderProgram? = shader
+
+    /**
      * Releases all GPU and CPU resources.
      */
     fun destroy() {
@@ -397,6 +450,7 @@ class ModernModelRenderer {
         s.setUniform("uSunColor", sunColor)
         s.setUniform(uAmbientLocation, ambient)
         s.setUniform(uContrastLocation, contrast)
+        s.setUniform(uPreLitColorsLocation, if (preLitColors) 1 else 0)
     }
 
     private fun setFogUniforms() {

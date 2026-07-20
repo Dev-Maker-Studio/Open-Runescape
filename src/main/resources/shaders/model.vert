@@ -22,6 +22,9 @@ uniform float uFogStart;
 uniform float uFogEnd;
 uniform bool uFogEnabled;
 
+// Pre-lit mode: when true, skip lighting calculation (colors are already lit)
+uniform bool uPreLitColors;
+
 // Outputs to fragment shader
 out vec2 vTexCoord;
 out vec4 vColor;
@@ -44,11 +47,15 @@ void main() {
     vNormal = normalize(uNormalMatrix * aNormal);
 
     // Calculate vertex lighting (Gouraud shading for compatibility with original)
-    float nDotL = dot(vNormal, uSunDirection);
-    float lightIntensity = uAmbient + max(nDotL, 0.0) * uContrast;
-
-    // Apply lighting to vertex color
-    vColor = vec4(aColor.rgb * uSunColor * lightIntensity, aColor.a);
+    if (uPreLitColors) {
+        // Colors are pre-lit (baked lighting from legacy path), pass through directly
+        vColor = aColor;
+    } else {
+        float nDotL = dot(vNormal, uSunDirection);
+        float lightIntensity = uAmbient + max(nDotL, 0.0) * uContrast;
+        // Apply lighting to vertex color
+        vColor = vec4(aColor.rgb * uSunColor * lightIntensity, aColor.a);
+    }
 
     // Calculate fog factor
     if (uFogEnabled) {

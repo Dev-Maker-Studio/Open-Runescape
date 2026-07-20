@@ -265,6 +265,8 @@ object GLWrapper {
     fun drawElementsInstanced(mode: Int, count: Int, type: Int, offset: Long, instanceCount: Int) =
         glDrawElementsInstanced(mode, count, type, offset, instanceCount)
 
+    fun vertexAttribDivisor(index: Int, divisor: Int) = glVertexAttribDivisor(index, divisor)
+
     // ===== State Functions =====
 
     fun enable(cap: Int) = glEnable(cap)

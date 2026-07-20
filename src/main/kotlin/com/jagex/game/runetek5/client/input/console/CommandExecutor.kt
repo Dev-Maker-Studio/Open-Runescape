@@ -79,6 +79,21 @@ object CommandExecutor {
                     Console.writeLine("Driver Version: ${renderInfo.driverVersion}")
                     return
                 }
+                command.equals("toolkit", ignoreCase = true) || command.startsWith("toolkit ", ignoreCase = true) -> {
+                    val current = PreferenceManager.preferences!!.activeToolkit!!.getValue()
+                    val id = command.substringAfter(' ', "").trim().toIntOrNull()
+                    if (id == null || id < 0 || id > 6) {
+                        Console.writeLine("Usage: toolkit <0-6> (current: $current, 6 = modern shader renderer)")
+                        return
+                    }
+                    if (id == current) {
+                        Console.writeLine("Toolkit $id is already active")
+                        return
+                    }
+                    Console.writeLine("Switching to toolkit $id...")
+                    Client.loadAssets(id, "Please wait - changing renderer...", true)
+                    return
+                }
                 command.equals("heap", ignoreCase = true) -> {
                     Console.writeLine("Heap: ${GameShell.maxMemory}MB")
                     return

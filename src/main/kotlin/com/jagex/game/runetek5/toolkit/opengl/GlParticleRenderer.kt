@@ -18,7 +18,6 @@ class GlParticleRenderer {
     var vertices: OpenGlArrayDrawBuffer? = null
     var colors: OpenGlArrayDrawBuffer? = null
     var overflowBucketCount: Int = 0
-    val modelviewMatrix: FloatArray = FloatArray(16)
     val textureBuffer = GlBitBuffer(786336)
     val depthBucketShiftBits: Int
     val particleDepths: IntArray
@@ -160,13 +159,19 @@ class GlParticleRenderer {
     }
 
     fun draw(toolkit: OpenGlToolkit, depthRange: Int) {
-        OpenGL.glGetFloatv(GL_MODELVIEW_MATRIX, this.modelviewMatrix, 0)
-        val vertexXA = this.modelviewMatrix[0]
-        val vertexXB = this.modelviewMatrix[4]
-        val vertexXC = this.modelviewMatrix[8]
-        val vertexYA = this.modelviewMatrix[1]
-        val vertexYB = this.modelviewMatrix[5]
-        val vertexYC = this.modelviewMatrix[9]
+        // The GL modelview matrix here is exactly the toolkit's tracked view matrix:
+        // setupMatrixRendering()/updateModelViewAndLights() load it, and model rendering
+        // push/pops its per-model transforms. drawParticles() already relies on this
+        // invariant by computing particle depths from viewMatrix44, so build the
+        // billboard basis from the tracked matrix instead of a glGetFloatv(
+        // GL_MODELVIEW_MATRIX) driver readback, which can stall the pipeline.
+        val modelview = toolkit.viewMatrix44.elements
+        val vertexXA = modelview[0]
+        val vertexXB = modelview[4]
+        val vertexXC = modelview[8]
+        val vertexYA = modelview[1]
+        val vertexYB = modelview[5]
+        val vertexYC = modelview[9]
         val offX1 = vertexXA + vertexYA
         val offY1 = vertexXB + vertexYB
         val offZ1 = vertexXC + vertexYC

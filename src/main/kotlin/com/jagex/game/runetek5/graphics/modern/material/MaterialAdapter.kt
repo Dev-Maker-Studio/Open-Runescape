@@ -301,33 +301,70 @@ data class MaterialUniforms(
 
 /**
  * Material effect types matching RuneScape's effect system.
+ *
+ * These IDs correspond to the indices in EffectManagerGL.materialEffects[]:
+ *   0 = none
+ *   1 = MaterialEffect1GL    (cube map specular highlights via normal maps)
+ *   2 = LappingWaterEffect   (animated lapping water with Perlin noise)
+ *   3 = StillWaterEffect     (still water with edge blending)
+ *   4 = RipplingWaterEffect  (white rippling waves)
+ *   5 = WaterfallEffect      (flowing waterfall texture)
+ *   6 = HideLightsEffect     (disables lighting for bright surfaces)
+ *   7 = ReflectingTextureEffect (environment map reflections)
+ *   8 = ReflectiveRipplingWaterEffect (HD reflective water)
+ *   9 = MaterialEffect9GL    (HD water with wave breaking and specular)
  */
 enum class EffectType(val id: Int) {
     NONE(0),
-    WATER(1),
-    LAVA(2),
-    FIRE(3),
-    SMOKE(4),
-    GLOW(5),
-    PULSATE(6);
+    CUBE_MAP_SPECULAR(1),
+    LAPPING_WATER(2),
+    STILL_WATER(3),
+    RIPPLING_WATER(4),
+    WATERFALL(5),
+    HIDE_LIGHTS(6),
+    REFLECTION_MAP(7),
+    REFLECTIVE_RIPPLING_WATER(8),
+    HD_WATER(9);
 
     companion object {
-        private val byId = values().associateBy { it.id }
+        private val byId = entries.associateBy { it.id }
         fun fromId(id: Int): EffectType = byId[id] ?: NONE
     }
 }
 
 /**
  * Texture combine modes for multi-texturing.
+ *
+ * These map to the legacy GL_COMBINE texture environment modes:
+ *   GL_MODULATE    = 8448  -> base * texture
+ *   GL_REPLACE     = 7681  -> replace base with texture
+ *   GL_ADD         = 260   -> base + texture
+ *   GL_ADD_SIGNED  = 34164 -> base + texture - 0.5
+ *   GL_INTERPOLATE = 34165 -> mix(base, texture, factor)
+ *   GL_DECAL       = 8449  -> texture over base using texture alpha
+ *
+ * The combineMode byte from MaterialType is an engine-specific index (0..3),
+ * not a raw GL constant. See OpenGlToolkit.loadTextureCombineMode() for mapping.
  */
 enum class CombineMode(val id: Int) {
-    MODULATE(0),   // Base * texture (default)
-    DECAL(1),      // Replace with texture where alpha > 0
-    ADD(2),        // Base + texture
-    BLEND(3);      // Interpolate based on alpha
+    MODULATE(0),      // Base * texture (default)
+    REPLACE(1),       // Replace base with texture
+    ADD(2),           // Base + texture
+    INTERPOLATE(3);   // mix(base, texture, factor)
 
     companion object {
-        private val byId = values().associateBy { it.id }
+        private val byId = entries.associateBy { it.id }
         fun fromId(id: Int): CombineMode = byId[id] ?: MODULATE
+
+        /**
+         * Converts a combine mode to the fragment shader operation.
+         * Returns the GLSL expression string for documentation purposes.
+         */
+        fun describeGlsl(mode: CombineMode): String = when (mode) {
+            MODULATE -> "texColor * vertexColor"
+            REPLACE -> "texColor"
+            ADD -> "texColor + vertexColor"
+            INTERPOLATE -> "mix(vertexColor, texColor, factor)"
+        }
     }
 }

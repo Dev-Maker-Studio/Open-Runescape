@@ -32,6 +32,14 @@ object Renderers {
 
     @JvmStatic
     fun prepareForRendering(toolkitId: Int, topleftScreenText: String?, verifySettingsPreUpdate: Boolean) {
+        // GUARD: Prevent re-initializing the same toolkit that's already active.
+        // This destroys all GL state (textures, shaders, buffers) and recreates them,
+        // but any previously loaded textures become invalid handles = black rendering.
+        val currentToolkitId = PreferenceManager.preferences?.activeToolkit?.getValue() ?: -1
+        if (currentToolkitId == toolkitId && activeToolkit != null) {
+            println("[Renderers] Toolkit $toolkitId is already active — skipping re-initialization")
+            return
+        }
         if (toolkitId == 0) {
             activeToolkit = AbstractToolkit.create(0, GameShell.gameCanvas, TypeLists.MATERIALS, Resource.SHADER, PreferenceManager.preferences!!.antiAliasingPreview!!.getValue() * 2)
             if (topleftScreenText != null) {

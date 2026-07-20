@@ -160,7 +160,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
         imageProducer.resize(screenCanvasWidth, screenCanvasHeight)
     }
 
-    fun resizeDisplay(directDisplay: DirectDisplay) {
+    open fun resizeDisplay(directDisplay: DirectDisplay) {
         if (this.directDisplayCursorPosition < 0 || directDisplay != this.directDisplays[this.directDisplayCursorPosition]) {
             throw RuntimeException()
         }
@@ -375,7 +375,7 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun createComponentSurface(sizeX: Int, sizeY: Int, rowStartX: IntArray, rowWidth: IntArray): ComponentSurface
 
-    fun setDisplay(activeDisplay: DirectDisplay) {
+    open fun setDisplay(activeDisplay: DirectDisplay) {
         if (this.directDisplayCursorPosition >= 3) {
             throw RuntimeException()
         }

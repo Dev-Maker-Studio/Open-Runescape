@@ -23,8 +23,8 @@ import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.FileOnDisk
 import com.jagex.game.runetek5.cache.JFS32
 import com.jagex.game.runetek5.client.cycle.AbstractCycleManager
-import com.jagex.game.runetek5.client.cycle.JaclibCycleManager
-import com.jagex.game.runetek5.client.cycle.SystemCycleManager
+import com.jagex.game.runetek5.client.cycle.DecoupledCycleManager
+import com.jagex.game.runetek5.client.cycle.FrameLimiter
 import com.jagex.game.runetek5.client.input.mouse.CursorManager
 import com.jagex.game.runetek5.client.window.DisplayModeDetails
 import com.jagex.game.runetek5.client.window.ApplicationType
@@ -90,7 +90,15 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         val PULSE_CACHE: LongArray = LongArray(32)
 
         @JvmField
-        var canvasRefreshCycle: Int = 500
+        var nextCanvasRefreshAt: Long = 0L
+
+        /**
+         * Interpolation alpha for the current render frame: how far we are
+         * through the 20ms logic window, in [0, 1]. Entities lerp between their
+         * previous and current pulse positions by this amount.
+         */
+        @JvmField
+        var renderPulseAlpha: Float = 1.0f
 
         @JvmField
         @Volatile
@@ -317,11 +325,7 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
 
         @JvmStatic
         fun getCycleManager(): AbstractCycleManager {
-            return try {
-                JaclibCycleManager()
-            } catch (trowable: Throwable) {
-                SystemCycleManager()
-            }
+            return DecoupledCycleManager()
         }
 
         @JvmStatic
@@ -690,8 +694,10 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
             val timeDelta = (currentTime - lastTime).toInt()
             FPS = ((timeDelta shr 1) + 32000) / timeDelta
         }
-        if (++canvasRefreshCycle - 1 > 50) {
-            canvasRefreshCycle -= 50
+        // Legacy code refreshed the canvas every 50 redraws (~1/sec at 50fps).
+        // Now that the render rate is decoupled, key this off wall time instead.
+        if (currentTime >= nextCanvasRefreshAt) {
+            nextCanvasRefreshAt = currentTime + 1000L
             WindowMode.redrawWindowBackground = true
             gameCanvas!!.setSize(screenCanvasWidth, screenCanvasHeight * -969250379)
             gameCanvas!!.isVisible = true
@@ -918,13 +924,23 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         buildCanvas()
         initializeEssentials()
         cycleManager = getCycleManager()
+        var nextDummyEventAt = 0L
         while (killTime == 0L || Utils.time() < killTime) {
             loopsInCycle = cycleManager!!.loopcycle(PREFERED_CYCLE_DURATION)
             for (loop in 0 until loopsInCycle) {
                 onPulseWrapper()
             }
+            renderPulseAlpha = cycleManager!!.pulseFraction(PREFERED_CYCLE_DURATION)
             mainRedrawWrapper()
-            performDummyActionevent(gameCanvas!!)
+            // The dummy event keeps the AWT queue pumping, but posting it every
+            // render frame floods the EDT at high frame rates (and can block in
+            // its peekEvent/sleep loop), so keep it at the legacy 50Hz cadence.
+            val now = Utils.time()
+            if (now >= nextDummyEventAt) {
+                performDummyActionevent(gameCanvas!!)
+                nextDummyEventAt = now + 20L
+            }
+            FrameLimiter.pace()
         }
     }
 

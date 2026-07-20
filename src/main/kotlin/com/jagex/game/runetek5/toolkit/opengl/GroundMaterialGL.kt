@@ -6,6 +6,7 @@ import com.jagex.game.runetek5.graphics.texture.GlElementsArrayBuffer
 import com.jagex.game.runetek5.scene.ground.GroundFunctionMask
 import com.jagex.game.runetek5.scene.ground.GroundGL
 import com.jagex.game.runetek5.scene.tile.WaterTile
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.buffer.GlVboArrayBuffer
 import com.jagex.game.runetek5.toolkit.opengl.buffer.OpenGlArrayDrawBuffer
@@ -125,6 +126,16 @@ class GroundMaterialGL(
     }
 
     fun drawMaterialTriangles(ints_1: IntArray, i_2: Int) {
+        // Under the modern toolkit the modern path is the ONLY path — no legacy
+        // fixed-function fallback. If the modern pipeline cannot draw (renderer not
+        // initialized, no vertex snapshot), the material draws NOTHING and the miss
+        // is counted in the [ModernDiag] gate counters (ground=drawn/noPipe/noSnap).
+        if (toolkit is ModernGLToolkit) {
+            renderGroundMaterialModern(ints_1, i_2)
+            return
+        }
+
+        // Legacy rendering path (non-modern toolkits only)
         var addedTextures = 0
         val textureBuffer = toolkit.textureBuffer
         textureBuffer.currentPosition = 0
@@ -193,6 +204,26 @@ class GroundMaterialGL(
             OpenGL.glMatrixMode(GL_MODELVIEW)
         }
 
+    }
+
+    /**
+     * Modern rendering path for ground materials using ModernGLToolkit.
+     *
+     * @return true when the modern pipeline handled the draw; false when the caller
+     *         must fall back to the legacy fixed-function path.
+     */
+    private fun renderGroundMaterialModern(tileIndices: IntArray, tileCount: Int): Boolean {
+        val modernToolkit = toolkit as ModernGLToolkit
+        return modernToolkit.renderGroundMaterialModern(
+            this,
+            ground,
+            tileIndices,
+            tileCount,
+            groundFunctionMask,
+            materialId,
+            textureScale,
+            (ground.waterFunctionMask and GroundFunctionMask.HD_LIGHT) != 0
+        )
     }
 
     fun createDataArrayBuffer(totalTiles: Int) {

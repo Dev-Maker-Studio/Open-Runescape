@@ -69,6 +69,7 @@ object EntityUpdating {
         var moveType = MovementType.STATIONARY.id.toInt()
         var turnDirection = 0
 
+        pathingEntity.captureInterpolationSnapshot()
         if (pathingEntity.forceMovementT1Delay > Client.cycles) {
             PathingEntity.forceMovementType1(pathingEntity)
         } else if (pathingEntity.forceMovementT2Delay >= Client.cycles) {
@@ -750,14 +751,16 @@ object EntityUpdating {
                 if (colorType < 6) {
                     color = Client.OVERHEAD_TEXT_COLORS[colorType]
                 }
+                // Flash phase keys off the 50Hz pulse counter, not the frame
+                // counter, so blink speed is independent of the frame rate.
                 if (colorType == 6) {
-                    color = if (Client.timesSceneRendered % 20 < 10) 16711680 else 16776960
+                    color = if (Client.cycles % 20 < 10) 16711680 else 16776960
                 }
                 if (colorType == 7) {
-                    color = if (Client.timesSceneRendered % 20 < 10) 255 else 65535
+                    color = if (Client.cycles % 20 < 10) 255 else 65535
                 }
                 if (colorType == 8) {
-                    color = if (Client.timesSceneRendered % 20 < 10) 45056 else 8454016
+                    color = if (Client.cycles % 20 < 10) 45056 else 8454016
                 }
                 if (colorType == 9) {
                     val colorProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
@@ -798,17 +801,18 @@ object EntityUpdating {
                     MiniMenu.minimenuHeader!!.renderCentered(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, 0xFF000000.toInt())
                 }
                 if (drawType == 1) {
-                    // Wave effect (wave:texthere)
-                    MiniMenu.minimenuHeader!!.renderCenteredWave(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered)
+                    // Wave effect (wave:texthere) - phase driven by the 50Hz pulse
+                    // counter so animation speed is frame-rate independent
+                    MiniMenu.minimenuHeader!!.renderCenteredWave(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.cycles)
                 }
                 if (drawType == 2) {
                     // Wave2 effect (wave2:texthere)
-                    MiniMenu.minimenuHeader!!.renderCenteredWave2(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered)
+                    MiniMenu.minimenuHeader!!.renderCenteredWave2(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.cycles)
                 }
                 if (drawType == 3) {
                     // Shake effect (shake:texthere)
                     val effectProgress = 150 - Client.HINT_DETAILS[hintIndex]!!.getTicksLeft() * 150 / Client.HINT_DETAILS[hintIndex]!!.getTotalTicksVisible()
-                    MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.timesSceneRendered, effectProgress)
+                    MiniMenu.minimenuHeader!!.renderCenteredShake(drawnText, clipLeft + hintX, hintY + clipTop, drawColor, Client.cycles, effectProgress)
                 }
                 if (drawType == 4) {
                     // Scroll effect (scroll:texthere)

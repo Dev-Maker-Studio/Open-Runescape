@@ -60,6 +60,17 @@ class ModelGL : Model {
         @JvmField
         var withinOrigin: Boolean = false
 
+        /** Source of unique face-content stamps; see [facesRevision]. */
+        private val FACES_REVISION_COUNTER = java.util.concurrent.atomic.AtomicLong(1L)
+
+        /**
+         * XORed into [facesRevision] by [mirror]. Mirroring swaps facesB/facesC, which is
+         * its own inverse, and XOR mirrors that: applying the salt twice restores the
+         * original stamp. The high bits guarantee a mirrored stamp can never collide with
+         * an unmirrored counter value.
+         */
+        private const val MIRRORED_FACES_REVISION_SALT = 0x517cc1b727220a95L
+
         @JvmStatic
         fun clone(src: FloatArray, size: Int): FloatArray {
             val dst = FloatArray(size)
@@ -277,6 +288,34 @@ class ModelGL : Model {
 
     @JvmField
     var dynamicArrayBuffer: ArrayBufferGL? = null
+
+    /**
+     * Content stamp for facesA/facesB/facesC. Every freshly built model gets a unique
+     * stamp; copies inherit the source's stamp (identical index content) and [mirror]
+     * XORs a salt (mirroring twice restores both the windings and the stamp). Used to
+     * skip rebuilding and re-uploading [dynamicElementsBuffer] when it already holds
+     * exactly this model's indices — animation only moves vertices, so the index data
+     * of an animated model is identical from frame to frame.
+     */
+    private var facesRevision: Long = FACES_REVISION_COUNTER.getAndIncrement()
+
+    /** Faces stamp and face count [dynamicElementsBuffer] was last built from. */
+    private var dynamicElementsRevision: Long = -1L
+    private var dynamicElementsFaceCount: Int = -1
+
+    /** Toolkit context generation the buffer's upload belongs to. */
+    private var dynamicElementsGeneration: Int = -1
+
+    /**
+     * Reusable 3x3 fixed-point matrix scratch for [animateTransform]. Skeletal animation
+     * previously allocated these per bone group per entity per render frame. Instance
+     * fields (not companion scratch) because models are built and animated concurrently
+     * on the game thread and the async map loader thread; per-instance reuse is exactly
+     * as thread-safe as the vertex arrays the same code writes.
+     */
+    private var animScratchMatrixA: IntArray? = null
+    private var animScratchMatrixB: IntArray? = null
+    private var animScratchMatrixC: IntArray? = null
 
     constructor(toolkit: OpenGlToolkit) {
         this.toolkit = toolkit
@@ -1250,6 +1289,11 @@ class ModelGL : Model {
             dst.facesC = this.facesC
         }
 
+        // Whether shared or copied, the destination's face indices now match the source.
+        // Note: dst.dynamicElementsRevision is deliberately untouched — it describes the
+        // contents of dst's persistent dynamic element buffer, not dst's face arrays.
+        dst.facesRevision = this.facesRevision
+
         if (ModelFunctionMaskGL.copyElementsBuffer(flags)) {
             if (usesPreallocated) {
                 dst.renderState = (dst.renderState.toInt() or 0x10).toByte()
@@ -1615,6 +1659,22 @@ class ModelGL : Model {
             return
         }
 
+        if (reuseBuffer) {
+            // Animation only displaces vertices; the index data and material batching
+            // only change when the face composition itself changes. If the dynamic
+            // element buffer already holds exactly this model's indices (same face
+            // content stamp and count), skip the rebuild and the GL re-upload.
+            val existingBuffer = this.dynamicElementsBuffer
+            if (existingBuffer != null &&
+                this.dynamicElementsRevision == this.facesRevision &&
+                this.dynamicElementsFaceCount == this.renderedFaceCount &&
+                this.dynamicElementsGeneration == this.toolkit.glContextGeneration
+            ) {
+                modelElements.openglElementsBuffer = existingBuffer
+                return
+            }
+        }
+
         if (this.toolkit.textureBuffer.buffer.size < this.renderedFaceCount * 6) {
             this.toolkit.textureBuffer = GlBitBuffer((this.renderedFaceCount + 100) * 6)
         } else {
@@ -1645,6 +1705,9 @@ class ModelGL : Model {
                     existingBuffer.putElements(textureBuffer.buffer, textureBuffer.currentPosition)
                 }
 
+                this.dynamicElementsRevision = this.facesRevision
+                this.dynamicElementsFaceCount = this.renderedFaceCount
+                this.dynamicElementsGeneration = this.toolkit.glContextGeneration
                 modelElements.openglElementsBuffer = this.dynamicElementsBuffer
             } else {
                 modelElements.openglElementsBuffer = this.toolkit.createElementsArrayBuffer(textureBuffer.buffer, textureBuffer.currentPosition, false)
@@ -2222,6 +2285,28 @@ class ModelGL : Model {
     }
 
     override fun drawMatrixThreaded(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon?, rasterizerFunctionMask: Int) {
+        // Check if the ACTIVE renderer is modern (not model's cached toolkit reference)
+        // Models cache their toolkit at creation time, but we switch toolkits at runtime.
+        // Under the modern toolkit the modern batcher is the ONLY path — when its gate
+        // rejects (renderer not initialized, wrong thread, offscreen target), the model
+        // draws NOTHING; the miss is counted in [ModernDiag] modelGate=accepted/total.
+        val activeToolkit = com.jagex.game.runetek5.rendering.Renderers.activeToolkit
+        if (activeToolkit is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+            if (activeToolkit.isModernRenderingActive()) {
+                // Render using modern pipeline
+                activeToolkit.renderModelGLModern(this, projectionMatrix)
+                // Still calculate bounding box for mouse interaction
+                if (boundingBox != null && this.numNormals != 0) {
+                    calculateBoundingBoxForModern(projectionMatrix, boundingBox)
+                }
+            } else {
+                // Gate rejected (wrong thread / renderer not initialized): the model is
+                // dropped — count it loudly so the diag exposes the gap.
+                activeToolkit.countLegacySkip("ModelGL.drawMatrixThreaded(gate-rejected)")
+            }
+            return
+        }
+
         if ((rasterizerFunctionMask and 0x2) != 0) {
             OpenGL.glPolygonMode(1032, 6913)
         }
@@ -2338,6 +2423,60 @@ class ModelGL : Model {
         }
     }
 
+    /**
+     * Calculates bounding box for mouse interaction when using modern renderer.
+     * This is a simplified version that doesn't require legacy GL matrix operations.
+     */
+    private fun calculateBoundingBoxForModern(projectionMatrix: Matrix43, boundingBox: BoundingBoxPolygon) {
+        if (!this.boundsCalculated) {
+            calculateBounds()
+        }
+
+        val mvpMatrix = this.toolkit.tempProjectionMatrix
+        val workingMatrix = this.toolkit.tempModelMatrix
+        workingMatrix.fromMatrix(projectionMatrix)
+        mvpMatrix.copyFrom(workingMatrix)
+        mvpMatrix.multiplyBy(this.toolkit.viewProjectionMatrix)
+
+        val centerX = (this.minX + this.maxX) shr 1
+        val centerZ = (this.minZ + this.maxZ) shr 1
+        var currentY = this.minY
+
+        val clipX1 = mvpMatrix.elements!![0] * centerX + mvpMatrix.elements!![4] * currentY + mvpMatrix.elements!![8] * centerZ + mvpMatrix.elements!![12]
+        val clipY1 = mvpMatrix.elements!![1] * centerX + mvpMatrix.elements!![5] * currentY + mvpMatrix.elements!![9] * centerZ + mvpMatrix.elements!![13]
+        val clipZ1 = mvpMatrix.elements!![2] * centerX + mvpMatrix.elements!![6] * currentY + mvpMatrix.elements!![10] * centerZ + mvpMatrix.elements!![14]
+        val clipW1 = mvpMatrix.elements!![3] * centerX + mvpMatrix.elements!![7] * currentY + mvpMatrix.elements!![11] * centerZ + mvpMatrix.elements!![15]
+
+        if (clipZ1 >= -clipW1) {
+            boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX1 / clipW1).toInt()
+            boundingBox.bottom = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY1 / clipW1).toInt()
+        }
+
+        currentY = this.maxY
+        val clipX2 = mvpMatrix.elements!![0] * centerX + mvpMatrix.elements!![4] * currentY + mvpMatrix.elements!![8] * centerZ + mvpMatrix.elements!![12]
+        val clipY2 = mvpMatrix.elements!![1] * centerX + mvpMatrix.elements!![5] * currentY + mvpMatrix.elements!![9] * centerZ + mvpMatrix.elements!![13]
+        val clipZ2 = mvpMatrix.elements!![2] * centerX + mvpMatrix.elements!![6] * currentY + mvpMatrix.elements!![10] * centerZ + mvpMatrix.elements!![14]
+        val clipW2 = mvpMatrix.elements!![3] * centerX + mvpMatrix.elements!![7] * currentY + mvpMatrix.elements!![11] * centerZ + mvpMatrix.elements!![15]
+
+        if (clipZ2 >= -clipW2) {
+            boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX2 / clipW2).toInt()
+            boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY2 / clipW2).toInt()
+        }
+
+        val modelMatrix = this.toolkit.currentModelMatrix
+        if (clipZ1 / clipW1 > clipZ2 / clipW2) {
+            val interpX = clipX1 + modelMatrix.elements!![0] * this.size2d + modelMatrix.elements!![12]
+            val interpW = clipW1 + modelMatrix.elements!![3] * this.size2d + modelMatrix.elements!![15]
+            boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+        } else {
+            val interpX = clipX2 + modelMatrix.elements!![0] * this.size2d + modelMatrix.elements!![12]
+            val interpW = clipW2 + modelMatrix.elements!![3] * this.size2d + modelMatrix.elements!![15]
+            boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
+        }
+
+        boundingBox.positionCalculated = true
+    }
+
     override fun translate(x: Int, y: Int, z: Int) {
         for (i in 0 until this.maxDepth) {
             this.verticesX!![i] += x
@@ -2388,6 +2527,11 @@ class ModelGL : Model {
             // have been shared from the cached source model during copy(). Drop
             // it so it is rebuilt with the corrected winding on the next draw.
             this.modelElementsBuffer?.openglElementsBuffer = null
+
+            // XOR (not a fresh counter value) so a double mirror restores the stamp,
+            // and so every copy of the same source mirrored the same way shares one
+            // stamp and can reuse an already-uploaded dynamic element buffer.
+            this.facesRevision = this.facesRevision xor MIRRORED_FACES_REVISION_SALT
         }
 
         if (this.vertexBuffer != null) {
@@ -2589,10 +2733,47 @@ class ModelGL : Model {
     }
 
     override fun createShadowSprite(shadow: Shadow?): Shadow? {
-        if (shadow == null) {
+        if (this.numNormals == 0) {
             return null
         }
-        val shadowGL = shadow as ShadowGL
+        if (!this.boundsCalculated) {
+            calculateBounds()
+        }
+
+        // Project the model's AABB along the sun direction onto the ground plane
+        // (same projection as projectShadow applies per vertex) to size the sprite.
+        val startX: Int
+        val endX: Int
+        if (this.toolkit.shadowOffsetX > 0) {
+            startX = (this.minX - (this.toolkit.shadowOffsetX * this.maxY shr 8)) shr this.toolkit.shadowScale
+            endX = (this.maxX - (this.toolkit.shadowOffsetX * this.minY shr 8)) shr this.toolkit.shadowScale
+        } else {
+            startX = (this.minX - (this.toolkit.shadowOffsetX * this.minY shr 8)) shr this.toolkit.shadowScale
+            endX = (this.maxX - (this.toolkit.shadowOffsetX * this.maxY shr 8)) shr this.toolkit.shadowScale
+        }
+
+        val startY: Int
+        val endY: Int
+        if (this.toolkit.shadowOffsetZ > 0) {
+            startY = (this.minZ - (this.toolkit.shadowOffsetZ * this.maxY shr 8)) shr this.toolkit.shadowScale
+            endY = (this.maxZ - (this.toolkit.shadowOffsetZ * this.minY shr 8)) shr this.toolkit.shadowScale
+        } else {
+            startY = (this.minZ - (this.toolkit.shadowOffsetZ * this.minY shr 8)) shr this.toolkit.shadowScale
+            endY = (this.maxZ - (this.toolkit.shadowOffsetZ * this.maxY shr 8)) shr this.toolkit.shadowScale
+        }
+
+        val sizeX = endX - startX + 1
+        val sizeY = endY - startY + 1
+        val existing = shadow as ShadowGL?
+        val shadowGL: ShadowGL
+        if (existing != null && existing.fitsDimension(sizeX, sizeY)) {
+            shadowGL = existing
+            existing.reset()
+        } else {
+            shadowGL = ShadowGL(sizeX, sizeY)
+        }
+
+        shadowGL.setDimension(startX, startY, endX, endY)
         projectShadow(shadowGL)
         return shadowGL
     }
@@ -3327,7 +3508,7 @@ class ModelGL : Model {
                     withinOrigin = false
                 }
 
-                val rotationMatrix = IntArray(9)
+                val rotationMatrix = this.animScratchMatrixA ?: IntArray(9).also { this.animScratchMatrixA = it }
                 val cosX = MathUtils.COSINE[paramX]
                 val sinX = MathUtils.SINE[paramX]
                 val cosY = MathUtils.COSINE[paramY]
@@ -3351,7 +3532,7 @@ class ModelGL : Model {
                 val rotOriginOffsetX = invOriginRotX + originX
                 val rotOriginOffsetY = invOriginRotY + originY
                 val rotOriginOffsetZ = invOriginRotZ + originZ
-                val combinedRotMatrix = IntArray(9)
+                val combinedRotMatrix = this.animScratchMatrixB ?: IntArray(9).also { this.animScratchMatrixB = it }
 
                 for (rowIdx in 0 until 3) {
                     for (colIdx in 0 until 3) {
@@ -3369,7 +3550,7 @@ class ModelGL : Model {
                 translatedX += rotOriginOffsetX
                 translatedY += rotOriginOffsetY
                 translatedZ += rotOriginOffsetZ
-                val finalMatrix = IntArray(9)
+                val finalMatrix = this.animScratchMatrixC ?: IntArray(9).also { this.animScratchMatrixC = it }
 
                 for (rowIdx in 0 until 3) {
                     for (colIdx in 0 until 3) {
@@ -3527,24 +3708,23 @@ class ModelGL : Model {
                 val scaleOriginOffsetX = scaledInvOriginX + originX
                 val scaleOriginOffsetY = scaledInvOriginY + originY
                 val scaleOriginOffsetZ = scaledInvOriginZ + originZ
-                val scaleMatrix = intArrayOf(
-                    ((scaleX * verticesData[0] + 8192) shr 14),
-                    ((scaleX * verticesData[3] + 8192) shr 14),
-                    ((scaleX * verticesData[6] + 8192) shr 14),
-                    ((scaleY * verticesData[1] + 8192) shr 14),
-                    ((scaleY * verticesData[4] + 8192) shr 14),
-                    ((verticesData[7] * scaleY + 8192) shr 14),
-                    ((scaleZ * verticesData[2] + 8192) shr 14),
-                    ((verticesData[5] * scaleZ + 8192) shr 14),
-                    ((scaleZ * verticesData[8] + 8192) shr 14)
-                )
+                val scaleMatrix = this.animScratchMatrixA ?: IntArray(9).also { this.animScratchMatrixA = it }
+                scaleMatrix[0] = (scaleX * verticesData[0] + 8192) shr 14
+                scaleMatrix[1] = (scaleX * verticesData[3] + 8192) shr 14
+                scaleMatrix[2] = (scaleX * verticesData[6] + 8192) shr 14
+                scaleMatrix[3] = (scaleY * verticesData[1] + 8192) shr 14
+                scaleMatrix[4] = (scaleY * verticesData[4] + 8192) shr 14
+                scaleMatrix[5] = (verticesData[7] * scaleY + 8192) shr 14
+                scaleMatrix[6] = (scaleZ * verticesData[2] + 8192) shr 14
+                scaleMatrix[7] = (verticesData[5] * scaleZ + 8192) shr 14
+                scaleMatrix[8] = (scaleZ * verticesData[8] + 8192) shr 14
                 var scaledTranslateX = ((scaleX * parentTranslateX + 8192) shr 14)
                 var scaledTranslateY = ((scaleY * parentTranslateY + 8192) shr 14)
                 var scaledTranslateZ = ((scaleZ * parentTranslateZ + 8192) shr 14)
                 scaledTranslateX += scaleOriginOffsetX
                 scaledTranslateY += scaleOriginOffsetY
                 scaledTranslateZ += scaleOriginOffsetZ
-                val combinedScaleMatrix = IntArray(9)
+                val combinedScaleMatrix = this.animScratchMatrixB ?: IntArray(9).also { this.animScratchMatrixB = it }
 
                 for (rowIdx in 0 until 3) {
                     for (colIdx in 0 until 3) {

@@ -77,6 +77,14 @@ class ShaderProgram private constructor(
             return create(vertexSource, fragmentSource)
         }
 
+        /**
+         * Creates a shader program from source strings.
+         * Alias for create() for API consistency.
+         */
+        fun createFromSource(vertexSource: String, fragmentSource: String): ShaderProgram {
+            return create(vertexSource, fragmentSource)
+        }
+
         private fun compileShader(type: Int, source: String): Int {
             val shaderId = GLWrapper.createShader(type)
             GLWrapper.shaderSource(shaderId, source)
@@ -97,6 +105,11 @@ class ShaderProgram private constructor(
                 ?: throw ShaderCompilationException("Could not load shader resource: $path")
         }
     }
+
+    /**
+     * Gets the OpenGL program ID.
+     */
+    fun getId(): Int = programId
 
     /**
      * Binds this shader program for use in rendering.

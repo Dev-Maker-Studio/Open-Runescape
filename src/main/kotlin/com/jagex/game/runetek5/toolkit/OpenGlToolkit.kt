@@ -220,7 +220,6 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @JvmField var textureBuffersSize: Int = 0
     @JvmField var renderBuffersSize: Int = 0
     @JvmField var textureAnimatingProgression: Int = 0
-    @JvmField var lastGcCycle: Long = 0L
     @JvmField var depthClippingMode: Int = 0
     @JvmField var functionMask: Int = 0
     @JvmField var shadowOffsetX: Int = 0
@@ -258,6 +257,78 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @JvmField var depthBuffering: Boolean = false
     @JvmField var sunCubeTextureGenerator: AbstractOpenGlCubeTextureGenerator? = null
     @JvmField var currentElementsBuffer: ElementsBufferGL? = null
+
+    /**
+     * Bumped by [prepareForRendering] on every GL context (re)initialization. Reuse
+     * checks that draw previously uploaded GL buffer contents without re-uploading
+     * (ground material index caches, model dynamic element buffers) must record and
+     * compare this so a context rebuild forces a fresh upload.
+     */
+    @JvmField var glContextGeneration: Int = 0
+
+    // --- Cached GL state, used to skip redundant driver calls. ---
+    // Every cache below is invalidated in prepareForRendering() (context/toolkit re-init)
+    // and, where GL state can be clobbered outside this class between frames
+    // (e.g. the modern renderer's raw scissor calls), once per frame in render().
+
+    /** Last scissor rect passed to glScissor; MIN_VALUE = unknown. */
+    private var scissorBoxX: Int = Int.MIN_VALUE
+    private var scissorBoxY: Int = Int.MIN_VALUE
+    private var scissorBoxWidth: Int = Int.MIN_VALUE
+    private var scissorBoxHeight: Int = Int.MIN_VALUE
+
+    /** Cached GL_SCISSOR_TEST enable state; null = unknown. */
+    private var scissorTestEnabled: Boolean? = null
+
+    /** Cached GL_MULTISAMPLE enable state (GL default is enabled). */
+    private var multisampleEnabled: Boolean = true
+
+    /**
+     * True while unit 0's GL_SOURCE0_RGB combiner source is left at GL_PREVIOUS by glyph
+     * rendering (see [applyGlyphCombinerSource]). Restored lazily instead of per glyph;
+     * invariant: when true, the unit 0 combine mode is GL_REPLACE/GL_MODULATE.
+     */
+    private var glyphCombinerSourceDirty: Boolean = false
+
+    /** Last color uploaded via [setGlyphColor]; only trusted while functionMask stays 4. */
+    private var glyphColorValid: Boolean = false
+    private var glyphColorArgb: Int = 0
+
+    /** Per-attribute cache of fixed-function client array state (vertex/normal/color/texcoord). */
+    private val clientArrayStates = Array(4) { ClientArrayState() }
+
+    private class ClientArrayState {
+        /** null = unknown (GL default is disabled, but treat as unknown after re-init). */
+        var enabled: Boolean? = null
+        var bufferId: Int = -1
+        var address: Long = -1L
+        var size: Int = -1
+        var type: Int = -1
+        var stride: Int = -1
+
+        fun reset() {
+            this.enabled = null
+            this.bufferId = -1
+            this.address = -1L
+            this.size = -1
+            this.type = -1
+            this.stride = -1
+        }
+    }
+
+    fun invalidateScissorCache() {
+        this.scissorBoxX = Int.MIN_VALUE
+        this.scissorBoxY = Int.MIN_VALUE
+        this.scissorBoxWidth = Int.MIN_VALUE
+        this.scissorBoxHeight = Int.MIN_VALUE
+        this.scissorTestEnabled = null
+    }
+
+    fun resetClientArrayCache() {
+        for (state in this.clientArrayStates) {
+            state.reset()
+        }
+    }
 
     init {
         try {
@@ -323,12 +394,16 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                     this.arbTextureFloat = false
                 }
                 this.arbRectangleTexturesSupported = this.arbRectangleTexturesSupported and this.activeOpenglInstance!!.supportsExtension("GL_ARB_half_float_pixel")
-                this.shouldUseArbVbo = this.vertexbufferSupported
                 this.radeonGpu = true
             }
             if (this.gpuCompanyString!!.indexOf("intel") != -1) {
                 this.intelGpu = false
             }
+            // VBOs for dynamic geometry were historically only enabled on Radeon GPUs
+            // (2012-era driver lore); modern drivers universally prefer VBOs over
+            // client-memory vertex arrays, so enable whenever the extension is supported.
+            // This runs after the Radeon block so its capability downgrades are respected.
+            this.shouldUseArbVbo = this.vertexbufferSupported
             this.s3Graphics = "s3 graphics" != this.gpuCompanyString
             if (this.vertexbufferSupported) {
                 try {
@@ -372,10 +447,38 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     fun defineScissorBox() {
+        val x: Int
+        val y: Int
+        val width: Int
+        val height: Int
         if (display != null && this.clipLeft < this.clipRight && this.clipTop < this.clipBottom) {
-            OpenGL.glScissor(this.viewportOffsetX + this.clipLeft, this.viewportOffsetY + display!!.getHeight() - this.clipBottom, this.clipRight - this.clipLeft, this.clipBottom - this.clipTop)
+            x = this.viewportOffsetX + this.clipLeft
+            y = this.viewportOffsetY + display!!.getHeight() - this.clipBottom
+            width = this.clipRight - this.clipLeft
+            height = this.clipBottom - this.clipTop
         } else {
-            OpenGL.glScissor(0, 0, 0, 0)
+            x = 0
+            y = 0
+            width = 0
+            height = 0
+        }
+        if (x != this.scissorBoxX || y != this.scissorBoxY || width != this.scissorBoxWidth || height != this.scissorBoxHeight) {
+            OpenGL.glScissor(x, y, width, height)
+            this.scissorBoxX = x
+            this.scissorBoxY = y
+            this.scissorBoxWidth = width
+            this.scissorBoxHeight = height
+        }
+    }
+
+    fun setScissorTestEnabled(enabled: Boolean) {
+        if (this.scissorTestEnabled != enabled) {
+            if (enabled) {
+                OpenGL.glEnable(GL_SCISSOR_TEST)
+            } else {
+                OpenGL.glDisable(GL_SCISSOR_TEST)
+            }
+            this.scissorTestEnabled = enabled
         }
     }
 
@@ -405,6 +508,19 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     fun prepareForRendering() {
+        // Full GL state (re)initialization: nothing cached beforehand can be trusted.
+        // Bumping the generation invalidates every retained-buffer reuse check keyed on
+        // it (GroundMaterialGL.cachedIndexCount, ModelGL.dynamicElementsRevision), whose
+        // uploaded contents did not survive the context rebuild.
+        this.glContextGeneration++
+        invalidateScissorCache()
+        resetClientArrayCache()
+        this.currentElementsBuffer = null
+        this.glyphColorValid = false
+        if (this.arbMultisample) {
+            OpenGL.glEnable(GL_MULTISAMPLE)
+        }
+        this.multisampleEnabled = true
         renderTexture(-2)
         for (textureUnit in this.maxTextureUnits - 1 downTo 0) {
             activateTexture(textureUnit)
@@ -465,6 +581,14 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             exception.printStackTrace()
         }
         materialProvider?.cycle()
+        // Scissor and client-array state can be clobbered outside this class between
+        // frames (e.g. the modern renderer's scene pass issues raw glScissor calls and
+        // binds VAOs), so drop those caches once per frame; the first user next frame
+        // re-issues the state. Also make sure multisampling is back on for the next
+        // frame's scene in case the frame ended on a rect draw.
+        invalidateScissorCache()
+        resetClientArrayCache()
+        setMultisampleEnabled(true)
     }
 
     override fun awaitRenderCompletion() {
@@ -584,17 +708,25 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         setupShapeRendering()
         setBlendMode(blendMode)
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
-        if (this.arbMultisample) {
-            OpenGL.glDisable(GL_MULTISAMPLE)
-        }
+        // Left disabled between consecutive rect draws; re-enabled lazily by the next
+        // non-rect draw path (see setMultisampleEnabled callers).
+        setMultisampleEnabled(false)
         OpenGL.glBegin(GL_LINE_LOOP)
         OpenGL.glVertex2f(leftX, topY)
         OpenGL.glVertex2f(leftX, bottomY)
         OpenGL.glVertex2f(rightX, bottomY)
         OpenGL.glVertex2f(rightX, topY)
         OpenGL.glEnd()
-        if (this.arbMultisample) {
-            OpenGL.glEnable(GL_MULTISAMPLE)
+    }
+
+    fun setMultisampleEnabled(enabled: Boolean) {
+        if (this.arbMultisample && this.multisampleEnabled != enabled) {
+            if (enabled) {
+                OpenGL.glEnable(GL_MULTISAMPLE)
+            } else {
+                OpenGL.glDisable(GL_MULTISAMPLE)
+            }
+            this.multisampleEnabled = enabled
         }
     }
 
@@ -606,9 +738,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         setupShapeRendering()
         setBlendMode(blendMode)
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
-        if (this.arbMultisample) {
-            OpenGL.glDisable(GL_MULTISAMPLE)
-        }
+        setMultisampleEnabled(false)
 
         OpenGL.glBegin(GL_QUADS)
         OpenGL.glVertex2f(leftX, topY)
@@ -616,9 +746,6 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glVertex2f(rightX, bottomY)
         OpenGL.glVertex2f(rightX, topY)
         OpenGL.glEnd()
-        if (this.arbMultisample) {
-            OpenGL.glEnable(GL_MULTISAMPLE)
-        }
     }
 
     fun setDepthMask() {
@@ -628,6 +755,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     override fun benchmark() {
         setupShapeRendering()
         setBlendMode(1)
+        setMultisampleEnabled(true)
         OpenGL.glBegin(4)
         OpenGL.glColor4ub((-65536 shr 16).toByte(), (-65536 shr 8).toByte(), (-65536).toByte(), (-65536 shr 24).toByte())
         OpenGL.glVertex3f(5.35f, 10.35f, 100.0f)
@@ -652,6 +780,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         if (endX != startX || startY != endY) {
             setupShapeRendering()
             setBlendMode(1)
+            setMultisampleEnabled(true)
             var deltaX = (endX - startX).toFloat()
             var deltaY = (endY - startY).toFloat()
             val inverseMagnitude = (1.0 / sqrt((deltaX * deltaX + deltaY * deltaY).toDouble())).toFloat()
@@ -883,6 +1012,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     override fun drawTransparentLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, blendMode: Int) {
         setupShapeRendering()
         setBlendMode(blendMode)
+        setMultisampleEnabled(true)
         var deltaX = (rightX - leftX).toFloat()
         var deltaY = (bottomY - topY).toFloat()
         if (deltaX == 0.0f && deltaY == 0.0f) {
@@ -1107,7 +1237,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             this.clipTop = 0
             this.clipRight = display!!.getWidth()
             this.clipBottom = display!!.getHeight()
-            OpenGL.glDisable(GL_SCISSOR_TEST)
+            setScissorTestEnabled(false)
         }
     }
 
@@ -1133,7 +1263,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             this.clipTop = top
             this.clipRight = right
             this.clipBottom = bottom
-            OpenGL.glEnable(GL_SCISSOR_TEST)
+            setScissorTestEnabled(true)
             defineScissorBox()
         }
     }
@@ -1151,7 +1281,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         if (this.clipBottom > bottom) {
             this.clipBottom = bottom
         }
-        OpenGL.glEnable(GL_SCISSOR_TEST)
+        setScissorTestEnabled(true)
         defineScissorBox()
     }
 
@@ -1196,6 +1326,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     @Synchronized
     override fun animateTextures(delta: Int) {
         var handleCount = 0
+        var deletedVboBuffers = false
         val maskedDelta = delta and 0x7fffffff
         while (!this.vboBuffersAwaitingDeallocation.isEmpty()) {
             val handle = this.vboBuffersAwaitingDeallocation.popTail() as IntNode
@@ -1204,11 +1335,22 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             if (handleCount == 1000) {
                 OpenGL.glDeleteBuffersARB(1000, HANDLE_BUFFER, 0)
                 handleCount = 0
+                deletedVboBuffers = true
             }
         }
         if (handleCount > 0) {
             OpenGL.glDeleteBuffersARB(handleCount, HANDLE_BUFFER, 0)
             handleCount = 0
+            deletedVboBuffers = true
+        }
+        if (deletedVboBuffers) {
+            // The driver may hand a freed buffer id to the next glGenBuffersARB call. The
+            // client-array pointer cache and the element-buffer identity cache key on id
+            // numbers, so a recycled id could satisfy the "already specified/bound" check
+            // while GL pointer state still references the deleted buffer object. Drop both
+            // caches so the next draw re-specifies its arrays and rebinds its indices.
+            resetClientArrayCache()
+            this.currentElementsBuffer = null
         }
         while (!this.texturesAwaitingDeallocation.isEmpty()) {
             val handle = this.texturesAwaitingDeallocation.popTail() as IntNode
@@ -1264,10 +1406,11 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             OpenGL.glDeleteLists(handle.pointer.toInt(), handle.value)
         }
         this.textureCache?.cycleBloomCache()
-        if (getOffheap() > 100663296 && Utils.time() > this.lastGcCycle + 60000L) {
-            System.gc()
-            this.lastGcCycle = Utils.time()
-        }
+        // A System.gc() call used to live here, gated to once per 60s whenever offheap
+        // usage exceeded 96MB. A full GC can stall the render thread for 10-100ms, which
+        // is catastrophic inside the frame loop; offheap buffers are already freed
+        // deterministically through the deallocation queues drained above, so the
+        // explicit GC trigger was removed entirely.
         this.textureAnimatingProgression = maskedDelta
     }
 
@@ -1280,6 +1423,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         if (radius + x >= this.clipLeft && x - radius <= this.clipRight && radius + y >= this.clipTop && y - radius <= this.clipBottom) {
             setupShapeRendering()
             setBlendMode(1)
+            setMultisampleEnabled(true)
             OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
             val startX = x + 0.35f
             val startY = y + 0.35f
@@ -1635,7 +1779,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         OpenGL.glDrawArrays(7, 0, count)
     }
 
-    fun setupShapeRendering() {
+    open fun setupShapeRendering() {
         if (this.functionMask != 1) {
             setProjectionMatrixMode()
             toggleFog(false)
@@ -1649,7 +1793,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    fun setupSpriteRendering() {
+    open fun setupSpriteRendering() {
         if (this.functionMask != 2) {
             setProjectionMatrixMode()
             toggleFog(false)
@@ -1661,7 +1805,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         }
     }
 
-    fun setupTextRendering() {
+    open fun setupTextRendering() {
         if (this.functionMask != 4) {
             setProjectionMatrixMode()
             toggleFog(false)
@@ -1671,6 +1815,9 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             renderTexture(-2)
             setBlendMode(1)
             this.functionMask = 4
+            // Something else rendered since the last glyph, so the GL current color can
+            // no longer be trusted (models/sprites/shapes all write it directly).
+            this.glyphColorValid = false
         }
     }
 
@@ -1681,7 +1828,49 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             toggleZbuffer(true)
             setDepthMask(true)
             setBlendMode(1)
+            restoreGlyphCombinerSource()
+            setMultisampleEnabled(true)
             this.functionMask = 8
+        }
+    }
+
+    /**
+     * Leaves unit 0's GL_SOURCE0_RGB combiner source at GL_PREVIOUS for glyph rendering.
+     * Instead of restoring it after every glyph (which costs 4 glTexEnvi calls per glyph),
+     * the restore happens lazily via [restoreGlyphCombinerSource], which is hooked into
+     * every path that draws anything other than glyphs: [renderTexture] (covers the
+     * setup*Rendering transitions, models, ground, sprites and particles),
+     * [setupMatrixRendering], and [loadTextureCombineMode] on a unit 0 state change
+     * (covers raw-drawing paths like FramebufferCompositor and the cube map generator).
+     */
+    fun applyGlyphCombinerSource() {
+        if (!this.glyphCombinerSourceDirty) {
+            setTexture(0, GL_PREVIOUS, GL_SRC_COLOR)
+            this.glyphCombinerSourceDirty = true
+        }
+    }
+
+    fun restoreGlyphCombinerSource() {
+        if (this.glyphCombinerSourceDirty) {
+            val activeUnit = this.glTexturesCursorPos
+            activateTexture(0)
+            setTexture(0, GL_TEXTURE, GL_SRC_COLOR)
+            this.glyphCombinerSourceDirty = false
+            activateTexture(activeUnit)
+        }
+    }
+
+    /**
+     * Sets the GL current color for glyph rendering, skipping the upload when unchanged.
+     * The cache is only trusted while functionMask stays 4: glyph rendering is the sole
+     * user of that mode, and every other color writer (shapes, sprites, models, worldmap)
+     * forces a different mask first, which invalidates the cache in [setupTextRendering].
+     */
+    fun setGlyphColor(colorArgb: Int) {
+        if (!this.glyphColorValid || this.glyphColorArgb != colorArgb) {
+            OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
+            this.glyphColorArgb = colorArgb
+            this.glyphColorValid = true
         }
     }
 
@@ -1690,6 +1879,11 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     fun renderTexture(materialId: Int, hasLight: Boolean, has0x8: Boolean) {
+        // Every non-glyph textured draw funnels through here (directly or via the
+        // setup*Rendering functions), so it is the central point to undo glyph
+        // rendering's lazily-held state and rect rendering's multisample disable.
+        restoreGlyphCombinerSource()
+        setMultisampleEnabled(true)
         // When textures are disabled, treat all materials as untextured
         val effectiveMaterialId = if (texturesEnabled) materialId else -1
         if (this.lastMaterialId != effectiveMaterialId || this.renderStillWater != this.stillWaterToggled) {
@@ -2006,47 +2200,124 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     override fun debugModeChanged() {
     }
 
+    /**
+     * Binds/unbinds the fixed-function client arrays for the next draw call, skipping GL
+     * calls whose state is already current. The cache keys on the actual glVertexPointer
+     * et al. arguments (buffer id, native address including offset, size, type, stride)
+     * rather than buffer object identity, because [GlBuffer.put] can reallocate the
+     * backing native memory (address change) and putArray can change the stride.
+     * Skipping a redundant gl*Pointer call is safe regardless of later buffer rebinds
+     * or data re-uploads: pointer state is captured at specification time and in-place
+     * data updates do not require re-specification.
+     */
     fun toggleDrawingClientstates(vertices: OpenGlArrayDrawBuffer?, normals: OpenGlArrayDrawBuffer?, colors: OpenGlArrayDrawBuffer?, textureCoordinates: OpenGlArrayDrawBuffer?) {
+        val vertexState = this.clientArrayStates[0]
         val verticesBuffer = vertices?.buffer
         if (verticesBuffer != null) {
-            setArrayBuffer(verticesBuffer)
-            OpenGL.glVertexPointer(vertices.size.toInt(), vertices.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + vertices.offset)
-            OpenGL.glEnableClientState(GL_VERTEX_ARRAY)
-        } else {
+            val size = vertices.size.toInt()
+            val type = vertices.type.toInt()
+            val stride = verticesBuffer.getStride()
+            val address = verticesBuffer.getBufferAddress() + vertices.offset
+            val bufferId = verticesBuffer.getId()
+            if (vertexState.enabled != true || vertexState.bufferId != bufferId || vertexState.address != address || vertexState.size != size || vertexState.type != type || vertexState.stride != stride) {
+                setArrayBuffer(verticesBuffer)
+                OpenGL.glVertexPointer(size, type, stride, address)
+                if (vertexState.enabled != true) {
+                    OpenGL.glEnableClientState(GL_VERTEX_ARRAY)
+                }
+                vertexState.enabled = true
+                vertexState.bufferId = bufferId
+                vertexState.address = address
+                vertexState.size = size
+                vertexState.type = type
+                vertexState.stride = stride
+            }
+        } else if (vertexState.enabled != false) {
             OpenGL.glDisableClientState(GL_VERTEX_ARRAY)
+            vertexState.enabled = false
         }
 
+        val normalState = this.clientArrayStates[1]
         val normalsBuffer = normals?.buffer
         if (normalsBuffer != null) {
-            setArrayBuffer(normalsBuffer)
-            OpenGL.glNormalPointer(normals.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + normals.offset)
-            OpenGL.glEnableClientState(GL_NORMAL_ARRAY)
-        } else {
+            val type = normals.type.toInt()
+            val stride = normalsBuffer.getStride()
+            val address = normalsBuffer.getBufferAddress() + normals.offset
+            val bufferId = normalsBuffer.getId()
+            if (normalState.enabled != true || normalState.bufferId != bufferId || normalState.address != address || normalState.type != type || normalState.stride != stride) {
+                setArrayBuffer(normalsBuffer)
+                OpenGL.glNormalPointer(type, stride, address)
+                if (normalState.enabled != true) {
+                    OpenGL.glEnableClientState(GL_NORMAL_ARRAY)
+                }
+                normalState.enabled = true
+                normalState.bufferId = bufferId
+                normalState.address = address
+                normalState.type = type
+                normalState.stride = stride
+            }
+        } else if (normalState.enabled != false) {
             OpenGL.glDisableClientState(GL_NORMAL_ARRAY)
+            normalState.enabled = false
         }
 
+        val colorState = this.clientArrayStates[2]
         val colorsBuffer = colors?.buffer
         if (colorsBuffer != null) {
-            setArrayBuffer(colorsBuffer)
-            OpenGL.glColorPointer(colors.size.toInt(), colors.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + colors.offset)
-            OpenGL.glEnableClientState(GL_COLOR_ARRAY)
-        } else {
+            val size = colors.size.toInt()
+            val type = colors.type.toInt()
+            val stride = colorsBuffer.getStride()
+            val address = colorsBuffer.getBufferAddress() + colors.offset
+            val bufferId = colorsBuffer.getId()
+            if (colorState.enabled != true || colorState.bufferId != bufferId || colorState.address != address || colorState.size != size || colorState.type != type || colorState.stride != stride) {
+                setArrayBuffer(colorsBuffer)
+                OpenGL.glColorPointer(size, type, stride, address)
+                if (colorState.enabled != true) {
+                    OpenGL.glEnableClientState(GL_COLOR_ARRAY)
+                }
+                colorState.enabled = true
+                colorState.bufferId = bufferId
+                colorState.address = address
+                colorState.size = size
+                colorState.type = type
+                colorState.stride = stride
+            }
+        } else if (colorState.enabled != false) {
             OpenGL.glDisableClientState(GL_COLOR_ARRAY)
+            colorState.enabled = false
         }
 
+        val textureCoordState = this.clientArrayStates[3]
         val textureCoordinatesBuffer = textureCoordinates?.buffer
         if (textureCoordinatesBuffer != null) {
-            setArrayBuffer(textureCoordinatesBuffer)
-            OpenGL.glTexCoordPointer(textureCoordinates.size.toInt(), textureCoordinates.type.toInt(), this.currentArrayBuffer!!.getStride(), this.currentArrayBuffer!!.getBufferAddress() + textureCoordinates.offset)
-            OpenGL.glEnableClientState(GL_TEXTURE_COORD_ARRAY)
-        } else {
+            val size = textureCoordinates.size.toInt()
+            val type = textureCoordinates.type.toInt()
+            val stride = textureCoordinatesBuffer.getStride()
+            val address = textureCoordinatesBuffer.getBufferAddress() + textureCoordinates.offset
+            val bufferId = textureCoordinatesBuffer.getId()
+            if (textureCoordState.enabled != true || textureCoordState.bufferId != bufferId || textureCoordState.address != address || textureCoordState.size != size || textureCoordState.type != type || textureCoordState.stride != stride) {
+                setArrayBuffer(textureCoordinatesBuffer)
+                OpenGL.glTexCoordPointer(size, type, stride, address)
+                if (textureCoordState.enabled != true) {
+                    OpenGL.glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+                }
+                textureCoordState.enabled = true
+                textureCoordState.bufferId = bufferId
+                textureCoordState.address = address
+                textureCoordState.size = size
+                textureCoordState.type = type
+                textureCoordState.stride = stride
+            }
+        } else if (textureCoordState.enabled != false) {
             OpenGL.glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+            textureCoordState.enabled = false
         }
     }
 
     override fun drawTransparentHorizontalLine(x: Int, y: Int, width: Int, colorArgb: Int, alpha: Int) {
         setupShapeRendering()
         setBlendMode(alpha)
+        setMultisampleEnabled(true)
         val lineX = x + 0.35f
         val lineY = y + 0.35f
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
@@ -2065,6 +2336,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     override fun drawTransparentVerticalLine(x: Int, y: Int, height: Int, colorArgb: Int, blendMode: Int) {
         setupShapeRendering()
         setBlendMode(blendMode)
+        setMultisampleEnabled(true)
         val lineX = x + 0.35f
         val lineY = y + 0.35f
         OpenGL.glColor4ub((colorArgb shr 16).toByte(), (colorArgb shr 8).toByte(), colorArgb.toByte(), (colorArgb shr 24).toByte())
@@ -2298,6 +2570,10 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             }
             if (hasCombining) {
                 this.functionMask = this.functionMask and -14
+                // A unit 0 combine change means someone other than glyph rendering is
+                // about to draw (glyphs keep REPLACE/MODULATE for their whole run), so
+                // undo the lazily-held glyph combiner source.
+                restoreGlyphCombinerSource()
             }
         } else {
             OpenGL.glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, combineRgb)
