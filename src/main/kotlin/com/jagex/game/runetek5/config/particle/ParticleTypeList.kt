@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.config.particle
 
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.IntNode
+import com.jagex.game.runetek5.cache.node.IterableNodeMap
 import com.jagex.game.runetek5.js5.Js5ResourceProvider
 
 object ParticleTypeList {
@@ -27,7 +28,7 @@ object ParticleTypeList {
             particletype.setDefaults()
             if (particletype.particleHandlingType == 2 && ParticleType.particleTypeCache.get(particleFileId.toLong()) == null) {
                 @Suppress("UNCHECKED_CAST")
-                (ParticleType.particleTypeCache as com.jagex.game.runetek5.cache.node.IterableNodeMap<IntNode>).put(IntNode(ParticleType.particleType), particleFileId.toLong())
+                (ParticleType.particleTypeCache as IterableNodeMap<IntNode>).put(IntNode(ParticleType.particleType), particleFileId.toLong())
                 ParticleType.particleTypes[++ParticleType.particleType - 1] = particletype
             }
 

@@ -1489,7 +1489,7 @@ class MapRegion(var asyncMaploading: Boolean) {
 
         @JvmStatic
         fun tileheightForAbsolutePosition(absoluteX: Int, absoluteY: Int, plane: Int): Int {
-            if (Resource.mapRegion!!.getScene()!! == null) {
+            if (Resource.mapRegion!!.getScene() == null) {
                 return 0
             }
             val sceneX = absoluteX shr 9
@@ -1499,13 +1499,13 @@ class MapRegion(var asyncMaploading: Boolean) {
                 if (plane < 3 && (Resource.mapRegion!!.settingsBits.tileFunctionMasks[1][sceneX][sceneY].toInt() and 0x2) != 0) {
                     collisionPlane = plane + 1
                 }
-                return Resource.mapRegion!!.getScene()!!!!.localHeightmap[collisionPlane]!!.getAverageHeight(absoluteX, absoluteY)
+                return Resource.mapRegion!!.getScene()!!.localHeightmap[collisionPlane]!!.getAverageHeight(absoluteX, absoluteY)
             }
             return 0
         }
 
         fun isMapSpriteCached(z: Int, x: Int, y: Int): Boolean {
-            val scene = Resource.mapRegion!!.getScene()!!!!
+            val scene = Resource.mapRegion!!.getScene()!!
             var fullyCached = true
             var gameObject: GameObject? = scene.getWall(z, x, y) as GameObject?
             if (gameObject != null) {
@@ -1546,7 +1546,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                     var absoluteX = absolutePosition.x.toInt()
                     var absoluteZ = absolutePosition.z.toInt()
                     val regionMap = Resource.mapRegion!!.settingsBits
-                    val scene = Resource.mapRegion!!.getScene()!!!!
+                    val scene = Resource.mapRegion!!.getScene()!!
                     if (Camera.cameraCalculationType != 2 && PingRequester.cameraTargetAbsX == -1) {
                         val tileheight: Int = tileheightForAbsolutePosition(Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteY, PlayerUpdate.MY_PLAYER_PLANE)
                         if (tileheight - Camera.cameraPositionAbsoluteZ < 3200 && (regionMap.tileFunctionMasks[PlayerUpdate.MY_PLAYER_PLANE][Camera.cameraPositionAbsoluteX shr 9][Camera.cameraPositionAbsoluteY shr 9].toInt() and 0x4) != 0) {
@@ -1657,7 +1657,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
 
         fun addCustomisation(z: Int, type: Int, x: Int, y: Int, locCustomisation: ObjectTypeCustomisation?) {
-            if (x >= 1 && y >= 1 && x <= Resource.mapRegion!!.sceneSizeX - 2 && y <= Resource.mapRegion!!.sceneSizeY - 2 && Resource.mapRegion!!.getScene()!! != null) {
+            if (x >= 1 && y >= 1 && x <= Resource.mapRegion!!.sceneSizeX - 2 && y <= Resource.mapRegion!!.sceneSizeY - 2 && Resource.mapRegion!!.getScene() != null) {
                 val gameObject: GameObject? = Resource.mapRegion!!.surfaceSceneGraph!!.getGameObject(z, type, x, y)
                 if (gameObject != null && locCustomisation != null) {
                     if (gameObject is AnimatedInteractiveObject) {
@@ -1740,8 +1740,8 @@ class MapRegion(var asyncMaploading: Boolean) {
         fun addGfxsToScene() {
             for (positionedGfx in Client.ACTIVE_GFX) {
                 val objectGfx: SpotAnimation = positionedGfx.objectGfx
-                if (Resource.mapRegion!!.getScene()!! != null && objectGfx.notAccelerated()) {
-                    Resource.mapRegion!!.getScene()!!!!.addInteractive(objectGfx, true)
+                if (Resource.mapRegion!!.getScene() != null && objectGfx.notAccelerated()) {
+                    Resource.mapRegion!!.getScene()!!.addInteractive(objectGfx, true)
                 }
             }
         }
@@ -1804,7 +1804,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                         }
                     }
                     projectile.animate(Client.animatingStep)
-                    Resource.mapRegion!!.getScene()!!!!.addInteractive(projectile, true)
+                    Resource.mapRegion!!.getScene()!!.addInteractive(projectile, true)
                 }
                 spawnRequest = Client.PROJECTILES.next() as ProjectileSpawnRequest?
             }
@@ -1841,7 +1841,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                 if (plane < 3 && Resource.mapRegion!!.settingsBits.areRoofsHidden(x, y)) {
                     collisionPlane = plane + 1
                 }
-                if (Resource.mapRegion!!.getScene()!! != null) {
+                if (Resource.mapRegion!!.getScene() != null) {
                     Resource.mapRegion!!.surfaceSceneGraph!!.removeGameObject(Renderers.activeToolkit!!, plane, type, x, y, Resource.mapRegion!!.getCollisionMap(plane)!!)
                     if (id >= 0) {
                         val groundDecorationPreference: Int = PreferenceManager.preferences!!.groundDecoration!!.getValue()
@@ -1941,7 +1941,7 @@ class MapRegion(var asyncMaploading: Boolean) {
                     }
                 }
                 if (visibilityUpdate) {
-                    val floorHeight = Resource.mapRegion!!.getScene()!!!!.localHeightmap[PlayerUpdate.MY_PLAYER_PLANE + 1]!!.getHeight(tileBaseX, tileBaseY)
+                    val floorHeight = Resource.mapRegion!!.getScene()!!.localHeightmap[PlayerUpdate.MY_PLAYER_PLANE + 1]!!.getHeight(tileBaseX, tileBaseY)
                     if (Client.visibleBelowDrawheight!![viewIndex] < floorHeight) {
                         Client.visibleBelowDrawheight!![viewIndex] = floorHeight
                     }

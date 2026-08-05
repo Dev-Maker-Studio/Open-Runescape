@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.toolkit.opengl.buffer
 
 import com.jagex.game.runetek5.toolkit.OpenGLNativeToolkit
+import com.jagex.game.runetek5.toolkit.NativeToolkitBuffer
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.*
 /**
@@ -13,7 +14,7 @@ class OpenGlArbElementArrayBuffer(
     toolkit: OpenGLNativeToolkit,
     @JvmField val actionFormat: GLActionFormat,
     drawStream: Boolean
-) : OpenGlArbBuffer(toolkit, GL_ELEMENT_ARRAY_BUFFER, drawStream), com.jagex.game.runetek5.toolkit.NativeToolkitBuffer {
+) : OpenGlArbBuffer(toolkit, GL_ELEMENT_ARRAY_BUFFER, drawStream), NativeToolkitBuffer {
 
     override fun getCapacity(): Int = super.getCapacity()
 

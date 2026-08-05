@@ -2536,6 +2536,12 @@ class Client : GameShell() {
             buildCanvasComponents()
             Renderers.prepareForRendering(toolkitId, leftTopScreenboxText, verifySettingsPreUpdate)
             StaticMethods.initializedFontcombos!!.resetFontMap()
+            // Also clear the FontCombo LRU: fonts obtained via listFontCombo (e.g. the
+            // minimenu bold font, FontCombo.kt:69/85) are cached there and were NEVER
+            // evicted on a toolkit switch, so they kept font renderers bound to the
+            // DEAD previous toolkit. Under toolkit 6 those stale legacy FontRendererGL
+            // draws are blocked (standalone rules) — menu text rendered invisible.
+            StaticMethods.initializedFontcombos!!.resetCache()
             StaticMethods.initializedFontcombos!!.initializeFontMap(FONT_PROVIDER)
             FontManager.initialize()
             StaticMedia.loadSprites(Renderers.activeToolkit!!, Resource.SPRITES!!)

@@ -80,7 +80,7 @@ class ModelCache(
 
     // Cache storage using LRU eviction (access-ordered LinkedHashMap)
     // Key is content hash, value is the cached model data
-    private val cache = LinkedHashMap<Int, CachedModel>(maxCacheSize, 0.75f, true)
+    private val cache = LinkedHashMap<Long, CachedModel>(maxCacheSize, 0.75f, true)
     private var totalCachedBytes = 0L
     private var cacheHits = 0L
     private var cacheMisses = 0L
@@ -96,7 +96,7 @@ class ModelCache(
      */
     fun getOrCreate(
         model: Any,
-        modelId: Int,
+        modelId: Long,
         buildCache: () -> CachedModel?
     ): CachedModel? {
         // Check existing cache by content hash
@@ -130,7 +130,7 @@ class ModelCache(
         return cached
     }
 
-    private fun evict(modelId: Int) {
+    private fun evict(modelId: Long) {
         val cached = cache.remove(modelId)
         if (cached != null) {
             totalCachedBytes -= cached.getTotalBytes()

@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.config.quickchat
 
+import com.jagex.game.runetek5.config.rsinterface.cs2.CS2QueryResults
 import com.jagex.game.runetek5.buffer.Packet
 import com.jagex.game.runetek5.cache.node.lru.CacheableNode
 import com.jagex.game.runetek5.config.TypeLists
@@ -137,8 +138,8 @@ class QuickchatMessageType : CacheableNode() {
                 val messageType = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(messageId)
                 if (messageType.searchable && messageType.getPlaceholderText().lowercase().indexOf(searchString) != -1) {
                     if (matchCount >= 50) {
-                        CS2Interpreter.CS2_QUERY_RESULTS_LEN = -1
-                        ColorImageCache.CS2_QUERY_RESULTS = null
+                        CS2QueryResults.count = -1
+                        CS2QueryResults.ids = null
                         return
                     }
                     if (matchCount >= matchingIds.size) {
@@ -149,14 +150,14 @@ class QuickchatMessageType : CacheableNode() {
                     matchingIds[matchCount++] = messageId.toShort()
                 }
             }
-            ColorImageCache.CS2_QUERY_RESULTS = matchingIds
-            StaticElements.CS2_QUERY_RESULT_IDX = 0
-            CS2Interpreter.CS2_QUERY_RESULTS_LEN = matchCount
-            val displayTexts = Array(CS2Interpreter.CS2_QUERY_RESULTS_LEN) { "" }
-            for (resultIndex in 0 until CS2Interpreter.CS2_QUERY_RESULTS_LEN) {
+            CS2QueryResults.ids = matchingIds
+            CS2QueryResults.cursor = 0
+            CS2QueryResults.count = matchCount
+            val displayTexts = Array(CS2QueryResults.count) { "" }
+            for (resultIndex in 0 until CS2QueryResults.count) {
                 displayTexts[resultIndex] = TypeLists.QUICK_CHAT_MESSAGE!!.listMessage(matchingIds[resultIndex].toInt()).getPlaceholderText()
             }
-            Utils.sortAlphabetically(displayTexts, ColorImageCache.CS2_QUERY_RESULTS)
+            Utils.sortAlphabetically(displayTexts, CS2QueryResults.ids)
         }
     }
 }

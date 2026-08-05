@@ -399,18 +399,117 @@ class ModernSpriteGL : SpriteGL {
         super.captureScreenRegion(offsetX, offsetY, width, height, x, y)
     }
 
+    /**
+     * Real surface-mask composite (was an unmasked approximation). Corner and UV
+     * math is byte-for-byte the legacy fixed-function version:
+     * SpriteGL.drawWithSurface, SpriteGL.kt:271-313 — mask UVs are screen-space
+     * relative to (offsetX, offsetY) scaled by surface.s/singleWidth and
+     * surface.t/singleLength, with the mask V axis flipped (surface.t - v).
+     */
     override fun drawWithSurface(x: Int, y: Int, surface: ComponentSurface, offsetX: Int, offsetY: Int) {
-        // Multi-texture surface overlay requires a dedicated shader variant. Until
-        // then, draw the base sprite without the surface mask (approximation, counted
-        // as a parity gap — NO legacy fallback under the modern toolkit).
-        modernToolkit.countLegacySkip("SpriteGL.drawWithSurface(approx)")
-        draw(x, y, 1, -1, 1)
+        val maskTexture = (surface as? SpriteSurfaceGL)?.surface
+        if (maskTexture == null) {
+            modernToolkit.countLegacySkip("SpriteGL.drawWithSurface(skipped)")
+            return
+        }
+        val baseHandle = texture2d.activeHandle
+        val maskHandle = maskTexture.activeHandle
+        if (baseHandle <= 0 || maskHandle <= 0) {
+            modernToolkit.countLegacySkip("SpriteGL.drawWithSurface(skipped)")
+            return
+        }
+
+        val drawX = (x + translateX).toFloat()
+        val drawY = (y + translateY).toFloat()
+        val endX = drawX + texture2d.singleWidth
+        val endY = drawY + texture2d.singleLength
+        val sScale = maskTexture.s / maskTexture.singleWidth
+        val tScale = maskTexture.t / maskTexture.singleLength
+        val mu0 = (drawX - offsetX) * sScale
+        val mu1 = (endX - offsetX) * sScale
+        val mv0 = maskTexture.t - (drawY - offsetY) * tScale
+        val mv1 = maskTexture.t - (endY - offsetY) * tScale
+
+        if (!modernToolkit.drawSurfaceMaskedQuad(
+                baseHandle, maskHandle,
+                drawX, drawY, 0f, texture2d.t, mu0, mv0,
+                drawX, endY, 0f, 0f, mu0, mv1,
+                endX, endY, texture2d.s, 0f, mu1, mv1,
+                endX, drawY, texture2d.s, texture2d.t, mu1, mv0
+            )
+        ) {
+            modernToolkit.countLegacySkip("SpriteGL.drawWithSurface(skipped)")
+        }
     }
 
+    /**
+     * Real affine surface-mask composite. Legacy reference:
+     * SpriteGL.drawAffineMasked, SpriteGL.kt:451-519 — the stretch/translate corner
+     * transform matches drawAffine; mask UVs per corner are f_14*(cornerX - offsetX)
+     * and surface.t - f_15*(cornerY - offsetY); linear filtering per (flags and 1).
+     */
     override fun drawAffineMasked(f_1: Float, f_2: Float, f_3: Float, f_4: Float, f_5: Float, f_6: Float, flags: Int, surface: ComponentSurface, offsetX: Int, offsetY: Int) {
-        // Multi-texture surface overlay requires a dedicated shader variant. Until
-        // then, draw the transformed sprite without the surface mask (approximation).
-        modernToolkit.countLegacySkip("SpriteGL.drawAffineMasked(approx)")
-        drawAffine(f_1, f_2, f_3, f_4, f_5, f_6, 1, -1, 1)
+        val maskTexture = (surface as? SpriteSurfaceGL)?.surface
+        if (maskTexture == null) {
+            modernToolkit.countLegacySkip("SpriteGL.drawAffineMasked(skipped)")
+            return
+        }
+        val baseHandle = texture2d.activeHandle
+        val maskHandle = maskTexture.activeHandle
+        if (baseHandle <= 0 || maskHandle <= 0) {
+            modernToolkit.countLegacySkip("SpriteGL.drawAffineMasked(skipped)")
+            return
+        }
+
+        // Legacy filtering toggle (SpriteGL.kt:489)
+        texture2d.setLinearTextureFilter((flags and 0x1) != 0)
+
+        var x1 = f_1
+        var y1 = f_2
+        var x2 = f_3
+        var y2 = f_4
+        var x3 = f_5
+        var y3 = f_6
+        if (stretched) {
+            val spriteW = getSpriteWidth().toFloat()
+            val spriteH = getSpriteHeight().toFloat()
+            val scaleXx = (x2 - x1) / spriteW
+            val scaleXy = (y2 - y1) / spriteW
+            val scaleYx = (x3 - x1) / spriteH
+            val scaleYy = (y3 - y1) / spriteH
+            val transYx = scaleYx * translateY
+            val transYy = scaleYy * translateY
+            val transXx = scaleXx * translateX
+            val transXy = scaleXy * translateX
+            val borderXx = -scaleXx * trimRight
+            val borderXy = -scaleXy * trimRight
+            val borderYx = -scaleYx * trimBottom
+            val borderYy = -scaleYy * trimBottom
+            x1 = x1 + transXx + transYx
+            y1 = y1 + transXy + transYy
+            x2 = x2 + borderXx + transYx
+            y2 = y2 + borderXy + transYy
+            x3 = x3 + transXx + borderYx
+            y3 = y3 + transXy + borderYy
+        }
+        // 4th corner (legacy SpriteGL.kt:487-488)
+        val x4 = x3 + (x2 - x1)
+        val y4 = y2 + (y3 - y1)
+
+        val sScale = maskTexture.s / maskTexture.singleWidth
+        val tScale = maskTexture.t / maskTexture.singleLength
+        fun mu(px: Float) = sScale * (px - offsetX)
+        fun mv(py: Float) = maskTexture.t - tScale * (py - offsetY)
+
+        if (!modernToolkit.drawSurfaceMaskedQuad(
+                baseHandle, maskHandle,
+                x1, y1, 0f, texture2d.t, mu(x1), mv(y1),
+                x3, y3, 0f, 0f, mu(x3), mv(y3),
+                x4, y4, texture2d.s, 0f, mu(x4), mv(y4),
+                x2, y2, texture2d.s, texture2d.t, mu(x2), mv(y2)
+            )
+        ) {
+            modernToolkit.countLegacySkip("SpriteGL.drawAffineMasked(skipped)")
+        }
     }
 }

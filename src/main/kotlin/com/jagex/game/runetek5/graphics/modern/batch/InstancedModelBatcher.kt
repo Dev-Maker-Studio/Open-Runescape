@@ -66,6 +66,18 @@ class InstancedModelBatcher {
         /** Maximum total indices across all unique meshes */
         private const val MAX_TOTAL_INDICES = 1000000
 
+        /**
+         * On overflow, evict down to this fraction of capacity rather than just
+         * far enough to fit the incoming mesh.
+         *
+         * Compaction costs a full pass over the resident arena, so evicting the
+         * bare minimum makes it run on EVERY subsequent insert — the store pins
+         * itself at 100% and every new mesh pays a whole-arena copy plus a full
+         * VBO re-upload. Freeing a large block at once amortises that across the
+         * many inserts that follow.
+         */
+        private const val EVICT_TARGET_RATIO = 0.65f
+
         /** Minimum instance count to use instancing (below this, falls through to regular batcher) */
         const val INSTANCING_THRESHOLD = 2
     }
@@ -80,6 +92,7 @@ class InstancedModelBatcher {
     // Uniform locations
     private var uTextureLocation = -1
     private var uTextureEnabledLocation = -1
+    private var uCombineModeLocation = -1
     private var uAlphaThresholdLocation = -1
     private var uViewProjectionLocation = -1
     private var uSunDirectionLocation = -1
@@ -112,7 +125,7 @@ class InstancedModelBatcher {
      */
     class MeshEntry(
         /** Content hash identifying this unique mesh */
-        val modelId: Int,
+        val modelId: Long,
         /** Offset into the shared vertex buffer (in vertices) */
         var vertexOffset: Int = 0,
         /** Number of vertices for this mesh */
@@ -123,6 +136,20 @@ class InstancedModelBatcher {
         /** Per-instance model matrices for the CURRENT frame (16 floats each, in place — no per-instance allocation) */
         var instanceData: FloatArray = FloatArray(16 * 16)
         var instanceCount: Int = 0
+
+        /**
+         * Presented-frame counter at the last [addInstance] touch. Drives LRU
+         * eviction; entries carrying the CURRENT frame are never evicted, so
+         * compaction can never pull geometry out from under this frame's draws.
+         */
+        var lastUsedFrame: Long = 0
+
+        /** Total indices this mesh owns — one contiguous run in the shared IBO. */
+        fun indexSpan(): Int {
+            var span = 0
+            for (batch in materialBatches) span += batch.indexCount
+            return span
+        }
 
         fun resetInstances() {
             instanceCount = 0
@@ -153,25 +180,47 @@ class InstancedModelBatcher {
     // PERSISTENT mesh tracking: geometry appended once per unique mesh and kept across
     // frames (per-frame re-copy + re-upload of all mesh geometry was the dominant CPU
     // cost). Only the per-entry instance matrices are per-frame state.
-    private val meshEntries = LinkedHashMap<Int, MeshEntry>(MAX_UNIQUE_MESHES)
+    private val meshEntries = LinkedHashMap<Long, MeshEntry>(MAX_UNIQUE_MESHES)
     private var totalVertexCount = 0
     private var totalIndexCount = 0
 
-    /** True when new mesh geometry was appended since the last GPU upload. */
-    private var geometryDirty = false
+    /**
+     * High-water marks of what the GPU already holds. Geometry is APPEND-ONLY
+     * between compactions, so each frame only needs the new tail range uploaded
+     * — a whole-store upload was re-sending ~19MB of unchanged vertex data every
+     * frame that any mesh appeared (the 11.6ms `geoUp` in the frame profile).
+     * Compaction rewrites every offset, so it resets both marks to 0.
+     */
+    private var uploadedVertexCount = 0
+    private var uploadedIndexCount = 0
 
-    /** Set when capacity was exhausted; the geometry store is rebuilt at next beginFrame. */
-    private var pendingGeometryReset = false
+    /**
+     * Presented-frame counter (bumped by [resetFrameStats]). Used only for LRU
+     * eviction bookkeeping — see [MeshEntry.lastUsedFrame].
+     */
+    private var frameCounter = 0L
+
+    /** Reusable staging buffer for the overlapping forward copies in [compactGeometryStore]. */
+    private val compactStaging = ByteArray(64 * 1024)
+
+    /** Meshes evicted by [evictAndCompact] since the last stats reset. */
+    private var meshesEvicted = 0
+
+    /** Times a mesh could not fit even after eviction (live set alone oversubscribed). */
+    private var capacityFallbacks = 0
 
     // State
     private var isInitialized = false
     private var isFrameActive = false
 
-    // Statistics
+    // Statistics (per presented frame; reset via resetFrameStats)
     private var instancedDrawCalls = 0
     private var instancedTriangles = 0
     private var instancedModels = 0
     private var instancedMeshesReused = 0
+
+    /** Instances added since the current beginFrame (drives hasPendingGeometry). */
+    private var instancesThisBatch = 0
 
     // Timing (nanoseconds, per endFrame)
     private var timeGeomUpload = 0L
@@ -190,6 +239,7 @@ class InstancedModelBatcher {
         shader!!.bind()
         uTextureLocation = shader!!.getUniformLocation("uTexture")
         uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
+        uCombineModeLocation = shader!!.getUniformLocation("uCombineMode")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
         uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
@@ -207,6 +257,11 @@ class InstancedModelBatcher {
 
         // Setup VAO with vertex format + instanced attributes
         setupVAO()
+
+        // Reserve the GPU store at full size up front. uploadSubRange never grows a
+        // buffer, and pre-allocating also means no glBufferData reallocation churn.
+        vbo!!.allocate(MAX_TOTAL_VERTICES.toLong() * VERTEX_STRIDE)
+        ibo!!.allocate(MAX_TOTAL_INDICES)
 
         // Allocate CPU staging buffers
         vertexBuffer = MemoryUtil.memAlloc(MAX_TOTAL_VERTICES * VERTEX_STRIDE)
@@ -325,6 +380,10 @@ class InstancedModelBatcher {
             uniform sampler2D uTexture;
             uniform bool uTextureEnabled;
             uniform float uAlphaThreshold;
+            // Legacy per-material texture combine mode (see OptimizedFrameBatcher /
+            // groundTextured.frag). REPLACE(1) ignores the per-face vColor — required
+            // or textured faces with junk face colors render tinted (green-quad bug).
+            uniform int uCombineMode;
 
             out vec4 fragColor;
 
@@ -332,7 +391,15 @@ class InstancedModelBatcher {
                 vec4 color;
                 if (uTextureEnabled) {
                     vec4 texColor = texture(uTexture, vTexCoord);
-                    color = texColor * vColor;
+                    if (uCombineMode == 1) {
+                        color = texColor;
+                    } else if (uCombineMode == 3) {
+                        color = vec4(clamp(texColor.rgb + vColor.rgb, 0.0, 1.0), texColor.a * vColor.a);
+                    } else if (uCombineMode == 4) {
+                        color = clamp(texColor - vColor, 0.0, 1.0);
+                    } else {
+                        color = texColor * vColor;
+                    }
                 } else {
                     color = vColor;
                 }
@@ -388,33 +455,37 @@ class InstancedModelBatcher {
         check(isInitialized) { "InstancedModelBatcher not initialized" }
         check(!isFrameActive) { "Frame already active" }
 
-        // Rebuild the geometry store if capacity ran out last frame (rare — e.g.
-        // after roaming across many regions accumulates stale meshes).
-        if (pendingGeometryReset) {
-            pendingGeometryReset = false
-            meshEntries.clear()
-            totalVertexCount = 0
-            totalIndexCount = 0
-            vertexBuffer!!.clear()
-            indexBuffer!!.clear()
-            geometryDirty = true
-            println("[InstancedModelBatcher] Geometry store reset (capacity exceeded); rebuilding from live meshes")
-        }
-
-        // Geometry persists across frames — only reset the per-frame instance lists.
+        // Geometry persists across frames — only reset the per-BATCH instance lists.
         for (entry in meshEntries.values) {
             entry.resetInstances()
         }
+        instancesThisBatch = 0
 
+        // NOTE: the presented-frame stats (instancedDrawCalls/Triangles/Models/...)
+        // are NOT reset here — beginFrame runs at every mid-frame batch reopen, which
+        // made the diag read zeros. They reset once per presented frame via
+        // resetFrameStats() from ModernGLToolkit.render().
+
+        isFrameActive = true
+    }
+
+    /**
+     * Resets the per-presented-frame statistics. Called once per presented frame
+     * (ModernGLToolkit.render), after the diag has read them.
+     */
+    fun resetFrameStats() {
         instancedDrawCalls = 0
         instancedTriangles = 0
         instancedModels = 0
         instancedMeshesReused = 0
+        meshesEvicted = 0
+        capacityFallbacks = 0
         timeGeomUpload = 0L
         timeInstanceUpload = 0L
         timeDraw = 0L
-
-        isFrameActive = true
+        // Advance the LRU clock at the presented-frame boundary. Entries stamped
+        // with the new value during the frame that follows are eviction-immune.
+        frameCounter++
     }
 
     /**
@@ -431,30 +502,47 @@ class InstancedModelBatcher {
      */
     fun addInstance(
         cachedModel: ModelCache.CachedModel,
-        modelId: Int,
+        modelId: Long,
         modelMatrix: Matrix43
     ): Boolean {
         if (!isFrameActive) return false
 
         var entry = meshEntries[modelId]
 
+        if (entry != null && entry.vertexCount != cachedModel.vertexCount) {
+            // COLLISION GUARD: the persistent store must never serve another mesh's
+            // geometry. If the incoming cached model disagrees with the stored entry
+            // (hash collision or a stale entry after external invalidation), drop
+            // just that entry and re-append below — no whole-store rebuild.
+            println("[InstancedModelBatcher] HASH COLLISION/STALE ENTRY for key=$modelId (stored=${entry.vertexCount}v incoming=${cachedModel.vertexCount}v) — re-appending this mesh")
+            meshEntries.remove(modelId)
+            entry = null
+        }
+
         if (entry == null) {
             // First time this mesh is EVER seen -- append its geometry to the
             // persistent store (kept across frames; uploaded only when dirty).
             val vertexCount = cachedModel.vertexCount
-            if (totalVertexCount + vertexCount > MAX_TOTAL_VERTICES) {
-                pendingGeometryReset = true
-                return false
-            }
 
             // Calculate index count needed
             var meshIndexCount = 0
             for (batch in cachedModel.materialBatches) {
                 meshIndexCount += batch.indexCount
             }
-            if (totalIndexCount + meshIndexCount > MAX_TOTAL_INDICES) {
-                pendingGeometryReset = true
-                return false
+
+            // The store is append-only within a frame; when it fills, evict the
+            // least-recently-used meshes (never this frame's) and compact the arena.
+            if (totalVertexCount + vertexCount > MAX_TOTAL_VERTICES ||
+                totalIndexCount + meshIndexCount > MAX_TOTAL_INDICES
+            ) {
+                if (!evictAndCompact(vertexCount, meshIndexCount)) {
+                    // This frame's live meshes alone exceed capacity — nothing is
+                    // safe to evict. Stream this mesh via the regular batcher.
+                    // Surfaced via the [ModernPerf] store[overflow=] counter rather
+                    // than a println: this fires per model, not per frame.
+                    capacityFallbacks++
+                    return false
+                }
             }
 
             entry = MeshEntry(
@@ -495,10 +583,13 @@ class InstancedModelBatcher {
 
             totalVertexCount += vertexCount
             meshEntries[modelId] = entry
-            geometryDirty = true
         } else {
             instancedMeshesReused++
         }
+
+        // Stamp the LRU clock: entries touched this presented frame are pinned
+        // against eviction for the rest of it.
+        entry.lastUsedFrame = frameCounter
 
         // Check instance limit
         if (entry.instanceCount >= MAX_INSTANCES_PER_MESH) return false
@@ -529,8 +620,134 @@ class InstancedModelBatcher {
         data[base + 15] = 1f
 
         instancedModels++
+        instancesThisBatch++
 
         return true
+    }
+
+    /**
+     * Frees room for a mesh of [neededVertices]/[neededIndices] by evicting the
+     * least-recently-used entries and compacting the arena.
+     *
+     * The store used to be append-only with a whole-store nuke on overflow, which
+     * freed nothing when the live working set was near capacity: it refilled and
+     * overflowed again the same frame, re-uploading the entire VBO every time.
+     * LRU eviction releases only cold meshes and keeps hot ones resident.
+     *
+     * Entries touched during the current presented frame are never candidates, so
+     * geometry this frame's draws reference can never move out from under them.
+     *
+     * @return true if there is now room, false if the un-evictable (this-frame)
+     *   set alone exceeds capacity — the caller should stream the mesh instead.
+     */
+    private fun evictAndCompact(neededVertices: Int, neededIndices: Int): Boolean {
+        // Coldest first; entries stamped with the current frame are pinned.
+        val candidates = ArrayList<MeshEntry>(meshEntries.size)
+        for (entry in meshEntries.values) {
+            if (entry.lastUsedFrame != frameCounter) candidates.add(entry)
+        }
+        candidates.sortBy { it.lastUsedFrame }
+
+        // Evict past the point of merely fitting, down to the hysteresis target,
+        // so the next few hundred inserts need no compaction at all.
+        val targetVertices = (MAX_TOTAL_VERTICES * EVICT_TARGET_RATIO).toInt() - neededVertices
+        val targetIndices = (MAX_TOTAL_INDICES * EVICT_TARGET_RATIO).toInt() - neededIndices
+
+        var freedVertices = 0
+        var freedIndices = 0
+        val evicted = HashSet<Long>()
+
+        for (candidate in candidates) {
+            if (totalVertexCount - freedVertices <= targetVertices &&
+                totalIndexCount - freedIndices <= targetIndices
+            ) break
+            evicted.add(candidate.modelId)
+            freedVertices += candidate.vertexCount
+            freedIndices += candidate.indexSpan()
+        }
+
+        // Cold entries alone may not reach the target; succeeding only requires
+        // that the incoming mesh now fits.
+        if (totalVertexCount - freedVertices + neededVertices > MAX_TOTAL_VERTICES ||
+            totalIndexCount - freedIndices + neededIndices > MAX_TOTAL_INDICES
+        ) {
+            return false
+        }
+
+        if (evicted.isNotEmpty()) {
+            meshEntries.keys.removeAll(evicted)
+            meshesEvicted += evicted.size
+            compactGeometryStore()
+        }
+        return true
+    }
+
+    /**
+     * Slides the surviving entries down over the holes left by eviction, in
+     * ascending arena order, and rebases their vertex/index offsets.
+     *
+     * Stored indices are ABSOLUTE vertex indices (addInstance writes
+     * `baseVertex + batch.indices[i]`), so a moved mesh's indices shift by the
+     * same delta as its vertex block.
+     */
+    private fun compactGeometryStore() {
+        val vb = vertexBuffer!!
+        val ib = indexBuffer!!
+        // Arena order, not map order: entries must be packed in the direction they
+        // already lie so every copy moves DOWN (dst < src) and can never clobber a
+        // block it has not read yet.
+        val ordered = meshEntries.values.sortedBy { it.vertexOffset }
+
+        var writeVertex = 0
+        var writeIndex = 0
+        for (entry in ordered) {
+            val vertexDelta = writeVertex - entry.vertexOffset
+            if (vertexDelta != 0) {
+                moveVertexBytes(
+                    vb,
+                    entry.vertexOffset * VERTEX_STRIDE,
+                    writeVertex * VERTEX_STRIDE,
+                    entry.vertexCount * VERTEX_STRIDE
+                )
+            }
+            for (batch in entry.materialBatches) {
+                val src = batch.indexOffset
+                for (i in 0 until batch.indexCount) {
+                    ib.put(writeIndex + i, ib.get(src + i) + vertexDelta)
+                }
+                batch.indexOffset = writeIndex
+                writeIndex += batch.indexCount
+            }
+            entry.vertexOffset = writeVertex
+            writeVertex += entry.vertexCount
+        }
+
+        totalVertexCount = writeVertex
+        totalIndexCount = writeIndex
+        // Every surviving mesh moved, so the GPU copy is stale end to end.
+        uploadedVertexCount = 0
+        uploadedIndexCount = 0
+    }
+
+    /**
+     * Forward chunked copy within the vertex arena. Always called with
+     * `dstByte < srcByte`; staging each chunk out before writing it back keeps
+     * overlapping ranges correct (ByteBuffer bulk puts give no overlap guarantee).
+     */
+    private fun moveVertexBytes(vb: ByteBuffer, srcByte: Int, dstByte: Int, length: Int) {
+        if (length == 0 || srcByte == dstByte) return
+        val staging = compactStaging
+        val src = vb.duplicate()
+        val dst = vb.duplicate()
+        var moved = 0
+        while (moved < length) {
+            val chunk = minOf(staging.size, length - moved)
+            src.position(srcByte + moved)
+            src.get(staging, 0, chunk)
+            dst.position(dstByte + moved)
+            dst.put(staging, 0, chunk)
+            moved += chunk
+        }
     }
 
     /**
@@ -554,7 +771,11 @@ class InstancedModelBatcher {
      *
      * @param textureCache Lambda to resolve material IDs to GL texture handles
      */
-    fun endFrame(textureCache: (Int) -> Int) {
+    fun endFrame(
+        textureCache: (Int) -> Int,
+        combineModeOf: (Int) -> Int = { 0 },
+        needsBlendOf: (Int) -> Boolean = { false }
+    ) {
         check(isFrameActive) { "No active frame" }
 
         // Render ALL meshes, whether they have 1 or many instances.
@@ -575,20 +796,25 @@ class InstancedModelBatcher {
             return
         }
 
-        // Upload mesh geometry ONLY when new meshes were appended since the last
-        // upload — the persistent store makes steady-state frames upload nothing here.
-        if (geometryDirty) {
+        // Upload ONLY the range appended since the last upload. Steady-state frames
+        // that add a handful of meshes send a few hundred KB instead of the whole
+        // ~19MB store; frames that add nothing send nothing.
+        if (totalVertexCount > uploadedVertexCount || totalIndexCount > uploadedIndexCount) {
             val t0 = System.nanoTime()
-            val vbView = vertexBuffer!!.duplicate()
-            vbView.position(0)
-            vbView.limit(totalVertexCount * VERTEX_STRIDE)
-            vbo!!.upload(vbView)
-
-            val ibView = indexBuffer!!.duplicate()
-            ibView.position(0)
-            ibView.limit(totalIndexCount)
-            ibo!!.upload(ibView)
-            geometryDirty = false
+            if (totalVertexCount > uploadedVertexCount) {
+                val vbView = vertexBuffer!!.duplicate()
+                vbView.position(uploadedVertexCount * VERTEX_STRIDE)
+                vbView.limit(totalVertexCount * VERTEX_STRIDE)
+                vbo!!.uploadSubRange(uploadedVertexCount.toLong() * VERTEX_STRIDE, vbView)
+                uploadedVertexCount = totalVertexCount
+            }
+            if (totalIndexCount > uploadedIndexCount) {
+                val ibView = indexBuffer!!.duplicate()
+                ibView.position(uploadedIndexCount)
+                ibView.limit(totalIndexCount)
+                ibo!!.uploadSubRange(uploadedIndexCount, ibView)
+                uploadedIndexCount = totalIndexCount
+            }
             timeGeomUpload += System.nanoTime() - t0
         }
 
@@ -612,6 +838,8 @@ class InstancedModelBatcher {
         ibo!!.bind()
 
         var lastTextureHandle = -1
+        // -1 = unknown, forces the first material batch to establish the state.
+        var lastBlend = -1
 
         // Render each mesh (instanced or not)
         for (entry in allEntries) {
@@ -629,18 +857,39 @@ class InstancedModelBatcher {
 
             // Render each material batch with instancing
             for (matBatch in entry.materialBatches) {
+                // -1 = untextured; 0..N = textured (material 0 is valid — see
+                // buildModelCache). Test `>= 0`, not `> 0`.
                 val texId = matBatch.materialId
-                val textureHandle = if (texId > 0) textureCache(texId) else 0
+                val textureHandle = if (texId >= 0) textureCache(texId) else 0
 
                 if (textureHandle != lastTextureHandle) {
                     if (textureHandle > 0) {
                         GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
                         GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
                         sh.setUniform(uTextureEnabledLocation, 1)
+                        // Legacy per-material combine mode (REPLACE ignores vColor).
+                        sh.setUniform(uCombineModeLocation, if (texId >= 0) combineModeOf(texId) else 0)
                     } else {
                         sh.setUniform(uTextureEnabledLocation, 0)
                     }
                     lastTextureHandle = textureHandle
+                }
+
+                // Per-material blend state (legacy setBlendMode parity). Opaque
+                // materials MUST draw with GL_BLEND off, or their alpha-carrying
+                // faces go translucent and depth-reject what is behind them.
+                val blend = if (needsBlendOf(texId)) 1 else 0
+                if (blend != lastBlend) {
+                    if (blend == 1) {
+                        GLWrapper.enable(GLWrapper.Constants.BLEND)
+                        GLWrapper.blendFunc(
+                            GLWrapper.Constants.SRC_ALPHA,
+                            GLWrapper.Constants.ONE_MINUS_SRC_ALPHA
+                        )
+                    } else {
+                        GLWrapper.disable(GLWrapper.Constants.BLEND)
+                    }
+                    lastBlend = blend
                 }
 
                 val t2 = System.nanoTime()
@@ -666,9 +915,10 @@ class InstancedModelBatcher {
 
     fun isActive(): Boolean = isFrameActive
 
-    /** True when the open frame has collected INSTANCES that have not been flushed yet.
-     *  (Mesh geometry persists across frames, so totalVertexCount is not the signal.) */
-    fun hasPendingGeometry(): Boolean = isFrameActive && instancedModels > 0
+    /** True when the open BATCH has collected instances that have not been flushed yet.
+     *  (Mesh geometry persists across frames and the frame stats accumulate across
+     *  batch reopens, so neither is the signal — only this batch's instance count.) */
+    fun hasPendingGeometry(): Boolean = isFrameActive && instancesThisBatch > 0
 
     fun getStats(): InstanceStats = InstanceStats(
         drawCalls = instancedDrawCalls,
@@ -677,6 +927,9 @@ class InstancedModelBatcher {
         uniqueMeshes = meshEntries.size,
         instancedMeshes = meshEntries.values.count { it.instanceCount >= INSTANCING_THRESHOLD },
         meshesReused = instancedMeshesReused,
+        meshesEvicted = meshesEvicted,
+        capacityFallbacks = capacityFallbacks,
+        storeVertices = totalVertexCount,
         geomUploadMs = timeGeomUpload / 1_000_000f,
         instanceUploadMs = timeInstanceUpload / 1_000_000f,
         drawMs = timeDraw / 1_000_000f
@@ -712,6 +965,12 @@ class InstancedModelBatcher {
         val uniqueMeshes: Int,
         val instancedMeshes: Int,
         val meshesReused: Int,
+        /** Meshes LRU-evicted from the geometry store this frame. */
+        val meshesEvicted: Int = 0,
+        /** Meshes that could not fit even after eviction and fell back to streaming. */
+        val capacityFallbacks: Int = 0,
+        /** Vertices currently resident in the persistent geometry store. */
+        val storeVertices: Int = 0,
         val geomUploadMs: Float = 0f,
         val instanceUploadMs: Float = 0f,
         val drawMs: Float = 0f

@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.graphics.sprite
 
 import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
@@ -31,7 +32,7 @@ open class SpriteGL : NativeSprite {
      */
     protected fun blockedUnderModernToolkit(callsite: String): Boolean {
         val t = toolkit
-        if (t is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+        if (t is ModernGLToolkit) {
             t.countLegacySkip(callsite)
             return true
         }

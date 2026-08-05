@@ -202,13 +202,14 @@ class NpcEntity(scene: Scene?) : PathingEntity(scene, 25) {
         if (this.currRenderAnim != -1) {
             return this.currRenderAnim
         }
-        if (this.definitions!!.alternativeIds != null) {
-            val npcType = this.definitions!!.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
+        val definitions = this.definitions ?: return -1
+        if (definitions.alternativeIds != null) {
+            val npcType = definitions.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER)
             if (npcType != null && npcType.npcBasId != -1) {
                 return npcType.npcBasId
             }
         }
-        return this.definitions!!.npcBasId
+        return definitions.npcBasId
     }
 
     fun move(direction: NPCDirection, movementType: Int) {

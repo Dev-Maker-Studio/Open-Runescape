@@ -8,13 +8,11 @@ Darkan Bot is a refactored and deobfuscated version of the RuneScape game client
 
 ## Current State
 
-This codebase has undergone an extensive Java-to-Kotlin migration and is nearing completion:
-- **993 Kotlin files** (99.8% migrated)
-- **2 Java files remaining** to be migrated:
-  - `src/main/java/com/jagex/game/runetek5/config/rsinterface/cs2/CS2Interpreter.java`
-  - `src/main/java/com/jagex/game/runetek5/graphics/model/ModelGL.java`
+The Java-to-Kotlin migration is **complete**. `src/main/java/` no longer exists;
+the codebase is 100% Kotlin.
 
-Recent commits show active migration work with the pattern "MORE KOTLIN LMAO", indicating steady progress toward a fully Kotlin codebase.
+Current focus is deobfuscation and structural cleanup of the migrated code
+rather than migration itself.
 
 ## Architecture
 
@@ -58,8 +56,8 @@ Low-level native interface libraries (all migrated to Kotlin):
 - **Shadow Plugin**: Creates fat JAR with all dependencies
 
 ### Languages
-- **Kotlin 2.2.21**: Primary language (99.8% of codebase)
-- **Java 17**: Target JVM version, legacy code (0.2% remaining)
+- **Kotlin 2.2.21**: The entire codebase
+- **Java 17**: Target JVM version
 
 ### Key Dependencies
 - **Kotlin Coroutines**: Asynchronous programming
@@ -139,9 +137,7 @@ The project follows an incremental migration approach:
 ```
 darkan-bot/
 ├── src/main/
-│   ├── java/          # Legacy Java code (2 files remaining)
-│   │   └── com/jagex/
-│   └── kotlin/        # Kotlin code (993 files)
+│   └── kotlin/        # All source (100% Kotlin)
 │       ├── com/
 │       │   ├── darkan/    # Bot framework
 │       │   └── jagex/     # Game engine
@@ -156,17 +152,16 @@ darkan-bot/
 ## Migration Status
 
 ### Completed
-- 99.8% of codebase converted to Kotlin
+- 100% of the codebase converted to Kotlin
 - All native libraries migrated
 - Bot framework fully in Kotlin
-- Most game engine components migrated
+- CS2 engine split into a package with a two-level JIT-friendly dispatch
 
 ### Remaining Work
-Two complex files requiring careful migration:
-1. **CS2Interpreter.java**: ClientScript 2 interpreter (game scripting engine)
-2. **ModelGL.java**: OpenGL 3D model rendering
-
-Both files likely involve complex logic that requires thorough testing after migration.
+Deobfuscation, not migration. The CS2 engine has been refactored into
+`config/rsinterface/cs2/` with an audit harness in `tools/cs2/` — see
+`tools/cs2/README.md`. 316 of its 1006 opcodes are still unidentified and keep
+their `instrNNNN` names deliberately.
 
 ## Historical Context
 
@@ -182,13 +177,11 @@ This client is designed to work with the Darkan server emulator, which recreates
 ## Notes for AI Assistants
 
 ### When Working on This Project
-- The migration is nearly complete - only 2 files remain
-- Always run full builds to verify Java-Kotlin interop
+- Always run full builds after changes
 - Be extremely careful with nullability (legacy code is null-heavy)
 - Preserve public APIs for compatibility
-- The CS2Interpreter and ModelGL files are complex and critical
+- The CS2 engine is critical; run `python3 tools/cs2/verify.py` after touching it
 - Don't use git commands (per migration guidelines)
-- Use the conversion tool in `./tools/` for Java-to-Kotlin conversion
 
 ### Understanding the Codebase
 - `com.jagex` = Original game engine (deobfuscated)
@@ -199,5 +192,4 @@ This client is designed to work with the Darkan server emulator, which recreates
 ### Testing & Building
 - Full build required after changes: `./gradlew build`
 - Main entry point for testing: `com.darkan.bot.BotKt`
-- Watch for Java-Kotlin interop issues at boundaries
 - Verify both compilation AND runtime behavior

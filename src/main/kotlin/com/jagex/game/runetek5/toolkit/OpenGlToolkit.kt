@@ -2411,7 +2411,7 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
         return attributes
     }
 
-    fun setActiveTexture(replacingCombiner: OpenGlTexture?) {
+    open fun setActiveTexture(replacingCombiner: OpenGlTexture?) {
         val currentCombiner = this.openglTextures!![this.glTexturesCursorPos]
         if (currentCombiner !== replacingCombiner) {
             if (replacingCombiner != null) {

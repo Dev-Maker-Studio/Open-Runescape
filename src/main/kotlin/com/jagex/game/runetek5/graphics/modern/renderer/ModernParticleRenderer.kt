@@ -7,6 +7,7 @@ import com.jagex.game.runetek5.graphics.modern.core.VertexBuffer
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.graphics.model.particle.PointEntity
+import com.jagex.game.runetek5.utils.BufferUtils
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 import java.nio.ShortBuffer
@@ -91,7 +92,7 @@ class ModernParticleRenderer {
     private val primaryBuckets = Array(MAX_DEPTH_BUCKETS) { arrayOfNulls<PointEntity>(MAX_PER_BUCKET) }
     private val overflowBuckets = Array(MAX_OVERFLOW_BUCKETS) { arrayOfNulls<PointEntity>(768) }
     private var overflowBucketIndex = 0
-    private val depthShift: Int = com.jagex.game.runetek5.utils.BufferUtils.ilog(MAX_DEPTH_BUCKETS)
+    private val depthShift: Int = BufferUtils.ilog(MAX_DEPTH_BUCKETS)
 
     /**
      * Initializes the renderer. Must be called on the GL thread before rendering.
@@ -246,18 +247,19 @@ class ModernParticleRenderer {
         val offAntiY = upY - rightY
         val offAntiZ = upZ - rightZ
 
-        // Build view-projection matrix for depth sorting
-        // Use the projection matrix row 2 (z near plane) for depth computation
-        val zNearA = projectionMatrixFloats[2]
-        val zNearB = projectionMatrixFloats[6]
-        val zNearC = projectionMatrixFloats[10]
-        val zNearD = projectionMatrixFloats[14]
+        // Depth-sort key: legacy parity — GlParticleRenderer computes per-particle
+        // depth from the VIEW matrix's z row (toolkit.viewMatrix44.elements[2,6,10,14],
+        // GlParticleRenderer.kt:48-51), i.e. view-space Z, not clip Z.
+        val zNearA = viewMatrixFloats[2]
+        val zNearB = viewMatrixFloats[6]
+        val zNearC = viewMatrixFloats[10]
+        val zNearD = viewMatrixFloats[14]
 
         // Build the combined VP matrix for the shader.
-        // The legacy code uploads pre-billboarded world-space positions, then the
-        // fixed-function pipeline applies the ModelView+Projection transform.
-        // In our modern path, the billboard positions are also in world space,
-        // so we need the combined ViewProjection matrix.
+        // Both inputs are RS row-major/row-vector matrices; indexing them as
+        // column-major here yields (V·P)^T in column-major form, so GLSL's M*v
+        // reproduces the legacy row-vector clip result (the same "straight upload"
+        // trick used by the ground/model batchers).
         val vpMatrix = FloatArray(16)
         for (row in 0..3) {
             for (col in 0..3) {
@@ -268,6 +270,12 @@ class ModernParticleRenderer {
                 vpMatrix[row + col * 4] = sum
             }
         }
+        // RS clip space is Y-down; OpenGL is Y-up. Negate the clip-Y output row
+        // (column-major indices 1,5,9,13), matching the ground/model batchers.
+        vpMatrix[1] = -vpMatrix[1]
+        vpMatrix[5] = -vpMatrix[5]
+        vpMatrix[9] = -vpMatrix[9]
+        vpMatrix[13] = -vpMatrix[13]
 
         // Setup GL state for particle rendering
         GLWrapper.enable(GLWrapper.Constants.BLEND)
@@ -314,7 +322,7 @@ class ModernParticleRenderer {
         var depthRange = maxDepth - minDepth
         val bucketShift: Int
         if (depthRange + 2 > MAX_DEPTH_BUCKETS) {
-            bucketShift = 1 + com.jagex.game.runetek5.utils.BufferUtils.ilog(depthRange) - depthShift
+            bucketShift = 1 + BufferUtils.ilog(depthRange) - depthShift
             depthRange = (depthRange shr bucketShift) + 2
         } else {
             bucketShift = 0

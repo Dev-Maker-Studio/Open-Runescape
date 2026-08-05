@@ -103,10 +103,10 @@ open class SceneGraph(
 
         @JvmStatic
         fun animateObject(plane: Int, x: Int, y: Int, type: Int, shape: Int, rotation: Int, sequence: Int) {
-            if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX - 1 && y < Resource.mapRegion!!.sceneSizeY - 1 && Resource.mapRegion!!.getScene()!! != null) {
+            if (x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX - 1 && y < Resource.mapRegion!!.sceneSizeY - 1 && Resource.mapRegion!!.getScene() != null) {
                 if (type == 0) {
-                    val primaryWall = Resource.mapRegion!!.getScene()!!!!.getWall(plane, x, y) as? GameObject
-                    val secondaryWall = Resource.mapRegion!!.getScene()!!!!.getSecondaryWall(plane, x, y) as? GameObject
+                    val primaryWall = Resource.mapRegion!!.getScene()!!.getWall(plane, x, y) as? GameObject
+                    val secondaryWall = Resource.mapRegion!!.getScene()!!.getSecondaryWall(plane, x, y) as? GameObject
                     if (primaryWall != null && shape != 2) {
                         if (primaryWall is AnimatedWall) {
                             primaryWall.gameObject.animate(sequence)
@@ -122,7 +122,7 @@ open class SceneGraph(
                         }
                     }
                 } else if (type == 1) {
-                    val wallDecoration = Resource.mapRegion!!.getScene()!!!!.getPrimaryWallDecoration(plane, x, y) as? GameObject
+                    val wallDecoration = Resource.mapRegion!!.getScene()!!.getPrimaryWallDecoration(plane, x, y) as? GameObject
                     if (wallDecoration != null) {
                         if (wallDecoration is AnimatedWallDecoration) {
                             wallDecoration.wallDecoration.animate(sequence)
@@ -144,7 +144,7 @@ open class SceneGraph(
                         }
                     }
                 } else if (type == 2) {
-                    val interactive = Resource.mapRegion!!.getScene()!!!!.getInteractiveObject(plane, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
+                    val interactive = Resource.mapRegion!!.getScene()!!.getInteractiveObject(plane, x, y, Client.INTERACTIVE_OBJECT_COMPARABLE) as? GameObject
                     if (interactive != null) {
                         var shapeVar = shape
                         if (shape == 11) {
@@ -157,7 +157,7 @@ open class SceneGraph(
                         }
                     }
                 } else if (type == 3) {
-                    val groundDecoration = Resource.mapRegion!!.getScene()!!!!.getGroundDecoration(plane, x, y) as? GameObject
+                    val groundDecoration = Resource.mapRegion!!.getScene()!!.getGroundDecoration(plane, x, y) as? GameObject
                     if (groundDecoration != null) {
                         if (groundDecoration is AnimatedGroundDecoration) {
                             groundDecoration.gameObject.animate(sequence)

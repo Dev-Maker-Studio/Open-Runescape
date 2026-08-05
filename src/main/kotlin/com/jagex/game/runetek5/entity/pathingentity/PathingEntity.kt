@@ -32,6 +32,7 @@ import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.movement.CoordinateSpace
 import com.jagex.game.runetek5.scene.Scene
 import com.jagex.game.runetek5.toolkit.AbstractToolkit
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.utils.MathUtils
 import kotlin.math.atan2
 import kotlin.math.ceil
@@ -1299,7 +1300,7 @@ abstract class PathingEntity : AbstractInteractiveEntity {
 
         @JvmStatic
         fun calculateAvgHeightInclRoofs(absX: Int, absZ: Int, nextAbsX: Int, nextAbsZ: Int, plane: Int): Int {
-            if (Resource.mapRegion!!.getScene()!! == null) {
+            if (Resource.mapRegion!!.getScene() == null) {
                 return 0
             }
             var plane = plane
@@ -1349,6 +1350,15 @@ abstract class PathingEntity : AbstractInteractiveEntity {
             colorSrc: Int, colorDst: Int, alphaSrc: Int, alphaDst: Int, animation: Sequence?
         ): Model? {
             if (shadowModel == null) {
+                return null
+            }
+            // Under the modern toolkit there is no shadow pass yet (ShadowPass unwired):
+            // the entity shadow "model" is a flat projected silhouette that the modern
+            // model batcher rasterizes as opaque untextured quads (the flat green/blue
+            // ground quads at players/NPCs). Legacy draws it as a dark translucent
+            // overlay. No modern impl → draw NOTHING (per the toolkit-6 no-fallback
+            // directive). Both call sites null-check the return and skip cleanly.
+            if (toolkit is ModernGLToolkit) {
                 return null
             }
             var functionMask = 2055

@@ -277,7 +277,7 @@ class Component {
                     val hookRequests = HookRequest()
                     hookRequests.source = component
                     hookRequests.params = component.onLoadScript
-                    CS2Executor.execute_hook_inner(hookRequests, 2000000)
+                    CS2Executor.executeHookInternal(hookRequests, 2000000)
                 }
             }
         }

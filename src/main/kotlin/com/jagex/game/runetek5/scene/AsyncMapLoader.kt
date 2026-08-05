@@ -1,6 +1,7 @@
 package com.jagex.game.runetek5.scene
 
 import com.jagex.game.runetek5.cache.node.NodeCollection
+import com.jagex.game.runetek5.config.`object`.ObjectTypeList
 import com.jagex.game.runetek5.sound.player.area.AmbientSound
 import java.util.LinkedList
 
@@ -63,7 +64,7 @@ class AsyncMapLoader : Runnable {
         return region
     }
 
-    fun initializeRegion(loctypelist: com.jagex.game.runetek5.config.`object`.ObjectTypeList) {
+    fun initializeRegion(loctypelist: ObjectTypeList) {
         region.setLoctypelist(loctypelist)
     }
 

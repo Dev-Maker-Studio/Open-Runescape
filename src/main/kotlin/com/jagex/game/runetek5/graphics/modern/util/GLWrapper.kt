@@ -69,6 +69,17 @@ object GLWrapper {
 
     fun uniform1i(location: Int, value: Int) = glUniform1i(location, value)
 
+    /** Sets consecutive elements of an int/sampler ARRAY uniform from a single base
+     *  location. Needed because some drivers return -1 for individual sampler-array
+     *  element locations (uTextures[5]); writing the whole array from uTextures[0]
+     *  with count=N sets every element regardless. */
+    fun uniform1iv(location: Int, values: IntArray) {
+        MemoryStack.stackPush().use { stack ->
+            val buffer = stack.ints(*values)
+            glUniform1iv(location, buffer)
+        }
+    }
+
     fun uniform1f(location: Int, value: Float) = glUniform1f(location, value)
 
     fun uniform2f(location: Int, x: Float, y: Float) = glUniform2f(location, x, y)

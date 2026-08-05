@@ -1457,7 +1457,7 @@ class Scene(
                 // Always
                 resetSettingsBits(0.toByte())
                 initializeRoofSettings(512)
-                if (Resource.mapRegion!!.getScene()!! != null) {
+                if (Resource.mapRegion!!.getScene() != null) {
                     updateTileVisibility()
                 }
             } else {

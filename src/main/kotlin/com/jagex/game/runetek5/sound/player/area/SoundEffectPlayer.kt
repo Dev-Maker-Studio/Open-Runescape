@@ -72,7 +72,7 @@ object SoundEffectPlayer {
 	        if (currentAnimatingType.toInt() != sound.animationType) {
 	        	val soundEffectId = getSoundEffectId(sound.npcEntity!!)
 	            var npc = sound.npcEntity!!.definitions
-	            if (npc!!.alternativeIds != null) {
+	            if (npc != null && npc.alternativeIds != null) {
 	                npc = npc.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) ?: npc
 	            }
 	            if (npc != null && soundEffectId != -1) {
@@ -322,8 +322,8 @@ object SoundEffectPlayer {
 
 	@JvmStatic
 	fun getSoundEffectId(npc: NpcEntity): Int {
-	    var npcType = npc.definitions
-	    if (npcType!!.alternativeIds != null) {
+	    var npcType = npc.definitions ?: return -1
+	    if (npcType.alternativeIds != null) {
 	        npcType = npcType.getMultiNpc(VarProviders.PLAYER_VAR_PROVIDER) ?: return -1
 	    }
 	    var soundEffect = npcType!!.idleSoundEffect

@@ -10,8 +10,4 @@ class StaticElements(count: Int) {
     @JvmField
     val mapCategoryIds: IntArray = IntArray(elementCount)
 
-    companion object {
-        @JvmField
-        var CS2_QUERY_RESULT_IDX: Int = 0
-    }
 }

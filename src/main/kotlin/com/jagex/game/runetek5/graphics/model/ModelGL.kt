@@ -16,12 +16,15 @@ import com.jagex.game.runetek5.graphics.model.normal.ModelNormalsGL
 import com.jagex.game.runetek5.graphics.model.normal.VertexNormalGL
 import com.jagex.game.runetek5.graphics.model.particle.EffectiveVertex
 import com.jagex.game.runetek5.graphics.model.particle.EmissiveTriangle
+import com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder
 import com.jagex.game.runetek5.graphics.shadow.Shadow
 import com.jagex.game.runetek5.graphics.shadow.ShadowGL
 import com.jagex.game.runetek5.graphics.texture.TextureTransformationMatrix
 import com.jagex.game.runetek5.math.Matrix43
 import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.scene.ground.Ground
+import com.jagex.game.runetek5.rendering.Renderers
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.buffer.OpenGlArrayDrawBuffer
 import com.jagex.game.runetek5.toolkit.opengl.buffer.GlBitBuffer
@@ -31,6 +34,7 @@ import com.jagex.game.runetek5.utils.ColorUtil
 import com.jagex.game.runetek5.utils.MathUtils
 import jaclib.memory.Stream
 import jaggl.OpenGL
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.sqrt
 
 class ModelGL : Model {
@@ -61,7 +65,7 @@ class ModelGL : Model {
         var withinOrigin: Boolean = false
 
         /** Source of unique face-content stamps; see [facesRevision]. */
-        private val FACES_REVISION_COUNTER = java.util.concurrent.atomic.AtomicLong(1L)
+        private val FACES_REVISION_COUNTER = AtomicLong(1L)
 
         /**
          * XORed into [facesRevision] by [mirror]. Mirroring swaps facesB/facesC, which is
@@ -144,6 +148,46 @@ class ModelGL : Model {
 
     @JvmField
     var functionMask: Int = 0
+
+    /**
+     * True when this model is a per-frame ANIMATED POSE snapshot (produced by
+     * copyModelData with a vertex-altering mask, i.e. a sequence-augmented mask).
+     *
+     * Captured at COPY time and never cleared by applyShading, because the animated
+     * pose paths (NPCType.getAnimatedBodymodel/head, SpotAnimType, ItemType) call
+     * applyShading(<base caller mask>) AFTER animating — that overwrites functionMask
+     * (dropping ALTERS_VERTICES) and nulls vertexGroups (releaseUploadedData), which
+     * destroys BOTH signals the modern renderer's cache gate relied on. Every such
+     * pose has different vertices, so if wrongly admitted to the content cache /
+     * persistent instanced store each pose becomes a unique mesh — flooding the store,
+     * forcing capacity-overflow rebuilds, and serving substituted geometry (the
+     * green-quad impling/signpost bug). The modern gate reads this flag so these
+     * snapshots always stream fresh and are never content-cached.
+     */
+    @JvmField
+    var animatedPoseSnapshot: Boolean = false
+
+    /**
+     * Modern-renderer geometry built from the CLEAN decoded mesh at createModel
+     * time (direct vertex indices, proper texture-projection UVs). Shared across
+     * copies (immutable). Nulled by any vertex/color mutation the modern path
+     * cannot represent in the per-instance model matrix (translate, mirror,
+     * scale, recolor, rematerial, tint, ambient change, non-yaw rotation,
+     * ground contouring) — the modern renderer then falls back to capturing the
+     * legacy arrays. Yaw rotations are representable: they accumulate in
+     * [modernYaw] and are applied via the model matrix instead of re-baking.
+     */
+    @JvmField
+    var modernBuilt: ModernModelBuilder.BuiltModel? = null
+
+    /**
+     * Accumulated Y-axis rotation (0..16383, legacy angle units) baked into this
+     * model's LEGACY vertices by rotateWithNormals. The modern path's base
+     * geometry ([modernBuilt]) is unrotated, so the modern renderer pre-multiplies
+     * this yaw into the per-instance model matrix.
+     */
+    @JvmField
+    var modernYaw: Int = 0
 
     @JvmField
     var preferenceFlags: Int = 0
@@ -1040,6 +1084,19 @@ class ModelGL : Model {
     fun copyModelData(dst: ModelGL, src: ModelGL, flags: Int, usesPreallocated: Boolean): Model {
         dst.renderState = 0
         dst.functionMask = flags
+        // Capture animation intent NOW, from the copy mask, before any later
+        // applyShading(<base mask>) overwrites functionMask / nulls vertexGroups.
+        // A vertex-altering copy mask means this is (or will be animated into) a
+        // per-frame pose snapshot the modern content cache must never key on.
+        // Set unconditionally (SET, not OR) so reused preallocated copy slots never
+        // carry a stale true into a later non-animated copy.
+        dst.animatedPoseSnapshot = ModelFunctionMaskGL.altersVertices(flags) ||
+            (this.vertexGroups != null && ModelFunctionMaskGL.altersAnyVerticeType(flags))
+        // Modern base geometry is immutable and shared with copies; each copy
+        // tracks its own accumulated yaw. SET (not OR) so reused preallocated
+        // copy slots never carry stale values from an earlier copy.
+        dst.modernBuilt = this.modernBuilt
+        dst.modernYaw = this.modernYaw
         dst.preferenceFlags = this.preferenceFlags
         dst.ambient = this.ambient
         dst.contrast = this.contrast
@@ -1518,6 +1575,9 @@ class ModelGL : Model {
     }
 
     override fun yaxisRotateWithoutNormals(rotation: Int) {
+        // Rotates vertices but deliberately NOT normals — the modern matrix path
+        // would rotate both, changing lighting. Not representable; invalidate.
+        this.modernBuilt = null
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
@@ -1535,6 +1595,9 @@ class ModelGL : Model {
     }
 
     override fun rotateWithNormals(rotation: Int) {
+        // Yaw is representable in the modern per-instance model matrix; track it
+        // instead of invalidating the modern base geometry.
+        this.modernYaw = (this.modernYaw + rotation) and 0x3fff
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
@@ -2290,8 +2353,8 @@ class ModelGL : Model {
         // Under the modern toolkit the modern batcher is the ONLY path — when its gate
         // rejects (renderer not initialized, wrong thread, offscreen target), the model
         // draws NOTHING; the miss is counted in [ModernDiag] modelGate=accepted/total.
-        val activeToolkit = com.jagex.game.runetek5.rendering.Renderers.activeToolkit
-        if (activeToolkit is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+        val activeToolkit = Renderers.activeToolkit
+        if (activeToolkit is ModernGLToolkit) {
             if (activeToolkit.isModernRenderingActive()) {
                 // Render using modern pipeline
                 activeToolkit.renderModelGLModern(this, projectionMatrix)
@@ -2478,6 +2541,7 @@ class ModelGL : Model {
     }
 
     override fun translate(x: Int, y: Int, z: Int) {
+        this.modernBuilt = null
         for (i in 0 until this.maxDepth) {
             this.verticesX!![i] += x
             this.verticesY!![i] += y
@@ -2492,6 +2556,9 @@ class ModelGL : Model {
     }
 
     override fun mirror() {
+        // Mirroring flips winding; not representable in the modern matrix path
+        // without a per-draw cull flip. Invalidate.
+        this.modernBuilt = null
         for (i in 0 until this.maxDepth) {
             this.verticesZ!![i] = -this.verticesZ!![i]
         }
@@ -2546,6 +2613,7 @@ class ModelGL : Model {
     }
 
     override fun scale(x: Int, y: Int, z: Int) {
+        this.modernBuilt = null
         for (i in 0 until this.maxDepth) {
             this.verticesX!![i] = (this.verticesX!![i] * x) shr 7
             this.verticesY!![i] = (this.verticesY!![i] * y) shr 7
@@ -2570,6 +2638,7 @@ class ModelGL : Model {
     }
 
     override fun recolor(src: Short, dst: Short) {
+        this.modernBuilt = null
         for (face in 0 until this.numFaces) {
             if (this.facesColor!![face] == src) {
                 this.facesColor!![face] = dst
@@ -2590,6 +2659,7 @@ class ModelGL : Model {
     }
 
     override fun rematerial(src: Short, dst: Short) {
+        this.modernBuilt = null
         val provider = this.toolkit.materialProvider!!
 
         for (face in 0 until this.numFaces) {
@@ -2633,6 +2703,7 @@ class ModelGL : Model {
     }
 
     override fun tint(hue: Int, saturation: Int, lightness: Int, opacity: Int) {
+        this.modernBuilt = null
         for (i in 0 until this.numFaces) {
             val hsl = this.facesColor!![i].toInt() and 0xffff
             var h = (hsl shr 10) and 0x3f
@@ -2664,6 +2735,8 @@ class ModelGL : Model {
     }
 
     override fun setAmbient(ambient: Int) {
+        // Modern base colors are baked with the createModel-time ambient.
+        this.modernBuilt = null
         this.ambient = ambient.toShort()
         if (this.colorsBuffer != null) {
             this.colorsBuffer!!.buffer = null
@@ -2671,6 +2744,7 @@ class ModelGL : Model {
     }
 
     override fun applyEnvironmentAlpha(alpha: Byte, transparency: ByteArray?) {
+        this.modernBuilt = null
         if (transparency == null) {
             for (f in 0 until this.numFaces) {
                 this.facesAlpha!![f] = alpha
@@ -2933,6 +3007,7 @@ class ModelGL : Model {
     }
 
     override fun offsetSubmesh(var1: Matrix43, functionMask: Int, var3: Boolean) {
+        this.modernBuilt = null
         if (this.verticesSubmeshes != null) {
             var matrix44var4 = var1
             if (var3) {
@@ -3059,6 +3134,7 @@ class ModelGL : Model {
     override fun accountForLayers(): Boolean = this.hasAlphaTransition
 
     override fun xaxisRotateWithoutNormals(rotation: Int) {
+        this.modernBuilt = null
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
@@ -3076,6 +3152,7 @@ class ModelGL : Model {
     }
 
     override fun zaxisRotateWithoutNormals(rotation: Int) {
+        this.modernBuilt = null
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
@@ -4036,6 +4113,8 @@ class ModelGL : Model {
     }
 
     override fun contourToGround(contourType: Int, contourModifier: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int) {
+        // Ground contouring reshapes vertices per-tile; not matrix-representable.
+        this.modernBuilt = null
         if (!this.boundsCalculated) {
             calculateBounds()
         }
@@ -4111,6 +4190,8 @@ class ModelGL : Model {
     }
 
     override fun hillChange(ground: Ground, sceneX: Int, averageHeight: Int, sceneY: Int, width: Int, length: Int, xan: Int, zan: Int) {
+        // Per-tile hillskew reshapes vertices; not matrix-representable.
+        this.modernBuilt = null
         val sin = MathUtils.SINE[xan]
         val cos = MathUtils.COSINE[xan]
         val sin2 = MathUtils.SINE[zan]

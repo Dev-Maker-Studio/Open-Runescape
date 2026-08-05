@@ -59,6 +59,7 @@ class OptimizedFrameBatcher {
     // Uniform locations
     private var uTextureLocation = -1
     private var uTextureEnabledLocation = -1
+    private var uCombineModeLocation = -1
     private var uAlphaThresholdLocation = -1
     private var uViewProjectionLocation = -1
 
@@ -149,6 +150,7 @@ class OptimizedFrameBatcher {
         shader!!.bind()
         uTextureLocation = shader!!.getUniformLocation("uTexture")
         uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
+        uCombineModeLocation = shader!!.getUniformLocation("uCombineMode")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
         // Lighting uniforms
@@ -256,6 +258,13 @@ class OptimizedFrameBatcher {
             uniform sampler2D uTexture;
             uniform bool uTextureEnabled;
             uniform float uAlphaThreshold;
+            // Legacy fixed-function texture combine mode (MaterialType.combineMode):
+            // 0 MODULATE, 1 REPLACE, 2 INTERPOLATE(~MODULATE), 3 ADD, 4 SUBTRACT.
+            // Hardwired MODULATE (texColor*vColor) multiplied the per-face color into
+            // every textured face; faces whose material is REPLACE carry arbitrary
+            // (often green) face colors that legacy discards — that was the green
+            // sign-board / textured-loc bug. Matches groundTextured.frag exactly.
+            uniform int uCombineMode;
 
             out vec4 fragColor;
 
@@ -263,7 +272,15 @@ class OptimizedFrameBatcher {
                 vec4 color;
                 if (uTextureEnabled) {
                     vec4 texColor = texture(uTexture, vTexCoord);
-                    color = texColor * vColor;
+                    if (uCombineMode == 1) {
+                        color = texColor;
+                    } else if (uCombineMode == 3) {
+                        color = vec4(clamp(texColor.rgb + vColor.rgb, 0.0, 1.0), texColor.a * vColor.a);
+                    } else if (uCombineMode == 4) {
+                        color = clamp(texColor - vColor, 0.0, 1.0);
+                    } else {
+                        color = texColor * vColor;
+                    }
                 } else {
                     color = vColor;
                 }
@@ -324,11 +341,13 @@ class OptimizedFrameBatcher {
         indexBuffer!!.clear()
         matrixBuffer!!.clear()
 
-        // Reset material tracking
+        // Reset material tracking. materialTextureIds holds the REAL material id
+        // (-1 = untextured, 0..N = textured, material 0 valid); materialIndexMap is
+        // indexed by (id + 1) so -1 maps to array index 0.
         for (i in 0 until activeMaterialCount) {
-            val texId = materialTextureIds[i]
-            if (texId >= 0 && texId < materialIndexMap.size) {
-                materialIndexMap[texId] = -1
+            val mapKey = materialTextureIds[i] + 1
+            if (mapKey >= 0 && mapKey < materialIndexMap.size) {
+                materialIndexMap[mapKey] = -1
             }
             tempIndexCountPerMaterial[i] = 0
         }
@@ -516,14 +535,17 @@ class OptimizedFrameBatcher {
         // FAST PATH 3: Use pre-sorted material batches with System.arraycopy
         val t3 = System.nanoTime()
         for (batch in cachedModel.materialBatches) {
+            // materialId: -1 = untextured, 0..N = textured (material 0 valid). Index
+            // materialIndexMap by (id + 1) so -1 → 0; store the REAL id.
             val materialId = batch.materialId
-            var materialSlot = if (materialId < materialIndexMap.size) materialIndexMap[materialId] else -1
+            val mapKey = materialId + 1
+            var materialSlot = if (mapKey < materialIndexMap.size) materialIndexMap[mapKey] else -1
 
             if (materialSlot < 0) {
                 if (activeMaterialCount >= MAX_MATERIALS) continue
                 materialSlot = activeMaterialCount++
-                if (materialId < materialIndexMap.size) {
-                    materialIndexMap[materialId] = materialSlot
+                if (mapKey < materialIndexMap.size) {
+                    materialIndexMap[mapKey] = materialSlot
                 }
                 materialTextureIds[materialSlot] = materialId
                 tempIndexCountPerMaterial[materialSlot] = 0
@@ -608,17 +630,22 @@ class OptimizedFrameBatcher {
 
         val modelIdxFloat = modelIndex.toFloat()
 
-        // Get or create material slot
-        val normalizedTexId = if (textureId <= 0) 0 else textureId
-        var materialSlot = if (normalizedTexId < materialIndexMap.size) materialIndexMap[normalizedTexId] else -1
+        // Get or create material slot. textureId is the face's material id: -1 =
+        // untextured, 0..N = textured (material 0 is a VALID textured material — old-
+        // format meshes start texture ids at 0; the previous `<= 0` folded it into the
+        // untextured batch → flat green multimodel-loc quads). Store the REAL id;
+        // index materialIndexMap by (id + 1) so -1 maps to array index 0.
+        val texId = if (textureId < 0) -1 else textureId
+        val mapKey = texId + 1
+        var materialSlot = if (mapKey < materialIndexMap.size) materialIndexMap[mapKey] else -1
 
         if (materialSlot < 0) {
             if (activeMaterialCount >= MAX_MATERIALS) return
             materialSlot = activeMaterialCount++
-            if (normalizedTexId < materialIndexMap.size) {
-                materialIndexMap[normalizedTexId] = materialSlot
+            if (mapKey < materialIndexMap.size) {
+                materialIndexMap[mapKey] = materialSlot
             }
-            materialTextureIds[materialSlot] = normalizedTexId
+            materialTextureIds[materialSlot] = texId
             tempIndexCountPerMaterial[materialSlot] = 0
         }
 
@@ -668,7 +695,11 @@ class OptimizedFrameBatcher {
     /**
      * Ends the frame and renders all batched geometry.
      */
-    fun endFrame(textureCache: (Int) -> Int) {
+    fun endFrame(
+        textureCache: (Int) -> Int,
+        combineModeOf: (Int) -> Int = { 0 },
+        needsBlendOf: (Int) -> Boolean = { false }
+    ) {
         check(isFrameActive) { "No active frame" }
 
         // Record time spent adding models (from beginFrame to now)
@@ -692,10 +723,10 @@ class OptimizedFrameBatcher {
         val ib = indexBuffer!!
         ib.clear()
 
-        // Sort materials (untextured first, then by texture ID)
+        // Sort materials (untextured first, then by texture ID). Untextured is now -1.
         val sortedMaterials = (0 until activeMaterialCount).sortedBy {
             val texId = materialTextureIds[it]
-            if (texId == 0) Int.MIN_VALUE else texId
+            if (texId < 0) Int.MIN_VALUE else texId
         }
 
         for (slot in sortedMaterials) {
@@ -756,24 +787,49 @@ class OptimizedFrameBatcher {
         ibo!!.bind()
 
         var lastTextureHandle = -1
+        // -1 = unknown, forces the first material batch to establish the state.
+        var lastBlend = -1
 
         // Render each material batch
         for (slot in sortedMaterials) {
             val indexCount = materialIndexCounts[slot]
             if (indexCount == 0) continue
 
+            // texId is the REAL material id: -1 = untextured, 0..N = textured (0 valid).
             val texId = materialTextureIds[slot]
-            val textureHandle = if (texId > 0) textureCache(texId) else 0
+            val textureHandle = if (texId >= 0) textureCache(texId) else 0
 
             if (textureHandle != lastTextureHandle) {
                 if (textureHandle > 0) {
                     GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
                     GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
                     sh.setUniform(uTextureEnabledLocation, 1)
+                    // Per-material combine mode (legacy parity). REPLACE (1) ignores the
+                    // per-face vColor — required or textured faces with junk face colors
+                    // render tinted (the green sign-board bug).
+                    sh.setUniform(uCombineModeLocation, if (texId >= 0) combineModeOf(texId) else 0)
                 } else {
                     sh.setUniform(uTextureEnabledLocation, 0)
                 }
                 lastTextureHandle = textureHandle
+                stateChangesThisBatch++
+            }
+
+            // Per-material blend state (legacy setBlendMode parity). Opaque
+            // materials MUST draw with GL_BLEND off, or their alpha-carrying faces
+            // go translucent and depth-reject the geometry behind them.
+            val blend = if (needsBlendOf(texId)) 1 else 0
+            if (blend != lastBlend) {
+                if (blend == 1) {
+                    GLWrapper.enable(GLWrapper.Constants.BLEND)
+                    GLWrapper.blendFunc(
+                        GLWrapper.Constants.SRC_ALPHA,
+                        GLWrapper.Constants.ONE_MINUS_SRC_ALPHA
+                    )
+                } else {
+                    GLWrapper.disable(GLWrapper.Constants.BLEND)
+                }
+                lastBlend = blend
                 stateChangesThisBatch++
             }
 

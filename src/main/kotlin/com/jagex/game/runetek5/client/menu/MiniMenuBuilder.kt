@@ -203,7 +203,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
     val i_3 = mouseX - MiniMenu.viewportX
     val i_4 = mouseY - MiniMenu.viewportY
 
-    if (Resource.mapRegion?.getScene()!! != null && (!Client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
+    if (Resource.mapRegion!!.getScene() != null && (!Client.interfaceSelectionActive || (USE_OPTIONS_FLAGS and 0x40) != 0)) {
         var x = -1
         var y = -1
 
@@ -291,7 +291,7 @@ fun tileHovered(toolkit: AbstractToolkit, mouseX: Int, mouseY: Int) {
         }
     }
 
-    val scene = Resource.mapRegion?.getScene()!! ?: return
+    val scene = Resource.mapRegion!!.getScene()!!
     val interactiveEntities = scene.interactiveEntities
     val renderedEntity = interactiveEntities.entities
 

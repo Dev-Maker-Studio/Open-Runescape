@@ -14,6 +14,7 @@ import com.jagex.game.runetek5.graphics.texture.GlElementsArrayBuffer
 import com.jagex.game.runetek5.imageproducer.AbstractDisplay
 import com.jagex.game.runetek5.scene.ground.GroundFunctionMask.*
 import com.jagex.game.runetek5.scene.tile.WaterTile
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GroundMaterialGL
 import com.jagex.game.runetek5.toolkit.opengl.buffer.GlVboArrayBuffer
@@ -26,6 +27,7 @@ import com.jagex.game.runetek5.buffer.ArrayBufferGL
 import jaclib.memory.Stream
 import jaclib.memory.heap.NativeHeapBuffer
 import jaggl.OpenGL
+import org.lwjgl.system.MemoryUtil
 import com.jagex.game.runetek5.toolkit.opengl.*
 open class GroundGL(
     toolkit: OpenGlToolkit,
@@ -265,7 +267,7 @@ open class GroundGL(
             // Point lights are not part of the modern pipeline yet; their fixed-function
             // light meshes draw client-memory arrays against modern-reconfigured GL
             // state (same native-crash class as the shadow overlay below).
-            if (!activeLights.isEmpty() && activeToolkit !is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+            if (!activeLights.isEmpty() && activeToolkit !is ModernGLToolkit) {
                 val fogColor = activeToolkit.fogColor
                 val fogDensity = activeToolkit.fogDensity
                 activeToolkit.calculateFog(0, fogDensity, activeToolkit.fogOffset)
@@ -297,7 +299,7 @@ open class GroundGL(
             // it draws client-memory index arrays against GL state the modern ground
             // pass has reconfigured (native crash), and the modern pipeline replaces it
             // with the shader ShadowPass.
-            if (shadowMapper != null && activeToolkit !is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+            if (shadowMapper != null && activeToolkit !is ModernGLToolkit) {
                 OpenGL.glPushMatrix()
                 OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
@@ -631,15 +633,15 @@ open class GroundGL(
             // path cannot draw AT ALL (no legacy fallback exists under toolkit 6), so
             // failures here must be loud.
             val dataSize = nativeStream.written()
-            if (activeToolkit is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+            if (activeToolkit is ModernGLToolkit) {
                 try {
                     val nativeAddr = nativeHeapBuffer.getBufferAddress()
                     if (nativeAddr != 0L && dataSize > 0) {
                         // Free old buffer if exists
-                        modernVertexData?.let { org.lwjgl.system.MemoryUtil.memFree(it) }
+                        modernVertexData?.let { MemoryUtil.memFree(it) }
                         // Create new buffer and copy data
-                        modernVertexData = org.lwjgl.system.MemoryUtil.memAlloc(dataSize)
-                        org.lwjgl.system.MemoryUtil.memCopy(nativeAddr, org.lwjgl.system.MemoryUtil.memAddress(modernVertexData!!), dataSize.toLong())
+                        modernVertexData = MemoryUtil.memAlloc(dataSize)
+                        MemoryUtil.memCopy(nativeAddr, MemoryUtil.memAddress(modernVertexData!!), dataSize.toLong())
                         modernVertexStride = bufferEntrySize
                         modernVertexCount = totalMaterializedTiles
                     } else {

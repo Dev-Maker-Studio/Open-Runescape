@@ -154,6 +154,21 @@ class IndexBuffer(
     /**
      * Pre-allocates buffer storage.
      */
+    /**
+     * Uploads [buffer] at [indexOffset] (in indices), leaving the rest untouched.
+     * Companion to [VertexBuffer.uploadSubRange]; requires a prior [allocate].
+     */
+    fun uploadSubRange(indexOffset: Int, buffer: IntBuffer) {
+        require(indexType == IndexType.UNSIGNED_INT) { "Buffer configured for UNSIGNED_SHORT indices" }
+        if (!buffer.hasRemaining()) return
+        bind()
+        val end = indexOffset + buffer.remaining()
+        buffer.mark()
+        GLWrapper.bufferSubData(ELEMENT_ARRAY_BUFFER, indexOffset.toLong() * 4, buffer)
+        buffer.reset()
+        if (end > indexCount) indexCount = end
+    }
+
     fun allocate(maxIndices: Int) {
         bind()
         val sizeBytes = maxIndices.toLong() * indexType.bytesPerIndex

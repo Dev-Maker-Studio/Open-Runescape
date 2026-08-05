@@ -4,6 +4,7 @@ import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.toolkit.opengl.*
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.texture.OpenGl2DTexture_Sub1
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.toolkit.OpenGlToolkit
 import com.jagex.game.runetek5.toolkit.opengl.GLActionFormat
 import com.jagex.game.runetek5.toolkit.opengl.GLFormat
@@ -162,7 +163,7 @@ class FontRendererGL(
         // (standalone modern renderer). This only triggers for fonts created before
         // the modern renderer's lazy init; counted in [ModernDiag] legacySkips.
         val tk = this.toolkit
-        if (tk is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+        if (tk is ModernGLToolkit) {
             tk.countLegacySkip("legacy FontRendererGL.drawChar")
             return
         }
@@ -212,7 +213,7 @@ class FontRendererGL(
         // (standalone modern renderer). This only triggers for fonts created before
         // the modern renderer's lazy init; counted in [ModernDiag] legacySkips.
         val tk = this.toolkit
-        if (tk is com.jagex.game.runetek5.toolkit.ModernGLToolkit) {
+        if (tk is ModernGLToolkit) {
             tk.countLegacySkip("legacy FontRendererGL.drawChar")
             return
         }

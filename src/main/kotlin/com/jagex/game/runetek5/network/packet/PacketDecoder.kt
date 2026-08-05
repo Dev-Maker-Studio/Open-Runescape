@@ -17,6 +17,7 @@ import com.jagex.game.runetek5.client.input.console.Console
 import com.jagex.game.runetek5.client.input.mouse.CursorManager
 import com.jagex.game.runetek5.client.login.*
 import com.jagex.game.runetek5.client.menu.MiniMenu
+import com.jagex.game.runetek5.client.menu.SHOW_FACE_HERE
 import com.jagex.game.runetek5.client.periodic.PulseEventQueue
 import com.jagex.game.runetek5.client.window.WindowMode
 import com.jagex.game.runetek5.config.Identifiable
@@ -1285,7 +1286,7 @@ object PacketDecoder {
         } else if (context.currentPacket == ServerProt.SHOW_FACE_HERE) {
             val showFaceHere = buffer.readUByte() == 1
             Client.requestVarVerifyid()
-            com.jagex.game.runetek5.client.menu.SHOW_FACE_HERE = showFaceHere
+            SHOW_FACE_HERE = showFaceHere
             context.currentPacket = null
             return true
         } else if (context.currentPacket == ServerProt.UPDATE_UID192) {

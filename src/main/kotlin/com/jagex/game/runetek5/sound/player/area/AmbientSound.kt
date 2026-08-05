@@ -199,14 +199,14 @@ class AmbientSound : Node<AmbientSound>() {
 
         @JvmStatic
         fun update() {
-            var ambientSound = LOC_AMBIENT_SOUNDS.first() as AmbientSound?
+            var ambientSound = LOC_AMBIENT_SOUNDS.getFirst() as AmbientSound?
             while (ambientSound != null) {
                 if (ambientSound.hasTransformation) {
                     ambientSound.load()
                 }
                 ambientSound = LOC_AMBIENT_SOUNDS.next() as AmbientSound?
             }
-            ambientSound = NPC_AMBIENT_SOUNDS.first() as AmbientSound?
+            ambientSound = NPC_AMBIENT_SOUNDS.getFirst() as AmbientSound?
             while (ambientSound != null) {
                 if (ambientSound.hasTransformation) {
                     ambientSound.load()
@@ -217,7 +217,7 @@ class AmbientSound : Node<AmbientSound>() {
 
         @JvmStatic
         fun unlinkEntitySound(entity: NpcEntity) {
-            var ambientSound = NPC_AMBIENT_SOUNDS.first() as AmbientSound?
+            var ambientSound = NPC_AMBIENT_SOUNDS.getFirst() as AmbientSound?
             while (ambientSound != null) {
                 if (ambientSound.npcEntity == entity) {
                     val effect = ambientSound.soundEffect
@@ -234,7 +234,7 @@ class AmbientSound : Node<AmbientSound>() {
 
         @JvmStatic
         fun unlinkLocSound(z: Int, x: Int, y: Int, locType: ObjectType) {
-            var soundNode = LOC_AMBIENT_SOUNDS.first() as AmbientSound?
+            var soundNode = LOC_AMBIENT_SOUNDS.getFirst() as AmbientSound?
             while (soundNode != null) {
                 if (z == soundNode.plane && soundNode.absStartX == x shl 9 && y shl 9 == soundNode.absStartY && soundNode.emittingLoc!!.id == locType.id) {
                     val effect = soundNode.soundEffect
@@ -256,7 +256,7 @@ class AmbientSound : Node<AmbientSound>() {
 
         @JvmStatic
         fun unlinkSounds(logout: Boolean) {
-            var ambientSound = LOC_AMBIENT_SOUNDS.first() as AmbientSound?
+            var ambientSound = LOC_AMBIENT_SOUNDS.getFirst() as AmbientSound?
             while (ambientSound != null) {
                 val effect = ambientSound.soundEffect
                 if (effect != null) {
@@ -272,7 +272,7 @@ class AmbientSound : Node<AmbientSound>() {
                 ambientSound = LOC_AMBIENT_SOUNDS.next() as AmbientSound?
             }
             if (logout) {
-                ambientSound = NPC_AMBIENT_SOUNDS.first() as AmbientSound?
+                ambientSound = NPC_AMBIENT_SOUNDS.getFirst() as AmbientSound?
                 while (ambientSound != null) {
                     val effect = ambientSound.soundEffect
                     if (effect != null) {

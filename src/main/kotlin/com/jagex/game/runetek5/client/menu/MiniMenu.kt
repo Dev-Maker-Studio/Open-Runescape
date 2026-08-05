@@ -23,6 +23,7 @@ import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontMetrics
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceComponentRenderer
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
+import com.jagex.game.runetek5.graphics.sprite.Sprite
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
 import com.jagex.game.runetek5.interaction.chat.ChatBox
 import com.jagex.game.runetek5.staticmethods.StaticMethods
@@ -92,7 +93,7 @@ object MiniMenu {
             text += ChatBox.addQuestChatIcons(quests)
         }
         @Suppress("UNCHECKED_CAST")
-        var width = fontmetrics.getTextWidth(text, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.Sprite>?)
+        var width = fontmetrics.getTextWidth(text, StaticMedia.chatIcons as Array<Sprite>?)
         if (menuEntry.showOtherLevelIcon) {
             width += (StaticMedia.otherLevelSprite?.getWidth() ?: 0) + 4
         }
@@ -179,7 +180,7 @@ object MiniMenu {
                     fontRenderer = minimenuHeader
                 }
                 @Suppress("UNCHECKED_CAST")
-                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.chatDisplayX, InterfaceComponentRenderer.chatDisplayY, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+                fontRenderer!!.renderTextAntiMacro(menuText, InterfaceComponentRenderer.chatDisplayX, InterfaceComponentRenderer.chatDisplayY, comp.width, comp.height, comp.color, comp.spriteShadow, comp.textHorizontalAli, comp.textVerticalAli, Client.RANDOMIZER, Client.randomSeed, Client.ANTI_MACRO_TEXT_BOUNDS, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
                 InterfaceComponentRenderer.inboundsComponentToTop(Client.ANTI_MACRO_TEXT_BOUNDS[0], Client.ANTI_MACRO_TEXT_BOUNDS[1], Client.ANTI_MACRO_TEXT_BOUNDS[2], Client.ANTI_MACRO_TEXT_BOUNDS[3])
             }
         }
@@ -277,7 +278,7 @@ object MiniMenu {
     fun getPrefixTextWidth(coloredChatText: ColoredMiniMenuEntry, fontMetrics: FontMetrics): Int {
         val formattedText = formatTag(coloredChatText)
         @Suppress("UNCHECKED_CAST")
-        return fontMetrics.getTextWidth(formattedText, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.Sprite>?)
+        return fontMetrics.getTextWidth(formattedText, StaticMedia.chatIcons as Array<Sprite>?)
     }
 
     @JvmStatic
@@ -817,7 +818,7 @@ object MiniMenu {
             while (currentEntry2 != null) {
                 entry = currentEntry2
                 entryY = menuY + headerSize + (entryCount - 1 - entryIndex) * entryRowHeight + fontMetrics.topPadding + 1
-                drawMenuEntry(mouseX, mouseY, menuX, menuW, entryY, entry, fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                drawMenuEntry(mouseX, mouseY, menuX, menuW, entryY, entry, fontRenderer, fontMetrics, menuTextColor or 0xffffff.inv(), StaticMethods.menuHoverTextColor or 0xffffff.inv())
                 ++entryIndex
                 currentEntry2 = entryList.next() as? MiniMenuEntry
             }
@@ -828,9 +829,9 @@ object MiniMenu {
                 coloredEntry = currentColoredEntry2
                 entryY = headerSize + entryIndex * entryRowHeight + fontMetrics.topPadding + StaticMethods.menuOpenY + 1
                 if (coloredEntry.queueSize == 1) {
-                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry), fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    drawMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, (coloredEntry.nodeQueue.current.nextCache as MiniMenuEntry), fontRenderer, fontMetrics, menuTextColor or 0xffffff.inv(), StaticMethods.menuHoverTextColor or 0xffffff.inv())
                 } else {
-                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, coloredEntry, fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    StaticMethods.drawColoredMenuEntry(mouseX, mouseY, StaticMethods.menuOpenX, menuWidth, entryY, coloredEntry, fontRenderer, fontMetrics, menuTextColor or 0xffffff.inv(), StaticMethods.menuHoverTextColor or 0xffffff.inv())
                 }
                 ++entryIndex
                 currentColoredEntry2 = sortedColoredEntries.getDirectNext() as? ColoredMiniMenuEntry
@@ -840,7 +841,7 @@ object MiniMenu {
                 entry = activeSubmenu!!.nodeQueue.getNext() as? MiniMenuEntry
                 while (entry != null) {
                     entryY = headerSize + entryIndex * entryRowHeight + fontMetrics.topPadding + submenuY + 1
-                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, entryY, entry, fontRenderer, fontMetrics, menuTextColor or -0xffffff.inv(), StaticMethods.menuHoverTextColor or -0xffffff.inv())
+                    drawMenuEntry(mouseX, mouseY, submenuX, submenuWidth, entryY, entry, fontRenderer, fontMetrics, menuTextColor or 0xffffff.inv(), StaticMethods.menuHoverTextColor or 0xffffff.inv())
                     ++entryIndex
                     entry = activeSubmenu!!.nodeQueue.getDirectNext() as? MiniMenuEntry
                 }
@@ -910,7 +911,7 @@ object MiniMenu {
             text += ChatBox.addQuestChatIcons(questIds)
         }
         @Suppress("UNCHECKED_CAST")
-        fontRenderer?.renderAntiMacroText(text, menuX + 3, entryY, activeColor, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<com.jagex.game.runetek5.graphics.sprite.NativeSprite>?, StaticMedia.chatScaleHeights)
+        fontRenderer?.renderAntiMacroText(text, menuX + 3, entryY, activeColor, Client.RANDOMIZER, Client.randomSeed, StaticMedia.chatIcons as Array<NativeSprite>?, StaticMedia.chatScaleHeights)
         if (entry.showOtherLevelIcon) {
             StaticMedia.otherLevelSprite!!.draw(5 + menuX + fontMetrics.getWidthNoSprites(text), entryY - fontMetrics.topPadding)
         }

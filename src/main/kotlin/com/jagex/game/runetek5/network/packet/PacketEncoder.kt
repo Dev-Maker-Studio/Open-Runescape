@@ -55,7 +55,8 @@ import java.net.URL
 object PacketEncoder {
 
     @JvmStatic
-    fun sendJoinFriendchatPacket() {
+    /** Sends FC_JOIN with an empty name, which the server reads as "leave". */
+    fun sendLeaveFriendsChatPacket() {
         val connectionContext = Client.connectionContext
         val tcpPacket = createPacket(ClientProt.FC_JOIN, connectionContext.isaac)
         tcpPacket.buffer.writeByte(0)

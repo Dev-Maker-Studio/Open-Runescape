@@ -6,6 +6,7 @@ import com.jagex.game.runetek5.graphics.modern.core.VertexArray
 import com.jagex.game.runetek5.graphics.modern.core.VertexBuffer
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import org.joml.Matrix4f
+import org.lwjgl.opengl.GL33
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 
@@ -44,6 +45,9 @@ import java.nio.ByteBuffer
 class ModernSpriteRenderer {
 
     companion object {
+        /** Gates the per-flush glGet* diagnostics (driver sync points). */
+        @JvmField var captureFlushState = false
+
         /** Bytes per vertex: 2 floats pos + 2 floats UV + 4 bytes color + 1 float texIndex = 24 bytes */
         const val BYTES_PER_VERTEX = 24
 
@@ -62,9 +66,20 @@ class ModernSpriteRenderer {
         /** Maximum indices in the batch */
         private const val MAX_INDICES = MAX_QUADS * INDICES_PER_QUAD
 
-        /** Maximum number of textures bound simultaneously.
-         *  GL 3.3 guarantees at least 16 texture image units; 8 is conservative. */
-        private const val MAX_TEXTURE_SLOTS = 8
+        /** Maximum number of textures bound simultaneously per batch.
+         *
+         *  Capped at 4 deliberately: on this client's GL setup, sampling a sprite
+         *  quad whose texture landed in slot 5+ of a batch returned nothing (the
+         *  minimenu entry text was invisible — box sprites filled slots 0-4 and the
+         *  font atlas got slot 5). Slots 0-4 were confirmed working; capping at 4
+         *  keeps every texture in a known-good low slot. When a 5th distinct texture
+         *  is needed the batch auto-flushes (resolveTextureSlot) and the new texture
+         *  starts again at slot 0 — the same flush-to-a-low-slot mechanism that fixed
+         *  the menu, applied globally. Cost is a few extra UI draw calls per frame. */
+        private const val MAX_TEXTURE_SLOTS = 4
+
+        /** {0,1,...,MAX_TEXTURE_SLOTS-1} — sampler-unit indices written to uTextures[]. */
+        private val SAMPLER_UNIT_INDICES = IntArray(MAX_TEXTURE_SLOTS) { it }
 
         /** Vertex attribute location for texture index (matches shader layout) */
         private const val ATTRIB_TEX_INDEX = 4
@@ -82,6 +97,10 @@ class ModernSpriteRenderer {
     // Cached uniform locations
     private var uProjectionLocation = -1
     private var uTextureLocations = IntArray(MAX_TEXTURE_SLOTS) { -1 }
+    /** Base location of the sampler ARRAY (uTextures[0]) — used to set every element
+     *  in one glUniform1iv call, robust to drivers that return -1 for element
+     *  locations like uTextures[5]. */
+    private var uTexturesBaseLocation = -1
 
     // Orthographic projection matrix (reused)
     private val projectionMatrix = Matrix4f()
@@ -173,6 +192,11 @@ class ModernSpriteRenderer {
         for (i in 0 until MAX_TEXTURE_SLOTS) {
             uTextureLocations[i] = s.getUniformLocation("uTextures[$i]")
         }
+        // Base location for the whole sampler array — set every element with one
+        // glUniform1iv from uTextures[0] (robust to drivers that report element
+        // locations like uTextures[3] as -1).
+        uTexturesBaseLocation = uTextureLocations[0].takeIf { it >= 0 }
+            ?: s.getUniformLocation("uTextures")
         s.unbind()
     }
 
@@ -214,10 +238,16 @@ class ModernSpriteRenderer {
         shader!!.bind()
         shader!!.setUniformMatrix4(uProjectionLocation, projectionMatrix)
 
-        // Bind texture samplers to their respective texture units
-        for (i in 0 until MAX_TEXTURE_SLOTS) {
-            if (uTextureLocations[i] >= 0) {
-                shader!!.setUniform(uTextureLocations[i], i)
+        // Bind texture samplers to their respective texture units. Set the WHOLE
+        // array from the base location (glUniform1iv) so element locations that the
+        // driver reports as -1 (e.g. uTextures[5]) still get bound — the per-element
+        // path silently skipped those, which is why slot-5+ text sampled unit 0 and
+        // was invisible.
+        if (uTexturesBaseLocation >= 0) {
+            GLWrapper.uniform1iv(uTexturesBaseLocation, SAMPLER_UNIT_INDICES)
+        } else {
+            for (i in 0 until MAX_TEXTURE_SLOTS) {
+                if (uTextureLocations[i] >= 0) shader!!.setUniform(uTextureLocations[i], i)
             }
         }
 
@@ -737,15 +767,32 @@ class ModernSpriteRenderer {
             GLWrapper.viewport(0, 0, batchScreenWidth, batchScreenHeight)
         }
 
-        // Capture the actual GL render-target state for the [ModernDiag2] line
-        // (cheap: a few glGet calls per flush, a handful of flushes per frame).
-        lastFlushFbo = org.lwjgl.opengl.GL33.glGetInteger(org.lwjgl.opengl.GL33.GL_FRAMEBUFFER_BINDING)
-        org.lwjgl.opengl.GL33.glGetIntegerv(org.lwjgl.opengl.GL33.GL_VIEWPORT, lastFlushViewport)
-        lastFlushScissorEnabled = org.lwjgl.opengl.GL33.glIsEnabled(org.lwjgl.opengl.GL33.GL_SCISSOR_TEST)
-        org.lwjgl.opengl.GL33.glGetIntegerv(org.lwjgl.opengl.GL33.GL_SCISSOR_BOX, lastFlushScissorBox)
+        // [ModernDiag2] render-target capture — glGet* calls are driver sync points
+        // and this runs PER FLUSH (dozens/frame). Off by default; flip on only while
+        // actively debugging a render-target question.
+        if (captureFlushState) {
+            lastFlushFbo = GL33.glGetInteger(GL33.GL_FRAMEBUFFER_BINDING)
+            GL33.glGetIntegerv(GL33.GL_VIEWPORT, lastFlushViewport)
+            lastFlushScissorEnabled = GL33.glIsEnabled(GL33.GL_SCISSOR_TEST)
+            GL33.glGetIntegerv(GL33.GL_SCISSOR_BOX, lastFlushScissorBox)
+        }
 
         // Upload vertex data
         vbo!!.upload(vb)
+
+        // Re-assert the sampler→unit mapping and texture→unit bindings for each active
+        // slot right before the draw. Cheap safety net (<=MAX_TEXTURE_SLOTS binds) that
+        // guards against a sampler-array element that never bound to its unit and
+        // against texture-unit bindings clobbered by intervening GL between a slot's
+        // first resolveTextureSlot() and this flush.
+        shader!!.bind()
+        if (uTexturesBaseLocation >= 0) {
+            GLWrapper.uniform1iv(uTexturesBaseLocation, SAMPLER_UNIT_INDICES)
+        }
+        for (i in 0 until textureSlotCount) {
+            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + i)
+            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureSlots[i])
+        }
 
         // Draw the batch.
         // Bind VAO first, then explicitly re-bind IBO. The VAO should restore

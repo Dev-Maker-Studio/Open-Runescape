@@ -941,7 +941,7 @@ object InterfaceRenderer {
 			Client.interfaceSelectionActive = true
 			Client.selectedComponentHash = componentDefs.idHash
 			Client.selectedSlotId = componentDefs.slotId
-			com.jagex.game.runetek5.client.menu.USE_OPTIONS_FLAGS = flags
+			USE_OPTIONS_FLAGS = flags
 			MiniMenu.USE_INTERFACE_ID = interfaceId
 			Client.selectedItemId = componentDefs.containerItemId
 			MiniMenu.useOnCursor = componentDefs.targetOverCursor

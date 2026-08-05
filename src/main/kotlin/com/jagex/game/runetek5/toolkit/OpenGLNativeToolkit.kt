@@ -29,6 +29,7 @@ import com.jagex.game.runetek5.graphics.texture.sampler.OpenGLCubeTextureSampler
 import com.jagex.game.runetek5.graphics.texture.sampler.RectangleTextureSampler
 import com.jagex.game.runetek5.graphics.texture.sampler.Texture3DSampler
 import com.jagex.game.runetek5.buffer.NativeMemoryNode
+import com.jagex.game.runetek5.buffer.NativeMemoryGL
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.imageproducer.DelegatingDisplay
 import com.jagex.game.runetek5.imageproducer.DirectDisplay
@@ -1017,11 +1018,11 @@ open class OpenGLNativeToolkit(
     }
 
     override fun createNativeMemory(capacity: Int): NativeMemoryNode {
-        return com.jagex.game.runetek5.buffer.NativeMemoryGL(capacity)
+        return NativeMemoryGL(capacity)
     }
 
     override fun extractNativeHeap(memoryNode: NativeMemoryNode): NativeHeap {
-        if (memoryNode is com.jagex.game.runetek5.buffer.NativeMemoryGL) {
+        if (memoryNode is NativeMemoryGL) {
             return memoryNode.nativeHeap
         }
         throw IllegalArgumentException("Unexpected memory node type")

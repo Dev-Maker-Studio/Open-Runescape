@@ -125,7 +125,11 @@ class LocAction : Node<LocAction>() {
 
         @JvmStatic
         fun fetchGameobject(action: LocAction) {
-            val scene = Resource.mapRegion!!.getScene()!!
+            // Original Java was null-tolerant: no scene (mid region swap / worldmap
+            // open) means there is nothing to fetch — skip quietly. The migration's
+            // `!!` here made the null check below unreachable and crashed on zone
+            // packets arriving during the swap window.
+            val scene = Resource.mapRegion?.getScene()
             if (scene != null) {
                 var gameObject: GameObject? = null
                 if (action.gameObjectType == 0) {

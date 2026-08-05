@@ -19,9 +19,18 @@ object BillboardTypeList {
         if (billboardType == null) {
             val billboardData = BILLBOARD_RESOURCE!!.getFile(0, id)
             billboardType = BillboardType()
-            if (billboardData != null) {
-                billboardType.decode(Packet(billboardData))
+            if (billboardData == null) {
+                // File has not streamed in yet. Return the blank default WITHOUT
+                // caching it: an undecoded BillboardType has hasUid = false, and
+                // callers bake that answer into immutable geometry (ModelGL's
+                // renderedFaceCount truncation, ModernModelBuilder's hidden-face
+                // set). Caching it pins "this face is not a billboard anchor" for
+                // the rest of the session, so the anchor face rasterizes as a flat
+                // tinted quad — the floating green quads. Not caching lets the next
+                // model build pick up the real type once the file lands.
+                return billboardType
             }
+            billboardType.decode(Packet(billboardData))
             BILLBOARD_CACHE.put(billboardType, id.toLong())
         }
         return billboardType

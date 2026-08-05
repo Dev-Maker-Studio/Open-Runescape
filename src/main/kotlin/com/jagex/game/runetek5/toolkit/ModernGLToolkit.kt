@@ -2,6 +2,7 @@ package com.jagex.game.runetek5.toolkit
 
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.material.MaterialProvider
+import com.jagex.game.runetek5.config.material.MaterialTypeList
 import com.jagex.game.runetek5.graphics.modern.batch.FrameBatcher
 import com.jagex.game.runetek5.graphics.modern.batch.InstancedModelBatcher
 import com.jagex.game.runetek5.graphics.modern.batch.ModelCache
@@ -9,11 +10,16 @@ import com.jagex.game.runetek5.graphics.modern.batch.OptimizedFrameBatcher
 import org.lwjgl.system.MemoryUtil
 import com.jagex.game.runetek5.graphics.font.AbstractFontRenderer
 import com.jagex.game.runetek5.graphics.font.FontMetrics
+import com.jagex.game.runetek5.client.Client
+import com.jagex.game.runetek5.client.GameShell
+import com.jagex.game.runetek5.client.input.camera.Camera
+import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernFontRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernGroundRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernModelRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernParticleRenderer
 import com.jagex.game.runetek5.graphics.modern.renderer.ModernSpriteRenderer
+import com.jagex.game.runetek5.graphics.modern.renderer.ModernSurfaceMaskRenderer
 import com.jagex.game.runetek5.graphics.model.particle.ParticleWrapper
 import com.jagex.game.runetek5.graphics.sprite.ModernSpriteGL
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
@@ -21,14 +27,23 @@ import com.jagex.game.runetek5.graphics.sprite.SpriteGL
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
 import com.jagex.game.runetek5.graphics.modern.util.MeshConverter
+import com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder
+import com.jagex.game.runetek5.utils.MathUtils
 import com.jagex.game.runetek5.graphics.model.Mesh
 import com.jagex.game.runetek5.graphics.model.Model
 import com.jagex.game.runetek5.graphics.model.ModelGL
+import com.jagex.game.runetek5.graphics.model.ModelFunctionMaskGL
+import com.jagex.game.runetek5.graphics.texture.OpenGlTexture
+import com.jagex.game.runetek5.imageproducer.DirectDisplay
+import com.jagex.game.runetek5.imageproducer.ImageProducerGL2
+import com.jagex.game.runetek5.math.Matrix43
+import com.jagex.game.runetek5.math.Matrix44
 import com.jagex.game.runetek5.scene.ground.GroundGL
 import com.jagex.game.runetek5.toolkit.opengl.GroundMaterialGL
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.KHRDebug
 import org.lwjgl.opengl.GL33.*
 import java.awt.Canvas
 
@@ -55,6 +70,7 @@ class ModernGLToolkit(
     private var modernRenderer: ModernModelRenderer? = null
     private var groundRenderer: ModernGroundRenderer? = null
     private var spriteRenderer: ModernSpriteRenderer? = null
+    private var surfaceMaskRenderer: ModernSurfaceMaskRenderer? = null
     private var particleRendererModern: ModernParticleRenderer? = null
     private var frameBatcher: FrameBatcher? = null
     private var optimizedBatcher: OptimizedFrameBatcher? = null
@@ -130,6 +146,45 @@ class ModernGLToolkit(
 
     // Texture cache for material ID to GL handle lookup
     private val textureHandleCache = mutableMapOf<Int, Int>()
+
+    // ===== Modern mesh-built geometry path =====
+    // Models whose ModelGL carries geometry built from the clean decoded mesh
+    // (ModernModelBuilder, attached at createModel) render from that geometry;
+    // everything else (animated poses, mutated models) falls back to capturing
+    // the legacy arrays via buildModelCache. Counters are printed and reset with
+    // the [ModernPerf] line to track coverage.
+    private var modernBuiltPathModels = 0L
+    private var modernBuiltFallbackModels = 0L
+
+    // TEMPORARY self-limiting diagnostics (no console command; dedups + global cap).
+    // [GreenDiag] = why a textured face resolves to GL handle 0 (flat-green fallback).
+    // [PostDiag]  = per multi-material mesh-built loc, its per-batch material/face split.
+    private var diagBudget = 120
+    private val diagGreenSeen = HashSet<Int>()
+    private val diagModelSeen = HashSet<Long>()
+
+    /** Scratch for composing baked-yaw rotation into the model matrix (render thread only). */
+    private val modernYawScratch = Matrix43()
+
+    /**
+     * Returns the model matrix to draw [model]'s modern-built (UNROTATED) base
+     * geometry at the same world placement as its legacy (yaw-baked) vertices:
+     * pre-multiplies the accumulated yaw so v_unrotated * R_yaw * M matches the
+     * legacy v_rotated * M (row-vector convention, R matching rotateWithNormals).
+     */
+    private fun composeModernModelMatrix(model: ModelGL, modelMatrix: Matrix43): Matrix43 {
+        val yaw = model.modernYaw and 0x3fff
+        if (yaw == 0) return modelMatrix
+        val sin = MathUtils.SINE[yaw] / 16384.0f
+        val cos = MathUtils.COSINE[yaw] / 16384.0f
+        val m = modernYawScratch
+        m.xA = cos; m.yA = 0f; m.zA = -sin
+        m.xB = 0f; m.yB = 1f; m.zB = 0f
+        m.xC = sin; m.yC = 0f; m.zC = cos
+        m.xD = 0f; m.yD = 0f; m.zD = 0f
+        m.multiply(modelMatrix)
+        return m
+    }
 
     // Model cache for avoiding per-face CPU work
     private var modelCache: ModelCache? = null
@@ -216,13 +271,17 @@ class ModernGLToolkit(
                 println("[ModernGLToolkit] KHR_debug unavailable")
                 return
             }
-            glEnable(org.lwjgl.opengl.KHRDebug.GL_DEBUG_OUTPUT)
-            glEnable(org.lwjgl.opengl.KHRDebug.GL_DEBUG_OUTPUT_SYNCHRONOUS)
-            org.lwjgl.opengl.KHRDebug.glDebugMessageCallback({ _, type, _, severity, length, message, _ ->
-                if (type == org.lwjgl.opengl.KHRDebug.GL_DEBUG_TYPE_ERROR ||
-                    severity == org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_HIGH
+            glEnable(KHRDebug.GL_DEBUG_OUTPUT)
+            // NOT synchronous: SYNC mode validates+round-trips every GL call through
+            // the driver (measured multi-x frame cost). Async still reports message
+            // text; only the Java stack loses precision — acceptable now that the
+            // renderer works. Re-enable SYNCHRONOUS temporarily when hunting a
+            // specific new violation.
+            KHRDebug.glDebugMessageCallback({ _, type, _, severity, length, message, _ ->
+                if (type == KHRDebug.GL_DEBUG_TYPE_ERROR ||
+                    severity == KHRDebug.GL_DEBUG_SEVERITY_HIGH
                 ) {
-                    val msg = org.lwjgl.system.MemoryUtil.memUTF8(message, length)
+                    val msg = MemoryUtil.memUTF8(message, length)
                     if (seenDebugMessages.add(msg) && seenDebugMessages.size <= 20) {
                         println("[GLDebug] $msg")
                         Thread.dumpStack()
@@ -265,6 +324,9 @@ class ModernGLToolkit(
             spriteRenderer = ModernSpriteRenderer()
             spriteRenderer!!.initialize()
 
+            surfaceMaskRenderer = ModernSurfaceMaskRenderer()
+            surfaceMaskRenderer!!.initialize()
+
             particleRendererModern = ModernParticleRenderer()
             particleRendererModern!!.initialize()
 
@@ -295,12 +357,28 @@ class ModernGLToolkit(
 
     /** Times the frame-start guard had to re-make the GL context current on this thread. */
     private var contextReattachCount = 0
+
+    // Frame-timing accumulators for [ModernPerf] (reset each print window).
+    private var perfLastRenderEntryNs = 0L
+    private var perfFrameNsAcc = 0L
+    private var perfRenderNsAcc = 0L
+    private var perfSwapNsAcc = 0L
+    private var perfFrameSamples = 0
     private var debugModernDraws = 0
     private var debugLegacyDraws = 0
     private var debugSetupSpriteCalls = 0
     private var debugBatchFlushes = 0
 
     override fun render() {
+        // Frame timing: frameMs = wall time between render() entries (whole frame incl.
+        // game logic + scene draw), renderMs = this method, swapMs = super.render().
+        val renderEntryNs = System.nanoTime()
+        if (perfLastRenderEntryNs != 0L) {
+            perfFrameNsAcc += renderEntryNs - perfLastRenderEntryNs
+            perfFrameSamples++
+        }
+        perfLastRenderEntryNs = renderEntryNs
+
         // CONTEXT CURRENCY GUARD. The login/loading-screen renderer thread calls
         // setDisplay/resizeDisplay/renderFrame on the active toolkit from ITS thread;
         // the reload() inside makes the GL context current THERE (jaggl setSurface =
@@ -333,7 +411,7 @@ class ModernGLToolkit(
         if (debugFrameCount % 600 == 0 || debugFrameCount == 30 || debugFrameCount == 120) {
             println(
                 "[ModernDiag] pipeline=${canUseModernPipeline()} init=$isModernRendererInitialized " +
-                    "caps=$ownerThreadHasCapabilities gameState=${try { com.jagex.game.runetek5.client.Client.gameState } catch (_: Exception) { "?" }} " +
+                    "caps=$ownerThreadHasCapabilities gameState=${try { Client.gameState } catch (_: Exception) { "?" }} " +
                     "groundDraws=${groundRenderer?.getFrameStats()?.drawCalls ?: -1} " +
                     "spriteQuads=${spriteRenderer?.getFrameStats()?.quads ?: -1} " +
                     "modelsBatched=$totalModelsProcessed culled=$modelsCulled " +
@@ -354,7 +432,16 @@ class ModernGLToolkit(
             val obStats = optimizedBatcher?.getStats()
             val instStats = instancedBatcher?.getStats()
             println(
-                "[ModernPerf] cache=${cacheHits}h/${cacheMisses}m " +
+                "[ModernPerf] frameMs=%.1f renderMs=%.2f swapMs=%.2f ".format(
+                    if (perfFrameSamples > 0) perfFrameNsAcc / 1e6 / perfFrameSamples else 0.0,
+                    if (perfFrameSamples > 0) perfRenderNsAcc / 1e6 / perfFrameSamples else 0.0,
+                    if (perfFrameSamples > 0) perfSwapNsAcc / 1e6 / perfFrameSamples else 0.0
+                ) +
+                    "cache=${cacheHits}h/${cacheMisses}m " +
+                    // Mesh-built geometry coverage: models drawn from the clean-mesh
+                    // build vs models on the legacy-capture fallback (animated poses,
+                    // mutated models, or no build available).
+                    "meshBuilt=$modernBuiltPathModels/fallback=$modernBuiltFallbackModels " +
                     "tkMs[hash=%.2f lookup=%.2f addCached=%.2f cull=%.2f beginModel=%.2f] ".format(
                         timeComputeHash / 1e6, timeCacheLookup / 1e6, timeAddCachedModel / 1e6,
                         timeFrustumCull / 1e6, timeBeginModel / 1e6
@@ -368,10 +455,22 @@ class ModernGLToolkit(
                         instStats?.drawMs ?: 0f
                     ) +
                     "inst[unique=${instStats?.uniqueMeshes ?: 0} instances=${instStats?.totalInstances ?: 0} " +
-                    "drawCalls=${instStats?.drawCalls ?: 0}] mbDrawCalls=${obStats?.drawCalls ?: 0}"
+                    "drawCalls=${instStats?.drawCalls ?: 0}] " +
+                    // Geometry-store residency: evicted/overflow should sit at 0 in
+                    // steady state; sustained nonzero means the store is undersized
+                    // for the working set (raise MAX_TOTAL_VERTICES).
+                    "store[verts=${instStats?.storeVertices ?: 0} evicted=${instStats?.meshesEvicted ?: 0} " +
+                    "overflow=${instStats?.capacityFallbacks ?: 0}] " +
+                    "mbDrawCalls=${obStats?.drawCalls ?: 0}"
             )
             cacheHits = 0
             cacheMisses = 0
+            modernBuiltPathModels = 0L
+            modernBuiltFallbackModels = 0L
+            perfFrameNsAcc = 0L
+            perfRenderNsAcc = 0L
+            perfSwapNsAcc = 0L
+            perfFrameSamples = 0
 
             // Presentation disambiguator: which framebuffer/viewport/scissor is active
             // NOW (immediately before super.render() → delegatingDisplay.draw() →
@@ -397,8 +496,8 @@ class ModernGLToolkit(
             // AWT/surface identity diagnostics: is the canvas the GL surface belongs to
             // actually the one in the visible hierarchy?
             try {
-                val canvas = com.jagex.game.runetek5.client.GameShell.gameCanvas
-                val producer = delegatingDisplay as? com.jagex.game.runetek5.imageproducer.ImageProducerGL2
+                val canvas = GameShell.gameCanvas
+                val producer = delegatingDisplay as? ImageProducerGL2
                 println(
                     "[ModernDiag3] canvas=${System.identityHashCode(canvas)} " +
                         "displayable=${canvas?.isDisplayable} showing=${canvas?.isShowing} " +
@@ -414,56 +513,8 @@ class ModernGLToolkit(
                 println("[ModernDiag3] failed: ${e.message}")
             }
 
-            // PRESENTATION PROBE (removable): draw a bright magenta bar directly to the
-            // current backbuffer immediately before the swap, bypassing all game draw
-            // logic. If the user sees a magenta flash every ~600 frames, presentation
-            // (surface + swap) works and the blackness is CONTENT; if not, the GL
-            // surface is detached from the visible canvas.
-            run {
-                val sr2 = spriteRenderer
-                val d = display ?: delegatingDisplay
-                if (sr2 != null && sr2.isReady() && d != null && !isSpriteBatchActive) {
-                    glDisable(GL_SCISSOR_TEST)
-                    sr2.begin(d.getWidth(), d.getHeight())
-                    sr2.drawFilledRect(0, 0, d.getWidth(), 40, 0xFFFF00FF.toInt(), 1)
-                    sr2.end()
-                    GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
-                    functionMask = 0
-                    invalidateScissorCache()
-
-                    // VERDICT PROBE: read the bar back from the backbuffer plus every GL
-                    // state that can silently discard rendering while queries stay sane.
-                    // pxAtBar=255,0,255 but black screen  => draws land, presentation/swap broken.
-                    // pxAtBar=0,0,0                       => draws discarded: check colorMask /
-                    //                                        drawBuf (0x405=GL_BACK ok, 0=GL_NONE
-                    //                                        bad, 0x404=GL_FRONT wrong) / errs.
-                    try {
-                        var e0 = glGetError()
-                        var errs = ""
-                        var errGuard = 0
-                        while (e0 != 0 && errGuard++ < 8) {
-                            errs += "0x${Integer.toHexString(e0)} "
-                            e0 = glGetError()
-                        }
-                        val maskBuf = org.lwjgl.BufferUtils.createByteBuffer(4)
-                        glGetBooleanv(GL_COLOR_WRITEMASK, maskBuf)
-                        val drawBuf = glGetInteger(GL_DRAW_BUFFER)
-                        val px = org.lwjgl.BufferUtils.createByteBuffer(4)
-                        glReadBuffer(GL_BACK)
-                        glReadPixels(10, d.getHeight() - 20, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, px)
-                        val readErr = glGetError()
-                        println(
-                            "[ModernProbe] errs=${errs.ifEmpty { "none" }} " +
-                                "colorMask=${maskBuf.get(0)},${maskBuf.get(1)},${maskBuf.get(2)},${maskBuf.get(3)} " +
-                                "drawBuf=0x${Integer.toHexString(drawBuf)} " +
-                                "pxAtBar=${px.get(0).toInt() and 0xff},${px.get(1).toInt() and 0xff},${px.get(2).toInt() and 0xff} " +
-                                "readErr=0x${Integer.toHexString(readErr)}"
-                        )
-                    } catch (e: Exception) {
-                        println("[ModernProbe] failed: $e")
-                    }
-                }
-            }
+            // (Presentation/verdict probe removed — it served its purpose finding the
+            // rectangle-texture root cause. Console diagnostics above are draw-free.)
             legacySkipCounters.clear()
             diagSetModelMatrixCalls = 0
             diagSetModelMatrixRejected = 0
@@ -481,11 +532,17 @@ class ModernGLToolkit(
         debugSetupSpriteCalls = 0
         debugBatchFlushes = 0
 
-        // Reset per-presented-frame sprite stats AFTER the diag has read them
+        // Reset per-presented-frame stats AFTER the diag has read them
         spriteRenderer?.resetFrameStats()
+        optimizedBatcher?.resetCumulativeStats()
+        instancedBatcher?.resetFrameStats()
 
         // Parent render: swapBuffers via jaggl (presents the framebuffer)
+        val swapStartNs = System.nanoTime()
         super.render()
+        val swapEndNs = System.nanoTime()
+        perfSwapNsAcc += swapEndNs - swapStartNs
+        perfRenderNsAcc += swapEndNs - perfLastRenderEntryNs
 
         // After swapBuffers, the GL context is current on this thread.
         // Initialize LWJGL3 capabilities and the modern renderer on the owner thread.
@@ -509,7 +566,7 @@ class ModernGLToolkit(
      * Called before scene rendering begins.
      * This starts the batcher to collect geometry from drawMatrixThreaded calls.
      */
-    override fun setModelMatrix(matrix441: com.jagex.game.runetek5.math.Matrix44) {
+    override fun setModelMatrix(matrix441: Matrix44) {
         // Call parent to set up legacy matrix state
         super.setModelMatrix(matrix441)
 
@@ -594,7 +651,11 @@ class ModernGLToolkit(
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
         glDepthMask(true)
-        glEnable(GL_BLEND)
+        // Scene models default to OPAQUE, matching legacy's setBlendMode(0). The
+        // batchers switch GL_BLEND on per material batch for the materials that
+        // actually need it (see materialNeedsBlend). Enabling blending here for
+        // the whole pass — as this used to — drew every model blended.
+        glDisable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glDisable(GL_CULL_FACE)
 
@@ -603,7 +664,10 @@ class ModernGLToolkit(
         gr.beginFrame()
 
         if (useOptimizedBatcher) {
-            optimizedBatcher?.resetCumulativeStats()  // Reset stats for new outer frame
+            // NOTE: cumulative stats are NOT reset here — openSceneBatch runs at every
+            // mid-frame batch reopen, which zeroed the counters the diag reads (the
+            // "mbDrawCalls=0 while models visibly render" artifact). They reset once
+            // per presented frame in render(), after the diag has read them.
             optimizedBatcher?.beginFrame()
             // Set VP matrix for GPU-side transformation
             optimizedBatcher?.setViewProjection(viewProjectionMatrix.elements)
@@ -741,13 +805,15 @@ class ModernGLToolkit(
         if (useOptimizedBatcher && optimizedBatcher?.isActive() == true) {
             // Render instanced geometry first (repeated meshes)
             if (useInstancing && instancedBatcher?.isActive() == true) {
-                instancedBatcher?.endFrame(::lookupTextureHandle)
+                instancedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend)
             }
             // Render remaining non-instanced geometry
-            optimizedBatcher?.endFrame(::lookupTextureHandle)
+            optimizedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend)
             mr.endFrame()
             gr.endFrame()
         } else if (batcher.isActive()) {
+            // Non-optimized FrameBatcher fallback (only when useOptimizedBatcher is
+            // false) — combine-mode plumbing lives on the optimized/instanced path.
             batcher.endFrame(::lookupTextureHandle)
             mr.endFrame()
             gr.endFrame()
@@ -755,6 +821,12 @@ class ModernGLToolkit(
 
         // Restore default winding order
         glFrontFace(GL_CCW)
+
+        // Restore blending for the 2D/UI pass. The model batchers leave GL_BLEND
+        // wherever their last material batch put it, and sprites/text/interfaces
+        // all assume standard alpha blending is on.
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         // Disable depth test before UI rendering.
         // The parent's render() calls delegatingDisplay?.draw() for UI,
@@ -852,6 +924,26 @@ class ModernGLToolkit(
     fun getSpriteRenderer(): ModernSpriteRenderer? = spriteRenderer
 
     /**
+     * Legacy texture BINDS (creation/upload paths: OpenGl2DTexture constructors,
+     * generateSprite, font-atlas builds — all call setActiveTexture to bind for
+     * glTexImage) can run MID-FRAME while the sprite batch holds queued quads: the
+     * bind lands on whatever texture unit resolveTextureSlot left active and
+     * CLOBBERS that slot's binding, so already-queued quads flush sampling the
+     * wrong texture (the minimenu's first-open "ghost texture" / first-frame
+     * interface corruption). Flush the queued quads with their still-correct
+     * bindings first — the flush resets the slot table, so later quads re-resolve
+     * and re-bind cleanly — and park the active unit on TEXTURE0 so the legacy
+     * bind only touches unit 0.
+     */
+    override fun setActiveTexture(replacingCombiner: OpenGlTexture?) {
+        if (isSpriteBatchActive) {
+            spriteRenderer?.flush()
+            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+        }
+        super.setActiveTexture(replacingCombiner)
+    }
+
+    /**
      * Flushes every deferred modern draw (3D scene batch + 2D sprite batch) to the
      * current framebuffer. Required before any operation that READS the framebuffer
      * (screen-capture sprites, copyTexSubImage updates) — legacy drew immediately,
@@ -861,6 +953,45 @@ class ModernGLToolkit(
         if (!canUseModernPipeline()) return
         flushSceneForUiDraw()
         endSpriteBatch()
+    }
+
+    /**
+     * Draws one surface-masked quad (legacy multi-texture overlay — SpriteGL
+     * drawWithSurface/drawAffineMasked) through the dedicated modern composite
+     * renderer, preserving submission order: pending batches are flushed first,
+     * the quad draws immediately, and legacy caches are invalidated afterwards.
+     * Returns false when the modern path cannot draw (caller drops the quad).
+     */
+    fun drawSurfaceMaskedQuad(
+        baseHandle: Int, maskHandle: Int,
+        x0: Float, y0: Float, b0u: Float, b0v: Float, m0u: Float, m0v: Float,
+        x1: Float, y1: Float, b1u: Float, b1v: Float, m1u: Float, m1v: Float,
+        x2: Float, y2: Float, b2u: Float, b2v: Float, m2u: Float, m2v: Float,
+        x3: Float, y3: Float, b3u: Float, b3v: Float, m3u: Float, m3v: Float
+    ): Boolean {
+        val smr = surfaceMaskRenderer ?: return false
+        if (!smr.isReady() || !canUseModernPipeline()) return false
+        val target = display ?: delegatingDisplay ?: return false
+
+        // Submission order: everything queued so far must be beneath this quad.
+        flushSceneForUiDraw()
+        endSpriteBatch()
+
+        smr.drawMaskedQuad(
+            baseHandle, maskHandle,
+            target.getWidth(), target.getHeight(),
+            x0, y0, b0u, b0v, m0u, m0v,
+            x1, y1, b1u, b1v, m1u, m1v,
+            x2, y2, b2u, b2v, m2u, m2v,
+            x3, y3, b3u, b3v, m3u, m3v
+        )
+
+        // Raw GL state changed behind the legacy caches (shader, blend, textures on
+        // units 0/1, viewport).
+        GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+        functionMask = 0
+        updateViewportAndCenter()
+        return true
     }
 
     // ===== Legacy GL Interop =====
@@ -925,7 +1056,7 @@ class ModernGLToolkit(
      * CURRENT framebuffer, so it must be flushed before the target changes; the batch
      * reopened inside the FBO then sizes itself from the FBO's dimensions.
      */
-    override fun setDisplay(activeDisplay: com.jagex.game.runetek5.imageproducer.DirectDisplay) {
+    override fun setDisplay(activeDisplay: DirectDisplay) {
         if (canUseModernPipeline()) {
             flushSceneForUiDraw()
             endSpriteBatch()
@@ -939,7 +1070,7 @@ class ModernGLToolkit(
      * later flush onto the window at FBO-local coordinates while the FBO texture
      * stays black (the original misplaced-quads/black-minimap failure mode).
      */
-    override fun resizeDisplay(directDisplay: com.jagex.game.runetek5.imageproducer.DirectDisplay) {
+    override fun resizeDisplay(directDisplay: DirectDisplay) {
         if (canUseModernPipeline()) {
             flushSceneForUiDraw()
             endSpriteBatch()
@@ -1230,12 +1361,12 @@ class ModernGLToolkit(
         super.applyClearFlags(functionMask, colorArgb)
     }
 
-    override fun clearRectangle(surface: com.jagex.game.runetek5.config.rsinterface.ComponentSurface, offsetX: Int, offsetY: Int) {
+    override fun clearRectangle(surface: ComponentSurface, offsetX: Int, offsetY: Int) {
         val sr = spriteRenderer
         if (sr != null && sr.isReady() && canUseModernPipeline()) {
             // clearRectangle draws the component surface texture across the clipping region.
             // SpriteSurfaceGL holds an OpenGl2DTexture_Sub1 whose activeHandle is the GL texture ID.
-            val spriteSurface = surface as? com.jagex.game.runetek5.toolkit.SpriteSurfaceGL
+            val spriteSurface = surface as? SpriteSurfaceGL
             if (spriteSurface != null) {
                 val surfaceTexture = spriteSurface.surface
                 val textureHandle = surfaceTexture.activeHandle
@@ -1274,10 +1405,10 @@ class ModernGLToolkit(
         countLegacySkip("clearRectangle")
     }
 
-    override fun drawSurfaceLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, dimension: com.jagex.game.runetek5.config.rsinterface.ComponentSurface, clipLeft: Int, clipTop: Int) {
+    override fun drawSurfaceLine(leftX: Int, topY: Int, rightX: Int, bottomY: Int, colorArgb: Int, dimension: ComponentSurface, clipLeft: Int, clipTop: Int) {
         val sr = spriteRenderer
         if (sr != null && sr.isReady() && canUseModernPipeline()) {
-            val spriteSurface = dimension as? com.jagex.game.runetek5.toolkit.SpriteSurfaceGL
+            val spriteSurface = dimension as? SpriteSurfaceGL
             if (spriteSurface != null) {
                 val surfaceTexture = spriteSurface.surface
                 val textureHandle = surfaceTexture.activeHandle
@@ -1312,10 +1443,10 @@ class ModernGLToolkit(
         countLegacySkip("drawSurfaceLine")
     }
 
-    override fun drawTexturedLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: com.jagex.game.runetek5.config.rsinterface.ComponentSurface, clipLeft: Int, clipTop: Int, lineSpacing: Int, lineLength: Int, offset: Int) {
+    override fun drawTexturedLine(startX: Int, startY: Int, endX: Int, endY: Int, colorArgb: Int, surface: ComponentSurface, clipLeft: Int, clipTop: Int, lineSpacing: Int, lineLength: Int, offset: Int) {
         val sr = spriteRenderer
         if (sr != null && sr.isReady() && canUseModernPipeline()) {
-            val spriteSurface = surface as? com.jagex.game.runetek5.toolkit.SpriteSurfaceGL
+            val spriteSurface = surface as? SpriteSurfaceGL
             if (spriteSurface != null && (endX != startX || startY != endY)) {
                 val surfaceTexture = spriteSurface.surface
                 val textureHandle = surfaceTexture.activeHandle
@@ -1414,19 +1545,28 @@ class ModernGLToolkit(
     override fun renderParticles(particleWrapper: ParticleWrapper) {
         val pr = particleRendererModern
         if (pr != null && pr.isReady() && canUseModernPipeline()) {
-            // End any active sprite batch before 3D particle rendering
+            // ORDERING: particles are emitted mid-entity-traversal, immediately after
+            // the emitting entity's models (PlayerEntity.kt:659-670 draws models then
+            // renderParticles). Under the deferred batcher those models are only
+            // QUEUED, so flush the scene (and any queued 2D) first — otherwise the
+            // later model flush would paint over the particles. Legacy drew both
+            // immediately in this same order.
+            flushSceneForUiDraw()
             endSpriteBatch()
 
-            // Source the view (modelview) matrix from the toolkit's modelViewMatrix.
-            // The legacy GlParticleRenderer uses glGetFloatv(GL_MODELVIEW_MATRIX) which
-            // returns the current modelview matrix set by setupMatrixRendering().
-            // The modelViewMatrix field in OpenGlToolkit contains this same data.
-            // For billboard vectors we need the raw modelview matrix (columns 0 and 1).
-            val viewMatrixFloats = this.currentModelMatrix.elements
+            // BILLBOARD BASIS — legacy parity: GlParticleRenderer builds the billboard
+            // right/up vectors and per-particle depths from toolkit.viewMatrix44 (the
+            // CAMERA view matrix; GlParticleRenderer.kt:48-51 and :163-168 — the
+            // tracked-matrix replacement for the old glGetFloatv(GL_MODELVIEW)).
+            // NOTE: currentModelMatrix is the PROJECTION matrix on this toolkit
+            // (setModelMatrix stores Camera.projectionMatrix, OpenGlToolkit.kt:2600) —
+            // passing it here previously produced degenerate billboard vectors and
+            // no visible particles.
+            val viewMatrixFloats = this.viewMatrix44.elements
 
-            // The projection matrix is used for depth sorting.
-            // The legacy code uses projectionMatrix.elements row 2 for Z-depth computation.
-            val projectionMatrixFloats = this.viewProjectionMatrix.elements
+            // Projection for the clip transform (renderer composes proj × view; the
+            // Y-flip for GL clip space is applied inside the renderer).
+            val projectionMatrixFloats = this.currentModelMatrix.elements
 
             // Fog state from the toolkit
             val hasFog = fogEnabled && fogDensity > 0
@@ -1444,6 +1584,10 @@ class ModernGLToolkit(
                 fogEndPosition,
                 fR, fG, fB
             )
+
+            // The particle pass changed raw GL state (shader, blend, depth mask)
+            // behind the legacy caches.
+            functionMask = 0
         } else {
             // No legacy fallback under the modern toolkit
             countLegacySkip("renderParticles")
@@ -1466,7 +1610,7 @@ class ModernGLToolkit(
                 // camAngleX is pitch (vertical rotation), camAngleY is yaw (horizontal rotation)
                 // RuneScape uses angles in units of 0.0055 degrees (65536 = 360 degrees)
                 // Convert to radians for JOML
-                val cameraObj = com.jagex.game.runetek5.client.input.camera.Camera
+                val cameraObj = Camera
 
                 // Convert camera angles to radians
                 // camAngleX: 0-4096 (pitch), camAngleY: 0-16384 (yaw)
@@ -1483,8 +1627,47 @@ class ModernGLToolkit(
      * Looks up the GL texture handle for a material ID.
      * Used by FrameBatcher during endFrame().
      */
+    /**
+     * Legacy per-material texture combine mode (MaterialType.combineMode), used by the
+     * model batchers' shaders exactly like the ground path (renderGroundMaterial):
+     * REPLACE(1) ignores the per-face vertex color, MODULATE(0) multiplies it, etc.
+     * Without this the model shader hardwired MODULATE and tinted textured faces by
+     * their (often junk-green) face colors — the green sign-board / textured-loc bug.
+     */
+    private fun lookupCombineMode(materialId: Int): Int {
+        // Material 0 is valid/textured — only -1 is untextured (matches lookupTextureHandle).
+        if (materialId < 0) return 0
+        return materialProvider?.getMaterial(materialId)?.combineMode?.toInt() ?: 0
+    }
+
+    /**
+     * Whether a material must be drawn with alpha blending.
+     *
+     * Ports legacy's opacity test verbatim: a material is opaque when
+     * `effectCombiner != 2 && isOpaqueEffect(effectId)`, where effect ids 1 and 7
+     * are the non-opaque effects (OpenGLTextureCache line 46,
+     * MaterialTypeList.isOpaqueEffect). effectCombiner == 2 is the same
+     * alpha-transition marker ModelGL uses to set hasAlphaTransition.
+     *
+     * Everything else is OPAQUE and must draw with GL_BLEND off, matching
+     * legacy's setBlendMode(0) default. The modern scene pass used to enable
+     * blending once in openSceneBatch and leave it on for every model, which made
+     * any face with a nonzero RS alpha translucent (the Canifis lamps) and — with
+     * depth writes still on — let those near-invisible faces depth-reject the
+     * geometry behind them (the missing Canifis walls).
+     */
+    private fun materialNeedsBlend(materialId: Int): Boolean {
+        if (materialId < 0) return false
+        val material = materialProvider?.getMaterial(materialId) ?: return false
+        return material.effectCombiner == 2 || !MaterialTypeList.isOpaqueEffect(material.effectId.toInt())
+    }
+
     private fun lookupTextureHandle(materialId: Int): Int {
-        if (materialId <= 0) return 0
+        // Only -1 is untextured. Material id 0 is a VALID textured material (old-format
+        // meshes start texture ids at 0); legacy tests `< 0` (OpenGlToolkit.kt:1895),
+        // not `<= 0`. Treating 0 as untextured dumped material-0 faces into the flat
+        // vertex-color path — the green multimodel-loc quads.
+        if (materialId < 0) return 0
 
         // Check cache first
         textureHandleCache[materialId]?.let { return it }
@@ -1498,14 +1681,31 @@ class ModernGLToolkit(
         if (handle != 0) {
             textureHandleCache[materialId] = handle
         }
+        if (handle == 0 && diagBudget > 0 && diagGreenSeen.add(materialId)) {
+            diagBudget--
+            val cached = try { materialProvider?.isCached(materialId).toString() } catch (e: Exception) { "ERR:${e.message}" }
+            System.err.println("[GreenDiag] mat=$materialId texNull=${texture == null} handle=$handle isCached=$cached")
+        }
         return handle
     }
 
     override fun createModel(rsmesh1: Mesh, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Model {
-        // Create a ModelGL that can also be used with modern pipeline
-        // For now, use the parent implementation
-        // In the future, we could create a ModernModel that works with both pipelines
-        return super.createModel(rsmesh1, i_2, i_3, i_4, i_5)
+        val model = super.createModel(rsmesh1, i_2, i_3, i_4, i_5)
+        // Build modern geometry from the CLEAN decoded mesh (direct vertex
+        // indices, proper texture-projection UVs) BEFORE any post-create baking
+        // (loc yaw, mirror, contour, recolor...). The mesh here is unrotated
+        // base geometry; ModelGL tracks later mutations (modernYaw accumulates
+        // representable yaw; anything else nulls modernBuilt → legacy-capture
+        // fallback). i_4 is the model ambient baked into the vertex colors.
+        if (model is ModelGL) {
+            model.modernBuilt = try {
+                ModernModelBuilder.build(rsmesh1, i_4, materialProvider, (i_3 and 0x40) != 0)
+            } catch (e: Exception) {
+                null  // Never let a build failure break model creation
+            }
+            model.modernYaw = 0
+        }
+        return model
     }
 
     /**
@@ -1550,8 +1750,14 @@ class ModernGLToolkit(
      * - Material IDs
      * - Ambient/contrast settings
      */
-    private fun computeModelContentHash(model: ModelGL): Int {
-        var hash = 17
+    private fun computeModelContentHash(model: ModelGL): Long {
+        // 64-BIT hash. The cache and the PERSISTENT instanced geometry store key on
+        // this value; with thousands of unique meshes accumulating per session, a
+        // 32-bit key hits birthday collisions readily (~2^16 entries), and since the
+        // instanced store keeps geometry across frames a single collision PERMANENTLY
+        // substituted one mesh's geometry for another (the signpost-drawn-as-foliage
+        // class). 64 bits pushes the collision horizon far beyond session scale.
+        var hash = 17L
         hash = hash * 31 + model.numFaces
         hash = hash * 31 + model.maxDepth
         hash = hash * 31 + model.numNormals
@@ -1599,19 +1805,51 @@ class ModernGLToolkit(
             }
         }
 
-        // Include material IDs
+        // Include ALL material IDs and face colors via rolling hashes. Sampling only
+        // the first/last entries let retexture()/recolor() VARIANTS collide with the
+        // base mesh (identical geometry, different mid-array materials/colors) — the
+        // colliding variant then permanently drew the WRONG cached faces (e.g. the
+        // flat-green textured faces). Cost is O(numFaces), far below the existing
+        // O(vertices) position hash above.
         val facesMaterial = model.facesMaterial
         if (facesMaterial != null && facesMaterial.isNotEmpty()) {
-            hash = hash * 31 + facesMaterial[0].toInt()
-            if (facesMaterial.size > 1) {
-                hash = hash * 31 + facesMaterial[facesMaterial.size - 1].toInt()
+            var mAcc = 0
+            for (i in facesMaterial.indices) {
+                mAcc = mAcc * 31 + facesMaterial[i]
             }
+            hash = hash * 31 + mAcc
         }
 
-        // Include face colors
         val facesColor = model.facesColor
         if (facesColor != null && facesColor.isNotEmpty()) {
-            hash = hash * 31 + facesColor[0].toInt()
+            var cAcc = 0
+            for (i in facesColor.indices) {
+                cAcc = cAcc * 31 + facesColor[i]
+            }
+            hash = hash * 31 + cAcc
+        }
+
+        val facesAlpha = model.facesAlpha
+        if (facesAlpha != null && facesAlpha.isNotEmpty()) {
+            var aAcc = 0
+            for (i in facesAlpha.indices) {
+                aAcc = aAcc * 31 + facesAlpha[i]
+            }
+            hash = hash * 31 + aAcc
+        }
+
+        // Include texture coordinates: retexture/UV-remap variants can share
+        // positions/materials but differ only in UVs — without this they collide.
+        val textureU = model.textureU
+        val textureV = model.textureV
+        if (textureU != null && textureV != null) {
+            var uvAcc = 0
+            val n = minOf(textureU.size, textureV.size)
+            for (i in 0 until n) {
+                uvAcc = uvAcc * 31 + textureU[i].toRawBits()
+                uvAcc = uvAcc * 31 + textureV[i].toRawBits()
+            }
+            hash = hash * 31 + uvAcc
         }
 
         // Include ambient and contrast for color variation
@@ -1631,7 +1869,7 @@ class ModernGLToolkit(
      * @param model The ModelGL to render
      * @param modelMatrix The model matrix from the scene (Matrix43)
      */
-    fun renderModelGLModern(model: ModelGL, modelMatrix: com.jagex.game.runetek5.math.Matrix43) {
+    fun renderModelGLModern(model: ModelGL, modelMatrix: Matrix43) {
         diagModelGateCalls++
         if (!canUseModernPipeline()) {
             countLegacySkip("ModelGL(pipeline-rejected)")
@@ -1672,7 +1910,7 @@ class ModernGLToolkit(
     private var timeCacheLookup = 0L
     private var timeAddCachedModel = 0L
 
-    private fun renderModelGLOptimized(model: ModelGL, modelMatrix: com.jagex.game.runetek5.math.Matrix43) {
+    private fun renderModelGLOptimized(model: ModelGL, modelMatrix: Matrix43) {
         val batcher = optimizedBatcher ?: return
         if (!batcher.isActive()) {
             // LAZY BATCH OPEN: models must never vanish silently. Some paths draw
@@ -1712,13 +1950,65 @@ class ModernGLToolkit(
         // Try to get cached model data FIRST (before reserving a batcher slot)
         // Use content-based hash for cache key since ModelGL instances may be recreated each frame
         // IMPORTANT: Skip cache for animated models - their vertex positions change each frame
-        val isAnimated = model.vertexGroups != null
+        // ANIMATED DETECTION — must catch per-pose entity/loc models, not just models
+        // carrying live vertexGroups. NPC/player/animated-loc models are regenerated
+        // as posed snapshots each animation tick (getAnimatedModel), usually with
+        // vertexGroups == null — the old check admitted EVERY POSE into the content
+        // cache and the PERSISTENT instanced store: ~9 cache misses/frame, unbounded
+        // unique-mesh growth (1647→1843 observed), a full geometry re-upload of the
+        // growing store every frame, and repeated capacity-overflow rebuilds — the
+        // regime in which animated models (implings, animated signpost) ended up
+        // drawing substituted geometry. Models created with the ALTERS_VERTICES
+        // function-mask bit (the legacy marker that vertex data will be rewritten —
+        // ModelGL init only builds vertexGroups under the same bit, ModelGL.kt:905)
+        // are pose-varying by construction and must always stream.
+        // PRIMARY SIGNAL: animatedPoseSnapshot is captured at copy time and survives
+        // the trailing applyShading(<base mask>) that the NPC-body/head, spot-anim and
+        // item pose paths run AFTER animating — that call overwrites functionMask
+        // (dropping ALTERS_VERTICES) and nulls vertexGroups, so the two live-model
+        // checks below are FALSE for exactly the pose snapshots that flood the store
+        // (root cause of the green-quad substitution — every NPC pose became a unique
+        // cached mesh). The flag closes that hole; the live checks stay as belt-and-
+        // suspenders for any direct-animated model that never went through copy().
+        val isAnimated = model.animatedPoseSnapshot ||
+            model.vertexGroups != null ||
+            ModelFunctionMaskGL.altersVertices(model.functionMask)
         val cache = if (isAnimated) null else modelCache
 
         val t4 = System.nanoTime()
         if (cache != null) {
-            // Content hash (full-vertex rolling hash) is only meaningful for static
-            // models — computing it for animated models was pure per-frame waste.
+            // MESH-BUILT PATH: geometry constructed from the clean decoded mesh
+            // at createModel time (ModernModelBuilder) — multi-model locs keep
+            // all submeshes (direct vertex indices, no slot reverse-mapping) and
+            // textured faces carry proper RS texture-projection UVs. The base
+            // geometry is UNROTATED; baked loc yaw is re-applied via the model
+            // matrix. Present only while the model's legacy vertices still match
+            // the base mesh up to yaw (any other mutation nulls modernBuilt).
+            val built = model.modernBuilt
+            if (built != null) {
+                if (diagBudget > 0 && built.batches.size > 1 && diagModelSeen.add(built.id)) {
+                    diagBudget--
+                    val split = built.batches.joinToString(",") { "${it.materialId}:${it.indices.size / 3}" }
+                    System.err.println("[PostDiag] meshBuilt id=${built.id} faces=${built.faceCount} yaw=${model.modernYaw} batches[mat:faces]=$split")
+                }
+                val cachedModel = cache.getOrCreate(model, built.id) { built.toCachedModel() }
+                if (cachedModel != null) {
+                    timeCacheLookup += System.nanoTime() - t4
+                    cacheHits++
+                    modernBuiltPathModels++
+                    submitCachedModel(
+                        batcher, cachedModel, built.id,
+                        composeModernModelMatrix(model, modelMatrix)
+                    )
+                    return
+                }
+            }
+
+            // LEGACY-CAPTURE FALLBACK: capture the model's post-connectNormal
+            // arrays, keyed by content hash (full-vertex rolling hash — only
+            // meaningful for static models; computing it for animated models
+            // was pure per-frame waste).
+            modernBuiltFallbackModels++
             val t3 = System.nanoTime()
             val modelId = computeModelContentHash(model)
             timeComputeHash += System.nanoTime() - t3
@@ -1730,45 +2020,11 @@ class ModernGLToolkit(
 
             if (cachedModel != null) {
                 cacheHits++
-
-                // INSTANCING PATH: Route cached models to the instanced batcher.
-                // The instanced batcher groups identical meshes (by modelId) and renders
-                // them with glDrawElementsInstanced, using one draw call per material
-                // regardless of how many instances exist.
-                if (useInstancing && instancedBatcher?.isActive() == true) {
-                    val t5 = System.nanoTime()
-                    val added = instancedBatcher!!.addInstance(cachedModel, modelId, modelMatrix)
-                    timeAddCachedModel += System.nanoTime() - t5
-                    if (added) {
-                        totalFacesProcessed += cachedModel.faceCount
-                        modelCounter++
-                        debugModelSuccesses++
-                        return
-                    }
-                    // If instanced batcher is full, fall through to regular batcher
-                }
-
-                // REGULAR BATCHER PATH: used when instancing is disabled or full
-                val t2 = System.nanoTime()
-                var modelIndex = batcher.beginModel(modelMatrix)
-                timeBeginModel += System.nanoTime() - t2
-
-                if (modelIndex < 0) {
-                    flushBatchMidFrame(batcher)
-                    modelIndex = batcher.beginModel(modelMatrix)
-                    if (modelIndex < 0) return
-                }
-
-                modelCounter++
-                debugModelSuccesses++
-
-                val t5 = System.nanoTime()
-                val facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
-                timeAddCachedModel += System.nanoTime() - t5
-                totalFacesProcessed += facesAdded
+                submitCachedModel(batcher, cachedModel, modelId, modelMatrix)
                 return
             }
         } else {
+            modernBuiltFallbackModels++
             timeCacheLookup += System.nanoTime() - t4
         }
 
@@ -1791,6 +2047,65 @@ class ModernGLToolkit(
     }
 
     /**
+     * Routes a cached model through the instanced batcher (preferred) or the
+     * regular optimized batcher. Shared by the mesh-built and legacy-capture
+     * cache paths.
+     *
+     * @param geometryKey stable key identifying the geometry: the instanced
+     *   batcher groups instances by it, so all instances sharing it must carry
+     *   identical vertex data (per-instance placement lives in [matrix]).
+     */
+    private fun submitCachedModel(
+        batcher: OptimizedFrameBatcher,
+        cachedModel: ModelCache.CachedModel,
+        geometryKey: Long,
+        matrix: Matrix43
+    ) {
+        // INSTANCING PATH: groups identical meshes (by geometryKey) and renders
+        // them with glDrawElementsInstanced, using one draw call per material
+        // regardless of how many instances exist.
+        //
+        // Single-use geometry (the legacy-capture path: post-rotation, post-
+        // contourToGround vertices) goes here too. Routing it to the streaming
+        // batcher instead looks correct on paper — it is never instanced — but
+        // OptimizedFrameBatcher.addCachedModel SILENTLY DROPS a model when its
+        // vertex buffer fills (returns 0; only beginModel overflow flushes and
+        // retries), and the legacy-capture path is ~96% of all models. That
+        // overran the 500k-vertex streaming buffer every frame and deleted walls.
+        if (useInstancing && instancedBatcher?.isActive() == true) {
+            val t5 = System.nanoTime()
+            val added = instancedBatcher!!.addInstance(cachedModel, geometryKey, matrix)
+            timeAddCachedModel += System.nanoTime() - t5
+            if (added) {
+                totalFacesProcessed += cachedModel.faceCount
+                modelCounter++
+                debugModelSuccesses++
+                return
+            }
+            // If instanced batcher is full, fall through to regular batcher
+        }
+
+        // REGULAR BATCHER PATH: used when instancing is disabled or full
+        val t2 = System.nanoTime()
+        var modelIndex = batcher.beginModel(matrix)
+        timeBeginModel += System.nanoTime() - t2
+
+        if (modelIndex < 0) {
+            flushBatchMidFrame(batcher)
+            modelIndex = batcher.beginModel(matrix)
+            if (modelIndex < 0) return
+        }
+
+        modelCounter++
+        debugModelSuccesses++
+
+        val t5 = System.nanoTime()
+        val facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
+        timeAddCachedModel += System.nanoTime() - t5
+        totalFacesProcessed += facesAdded
+    }
+
+    /**
      * Builds a cached representation of the model's geometry.
      * This is called once per unique model, then the cache is reused.
      *
@@ -1798,7 +2113,16 @@ class ModernGLToolkit(
      * This eliminates per-vertex normal conversion at render time.
      */
     private fun buildModelCache(model: ModelGL): ModelCache.CachedModel? {
-        val numFaces = model.numFaces
+        // renderedFaceCount, NOT numFaces: faces in [renderedFaceCount, numFaces) are
+        // BILLBOARD ANCHOR faces (uid Long.MAX_VALUE, sorted to the tail by
+        // Model.addBillboard). Legacy NEVER rasterizes them — it draws only
+        // [0, renderedFaceCount) and paints the billboards as textured sprites via
+        // drawBillboards. These anchor faces are untextured and carry the billboard's
+        // tint as their face color, so drawing them (as the modern path did, iterating
+        // numFaces) renders flat green/tinted quads over implings/glowing locs — the
+        // "green quad" bug. Truncating to renderedFaceCount reproduces legacy's exact
+        // drawn-face set. (Model billboards themselves are still a modern feature gap.)
+        val numFaces = model.renderedFaceCount
         if (numFaces <= 0) return null
 
         val facesA = model.facesA ?: return null
@@ -1994,12 +2318,12 @@ class ModernGLToolkit(
         // Group faces by material ID and create index arrays
         val materialToIndices = mutableMapOf<Int, MutableList<Int>>()
         for (faceIdx in 0 until validFaceCount) {
-            // SIGNED read: untextured faces store materialId -1. Reading with
-            // `and 0xFFFF` turned -1 into 65535, which passed the <= 0 check and
-            // created a bogus material batch — lookupTextureHandle(65535) then bound
-            // arbitrary/invalid textures for every untextured face of the model.
+            // SIGNED read: untextured faces store materialId -1 (0..N are textured,
+            // INCLUDING material 0 — old-format meshes start texture ids at 0). The
+            // untextured test is `< 0`, NOT `<= 0`: `<= 0` folded valid material-0
+            // faces into the untextured batch → flat green quads on multimodel locs.
             val materialId = materialIds[faceIdx].toInt()
-            val normalizedId = if (materialId <= 0) 0 else materialId
+            val normalizedId = if (materialId < 0) -1 else materialId
             val indices = materialToIndices.getOrPut(normalizedId) { mutableListOf() }
             val baseVertex = faceIdx * 3
             indices.add(baseVertex)
@@ -2008,7 +2332,7 @@ class ModernGLToolkit(
         }
 
         // Sort materials (untextured first, then by ID) and create batches
-        val sortedMaterials = materialToIndices.keys.sortedBy { if (it == 0) Int.MIN_VALUE else it }
+        val sortedMaterials = materialToIndices.keys.sortedBy { if (it < 0) Int.MIN_VALUE else it }
         val materialBatches = sortedMaterials.map { materialId ->
             val indices = materialToIndices[materialId]!!
             ModelCache.MaterialBatch(
@@ -2032,11 +2356,13 @@ class ModernGLToolkit(
      */
     private fun renderModelGLDirect(
         model: ModelGL,
-        modelMatrix: com.jagex.game.runetek5.math.Matrix43,
+        modelMatrix: Matrix43,
         batcher: OptimizedFrameBatcher,
         modelIndex: Int
     ) {
-        val numFaces = model.numFaces
+        // renderedFaceCount, NOT numFaces — exclude billboard-anchor faces at the tail
+        // (see buildModelCache for the full rationale: they are the flat green quads).
+        val numFaces = model.renderedFaceCount
         val facesA = model.facesA ?: return
         val facesB = model.facesB ?: return
         val facesC = model.facesC ?: return
@@ -2200,7 +2526,7 @@ class ModernGLToolkit(
      * Legacy rendering path: CPU-side vertex transformation.
      * Kept for comparison/fallback purposes.
      */
-    private fun renderModelGLLegacy(model: ModelGL, modelMatrix: com.jagex.game.runetek5.math.Matrix43) {
+    private fun renderModelGLLegacy(model: ModelGL, modelMatrix: Matrix43) {
         val batcher = frameBatcher ?: return
         if (!batcher.isActive()) return
 
@@ -2422,6 +2748,9 @@ class ModernGLToolkit(
         spriteRenderer?.destroy()
         spriteRenderer = null
 
+        surfaceMaskRenderer?.destroy()
+        surfaceMaskRenderer = null
+
         particleRendererModern?.destroy()
         particleRendererModern = null
 
@@ -2553,7 +2882,7 @@ class ModernGLToolkit(
     /**
      * Gets detailed batcher statistics for debugging.
      */
-    fun getOptimizedBatcherStats(): com.jagex.game.runetek5.graphics.modern.batch.OptimizedFrameBatcher.FrameStats? {
+    fun getOptimizedBatcherStats(): OptimizedFrameBatcher.FrameStats? {
         return optimizedBatcher?.getStats()
     }
 
@@ -2623,7 +2952,7 @@ class ModernGLToolkit(
      */
     private fun flushBatchMidFrame(batcher: OptimizedFrameBatcher) {
         // Render current batch
-        batcher.endFrame(::lookupTextureHandle)
+        batcher.endFrame(::lookupTextureHandle, ::lookupCombineMode)
 
         // Start new batch
         batcher.beginFrame()
@@ -2645,8 +2974,8 @@ class ModernGLToolkit(
      * This is a conservative check - returns true if any part of the AABB might be visible.
      */
     private fun isModelVisible(
-        model: com.jagex.game.runetek5.graphics.model.ModelGL,
-        modelMatrix: com.jagex.game.runetek5.math.Matrix43,
+        model: ModelGL,
+        modelMatrix: Matrix43,
         vp: FloatArray
     ): Boolean {
         // Get model bounds in local space

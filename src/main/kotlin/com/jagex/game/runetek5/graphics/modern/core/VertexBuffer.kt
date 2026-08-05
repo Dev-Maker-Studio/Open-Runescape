@@ -101,6 +101,24 @@ class VertexBuffer(
     }
 
     /**
+     * Uploads [data] at [byteOffset], leaving the rest of the buffer untouched.
+     *
+     * For append-only stores where only a tail range changes each frame, this
+     * replaces a whole-buffer [upload] (which always writes from offset 0).
+     * The caller must have reserved the range via [allocate] first — this never
+     * grows the buffer.
+     */
+    fun uploadSubRange(byteOffset: Long, data: ByteBuffer) {
+        if (!data.hasRemaining()) return
+        bind()
+        data.mark()
+        GLWrapper.bufferSubData(ARRAY_BUFFER, byteOffset, data)
+        data.reset()
+        val end = byteOffset + data.remaining()
+        if (end > currentSize) currentSize = end
+    }
+
+    /**
      * Pre-allocates buffer storage without uploading data.
      *
      * @param sizeBytes Size in bytes to allocate

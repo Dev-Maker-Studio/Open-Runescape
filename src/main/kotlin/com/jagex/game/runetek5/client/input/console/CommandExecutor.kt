@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.client.input.console
 
+import com.jagex.game.runetek5.config.rsinterface.cs2.CS2Executor
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.FileNotFoundException
@@ -57,6 +58,7 @@ object CommandExecutor {
                     Console.writeLine("heap - Print java memory information")
                     Console.writeLine("getcamerapos - Print location and direction of camera for use in bug reports")
                     Console.writeLine("asyncmap - Toggle asynchronous (seamless) map loading beta")
+                    Console.writeLine("cs2trace [name|off] - Log every CS2 opcode executed, optionally filtered by script name")
                     return
                 }
                 command.equals("cls", ignoreCase = true) -> {
@@ -113,6 +115,31 @@ object CommandExecutor {
                     PreferenceManager.savePreferences()
                     Client.preferencesSavedOnServer = false
                     Console.writeLine("Async map loading: ${if (preference.getValue() == 1) "ON" else "OFF"} (takes effect next region load)")
+                    return
+                }
+                command.equals("cs2trace", ignoreCase = true) ||
+                    command.startsWith("cs2trace ", ignoreCase = true) -> {
+                    // The interpreter has always been able to log every opcode it
+                    // executes, but nothing exposed the flags, so the capability
+                    // was unreachable. An opcode trace is the only practical way
+                    // to confirm a CS2 refactor changed nothing at runtime:
+                    // capture one before and after and diff the sequences.
+                    val filter = command.substringAfter(' ', "").trim()
+                    if (filter.isEmpty()) {
+                        CS2Executor.isDebugTracing = !CS2Executor.isDebugTracing
+                        CS2Executor.debugFilterScript = null
+                        Console.writeLine(
+                            "CS2 opcode tracing: ${if (CS2Executor.isDebugTracing) "ON (all scripts)" else "OFF"}"
+                        )
+                    } else if (filter.equals("off", ignoreCase = true)) {
+                        CS2Executor.isDebugTracing = false
+                        CS2Executor.debugFilterScript = null
+                        Console.writeLine("CS2 opcode tracing: OFF")
+                    } else {
+                        CS2Executor.isDebugTracing = true
+                        CS2Executor.debugFilterScript = filter
+                        Console.writeLine("CS2 opcode tracing: ON for scripts matching '$filter'")
+                    }
                     return
                 }
                 command.equals("getcamerapos", ignoreCase = true) -> {

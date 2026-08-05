@@ -89,7 +89,7 @@ class CS2Executor {
     var returnValuesPtr: Int = 0
 
     @JvmField
-    val returnValues: Array<CS2ReturnValue?> = arrayOfNulls(50)
+    val returnValues: Array<CS2CallFrame?> = arrayOfNulls(50)
 
     @JvmField
     val hookedInterface1: CS2Interface = CS2Interface()
@@ -134,7 +134,7 @@ class CS2Executor {
         }
 
         @JvmStatic
-        fun execute_trigger(triggerType: ClientTriggerType, scriptId: Int, alternateId: Int, executor: CS2Executor) {
+        fun executeTriggerInternal(triggerType: ClientTriggerType, scriptId: Int, alternateId: Int, executor: CS2Executor) {
             val script = CS2Script.getScript(triggerType, scriptId, alternateId)
             if (script == null) {
                 decrementCS2ExecIdx()
@@ -206,11 +206,11 @@ class CS2Executor {
 
         @JvmStatic
         fun executeHookInner(hook: HookRequest) {
-            execute_hook_inner(hook, 200000)
+            executeHookInternal(hook, 200000)
         }
 
         @JvmStatic
-        fun execute_hook_inner(hook: HookRequest, stackLimit: Int) {
+        fun executeHookInternal(hook: HookRequest, stackLimit: Int) {
             val params = hook.params!!
             val scriptId = (params[0] as Int).toInt()
             val script = CS2Script.getCs2Script(scriptId)
@@ -321,7 +321,7 @@ class CS2Executor {
             val executor = getNextScriptExecutor()
             executor.currentEntity = entity
             executor.playerIndex = playerIdx
-            execute_trigger(triggerType, scriptId, -1, executor)
+            executeTriggerInternal(triggerType, scriptId, -1, executor)
             executor.currentEntity = null
             executor.playerIndex = -1
         }
@@ -330,7 +330,7 @@ class CS2Executor {
         fun ifObjectTrigger(triggerType: ClientTriggerType, scriptId: Int, gameObject: GameObject) {
             val executor = getNextScriptExecutor()
             executor.currentLocation = gameObject
-            execute_trigger(triggerType, scriptId, -1, executor)
+            executeTriggerInternal(triggerType, scriptId, -1, executor)
             executor.currentLocation = null
         }
 
@@ -338,7 +338,7 @@ class CS2Executor {
         fun executeIfOnGitem(triggerType: ClientTriggerType, interfaceId: Int, groundItem: GroundItem) {
             val executor = getNextScriptExecutor()
             executor.currentGroundItem = groundItem
-            execute_trigger(triggerType, interfaceId, -1, executor)
+            executeTriggerInternal(triggerType, interfaceId, -1, executor)
             executor.currentGroundItem = null
         }
 
@@ -350,7 +350,7 @@ class CS2Executor {
         @JvmStatic
         fun executeTrigger(triggerType: ClientTriggerType, scriptId: Int, alternateId: Int) {
             val cs2Executor = getNextScriptExecutor()
-            execute_trigger(triggerType, scriptId, alternateId, cs2Executor)
+            executeTriggerInternal(triggerType, scriptId, alternateId, cs2Executor)
         }
 
         @JvmStatic

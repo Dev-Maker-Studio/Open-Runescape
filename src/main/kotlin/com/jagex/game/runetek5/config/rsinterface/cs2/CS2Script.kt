@@ -81,7 +81,7 @@ class CS2Script(buffer: Packet) : CacheableNode() {
 
     fun decodeInstruction(buffer: Packet, op: Int, instruction: ClientScriptOpCode) {
         val operationsCount = operations!!.size
-        if (instruction == ClientScriptOpCode.PUSH_STRING) {
+        if (instruction == ClientScriptOpCode.PUSH_CONSTANT_STRING) {
             if (stringOpValues == null) {
                 stringOpValues = arrayOfNulls(operationsCount)
             }
@@ -94,7 +94,7 @@ class CS2Script(buffer: Packet) : CacheableNode() {
             }
 
             stringOpValues!![op] = stringValue.intern()
-        } else if (instruction == ClientScriptOpCode.PUSH_LONG) {
+        } else if (instruction == ClientScriptOpCode.PUSH_LONG_CONSTANT) {
             if (longOpValues == null) {
                 longOpValues = LongArray(operationsCount)
             }

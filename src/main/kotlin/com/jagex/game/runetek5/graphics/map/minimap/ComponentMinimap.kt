@@ -817,7 +817,7 @@ object ComponentMinimap {
 
     @JvmStatic
     fun drawGame(toolkit: AbstractToolkit) {
-        if (MAP_PLANE != PlayerUpdate.MY_PLAYER!!.plane.toInt() && Resource.mapRegion!!.getScene()!! != null) {
+        if (MAP_PLANE != PlayerUpdate.MY_PLAYER!!.plane.toInt() && Resource.mapRegion!!.getScene() != null) {
             Utils.time()
             if (drawGame(toolkit, PlayerUpdate.MY_PLAYER!!.plane.toInt())) {
                 MAP_PLANE = PlayerUpdate.MY_PLAYER!!.plane.toInt()

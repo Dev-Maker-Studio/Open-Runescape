@@ -115,20 +115,28 @@ class ShaderProgram private constructor(
      * Binds this shader program for use in rendering.
      */
     fun bind() {
-        if (!isBound) {
-            GLWrapper.useProgram(programId)
-            isBound = true
-        }
+        // ALWAYS issue the call. glUseProgram is a single piece of GL state, so the
+        // old per-object `isBound` flag went stale as soon as any other program
+        // bound: this object still believed it was current, bind() no-opped, and the
+        // following glUniform* calls landed on whatever program was really active —
+        // or on none, if something had called unbind(). That is the
+        // "GL_INVALID_OPERATION: No active program" out of ModernSpriteRenderer.flush.
+        //
+        // A global "currently bound" cache would not be safe either: the legacy
+        // toolkit calls jaggl OpenGL.glUseProgram directly (ShaderGL,
+        // RectangularTextureGL, MaterialEffect9GL...), including glUseProgram(0),
+        // with no way to notify us. A redundant bind is one cheap call per batch
+        // flush; a missed one silently corrupts a frame.
+        GLWrapper.useProgram(programId)
+        isBound = true
     }
 
     /**
      * Unbinds this shader program.
      */
     fun unbind() {
-        if (isBound) {
-            GLWrapper.useProgram(0)
-            isBound = false
-        }
+        GLWrapper.useProgram(0)
+        isBound = false
     }
 
     /**

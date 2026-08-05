@@ -92,7 +92,6 @@ class ColorImageCache(
     }
 
     companion object {
-        @JvmField var CS2_QUERY_RESULTS: ShortArray? = null
         @JvmField val SENTINEL_ENTRY = ColorImageCacheEntry(0, 0)
     }
 }

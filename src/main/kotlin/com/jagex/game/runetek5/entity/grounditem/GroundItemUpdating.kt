@@ -47,7 +47,7 @@ object GroundItemUpdating {
         val base = Resource.mapRegion!!.getBaseCoordinates()
         val absX = base.x + x
         val absY = base.y + y
-        if (Resource.mapRegion!!.getScene()!! != null && Resource.mapRegion!!.loadingType != RegionLoadingType.CUTSCENE && x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
+        if (Resource.mapRegion!!.getScene() != null && Resource.mapRegion!!.loadingType != RegionLoadingType.CUTSCENE && x >= 0 && y >= 0 && x < Resource.mapRegion!!.sceneSizeX && y < Resource.mapRegion!!.sceneSizeY) {
             val hash = plane.toLong() shl 28 or (absY.toLong() shl 14) or absX.toLong()
             val node = Client.GROUND_ITEMS.get(hash)
             if (node == null) {
