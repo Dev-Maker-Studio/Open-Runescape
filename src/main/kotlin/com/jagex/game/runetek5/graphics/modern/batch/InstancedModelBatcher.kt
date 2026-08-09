@@ -45,7 +45,8 @@ class InstancedModelBatcher {
         /** Fold the texture alpha channel into model fragment alpha.
          *  Legacy model faces take alpha from the face colour, so this is OFF. */
         /** Must match MAX_POINT_LIGHTS in the vertex shader. */
-        const val MAX_POINT_LIGHTS = 16
+        /** Raise with -Drender.maxlights. */
+        @JvmStatic val MAX_POINT_LIGHTS = System.getProperty("render.maxlights")?.toIntOrNull()?.coerceIn(1, 256) ?: 128
 
         @JvmStatic val CULL_FACE = System.getProperty("render.cullface")?.equals("false", true) != true
         /** GL_BACK. */
@@ -412,7 +413,7 @@ class InstancedModelBatcher {
     private fun createInstancedShader(): ShaderProgram {
         val vertexSource = """
             #version 330 core
-            #define MAX_POINT_LIGHTS 16
+            #define MAX_POINT_LIGHTS $MAX_POINT_LIGHTS
 
             // Per-vertex attributes
             layout(location = 0) in vec3 aPosition;
@@ -483,8 +484,9 @@ class InstancedModelBatcher {
                     vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
                     float d2 = dot(toLight, toLight);
                     float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+                    vec3 lc = uPointLightColor[i];
                     float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
-                    litRGB += aColor.rgb * uPointLightColor[i] * (att * ndotl);
+                    litRGB += aColor.rgb * lc * (att * ndotl);
                 }
 
                 litRGB = clamp(litRGB, 0.0, 1.0);
@@ -538,13 +540,10 @@ class InstancedModelBatcher {
                     // geometry translucent (Canifis lampposts: vertex alpha 1.0,
                     // texture alpha ~0.55). -Drender.texalpha=true restores the old
                     // behaviour for comparison.
-                    // RS stores INVERTED alpha (0 = opaque, 255 = transparent) and
-                    // getPixelsArgb hands that straight to GL, so the sampled alpha must be
-                    // flipped before use. Measured: wall/roof materials come back meanA~13,
-                    // i.e. ~242 opaque once inverted. Using it raw made whole opaque models
-                    // translucent -- the Canifis lamppost probes vertex alpha 1.0 but final
-                    // alpha 0.55 across post, arm and lantern.
-                    color.a = uTexAlpha ? (1.0 - texColor.a) * vColor.a : vColor.a;
+                    // Materials whose texture carries no alpha channel (loaded through
+                    // getPixelsRgb) take alpha from the face colour; the rest use the
+                    // texture's own alpha, as fixed-function does.
+                    if (!uTexAlpha) color.a = vColor.a;
                 } else {
                     color = vColor;
                 }

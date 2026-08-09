@@ -541,7 +541,7 @@ class ModernGLToolkit(
                     "smm=$diagSetModelMatrixCalls(rej=$diagSetModelMatrixRejected) " +
                     "batchOpen=$diagBatchOpens(lazy=$diagLazyBatchOpens) " +
                     "modelDraws=$diagModelGateAccepted/$diagModelGateCalls unwrittenSlots=$unwrittenSlotFaces " +
-                    "ptLights=$diagPointLights " +
+                    "ptLights=$diagPointLights/$diagSceneLights " +
                     "ground=$diagGroundDrawn/noPipe=$diagGroundNoPipeline/noSnap=$diagGroundNoSnapshot/calls=$diagGroundCalls " +
                     "reject=$lastPipelineRejectReason " +
                     "legacySkips=${if (legacySkipCounters.isEmpty()) "{}" else legacySkipCounters.toSortedMap().toString()}"
@@ -884,9 +884,7 @@ class ModernGLToolkit(
                 )
                 instancedBatcher?.setPointLights(frameLightCount, frameLightPos, frameLightColor)
             }
-            // Lights are collected during the scene walk that follows; clear after
-            // uploading so the next frame starts empty.
-            frameLights.clear()
+
         } else {
             frameBatcher?.beginFrame()
         }
@@ -1160,25 +1158,56 @@ class ModernGLToolkit(
     private val frameLightColor = FloatArray(InstancedModelBatcher.MAX_POINT_LIGHTS * 3)
     private var frameLightCount = 0
     @JvmField var diagPointLights = 0
+    @JvmField var diagSceneLights = 0
 
     override fun copyLights(lightCount: Int, lights: Array<PointLight>?) {
-        // Keep legacy's GL_LIGHT state in sync: the ground's fixed-function light
-        // pass runs inside this toolkit and reads it.
+        // Keeps legacy's GL_LIGHT state in sync for the ground's fixed-function light
+        // pass. Shader point lights come from the scene list (see buildFrameLights),
+        // not from here, so that a light does not depend on which entities were drawn.
         super.copyLights(lightCount, lights)
-        if (!pointLightsEnabled || lightCount <= 0 || lights == null) return
-        for (i in 0 until lightCount) {
-            val l = lights[i] ?: continue
-            // Identity dedup: the same light is submitted once per entity it touches.
-            var seen = false
-            for (j in frameLights.indices) if (frameLights[j] === l) { seen = true; break }
-            if (!seen) frameLights.add(l)
-        }
     }
 
-    /** Packs the frame's lights into the batcher upload arrays. */
+    /**
+     * Collects the scene's point lights and packs them for upload.
+     *
+     * Sourced from Scene.lightSlotOccupant, which is the COMPLETE set of lights the
+     * scene holds, rather than from copyLights. copyLights only fires for entities the
+     * scene walk actually reaches, so a lamp went dark whenever the geometry it lit
+     * fell outside the walk -- the light switched on and off as the player moved a tile
+     * or turned the camera. The scene list does not depend on traversal, so a light
+     * stays lit for as long as it exists.
+     */
     private fun buildFrameLights() {
-        var n = frameLights.size
-        if (n > InstancedModelBatcher.MAX_POINT_LIGHTS) n = InstancedModelBatcher.MAX_POINT_LIGHTS
+        frameLights.clear()
+        if (pointLightsEnabled) {
+            val scene = Resource.mapRegion?.getScene()
+            val occupants = scene?.lightSlotOccupant
+            if (scene != null && occupants != null) {
+                val count = scene.lightSlot
+                for (i in 0 until count) {
+                    val light = occupants[i]?.pointLight ?: continue
+                    frameLights.add(light)
+                }
+            }
+        }
+        diagSceneLights = frameLights.size
+
+        // Order by distance to the camera before capping, so the cap only ever drops
+        // the lights whose quadratic falloff contributes least — and does so
+        // deterministically, instead of varying with collection order.
+        val maxLights = InstancedModelBatcher.MAX_POINT_LIGHTS
+        if (frameLights.size > maxLights) {
+            val camX = Camera.cameraPositionAbsoluteX.toFloat()
+            val camY = Camera.cameraPositionAbsoluteZ.toFloat()
+            val camZ = Camera.cameraPositionAbsoluteY.toFloat()
+            frameLights.sortBy { l ->
+                val dx = l.getX() - camX
+                val dy = l.getY() - camY
+                val dz = l.getZ() - camZ
+                dx * dx + dy * dy + dz * dz
+            }
+        }
+        val n = if (frameLights.size > maxLights) maxLights else frameLights.size
         for (i in 0 until n) {
             val l = frameLights[i]
             val size = l.getSize2d().toFloat()
@@ -1197,7 +1226,7 @@ class ModernGLToolkit(
             frameLightColor[i * 3 + 2] = (c and 0xff) * a
         }
         frameLightCount = n
-        diagPointLights = frameLights.size
+        diagPointLights = n
     }
 
     /**
@@ -1217,6 +1246,14 @@ class ModernGLToolkit(
         flushSceneForUiDraw()
         GLWrapper.bindVertexArray(0)
         GLWrapper.useProgram(0)
+        // Depth TESTING must be on. The legacy passes only manage the depth MASK
+        // (setDepthMask(false)) and assume setupMatrixRendering already enabled the
+        // test; under this toolkit the modern renderers may have left it disabled, and
+        // the toolkit's own toggleZbuffer cache can disagree with real GL. With the
+        // test off, the MULTIPLY light meshes paint over geometry that is in front of
+        // them -- lamp light showing through walls and objects.
+        glEnable(GL_DEPTH_TEST)
+        glDepthFunc(GL_LEQUAL)
     }
 
     /**
@@ -2009,24 +2046,30 @@ class ModernGLToolkit(
     }
 
     /**
-     * Whether a material's GL texture actually carries a meaningful alpha channel.
+     * Whether a material's fragment alpha should come from its TEXTURE.
      *
-     * OpenGLTextureCache.getTexture loads opaque materials through
-     * MaterialProvider.getPixels -> getPixelsRgb (RGB, no alpha), and everything else
-     * through getPixelsArgb. The RGB path still lands in an RGBA texture, so its alpha
-     * bytes are junk -- measured across this scene they sit at a near-uniform ~0.05-0.55
-     * with no binary structure, while genuine cutout textures come out binary (e.g.
-     * 78% zero / 21% full). Sampling the junk alpha tinted whole opaque models
-     * translucent: the Canifis lamppost probes as vertex alpha 1.0 but final alpha 0.55
-     * across post, arm and lantern alike.
+     * Legacy decides this per material effect. Effects 1 (MaterialEffect1GL) and 7
+     * (ReflectingTextureEffect) install their own combiner:
+     *   loadTextureCombineMode(..., GL_REPLACE) + setTextureTransparency(0, GL_PRIMARY_COLOR)
+     * i.e. fragment alpha is REPLACED by the primary (vertex) colour's alpha and the
+     * texture's alpha is never used for transparency at all. Those effects load their
+     * texture through getPixelsArgb precisely because they need the alpha channel as a
+     * SPECULAR/REFLECTION MASK (setTexture(0, GL_TEXTURE, GL_SRC_ALPHA)) -- which is why
+     * their alpha reads as a mostly-dark mask (measured meanA ~13) rather than opacity.
+     * Sampling it as transparency tinted whole opaque models translucent: the Canifis
+     * lamppost probes as vertex alpha 1.0 but final alpha 0.55 across post, arm and
+     * lantern alike.
      *
-     * Mirrors the cache's own branch so the shader honours alpha exactly where the
-     * texture has it.
+     * Every other material falls through to loadTextureCombineMode(combineMode), whose
+     * alpha combiner does read the texture -- that is what cuts out decals such as the
+     * cape icon, so those must keep using it.
+     *
+     * The predicate is exactly MaterialTypeList.isOpaqueEffect.
      */
     fun materialTextureHasAlpha(materialId: Int): Boolean {
         if (materialId < 0) return false
         val m = materialProvider?.getMaterial(materialId) ?: return false
-        return m.effectCombiner == 2 || !MaterialTypeList.isOpaqueEffect(m.effectId.toInt())
+        return MaterialTypeList.isOpaqueEffect(m.effectId.toInt())
     }
 
     private fun lookupTextureHandle(materialId: Int): Int {

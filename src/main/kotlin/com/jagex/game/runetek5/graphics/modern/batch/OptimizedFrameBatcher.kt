@@ -42,7 +42,8 @@ class OptimizedFrameBatcher {
         /** Fold the texture alpha channel into model fragment alpha.
          *  Legacy model faces take alpha from the face colour, so this is OFF. */
         /** Must match MAX_POINT_LIGHTS in the vertex shader. */
-        const val MAX_POINT_LIGHTS = 16
+        /** Raise with -Drender.maxlights. */
+        @JvmStatic val MAX_POINT_LIGHTS = System.getProperty("render.maxlights")?.toIntOrNull()?.coerceIn(1, 256) ?: 128
 
         @JvmStatic val CULL_FACE = System.getProperty("render.cullface")?.equals("false", true) != true
         /** GL_BACK. */
@@ -255,7 +256,7 @@ class OptimizedFrameBatcher {
     private fun createOptimizedShader(): ShaderProgram {
         val vertexSource = """
             #version 330 core
-            #define MAX_POINT_LIGHTS 16
+            #define MAX_POINT_LIGHTS $MAX_POINT_LIGHTS
 
             layout(location = 0) in vec3 aPosition;   // Local space position
             layout(location = 1) in vec3 aNormal;     // Vertex normal for lighting
@@ -330,8 +331,9 @@ class OptimizedFrameBatcher {
                     vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
                     float d2 = dot(toLight, toLight);
                     float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+                    vec3 lc = uPointLightColor[i];
                     float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
-                    litRGB += baseRGB * uPointLightColor[i] * (att * ndotl);
+                    litRGB += baseRGB * lc * (att * ndotl);
                 }
 
                 // Clamp to valid range (matching legacy's 0-255 clamping)
@@ -372,10 +374,8 @@ class OptimizedFrameBatcher {
 
             void main() {
                 vec4 color;
-                float texAlphaRaw = 1.0;
                 if (uTextureEnabled) {
                     vec4 texColor = texture(uTexture, vTexCoord);
-                    texAlphaRaw = texColor.a;
                     if (uCombineMode == 1) {
                         color = texColor;
                     } else if (uCombineMode == 3) {
@@ -391,7 +391,7 @@ class OptimizedFrameBatcher {
 
                 // RS stores INVERTED alpha (0 = opaque, 255 = transparent); getPixelsArgb
                 // hands that straight to GL, so flip it before use (see InstancedModelBatcher).
-                if (uTextureEnabled) color.a = uTexAlpha ? (1.0 - texAlphaRaw) * vColor.a : vColor.a;
+                if (uTextureEnabled && !uTexAlpha) color.a = vColor.a;
 
                 if (color.a <= uAlphaThreshold) {
                     discard;
