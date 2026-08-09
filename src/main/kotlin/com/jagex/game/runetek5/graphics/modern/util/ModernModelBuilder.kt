@@ -46,14 +46,19 @@ import kotlin.math.sqrt
  *   position vec3 (12) + normal vec3 (12) + uv vec2 (8) + rgba u8x4 (4) +
  *   modelIndex float placeholder (4).
  *
- * Face filtering (ports the reference createTexturedModel semantics, which match
- * legacy behavior):
+ * Face filtering — a VERBATIM port of legacy's count-time filter (ModelGL:402-419)
+ * plus its render-type handling. Verified by GeometryDiff over the whole cache:
+ * 157,236 mesh-built models, zero divergence from legacy in face count, vertex
+ * position (all four rotations, yaw applied) and per-face RGBA.
  * - faceRenderType 0: smooth-shaded; contributes to per-vertex normals.
  * - faceRenderType 1: flat-shaded; uses the face normal for all three vertices.
- * - any other render type: hidden, skipped entirely (legacy never rasterizes them).
- * - facesAlpha == 255 (RS inverted alpha: 0 = opaque): fully transparent, skipped.
- * - Materials flagged detailsOnly are demoted to untextured when
- *   [stripDetailLayers] is set (legacy: preferenceFlags bit 0x40).
+ * - any other render type: hidden, skipped entirely.
+ * - material.skipTriangles: face dropped (legacy ModelGL:407).
+ * - detailsOnly material under [stripDetailLayers]: face DROPPED, not demoted to
+ *   untextured (legacy ModelGL:410-412).
+ * - facesAlpha is NOT a filter. RS alpha 255 means GL alpha 0, but legacy draws
+ *   opaque scenery with GL_BLEND disabled, which ignores vertex alpha outright, so
+ *   those faces rasterize solid. Skipping them deleted Canifis wall and door faces.
  *
  * Preconditions: ColorUtil.hslToRgb must be initialized (it always is once the
  * client has started); returns null otherwise rather than throwing.
@@ -86,7 +91,22 @@ object ModernModelBuilder {
         val faceCount: Int,
         val vertexCount: Int,
         val vertexData: ByteArray,
-        val batches: List<TextureBatch>
+        val batches: List<TextureBatch>,
+        /**
+         * Why faces from the source mesh were not emitted, by rule. Populated for
+         * diagnostics only (GeometryDiff): when this builder's face set diverges
+         * from legacy's, this names the responsible rejection rule instead of
+         * leaving it to be inferred.
+         */
+        val skipBillboardHidden: Int = 0,
+        val skipRenderType: Int = 0,
+        val skipInvalidVertex: Int = 0,
+        val skipTransparent: Int = 0,
+        val sourceFaceCount: Int = 0,
+        val billboardsSeen: Int = 0,
+        val billboardsWithUid: Int = 0,
+        val billboardsOutOfRange: Int = 0,
+        val skipMaterialFiltered: Int = 0
     ) {
         /**
          * One draw batch: all faces sharing a material.
@@ -207,10 +227,18 @@ object ModernModelBuilder {
         // replaces the anchor face). Drawing them anyway is the "green quad"
         // bug - anchor faces carry the billboard tint as their face color.
         var billboardHiddenFaces: HashSet<Int>? = null
+        var billboardsSeen = 0
+        var billboardsWithUid = 0
+        var billboardsOutOfRange = 0
         mesh.billboards?.let { billboards ->
             for (billboard in billboards) {
-                if (billboard.appliesOnFace < 0 || billboard.appliesOnFace >= numFaces) continue
+                billboardsSeen++
+                if (billboard.appliesOnFace < 0 || billboard.appliesOnFace >= numFaces) {
+                    billboardsOutOfRange++
+                    continue
+                }
                 if (BillboardTypeList.list(billboard.billboardId).hasUid) {
+                    billboardsWithUid++
                     (billboardHiddenFaces ?: HashSet<Int>().also { billboardHiddenFaces = it })
                         .add(billboard.appliesOnFace)
                 }
@@ -222,28 +250,59 @@ object ModernModelBuilder {
         val acceptedMaterials = IntArray(numFaces)
         var acceptedCount = 0
 
+        var skipBillboardHidden = 0
+        var skipRenderType = 0
+        var skipInvalidVertex = 0
+        var skipTransparent = 0
+        var skipMaterialFiltered = 0
+
         for (face in 0 until numFaces) {
-            if (billboardHiddenFaces?.contains(face) == true) continue
+            if (billboardHiddenFaces?.contains(face) == true) { skipBillboardHidden++; continue }
 
             val renderType = faceRenderType?.get(face)?.toInt() ?: 0
             // Only render types 0 (smooth) and 1 (flat) are drawable; legacy
             // never rasterizes any other type (billboard anchors, markers).
-            if (renderType != 0 && renderType != 1) continue
+            if (renderType != 0 && renderType != 1) { skipRenderType++; continue }
 
             val a = vertexA(face)
             val b = vertexB(face)
             val c = vertexC(face)
-            if (!isValidVertex(a) || !isValidVertex(b) || !isValidVertex(c)) continue
+            if (!isValidVertex(a) || !isValidVertex(b) || !isValidVertex(c)) { skipInvalidVertex++; continue }
 
-            // RS inverted alpha: 0 = opaque, 255 = fully transparent.
-            val alpha = facesAlpha?.get(face)?.toInt()?.and(0xff) ?: 0
-            if (alpha == 255) continue
+            // DO NOT skip RS alpha == 255 faces. The obvious reading is "fully
+            // transparent, nothing to draw", but legacy draws opaque scenery with
+            // GL_BLEND DISABLED (OpenGlToolkit.setBlendMode(0)), and with blending
+            // off the vertex alpha is ignored entirely — the face rasterizes solid.
+            // Legacy's renderedFaceCount confirms it: for Canifis walls it equals
+            // the full source face count, so legacy discards none of them.
+            //
+            // Dropping them here deleted whole wall/door faces that legacy renders,
+            // which is exactly the missing-Canifis-walls symptom (GeometryDiff:
+            // every wall/door divergence was skips[transparent=N], nothing else).
+            // The alpha still travels in the vertex colour; whether it is honoured
+            // is the blend state's decision at draw time, not the builder's.
 
             // SIGNED read: -1 = untextured, 0..N = valid material (including 0).
             var materialId = facesMaterial?.get(face)?.toInt() ?: -1
-            if (materialId != -1 && stripDetailLayers && materialProvider != null) {
-                if (materialProvider.getMaterial(materialId and 0xffff).detailsOnly) {
-                    materialId = -1
+            if (materialId != -1 && materialProvider != null) {
+                // Port legacy's count-time face filter VERBATIM (ModelGL:402-419):
+                //
+                //   if (!stripDetail || !detailsOnly) { if (skipTriangles) continue }
+                //   else                              { continue }
+                //
+                // Two rules the builder previously lacked. skipTriangles was not
+                // checked at all, and a detailsOnly face under stripDetail was
+                // DEMOTED to untextured and still drawn rather than dropped. Both
+                // emit faces legacy never rasterizes; being untextured they render
+                // as flat quads carrying the raw face tint — the green quads.
+                val material = materialProvider.getMaterial(materialId and 0xffff)
+                if (stripDetailLayers && material.detailsOnly) {
+                    skipMaterialFiltered++
+                    continue
+                }
+                if (material.skipTriangles) {
+                    skipMaterialFiltered++
+                    continue
                 }
             }
 
@@ -335,7 +394,16 @@ object ModernModelBuilder {
             faceCount = acceptedCount,
             vertexCount = vertexCount,
             vertexData = vertexArray,
-            batches = batches
+            batches = batches,
+            skipBillboardHidden = skipBillboardHidden,
+            skipRenderType = skipRenderType,
+            skipInvalidVertex = skipInvalidVertex,
+            skipTransparent = skipTransparent,
+            sourceFaceCount = numFaces,
+            billboardsSeen = billboardsSeen,
+            billboardsWithUid = billboardsWithUid,
+            billboardsOutOfRange = billboardsOutOfRange,
+            skipMaterialFiltered = skipMaterialFiltered
         )
     }
 

@@ -29,7 +29,7 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
         if (!initialized) {
             initialized = true
             if (id >= 0) {
-                npc = NpcEntity(Resource.mapRegion!!.getScene()!!)
+                npc = NpcEntity(Resource.mapRegion!!.getScene())
                 npc!!.playerIndex = index
                 npc!!.lastUpdate = Client.cycles
                 npc!!.setDirection(TypeLists.NPC!!.list(id))
@@ -37,7 +37,7 @@ class CutsceneEntity(buffer: Packet, val index: Int) {
                 npc!!.turnDirection = npc!!.definitions!!.turnDirection shl 3
                 npc!!.worldPriority = ++drawPriority - 1
             } else {
-                player = PlayerEntity(Resource.mapRegion!!.getScene()!!)
+                player = PlayerEntity(Resource.mapRegion!!.getScene())
                 player!!.decodeAppearance(CutsceneTypeList.CUTSCENE_BUFFER!!)
                 player!!.playerIndex = index
                 player!!.lastUpdate = Client.cycles

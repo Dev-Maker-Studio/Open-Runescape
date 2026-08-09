@@ -2328,7 +2328,8 @@ class Client : GameShell() {
                     }
                     Camera.storePickingState(SUN_MATRIX, Camera.projectionMatrix, gameAreaWidth, gameAreaHeight)
                     Resource.mapRegion!!.getEnvironmentManager().updateAtmosphere(Resource.mapRegion!!)
-                    val roofPreference = if (PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue() == 2) timesSceneRendered.toByte() else 1
+                    val roofPrefValue = PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue()
+                    val roofPreference = if (roofPrefValue == 2) timesSceneRendered.toByte() else 1
                     Resource.mapRegion!!.getScene()!!.drawScene(
                         cycles, Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteZ, Camera.cameraPositionAbsoluteY, Resource.mapRegion!!.bits, visibleBelowDrawheight, visibleAboveX, visibleBelowX, visibleBelowY, visibleAboveY, PlayerUpdate.MY_PLAYER!!.plane + 1, roofPreference, PreferenceManager.preferences!!.flickeringEffects!!.getValue() == 0
                     )

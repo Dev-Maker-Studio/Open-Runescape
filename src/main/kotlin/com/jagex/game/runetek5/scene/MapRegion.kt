@@ -1854,6 +1854,7 @@ class MapRegion(var asyncMaploading: Boolean) {
         }
 
         // Something with roofs? - TODO: fix the horrible naming in this
+
         fun calculateVisibilityAdjustments(regionTiles: Array<Array<Array<Tile>?>?>?, viewIndex: Int, baseX: Int, baseY: Int, hideRoofs: Boolean): Boolean {
             val settingBits = Resource.mapRegion!!.bits
             val setting = if (hideRoofs) 1 else (Client.timesSceneRendered and 0xff).toByte()

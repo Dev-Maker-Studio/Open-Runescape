@@ -43,6 +43,24 @@ class InstancedModelBatcher {
 
     companion object {
         /**
+         * Alpha cutoff for the model pass.
+         *
+         * Legacy uses glAlphaFunc(GL_GREATER, 0) — it only discards fully
+         * transparent texels — and gets away with it because Scene draws its
+         * layered/alpha bucket LAST and sorted (Scene.drawTiles). This batcher
+         * sorts by MATERIAL instead, so a low-alpha texel drawn early both blends
+         * AND writes depth, occluding whatever is behind it: grass fringes were
+         * punching holes through lamp posts and signposts, which reads as the model
+         * being transparent.
+         *
+         * Discarding the fringe restores solid geometry. It deviates from legacy's
+         * exact threshold, deliberately: reproducing GL_GREATER(0) faithfully would
+         * require reproducing legacy's per-entity draw order too, which the
+         * material-batched design cannot do.
+         */
+        const val ALPHA_CUTOFF = 0f
+
+        /**
          * Vertex stride: position(12) + normal(12) + texcoord(8) + color(4) + 4 bytes
          * padding (the ModelCache 40-byte format's modelIndex slot, ignored by the
          * instanced VAO). Keeping the cache's native stride lets addInstance bulk-copy
@@ -60,11 +78,32 @@ class InstancedModelBatcher {
         /** Maximum unique meshes tracked per frame */
         private const val MAX_UNIQUE_MESHES = 256
 
-        /** Maximum total vertices across all unique meshes */
-        private const val MAX_TOTAL_VERTICES = 500000
+        /**
+         * Maximum total vertices across all unique meshes.
+         *
+         * Sized against the measured WORKING SET, not a guess: a Canifis-density
+         * frame submits ~1600 meshes averaging ~650 vertices, i.e. ~1M vertices
+         * that are ALL live in the same frame. At the old 500k the working set was
+         * twice capacity, which is textbook LRU thrashing — only previous-frame
+         * entries are evictable, so each frame evicted meshes it then immediately
+         * needed again (531 evictions and 1171 overflows in a single frame), paid a
+         * full arena compaction each time, and re-uploaded the whole store after
+         * every one. Overflowing meshes fell through to the streaming batcher and
+         * were silently dropped there, which is what deleted walls and punched
+         * holes in lamp posts and the signpost.
+         *
+         * 2M gives ~2x headroom over the observed working set. Cost is 80MB of
+         * staging plus 80MB on the GPU.
+         */
+        private const val MAX_TOTAL_VERTICES = 2000000
 
-        /** Maximum total indices across all unique meshes */
-        private const val MAX_TOTAL_INDICES = 1000000
+        /**
+         * Maximum total indices. Both cache paths emit 3 unshared vertices per face
+         * with sequential indices, so index count tracks vertex count exactly —
+         * this is deliberately equal to [MAX_TOTAL_VERTICES] rather than a
+         * multiple, and was never the binding constraint.
+         */
+        private const val MAX_TOTAL_INDICES = 2000000
 
         /**
          * On overflow, evict down to this fraction of capacity rather than just
@@ -100,6 +139,17 @@ class InstancedModelBatcher {
     private var uSunColorLocation = -1
     private var uContrastPosLocation = -1
     private var uContrastNegLocation = -1
+    private var uViewMatrixLocation = -1
+    private var uFogColorLocation = -1
+    private var uFogColor2Location = -1
+    private var uFogStartLocation = -1
+    private var uFogEndLocation = -1
+    private var uFogEnabledLocation = -1
+
+    // Fog state, mirrored from the toolkit each frame (legacy GL_LINEAR fog).
+    private var viewMatrix: FloatArray? = null
+    private var fogR = 0f; private var fogG = 0f; private var fogB = 0f
+    private var fogStart = 0f; private var fogEnd = 0f; private var fogOn = false
 
     // Per-frame lighting parameters (set once per frame)
     private var sunDirX = 0f
@@ -247,6 +297,12 @@ class InstancedModelBatcher {
         uSunColorLocation = shader!!.getUniformLocation("uSunColor")
         uContrastPosLocation = shader!!.getUniformLocation("uContrastPos")
         uContrastNegLocation = shader!!.getUniformLocation("uContrastNeg")
+        uViewMatrixLocation = shader!!.getUniformLocation("uViewMatrix")
+        uFogColorLocation = shader!!.getUniformLocation("uFogColor")
+        uFogColor2Location = shader!!.getUniformLocation("uFogColor2")
+        uFogStartLocation = shader!!.getUniformLocation("uFogStart")
+        uFogEndLocation = shader!!.getUniformLocation("uFogEnd")
+        uFogEnabledLocation = shader!!.getUniformLocation("uFogEnabled")
         shader!!.unbind()
 
         // Create GPU resources
@@ -345,8 +401,19 @@ class InstancedModelBatcher {
             uniform float uContrastPos;
             uniform float uContrastNeg;
 
+            // Linear fog, matching legacy: glFogi(GL_FOG_MODE, GL_LINEAR) with
+            // GL_FOG_START/END from fogStartPosition/fogEndPosition. setupMatrixRendering
+            // enables fog for every model draw, so omitting it here left all geometry
+            // un-fogged and measurably brighter than legacy.
+            uniform mat4 uViewMatrix;
+            uniform vec3 uFogColor;
+            uniform float uFogStart;
+            uniform float uFogEnd;
+            uniform int uFogEnabled;
+
             out vec2 vTexCoord;
             out vec4 vColor;
+            out float vFogFactor;
 
             void main() {
                 // Reconstruct model matrix from per-instance attributes
@@ -359,7 +426,7 @@ class InstancedModelBatcher {
 
                 // GPU-side lighting calculation matching legacy formula exactly
                 mat3 normalMat = mat3(modelMat);
-                vec3 worldNormal = normalize(normalMat * aNormal);
+                vec3 worldNormal = normalMat * aNormal; // length carries 768/contrast — do NOT normalise
 
                 float dotProduct = dot(uSunDirection, worldNormal);
                 float lightIntensity = uSunBrightness + dotProduct * (dotProduct < 0.0 ? uContrastNeg : uContrastPos);
@@ -368,6 +435,14 @@ class InstancedModelBatcher {
                 litRGB = clamp(litRGB, 0.0, 1.0);
 
                 vColor = vec4(litRGB, aColor.a);
+
+                // GL linear fog factor f = (end - z) / (end - start), z = eye distance.
+                if (uFogEnabled != 0) {
+                    float eyeZ = -(uViewMatrix * worldPos).z;
+                    vFogFactor = clamp((uFogEnd - eyeZ) / max(uFogEnd - uFogStart, 1e-4), 0.0, 1.0);
+                } else {
+                    vFogFactor = 1.0;
+                }
             }
         """.trimIndent()
 
@@ -376,6 +451,8 @@ class InstancedModelBatcher {
 
             in vec2 vTexCoord;
             in vec4 vColor;
+            in float vFogFactor;
+            uniform vec3 uFogColor2;
 
             uniform sampler2D uTexture;
             uniform bool uTextureEnabled;
@@ -408,7 +485,8 @@ class InstancedModelBatcher {
                     discard;
                 }
 
-                fragColor = color;
+                // GL fog: C = f*Cfrag + (1-f)*Cfog. Alpha is not fogged.
+                fragColor = vec4(mix(uFogColor2, color.rgb, vFogFactor), color.a);
             }
         """.trimIndent()
 
@@ -426,6 +504,17 @@ class InstancedModelBatcher {
         flipped[9] = -flipped[9]
         flipped[13] = -flipped[13]
         this.vpMatrix = flipped
+    }
+
+    /** Mirrors legacy's GL_LINEAR fog state for this frame. */
+    fun setFog(view: FloatArray, enabled: Boolean, colorRgb: Int, start: Float, end: Float) {
+        viewMatrix = view
+        fogOn = enabled
+        fogR = ((colorRgb shr 16) and 0xff) / 255f
+        fogG = ((colorRgb shr 8) and 0xff) / 255f
+        fogB = (colorRgb and 0xff) / 255f
+        fogStart = start
+        fogEnd = end
     }
 
     /**
@@ -774,7 +863,8 @@ class InstancedModelBatcher {
     fun endFrame(
         textureCache: (Int) -> Int,
         combineModeOf: (Int) -> Int = { 0 },
-        needsBlendOf: (Int) -> Boolean = { false }
+        needsBlendOf: (Int) -> Boolean = { false },
+        alphaDiscard: Boolean = true
     ) {
         check(isFrameActive) { "No active frame" }
 
@@ -821,7 +911,17 @@ class InstancedModelBatcher {
         // Bind shader and set per-frame uniforms
         sh.bind()
         sh.setUniform(uTextureLocation, 0)
-        sh.setUniform(uAlphaThresholdLocation, 0f)
+        // -1 disables the shader's `color.a <= uAlphaThreshold` discard entirely,
+        // so geometry lost to a zero alpha becomes visible (render alphatest).
+        // Legacy: glAlphaFunc(GL_GREATER, 0) -> keep a > 0, discard a <= 0.
+        sh.setUniform(
+            uAlphaThresholdLocation,
+            // -Drender.alphaprobe=<t> discards any fragment with alpha <= t.
+            // At 0.99 only FULLY opaque fragments survive, which answers
+            // "is this surface actually alpha < 255?" without guessing.
+            System.getProperty("render.alphaprobe")?.toFloatOrNull()
+                ?: (if (alphaDiscard) ALPHA_CUTOFF else -1f)
+        )
 
         // Set VP matrix (already in column-major format for GLSL)
         glUniformMatrix4fv(uViewProjectionLocation, false, vp)
@@ -832,6 +932,12 @@ class InstancedModelBatcher {
         sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)
         sh.setUniform(uContrastPosLocation, contrastPos)
         sh.setUniform(uContrastNegLocation, contrastNeg)
+        viewMatrix?.let { glUniformMatrix4fv(uViewMatrixLocation, false, it) }
+        sh.setUniform(uFogEnabledLocation, if (fogOn) 1 else 0)
+        sh.setUniform(uFogStartLocation, fogStart)
+        sh.setUniform(uFogEndLocation, fogEnd)
+        sh.setUniform(uFogColorLocation, fogR, fogG, fogB)
+        sh.setUniform(uFogColor2Location, fogR, fogG, fogB)
 
         // Bind VAO (has both vertex and instance attribute pointers configured)
         vao!!.bind()
@@ -878,19 +984,10 @@ class InstancedModelBatcher {
                 // Per-material blend state (legacy setBlendMode parity). Opaque
                 // materials MUST draw with GL_BLEND off, or their alpha-carrying
                 // faces go translucent and depth-reject what is behind them.
-                val blend = if (needsBlendOf(texId)) 1 else 0
-                if (blend != lastBlend) {
-                    if (blend == 1) {
-                        GLWrapper.enable(GLWrapper.Constants.BLEND)
-                        GLWrapper.blendFunc(
-                            GLWrapper.Constants.SRC_ALPHA,
-                            GLWrapper.Constants.ONE_MINUS_SRC_ALPHA
-                        )
-                    } else {
-                        GLWrapper.disable(GLWrapper.Constants.BLEND)
-                    }
-                    lastBlend = blend
-                }
+                // Blend state is uniform across models (legacy setBlendMode(1) in
+                // setupMatrixRendering), established once per pass in openSceneBatch.
+                // No per-material toggling: legacy does not do it for model faces,
+                // and doing it here made translucent geometry render solid.
 
                 val t2 = System.nanoTime()
                 GLWrapper.drawElementsInstanced(

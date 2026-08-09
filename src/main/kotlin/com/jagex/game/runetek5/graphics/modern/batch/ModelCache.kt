@@ -23,7 +23,18 @@ import java.nio.ByteBuffer
  * - modelIndex: float (4 bytes) - placeholder, filled at render time
  */
 class ModelCache(
-    private val maxCacheSize: Int = 512,  // Max models to cache
+    /**
+     * Max models to cache.
+     *
+     * Must be sized against the live unique-mesh count, not a round number. At 512
+     * against an observed ~2500 resident unique meshes, EVERY miss tripped the
+     * `cache.size >= maxCacheSize` eviction, freeing a buffer that was needed again
+     * moments later — so misses rebuilt geometry the cache had just discarded, and
+     * the rebuild (native alloc + full per-face walk) dominated the frame
+     * (tkMs lookup=67ms of a 106ms frame). The 96MB byte cap below is the real
+     * memory bound; this is only an entry-count backstop and must not bite first.
+     */
+    private val maxCacheSize: Int = 4096,
     private val maxVertexBytes: Long = 96 * 1024 * 1024  // 96MB max cache
 ) {
     companion object {
@@ -86,6 +97,23 @@ class ModelCache(
     private var cacheMisses = 0L
     private var currentFrame = 0L
 
+    /** Nanoseconds spent inside buildCache lambdas since the last [resetBuildTimer]. */
+    private var buildNanos = 0L
+
+    /** Entries evicted since the last [resetBuildTimer]. */
+    private var evictions = 0L
+
+    fun getBuildMillis(): Float = buildNanos / 1_000_000f
+
+    fun getEvictions(): Long = evictions
+
+    fun getSize(): Int = cache.size
+
+    fun resetBuildTimer() {
+        buildNanos = 0L
+        evictions = 0L
+    }
+
     /**
      * Gets or creates cached data for a model.
      *
@@ -109,8 +137,12 @@ class ModelCache(
 
         cacheMisses++
 
-        // Build new cache
+        // Build new cache. Timed separately from the lookup: a miss costs a native
+        // allocation plus a full per-face walk, and lumping it into the lookup timer
+        // hid which of the two was actually eating the frame.
+        val buildStart = System.nanoTime()
         val cached = buildCache() ?: return null
+        buildNanos += System.nanoTime() - buildStart
         cached.creationFrame = currentFrame
 
         // Check if we have space
@@ -135,6 +167,7 @@ class ModelCache(
         if (cached != null) {
             totalCachedBytes -= cached.getTotalBytes()
             cached.free()
+            evictions++
         }
     }
 

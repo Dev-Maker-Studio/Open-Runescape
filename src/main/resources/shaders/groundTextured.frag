@@ -25,6 +25,14 @@ out vec4 fragColor;
 
 void main() {
     vec4 color;
+    // Debug (-Drender.groundcolor=true): output the per-material baked vertex
+    // colour alone. If the terrain goes black here, the colour VBO is not reaching
+    // the shader and MODULATE is a no-op, which is exactly what full-brightness
+    // ground looks like.
+    if (uCombineMode == 99) {
+        fragColor = vec4(vColor.rgb, 1.0);
+        return;
+    }
     if (uHasTexture) {
         vec4 texColor = texture(uTexture, vTexCoord);
         if (uCombineMode == 1) {

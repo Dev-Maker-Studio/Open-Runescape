@@ -39,6 +39,24 @@ import java.nio.IntBuffer
 class OptimizedFrameBatcher {
 
     companion object {
+        /**
+         * Alpha cutoff for the model pass.
+         *
+         * Legacy uses glAlphaFunc(GL_GREATER, 0) — it only discards fully
+         * transparent texels — and gets away with it because Scene draws its
+         * layered/alpha bucket LAST and sorted (Scene.drawTiles). This batcher
+         * sorts by MATERIAL instead, so a low-alpha texel drawn early both blends
+         * AND writes depth, occluding whatever is behind it: grass fringes were
+         * punching holes through lamp posts and signposts, which reads as the model
+         * being transparent.
+         *
+         * Discarding the fringe restores solid geometry. It deviates from legacy's
+         * exact threshold, deliberately: reproducing GL_GREATER(0) faithfully would
+         * require reproducing legacy's per-entity draw order too, which the
+         * material-batched design cannot do.
+         */
+        const val ALPHA_CUTOFF = 0f
+
         const val BYTES_PER_VERTEX = 40  // position(12) + normal(12) + texcoord(8) + color(4) + modelIndex(4)
         private const val INITIAL_VERTEX_CAPACITY = 500000  // ~20MB vertex data
         private const val INITIAL_INDEX_CAPACITY = 1000000  // ~4MB index data
@@ -69,6 +87,15 @@ class OptimizedFrameBatcher {
     private var uSunColorLocation = -1
     private var uContrastPosLocation = -1
     private var uContrastNegLocation = -1
+    private var uViewMatrixLocation = -1
+    private var uFogColorLocation = -1
+    private var uFogStartLocation = -1
+    private var uFogEndLocation = -1
+    private var uFogEnabledLocation = -1
+
+    private var viewMatrix: FloatArray? = null
+    private var fogR = 0f; private var fogG = 0f; private var fogB = 0f
+    private var fogStart = 0f; private var fogEnd = 0f; private var fogOn = false
 
     // Per-frame lighting parameters
     private var sunDirX = 0f
@@ -159,6 +186,11 @@ class OptimizedFrameBatcher {
         uSunColorLocation = shader!!.getUniformLocation("uSunColor")
         uContrastPosLocation = shader!!.getUniformLocation("uContrastPos")
         uContrastNegLocation = shader!!.getUniformLocation("uContrastNeg")
+        uViewMatrixLocation = shader!!.getUniformLocation("uViewMatrix")
+        uFogColorLocation = shader!!.getUniformLocation("uFogColor")
+        uFogStartLocation = shader!!.getUniformLocation("uFogStart")
+        uFogEndLocation = shader!!.getUniformLocation("uFogEnd")
+        uFogEnabledLocation = shader!!.getUniformLocation("uFogEnabled")
         shader!!.unbind()
 
         // Create GPU resources
@@ -204,7 +236,13 @@ class OptimizedFrameBatcher {
             uniform float uSunBrightness; // Ambient/base brightness
             uniform vec3 uSunColor;       // RGB color multiplier
             uniform float uContrastPos;   // Contrast for positive dot product
-            uniform float uContrastNeg;   // Contrast for negative dot product
+            uniform float uContrastNeg;
+
+            // Legacy GL_LINEAR fog (setupMatrixRendering enables it per model draw).
+            uniform mat4 uViewMatrix;
+            uniform float uFogStart;
+            uniform float uFogEnd;
+            uniform int uFogEnabled;   // Contrast for negative dot product
 
             // Use uniform buffer object for model matrices to avoid uniform count limits
             layout(std140) uniform ModelMatrices {
@@ -213,6 +251,7 @@ class OptimizedFrameBatcher {
 
             out vec2 vTexCoord;
             out vec4 vColor;
+            out float vFogFactor;
 
             void main() {
                 int modelIdx = int(aModelIndex);
@@ -230,7 +269,7 @@ class OptimizedFrameBatcher {
                 // Note: For proper normal transformation we should use inverse transpose,
                 // but for uniform scaling this is equivalent and much cheaper
                 mat3 normalMat = mat3(modelMat);
-                vec3 worldNormal = normalize(normalMat * aNormal);
+                vec3 worldNormal = normalMat * aNormal; // length carries 768/contrast — do NOT normalise
 
                 // Compute dot product (legacy uses pre-normalized normal data)
                 float dotProduct = dot(uSunDirection, worldNormal);
@@ -246,6 +285,13 @@ class OptimizedFrameBatcher {
                 litRGB = clamp(litRGB, 0.0, 1.0);
 
                 vColor = vec4(litRGB, aColor.a);
+
+                if (uFogEnabled != 0) {
+                    float eyeZ = -(uViewMatrix * worldPos).z;
+                    vFogFactor = clamp((uFogEnd - eyeZ) / max(uFogEnd - uFogStart, 1e-4), 0.0, 1.0);
+                } else {
+                    vFogFactor = 1.0;
+                }
             }
         """.trimIndent()
 
@@ -254,6 +300,8 @@ class OptimizedFrameBatcher {
 
             in vec2 vTexCoord;
             in vec4 vColor;
+            in float vFogFactor;
+            uniform vec3 uFogColor;
 
             uniform sampler2D uTexture;
             uniform bool uTextureEnabled;
@@ -289,7 +337,15 @@ class OptimizedFrameBatcher {
                     discard;
                 }
 
-                fragColor = color;
+                // Debug: uAlphaThreshold == -99 outputs ALPHA as greyscale, so the
+                // actual per-fragment alpha of a surface can be read off a capture
+                // instead of inferred.
+                if (uAlphaThreshold < -50.0) {
+                    fragColor = vec4(color.a, color.a, color.a, 1.0);
+                } else {
+                    // GL fog: C = f*Cfrag + (1-f)*Cfog. Alpha is not fogged.
+                    fragColor = vec4(mix(uFogColor, color.rgb, vFogFactor), color.a);
+                }
             }
         """.trimIndent()
 
@@ -404,6 +460,18 @@ class OptimizedFrameBatcher {
      * @param contrastPositive Contrast factor for lit surfaces
      * @param contrastNegative Contrast factor for back-facing surfaces
      */
+
+    /** Mirrors legacy's GL_LINEAR fog state for this frame. */
+    fun setFog(view: FloatArray, enabled: Boolean, colorRgb: Int, start: Float, end: Float) {
+        viewMatrix = view
+        fogOn = enabled
+        fogR = ((colorRgb shr 16) and 0xff) / 255f
+        fogG = ((colorRgb shr 8) and 0xff) / 255f
+        fogB = (colorRgb and 0xff) / 255f
+        fogStart = start
+        fogEnd = end
+    }
+
     fun setLighting(
         sunDirX: Float, sunDirY: Float, sunDirZ: Float,
         brightness: Float,
@@ -698,7 +766,8 @@ class OptimizedFrameBatcher {
     fun endFrame(
         textureCache: (Int) -> Int,
         combineModeOf: (Int) -> Int = { 0 },
-        needsBlendOf: (Int) -> Boolean = { false }
+        needsBlendOf: (Int) -> Boolean = { false },
+        alphaDiscard: Boolean = true
     ) {
         check(isFrameActive) { "No active frame" }
 
@@ -761,7 +830,17 @@ class OptimizedFrameBatcher {
         // Bind shader and set uniforms
         sh.bind()
         sh.setUniform(uTextureLocation, 0)
-        sh.setUniform(uAlphaThresholdLocation, 0f)
+        // -1 disables the shader's `color.a <= uAlphaThreshold` discard entirely,
+        // so geometry lost to a zero alpha becomes visible (render alphatest).
+        // Legacy: glAlphaFunc(GL_GREATER, 0) -> keep a > 0, discard a <= 0.
+        sh.setUniform(
+            uAlphaThresholdLocation,
+            // -Drender.alphaprobe=<t> discards any fragment with alpha <= t.
+            // At 0.99 only FULLY opaque fragments survive, which answers
+            // "is this surface actually alpha < 255?" without guessing.
+            System.getProperty("render.alphaprobe")?.toFloatOrNull()
+                ?: (if (alphaDiscard) ALPHA_CUTOFF else -1f)
+        )
 
         // Set VP matrix - convert legacy row-vector format to column-major for GLSL
         // Legacy uses: clip = VP * world (where VP is stored row-major for row-vector math)
@@ -774,6 +853,11 @@ class OptimizedFrameBatcher {
         sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)
         sh.setUniform(uContrastPosLocation, contrastPos)
         sh.setUniform(uContrastNegLocation, contrastNeg)
+        viewMatrix?.let { glUniformMatrix4fv(uViewMatrixLocation, false, it) }
+        sh.setUniform(uFogEnabledLocation, if (fogOn) 1 else 0)
+        sh.setUniform(uFogStartLocation, fogStart)
+        sh.setUniform(uFogEndLocation, fogEnd)
+        sh.setUniform(uFogColorLocation, fogR, fogG, fogB)
 
         // Bind matrix UBO to binding point 0
         val blockIndex = glGetUniformBlockIndex(sh.getId(), "ModelMatrices")
@@ -818,20 +902,8 @@ class OptimizedFrameBatcher {
             // Per-material blend state (legacy setBlendMode parity). Opaque
             // materials MUST draw with GL_BLEND off, or their alpha-carrying faces
             // go translucent and depth-reject the geometry behind them.
-            val blend = if (needsBlendOf(texId)) 1 else 0
-            if (blend != lastBlend) {
-                if (blend == 1) {
-                    GLWrapper.enable(GLWrapper.Constants.BLEND)
-                    GLWrapper.blendFunc(
-                        GLWrapper.Constants.SRC_ALPHA,
-                        GLWrapper.Constants.ONE_MINUS_SRC_ALPHA
-                    )
-                } else {
-                    GLWrapper.disable(GLWrapper.Constants.BLEND)
-                }
-                lastBlend = blend
-                stateChangesThisBatch++
-            }
+            // Blend state is uniform across models (legacy setBlendMode(1)), set once
+            // per pass in openSceneBatch — see InstancedModelBatcher.
 
             GLWrapper.drawElements(
                 TRIANGLES,

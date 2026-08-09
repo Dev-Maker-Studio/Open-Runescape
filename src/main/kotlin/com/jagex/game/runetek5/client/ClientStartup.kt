@@ -412,10 +412,22 @@ object ClientStartup {
                 PreferenceManager.preferences!!.setValue(PreferenceManager.preferences!!.toolkit!!, 0)
             }
             PreferenceManager.savePreferences()
-            if (Client.isForcedSafemode) {
+            // The geometry-diff harness lives on ModernGLToolkit (only it builds
+            // modernBuilt), so it needs render mode 6 active. Saved preferences boot
+            // into SM/legacy, and the harness has to run at the login screen where
+            // nobody is around to type `toolkit 6`. Guarded by the property so a
+            // normal launch is completely unaffected.
+            // -Dtoolkit=<id> pins the renderer at startup, which is what makes an
+            // unattended legacy-vs-modern comparison possible: same scene, same
+            // camera, one process each. Ids per AbstractToolkit.toolkitForType:
+            // 0 = SM (software), 1 or 5 = legacy GL, 6 = modern GL.
+            // -Dgeodiff implies 6 because its oracle only exists on the modern path.
+            val geodiffToolkit = System.getProperty("toolkit")?.trim()?.toIntOrNull()
+                ?: if (System.getProperty("geodiff") != null) 6 else null
+            if (Client.isForcedSafemode && geodiffToolkit == null) {
                 Client.loadAssets(0, false)
             } else {
-                Client.loadAssets(PreferenceManager.preferences!!.toolkit!!.getValue(), false)
+                Client.loadAssets(geodiffToolkit ?: PreferenceManager.preferences!!.toolkit!!.getValue(), false)
             }
             WindowMode.requestWindowMode(PreferenceManager.preferences!!.fixedScreen!!.getValue(), -1, -1, false)
             StaticMethods.initializedFontcombos!!.initializeFontMap(Client.FONT_PROVIDER)

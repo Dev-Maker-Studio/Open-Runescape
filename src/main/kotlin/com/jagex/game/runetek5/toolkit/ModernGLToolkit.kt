@@ -3,6 +3,8 @@ package com.jagex.game.runetek5.toolkit
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.material.MaterialTypeList
+import com.jagex.game.runetek5.graphics.modern.debug.AutoLogin
+import com.jagex.game.runetek5.graphics.modern.debug.GeometryDiff
 import com.jagex.game.runetek5.graphics.modern.batch.FrameBatcher
 import com.jagex.game.runetek5.graphics.modern.batch.InstancedModelBatcher
 import com.jagex.game.runetek5.graphics.modern.batch.ModelCache
@@ -77,6 +79,7 @@ class ModernGLToolkit(
     private var instancedBatcher: InstancedModelBatcher? = null
     private var useOptimizedBatcher = true  // Toggle for A/B testing
     private var useInstancing = true  // Enable model instancing for repeated meshes
+
     private var isModernRendererInitialized = false
 
     // Thread safety: LWJGL3 capabilities are thread-local. The modern pipeline
@@ -162,6 +165,15 @@ class ModernGLToolkit(
     private var diagBudget = 120
     private val diagGreenSeen = HashSet<Int>()
     private val diagModelSeen = HashSet<Long>()
+    private val diagDropSeen = HashSet<Int>()
+
+    /** Faces silently discarded by buildModelCache's validity check (see there). */
+    private var legacyCaptureDroppedFaces = 0L
+    private var legacyCaptureModelsWithDrops = 0L
+    private var legacyCaptureModelsFullyDropped = 0L
+
+    /** Models lost by the streaming batcher even after a flush-and-retry. */
+    private var streamingModelsDropped = 0L
 
     /** Scratch for composing baked-yaw rotation into the model matrix (render thread only). */
     private val modernYawScratch = Matrix43()
@@ -173,7 +185,7 @@ class ModernGLToolkit(
      * legacy v_rotated * M (row-vector convention, R matching rotateWithNormals).
      */
     private fun composeModernModelMatrix(model: ModelGL, modelMatrix: Matrix43): Matrix43 {
-        val yaw = model.modernYaw and 0x3fff
+        val yaw = if (modernYawEnabled) model.modernYaw and 0x3fff else 0
         if (yaw == 0) return modelMatrix
         val sin = MathUtils.SINE[yaw] / 16384.0f
         val cos = MathUtils.COSINE[yaw] / 16384.0f
@@ -209,6 +221,70 @@ class ModernGLToolkit(
     private var lastBatcherStatus = "not checked"  // Debug status for MCP
 
     companion object {
+        /**
+         * Runtime A/B switches for isolating which stage loses geometry, flipped by
+         * the `render` console command. Each removes one suspect from the pipeline
+         * without a rebuild, so a missing-geometry question can be bisected in a
+         * single session instead of one relaunch per hypothesis.
+         */
+        /**
+         * Each also reads `-Drender.<name>=false` at startup so tools/capture.sh can
+         * A/B a hypothesis across two unattended runs (EXTRA="-Drender.cull=false")
+         * without a rebuild or a human at the console.
+         */
+        private fun flag(name: String) =
+            System.getProperty("render.$name")?.equals("false", true) != true
+
+        @JvmStatic var frustumCullEnabled = flag("cull")
+
+        /** Route every model to the streaming batcher, bypassing the instanced store. */
+        @JvmStatic var instancingEnabled = flag("instancing")
+
+        /**
+         * Mesh-built geometry path. DEFAULT OFF — enable with -Drender.meshbuilt=true.
+         *
+         * It was introduced to fix multi-model locs, but GeometryDiff comparing both
+         * paths over the entire cache (312,796 models) reports zero divergence in
+         * face count, vertex position and per-face colour, so legacy-capture already
+         * handles multi-model locs correctly and the stated benefit does not exist.
+         *
+         * Against that, its UVs are wrong: it recomputes the RS texture projection
+         * from scratch instead of using the values legacy derives in connectNormal,
+         * and the live check finds 18,040 of 27,115 models (67%) with divergent UVs,
+         * all on mask 2048 — the wall/scenery mask. Geometrically perfect faces
+         * sampling the wrong texels is exactly how Lumbridge/Canifis walls and
+         * bushes render invisibly while their neighbours look fine.
+         *
+         * Correctness first: the path stays available behind the flag for whoever
+         * fixes computeUVs against legacy, gated by the same oracle.
+         */
+        @JvmStatic var meshBuiltPathEnabled =
+            System.getProperty("render.meshbuilt")?.equals("true", true) == true
+
+        /** Whether the model shaders' `color.a <= threshold` discard is active. */
+        @JvmStatic var alphaDiscardEnabled = flag("alphatest")
+
+        /**
+         * Whether the mesh-built path re-applies baked loc yaw via the per-instance
+         * matrix. Its geometry is UNROTATED, so turning this off leaves every
+         * mesh-built loc at rotation 0 — which splits a mesh-built failure in two:
+         * geometry still absent means [ModernModelBuilder] built it wrong, geometry
+         * present but mis-oriented means the fault is in the yaw compose.
+         */
+        @JvmStatic var modernYawEnabled = flag("yaw")
+
+        /** -Drender.meshkey=hash : key mesh-built geometry by current vertices. */
+        /** -Drender.verifylive=true : live stale-modernBuilt detector. */
+        @JvmStatic val modelBlend = System.getProperty("render.modelblend")?.equals("false", true) != true
+
+        @JvmStatic val noLight = System.getProperty("render.nolight")?.equals("true", true) == true
+
+        @JvmStatic var verifyLiveGeometry =
+            System.getProperty("render.verifylive")?.equals("true", true) == true
+
+        @JvmStatic var meshKeyByCurrentVertices =
+            System.getProperty("render.meshkey")?.equals("hash", true) == true
+
         /**
          * Creates a modern GL toolkit with the specified settings.
          */
@@ -342,7 +418,11 @@ class ModernGLToolkit(
             instancedBatcher!!.initialize()
 
             // Initialize model cache for avoiding per-face CPU work
-            modelCache = ModelCache(maxCacheSize = 1024, maxVertexBytes = 128 * 1024 * 1024)
+            // Entry count must exceed the live unique-mesh count (inst[unique=] runs
+            // ~2500-3200), or every miss evicts geometry that is needed again moments
+            // later: mc[size=1024 evict=853] with tkMs build=26.82ms on a 67ms frame.
+            // maxVertexBytes stays the real memory bound.
+            modelCache = ModelCache(maxCacheSize = 8192, maxVertexBytes = 128 * 1024 * 1024)
 
             isModernRendererInitialized = true
             println("[ModernGLToolkit] Modern renderer initialized (with model caching + instancing + sprite + particle renderer)")
@@ -369,6 +449,12 @@ class ModernGLToolkit(
     private var debugSetupSpriteCalls = 0
     private var debugBatchFlushes = 0
 
+    /**
+     * Whether this frame's scene depth clear has already been issued. Reset once
+     * per presented frame (after the swap in [render]); see [openSceneBatch].
+     */
+    private var sceneDepthCleared = false
+
     override fun render() {
         // Frame timing: frameMs = wall time between render() entries (whole frame incl.
         // game logic + scene draw), renderMs = this method, swapMs = super.render().
@@ -393,6 +479,15 @@ class ModernGLToolkit(
             (this.display ?: this.delegatingDisplay)?.reload()
             contextReattachCount++
         }
+
+        // Self-verifying geometry check (-Dgeodiff=<locIds>). Fires once, from the
+        // login screen — JS5 assets and the type lists are up long before login, so
+        // this needs no account and no game session.
+        GeometryDiff.runOnce(this)
+
+        // Drives login → lobby → world so a change can be checked against a real
+        // on-screen frame, not just a headless model dump.
+        AutoLogin.tick()
 
         // Flush modern 3D pipeline BEFORE swap
         if (canUseModernPipeline()) {
@@ -442,10 +537,18 @@ class ModernGLToolkit(
                     // build vs models on the legacy-capture fallback (animated poses,
                     // mutated models, or no build available).
                     "meshBuilt=$modernBuiltPathModels/fallback=$modernBuiltFallbackModels " +
-                    "tkMs[hash=%.2f lookup=%.2f addCached=%.2f cull=%.2f beginModel=%.2f] ".format(
-                        timeComputeHash / 1e6, timeCacheLookup / 1e6, timeAddCachedModel / 1e6,
+                    // Faces the legacy-capture path threw away. Nonzero here means
+                    // scenery is losing geometry before it ever reaches the GPU.
+                    "dropped[faces=$legacyCaptureDroppedFaces models=$legacyCaptureModelsWithDrops " +
+                    "whole=$legacyCaptureModelsFullyDropped stream=$streamingModelsDropped] " +
+                    "tkMs[hash=%.2f lookup=%.2f build=%.2f addCached=%.2f cull=%.2f beginModel=%.2f] ".format(
+                        timeComputeHash / 1e6, timeCacheLookup / 1e6,
+                        modelCache?.getBuildMillis() ?: 0f, timeAddCachedModel / 1e6,
                         timeFrustumCull / 1e6, timeBeginModel / 1e6
                     ) +
+                    // build is the miss cost (inside lookup); mcEvict nonzero means the
+                    // model cache is undersized and is rebuilding what it just freed.
+                    "mc[size=${modelCache?.getSize() ?: 0} evict=${modelCache?.getEvictions() ?: 0}] " +
                     "mbMs[add=%.2f up=%.2f draw=%.2f total=%.2f] ".format(
                         obStats?.timeAddModelsMs ?: 0f, obStats?.timeUploadMs ?: 0f,
                         obStats?.timeRenderMs ?: 0f, obStats?.timeTotalMs ?: 0f
@@ -461,12 +564,19 @@ class ModernGLToolkit(
                     // for the working set (raise MAX_TOTAL_VERTICES).
                     "store[verts=${instStats?.storeVertices ?: 0} evicted=${instStats?.meshesEvicted ?: 0} " +
                     "overflow=${instStats?.capacityFallbacks ?: 0}] " +
-                    "mbDrawCalls=${obStats?.drawCalls ?: 0}"
+                    "mbDrawCalls=${obStats?.drawCalls ?: 0} " +
+                    "fog[on=$fogEnabled dens=$fogDensity start=%.0f end=%.0f col=%06X] ".format(fogStartPosition, fogEndPosition, fogColor and 0xffffff) +
+                    "light[sunB=%.3f int=%.3f anti=%.3f col=%.2f,%.2f,%.2f] ".format(sunBrightness, sunColorIntensity, antiSunColorIntensity, sunColorRed, sunColorGreen, sunColorBlue) +
+                    GeometryDiff.liveSummary() + " " + GeometryDiff.contrastSummary() + " " + GeometryDiff.groundSummary()
             )
             cacheHits = 0
             cacheMisses = 0
             modernBuiltPathModels = 0L
             modernBuiltFallbackModels = 0L
+            legacyCaptureDroppedFaces = 0L
+            legacyCaptureModelsWithDrops = 0L
+            legacyCaptureModelsFullyDropped = 0L
+            streamingModelsDropped = 0L
             perfFrameNsAcc = 0L
             perfRenderNsAcc = 0L
             perfSwapNsAcc = 0L
@@ -533,6 +643,12 @@ class ModernGLToolkit(
         debugBatchFlushes = 0
 
         // Reset per-presented-frame stats AFTER the diag has read them
+        timeFrustumCull = 0L
+        timeBeginModel = 0L
+        timeComputeHash = 0L
+        timeCacheLookup = 0L
+        timeAddCachedModel = 0L
+        modelCache?.resetBuildTimer()
         spriteRenderer?.resetFrameStats()
         optimizedBatcher?.resetCumulativeStats()
         instancedBatcher?.resetFrameStats()
@@ -543,6 +659,10 @@ class ModernGLToolkit(
         val swapEndNs = System.nanoTime()
         perfSwapNsAcc += swapEndNs - swapStartNs
         perfRenderNsAcc += swapEndNs - perfLastRenderEntryNs
+
+        // The framebuffer has been presented: the next scene traversal is a new
+        // frame and owes exactly one depth clear (see openSceneBatch).
+        sceneDepthCleared = false
 
         // After swapBuffers, the GL context is current on this thread.
         // Initialize LWJGL3 capabilities and the modern renderer on the owner thread.
@@ -645,18 +765,43 @@ class ModernGLToolkit(
         diagBatchOpens++
 
         // CRITICAL: Set up GL state BEFORE any rendering starts.
-        // Ground renders immediately during scene traversal, so we must
-        // clear depth and enable depth test here, not in renderWithModernPipeline().
-        glClear(GL_DEPTH_BUFFER_BIT)
+        // Ground renders immediately during scene traversal, so we must set depth
+        // state here, not in renderWithModernPipeline().
+        //
+        // The depth CLEAR happens once per presented frame, NOT per batch open.
+        // openSceneBatch runs on every mid-frame reopen — setModelMatrix flushes
+        // and reopens whenever the VP changes or geometry is pending, which is
+        // hundreds of times per scene. Clearing depth there wiped the depth of
+        // everything already drawn, so each batch painted over its predecessors
+        // regardless of actual distance: ground decoration through roofs, walls
+        // buried under later geometry, occluded quads showing through, submeshes
+        // of one loc disagreeing about what is in front.
+        if (!sceneDepthCleared) {
+            glClear(GL_DEPTH_BUFFER_BIT)
+            sceneDepthCleared = true
+        }
         glEnable(GL_DEPTH_TEST)
         glDepthFunc(GL_LEQUAL)
         glDepthMask(true)
-        // Scene models default to OPAQUE, matching legacy's setBlendMode(0). The
-        // batchers switch GL_BLEND on per material batch for the materials that
-        // actually need it (see materialNeedsBlend). Enabling blending here for
-        // the whole pass — as this used to — drew every model blended.
-        glDisable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        // Match legacy's model GL state EXACTLY. setupMatrixRendering() — the path
+        // that draws models — calls setBlendMode(1) = BlendType.ALPHA, which is
+        // glEnable(GL_BLEND) + SRC_ALPHA/ONE_MINUS_SRC_ALPHA together with
+        // glEnable(GL_ALPHA_TEST) + glAlphaFunc(GL_GREATER, 0).
+        //
+        // So legacy blends EVERY model and discards only fully transparent
+        // fragments. An earlier reading of setBlendMode(0) from a 2D/UI path led me
+        // to disable blending for "opaque" materials, which makes genuinely
+        // translucent geometry render solid — the transparency mismatch.
+        // -Drender.modelblend=false draws models unblended. Legacy renders Canifis
+        // lampposts SOLID even though their faces carry ~50% alpha (confirmed by
+        // visualising per-fragment alpha), so honouring that alpha is what makes
+        // them ghostly here.
+        if (modelBlend) {
+            glEnable(GL_BLEND)
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        } else {
+            glDisable(GL_BLEND)
+        }
         glDisable(GL_CULL_FACE)
 
         // Begin frame for all renderers
@@ -673,11 +818,27 @@ class ModernGLToolkit(
             optimizedBatcher?.setViewProjection(viewProjectionMatrix.elements)
             // Set lighting parameters for GPU-side lighting
             // These match the legacy lighting model from ModelGL.kt
-            optimizedBatcher?.setLighting(
+            // -Drender.nolight=true collapses the sun term to identity
+            // (litRGB == vertex colour), isolating how much of the modern/legacy
+            // brightness gap comes from the shader's lighting rather than from the
+            // baked vertex colours.
+            if (noLight) {
+                optimizedBatcher?.setLighting(
+                    sunDirection[0], sunDirection[1], sunDirection[2],
+                    1f, 1f, 1f, 1f, 0f, 0f
+                )
+            } else optimizedBatcher?.setLighting(
                 sunDirection[0], sunDirection[1], sunDirection[2],
                 sunBrightness,
                 sunColorRed, sunColorGreen, sunColorBlue,
                 sunColorIntensity, antiSunColorIntensity  // Contrast factors
+            )
+            // Legacy enables GL_LINEAR fog for every model draw via
+            // setupMatrixRendering(); without it modern geometry never blends
+            // toward the fog colour and the whole scene reads ~25% brighter.
+            optimizedBatcher?.setFog(
+                viewMatrix44.elements, fogEnabled && fogDensity >= 0,
+                fogColor, fogStartPosition, fogEndPosition
             )
 
             // Begin instanced batcher for repeated mesh detection
@@ -690,6 +851,10 @@ class ModernGLToolkit(
                     sunColorRed, sunColorGreen, sunColorBlue,
                     sunColorIntensity, antiSunColorIntensity
                 )
+                instancedBatcher?.setFog(
+                    viewMatrix44.elements, fogEnabled && fogDensity >= 0,
+                    fogColor, fogStartPosition, fogEndPosition
+                )
             }
         } else {
             frameBatcher?.beginFrame()
@@ -701,12 +866,12 @@ class ModernGLToolkit(
         // Reset diagnostic counters
         modelCounter = 0
 
-        // Reset detailed timing
-        timeFrustumCull = 0L
-        timeBeginModel = 0L
-        timeComputeHash = 0L
-        timeCacheLookup = 0L
-        timeAddCachedModel = 0L
+        // NOTE: the tkMs traversal timers are NOT reset here. openSceneBatch runs at
+        // every mid-frame batch reopen (119-301 per diag interval), so zeroing them
+        // here left the diag reading only the final batch's slice — every tkMs field
+        // printed 0.00 while the frame was spending ~69ms somewhere in traversal.
+        // They reset once per presented frame in render(), after the diag reads them
+        // (same fix the cumulative batcher stats already carry).
 
         // Clear texture handle cache for this frame
         textureHandleCache.clear()
@@ -805,10 +970,10 @@ class ModernGLToolkit(
         if (useOptimizedBatcher && optimizedBatcher?.isActive() == true) {
             // Render instanced geometry first (repeated meshes)
             if (useInstancing && instancedBatcher?.isActive() == true) {
-                instancedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend)
+                instancedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
             }
             // Render remaining non-instanced geometry
-            optimizedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend)
+            optimizedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
             mr.endFrame()
             gr.endFrame()
         } else if (batcher.isActive()) {
@@ -1634,7 +1799,11 @@ class ModernGLToolkit(
      * Without this the model shader hardwired MODULATE and tinted textured faces by
      * their (often junk-green) face colors — the green sign-board / textured-loc bug.
      */
+    /** -Drender.combine=modulate forces MODULATE, matching legacy's default. */
+    private val forceModulate = System.getProperty("render.combine")?.equals("modulate", true) == true
+
     private fun lookupCombineMode(materialId: Int): Int {
+        if (forceModulate) return 0
         // Material 0 is valid/textured — only -1 is untextured (matches lookupTextureHandle).
         if (materialId < 0) return 0
         return materialProvider?.getMaterial(materialId)?.combineMode?.toInt() ?: 0
@@ -1690,6 +1859,20 @@ class ModernGLToolkit(
     }
 
     override fun createModel(rsmesh1: Mesh, i_2: Int, i_3: Int, i_4: Int, i_5: Int): Model {
+        // Build BEFORE super.createModel. The ModelGL constructor consumes the
+        // mesh's billboard list, so by the time it returns, mesh.billboards is empty
+        // and ModernModelBuilder can no longer tell which faces are billboard
+        // ANCHORS. Legacy hides those (they are never rasterized — renderedFaceCount
+        // excludes them); emitting them anyway draws the billboard's tint as a flat
+        // untextured quad, which is the "green quads sticking out" symptom.
+        // GeometryDiff proved it: every remaining divergence was extraInMesh=N with
+        // bb[seen=0], i.e. the builder saw no billboards at all while legacy hid N.
+        val built = try {
+            ModernModelBuilder.build(rsmesh1, i_4, materialProvider, (i_3 and 0x40) != 0)
+        } catch (e: Exception) {
+            null  // Never let a build failure break model creation
+        }
+
         val model = super.createModel(rsmesh1, i_2, i_3, i_4, i_5)
         // Build modern geometry from the CLEAN decoded mesh (direct vertex
         // indices, proper texture-projection UVs) BEFORE any post-create baking
@@ -1698,11 +1881,7 @@ class ModernGLToolkit(
         // representable yaw; anything else nulls modernBuilt → legacy-capture
         // fallback). i_4 is the model ambient baked into the vertex colors.
         if (model is ModelGL) {
-            model.modernBuilt = try {
-                ModernModelBuilder.build(rsmesh1, i_4, materialProvider, (i_3 and 0x40) != 0)
-            } catch (e: Exception) {
-                null  // Never let a build failure break model creation
-            }
+            model.modernBuilt = built
             model.modernYaw = 0
         }
         return model
@@ -1934,7 +2113,7 @@ class ModernGLToolkit(
 
         // OPTIMIZATION: Frustum culling at model level
         val t1 = System.nanoTime()
-        if (model.boundsCalculated) {
+        if (frustumCullEnabled && model.boundsCalculated) {
             val vp = viewProjectionMatrix.elements
             if (!isModelVisible(model, modelMatrix, vp)) {
                 modelsCulled++
@@ -1946,6 +2125,7 @@ class ModernGLToolkit(
 
         val numFaces = model.numFaces
         if (numFaces <= 0) return
+        if (verifyLiveGeometry) GeometryDiff.recordContrast(model.contrast.toInt())
 
         // Try to get cached model data FIRST (before reserving a batcher slot)
         // Use content-based hash for cache key since ModelGL instances may be recreated each frame
@@ -1984,20 +2164,30 @@ class ModernGLToolkit(
             // geometry is UNROTATED; baked loc yaw is re-applied via the model
             // matrix. Present only while the model's legacy vertices still match
             // the base mesh up to yaw (any other mutation nulls modernBuilt).
-            val built = model.modernBuilt
+            val built = if (meshBuiltPathEnabled) model.modernBuilt else null
             if (built != null) {
                 if (diagBudget > 0 && built.batches.size > 1 && diagModelSeen.add(built.id)) {
                     diagBudget--
                     val split = built.batches.joinToString(",") { "${it.materialId}:${it.indices.size / 3}" }
                     System.err.println("[PostDiag] meshBuilt id=${built.id} faces=${built.faceCount} yaw=${model.modernYaw} batches[mat:faces]=$split")
                 }
-                val cachedModel = cache.getOrCreate(model, built.id) { built.toCachedModel() }
+                // EXPERIMENT (-Drender.meshkey=hash): key the mesh-built geometry by
+                // the model's CURRENT vertices instead of the shared unrotated
+                // base-content hash. built.id is identical for every placement and
+                // rotation of a loc, so if any per-placement vertex state is NOT
+                // reflected in modernBuilt, one geometry gets served to all of them.
+                // Everything else about the path is unchanged, so a difference here
+                // isolates the key as the fault.
+                if (verifyLiveGeometry) GeometryDiff.verifyLive(model, built)
+                val geometryKey =
+                    if (meshKeyByCurrentVertices) computeModelContentHash(model) else built.id
+                val cachedModel = cache.getOrCreate(model, geometryKey) { built.toCachedModel() }
                 if (cachedModel != null) {
                     timeCacheLookup += System.nanoTime() - t4
                     cacheHits++
                     modernBuiltPathModels++
                     submitCachedModel(
-                        batcher, cachedModel, built.id,
+                        batcher, cachedModel, geometryKey,
                         composeModernModelMatrix(model, modelMatrix)
                     )
                     return
@@ -2072,7 +2262,7 @@ class ModernGLToolkit(
         // vertex buffer fills (returns 0; only beginModel overflow flushes and
         // retries), and the legacy-capture path is ~96% of all models. That
         // overran the 500k-vertex streaming buffer every frame and deleted walls.
-        if (useInstancing && instancedBatcher?.isActive() == true) {
+        if (instancingEnabled && useInstancing && instancedBatcher?.isActive() == true) {
             val t5 = System.nanoTime()
             val added = instancedBatcher!!.addInstance(cachedModel, geometryKey, matrix)
             timeAddCachedModel += System.nanoTime() - t5
@@ -2100,7 +2290,22 @@ class ModernGLToolkit(
         debugModelSuccesses++
 
         val t5 = System.nanoTime()
-        val facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
+        var facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
+
+        // addCachedModel returns 0 when its vertex buffer is full and DISCARDS the
+        // model — unlike the beginModel overflow above, which already flushes and
+        // retries. Silently losing a model here is what made walls vanish and left
+        // holes in lamp posts once instanced-store overflow started routing large
+        // numbers of models down this path. Flush the batch to reclaim the buffer
+        // and retry once, mirroring the beginModel path.
+        if (facesAdded == 0 && cachedModel.faceCount > 0) {
+            flushBatchMidFrame(batcher)
+            modelIndex = batcher.beginModel(matrix)
+            if (modelIndex >= 0) {
+                facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
+            }
+            if (facesAdded == 0) streamingModelsDropped++
+        }
         timeAddCachedModel += System.nanoTime() - t5
         totalFacesProcessed += facesAdded
     }
@@ -2193,6 +2398,27 @@ class ModernGLToolkit(
             }
         }
 
+        // A face failing the check above is SILENTLY DISCARDED — geometry vanishes
+        // with no signal anywhere. That is the documented failure mode of this
+        // legacy-capture path ("dropped whole submeshes on multi-model locs", see
+        // ModernModelBuilder's header), and the suspected cause of the missing
+        // Canifis walls and the signpost's missing post. Count it so the next run
+        // says whether faces are actually being dropped, and by how much.
+        val droppedFaces = numFaces - validFaceCount
+        if (droppedFaces > 0) {
+            legacyCaptureDroppedFaces += droppedFaces.toLong()
+            legacyCaptureModelsWithDrops++
+            if (droppedFaces == numFaces) legacyCaptureModelsFullyDropped++
+            if (diagBudget > 0 && diagDropSeen.add(numFaces * 31 + droppedFaces)) {
+                diagBudget--
+                System.err.println(
+                    "[DropDiag] legacy-capture dropped $droppedFaces/$numFaces faces " +
+                        "(directIdx=$useDirectVertexIndices maxDepth=$maxDepth " +
+                        "numNormals=$numNormals numVertices=${model.numVertices})"
+                )
+            }
+        }
+
         if (validFaceCount == 0) return null
 
         // Allocate buffers - NEW 40-byte format
@@ -2201,6 +2427,15 @@ class ModernGLToolkit(
         val materialIds = ShortArray(validFaceCount)
 
         var outFaceIdx = 0
+
+        // Legacy scales the sun term by 768/contrast per MODEL (ModelGL:1933:
+        // normalScale = sunColorIntensity * 768 / contrast). The shader has only a
+        // global uContrastPos, so fold the per-model factor into the NORMAL LENGTH:
+        // dot(sun, N * k) * sunColorIntensity == dot(sun, N) * sunColorIntensity * k.
+        // The shaders must therefore NOT renormalise. Measured contrast is 850-1000,
+        // never 768, so omitting this left models ~1.20x too bright — matching the
+        // 1.18x measured against legacy.
+        val contrastScale = if (model.contrast.toInt() != 0) 768f / model.contrast.toInt() else 1f
 
         // Helper function to compute normalized normal from legacy format
         fun writeNormal(normalIdx: Int) {
@@ -2214,11 +2449,11 @@ class ModernGLToolkit(
                     // mag==0 means pre-normalized with scale factor
                     val len = kotlin.math.sqrt(nX * nX + nY * nY + nZ * nZ)
                     if (len > 0.001f) {
-                        vertexData.putFloat(nX / len)
-                        vertexData.putFloat(nY / len)
-                        vertexData.putFloat(nZ / len)
+                        vertexData.putFloat(nX / len * contrastScale)
+                        vertexData.putFloat(nY / len * contrastScale)
+                        vertexData.putFloat(nZ / len * contrastScale)
                     } else {
-                        vertexData.putFloat(0f).putFloat(1f).putFloat(0f)
+                        vertexData.putFloat(0f).putFloat(contrastScale).putFloat(0f)
                     }
                 } else {
                     // Normal stored as N*magnitude
@@ -2228,16 +2463,16 @@ class ModernGLToolkit(
                     val rawNz = nZ * invMag
                     val len = kotlin.math.sqrt(rawNx * rawNx + rawNy * rawNy + rawNz * rawNz)
                     if (len > 0.001f) {
-                        vertexData.putFloat(rawNx / len)
-                        vertexData.putFloat(rawNy / len)
-                        vertexData.putFloat(rawNz / len)
+                        vertexData.putFloat(rawNx / len * contrastScale)
+                        vertexData.putFloat(rawNy / len * contrastScale)
+                        vertexData.putFloat(rawNz / len * contrastScale)
                     } else {
-                        vertexData.putFloat(0f).putFloat(1f).putFloat(0f)
+                        vertexData.putFloat(0f).putFloat(contrastScale).putFloat(0f)
                     }
                 }
             } else {
-                // Default up normal
-                vertexData.putFloat(0f).putFloat(1f).putFloat(0f)
+                // Default up normal (carrying the per-model contrast scale)
+                vertexData.putFloat(0f).putFloat(contrastScale).putFloat(0f)
             }
         }
 
@@ -2952,7 +3187,7 @@ class ModernGLToolkit(
      */
     private fun flushBatchMidFrame(batcher: OptimizedFrameBatcher) {
         // Render current batch
-        batcher.endFrame(::lookupTextureHandle, ::lookupCombineMode)
+        batcher.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
 
         // Start new batch
         batcher.beginFrame()
@@ -3015,8 +3250,15 @@ class ModernGLToolkit(
         val worldExtentY = extentX * absYA + extentY * absYB + extentZ * absYC
         val worldExtentZ = extentX * absZA + extentY * absZB + extentZ * absZC
 
-        // Use the maximum extent as a conservative bounding sphere radius
-        val radius = kotlin.math.max(worldExtentX, kotlin.math.max(worldExtentY, worldExtentZ))
+        // Bounding-sphere radius enclosing the transformed AABB. This is the LENGTH
+        // of the extent vector, not its largest component: max() under-estimates by
+        // up to sqrt(3), which shrinks the test sphere and culls geometry whose real
+        // bounds still cross a frustum plane. Thin geometry (walls, posts, lamp
+        // stems) is hit hardest, since one tiny extent drags the max down while the
+        // true radius stays large.
+        val radius = kotlin.math.sqrt(
+            worldExtentX * worldExtentX + worldExtentY * worldExtentY + worldExtentZ * worldExtentZ
+        )
 
         // Transform center to clip space
         val clipX = vp[12] + vp[0] * worldCenterX + vp[4] * worldCenterY + vp[8] * worldCenterZ
@@ -3191,7 +3433,9 @@ class ModernGLToolkit(
         // material.combineMode and applies it via loadTextureCombineMode(combineMode)
         // (OpenGlToolkit.kt:1910-1915, 1935-1947). materialId -1 draws untextured with
         // the per-material vertex colors only.
-        val combineMode = if (materialId >= 0) {
+        val combineMode = if (System.getProperty("render.groundcolor")?.equals("true", true) == true) {
+            99
+        } else if (materialId >= 0) {
             materialProvider?.getMaterial(materialId)?.combineMode ?: 0
         } else {
             0
@@ -3202,6 +3446,8 @@ class ModernGLToolkit(
             sunDirection[0], sunDirection[1], sunDirection[2],
             sunBrightness, sunColorIntensity, antiSunColorIntensity
         )
+
+        if (verifyLiveGeometry) GeometryDiff.recordGround(materialId, combineMode, colorVboId, colorData != null)
 
         // Render through modern ground renderer (pure LWJGL path)
         gr.renderWithModernData(

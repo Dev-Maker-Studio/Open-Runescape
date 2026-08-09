@@ -763,7 +763,11 @@ class Scene(
             val sceneY = absolutePosition.z.toInt() shr this.tileUnits
             if (graphNode.collisionPlane < this.regionSizeZ && sceneX >= this.visibleToXnegative && sceneX < this.visibleToXpositive
                                                            && sceneY >= this.visibleToYnegative && sceneY < this.visibleToYpositive) {
-                if ((tileSettingBits == null || graphNode.plane.toInt() < locPlane || roofPreference != tileSettingBits[graphNode.plane.toInt()][sceneX][sceneY])
+                val gp = graphNode.plane.toInt()
+                val locByLowPlane = gp < locPlane
+                val locByBits = tileSettingBits != null && !locByLowPlane &&
+                    roofPreference != tileSettingBits[gp][sceneX][sceneY]
+                if ((tileSettingBits == null || locByLowPlane || locByBits)
                         && graphNode.canRender() && !graphNode.isSoftHidden(this.activeToolkit)) {
                     return false
                 }
@@ -1055,13 +1059,19 @@ class Scene(
         }
         for (z in 0 until this.regionSizeZ) {
             if (z >= lowestRenderedPlane && settingBits != null) {
+                // These bounds are array indices, and index -> scene tile is
+                // `tileX + visibleToXnegative - visibleToInvertedXnegative`, so the
+                // overflow test has to subtract the inverted offset too. Without it the
+                // window is clamped in scene space while used in index space, leaving the
+                // tiles the camera actually sees untouched -- they then keep the raw
+                // frustum visibility drawScene wrote and render with no roof test at all.
                 var visibleSizeX = this.adjacent_tile_on_screen.size
-                if (this.adjacent_tile_on_screen.size + this.visibleToXnegative > this.sceneDimensionX) {
-                    visibleSizeX -= this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.sceneDimensionX
+                if (this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
+                    visibleSizeX -= this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
                 }
                 var visibleSizeY = this.adjacent_tile_on_screen[0].size
-                if (this.adjacent_tile_on_screen[0].size + this.visibleToYnegative > this.sceneDimensionY) {
-                    visibleSizeY -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.sceneDimensionY
+                if (this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative > this.sceneDimensionY) {
+                    visibleSizeY -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
                 }
                 if (this.calculateTilesOnScreen) {
                     for (tileX in this.visibleToInvertedXnegative until visibleSizeX) {
@@ -1073,7 +1083,9 @@ class Scene(
                                 var descendingPlane = z
                                 while (descendingPlane >= 0) {
                                     if (this.tiles[descendingPlane][x][y] != null && this.tiles[descendingPlane][x][y]!!.plane.toInt() == z) {
-                                        if ((descendingPlane < lowestRenderedPlane || settingBits[descendingPlane][x][y] != roofPreference) && !this.culling.isTileHidden(z, x, y)) {
+                                        val byLowPlane = descendingPlane < lowestRenderedPlane
+                                        val byRoofBits = settingBits[descendingPlane][x][y] != roofPreference
+                                        if ((byLowPlane || byRoofBits) && !this.culling.isTileHidden(z, x, y)) {
                                             this.tileOnScreen[tileX][tileY] = true
                                             break
                                         }
@@ -1088,13 +1100,14 @@ class Scene(
                 }
                 this.localHeightmap[z]!!.renderFloor(this.cameraGridPositionX, this.cameraGridPositionY, this.visibleTiles, this.tileOnScreen, false)
             } else {
+                // Same index-space clamp as the roof-tested branch above.
                 var adjacentTileRowCount = this.adjacent_tile_on_screen.size
-                if (this.adjacent_tile_on_screen.size + this.visibleToXnegative > this.sceneDimensionX) {
-                    adjacentTileRowCount -= this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.sceneDimensionX
+                if (this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative > this.sceneDimensionX) {
+                    adjacentTileRowCount -= this.adjacent_tile_on_screen.size + this.visibleToXnegative - this.visibleToInvertedXnegative - this.sceneDimensionX
                 }
                 var adjacentTileColumnCount = this.adjacent_tile_on_screen[0].size
-                if (this.adjacent_tile_on_screen[0].size + this.visibleToYnegative > this.sceneDimensionY) {
-                    adjacentTileColumnCount -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.sceneDimensionY
+                if (this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative > this.sceneDimensionY) {
+                    adjacentTileColumnCount -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
                 }
                 if (this.calculateTilesOnScreen) {
                     for (tileX in this.visibleToInvertedXnegative until adjacentTileRowCount) {

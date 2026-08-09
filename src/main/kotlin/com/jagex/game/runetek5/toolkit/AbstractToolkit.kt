@@ -5,6 +5,7 @@ import java.util.Hashtable
 
 import com.jagex.game.runetek5.buffer.NativeMemoryNode
 import com.jagex.game.runetek5.client.Client
+import com.jagex.game.runetek5.graphics.modern.debug.AutoLogin
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.config.rsinterface.ComponentSurface
@@ -70,6 +71,10 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     @Throws(FrameRenderException::class)
     open fun renderFrame() {
+        // Toolkit-agnostic on purpose: the whole point is A/B'ing legacy (2) against
+        // modern (6) on the same in-game scene, so the driver cannot live on
+        // ModernGLToolkit. No-ops unless -Dautologin is set.
+        AutoLogin.tick()
         render()
     }
 

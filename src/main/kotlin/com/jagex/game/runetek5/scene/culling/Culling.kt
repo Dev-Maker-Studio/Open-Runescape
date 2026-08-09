@@ -17,10 +17,31 @@ open class Culling(
     companion object {
         @JvmField
         var activeToolkit: AbstractToolkit? = null
+
+        /**
+         * Runtime switch for wall occlusion culling, flipped by `render wallcull`.
+         * See [hideWall] — isolating this answers whether the missing Canifis walls
+         * are being culled rather than mis-built, which byte-exact geometry parity
+         * with legacy has already ruled out as a construction problem.
+         */
+        @JvmField
+        var wallCullingEnabled: Boolean =
+            System.getProperty("render.wallcull")?.equals("false", true) != true
     }
 
+    /**
+     * `-Drender.occlusion=false` disables the software occlusion system wholesale.
+     *
+     * Wider than wallCullingEnabled on purpose: the same depth buffer also gates
+     * isTileHidden/hideTile, which hide ordinary game objects. Walls AND bushes
+     * disappearing together in modern points at the shared occluder buffer rather
+     * than at anything wall-specific.
+     */
+    private var statTick = 0
+
     @JvmField
-    var cullingEnabled: Boolean = true
+    var cullingEnabled: Boolean =
+        System.getProperty("render.occlusion")?.equals("false", true) != true
 
     @JvmField
     var visibleAboveY: IntArray? = null
@@ -117,7 +138,10 @@ open class Culling(
             }
         }
         cullingClustersCleared = false
-        cullingEnabled = true // SW3D removed - culling always enabled
+        // NOTE: this used to unconditionally re-enable culling, silently overriding
+        // -Drender.occlusion=false set at field init — which is why an earlier
+        // "occlusion disabled" experiment showed no change. Respect the property.
+        cullingEnabled = System.getProperty("render.occlusion")?.equals("false", true) != true
         if (cullingEnabled) {
             frustumCulling = FrustumCulling(this)
         }
@@ -238,6 +262,18 @@ open class Culling(
                     )
                 }
                 frustumCulling!!.state = 2
+            }
+            // Occluder-buffer health. isTileHidden/hideWall/hideTile all bail out to
+            // "don't hide" when depthWriteCount < 102, so an underfilled buffer makes
+            // the scene render tiles legacy hides (roof/interior tiles showing while
+            // indoors). Compare this figure between toolkits.
+            if (System.getProperty("render.cullstats") != null && (statTick++ % 120) == 0) {
+                System.err.println(
+                    "[CullStat] depthWrites=${frustumCulling!!.depthWriteCount} " +
+                        "clusters=$frusumCullingCursorPos tileClusters=$tileCullingClusterCount " +
+                        "buf=${oneThirdViewportWidth}x${oneThirdViewportHeight} " +
+                        "toolkit=${activeToolkit?.javaClass?.simpleName}"
+                )
             }
             if (benchmarkCulling) {
                 scene.nanoTimer.getTime()
@@ -369,6 +405,12 @@ open class Culling(
     }
 
     fun hideWall(wall: AbstractWall, z: Int, x: Int, y: Int): Boolean {
+        // `render wallcull` forces this off. hideWall is the only culling consumer
+        // that can hide every wall while leaving roofs, floors and stairs drawn —
+        // exactly the Canifis symptom — and it depends on the software occlusion
+        // buffer, which is fed through activeToolkit.calculateProjection and so can
+        // differ between the legacy and modern toolkits.
+        if (!wallCullingEnabled) return false
         if (cullingEnabled && drawingScene) {
             if (frustumCulling!!.depthWriteCount < 102) {
                 return false

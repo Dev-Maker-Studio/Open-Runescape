@@ -18,6 +18,8 @@ import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.TypeLists
 import com.jagex.game.runetek5.config.rsinterface.Component
 import com.jagex.game.runetek5.entity.pathingentity.player.PlayerUpdate
+import com.jagex.game.runetek5.scene.culling.Culling
+import com.jagex.game.runetek5.toolkit.ModernGLToolkit
 import com.jagex.game.runetek5.network.WorldConnection
 import com.jagex.game.runetek5.network.packet.ClientProt
 import com.jagex.game.runetek5.network.packet.PacketEncoder
@@ -94,6 +96,40 @@ object CommandExecutor {
                     }
                     Console.writeLine("Switching to toolkit $id...")
                     Client.loadAssets(id, "Please wait - changing renderer...", true)
+                    return
+                }
+                command.equals("render", ignoreCase = true) ||
+                    command.startsWith("render ", ignoreCase = true) -> {
+                    // Toggle individual modern-renderer stages at runtime so a
+                    // missing-geometry question can be bisected in one session
+                    // instead of one rebuild per hypothesis.
+                    when (command.substringAfter(' ', "").trim().lowercase()) {
+                        "cull" -> {
+                            ModernGLToolkit.frustumCullEnabled = !ModernGLToolkit.frustumCullEnabled
+                            Console.writeLine("Frustum culling: ${if (ModernGLToolkit.frustumCullEnabled) "ON" else "OFF"}")
+                        }
+                        "instancing" -> {
+                            ModernGLToolkit.instancingEnabled = !ModernGLToolkit.instancingEnabled
+                            Console.writeLine("Instanced batcher: ${if (ModernGLToolkit.instancingEnabled) "ON" else "OFF"} (models stream instead)")
+                        }
+                        "meshbuilt" -> {
+                            ModernGLToolkit.meshBuiltPathEnabled = !ModernGLToolkit.meshBuiltPathEnabled
+                            Console.writeLine("Mesh-built path: ${if (ModernGLToolkit.meshBuiltPathEnabled) "ON" else "OFF"} (OFF = legacy-capture only)")
+                        }
+                        "alphatest" -> {
+                            ModernGLToolkit.alphaDiscardEnabled = !ModernGLToolkit.alphaDiscardEnabled
+                            Console.writeLine("Alpha discard: ${if (ModernGLToolkit.alphaDiscardEnabled) "ON" else "OFF"}")
+                        }
+                        "yaw" -> {
+                            ModernGLToolkit.modernYawEnabled = !ModernGLToolkit.modernYawEnabled
+                            Console.writeLine("Mesh-built yaw: ${if (ModernGLToolkit.modernYawEnabled) "ON" else "OFF"} (OFF = locs drawn unrotated)")
+                        }
+                        "wallcull" -> {
+                            Culling.wallCullingEnabled = !Culling.wallCullingEnabled
+                            Console.writeLine("Wall occlusion culling: ${if (Culling.wallCullingEnabled) "ON" else "OFF"}")
+                        }
+                        else -> Console.writeLine("Usage: render <cull|instancing|meshbuilt|alphatest|yaw|wallcull>")
+                    }
                     return
                 }
                 command.equals("heap", ignoreCase = true) -> {

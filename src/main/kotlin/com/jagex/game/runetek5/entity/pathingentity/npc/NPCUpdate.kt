@@ -171,7 +171,7 @@ object NPCUpdate {
             val npcEntity: NpcEntity
 
             if (cachedNpc == null) {
-                npcEntity = NpcEntity(Resource.mapRegion?.getScene()!!)
+                npcEntity = NpcEntity(Resource.mapRegion?.getScene())
                 npcEntity.playerIndex = npcIndex
                 cachedNpc = ObjectNode(npcEntity)
                 Client.NPC_MAP?.put(cachedNpc, npcIndex.toLong())
