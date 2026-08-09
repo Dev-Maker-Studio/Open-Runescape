@@ -132,7 +132,15 @@ object Renderers {
         Resource.mapRegion!!.calculateViewRange()
         activeToolkit!!.resetTextureState()
         if (activeToolkit!!.hasBloomSupport()) {
-            PreferenceManager.setBloom(PreferenceManager.preferences!!.bloom!!.getValue() == 1)
+            // -Drender.bloom=true/false overrides the saved preference, so the bloom
+            // post-process can be exercised without changing the user's settings.
+            val bloomOverride = System.getProperty("render.bloom")
+            val wantBloom = when {
+                bloomOverride.equals("true", true) -> true
+                bloomOverride.equals("false", true) -> false
+                else -> PreferenceManager.preferences!!.bloom!!.getValue() == 1
+            }
+            PreferenceManager.setBloom(wantBloom)
         }
         Resource.mapRegion!!.resetAtmosphere()
         Resource.mapRegion!!.getEnvironmentManager().requestDirectEnvironmentTransition()

@@ -42,6 +42,29 @@ import java.nio.IntBuffer
 class InstancedModelBatcher {
 
     companion object {
+        /** Fold the texture alpha channel into model fragment alpha.
+         *  Legacy model faces take alpha from the face colour, so this is OFF. */
+        /** Must match MAX_POINT_LIGHTS in the vertex shader. */
+        const val MAX_POINT_LIGHTS = 16
+
+        @JvmStatic val CULL_FACE = System.getProperty("render.cullface")?.equals("false", true) != true
+        /** GL_BACK. */
+        @JvmStatic val CULL_MODE = 0x0405
+        /** GL_CCW. Front faces come out counter-clockwise for this batcher's
+         *  geometry; verified against legacy (GL_CW culled the wrong side and left
+         *  the signpost's underside quads visible). -Drender.cullwind=cw to flip. */
+        @JvmStatic val CULL_WIND = if (System.getProperty("render.cullwind") == "cw") 0x0900 else 0x0901
+        /** Fold the texture alpha channel into model fragment alpha.
+         *
+         *  ON, because that is what legacy does: loadTextureCombineMode maps every
+         *  material mode onto an alpha combiner that reads the texture (MODULATE ->
+         *  texA*vertA, REPLACE -> texA), and glAlphaFunc(GL_GREATER, 0) discards only
+         *  fully transparent fragments -- the alpha combiner source is never
+         *  redirected away from the texture. Forcing alpha to come from the vertex
+         *  colour instead made the Canifis lampposts solid, but it also made every
+         *  texture that legitimately uses its alpha opaque (cape icon backgrounds,
+         *  roof tiles). -Drender.texalpha=false restores that behaviour. */
+        @JvmStatic val TEX_ALPHA = System.getProperty("render.texalpha")?.equals("false", true) != true
         /**
          * Alpha cutoff for the model pass.
          *
@@ -132,9 +155,15 @@ class InstancedModelBatcher {
     private var uTextureLocation = -1
     private var uTextureEnabledLocation = -1
     private var uCombineModeLocation = -1
+    private var uTexAlphaLocation = -1
+    /** Per-material: does this texture actually carry an alpha channel? */
+    private var texHasAlpha: (Int) -> Boolean = { true }
     private var uAlphaThresholdLocation = -1
     private var uViewProjectionLocation = -1
     private var uSunDirectionLocation = -1
+    private var uPointLightCountLocation = -1
+    private var uPointLightPosLocation = -1
+    private var uPointLightColorLocation = -1
     private var uSunBrightnessLocation = -1
     private var uSunColorLocation = -1
     private var uContrastPosLocation = -1
@@ -290,9 +319,13 @@ class InstancedModelBatcher {
         uTextureLocation = shader!!.getUniformLocation("uTexture")
         uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
         uCombineModeLocation = shader!!.getUniformLocation("uCombineMode")
+        uTexAlphaLocation = shader!!.getUniformLocation("uTexAlpha")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
         uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
+        uPointLightCountLocation = shader!!.getUniformLocation("uPointLightCount")
+        uPointLightPosLocation = shader!!.getUniformLocation("uPointLightPos")
+        uPointLightColorLocation = shader!!.getUniformLocation("uPointLightColor")
         uSunBrightnessLocation = shader!!.getUniformLocation("uSunBrightness")
         uSunColorLocation = shader!!.getUniformLocation("uSunColor")
         uContrastPosLocation = shader!!.getUniformLocation("uContrastPos")
@@ -379,6 +412,7 @@ class InstancedModelBatcher {
     private fun createInstancedShader(): ShaderProgram {
         val vertexSource = """
             #version 330 core
+            #define MAX_POINT_LIGHTS 16
 
             // Per-vertex attributes
             layout(location = 0) in vec3 aPosition;
@@ -400,6 +434,16 @@ class InstancedModelBatcher {
             uniform vec3 uSunColor;
             uniform float uContrastPos;
             uniform float uContrastNeg;
+
+            // Legacy point lights (OpenGlToolkit.renderLights): GL_LIGHT2+ with
+            // GL_POSITION, GL_DIFFUSE = colour * (transparency/255) and
+            // GL_QUADRATIC_ATTENUATION = 1/size2d^2 (constant/linear terms are 0).
+            // So att = 1/(kq*d^2). Legacy never enables GL_NORMALIZE, so the scaled
+            // normal (length 768/contrast) feeds the diffuse term as-is, same as the
+            // sun term above.
+            uniform int uPointLightCount;
+            uniform vec4 uPointLightPos[MAX_POINT_LIGHTS];   // xyz world, w = kq
+            uniform vec3 uPointLightColor[MAX_POINT_LIGHTS]; // already * transparency/255
 
             // Linear fog, matching legacy: glFogi(GL_FOG_MODE, GL_LINEAR) with
             // GL_FOG_START/END from fogStartPosition/fogEndPosition. setupMatrixRendering
@@ -432,6 +476,17 @@ class InstancedModelBatcher {
                 float lightIntensity = uSunBrightness + dotProduct * (dotProduct < 0.0 ? uContrastNeg : uContrastPos);
 
                 vec3 litRGB = aColor.rgb * uSunColor * lightIntensity;
+
+                // Point lights add on top of the sun term, exactly as fixed-function
+                // accumulates GL_LIGHT2+ before the final clamp.
+                for (int i = 0; i < uPointLightCount; ++i) {
+                    vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
+                    float d2 = dot(toLight, toLight);
+                    float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+                    float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
+                    litRGB += aColor.rgb * uPointLightColor[i] * (att * ndotl);
+                }
+
                 litRGB = clamp(litRGB, 0.0, 1.0);
 
                 vColor = vec4(litRGB, aColor.a);
@@ -461,6 +516,7 @@ class InstancedModelBatcher {
             // groundTextured.frag). REPLACE(1) ignores the per-face vColor — required
             // or textured faces with junk face colors render tinted (green-quad bug).
             uniform int uCombineMode;
+            uniform bool uTexAlpha;
 
             out vec4 fragColor;
 
@@ -477,6 +533,18 @@ class InstancedModelBatcher {
                     } else {
                         color = texColor * vColor;
                     }
+                    // Legacy model faces take their alpha from the face/vertex colour;
+                    // folding the texture's alpha channel in here made fully-opaque
+                    // geometry translucent (Canifis lampposts: vertex alpha 1.0,
+                    // texture alpha ~0.55). -Drender.texalpha=true restores the old
+                    // behaviour for comparison.
+                    // RS stores INVERTED alpha (0 = opaque, 255 = transparent) and
+                    // getPixelsArgb hands that straight to GL, so the sampled alpha must be
+                    // flipped before use. Measured: wall/roof materials come back meanA~13,
+                    // i.e. ~242 opaque once inverted. Using it raw made whole opaque models
+                    // translucent -- the Canifis lamppost probes vertex alpha 1.0 but final
+                    // alpha 0.55 across post, arm and lantern.
+                    color.a = uTexAlpha ? (1.0 - texColor.a) * vColor.a : vColor.a;
                 } else {
                     color = vColor;
                 }
@@ -520,6 +588,27 @@ class InstancedModelBatcher {
     /**
      * Sets the lighting parameters for this frame.
      */
+    // ===== Point lights =====
+    // Legacy sets GL_LIGHT2+ per model in copyLights; this batcher draws models in
+    // material batches, so the frame's lights are uploaded once as a small array and
+    // every fragment accumulates them. Quadratic falloff means distant lights
+    // contribute ~0, which is what legacy's per-model light selection approximates.
+    private var pointLightCount = 0
+    private val pointLightPos = FloatArray(MAX_POINT_LIGHTS * 4)
+    private val pointLightColor = FloatArray(MAX_POINT_LIGHTS * 3)
+
+    /** [count] lights; [pos] is xyzw per light (w = 1/size2d^2), [color] is rgb per light. */
+    fun setTextureAlphaPredicate(p: (Int) -> Boolean) { texHasAlpha = p }
+
+    fun setPointLights(count: Int, pos: FloatArray, color: FloatArray) {
+        val n = if (count > MAX_POINT_LIGHTS) MAX_POINT_LIGHTS else count
+        pointLightCount = n
+        if (n > 0) {
+            System.arraycopy(pos, 0, pointLightPos, 0, n * 4)
+            System.arraycopy(color, 0, pointLightColor, 0, n * 3)
+        }
+    }
+
     fun setLighting(
         sunDirX: Float, sunDirY: Float, sunDirZ: Float,
         brightness: Float,
@@ -910,6 +999,18 @@ class InstancedModelBatcher {
 
         // Bind shader and set per-frame uniforms
         sh.bind()
+        // Legacy back-face culls model geometry (OpenGlToolkit init:
+        // glEnable(GL_CULL_FACE) + glCullFace(GL_BACK), never turned off for the
+        // scene). Asserted HERE rather than in openSceneBatch because state set
+        // there is cleared before the draws land. The projection flips Y, which
+        // reverses winding, so front faces are CW.
+        if (CULL_FACE) {
+            GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
+            GLWrapper.cullFace(CULL_MODE)
+            GLWrapper.frontFace(CULL_WIND)
+        } else {
+            GLWrapper.disable(GLWrapper.Constants.CULL_FACE)
+        }
         sh.setUniform(uTextureLocation, 0)
         // -1 disables the shader's `color.a <= uAlphaThreshold` discard entirely,
         // so geometry lost to a zero alpha becomes visible (render alphatest).
@@ -928,6 +1029,14 @@ class InstancedModelBatcher {
 
         // Set lighting uniforms
         sh.setUniform(uSunDirectionLocation, sunDirX, sunDirY, sunDirZ)
+        // Point lights for this frame (see setPointLights).
+        if (uPointLightCountLocation >= 0) {
+            GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
+            if (pointLightCount > 0) {
+                if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
+                if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
+            }
+        }
         sh.setUniform(uSunBrightnessLocation, sunBrightness)
         sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)
         sh.setUniform(uContrastPosLocation, contrastPos)
@@ -975,6 +1084,7 @@ class InstancedModelBatcher {
                         sh.setUniform(uTextureEnabledLocation, 1)
                         // Legacy per-material combine mode (REPLACE ignores vColor).
                         sh.setUniform(uCombineModeLocation, if (texId >= 0) combineModeOf(texId) else 0)
+                        sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
                     } else {
                         sh.setUniform(uTextureEnabledLocation, 0)
                     }

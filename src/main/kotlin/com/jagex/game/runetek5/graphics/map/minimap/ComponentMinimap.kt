@@ -29,6 +29,7 @@ import com.jagex.game.runetek5.graphics.font.FontManager
 import com.jagex.game.runetek5.graphics.font.FontMetrics
 import com.jagex.game.runetek5.graphics.hint.HintRenderer
 import com.jagex.game.runetek5.graphics.ifcomponent.InterfaceComponentRenderer
+import com.jagex.game.runetek5.graphics.modern.debug.MinimapDump
 import com.jagex.game.runetek5.graphics.map.worldmap.WorldMapRasterManager
 import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.StaticMedia
@@ -811,6 +812,7 @@ object ComponentMinimap {
                     TypeLists.MEC!!.createCache(128, 64)
                 }
             }
+            MinimapDump.dump(minimapBackground, "bg")
             return true
         }
     }

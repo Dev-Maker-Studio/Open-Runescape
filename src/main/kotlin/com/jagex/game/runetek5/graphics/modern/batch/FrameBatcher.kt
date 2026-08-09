@@ -259,6 +259,11 @@ class FrameBatcher {
 
         // Bind our passthrough shader
         sh.bind()
+        // Legacy back-face culls model geometry; matches the optimized/instanced
+        // batchers (see InstancedModelBatcher.endFrame). Front faces are CW here.
+        GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
+        GLWrapper.cullFace(0x0405)
+        GLWrapper.frontFace(0x0901)
         sh.setUniform(uTextureLocation, 0)  // Texture unit 0
         sh.setUniform(uAlphaThresholdLocation, 0f)
 

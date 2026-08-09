@@ -303,13 +303,16 @@ class ModernSpriteRenderer {
             applyBlendMode(blendMode)
         }
 
-        // Resolve the texture slot index for this quad
-        val texSlotIndex = resolveTextureSlot(textureId)
-
-        // Check if batch is full
+        // Flush a full batch BEFORE resolving the slot. flush() zeroes
+        // textureSlotCount, so a slot resolved first would leave this quad pointing
+        // at a slot the next flush never binds -- it samples an unbound sampler and
+        // draws as white garbage.
         if (quadCount >= MAX_QUADS) {
             flush()
         }
+
+        // Resolve the texture slot index for this quad
+        val texSlotIndex = resolveTextureSlot(textureId)
 
         // Extract RGBA components from ARGB int (matching legacy glColor4ub byte order),
         // with the alpha byte corrected for the legacy blend-mode semantics.
@@ -373,13 +376,16 @@ class ModernSpriteRenderer {
             applyBlendMode(blendMode)
         }
 
-        // Resolve the texture slot index for this quad
-        val texSlotIndex = resolveTextureSlot(textureId)
-
-        // Check if batch is full
+        // Flush a full batch BEFORE resolving the slot. flush() zeroes
+        // textureSlotCount, so a slot resolved first would leave this quad pointing
+        // at a slot the next flush never binds -- it samples an unbound sampler and
+        // draws as white garbage.
         if (quadCount >= MAX_QUADS) {
             flush()
         }
+
+        // Resolve the texture slot index for this quad
+        val texSlotIndex = resolveTextureSlot(textureId)
 
         // Extract RGBA components (alpha corrected for legacy blend-mode semantics)
         val effColor = effectiveColor(colorArgb, blendMode)
@@ -811,6 +817,15 @@ class ModernSpriteRenderer {
 
         drawCallsThisFrame++
         quadsThisFrame += quadCount
+
+        // Restore the default binding point. Legacy fixed-function paths that still
+        // run under this toolkit (GroundGL.renderMinimapFloor and the ground pass draw
+        // client-memory vertex arrays via toggleDrawingClientstates) are only legal
+        // with VAO 0 and program 0 bound; leaving this batch's VAO/shader bound makes
+        // those draws read the sprite batch's attribute state instead, which is what
+        // painted textured spikes and fans into the generated minimap texture.
+        vao!!.unbind()
+        GLWrapper.useProgram(0)
 
         // Reset for next batch
         quadCount = 0

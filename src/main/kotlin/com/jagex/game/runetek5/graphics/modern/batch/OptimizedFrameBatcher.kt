@@ -39,6 +39,29 @@ import java.nio.IntBuffer
 class OptimizedFrameBatcher {
 
     companion object {
+        /** Fold the texture alpha channel into model fragment alpha.
+         *  Legacy model faces take alpha from the face colour, so this is OFF. */
+        /** Must match MAX_POINT_LIGHTS in the vertex shader. */
+        const val MAX_POINT_LIGHTS = 16
+
+        @JvmStatic val CULL_FACE = System.getProperty("render.cullface")?.equals("false", true) != true
+        /** GL_BACK. */
+        @JvmStatic val CULL_MODE = 0x0405
+        /** GL_CCW. Front faces come out counter-clockwise for this batcher's
+         *  geometry; verified against legacy (GL_CW culled the wrong side and left
+         *  the signpost's underside quads visible). -Drender.cullwind=cw to flip. */
+        @JvmStatic val CULL_WIND = if (System.getProperty("render.cullwind") == "cw") 0x0900 else 0x0901
+        /** Fold the texture alpha channel into model fragment alpha.
+         *
+         *  ON, because that is what legacy does: loadTextureCombineMode maps every
+         *  material mode onto an alpha combiner that reads the texture (MODULATE ->
+         *  texA*vertA, REPLACE -> texA), and glAlphaFunc(GL_GREATER, 0) discards only
+         *  fully transparent fragments -- the alpha combiner source is never
+         *  redirected away from the texture. Forcing alpha to come from the vertex
+         *  colour instead made the Canifis lampposts solid, but it also made every
+         *  texture that legitimately uses its alpha opaque (cape icon backgrounds,
+         *  roof tiles). -Drender.texalpha=false restores that behaviour. */
+        @JvmStatic val TEX_ALPHA = System.getProperty("render.texalpha")?.equals("false", true) != true
         /**
          * Alpha cutoff for the model pass.
          *
@@ -78,6 +101,9 @@ class OptimizedFrameBatcher {
     private var uTextureLocation = -1
     private var uTextureEnabledLocation = -1
     private var uCombineModeLocation = -1
+    private var uTexAlphaLocation = -1
+    /** Per-material: does this texture actually carry an alpha channel? */
+    private var texHasAlpha: (Int) -> Boolean = { true }
     private var uAlphaThresholdLocation = -1
     private var uViewProjectionLocation = -1
 
@@ -85,6 +111,9 @@ class OptimizedFrameBatcher {
     private var uSunDirectionLocation = -1
     private var uSunBrightnessLocation = -1
     private var uSunColorLocation = -1
+    private var uPointLightCountLocation = -1
+    private var uPointLightPosLocation = -1
+    private var uPointLightColorLocation = -1
     private var uContrastPosLocation = -1
     private var uContrastNegLocation = -1
     private var uViewMatrixLocation = -1
@@ -178,12 +207,16 @@ class OptimizedFrameBatcher {
         uTextureLocation = shader!!.getUniformLocation("uTexture")
         uTextureEnabledLocation = shader!!.getUniformLocation("uTextureEnabled")
         uCombineModeLocation = shader!!.getUniformLocation("uCombineMode")
+        uTexAlphaLocation = shader!!.getUniformLocation("uTexAlpha")
         uAlphaThresholdLocation = shader!!.getUniformLocation("uAlphaThreshold")
         uViewProjectionLocation = shader!!.getUniformLocation("uViewProjection")
         // Lighting uniforms
         uSunDirectionLocation = shader!!.getUniformLocation("uSunDirection")
         uSunBrightnessLocation = shader!!.getUniformLocation("uSunBrightness")
         uSunColorLocation = shader!!.getUniformLocation("uSunColor")
+        uPointLightCountLocation = shader!!.getUniformLocation("uPointLightCount")
+        uPointLightPosLocation = shader!!.getUniformLocation("uPointLightPos")
+        uPointLightColorLocation = shader!!.getUniformLocation("uPointLightColor")
         uContrastPosLocation = shader!!.getUniformLocation("uContrastPos")
         uContrastNegLocation = shader!!.getUniformLocation("uContrastNeg")
         uViewMatrixLocation = shader!!.getUniformLocation("uViewMatrix")
@@ -222,6 +255,7 @@ class OptimizedFrameBatcher {
     private fun createOptimizedShader(): ShaderProgram {
         val vertexSource = """
             #version 330 core
+            #define MAX_POINT_LIGHTS 16
 
             layout(location = 0) in vec3 aPosition;   // Local space position
             layout(location = 1) in vec3 aNormal;     // Vertex normal for lighting
@@ -237,6 +271,15 @@ class OptimizedFrameBatcher {
             uniform vec3 uSunColor;       // RGB color multiplier
             uniform float uContrastPos;   // Contrast for positive dot product
             uniform float uContrastNeg;
+
+            // Legacy point lights (OpenGlToolkit.renderLights): GL_LIGHT2+ with
+            // GL_POSITION, GL_DIFFUSE = colour * (transparency/255) and
+            // GL_QUADRATIC_ATTENUATION = 1/size2d^2 (constant/linear terms are 0),
+            // so att = 1/(kq*d^2). GL_NORMALIZE is never enabled, so the scaled normal
+            // feeds the diffuse term as-is, same as the sun term.
+            uniform int uPointLightCount;
+            uniform vec4 uPointLightPos[MAX_POINT_LIGHTS];   // xyz world, w = kq
+            uniform vec3 uPointLightColor[MAX_POINT_LIGHTS]; // already * transparency/255
 
             // Legacy GL_LINEAR fog (setupMatrixRendering enables it per model draw).
             uniform mat4 uViewMatrix;
@@ -281,6 +324,16 @@ class OptimizedFrameBatcher {
                 vec3 baseRGB = aColor.rgb;
                 vec3 litRGB = baseRGB * uSunColor * lightIntensity;
 
+                // Point lights add on top of the sun term, exactly as fixed-function
+                // accumulates GL_LIGHT2+ before the final clamp.
+                for (int i = 0; i < uPointLightCount; ++i) {
+                    vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
+                    float d2 = dot(toLight, toLight);
+                    float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
+                    float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
+                    litRGB += baseRGB * uPointLightColor[i] * (att * ndotl);
+                }
+
                 // Clamp to valid range (matching legacy's 0-255 clamping)
                 litRGB = clamp(litRGB, 0.0, 1.0);
 
@@ -313,13 +366,16 @@ class OptimizedFrameBatcher {
             // (often green) face colors that legacy discards — that was the green
             // sign-board / textured-loc bug. Matches groundTextured.frag exactly.
             uniform int uCombineMode;
+            uniform bool uTexAlpha;
 
             out vec4 fragColor;
 
             void main() {
                 vec4 color;
+                float texAlphaRaw = 1.0;
                 if (uTextureEnabled) {
                     vec4 texColor = texture(uTexture, vTexCoord);
+                    texAlphaRaw = texColor.a;
                     if (uCombineMode == 1) {
                         color = texColor;
                     } else if (uCombineMode == 3) {
@@ -333,6 +389,10 @@ class OptimizedFrameBatcher {
                     color = vColor;
                 }
 
+                // RS stores INVERTED alpha (0 = opaque, 255 = transparent); getPixelsArgb
+                // hands that straight to GL, so flip it before use (see InstancedModelBatcher).
+                if (uTextureEnabled) color.a = uTexAlpha ? (1.0 - texAlphaRaw) * vColor.a : vColor.a;
+
                 if (color.a <= uAlphaThreshold) {
                     discard;
                 }
@@ -340,7 +400,12 @@ class OptimizedFrameBatcher {
                 // Debug: uAlphaThreshold == -99 outputs ALPHA as greyscale, so the
                 // actual per-fragment alpha of a surface can be read off a capture
                 // instead of inferred.
-                if (uAlphaThreshold < -50.0) {
+                if (uAlphaThreshold < -90.0) {
+                    // -99: VERTEX alpha only (pre-texture), to tell whether a
+                    // translucent surface is translucent in its face data or only
+                    // after the texture's alpha channel is modulated in.
+                    fragColor = vec4(vColor.a, vColor.a, vColor.a, 1.0);
+                } else if (uAlphaThreshold < -50.0) {
                     fragColor = vec4(color.a, color.a, color.a, 1.0);
                 } else {
                     // GL fog: C = f*Cfrag + (1-f)*Cfog. Alpha is not fogged.
@@ -470,6 +535,27 @@ class OptimizedFrameBatcher {
         fogB = (colorRgb and 0xff) / 255f
         fogStart = start
         fogEnd = end
+    }
+
+    // ===== Point lights =====
+    // Legacy sets GL_LIGHT2+ per model in copyLights; this batcher draws models in
+    // material batches, so the frame's lights are uploaded once as a small array and
+    // every fragment accumulates them. Quadratic falloff means distant lights
+    // contribute ~0, which is what legacy's per-model light selection approximates.
+    private var pointLightCount = 0
+    private val pointLightPos = FloatArray(MAX_POINT_LIGHTS * 4)
+    private val pointLightColor = FloatArray(MAX_POINT_LIGHTS * 3)
+
+    /** [count] lights; [pos] is xyzw per light (w = 1/size2d^2), [color] is rgb per light. */
+    fun setTextureAlphaPredicate(p: (Int) -> Boolean) { texHasAlpha = p }
+
+    fun setPointLights(count: Int, pos: FloatArray, color: FloatArray) {
+        val n = if (count > MAX_POINT_LIGHTS) MAX_POINT_LIGHTS else count
+        pointLightCount = n
+        if (n > 0) {
+            System.arraycopy(pos, 0, pointLightPos, 0, n * 4)
+            System.arraycopy(color, 0, pointLightColor, 0, n * 3)
+        }
     }
 
     fun setLighting(
@@ -829,6 +915,18 @@ class OptimizedFrameBatcher {
 
         // Bind shader and set uniforms
         sh.bind()
+        // Legacy back-face culls model geometry (OpenGlToolkit init:
+        // glEnable(GL_CULL_FACE) + glCullFace(GL_BACK), never turned off for the
+        // scene). Asserted HERE rather than in openSceneBatch because state set
+        // there is cleared before the draws land. The projection flips Y, which
+        // reverses winding, so front faces are CW.
+        if (CULL_FACE) {
+            GLWrapper.enable(GLWrapper.Constants.CULL_FACE)
+            GLWrapper.cullFace(CULL_MODE)
+            GLWrapper.frontFace(CULL_WIND)
+        } else {
+            GLWrapper.disable(GLWrapper.Constants.CULL_FACE)
+        }
         sh.setUniform(uTextureLocation, 0)
         // -1 disables the shader's `color.a <= uAlphaThreshold` discard entirely,
         // so geometry lost to a zero alpha becomes visible (render alphatest).
@@ -851,6 +949,14 @@ class OptimizedFrameBatcher {
         sh.setUniform(uSunDirectionLocation, sunDirX, sunDirY, sunDirZ)
         sh.setUniform(uSunBrightnessLocation, sunBrightness)
         sh.setUniform(uSunColorLocation, sunColorR, sunColorG, sunColorB)
+        // Point lights for this frame (see setPointLights).
+        if (uPointLightCountLocation >= 0) {
+            GLWrapper.uniform1i(uPointLightCountLocation, pointLightCount)
+            if (pointLightCount > 0) {
+                if (uPointLightPosLocation >= 0) GLWrapper.uniform4fv(uPointLightPosLocation, pointLightPos)
+                if (uPointLightColorLocation >= 0) GLWrapper.uniform3fv(uPointLightColorLocation, pointLightColor)
+            }
+        }
         sh.setUniform(uContrastPosLocation, contrastPos)
         sh.setUniform(uContrastNegLocation, contrastNeg)
         viewMatrix?.let { glUniformMatrix4fv(uViewMatrixLocation, false, it) }
@@ -892,6 +998,7 @@ class OptimizedFrameBatcher {
                     // per-face vColor — required or textured faces with junk face colors
                     // render tinted (the green sign-board bug).
                     sh.setUniform(uCombineModeLocation, if (texId >= 0) combineModeOf(texId) else 0)
+                    sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
                 } else {
                     sh.setUniform(uTextureEnabledLocation, 0)
                 }

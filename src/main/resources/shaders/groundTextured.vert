@@ -48,7 +48,14 @@ void main() {
     if (uHasNormals) {
         float d = dot(uSunDirection, aNormal);
         float intensity = uSunBrightness + d * (d > 0.0 ? uContrastPos : uContrastNeg);
-        color = clamp(color * intensity, 0.0, 1.0);
+        // Multiply by the SUN COLOUR as well as the intensity. Fixed-function ground
+        // lighting uses GL_LIGHT0 diffuse = sunColorIntensity * sunColor and
+        // GL_LIGHT_MODEL_AMBIENT = sunBrightness * sunColor, so the tint is part of
+        // the lit result; writeVertexColor bakes only a SCALAR colourMultiplier, never
+        // the tint. Omitting it left textured terrain untinted and ~2x too bright
+        // (measured blue/red 0.66 here vs 0.32 in legacy, exactly the 0.35/0.71 the
+        // sun colour applies). ground.vert already did this for untextured terrain.
+        color = clamp(color * uSunColor * intensity, 0.0, 1.0);
     }
     vColor = vec4(color, aColor.a);
     vTexCoord = aTexCoord * uTextureScale;

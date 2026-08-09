@@ -191,6 +191,7 @@ object CoreVmOps {
         val class4053: ClanVarType? = TypeLists.CLAN_VAR!!.list(i_2)
         if (class4053!!.aChar4832.code != 1) {
             executor.intStack[++executor.intStackPtr - 1] = 0
+            return
         }
         val integer4: Int? = ClanVarTypeList.CLAN_VARS!![class4053!!.baseVar] as Int?
         if (integer4 == null) {

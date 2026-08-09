@@ -264,10 +264,14 @@ open class GroundGL(
                 (goundMaterialNodes!![tileX] as GroundMaterialGL).drawMaterialTriangles(visibleTileIndices, visibleTileCount)
             }
 
-            // Point lights are not part of the modern pipeline yet; their fixed-function
-            // light meshes draw client-memory arrays against modern-reconfigured GL
-            // state (same native-crash class as the shadow overlay below).
-            if (!activeLights.isEmpty() && activeToolkit !is ModernGLToolkit) {
+            // Legacy point-light pass: MULTIPLY-blended light meshes painted over the
+            // ground, which is what gives lamps their pools of light AND darkens the
+            // unlit ground. Under the modern toolkit it runs inside a fixed-function
+            // isolation window (see beginLegacyFixedFunctionPass) -- the reason it was
+            // disabled was a core program/VAO still being bound, not the pass itself.
+            val modernTk = activeToolkit as? ModernGLToolkit
+            if (!activeLights.isEmpty() && (modernTk == null || ModernGLToolkit.groundLightPass)) {
+                modernTk?.beginLegacyFixedFunctionPass()
                 val fogColor = activeToolkit.fogColor
                 val fogDensity = activeToolkit.fogDensity
                 activeToolkit.calculateFog(0, fogDensity, activeToolkit.fogOffset)
@@ -293,18 +297,19 @@ open class GroundGL(
                 activeToolkit.setTextureTransparency(0, GL_TEXTURE)
                 activeToolkit.setActiveTexture(null)
                 activeToolkit.calculateFog(fogColor, fogDensity, activeToolkit.fogOffset)
+                modernTk?.endLegacyFixedFunctionPass()
             }
 
-            // The fixed-function shadow overlay is skipped under the modern toolkit:
-            // it draws client-memory index arrays against GL state the modern ground
-            // pass has reconfigured (native crash), and the modern pipeline replaces it
-            // with the shader ShadowPass.
-            if (shadowMapper != null && activeToolkit !is ModernGLToolkit) {
+            // Legacy shadow overlay: the projected scenery/entity shadows composited
+            // onto the ground. Same fixed-function isolation as the light pass above.
+            if (shadowMapper != null && (modernTk == null || ModernGLToolkit.groundShadowPass)) {
+                modernTk?.beginLegacyFixedFunctionPass()
                 OpenGL.glPushMatrix()
                 OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
                 shadowMapper!!.renderShadowOverlay(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen, belowLowestPlane)
                 OpenGL.glPopMatrix()
+                modernTk?.endLegacyFixedFunctionPass()
             }
         }
     }

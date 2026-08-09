@@ -520,6 +520,7 @@ object MathStringOps {
         val i_3 = executor.intStack[executor.intStackPtr + 1]
         if (i_2 > 700 || i_3 > 700) {
             executor.intStack[++executor.intStackPtr - 1] = 256
+            return
         }
         val d_4 = (Math.random() * (i_3 + i_2) - i_2 + 800.0) / 100.0
         executor.intStack[++executor.intStackPtr - 1] = (Math.pow(2.0, d_4) + 0.5).toInt()

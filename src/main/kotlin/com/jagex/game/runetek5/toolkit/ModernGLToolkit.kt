@@ -1,5 +1,6 @@
 package com.jagex.game.runetek5.toolkit
 
+import com.jagex.game.runetek5.graphics.light.PointLight
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.material.MaterialProvider
 import com.jagex.game.runetek5.config.material.MaterialTypeList
@@ -272,6 +273,17 @@ class ModernGLToolkit(
          * present but mis-oriented means the fault is in the yaw compose.
          */
         @JvmStatic var modernYawEnabled = flag("yaw")
+        /** Legacy back-face culling for the 3D scene pass. -Drender.cullface=false to disable. */
+        @JvmStatic val cullFaceEnabled = flag("cullface")
+        /** Legacy fixed-function ground point-light pass. -Drender.groundlight=false disables. */
+        @JvmStatic val groundLightPass = flag("groundlight")
+        /** Shader point lights on models. -Drender.pointlights=false disables. */
+        @JvmStatic val pointLightsEnabled = flag("pointlights")
+        @JvmStatic val TEX_ALPHA_DIAG = System.getProperty("render.texalphadiag") != null
+        /** Legacy fixed-function ground shadow overlay. -Drender.groundshadow=false disables. */
+        @JvmStatic val groundShadowPass = flag("groundshadow")
+        /** Legacy per-vertex-slot colours (last face wins). -Drender.slotcolor=false = per-face. */
+        @JvmStatic var slotColorEnabled = flag("slotcolor")
 
         /** -Drender.meshkey=hash : key mesh-built geometry by current vertices. */
         /** -Drender.verifylive=true : live stale-modernBuilt detector. */
@@ -306,7 +318,15 @@ class ModernGLToolkit(
      * the standalone modern renderer, so report no bloom support until a modern
      * post-processing pass exists (parity gap).
      */
-    override fun hasBloomSupport(): Boolean = false
+    /**
+     * Bloom is the inherited legacy post-process (RectangularTextureGL on the
+     * FramebufferCompositor); it operates on the finished scene framebuffer, so it is
+     * renderer-agnostic. It was hard-disabled here while the modern path was being
+     * brought up. -Drender.bloomsupport=false restores the disabled behaviour.
+     */
+    override fun hasBloomSupport(): Boolean =
+        if (System.getProperty("render.bloomsupport")?.equals("false", true) == true) false
+        else super.hasBloomSupport()
 
     override fun initialize() {
         super.initialize()
@@ -445,6 +465,8 @@ class ModernGLToolkit(
     private var perfSwapNsAcc = 0L
     private var perfFrameSamples = 0
     private var debugModernDraws = 0
+    /** Faces whose vertex slot was never written by the colour pre-pass. */
+    private var unwrittenSlotFaces = 0
     private var debugLegacyDraws = 0
     private var debugSetupSpriteCalls = 0
     private var debugBatchFlushes = 0
@@ -518,7 +540,8 @@ class ModernGLToolkit(
                     // reject   = most recent reason canUseModernPipeline() returned false
                     "smm=$diagSetModelMatrixCalls(rej=$diagSetModelMatrixRejected) " +
                     "batchOpen=$diagBatchOpens(lazy=$diagLazyBatchOpens) " +
-                    "modelDraws=$diagModelGateAccepted/$diagModelGateCalls " +
+                    "modelDraws=$diagModelGateAccepted/$diagModelGateCalls unwrittenSlots=$unwrittenSlotFaces " +
+                    "ptLights=$diagPointLights " +
                     "ground=$diagGroundDrawn/noPipe=$diagGroundNoPipeline/noSnap=$diagGroundNoSnapshot/calls=$diagGroundCalls " +
                     "reject=$lastPipelineRejectReason " +
                     "legacySkips=${if (legacySkipCounters.isEmpty()) "{}" else legacySkipCounters.toSortedMap().toString()}"
@@ -802,6 +825,8 @@ class ModernGLToolkit(
         } else {
             glDisable(GL_BLEND)
         }
+        // Cull state for model geometry is asserted at the draw site in the
+        // model batchers (state set here does not survive to the draws).
         glDisable(GL_CULL_FACE)
 
         // Begin frame for all renderers
@@ -840,6 +865,8 @@ class ModernGLToolkit(
                 viewMatrix44.elements, fogEnabled && fogDensity >= 0,
                 fogColor, fogStartPosition, fogEndPosition
             )
+            buildFrameLights()
+            optimizedBatcher?.setPointLights(frameLightCount, frameLightPos, frameLightColor)
 
             // Begin instanced batcher for repeated mesh detection
             if (useInstancing) {
@@ -855,7 +882,11 @@ class ModernGLToolkit(
                     viewMatrix44.elements, fogEnabled && fogDensity >= 0,
                     fogColor, fogStartPosition, fogEndPosition
                 )
+                instancedBatcher?.setPointLights(frameLightCount, frameLightPos, frameLightColor)
             }
+            // Lights are collected during the scene walk that follows; clear after
+            // uploading so the next frame starts empty.
+            frameLights.clear()
         } else {
             frameBatcher?.beginFrame()
         }
@@ -970,9 +1001,11 @@ class ModernGLToolkit(
         if (useOptimizedBatcher && optimizedBatcher?.isActive() == true) {
             // Render instanced geometry first (repeated meshes)
             if (useInstancing && instancedBatcher?.isActive() == true) {
+                instancedBatcher?.setTextureAlphaPredicate(::materialTextureHasAlpha)
                 instancedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
             }
             // Render remaining non-instanced geometry
+            optimizedBatcher?.setTextureAlphaPredicate(::materialTextureHasAlpha)
             optimizedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
             mr.endFrame()
             gr.endFrame()
@@ -984,8 +1017,9 @@ class ModernGLToolkit(
             gr.endFrame()
         }
 
-        // Restore default winding order
+        // Restore default winding order and two-sided drawing for the 2D/UI pass.
         glFrontFace(GL_CCW)
+        glDisable(GL_CULL_FACE)
 
         // Restore blending for the 2D/UI pass. The model batchers leave GL_BLEND
         // wherever their last material batch put it, and sprites/text/interfaces
@@ -1114,6 +1148,108 @@ class ModernGLToolkit(
      * (screen-capture sprites, copyTexSubImage updates) — legacy drew immediately,
      * so captures could assume the pixels were present.
      */
+    // ===== Point lights =====
+    // Legacy calls copyLights per entity (Scene.placeSceneryObjects) and programs
+    // GL_LIGHT2+ for that model only. The modern batchers draw models grouped by
+    // material, so per-model light state cannot be expressed; instead the frame's
+    // lights are accumulated here and uploaded once as a small array. Because
+    // attenuation is quadratic, a light far from a model contributes ~0, which is
+    // what legacy's per-model selection approximates anyway.
+    private val frameLights = ArrayList<PointLight>()
+    private val frameLightPos = FloatArray(InstancedModelBatcher.MAX_POINT_LIGHTS * 4)
+    private val frameLightColor = FloatArray(InstancedModelBatcher.MAX_POINT_LIGHTS * 3)
+    private var frameLightCount = 0
+    @JvmField var diagPointLights = 0
+
+    override fun copyLights(lightCount: Int, lights: Array<PointLight>?) {
+        // Keep legacy's GL_LIGHT state in sync: the ground's fixed-function light
+        // pass runs inside this toolkit and reads it.
+        super.copyLights(lightCount, lights)
+        if (!pointLightsEnabled || lightCount <= 0 || lights == null) return
+        for (i in 0 until lightCount) {
+            val l = lights[i] ?: continue
+            // Identity dedup: the same light is submitted once per entity it touches.
+            var seen = false
+            for (j in frameLights.indices) if (frameLights[j] === l) { seen = true; break }
+            if (!seen) frameLights.add(l)
+        }
+    }
+
+    /** Packs the frame's lights into the batcher upload arrays. */
+    private fun buildFrameLights() {
+        var n = frameLights.size
+        if (n > InstancedModelBatcher.MAX_POINT_LIGHTS) n = InstancedModelBatcher.MAX_POINT_LIGHTS
+        for (i in 0 until n) {
+            val l = frameLights[i]
+            val size = l.getSize2d().toFloat()
+            // GL_QUADRATIC_ATTENUATION = 1/size2d^2 (OpenGlToolkit.renderLights).
+            val kq = if (size > 0f) 1f / (size * size) else 1f
+            frameLightPos[i * 4] = l.getX().toFloat()
+            frameLightPos[i * 4 + 1] = l.getY().toFloat()
+            frameLightPos[i * 4 + 2] = l.getZ().toFloat()
+            frameLightPos[i * 4 + 3] = kq
+            // GL_DIFFUSE = colour components * (transparency / 255), matching
+            // renderLights; transparency carries the flicker factor (~1.0).
+            val c = l.getColor()
+            val a = l.getAlpha() / 255.0f
+            frameLightColor[i * 3] = ((c shr 16) and 0xff) * a
+            frameLightColor[i * 3 + 1] = ((c shr 8) and 0xff) * a
+            frameLightColor[i * 3 + 2] = (c and 0xff) * a
+        }
+        frameLightCount = n
+        diagPointLights = frameLights.size
+    }
+
+    /**
+     * Prepares GL for a LEGACY FIXED-FUNCTION pass that runs inside the modern
+     * scene (the ground's point-light meshes and shadow overlay).
+     *
+     * Fixed-function drawing needs the default binding points: with a core shader
+     * program bound the FFP is bypassed entirely, and with a non-zero VAO bound the
+     * legacy vertex/colour pointers are read from the wrong attribute state. These
+     * two passes were disabled under this toolkit for exactly that reason; isolating
+     * the state is what makes them safe to run again.
+     *
+     * Pending modern batches are flushed first so the legacy pass composites over
+     * geometry that is already in the framebuffer, matching legacy's draw order.
+     */
+    fun beginLegacyFixedFunctionPass() {
+        flushSceneForUiDraw()
+        GLWrapper.bindVertexArray(0)
+        GLWrapper.useProgram(0)
+    }
+
+    /**
+     * Restores the state a legacy fixed-function pass changed.
+     *
+     * Those passes run MID-FRAME (per ground material) and leave depth writes off,
+     * MULTIPLY blending and a modified texture environment behind. Legacy gets away
+     * with it because its next setupMatrixRendering() resets everything; the modern
+     * batchers cache their own state and do not, so whatever draws after the ground
+     * inherits the clobbered state. Scene.drawTiles draws roofs in the layered/priority
+     * pass AFTER the ground loop, which is why roof geometry came out as flat washed
+     * quads until this restore existed.
+     */
+    fun endLegacyFixedFunctionPass() {
+        GLWrapper.bindVertexArray(0)
+        GLWrapper.useProgram(0)
+        // Put the legacy toolkit's own state cache back where the model path expects it
+        // (setupMatrixRendering's state), so both caches agree with real GL.
+        setDepthMask(true)
+        setBlendMode(1)
+        // Re-assert the modern scene's GL state directly — openSceneBatch established
+        // it once for the frame and will not run again before the next model draw.
+        glEnable(GL_DEPTH_TEST)
+        glDepthFunc(GL_LEQUAL)
+        glDepthMask(true)
+        if (modelBlend) {
+            glEnable(GL_BLEND)
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        } else {
+            glDisable(GL_BLEND)
+        }
+    }
+
     fun flushAllPendingDraws() {
         if (!canUseModernPipeline()) return
         flushSceneForUiDraw()
@@ -1831,6 +1967,68 @@ class ModernGLToolkit(
         return material.effectCombiner == 2 || !MaterialTypeList.isOpaqueEffect(material.effectId.toInt())
     }
 
+    /**
+     * Reads a material's texture alpha channel off the GPU once and reports its
+     * distribution. Answers directly whether a surface that renders translucent has
+     * genuinely partial alpha in its texture data, or whether the translucency comes
+     * from somewhere else in the pipeline. -Drender.texalphadiag=1.
+     */
+    private fun dumpTextureAlpha(materialId: Int, handle: Int) {
+        try {
+            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, handle)
+            val w = org.lwjgl.opengl.GL33.glGetTexLevelParameteri(org.lwjgl.opengl.GL33.GL_TEXTURE_2D, 0, org.lwjgl.opengl.GL33.GL_TEXTURE_WIDTH)
+            val h = org.lwjgl.opengl.GL33.glGetTexLevelParameteri(org.lwjgl.opengl.GL33.GL_TEXTURE_2D, 0, org.lwjgl.opengl.GL33.GL_TEXTURE_HEIGHT)
+            if (w <= 0 || h <= 0 || w * h > 4 * 1024 * 1024) return
+            val buf = MemoryUtil.memAlloc(w * h * 4)
+            org.lwjgl.opengl.GL33.glPixelStorei(org.lwjgl.opengl.GL33.GL_PACK_ALIGNMENT, 1)
+            org.lwjgl.opengl.GL33.glGetTexImage(org.lwjgl.opengl.GL33.GL_TEXTURE_2D, 0,
+                org.lwjgl.opengl.GL33.GL_RGBA, org.lwjgl.opengl.GL33.GL_UNSIGNED_BYTE, buf)
+            var sum = 0L; var partial = 0; var zero = 0; var full = 0
+            val n = w * h
+            for (i in 0 until n) {
+                val a = buf.get(i * 4 + 3).toInt() and 0xff
+                sum += a
+                when {
+                    a == 0 -> zero++
+                    a == 255 -> full++
+                    else -> partial++
+                }
+            }
+            MemoryUtil.memFree(buf)
+            val mean = sum.toDouble() / n
+            if (partial > 0 || zero > 0) {
+                val mt = materialProvider?.getMaterial(materialId)
+                System.err.println("[TexAlpha] mat=$materialId ${w}x$h meanA=${"%.1f".format(mean)} " +
+                    "zero=${zero * 100 / n}% partial=${partial * 100 / n}% full=${full * 100 / n}% " +
+                    "combine=${mt?.combineMode} effectId=${mt?.effectId} effectCombiner=${mt?.effectCombiner} " +
+                    "hasAlpha=${materialTextureHasAlpha(materialId)}")
+            }
+        } catch (t: Throwable) {
+            System.err.println("[TexAlpha] mat=$materialId failed: $t")
+        }
+    }
+
+    /**
+     * Whether a material's GL texture actually carries a meaningful alpha channel.
+     *
+     * OpenGLTextureCache.getTexture loads opaque materials through
+     * MaterialProvider.getPixels -> getPixelsRgb (RGB, no alpha), and everything else
+     * through getPixelsArgb. The RGB path still lands in an RGBA texture, so its alpha
+     * bytes are junk -- measured across this scene they sit at a near-uniform ~0.05-0.55
+     * with no binary structure, while genuine cutout textures come out binary (e.g.
+     * 78% zero / 21% full). Sampling the junk alpha tinted whole opaque models
+     * translucent: the Canifis lamppost probes as vertex alpha 1.0 but final alpha 0.55
+     * across post, arm and lantern alike.
+     *
+     * Mirrors the cache's own branch so the shader honours alpha exactly where the
+     * texture has it.
+     */
+    fun materialTextureHasAlpha(materialId: Int): Boolean {
+        if (materialId < 0) return false
+        val m = materialProvider?.getMaterial(materialId) ?: return false
+        return m.effectCombiner == 2 || !MaterialTypeList.isOpaqueEffect(m.effectId.toInt())
+    }
+
     private fun lookupTextureHandle(materialId: Int): Int {
         // Only -1 is untextured. Material id 0 is a VALID textured material (old-format
         // meshes start texture ids at 0); legacy tests `< 0` (OpenGlToolkit.kt:1895),
@@ -1849,6 +2047,7 @@ class ModernGLToolkit(
         // Never cache a miss, or the material is stuck untextured (white) forever.
         if (handle != 0) {
             textureHandleCache[materialId] = handle
+            if (TEX_ALPHA_DIAG) dumpTextureAlpha(materialId, handle)
         }
         if (handle == 0 && diagBudget > 0 && diagGreenSeen.add(materialId)) {
             diagBudget--
@@ -1916,6 +2115,9 @@ class ModernGLToolkit(
     private val reusableColors = ByteArray(12)
     private val reusableNormals = FloatArray(9)  // 3 vertices * 3 components for normals
     private var reusableNormalToVertex = IntArray(4096)  // Pooled array for normal-to-vertex mapping
+    private var reusableSlotColor = IntArray(4096)
+    private var reusableSlotStamp = IntArray(4096)
+    private var slotStampCounter = 0
 
     /**
      * Computes a content-based hash for a ModelGL.
@@ -2123,7 +2325,12 @@ class ModernGLToolkit(
         }
         timeFrustumCull += System.nanoTime() - t1
 
-        val numFaces = model.numFaces
+        // renderedFaceCount, NOT numFaces — see buildModelCache: faces in
+        // [renderedFaceCount, numFaces) are billboard ANCHOR faces that legacy never
+        // rasterizes (it paints them as sprites via drawBillboards). They are
+        // untextured and carry the billboard's tint as their face colour, so drawing
+        // them paints flat green quads over glowing locs (the Canifis signpost).
+        val numFaces = model.renderedFaceCount
         if (numFaces <= 0) return
         if (verifyLiveGeometry) GeometryDiff.recordContrast(model.contrast.toInt())
 
@@ -2364,7 +2571,16 @@ class ModernGLToolkit(
                 val triStart = triangles[vertIdx]
                 val triEnd = triangles[vertIdx + 1]
                 for (i in triStart until triEnd) {
-                    val normalIdx = (normalMapping[i].toInt() and 0xFFFF) - 1
+                    // Legacy BREAKS here on the 0 sentinel (ModelGL.upload:
+                    // `normalIdx = vertexNormalIndices[triIdx] - 1; if (normalIdx == -1) break`).
+                    // The slot run for a vertex is zero-terminated inside its
+                    // [triangles[v], triangles[v+1]) window; entries past the
+                    // terminator belong to other vertices. Skipping instead of
+                    // breaking claimed those slots for the wrong vertex, and since
+                    // later vertices overwrite, faces referencing them got wrong
+                    // positions — the stretched green quads on the Canifis signpost.
+                    val normalIdx = normalMapping[i].toInt() - 1
+                    if (normalIdx == -1) break
                     if (normalIdx >= 0 && normalIdx < numNormals) {
                         normalToVertex[normalIdx] = vertIdx
                     }
@@ -2373,6 +2589,7 @@ class ModernGLToolkit(
         } else {
             normalToVertex = null
         }
+
 
         // Count valid faces first
         var validFaceCount = 0
@@ -2476,6 +2693,36 @@ class ModernGLToolkit(
             }
         }
 
+        // Legacy colours are PER VERTEX SLOT, not per face: ModelGL.upload writes
+        // hslToRgb(face) into the slots named by facesA/B/C for every face in order
+        // (ModelGL.kt:2050-2058), so on shared vertices the LAST face wins for both
+        // RGB and alpha. Emitting per-face colour instead let translucent faces keep
+        // alpha ~127 on vertices legacy had already overwritten opaque -- the
+        // see-through Canifis lampposts.
+        val slotCount = if (useDirectVertexIndices) maxDepth else numNormals
+        if (reusableSlotColor.size < slotCount) {
+            reusableSlotColor = IntArray(slotCount * 2)
+        }
+        val slotColor = reusableSlotColor
+        if (reusableSlotStamp.size < slotCount) {
+            reusableSlotStamp = IntArray(slotCount * 2)
+        }
+        val slotStamp = reusableSlotStamp
+        val stamp = ++slotStampCounter
+        val colorFaceCount = minOf(model.numFaces, facesA.size, facesB.size, facesC.size)
+        for (f in 0 until colorFaceCount) {
+            val mat = facesMaterial?.get(f)?.toInt() ?: -1
+            val hsl = facesColor?.get(f)?.toInt()?.and(0xFFFF) ?: 0
+            val fa = facesAlpha?.get(f) ?: 0.toByte()
+            val rgba = model.hslToRgb(hsl.toShort(), mat.toShort(), modelAmbient, fa)
+            val sa = facesA[f].toInt() and 0xFFFF
+            val sb = facesB[f].toInt() and 0xFFFF
+            val sc = facesC[f].toInt() and 0xFFFF
+            if (sa < slotCount) { slotColor[sa] = rgba; slotStamp[sa] = stamp }
+            if (sb < slotCount) { slotColor[sb] = rgba; slotStamp[sb] = stamp }
+            if (sc < slotCount) { slotColor[sc] = rgba; slotStamp[sc] = stamp }
+        }
+
         // Process faces - write full 40-byte vertices with pre-computed normals
         for (faceIdx in 0 until numFaces) {
             val idxA = facesA[faceIdx].toInt() and 0xFFFF
@@ -2502,17 +2749,30 @@ class ModernGLToolkit(
             val materialId = facesMaterial?.get(faceIdx)?.toInt() ?: -1
             materialIds[outFaceIdx] = materialId.toShort()
 
-            // Base color (pre-computed RGBA)
-            val hslColor = facesColor?.get(faceIdx)?.toInt()?.and(0xFFFF) ?: 0
-            val faceAlpha = facesAlpha?.get(faceIdx) ?: 0.toByte()
-            val baseRgba = model.hslToRgb(hslColor.toShort(), materialId.toShort(), modelAmbient, faceAlpha)
-            val finalAlpha = 255 - (faceAlpha.toInt() and 0xFF)
-            val packedColor = (baseRgba and 0xFFFFFF00.toInt()) or finalAlpha
-
-            val colorR = ((packedColor ushr 24) and 0xFF).toByte()
-            val colorG = ((packedColor ushr 16) and 0xFF).toByte()
-            val colorB = ((packedColor ushr 8) and 0xFF).toByte()
-            val colorA = (packedColor and 0xFF).toByte()
+            // Base colour: per vertex slot (legacy last-face-wins), not per face.
+            // A slot the pre-pass never touched (model.numFaces not covering this
+            // face) would read 0 = alpha 0 = invisible; fall back to the face colour.
+            val faceRgba = run {
+                val hsl = facesColor?.get(faceIdx)?.toInt()?.and(0xFFFF) ?: 0
+                val fa = facesAlpha?.get(faceIdx) ?: 0.toByte()
+model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
+            }
+            val useSlot = slotColorEnabled
+            val rgbaA = if (useSlot && idxA < slotCount && slotStamp[idxA] == stamp) slotColor[idxA] else { if (useSlot) unwrittenSlotFaces++; faceRgba }
+            val rgbaB = if (useSlot && idxB < slotCount && slotStamp[idxB] == stamp) slotColor[idxB] else faceRgba
+            val rgbaC = if (useSlot && idxC < slotCount && slotStamp[idxC] == stamp) slotColor[idxC] else faceRgba
+            val colorRA = ((rgbaA ushr 24) and 0xFF).toByte()
+            val colorGA = ((rgbaA ushr 16) and 0xFF).toByte()
+            val colorBA = ((rgbaA ushr 8) and 0xFF).toByte()
+            val colorAA = (rgbaA and 0xFF).toByte()
+            val colorRB = ((rgbaB ushr 24) and 0xFF).toByte()
+            val colorGB = ((rgbaB ushr 16) and 0xFF).toByte()
+            val colorBB = ((rgbaB ushr 8) and 0xFF).toByte()
+            val colorAB = (rgbaB and 0xFF).toByte()
+            val colorRC = ((rgbaC ushr 24) and 0xFF).toByte()
+            val colorGC = ((rgbaC ushr 16) and 0xFF).toByte()
+            val colorBC = ((rgbaC ushr 8) and 0xFF).toByte()
+            val colorAC = (rgbaC and 0xFF).toByte()
 
             // Vertex 0: position(12) + normal(12) + texcoord(8) + color(4) + modelIndex(4) = 40 bytes
             vertexData.putFloat(verticesX[vertA].toFloat())
@@ -2521,7 +2781,7 @@ class ModernGLToolkit(
             writeNormal(idxA)  // Pre-computed normalized normal
             vertexData.putFloat(if (textureU != null && idxA < textureU.size) textureU[idxA] else 0f)
             vertexData.putFloat(if (textureV != null && idxA < textureV.size) textureV[idxA] else 0f)
-            vertexData.put(colorR).put(colorG).put(colorB).put(colorA)
+            vertexData.put(colorRA).put(colorGA).put(colorBA).put(colorAA)
             vertexData.putFloat(0f)  // modelIndex placeholder
 
             // Vertex 1
@@ -2531,7 +2791,7 @@ class ModernGLToolkit(
             writeNormal(idxB)
             vertexData.putFloat(if (textureU != null && idxB < textureU.size) textureU[idxB] else 0f)
             vertexData.putFloat(if (textureV != null && idxB < textureV.size) textureV[idxB] else 0f)
-            vertexData.put(colorR).put(colorG).put(colorB).put(colorA)
+            vertexData.put(colorRB).put(colorGB).put(colorBB).put(colorAB)
             vertexData.putFloat(0f)
 
             // Vertex 2
@@ -2541,7 +2801,7 @@ class ModernGLToolkit(
             writeNormal(idxC)
             vertexData.putFloat(if (textureU != null && idxC < textureU.size) textureU[idxC] else 0f)
             vertexData.putFloat(if (textureV != null && idxC < textureV.size) textureV[idxC] else 0f)
-            vertexData.put(colorR).put(colorG).put(colorB).put(colorA)
+            vertexData.put(colorRC).put(colorGC).put(colorBC).put(colorAC)
             vertexData.putFloat(0f)
 
             outFaceIdx++
@@ -2634,7 +2894,16 @@ class ModernGLToolkit(
                 val triStart = triangles[vertIdx]
                 val triEnd = triangles[vertIdx + 1]
                 for (i in triStart until triEnd) {
-                    val normalIdx = (normalMapping[i].toInt() and 0xFFFF) - 1
+                    // Legacy BREAKS here on the 0 sentinel (ModelGL.upload:
+                    // `normalIdx = vertexNormalIndices[triIdx] - 1; if (normalIdx == -1) break`).
+                    // The slot run for a vertex is zero-terminated inside its
+                    // [triangles[v], triangles[v+1]) window; entries past the
+                    // terminator belong to other vertices. Skipping instead of
+                    // breaking claimed those slots for the wrong vertex, and since
+                    // later vertices overwrite, faces referencing them got wrong
+                    // positions — the stretched green quads on the Canifis signpost.
+                    val normalIdx = normalMapping[i].toInt() - 1
+                    if (normalIdx == -1) break
                     if (normalIdx >= 0 && normalIdx < numNormals) {
                         normalToVertex[normalIdx] = vertIdx
                     }
@@ -2646,6 +2915,39 @@ class ModernGLToolkit(
 
         val hasVertexNormals = normalsX != null && normalsY != null && normalsZ != null && magnitudes != null
         val normals = reusableNormals  // 9 floats for 3 vertex normals
+
+        // Legacy colours are PER VERTEX SLOT, not per face. ModelGL.upload writes
+        // hslToRgb(face) into the slots named by facesA/B/C for every face in order
+        // (ModelGL.kt:2050-2058), so where faces share a vertex the LAST face to
+        // touch it wins -- for both RGB and alpha. Emitting per-face colour instead
+        // let a lamppost's translucent faces keep alpha ~127 on vertices that legacy
+        // had already overwritten to opaque by a later face, which is what made the
+        // Canifis lampposts see-through under this toolkit.
+        val slotCount = if (useDirectVertexIndices) maxDepth else numNormals
+        if (reusableSlotColor.size < slotCount) {
+            reusableSlotColor = IntArray(slotCount * 2)
+        }
+        val slotColor = reusableSlotColor
+        if (reusableSlotStamp.size < slotCount) {
+            reusableSlotStamp = IntArray(slotCount * 2)
+        }
+        val slotStamp = reusableSlotStamp
+        val stamp = ++slotStampCounter
+        // Iterate model.numFaces, matching legacy's loop bound -- faces the render
+        // pass skips still contribute their colour to shared slots.
+        val colorFaceCount = minOf(model.numFaces, facesA.size, facesB.size, facesC.size)
+        for (f in 0 until colorFaceCount) {
+            val mat = facesMaterial?.get(f)?.toInt() ?: -1
+            val hsl = facesColor?.get(f)?.toInt()?.and(0xFFFF) ?: 0
+            val fa = facesAlpha?.get(f) ?: 0.toByte()
+            val rgba = model.hslToRgb(hsl.toShort(), mat.toShort(), modelAmbient, fa)
+            val sa = facesA[f].toInt() and 0xFFFF
+            val sb = facesB[f].toInt() and 0xFFFF
+            val sc = facesC[f].toInt() and 0xFFFF
+            if (sa < slotCount) { slotColor[sa] = rgba; slotStamp[sa] = stamp }
+            if (sb < slotCount) { slotColor[sb] = rgba; slotStamp[sb] = stamp }
+            if (sc < slotCount) { slotColor[sc] = rgba; slotStamp[sc] = stamp }
+        }
 
         for (faceIdx in 0 until numFaces) {
             val idxA = facesA[faceIdx].toInt() and 0xFFFF
@@ -2671,14 +2973,31 @@ class ModernGLToolkit(
             totalFacesProcessed++
 
             val materialId = facesMaterial?.get(faceIdx)?.toInt() ?: -1
-            val hslColor = facesColor?.get(faceIdx)?.toInt()?.and(0xFFFF) ?: 0
-            val faceAlpha = facesAlpha?.get(faceIdx) ?: 0.toByte()
 
-            val baseRgba = model.hslToRgb(hslColor.toShort(), materialId.toShort(), modelAmbient, faceAlpha)
-            val baseR = ((baseRgba ushr 24) and 0xFF).toByte()
-            val baseG = ((baseRgba ushr 16) and 0xFF).toByte()
-            val baseB = ((baseRgba ushr 8) and 0xFF).toByte()
-            val finalAlpha = (255 - (faceAlpha.toInt() and 0xFF)).toByte()
+            // Per-vertex-slot colour (legacy last-face-wins), not per-face.
+            // A slot the pre-pass never touched (model.numFaces not covering this
+            // face) would read 0 = alpha 0 = invisible; fall back to the face colour.
+            val faceRgba = run {
+                val hsl = facesColor?.get(faceIdx)?.toInt()?.and(0xFFFF) ?: 0
+                val fa = facesAlpha?.get(faceIdx) ?: 0.toByte()
+model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
+            }
+            val useSlot = slotColorEnabled
+            val rgbaA = if (useSlot && idxA < slotCount && slotStamp[idxA] == stamp) slotColor[idxA] else { if (useSlot) unwrittenSlotFaces++; faceRgba }
+            val rgbaB = if (useSlot && idxB < slotCount && slotStamp[idxB] == stamp) slotColor[idxB] else faceRgba
+            val rgbaC = if (useSlot && idxC < slotCount && slotStamp[idxC] == stamp) slotColor[idxC] else faceRgba
+            val rA = ((rgbaA ushr 24) and 0xFF).toByte()
+            val gA = ((rgbaA ushr 16) and 0xFF).toByte()
+            val bA = ((rgbaA ushr 8) and 0xFF).toByte()
+            val aA = (rgbaA and 0xFF).toByte()
+            val rB = ((rgbaB ushr 24) and 0xFF).toByte()
+            val gB = ((rgbaB ushr 16) and 0xFF).toByte()
+            val bB = ((rgbaB ushr 8) and 0xFF).toByte()
+            val aB = (rgbaB and 0xFF).toByte()
+            val rC = ((rgbaC ushr 24) and 0xFF).toByte()
+            val gC = ((rgbaC ushr 16) and 0xFF).toByte()
+            val bC = ((rgbaC ushr 8) and 0xFF).toByte()
+            val aC = (rgbaC and 0xFF).toByte()
 
             val lx0 = verticesX[vertA].toFloat()
             val ly0 = verticesY[vertA].toFloat()
@@ -2712,9 +3031,9 @@ class ModernGLToolkit(
 
             batcher.addFaceOptimized(
                 materialId, modelIndex,
-                lx0, ly0, lz0, normals[0], normals[1], normals[2], u0, v0, baseR, baseG, baseB, finalAlpha,
-                lx1, ly1, lz1, normals[3], normals[4], normals[5], u1, v1, baseR, baseG, baseB, finalAlpha,
-                lx2, ly2, lz2, normals[6], normals[7], normals[8], u2, v2, baseR, baseG, baseB, finalAlpha
+                lx0, ly0, lz0, normals[0], normals[1], normals[2], u0, v0, rA, gA, bA, aA,
+                lx1, ly1, lz1, normals[3], normals[4], normals[5], u1, v1, rB, gB, bB, aB,
+                lx2, ly2, lz2, normals[6], normals[7], normals[8], u2, v2, rC, gC, bC, aC
             )
         }
     }
@@ -2765,7 +3084,8 @@ class ModernGLToolkit(
         val batcher = frameBatcher ?: return
         if (!batcher.isActive()) return
 
-        val numFaces = model.numFaces
+        // renderedFaceCount, NOT numFaces — excludes the billboard anchor tail.
+        val numFaces = model.renderedFaceCount
         if (numFaces <= 0) return
 
         val facesA = model.facesA ?: return
@@ -2809,7 +3129,16 @@ class ModernGLToolkit(
                 val triStart = triangles[vertIdx]
                 val triEnd = triangles[vertIdx + 1]
                 for (i in triStart until triEnd) {
-                    val normalIdx = (normalMapping[i].toInt() and 0xFFFF) - 1
+                    // Legacy BREAKS here on the 0 sentinel (ModelGL.upload:
+                    // `normalIdx = vertexNormalIndices[triIdx] - 1; if (normalIdx == -1) break`).
+                    // The slot run for a vertex is zero-terminated inside its
+                    // [triangles[v], triangles[v+1]) window; entries past the
+                    // terminator belong to other vertices. Skipping instead of
+                    // breaking claimed those slots for the wrong vertex, and since
+                    // later vertices overwrite, faces referencing them got wrong
+                    // positions — the stretched green quads on the Canifis signpost.
+                    val normalIdx = normalMapping[i].toInt() - 1
+                    if (normalIdx == -1) break
                     if (normalIdx >= 0 && normalIdx < numNormals) {
                         normalToVertex[normalIdx] = vertIdx
                     }

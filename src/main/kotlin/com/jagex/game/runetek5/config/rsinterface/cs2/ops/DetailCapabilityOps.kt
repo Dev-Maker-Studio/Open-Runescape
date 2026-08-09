@@ -161,7 +161,7 @@ object DetailCapabilityOps {
             ClientScriptOpCode.GETENTITYOVERHEADIF -> getEntityOverHeadIf(exec)
             ClientScriptOpCode.GET_ENTITY_SAY -> getEntitySay(exec)
             ClientScriptOpCode.GET_DISPLAYNAME_WITHEXTRAS -> getDisplayNameWithExtras(exec)
-            ClientScriptOpCode.instr6905 -> method5814(exec)
+            ClientScriptOpCode.CC_LOADENTITYMODEL -> method5814(exec)
             ClientScriptOpCode.IF_CREATE -> ifCreate(exec)
             ClientScriptOpCode.GET_NPC_NAME -> getNpcName(exec)
             ClientScriptOpCode.GET_NPC_VISLEVEL -> getNpcVIsLevel(exec)
