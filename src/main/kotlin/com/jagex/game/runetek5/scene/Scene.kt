@@ -1200,7 +1200,9 @@ class Scene(
         this.culling.visibleBelowX = visibleBelowX
         this.culling.visibleBelowY = visibleBelowY
         this.culling.visibleAboveY = visibleAboveY
+        val cullT0 = System.nanoTime()
         this.culling.processCulling(this.activeToolkit, nextPlane)
+        phaseCullNs += System.nanoTime() - cullT0
         ParticleSystemManager.processParticleCycle(this, this.activeToolkit)
         if (!this.interactiveEntities.removeDuplicates) {
             val interactivesIterator = this.interactiveEntities.entities.iterator()
@@ -1222,7 +1224,10 @@ class Scene(
             this.activeToolkit.onTilesDrawn()
             setUnderwater(false)
         }
+        val tilesT0 = System.nanoTime()
         drawTiles(false, bits, nextPlane, roofPreference)
+        phaseTilesNs += System.nanoTime() - tilesT0
+        phaseSamples++
         if (!this.calculateTilesOnScreen) {
             this.adjacent_tile_on_screen = unadjustedAdjacentTilesOnScreen
             this.tileOnScreen = unadjustedTilesOnScreen
@@ -1459,6 +1464,9 @@ class Scene(
     }
 
     companion object {
+        @JvmStatic var phaseCullNs = 0L
+        @JvmStatic var phaseTilesNs = 0L
+        @JvmStatic var phaseSamples = 0
         @JvmStatic
         fun setRoofOverride() {
             val roofToggle = PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue()

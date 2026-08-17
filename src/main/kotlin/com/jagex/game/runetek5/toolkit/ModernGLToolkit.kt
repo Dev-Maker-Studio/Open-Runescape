@@ -1,5 +1,7 @@
 package com.jagex.game.runetek5.toolkit
 
+import com.jagex.game.runetek5.scene.Scene
+import com.jagex.game.runetek5.utils.ColorUtil
 import com.jagex.game.runetek5.graphics.light.PointLight
 import com.jagex.game.runetek5.config.Resource
 import com.jagex.game.runetek5.config.material.MaterialProvider
@@ -72,6 +74,9 @@ class ModernGLToolkit(
     // Modern renderer for 3D models
     private var modernRenderer: ModernModelRenderer? = null
     private var groundRenderer: ModernGroundRenderer? = null
+
+    /** Ground renderer, for handing over the native shadow map. */
+    fun groundRendererForShadows(): ModernGroundRenderer? = groundRenderer
     private var spriteRenderer: ModernSpriteRenderer? = null
     private var surfaceMaskRenderer: ModernSurfaceMaskRenderer? = null
     private var particleRendererModern: ModernParticleRenderer? = null
@@ -259,8 +264,19 @@ class ModernGLToolkit(
          * Correctness first: the path stays available behind the flag for whoever
          * fixes computeUVs against legacy, gated by the same oracle.
          */
+        /**
+         * Mesh-built geometry (ModernModelBuilder) instead of legacy capture.
+         *
+         * ON. It was disabled because "67% of models had wrong UVs", but that verdict
+         * came from an oracle that index-aligns built face f against legacy face f --
+         * legacy SORTS faces via Model.addBillboard -- and compared untextured faces
+         * whose legacy UV is legitimately (0,0). The real defect was a byte-order bug
+         * that stopped this path drawing anything at all; with it fixed the offline
+         * scan reports countMISMATCH=0 posMISMATCH=0 colourMISMATCH=0 over 625k models.
+         * -Drender.meshbuilt=false reverts to legacy capture.
+         */
         @JvmStatic var meshBuiltPathEnabled =
-            System.getProperty("render.meshbuilt")?.equals("true", true) == true
+            System.getProperty("render.meshbuilt")?.equals("false", true) != true
 
         /** Whether the model shaders' `color.a <= threshold` discard is active. */
         @JvmStatic var alphaDiscardEnabled = flag("alphatest")
@@ -275,13 +291,9 @@ class ModernGLToolkit(
         @JvmStatic var modernYawEnabled = flag("yaw")
         /** Legacy back-face culling for the 3D scene pass. -Drender.cullface=false to disable. */
         @JvmStatic val cullFaceEnabled = flag("cullface")
-        /** Legacy fixed-function ground point-light pass. -Drender.groundlight=false disables. */
-        @JvmStatic val groundLightPass = flag("groundlight")
         /** Shader point lights on models. -Drender.pointlights=false disables. */
         @JvmStatic val pointLightsEnabled = flag("pointlights")
         @JvmStatic val TEX_ALPHA_DIAG = System.getProperty("render.texalphadiag") != null
-        /** Legacy fixed-function ground shadow overlay. -Drender.groundshadow=false disables. */
-        @JvmStatic val groundShadowPass = flag("groundshadow")
         /** Legacy per-vertex-slot colours (last face wins). -Drender.slotcolor=false = per-face. */
         @JvmStatic var slotColorEnabled = flag("slotcolor")
 
@@ -541,7 +553,9 @@ class ModernGLToolkit(
                     "smm=$diagSetModelMatrixCalls(rej=$diagSetModelMatrixRejected) " +
                     "batchOpen=$diagBatchOpens(lazy=$diagLazyBatchOpens) " +
                     "modelDraws=$diagModelGateAccepted/$diagModelGateCalls unwrittenSlots=$unwrittenSlotFaces " +
-                    "ptLights=$diagPointLights/$diagSceneLights " +
+                    "ptLights=$diagPointLights/$diagSceneLights recolourBad=$recolourBad " +
+                    "${ModernModelBuilder.skipSummary()} " +
+                    "inval[${ModelGL.invalidateSummary()}] " +
                     "ground=$diagGroundDrawn/noPipe=$diagGroundNoPipeline/noSnap=$diagGroundNoSnapshot/calls=$diagGroundCalls " +
                     "reject=$lastPipelineRejectReason " +
                     "legacySkips=${if (legacySkipCounters.isEmpty()) "{}" else legacySkipCounters.toSortedMap().toString()}"
@@ -550,7 +564,14 @@ class ModernGLToolkit(
             val obStats = optimizedBatcher?.getStats()
             val instStats = instancedBatcher?.getStats()
             println(
-                "[ModernPerf] frameMs=%.1f renderMs=%.2f swapMs=%.2f ".format(
+                "[ModernPerf] cullMs=%.2f tilesMs=%.2f ".format(
+                    if (Scene.phaseSamples > 0) Scene.phaseCullNs / 1e6 / Scene.phaseSamples else 0.0,
+                    if (Scene.phaseSamples > 0) Scene.phaseTilesNs / 1e6 / Scene.phaseSamples else 0.0
+                ) +
+                "sceneMs=%.2f ".format(
+                    if (Client.sceneDrawSamples > 0) Client.sceneDrawNs / 1e6 / Client.sceneDrawSamples else 0.0
+                ) +
+                "frameMs=%.1f renderMs=%.2f swapMs=%.2f ".format(
                     if (perfFrameSamples > 0) perfFrameNsAcc / 1e6 / perfFrameSamples else 0.0,
                     if (perfFrameSamples > 0) perfRenderNsAcc / 1e6 / perfFrameSamples else 0.0,
                     if (perfFrameSamples > 0) perfSwapNsAcc / 1e6 / perfFrameSamples else 0.0
@@ -867,6 +888,7 @@ class ModernGLToolkit(
             )
             buildFrameLights()
             optimizedBatcher?.setPointLights(frameLightCount, frameLightPos, frameLightColor)
+            gr.setPointLights(frameLightCount, frameLightPos, frameLightColor)
 
             // Begin instanced batcher for repeated mesh detection
             if (useInstancing) {
@@ -1159,12 +1181,59 @@ class ModernGLToolkit(
     private var frameLightCount = 0
     @JvmField var diagPointLights = 0
     @JvmField var diagSceneLights = 0
+    private var recolourChecks = 0
+    @JvmField var recolourBad = 0
+    private val VERIFY_RECOLOUR = System.getProperty("render.verifyrecolour") != null
+    /** Global index of each uploaded light, for per-entity index lookup. */
+    private val lightIndexOf = HashMap<PointLight, Int>()
+    /** Light indices for the entity currently being submitted (-1 = unused). */
+    private val currentLightIdx = FloatArray(4) { -1f }
 
     override fun copyLights(lightCount: Int, lights: Array<PointLight>?) {
-        // Keeps legacy's GL_LIGHT state in sync for the ground's fixed-function light
-        // pass. Shader point lights come from the scene list (see buildFrameLights),
-        // not from here, so that a light does not depend on which entities were drawn.
+        // Legacy GL_LIGHT state only (the ground's fixed-function pass reads it).
+        // Per-model light selection is positional — see selectLightsFor. Deriving it
+        // from this callback instead made a model inherit the PREVIOUS entity's lights
+        // whenever it was submitted without a copyLights of its own (players/NPCs take
+        // a different path), which flickered as traversal order changed and left many
+        // models unlit entirely.
         super.copyLights(lightCount, lights)
+    }
+
+    /**
+     * Chooses the lights that reach a model, by proximity to its world origin.
+     *
+     * Legacy associates up to getMaxLights() = 4 lights per entity; this reproduces the
+     * selection from the model's own position so it depends only on geometry, never on
+     * traversal order. Keeps the per-vertex loop at 4 instead of every scene light.
+     */
+    private fun selectLightsFor(wx: Float, wy: Float, wz: Float) {
+        currentLightIdx[0] = -1f; currentLightIdx[1] = -1f
+        currentLightIdx[2] = -1f; currentLightIdx[3] = -1f
+        val n = frameLightCount
+        if (n <= 0) return
+        // Keep the 4 strongest contributors: attenuation is size^2/d^2, so rank on
+        // d^2/size^2 (smaller is stronger) and ignore lights that cannot register on an
+        // 8-bit channel at this distance.
+        var b0 = Float.MAX_VALUE; var b1 = Float.MAX_VALUE
+        var b2 = Float.MAX_VALUE; var b3 = Float.MAX_VALUE
+        var i0 = -1; var i1 = -1; var i2 = -1; var i3 = -1
+        for (i in 0 until n) {
+            val dx = frameLightPos[i * 4] - wx
+            val dy = frameLightPos[i * 4 + 1] - wy
+            val dz = frameLightPos[i * 4 + 2] - wz
+            val d2 = dx * dx + dy * dy + dz * dz
+            // frameLightPos[w] holds kq = 1/size^2, so kq*d^2 is the inverse of att.
+            val rank = frameLightPos[i * 4 + 3] * d2
+            if (rank >= 255f) continue
+            when {
+                rank < b0 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=b0; i1=i0; b0=rank; i0=i }
+                rank < b1 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=rank; i1=i }
+                rank < b2 -> { b3=b2; i3=i2; b2=rank; i2=i }
+                rank < b3 -> { b3=rank; i3=i }
+            }
+        }
+        currentLightIdx[0] = i0.toFloat(); currentLightIdx[1] = i1.toFloat()
+        currentLightIdx[2] = i2.toFloat(); currentLightIdx[3] = i3.toFloat()
     }
 
     /**
@@ -1225,67 +1294,12 @@ class ModernGLToolkit(
             frameLightColor[i * 3 + 1] = ((c shr 8) and 0xff) * a
             frameLightColor[i * 3 + 2] = (c and 0xff) * a
         }
+        lightIndexOf.clear()
+        for (i in 0 until n) lightIndexOf[frameLights[i]] = i
         frameLightCount = n
         diagPointLights = n
     }
 
-    /**
-     * Prepares GL for a LEGACY FIXED-FUNCTION pass that runs inside the modern
-     * scene (the ground's point-light meshes and shadow overlay).
-     *
-     * Fixed-function drawing needs the default binding points: with a core shader
-     * program bound the FFP is bypassed entirely, and with a non-zero VAO bound the
-     * legacy vertex/colour pointers are read from the wrong attribute state. These
-     * two passes were disabled under this toolkit for exactly that reason; isolating
-     * the state is what makes them safe to run again.
-     *
-     * Pending modern batches are flushed first so the legacy pass composites over
-     * geometry that is already in the framebuffer, matching legacy's draw order.
-     */
-    fun beginLegacyFixedFunctionPass() {
-        flushSceneForUiDraw()
-        GLWrapper.bindVertexArray(0)
-        GLWrapper.useProgram(0)
-        // Depth TESTING must be on. The legacy passes only manage the depth MASK
-        // (setDepthMask(false)) and assume setupMatrixRendering already enabled the
-        // test; under this toolkit the modern renderers may have left it disabled, and
-        // the toolkit's own toggleZbuffer cache can disagree with real GL. With the
-        // test off, the MULTIPLY light meshes paint over geometry that is in front of
-        // them -- lamp light showing through walls and objects.
-        glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LEQUAL)
-    }
-
-    /**
-     * Restores the state a legacy fixed-function pass changed.
-     *
-     * Those passes run MID-FRAME (per ground material) and leave depth writes off,
-     * MULTIPLY blending and a modified texture environment behind. Legacy gets away
-     * with it because its next setupMatrixRendering() resets everything; the modern
-     * batchers cache their own state and do not, so whatever draws after the ground
-     * inherits the clobbered state. Scene.drawTiles draws roofs in the layered/priority
-     * pass AFTER the ground loop, which is why roof geometry came out as flat washed
-     * quads until this restore existed.
-     */
-    fun endLegacyFixedFunctionPass() {
-        GLWrapper.bindVertexArray(0)
-        GLWrapper.useProgram(0)
-        // Put the legacy toolkit's own state cache back where the model path expects it
-        // (setupMatrixRendering's state), so both caches agree with real GL.
-        setDepthMask(true)
-        setBlendMode(1)
-        // Re-assert the modern scene's GL state directly — openSceneBatch established
-        // it once for the frame and will not run again before the next model draw.
-        glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LEQUAL)
-        glDepthMask(true)
-        if (modelBlend) {
-            glEnable(GL_BLEND)
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        } else {
-            glDisable(GL_BLEND)
-        }
-    }
 
     fun flushAllPendingDraws() {
         if (!canUseModernPipeline()) return
@@ -2174,6 +2188,26 @@ class ModernGLToolkit(
      * - Material IDs
      * - Ambient/contrast settings
      */
+    /**
+     * Hash of the model's COLOUR state only (face colours, alphas and ambient).
+     *
+     * Walks faces rather than vertices, so it costs a fraction of
+     * computeModelContentHash — which exists to detect geometry changes and has to
+     * touch every vertex position.
+     */
+    private fun colourStateHash(model: ModelGL): Long {
+        val fc = model.facesColor ?: return 0L
+        val fa = model.facesAlpha
+        var h = 1125899906842597L
+        h = h * 31 + model.ambient
+        val n = model.numFaces
+        for (i in 0 until minOf(n, fc.size)) {
+            h = h * 31 + fc[i]
+            if (fa != null && i < fa.size) h = h * 31 + fa[i]
+        }
+        return h
+    }
+
     private fun computeModelContentHash(model: ModelGL): Long {
         // 64-BIT hash. The cache and the PERSISTENT instanced geometry store key on
         // this value; with thousands of unique meshes accumulating per session, a
@@ -2429,9 +2463,53 @@ class ModernGLToolkit(
                 // Everything else about the path is unchanged, so a difference here
                 // isolates the key as the fault.
                 if (verifyLiveGeometry) GeometryDiff.verifyLive(model, built)
+                // Key on geometry AND colour. built.id identifies the base geometry,
+                // which colour-only mutations no longer invalidate, so the colour state
+                // has to distinguish otherwise-identical placements (a tinted loc from
+                // an untinted one). The colour hash walks FACES, not vertices — far
+                // cheaper than the legacy-capture path's full per-vertex content hash.
+                // Untouched colours need no hash at all: built.id already identifies
+                // the geometry AND its baked base colours. Only a model that actually
+                // took a colour mutation has to be distinguished from its siblings.
+                // -Drender.verifyrecolour: for an UNMUTATED model, recolour must
+                // reproduce the emission bytes exactly. Any mismatch means the recolour
+                // path disagrees with the builder about how a face's colour is derived.
+                if (VERIFY_RECOLOUR && model.modernColorRevision == 0 && recolourChecks < 200) {
+                    recolourChecks++
+                    val redone = ModernModelBuilder.recolour(
+                        built, model.facesColor, model.facesAlpha, model.facesMaterial,
+                        model.ambient.toInt(), ColorUtil.hslToRgb!!, materialProvider
+                    )
+                    var bad = 0
+                    val stride = ModelCache.BYTES_PER_VERTEX
+                    var off = ModernModelBuilder.COLOR_OFFSET
+                    while (off + 3 < redone.size) {
+                        for (k in 0 until 4) if (redone[off + k] != built.vertexData[off + k]) { bad++; break }
+                        off += stride
+                    }
+                    if (bad > 0) {
+                        recolourBad++
+                        if (recolourBad <= 5) System.err.println(
+                            "[Recolour] MISMATCH $bad verts on model faces=${built.faceCount}")
+                    }
+                }
+                val colourKey = if (model.modernColorRevision == 0) 0L else colourStateHash(model)
                 val geometryKey =
-                    if (meshKeyByCurrentVertices) computeModelContentHash(model) else built.id
-                val cachedModel = cache.getOrCreate(model, geometryKey) { built.toCachedModel() }
+                    if (meshKeyByCurrentVertices) computeModelContentHash(model)
+                    else built.id * 1000003L + colourKey
+                val cachedModel = cache.getOrCreate(model, geometryKey) {
+                    if (model.modernColorRevision == 0) {
+                        built.toCachedModel()
+                    } else {
+                        // Geometry is reused verbatim; only the colour bytes are redone.
+                        built.toCachedModel(
+                            ModernModelBuilder.recolour(
+                                built, model.facesColor, model.facesAlpha, model.facesMaterial,
+                                model.ambient.toInt(), ColorUtil.hslToRgb!!, materialProvider
+                            )
+                        )
+                    }
+                }
                 if (cachedModel != null) {
                     timeCacheLookup += System.nanoTime() - t4
                     cacheHits++
@@ -2470,13 +2548,14 @@ class ModernGLToolkit(
 
         // Fallback: process faces directly (no cache or cache build failed)
         // Register model matrix with the optimized batcher
+        selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
         val t2 = System.nanoTime()
-        var modelIndex = batcher.beginModel(modelMatrix)
+        var modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
         timeBeginModel += System.nanoTime() - t2
 
         if (modelIndex < 0) {
             flushBatchMidFrame(batcher)
-            modelIndex = batcher.beginModel(modelMatrix)
+            modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
             if (modelIndex < 0) return
         }
 
@@ -2501,6 +2580,8 @@ class ModernGLToolkit(
         geometryKey: Long,
         matrix: Matrix43
     ) {
+        // Pick this model's lights from its own world origin (see selectLightsFor).
+        selectLightsFor(matrix.xD, matrix.yD, matrix.zD)
         // INSTANCING PATH: groups identical meshes (by geometryKey) and renders
         // them with glDrawElementsInstanced, using one draw call per material
         // regardless of how many instances exist.
@@ -2514,7 +2595,7 @@ class ModernGLToolkit(
         // overran the 500k-vertex streaming buffer every frame and deleted walls.
         if (instancingEnabled && useInstancing && instancedBatcher?.isActive() == true) {
             val t5 = System.nanoTime()
-            val added = instancedBatcher!!.addInstance(cachedModel, geometryKey, matrix)
+            val added = instancedBatcher!!.addInstance(cachedModel, geometryKey, matrix, currentLightIdx)
             timeAddCachedModel += System.nanoTime() - t5
             if (added) {
                 totalFacesProcessed += cachedModel.faceCount
@@ -2527,12 +2608,12 @@ class ModernGLToolkit(
 
         // REGULAR BATCHER PATH: used when instancing is disabled or full
         val t2 = System.nanoTime()
-        var modelIndex = batcher.beginModel(matrix)
+        var modelIndex = batcher.beginModel(matrix, currentLightIdx)
         timeBeginModel += System.nanoTime() - t2
 
         if (modelIndex < 0) {
             flushBatchMidFrame(batcher)
-            modelIndex = batcher.beginModel(matrix)
+            modelIndex = batcher.beginModel(matrix, currentLightIdx)
             if (modelIndex < 0) return
         }
 
@@ -2550,7 +2631,7 @@ class ModernGLToolkit(
         // and retry once, mirroring the beginModel path.
         if (facesAdded == 0 && cachedModel.faceCount > 0) {
             flushBatchMidFrame(batcher)
-            modelIndex = batcher.beginModel(matrix)
+            modelIndex = batcher.beginModel(matrix, currentLightIdx)
             if (modelIndex >= 0) {
                 facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
             }
@@ -3124,6 +3205,9 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
      * Kept for comparison/fallback purposes.
      */
     private fun renderModelGLLegacy(model: ModelGL, modelMatrix: Matrix43) {
+        // Pick this model's lights from its own world origin (see selectLightsFor).
+        selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
+
         val batcher = frameBatcher ?: return
         if (!batcher.isActive()) return
 

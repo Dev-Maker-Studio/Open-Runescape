@@ -168,7 +168,7 @@ object GeometryDiff {
             val fa = model.facesA
             if (tu != null && tv != null && fa != null) {
                 val stride = com.jagex.game.runetek5.graphics.modern.batch.ModelCache.BYTES_PER_VERTEX
-                val data = java.nio.ByteBuffer.wrap(built.vertexData).order(java.nio.ByteOrder.BIG_ENDIAN)
+                val data = java.nio.ByteBuffer.wrap(built.vertexData).order(java.nio.ByteOrder.nativeOrder())
                 var uvBad = 0
                 val n = minOf(built.faceCount, model.renderedFaceCount)
                 for (f in 0 until n) {
@@ -542,7 +542,7 @@ object GeometryDiff {
         includeColour: Boolean = false
     ): LongArray {
         val stride = com.jagex.game.runetek5.graphics.modern.batch.ModelCache.BYTES_PER_VERTEX
-        val data = java.nio.ByteBuffer.wrap(built.vertexData).order(java.nio.ByteOrder.BIG_ENDIAN)
+        val data = java.nio.ByteBuffer.wrap(built.vertexData).order(java.nio.ByteOrder.nativeOrder())
         val sin = if (yaw == 0) 0 else MathUtils.SINE[yaw]
         val cos = if (yaw == 0) 16384 else MathUtils.COSINE[yaw]
         val keys = LongArray(built.faceCount)
@@ -669,7 +669,7 @@ object GeometryDiff {
         val sin = if (yaw == 0) 0 else MathUtils.SINE[yaw]
         val cos = if (yaw == 0) 16384 else MathUtils.COSINE[yaw]
         val stride = com.jagex.game.runetek5.graphics.modern.batch.ModelCache.BYTES_PER_VERTEX
-        val data = java.nio.ByteBuffer.wrap(built.vertexData).order(java.nio.ByteOrder.BIG_ENDIAN)
+        val data = java.nio.ByteBuffer.wrap(built.vertexData).order(java.nio.ByteOrder.nativeOrder())
         var shown = 0
         for (f in 0 until built.faceCount) {
             if (shown >= 4) break

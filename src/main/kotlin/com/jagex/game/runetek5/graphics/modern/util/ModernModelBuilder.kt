@@ -106,7 +106,21 @@ object ModernModelBuilder {
         val billboardsSeen: Int = 0,
         val billboardsWithUid: Int = 0,
         val billboardsOutOfRange: Int = 0,
-        val skipMaterialFiltered: Int = 0
+        val skipMaterialFiltered: Int = 0,
+        /**
+         * Source-mesh face index for each emitted triangle, in emission order.
+         * Lets colour be recomputed WITHOUT rebuilding geometry: colour lives at a
+         * fixed offset inside each 40-byte vertex, so a tint/recolour only has to
+         * rewrite 4 bytes per vertex while positions, normals and UVs stay valid.
+         */
+        val acceptedFaces: IntArray = IntArray(0),
+        /**
+         * RESOLVED material per emitted triangle, in emission order — the value the
+         * face filter settled on, which is not always facesMaterial[face]. Colour
+         * depends on it (material brightness/alpha feed faceColorRgba), so a recolour
+         * must reuse it rather than re-read the raw array.
+         */
+        val acceptedMaterialIds: IntArray = IntArray(0)
     ) {
         /**
          * One draw batch: all faces sharing a material.
@@ -121,9 +135,12 @@ object ModernModelBuilder {
          * Allocates a native copy of the vertex data; the returned CachedModel
          * owns it (its free() releases it, as the ModelCache LRU expects).
          */
-        fun toCachedModel(): ModelCache.CachedModel {
-            val buffer = MemoryUtil.memAlloc(vertexData.size)
-            buffer.put(vertexData)
+        fun toCachedModel(): ModelCache.CachedModel = toCachedModel(vertexData)
+
+        /** As [toCachedModel], but with colour bytes supplied by [recolour]. */
+        fun toCachedModel(data: ByteArray): ModelCache.CachedModel {
+            val buffer = MemoryUtil.memAlloc(data.size)
+            buffer.put(data)
             buffer.flip()
             return ModelCache.CachedModel(
                 faceCount = faceCount,
@@ -139,6 +156,73 @@ object ModernModelBuilder {
             )
         }
     }
+
+    /** Byte offset of the RGBA colour within a 40-byte vertex (pos12+normal12+uv8). */
+    const val COLOR_OFFSET = 32
+
+    /**
+     * Returns a copy of [built]'s vertex data with ONLY the colour bytes recomputed
+     * from the model's current face colours.
+     *
+     * Colour-only mutations (tint, recolor, setAmbient, environment alpha) change no
+     * geometry, yet they used to discard the mesh-built model entirely and drop it onto
+     * the legacy-capture path — where it is content-hashed over every vertex, every
+     * frame, forever. Measured over one scene those four accounted for 13,383 of 19,684
+     * invalidations. Rewriting 4 bytes per vertex keeps the geometry.
+     */
+    @JvmStatic
+    fun recolour(
+        built: BuiltModel,
+        facesColor: ShortArray?,
+        facesAlpha: ByteArray?,
+        @Suppress("UNUSED_PARAMETER") facesMaterial: ShortArray?,
+        ambient: Int,
+        colorTable: IntArray,
+        materialProvider: MaterialProvider?
+    ): ByteArray {
+        val out = built.vertexData.copyOf()
+        if (facesColor == null) return out
+        val faces = built.acceptedFaces
+        val stride = ModelCache.BYTES_PER_VERTEX
+        for (i in faces.indices) {
+            val face = faces[i]
+            if (face >= facesColor.size) continue
+            // The RESOLVED material, exactly as emission used it. Re-reading
+            // facesMaterial[face] here instead applied a different material's
+            // brightness through faceColorRgba, which saturates to white — that is
+            // what turned recoloured bushes white while everything else looked fine.
+            val materialId = if (i < built.acceptedMaterialIds.size) built.acceptedMaterialIds[i] else -1
+            val alpha = facesAlpha?.getOrNull(face)?.toInt()?.and(0xff) ?: 0
+            val rgba = faceColorRgba(
+                colorTable, facesColor[face].toInt() and 0xffff,
+                materialId, ambient, alpha, materialProvider
+            )
+            var base = i * 3 * stride + COLOR_OFFSET
+            for (k in 0 until 3) {
+                out[base] = ((rgba ushr 24) and 0xff).toByte()
+                out[base + 1] = ((rgba ushr 16) and 0xff).toByte()
+                out[base + 2] = ((rgba ushr 8) and 0xff).toByte()
+                out[base + 3] = (rgba and 0xff).toByte()
+                base += stride
+            }
+        }
+        return out
+    }
+
+    @JvmField val MB_TINT = System.getProperty("render.mbtint")?.equals("true", true) == true
+
+    /** Aggregate skip accounting across every build this session. */
+    @JvmField var aggSource = 0L
+    @JvmField var aggBillboard = 0L
+    @JvmField var aggRenderType = 0L
+    @JvmField var aggInvalidVertex = 0L
+    @JvmField var aggTransparent = 0L
+    @JvmField var aggMaterial = 0L
+
+    @JvmStatic
+    fun skipSummary(): String =
+        "mbSkip[src=$aggSource bb=$aggBillboard rt=$aggRenderType " +
+        "badVert=$aggInvalidVertex alpha=$aggTransparent mat=$aggMaterial]"
 
     /**
      * Builds renderable geometry from a clean decoded mesh.
@@ -260,9 +344,11 @@ object ModernModelBuilder {
             if (billboardHiddenFaces?.contains(face) == true) { skipBillboardHidden++; continue }
 
             val renderType = faceRenderType?.get(face)?.toInt() ?: 0
-            // Only render types 0 (smooth) and 1 (flat) are drawable; legacy
-            // never rasterizes any other type (billboard anchors, markers).
-            if (renderType != 0 && renderType != 1) { skipRenderType++; continue }
+            // Legacy skips render type 2 and NOTHING ELSE — the ModelGL constructor's
+            // filter is `faceRenderType[i] != 2` (ModelGL.kt:403). Restricting to types
+            // 0 and 1 additionally dropped every face of any other type, which removed
+            // whole wall surfaces from buildings while leaving their frames and roofs.
+            if (renderType == 2) { skipRenderType++; continue }
 
             val a = vertexA(face)
             val b = vertexB(face)
@@ -322,7 +408,15 @@ object ModernModelBuilder {
         // ---- Pass 3: emit 40-byte vertices in face order ---------------------
         val vertexCount = acceptedCount * 3
         val vertexArray = ByteArray(vertexCount * ModelCache.BYTES_PER_VERTEX)
-        val vertexData = ByteBuffer.wrap(vertexArray)
+        // NATIVE byte order. ByteBuffer.wrap defaults to BIG_ENDIAN, but
+        // toCachedModel copies these bytes verbatim into a MemoryUtil.memAlloc buffer
+        // (native = little-endian on x86) that is uploaded straight to the GPU, so
+        // big-endian floats were read byte-swapped: every position became garbage and
+        // no mesh-built geometry ever appeared on screen. The legacy-capture path
+        // writes native order (ModernGLToolkit.buildModelCache), which is why only
+        // this path was affected — and why the build-time scan passed, since both the
+        // data and the oracle read it as big-endian and never exercised the GPU view.
+        val vertexData = ByteBuffer.wrap(vertexArray).order(java.nio.ByteOrder.nativeOrder())
         val uv = FloatArray(6)
 
         fun writeVertex(vertex: Int, nx: Float, ny: Float, nz: Float, u: Float, v: Float, rgba: Int) {
@@ -395,7 +489,16 @@ object ModernModelBuilder {
             vertexCount = vertexCount,
             vertexData = vertexArray,
             batches = batches,
-            skipBillboardHidden = skipBillboardHidden,
+            acceptedFaces = acceptedFaces.copyOf(acceptedCount),
+            acceptedMaterialIds = acceptedMaterials.copyOf(acceptedCount),
+            skipBillboardHidden = skipBillboardHidden.also {
+                aggSource += numFaces
+                aggBillboard += skipBillboardHidden
+                aggRenderType += skipRenderType
+                aggInvalidVertex += skipInvalidVertex
+                aggTransparent += skipTransparent
+                aggMaterial += skipMaterialFiltered
+            },
             skipRenderType = skipRenderType,
             skipInvalidVertex = skipInvalidVertex,
             skipTransparent = skipTransparent,
@@ -460,6 +563,9 @@ object ModernModelBuilder {
         alpha: Int,
         materialProvider: MaterialProvider?
     ): Int {
+        // -Drender.mbtint=true paints every mesh-built face magenta, so a single
+        // capture shows exactly which geometry takes this path.
+        if (MB_TINT) return 0xFF00FFFF.toInt()
         var rgb = colorTable[ModelGL.adjustLuminance(colorHsl, ambient)]
         if (materialId != -1 && materialProvider != null) {
             val material = materialProvider.getMaterial(materialId and 0xffff)

@@ -1091,6 +1091,9 @@ class Client : GameShell() {
     }
 
     companion object {
+        /** Scene-draw wall time: traversal + model submission, excluding the toolkit render. */
+        @JvmStatic var sceneDrawNs = 0L
+        @JvmStatic var sceneDrawSamples = 0
         val HINT_TRAILS: Array<HintTrail?> = arrayOfNulls<HintTrail>(9)
         val MOUSE_MOVEMENTS: NodeCollection = NodeCollection()
         val KEYS_PRESSED: Array<KeyRecord?> = arrayOfNulls<KeyRecord>(131)
@@ -2330,9 +2333,12 @@ class Client : GameShell() {
                     Resource.mapRegion!!.getEnvironmentManager().updateAtmosphere(Resource.mapRegion!!)
                     val roofPrefValue = PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue()
                     val roofPreference = if (roofPrefValue == 2) timesSceneRendered.toByte() else 1
+                    val sceneT0 = System.nanoTime()
                     Resource.mapRegion!!.getScene()!!.drawScene(
                         cycles, Camera.cameraPositionAbsoluteX, Camera.cameraPositionAbsoluteZ, Camera.cameraPositionAbsoluteY, Resource.mapRegion!!.bits, visibleBelowDrawheight, visibleAboveX, visibleBelowX, visibleBelowY, visibleAboveY, PlayerUpdate.MY_PLAYER!!.plane + 1, roofPreference, PreferenceManager.preferences!!.flickeringEffects!!.getValue() == 0
                     )
+                    sceneDrawNs += System.nanoTime() - sceneT0
+                    sceneDrawSamples++
                     // Advance at pulse rate, not frame rate: animatingStep holds the
                     // number of 50Hz pulses since the last rendered frame, so the
                     // idle-detection gate in processGameTick keeps its 200ms timing.

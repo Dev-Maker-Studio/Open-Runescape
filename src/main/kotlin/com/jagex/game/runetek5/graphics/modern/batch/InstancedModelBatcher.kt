@@ -94,7 +94,9 @@ class InstancedModelBatcher {
         const val VERTEX_STRIDE = 40
 
         /** Per-instance data: mat4 = 16 floats = 64 bytes */
-        const val INSTANCE_STRIDE = 64
+        /** mat4 (16 floats) + light indices (4 floats). */
+        const val INSTANCE_FLOATS = 20
+        const val INSTANCE_STRIDE = INSTANCE_FLOATS * 4
 
         /** Maximum instances per instanced draw call */
         private const val MAX_INSTANCES_PER_MESH = 1024
@@ -214,7 +216,7 @@ class InstancedModelBatcher {
         val materialBatches: MutableList<MaterialBatchEntry> = mutableListOf()
     ) {
         /** Per-instance model matrices for the CURRENT frame (16 floats each, in place — no per-instance allocation) */
-        var instanceData: FloatArray = FloatArray(16 * 16)
+        var instanceData: FloatArray = FloatArray(INSTANCE_FLOATS * 16)
         var instanceCount: Int = 0
 
         /**
@@ -237,8 +239,8 @@ class InstancedModelBatcher {
 
         /** Reserves space for one more instance and returns its base offset into [instanceData]. */
         fun reserveInstanceSlot(): Int {
-            val base = instanceCount * 16
-            if (base + 16 > instanceData.size) {
+            val base = instanceCount * INSTANCE_FLOATS
+            if (base + INSTANCE_FLOATS > instanceData.size) {
                 instanceData = instanceData.copyOf(instanceData.size * 2)
             }
             instanceCount++
@@ -356,7 +358,7 @@ class InstancedModelBatcher {
         // Allocate CPU staging buffers
         vertexBuffer = MemoryUtil.memAlloc(MAX_TOTAL_VERTICES * VERTEX_STRIDE)
         indexBuffer = MemoryUtil.memAllocInt(MAX_TOTAL_INDICES)
-        instanceBuffer = MemoryUtil.memAllocFloat(MAX_INSTANCES_PER_MESH * 16)
+        instanceBuffer = MemoryUtil.memAllocFloat(MAX_INSTANCES_PER_MESH * INSTANCE_FLOATS)
 
         isInitialized = true
     }
@@ -399,6 +401,10 @@ class InstancedModelBatcher {
         GLWrapper.vertexAttribPointer(8, 4, FLOAT, false, INSTANCE_STRIDE, 48)
         GLWrapper.enableVertexAttribArray(8)
         GLWrapper.vertexAttribDivisor(8, 1)
+        // Per-instance light indices (4 slots, -1 = unused) at location 9
+        GLWrapper.vertexAttribPointer(9, 4, FLOAT, false, INSTANCE_STRIDE, 64)
+        GLWrapper.enableVertexAttribArray(9)
+        GLWrapper.vertexAttribDivisor(9, 1)
 
         // Bind IBO
         ibo!!.bind()
@@ -426,6 +432,7 @@ class InstancedModelBatcher {
             layout(location = 6) in vec4 aModelMatCol1;
             layout(location = 7) in vec4 aModelMatCol2;
             layout(location = 8) in vec4 aModelMatCol3;
+            layout(location = 9) in vec4 aLightIdx;
 
             uniform mat4 uViewProjection;
 
@@ -480,13 +487,17 @@ class InstancedModelBatcher {
 
                 // Point lights add on top of the sun term, exactly as fixed-function
                 // accumulates GL_LIGHT2+ before the final clamp.
-                for (int i = 0; i < uPointLightCount; ++i) {
+                // Only the lights legacy associated with THIS entity (copyLights ->
+                // getActiveLights, max 4). Looping every scene light instead cost 5.2ms
+                // of GPU time with 117 lights, and lit geometry the light never reached.
+                for (int k = 0; k < 4; ++k) {
+                    int i = int(aLightIdx[k]);
+                    if (i < 0) continue;
                     vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
                     float d2 = dot(toLight, toLight);
                     float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
-                    vec3 lc = uPointLightColor[i];
                     float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
-                    litRGB += aColor.rgb * lc * (att * ndotl);
+                    litRGB += aColor.rgb * uPointLightColor[i] * (att * ndotl);
                 }
 
                 litRGB = clamp(litRGB, 0.0, 1.0);
@@ -680,7 +691,8 @@ class InstancedModelBatcher {
     fun addInstance(
         cachedModel: ModelCache.CachedModel,
         modelId: Long,
-        modelMatrix: Matrix43
+        modelMatrix: Matrix43,
+        lightIdx: FloatArray? = null
     ): Boolean {
         if (!isFrameActive) return false
 
@@ -795,6 +807,19 @@ class InstancedModelBatcher {
         data[base + 13] = modelMatrix.yD
         data[base + 14] = modelMatrix.zD
         data[base + 15] = 1f
+
+        // Per-entity light indices (-1 = unused slot)
+        if (lightIdx != null) {
+            data[base + 16] = lightIdx[0]
+            data[base + 17] = lightIdx[1]
+            data[base + 18] = lightIdx[2]
+            data[base + 19] = lightIdx[3]
+        } else {
+            data[base + 16] = -1f
+            data[base + 17] = -1f
+            data[base + 18] = -1f
+            data[base + 19] = -1f
+        }
 
         instancedModels++
         instancesThisBatch++
@@ -1064,7 +1089,7 @@ class InstancedModelBatcher {
             val t1 = System.nanoTime()
             val instBuf = instanceBuffer!!
             instBuf.clear()
-            instBuf.put(entry.instanceData, 0, count * 16)
+            instBuf.put(entry.instanceData, 0, count * INSTANCE_FLOATS)
             instBuf.flip()
             instanceVbo!!.upload(instBuf)
             timeInstanceUpload += System.nanoTime() - t1

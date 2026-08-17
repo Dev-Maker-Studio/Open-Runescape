@@ -81,6 +81,109 @@ class ModernGroundRenderer {
      * Sets the raw legacy sun parameters used by the HD_LIGHT ground lighting formula
      * (GroundGL.kt:458-459). Values must be passed UNNORMALIZED, matching legacy.
      */
+    // ===== Ground shadows (native) =====
+    // Legacy composites dynamic scenery/entity shadows with a fixed-function overlay
+    // (ShadowMapperGL.renderShadowOverlay). That must never run in this pipeline, so
+    // the same source data -- ShadowMapperGL.shadowMapperData, one intensity byte per
+    // shadow texel over the whole ground -- is uploaded as an R8 texture and sampled
+    // in the ground shaders instead.
+    private var shadowTex = 0
+    private var shadowW = 0
+    private var shadowH = 0
+    private var shadowTexelSize = 32f
+    private var shadowVersionUploaded = -1
+    private var shadowVersion = 0
+    private var shadowData: ByteArray? = null
+    private var shadowDiagCount = 0
+    private val GROUND_POINT_LIGHTS =
+        System.getProperty("render.groundlights")?.equals("false", true) != true
+    private val GROUND_SHADOWS =
+        System.getProperty("render.groundshadows")?.equals("true", true) == true
+
+    /**
+     * [texelSize] = world units per shadow texel.
+     *
+     * OFF by default (-Drender.groundshadows=true to enable). The sampling path is
+     * wired and verified end to end EXCEPT the fetch, which still returns ~0, so the
+     * feature contributes nothing visually — while the 2.78MB map re-uploads whenever
+     * ShadowMapperGL bumps its version (every entity shadow add/remove), which cost
+     * ~11ms/frame. Not worth carrying until the fetch is fixed.
+     */
+    fun setShadowMap(data: ByteArray, w: Int, h: Int, texelSize: Float, version: Int) {
+        if (!GROUND_SHADOWS) return
+        shadowData = data; shadowW = w; shadowH = h
+        shadowTexelSize = texelSize; shadowVersion = version
+    }
+
+    private fun ensureShadowTexture() {
+        val data = shadowData ?: return
+        if (shadowW <= 0 || shadowH <= 0) return
+        if (shadowTex == 0) {
+            shadowTex = glGenTextures()
+            glBindTexture(GL_TEXTURE_2D, shadowTex)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+            shadowVersionUploaded = -1
+        }
+        if (shadowVersionUploaded == shadowVersion) return
+        shadowVersionUploaded = shadowVersion
+        val buf = MemoryUtil.memAlloc(data.size)
+        buf.put(data); buf.flip()
+        glBindTexture(GL_TEXTURE_2D, shadowTex)
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, shadowW, shadowH, 0,
+            GL_RED, GL_UNSIGNED_BYTE, buf)
+        MemoryUtil.memFree(buf)
+    }
+
+    private fun uploadShadowUniforms(s: ShaderProgram) {
+        val en = s.getUniformLocation("uGroundShadowEnabled")
+        if (System.getProperty("shadow.diag") != null && shadowDiagCount++ % 2000 == 1500) {
+            System.err.println("[GroundShadow] uniformLoc=$en data=${shadowData != null} " +
+                "dims=${shadowW}x${shadowH} texel=$shadowTexelSize tex=$shadowTex ver=$shadowVersion")
+        }
+        if (en < 0) return
+        val have = shadowData != null && shadowW > 0
+        if (!have) { GLWrapper.uniform1i(en, 0); return }
+        ensureShadowTexture()
+        GLWrapper.uniform1i(en, 1)
+        val sc = s.getUniformLocation("uGroundShadowScale")
+        if (sc >= 0) GLWrapper.uniform1f(sc, 1f / (shadowTexelSize * shadowW))
+        val tx = s.getUniformLocation("uGroundShadowTex")
+        if (tx >= 0) {
+            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0 + 4)
+            glBindTexture(GL_TEXTURE_2D, shadowTex)
+            GLWrapper.uniform1i(tx, 4)
+            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+        }
+    }
+
+    /** Point lights for this frame, evaluated in the ground shaders (no FFP). */
+    private var plCount = 0
+    private var plPos = FloatArray(0)
+    private var plColor = FloatArray(0)
+
+    fun setPointLights(count: Int, pos: FloatArray, color: FloatArray) {
+        plCount = count
+        plPos = pos
+        plColor = color
+    }
+
+    private fun uploadPointLights(s: ShaderProgram) {
+        val loc = s.getUniformLocation("uPointLightCount")
+        if (loc < 0) return
+        if (!GROUND_POINT_LIGHTS) { GLWrapper.uniform1i(loc, 0); return }
+        GLWrapper.uniform1i(loc, plCount)
+        if (plCount > 0) {
+            val lp = s.getUniformLocation("uPointLightPos")
+            val lc = s.getUniformLocation("uPointLightColor")
+            if (lp >= 0) GLWrapper.uniform4fv(lp, plPos)
+            if (lc >= 0) GLWrapper.uniform3fv(lc, plColor)
+        }
+    }
+
     fun setLegacySunParams(
         dirX: Float, dirY: Float, dirZ: Float,
         brightness: Float, contrastPos: Float, contrastNeg: Float
@@ -465,6 +568,8 @@ class ModernGroundRenderer {
         s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
         s.setUniform(uTexSunDirectionLocation, sunDirection.x, sunDirection.y, sunDirection.z)
         s.setUniform("uSunColor", sunColor)
+        uploadPointLights(s)
+        uploadShadowUniforms(s)
         s.setUniform(uTexAmbientLocation, ambient)
         s.setUniform(uTexContrastLocation, contrast)
 
@@ -634,6 +739,8 @@ class ModernGroundRenderer {
         s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
         s.setUniform(uTexSunDirectionLocation, legacySunDirX, legacySunDirY, legacySunDirZ)
         s.setUniform("uSunColor", sunColor)
+        uploadPointLights(s)
+        uploadShadowUniforms(s)
         s.setUniform(uTexAmbientLocation, ambient)
         s.setUniform(uTexContrastLocation, contrast)
         s.setUniform(uTexSunBrightnessLocation, legacySunBrightness)
@@ -808,6 +915,8 @@ class ModernGroundRenderer {
         val s = shader ?: return
         s.setUniform(uSunDirectionLocation, sunDirection.x, sunDirection.y, sunDirection.z)
         s.setUniform("uSunColor", sunColor)
+        uploadPointLights(s)
+        uploadShadowUniforms(s)
         s.setUniform(uAmbientLocation, ambient)
         s.setUniform(uContrastLocation, contrast)
     }

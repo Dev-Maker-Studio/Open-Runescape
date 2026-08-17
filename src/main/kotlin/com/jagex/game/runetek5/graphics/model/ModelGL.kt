@@ -39,7 +39,31 @@ import kotlin.math.sqrt
 
 class ModelGL : Model {
 
+    /**
+     * Drops the mesh-built geometry because a mutation changed this model beyond what
+     * the per-instance matrix can express, and records WHY. The reason histogram
+     * (-Dmodel.invalidatediag) shows which mutations force the legacy-capture path, and
+     * therefore which ones are worth expressing as a matrix instead of a vertex bake.
+     */
+    private fun invalidateModernBuilt(reason: Int) {
+        if (INVALIDATE_DIAG) invalidateCounts[reason]++
+        // NOTE: colour-only mutations could keep the geometry (positions, normals and
+        // UVs are untouched by a tint/recolour) and rebuild just the colour bytes.
+        // That optimisation is DISABLED because the recolour path indexes the model's
+        // compacted, sorted facesColour array with MESH face indices -- ModelGL's
+        // constructor rebuilds those arrays over the filtered face list, so the two
+        // index spaces do not correspond. The wrong entries produced wrong material
+        // brightness and saturated recoloured models to white. Re-enable only with a
+        // mesh-face -> model-face map and the -Drender.verifyrecolour check at zero.
+        this.modernBuilt = null
+    }
+
     companion object {
+        @JvmStatic val INVALIDATE_DIAG = System.getProperty("model.invalidatediag") != null
+        @JvmStatic val INVALIDATE_REASONS = arrayOf("yaxisRotate", "translate", "mirror", "scale", "recolor", "rematerial", "tint", "setAmbient", "envAlpha", "offsetSubmesh", "xaxisRotate", "zaxisRotate", "contourToGround", "hillChange")
+        @JvmStatic val invalidateCounts = LongArray(14)
+        @JvmStatic fun invalidateSummary(): String =
+            INVALIDATE_REASONS.indices.joinToString(" ") { "${INVALIDATE_REASONS[it]}=${invalidateCounts[it]}" }
         // Picking scratch (calculateProjection) — game thread only. Construction-time
         // scratch must NOT live here: models are built concurrently by the game thread
         // (NPC/player/item models) and the async map loader (loc models).
@@ -188,6 +212,10 @@ class ModelGL : Model {
      */
     @JvmField
     var modernYaw: Int = 0
+
+    /** Bumped by colour-only mutations; geometry stays valid (see invalidateModernBuilt). */
+    @JvmField
+    var modernColorRevision: Int = 0
 
     @JvmField
     var preferenceFlags: Int = 0
@@ -1577,7 +1605,7 @@ class ModelGL : Model {
     override fun yaxisRotateWithoutNormals(rotation: Int) {
         // Rotates vertices but deliberately NOT normals — the modern matrix path
         // would rotate both, changing lighting. Not representable; invalidate.
-        this.modernBuilt = null
+        invalidateModernBuilt(0)
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
@@ -2541,7 +2569,7 @@ class ModelGL : Model {
     }
 
     override fun translate(x: Int, y: Int, z: Int) {
-        this.modernBuilt = null
+        invalidateModernBuilt(1)
         for (i in 0 until this.maxDepth) {
             this.verticesX!![i] += x
             this.verticesY!![i] += y
@@ -2558,7 +2586,7 @@ class ModelGL : Model {
     override fun mirror() {
         // Mirroring flips winding; not representable in the modern matrix path
         // without a per-draw cull flip. Invalidate.
-        this.modernBuilt = null
+        invalidateModernBuilt(2)
         for (i in 0 until this.maxDepth) {
             this.verticesZ!![i] = -this.verticesZ!![i]
         }
@@ -2613,7 +2641,7 @@ class ModelGL : Model {
     }
 
     override fun scale(x: Int, y: Int, z: Int) {
-        this.modernBuilt = null
+        invalidateModernBuilt(3)
         for (i in 0 until this.maxDepth) {
             this.verticesX!![i] = (this.verticesX!![i] * x) shr 7
             this.verticesY!![i] = (this.verticesY!![i] * y) shr 7
@@ -2638,7 +2666,7 @@ class ModelGL : Model {
     }
 
     override fun recolor(src: Short, dst: Short) {
-        this.modernBuilt = null
+        invalidateModernBuilt(4)
         for (face in 0 until this.numFaces) {
             if (this.facesColor!![face] == src) {
                 this.facesColor!![face] = dst
@@ -2659,7 +2687,7 @@ class ModelGL : Model {
     }
 
     override fun rematerial(src: Short, dst: Short) {
-        this.modernBuilt = null
+        invalidateModernBuilt(5)
         val provider = this.toolkit.materialProvider!!
 
         for (face in 0 until this.numFaces) {
@@ -2703,7 +2731,7 @@ class ModelGL : Model {
     }
 
     override fun tint(hue: Int, saturation: Int, lightness: Int, opacity: Int) {
-        this.modernBuilt = null
+        invalidateModernBuilt(6)
         for (i in 0 until this.numFaces) {
             val hsl = this.facesColor!![i].toInt() and 0xffff
             var h = (hsl shr 10) and 0x3f
@@ -2736,7 +2764,7 @@ class ModelGL : Model {
 
     override fun setAmbient(ambient: Int) {
         // Modern base colors are baked with the createModel-time ambient.
-        this.modernBuilt = null
+        invalidateModernBuilt(7)
         this.ambient = ambient.toShort()
         if (this.colorsBuffer != null) {
             this.colorsBuffer!!.buffer = null
@@ -2744,7 +2772,7 @@ class ModelGL : Model {
     }
 
     override fun applyEnvironmentAlpha(alpha: Byte, transparency: ByteArray?) {
-        this.modernBuilt = null
+        invalidateModernBuilt(8)
         if (transparency == null) {
             for (f in 0 until this.numFaces) {
                 this.facesAlpha!![f] = alpha
@@ -3007,7 +3035,7 @@ class ModelGL : Model {
     }
 
     override fun offsetSubmesh(var1: Matrix43, functionMask: Int, var3: Boolean) {
-        this.modernBuilt = null
+        invalidateModernBuilt(9)
         if (this.verticesSubmeshes != null) {
             var matrix44var4 = var1
             if (var3) {
@@ -3134,7 +3162,7 @@ class ModelGL : Model {
     override fun accountForLayers(): Boolean = this.hasAlphaTransition
 
     override fun xaxisRotateWithoutNormals(rotation: Int) {
-        this.modernBuilt = null
+        invalidateModernBuilt(10)
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
@@ -3152,7 +3180,7 @@ class ModelGL : Model {
     }
 
     override fun zaxisRotateWithoutNormals(rotation: Int) {
-        this.modernBuilt = null
+        invalidateModernBuilt(11)
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
 
@@ -4114,7 +4142,7 @@ class ModelGL : Model {
 
     override fun contourToGround(contourType: Int, contourModifier: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int) {
         // Ground contouring reshapes vertices per-tile; not matrix-representable.
-        this.modernBuilt = null
+        invalidateModernBuilt(12)
         if (!this.boundsCalculated) {
             calculateBounds()
         }
@@ -4191,7 +4219,7 @@ class ModelGL : Model {
 
     override fun hillChange(ground: Ground, sceneX: Int, averageHeight: Int, sceneY: Int, width: Int, length: Int, xan: Int, zan: Int) {
         // Per-tile hillskew reshapes vertices; not matrix-representable.
-        this.modernBuilt = null
+        invalidateModernBuilt(13)
         val sin = MathUtils.SINE[xan]
         val cos = MathUtils.COSINE[xan]
         val sin2 = MathUtils.SINE[zan]

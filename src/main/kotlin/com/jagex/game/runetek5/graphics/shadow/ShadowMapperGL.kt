@@ -13,6 +13,8 @@ class ShadowMapperGL(
     val width: Int
     val length: Int
     val shadowMapperData: ByteArray
+    /** Bumped whenever the intensity map changes, so the modern texture re-uploads. */
+    @JvmField var shadowVersion: Int = 0
     val sizeShift: Int
     val sizeX: Int
     val sizeY: Int
@@ -249,6 +251,7 @@ class ShadowMapperGL(
         }
 
         if (clippedWidth > 0 && clippedHeight > 0) {
+            shadowVersion++
             addShadowData(shadowMapperData, shadowGL.shade, srcOffset, dataOffset, clippedWidth, clippedHeight, dstRowStride, srcRowStride)
             invalidateShadowTiles(adjustedX, adjustedY, clippedWidth, clippedHeight)
         }
@@ -298,6 +301,7 @@ class ShadowMapperGL(
         }
 
         if (clippedWidth > 0 && clippedHeight > 0) {
+            shadowVersion++
             subtractShadowData(shadowMapperData, shadowGL.shade, srcOffset, dataOffset, clippedWidth, clippedHeight, dstRowStride, srcRowStride)
             invalidateShadowTiles(adjustedX, adjustedY, clippedWidth, clippedHeight)
         }

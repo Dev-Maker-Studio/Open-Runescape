@@ -40,6 +40,7 @@ open class GroundGL(
 ) : Ground(regionSizeX, regionSizeY, 512, heightsCurrentLvl) {
 
     companion object {
+        @JvmStatic var shadowProbeTick = 0
         @JvmField val GROUND_MATRIX = FloatArray(16)
     }
 
@@ -264,14 +265,19 @@ open class GroundGL(
                 (goundMaterialNodes!![tileX] as GroundMaterialGL).drawMaterialTriangles(visibleTileIndices, visibleTileCount)
             }
 
-            // Legacy point-light pass: MULTIPLY-blended light meshes painted over the
-            // ground, which is what gives lamps their pools of light AND darkens the
-            // unlit ground. Under the modern toolkit it runs inside a fixed-function
-            // isolation window (see beginLegacyFixedFunctionPass) -- the reason it was
-            // disabled was a core program/VAO still being bound, not the pass itself.
-            val modernTk = activeToolkit as? ModernGLToolkit
-            if (!activeLights.isEmpty() && (modernTk == null || ModernGLToolkit.groundLightPass)) {
-                modernTk?.beginLegacyFixedFunctionPass()
+            // Native ground shadows for the modern pipeline: hand the shadow intensity
+            // map to the ground renderer, which samples it in-shader. No fixed function.
+            val sm = shadowMapper
+            if (sm != null && activeToolkit is ModernGLToolkit) {
+                val texelSize = (width * tileUnits).toFloat() / (sm.width - 2).toFloat()
+                (activeToolkit as ModernGLToolkit).groundRendererForShadows()
+                    ?.setShadowMap(sm.shadowMapperData, sm.width, sm.length, texelSize, sm.shadowVersion)
+            }
+
+            // FIXED-FUNCTION, LEGACY TOOLKIT ONLY. The modern pipeline must never run
+            // fixed-function work: it lights the ground in its own shaders instead
+            // (ModernGroundRenderer point lights). No crossover between pipelines.
+            if (!activeLights.isEmpty() && activeToolkit !is ModernGLToolkit) {
                 val fogColor = activeToolkit.fogColor
                 val fogDensity = activeToolkit.fogDensity
                 activeToolkit.calculateFog(0, fogDensity, activeToolkit.fogOffset)
@@ -297,19 +303,24 @@ open class GroundGL(
                 activeToolkit.setTextureTransparency(0, GL_TEXTURE)
                 activeToolkit.setActiveTexture(null)
                 activeToolkit.calculateFog(fogColor, fogDensity, activeToolkit.fogOffset)
-                modernTk?.endLegacyFixedFunctionPass()
             }
 
-            // Legacy shadow overlay: the projected scenery/entity shadows composited
-            // onto the ground. Same fixed-function isolation as the light pass above.
-            if (shadowMapper != null && (modernTk == null || ModernGLToolkit.groundShadowPass)) {
-                modernTk?.beginLegacyFixedFunctionPass()
+            if (System.getProperty("shadow.dims") != null && shadowMapper != null && shadowProbeTick++ % 300 == 250) {
+                val sm = shadowMapper!!
+                var nz = 0; var mx = 0
+                for (b in sm.shadowMapperData) { val v = b.toInt() and 0xff; if (v != 0) nz++; if (v > mx) mx = v }
+                System.err.println("[ShadowData] nonZero=$nz max=$mx version=${sm.shadowVersion}")
+                System.err.println("[ShadowDims] map=${sm.width}x${sm.length} bytes=${sm.shadowMapperData.size} " +
+                    "groundTiles=${width}x${length} tileUnits=$tileUnits tileScale=$tileScale " +
+                    "worldUnits=${width * tileUnits}x${length * tileUnits}")
+            }
+            // FIXED-FUNCTION, LEGACY TOOLKIT ONLY (see above).
+            if (shadowMapper != null && activeToolkit !is ModernGLToolkit) {
                 OpenGL.glPushMatrix()
                 OpenGL.glTranslatef(0.0f, -1.0f, 0.0f)
                 activeToolkit.toggleDrawingClientstates(vertexBuffer, null, null, textureBuffer)
                 shadowMapper!!.renderShadowOverlay(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen, belowLowestPlane)
                 OpenGL.glPopMatrix()
-                modernTk?.endLegacyFixedFunctionPass()
             }
         }
     }

@@ -242,13 +242,13 @@ class OptimizedFrameBatcher {
         // Create UBO for model matrices
         matrixUbo = glGenBuffers()
         glBindBuffer(GL_UNIFORM_BUFFER, matrixUbo)
-        glBufferData(GL_UNIFORM_BUFFER, (MAX_MODELS * 16 * 4).toLong(), GL_STREAM_DRAW)
+        glBufferData(GL_UNIFORM_BUFFER, (MAX_MODELS * 20 * 4).toLong(), GL_STREAM_DRAW)
         glBindBuffer(GL_UNIFORM_BUFFER, 0)
 
         // Allocate pooled staging buffers
         vertexBuffer = MemoryUtil.memAlloc(INITIAL_VERTEX_CAPACITY * BYTES_PER_VERTEX)
         indexBuffer = MemoryUtil.memAllocInt(INITIAL_INDEX_CAPACITY)
-        matrixBuffer = MemoryUtil.memAllocFloat(MAX_MODELS * 16)
+        matrixBuffer = MemoryUtil.memAllocFloat(MAX_MODELS * 20)
 
         isInitialized = true
     }
@@ -291,6 +291,10 @@ class OptimizedFrameBatcher {
             // Use uniform buffer object for model matrices to avoid uniform count limits
             layout(std140) uniform ModelMatrices {
                 mat4 uModelMatrices[${MAX_MODELS}];
+                // Per-model light indices (4 slots, -1 = unused). Same per-entity set
+                // legacy programs via copyLights -> getActiveLights, so a vertex
+                // evaluates at most 4 lights instead of every light in the scene.
+                vec4 uModelLights[${MAX_MODELS}];
             };
 
             out vec2 vTexCoord;
@@ -327,13 +331,15 @@ class OptimizedFrameBatcher {
 
                 // Point lights add on top of the sun term, exactly as fixed-function
                 // accumulates GL_LIGHT2+ before the final clamp.
-                for (int i = 0; i < uPointLightCount; ++i) {
+                vec4 lightIdx = uModelLights[modelIdx];
+                for (int k = 0; k < 4; ++k) {
+                    int i = int(lightIdx[k]);
+                    if (i < 0) continue;
                     vec3 toLight = uPointLightPos[i].xyz - worldPos.xyz;
                     float d2 = dot(toLight, toLight);
                     float att = 1.0 / max(uPointLightPos[i].w * d2, 1e-6);
-                    vec3 lc = uPointLightColor[i];
                     float ndotl = max(dot(worldNormal, normalize(toLight)), 0.0);
-                    litRGB += baseRGB * lc * (att * ndotl);
+                    litRGB += baseRGB * uPointLightColor[i] * (att * ndotl);
                 }
 
                 // Clamp to valid range (matching legacy's 0-255 clamping)
@@ -581,7 +587,7 @@ class OptimizedFrameBatcher {
      * @param modelMatrix The model's local-to-world transform
      * @return Model index, or -1 if max models reached
      */
-    fun beginModel(modelMatrix: Matrix43): Int {
+    fun beginModel(modelMatrix: Matrix43, lightIdx: FloatArray? = null): Int {
         if (currentModelIndex >= MAX_MODELS) return -1
 
         val mb = matrixBuffer!!
@@ -591,6 +597,16 @@ class OptimizedFrameBatcher {
         // Matrix43: v' = v * M  where v is a row vector
         // GLSL mat4: v' = M * v where v is a column vector
         // So we need to transpose: GLSL column i = Matrix43 row i
+
+        // Per-model light indices live after the whole matrix array (std140).
+        val lightBase = MAX_MODELS * 16 + idx * 4
+        if (lightIdx != null) {
+            mb.put(lightBase, lightIdx[0]); mb.put(lightBase + 1, lightIdx[1])
+            mb.put(lightBase + 2, lightIdx[2]); mb.put(lightBase + 3, lightIdx[3])
+        } else {
+            mb.put(lightBase, -1f); mb.put(lightBase + 1, -1f)
+            mb.put(lightBase + 2, -1f); mb.put(lightBase + 3, -1f)
+        }
 
         // Column 0 (X transform)
         mb.put(idx * 16 + 0, modelMatrix.xA)
@@ -906,7 +922,9 @@ class OptimizedFrameBatcher {
 
         // Upload model matrices
         matrixBuffer!!.position(0)
-        matrixBuffer!!.limit(currentModelIndex * 16)
+        // The per-model light indices live after the FULL matrix array (std140), so
+        // the upload has to span the matrix block plus the used light entries.
+        matrixBuffer!!.limit(MAX_MODELS * 16 + currentModelIndex * 4)
         glBindBuffer(GL_UNIFORM_BUFFER, matrixUbo)
         glBufferSubData(GL_UNIFORM_BUFFER, 0, matrixBuffer!!)
         glBindBuffer(GL_UNIFORM_BUFFER, 0)

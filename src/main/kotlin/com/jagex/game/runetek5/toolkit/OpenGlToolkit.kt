@@ -347,7 +347,16 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
                 throw RuntimeException("")
             }
             attach()
-            val capabilityFlags = accumulateCapabilities()
+            var capabilityFlags = accumulateCapabilities()
+            // accumulateCapabilities sets bit 0x1 for renderers the original client
+            // blacklists -- notably anything reporting "mesa", which includes llvmpipe.
+            // -Drender.allowsoftgl=true clears just that bit so the client can run on a
+            // headless Xvfb display for screenshot comparison. Software rendering is
+            // conformant but NOT accelerated, so never read frame timings from such a
+            // run; it exists purely so captures do not have to touch the live display.
+            if (System.getProperty("render.allowsoftgl")?.equals("true", true) == true) {
+                capabilityFlags = capabilityFlags and 0x1.inv()
+            }
             if (capabilityFlags != 0) {
                 throw RuntimeException("")
             }
