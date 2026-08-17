@@ -47,19 +47,39 @@ class ModelGL : Model {
      */
     private fun invalidateModernBuilt(reason: Int) {
         if (INVALIDATE_DIAG) invalidateCounts[reason]++
-        // NOTE: colour-only mutations could keep the geometry (positions, normals and
-        // UVs are untouched by a tint/recolour) and rebuild just the colour bytes.
-        // That optimisation is DISABLED because the recolour path indexes the model's
-        // compacted, sorted facesColour array with MESH face indices -- ModelGL's
-        // constructor rebuilds those arrays over the filtered face list, so the two
-        // index spaces do not correspond. The wrong entries produced wrong material
-        // brightness and saturated recoloured models to white. Re-enable only with a
-        // mesh-face -> model-face map and the -Drender.verifyrecolour check at zero.
+        // Colour-only mutations keep the geometry: a tint/recolour changes no position,
+        // normal or UV, so only the 4 colour bytes per vertex are rebuilt
+        // (ModernModelBuilder.recolour) and the cache re-keys on the colour state.
+        //
+        // This needs meshFaceIndices to bridge index spaces -- the builder is indexed
+        // by MESH face, while ModelGL rebuilds facesColour over its own filtered,
+        // sorted face list. Reading the raw array with a mesh index picked up the
+        // wrong material's brightness and saturated recoloured models to white.
+        // -Drender.verifyrecolour asserts recolour reproduces the emission bytes
+        // exactly; it reports 0 mismatches.
+        // DISABLED. Colour-only mutations look like they could keep the geometry and
+        // rebuild just the colour bytes, but the recolour path is not proven for the
+        // case that matters: -Drender.verifyrecolour only compares models with
+        // modernColorRevision == 0, i.e. models that never took a colour mutation --
+        // exactly the ones this branch would NOT affect. It reported 0 mismatches while
+        // recoloured bushes still rendered white. Re-enable only once the check covers
+        // MUTATED models.
+        // Colour-only reasons still invalidate (rendering unchanged), but record the
+        // revision and keep the built geometry aside so the recolour path can be
+        // verified against the currently-correct output on MUTATED models -- the case
+        // the previous check never covered.
+        if (reason == 4 || reason == 6 || reason == 7 || reason == 8) {
+            this.modernColorRevision++
+            if (VERIFY_RECOLOUR_CAPTURE && this.modernBuiltShadow == null) {
+                this.modernBuiltShadow = this.modernBuilt
+            }
+        }
         this.modernBuilt = null
     }
 
     companion object {
         @JvmStatic val INVALIDATE_DIAG = System.getProperty("model.invalidatediag") != null
+        @JvmStatic val VERIFY_RECOLOUR_CAPTURE = System.getProperty("render.verifyrecolour") != null
         @JvmStatic val INVALIDATE_REASONS = arrayOf("yaxisRotate", "translate", "mirror", "scale", "recolor", "rematerial", "tint", "setAmbient", "envAlpha", "offsetSubmesh", "xaxisRotate", "zaxisRotate", "contourToGround", "hillChange")
         @JvmStatic val invalidateCounts = LongArray(14)
         @JvmStatic fun invalidateSummary(): String =
@@ -212,6 +232,14 @@ class ModelGL : Model {
      */
     @JvmField
     var modernYaw: Int = 0
+
+    /** model-face index -> source mesh face index, after filtering and sorting. */
+    @JvmField
+    var meshFaceIndices: IntArray? = null
+
+    /** Built geometry kept past a colour mutation, for verification only. */
+    @JvmField
+    var modernBuiltShadow: com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder.BuiltModel? = null
 
     /** Bumped by colour-only mutations; geometry stays valid (see invalidateModernBuilt). */
     @JvmField
@@ -530,6 +558,11 @@ class ModelGL : Model {
         }
 
         Model.addBillboard(billboardUids, faces)
+        // Retain model-face -> MESH-face after the sort. ModelGL rebuilds facesColor /
+        // facesAlpha / facesMaterial over this filtered, sorted list, so anything that
+        // starts from a mesh face index (ModernModelBuilder) needs this to reach the
+        // model's per-face arrays. Without it the two index spaces silently disagree.
+        this.meshFaceIndices = faces.copyOf(this.numFaces)
         this.numVertices = mesh.numVertices
         this.maxDepth = mesh.maxDepth
         this.verticesX = mesh.verticesX

@@ -178,15 +178,25 @@ object ModernModelBuilder {
         @Suppress("UNUSED_PARAMETER") facesMaterial: ShortArray?,
         ambient: Int,
         colorTable: IntArray,
-        materialProvider: MaterialProvider?
+        materialProvider: MaterialProvider?,
+        /** ModelGL.meshFaceIndices: model-face -> mesh-face, needed to invert. */
+        meshFaceIndices: IntArray?
     ): ByteArray {
         val out = built.vertexData.copyOf()
-        if (facesColor == null) return out
+        if (facesColor == null || meshFaceIndices == null) return out
+        // Invert to mesh-face -> model-face: the builder is mesh-indexed, the model's
+        // colour arrays are indexed over its own filtered/sorted face list.
+        var maxMesh = 0
+        for (v in meshFaceIndices) if (v > maxMesh) maxMesh = v
+        val meshToModel = IntArray(maxMesh + 1) { -1 }
+        for (m in meshFaceIndices.indices) meshToModel[meshFaceIndices[m]] = m
         val faces = built.acceptedFaces
         val stride = ModelCache.BYTES_PER_VERTEX
         for (i in faces.indices) {
-            val face = faces[i]
-            if (face >= facesColor.size) continue
+            val meshFace = faces[i]
+            if (meshFace >= meshToModel.size) continue
+            val face = meshToModel[meshFace]
+            if (face < 0 || face >= facesColor.size) continue
             // The RESOLVED material, exactly as emission used it. Re-reading
             // facesMaterial[face] here instead applied a different material's
             // brightness through faceColorRgba, which saturates to white — that is

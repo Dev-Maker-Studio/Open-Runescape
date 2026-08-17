@@ -553,7 +553,7 @@ class ModernGLToolkit(
                     "smm=$diagSetModelMatrixCalls(rej=$diagSetModelMatrixRejected) " +
                     "batchOpen=$diagBatchOpens(lazy=$diagLazyBatchOpens) " +
                     "modelDraws=$diagModelGateAccepted/$diagModelGateCalls unwrittenSlots=$unwrittenSlotFaces " +
-                    "ptLights=$diagPointLights/$diagSceneLights recolourBad=$recolourBad " +
+                    "ptLights=$diagPointLights/$diagSceneLights recolour[ran=$recolourChecks bad=$recolourBad shadow=$recolourShadowSeen rev0=$recolourRev0 noMap=$recolourNoMap] " +
                     "${ModernModelBuilder.skipSummary()} " +
                     "inval[${ModelGL.invalidateSummary()}] " +
                     "ground=$diagGroundDrawn/noPipe=$diagGroundNoPipeline/noSnap=$diagGroundNoSnapshot/calls=$diagGroundCalls " +
@@ -1182,6 +1182,9 @@ class ModernGLToolkit(
     @JvmField var diagPointLights = 0
     @JvmField var diagSceneLights = 0
     private var recolourChecks = 0
+    @JvmField var recolourShadowSeen = 0
+    @JvmField var recolourRev0 = 0
+    @JvmField var recolourNoMap = 0
     @JvmField var recolourBad = 0
     private val VERIFY_RECOLOUR = System.getProperty("render.verifyrecolour") != null
     /** Global index of each uploaded light, for per-entity index lookup. */
@@ -2474,29 +2477,13 @@ class ModernGLToolkit(
                 // -Drender.verifyrecolour: for an UNMUTATED model, recolour must
                 // reproduce the emission bytes exactly. Any mismatch means the recolour
                 // path disagrees with the builder about how a face's colour is derived.
-                if (VERIFY_RECOLOUR && model.modernColorRevision == 0 && recolourChecks < 200) {
-                    recolourChecks++
-                    val redone = ModernModelBuilder.recolour(
-                        built, model.facesColor, model.facesAlpha, model.facesMaterial,
-                        model.ambient.toInt(), ColorUtil.hslToRgb!!, materialProvider
-                    )
-                    var bad = 0
-                    val stride = ModelCache.BYTES_PER_VERTEX
-                    var off = ModernModelBuilder.COLOR_OFFSET
-                    while (off + 3 < redone.size) {
-                        for (k in 0 until 4) if (redone[off + k] != built.vertexData[off + k]) { bad++; break }
-                        off += stride
-                    }
-                    if (bad > 0) {
-                        recolourBad++
-                        if (recolourBad <= 5) System.err.println(
-                            "[Recolour] MISMATCH $bad verts on model faces=${built.faceCount}")
-                    }
-                }
                 val colourKey = if (model.modernColorRevision == 0) 0L else colourStateHash(model)
                 val geometryKey =
                     if (meshKeyByCurrentVertices) computeModelContentHash(model)
                     else built.id * 1000003L + colourKey
+                if (VERIFY_RECOLOUR && model.modernColorRevision > 0) {
+                    verifyRecolourVsLegacyCapture(model, built)
+                }
                 val cachedModel = cache.getOrCreate(model, geometryKey) {
                     if (model.modernColorRevision == 0) {
                         built.toCachedModel()
@@ -2505,7 +2492,8 @@ class ModernGLToolkit(
                         built.toCachedModel(
                             ModernModelBuilder.recolour(
                                 built, model.facesColor, model.facesAlpha, model.facesMaterial,
-                                model.ambient.toInt(), ColorUtil.hslToRgb!!, materialProvider
+                                model.ambient.toInt(), ColorUtil.hslToRgb!!, materialProvider,
+                                model.meshFaceIndices
                             )
                         )
                     }
@@ -2538,6 +2526,7 @@ class ModernGLToolkit(
 
             if (cachedModel != null) {
                 cacheHits++
+                if (VERIFY_RECOLOUR) verifyRecolourAgainst(model, cachedModel)
                 submitCachedModel(batcher, cachedModel, modelId, modelMatrix)
                 return
             }
@@ -2648,6 +2637,106 @@ class ModernGLToolkit(
      * NEW: Outputs 40-byte vertex format with pre-computed normalized normals.
      * This eliminates per-vertex normal conversion at render time.
      */
+    /**
+     * Verifies the colour-only recolour path on MUTATED models.
+     *
+     * The previous check only compared models with modernColorRevision == 0 -- exactly
+     * the ones the optimisation does not touch -- so it reported zero while recoloured
+     * bushes rendered white. This compares recolour's output against the colours the
+     * currently-correct path produces for the SAME model, face by face, using
+     * meshFaceIndices to bridge the mesh-indexed builder to the model-indexed arrays.
+     */
+    private fun verifyRecolourAgainst(model: ModelGL, cached: ModelCache.CachedModel) {
+        if (!VERIFY_RECOLOUR || recolourChecks >= 60) return
+        val built = model.modernBuiltShadow ?: return
+        recolourShadowSeen++
+        if (model.modernColorRevision == 0) { recolourRev0++; return }
+        val map = model.meshFaceIndices ?: run { recolourNoMap++; return }
+        recolourChecks++
+        val redone = ModernModelBuilder.recolour(
+            built, model.facesColor, model.facesAlpha, model.facesMaterial,
+            model.ambient.toInt(), ColorUtil.hslToRgb!!, materialProvider, map
+        )
+        var maxMesh = 0
+        for (v in map) if (v > maxMesh) maxMesh = v
+        val meshToModel = IntArray(maxMesh + 1) { -1 }
+        for (m in map.indices) meshToModel[map[m]] = m
+        val stride = ModelCache.BYTES_PER_VERTEX
+        val off = ModernModelBuilder.COLOR_OFFSET
+        var bad = 0
+        var firstMsg: String? = null
+        for (i in built.acceptedFaces.indices) {
+            val meshFace = built.acceptedFaces[i]
+            if (meshFace >= meshToModel.size) continue
+            val modelFace = meshToModel[meshFace]
+            if (modelFace < 0 || modelFace >= cached.faceCount) continue
+            val rp = i * 3 * stride + off
+            val cp = modelFace * 3 * stride + off
+            if (rp + 3 >= redone.size || cp + 3 >= cached.vertexData.limit()) continue
+            for (k in 0 until 3) {
+                if (redone[rp + k] != cached.vertexData.get(cp + k)) {
+                    bad++
+                    if (firstMsg == null) firstMsg =
+                        "recolour=(${redone[rp].toInt() and 0xff},${redone[rp+1].toInt() and 0xff},${redone[rp+2].toInt() and 0xff}) " +
+                        "expected=(${cached.vertexData.get(cp).toInt() and 0xff},${cached.vertexData.get(cp+1).toInt() and 0xff},${cached.vertexData.get(cp+2).toInt() and 0xff})"
+                    break
+                }
+            }
+        }
+        if (bad > 0) {
+            recolourBad++
+            if (recolourBad <= 6) System.err.println(
+                "[RecolourMut] MISMATCH $bad/${built.acceptedFaces.size} faces rev=${model.modernColorRevision} $firstMsg")
+        }
+    }
+
+    /**
+     * Compares the recolour path against a legacy-capture build of the SAME mutated
+     * model -- the output that renders correctly today. Face order differs between the
+     * two (mesh order vs model order), so meshFaceIndices bridges them.
+     */
+    private fun verifyRecolourVsLegacyCapture(model: ModelGL, built: ModernModelBuilder.BuiltModel) {
+        if (recolourChecks >= 40) return
+        val map = model.meshFaceIndices ?: run { recolourNoMap++; return }
+        val reference = buildModelCache(model) ?: return
+        recolourChecks++
+        val redone = ModernModelBuilder.recolour(
+            built, model.facesColor, model.facesAlpha, model.facesMaterial,
+            model.ambient.toInt(), ColorUtil.hslToRgb!!, materialProvider, map
+        )
+        var maxMesh = 0
+        for (v in map) if (v > maxMesh) maxMesh = v
+        val meshToModel = IntArray(maxMesh + 1) { -1 }
+        for (m in map.indices) meshToModel[map[m]] = m
+        val stride = ModelCache.BYTES_PER_VERTEX
+        val off = ModernModelBuilder.COLOR_OFFSET
+        var bad = 0
+        var first: String? = null
+        for (i in built.acceptedFaces.indices) {
+            val mf = built.acceptedFaces[i]
+            if (mf >= meshToModel.size) continue
+            val modelFace = meshToModel[mf]
+            if (modelFace < 0 || modelFace >= reference.faceCount) continue
+            val rp = i * 3 * stride + off
+            val cp = modelFace * 3 * stride + off
+            if (rp + 3 >= redone.size || cp + 3 >= reference.vertexData.limit()) continue
+            var diff = false
+            for (k in 0 until 3) if (redone[rp + k] != reference.vertexData.get(cp + k)) diff = true
+            if (diff) {
+                bad++
+                if (first == null) first =
+                    "got=(${redone[rp].toInt() and 0xff},${redone[rp+1].toInt() and 0xff},${redone[rp+2].toInt() and 0xff}) " +
+                    "want=(${reference.vertexData.get(cp).toInt() and 0xff},${reference.vertexData.get(cp+1).toInt() and 0xff},${reference.vertexData.get(cp+2).toInt() and 0xff})"
+            }
+        }
+        reference.free()
+        if (bad > 0) {
+            recolourBad++
+            if (recolourBad <= 6) System.err.println(
+                "[RecolourMut] $bad/${built.acceptedFaces.size} faces rev=${model.modernColorRevision} $first")
+        }
+    }
+
     private fun buildModelCache(model: ModelGL): ModelCache.CachedModel? {
         // renderedFaceCount, NOT numFaces: faces in [renderedFaceCount, numFaces) are
         // BILLBOARD ANCHOR faces (uid Long.MAX_VALUE, sorted to the tail by
