@@ -980,12 +980,18 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
     }
 
     override fun calculateProjection(worldX: Float, worldY: Float, worldZ: Float, screenCoords: FloatArray) {
-        val clipW = this.viewProjectionMatrix.elements[15] + this.viewProjectionMatrix.elements[3] * worldX + this.viewProjectionMatrix.elements[7] * worldY + this.viewProjectionMatrix.elements[11] * worldZ
-        val clipX = this.viewProjectionMatrix.elements[12] + this.viewProjectionMatrix.elements[0] * worldX + this.viewProjectionMatrix.elements[4] * worldY + this.viewProjectionMatrix.elements[8] * worldZ
-        val clipY = this.viewProjectionMatrix.elements[13] + this.viewProjectionMatrix.elements[1] * worldX + this.viewProjectionMatrix.elements[5] * worldY + this.viewProjectionMatrix.elements[9] * worldZ
-        val viewZ = this.viewMatrix44.elements[14] + this.viewMatrix44.elements[2] * worldX + this.viewMatrix44.elements[6] * worldY + this.viewMatrix44.elements[10] * worldZ
-        screenCoords[0] = this.viewportOriginX + this.imageProducerCenterX * clipX / clipW
-        screenCoords[1] = this.viewportOriginY + this.imageProducerCenterY * clipY / clipW
+        // Read each matrix into a local: this runs once per scene entity per frame
+        // (Scene.separateFromFloor), and the repeated `field.field[i]` hops were a
+        // measurable share of the scene walk on their own.
+        val m = this.viewProjectionMatrix.elements
+        val v = this.viewMatrix44.elements
+        val clipW = m[15] + m[3] * worldX + m[7] * worldY + m[11] * worldZ
+        val clipX = m[12] + m[0] * worldX + m[4] * worldY + m[8] * worldZ
+        val clipY = m[13] + m[1] * worldX + m[5] * worldY + m[9] * worldZ
+        val viewZ = v[14] + v[2] * worldX + v[6] * worldY + v[10] * worldZ
+        val invW = 1.0f / clipW
+        screenCoords[0] = this.viewportOriginX + this.imageProducerCenterX * clipX * invW
+        screenCoords[1] = this.viewportOriginY + this.imageProducerCenterY * clipY * invW
         screenCoords[2] = viewZ
     }
 
@@ -1576,6 +1582,100 @@ open class OpenGlToolkit(canvas: Canvas, materials: MaterialProvider, multiSampl
             setLightingSourceParams()
             this.shadowOffsetX = (x * 256.0f / y).toInt()
             this.shadowOffsetZ = (z * 256.0f / y).toInt()
+        }
+    }
+
+    /**
+     * [isOnScreen] for a vertical column — the shape the scene's tile-visibility grid
+     * tests, ~11k times a frame.
+     *
+     * Only Y differs between the two corners there, so the X and Z contributions to
+     * every clip coordinate are shared between them, and the matrix can be read into
+     * locals once instead of sixteen times through two field hops.
+     */
+    override fun isColumnOnScreen(x: Int, z: Int, yLow: Int, yHigh: Int): Int {
+        val m = this.viewProjectionMatrix.elements
+        val fx = x.toFloat()
+        val fz = z.toFloat()
+        val zBase = m[14] + m[2] * fx + m[10] * fz
+        val wBase = m[15] + m[3] * fx + m[11] * fz
+        val xBase = m[12] + m[0] * fx + m[8] * fz
+        val yBase = m[13] + m[1] * fx + m[9] * fz
+        val loY = yLow.toFloat()
+        val hiY = yHigh.toFloat()
+
+        val clipZMin = zBase + m[6] * loY
+        val clipZMax = zBase + m[6] * hiY
+        val clipWMin = wBase + m[7] * loY
+        val clipWMax = wBase + m[7] * hiY
+
+        var clipFlags = 0
+        if (clipZMin < -clipWMin && clipZMax < -clipWMax) {
+            clipFlags = 0x10
+        } else if (clipZMin > clipWMin && clipZMax > clipWMax) {
+            clipFlags = 0x20
+        }
+
+        val clipXMin = xBase + m[4] * loY
+        val clipXMax = xBase + m[4] * hiY
+        if (clipXMin < -clipWMin && clipXMax < -clipWMax) clipFlags = clipFlags or 0x1
+        if (clipXMin > clipWMin && clipXMax > clipWMax) clipFlags = clipFlags or 0x2
+
+        val clipYMin = yBase + m[5] * loY
+        val clipYMax = yBase + m[5] * hiY
+        if (clipYMin < -clipWMin && clipYMax < -clipWMax) clipFlags = clipFlags or 0x4
+        if (clipYMin > clipWMin && clipYMax > clipWMax) clipFlags = clipFlags or 0x8
+
+        return clipFlags
+    }
+
+    override fun isColumnRunOnScreen(
+        x: Int, zs: IntArray, yLow: IntArray, yHigh: IntArray, out: IntArray, count: Int
+    ) {
+        // Matrix and the X contribution to every clip coordinate hoisted out of the
+        // loop; only the Z and Y terms vary across the run.
+        val m = this.viewProjectionMatrix.elements
+        val m0 = m[0]; val m1 = m[1]; val m2 = m[2]; val m3 = m[3]
+        val m4 = m[4]; val m5 = m[5]; val m6 = m[6]; val m7 = m[7]
+        val m8 = m[8]; val m9 = m[9]; val m10 = m[10]; val m11 = m[11]
+        val fx = x.toFloat()
+        val zBaseX = m[14] + m2 * fx
+        val wBaseX = m[15] + m3 * fx
+        val xBaseX = m[12] + m0 * fx
+        val yBaseX = m[13] + m1 * fx
+
+        for (i in 0 until count) {
+            val fz = zs[i].toFloat()
+            val zBase = zBaseX + m10 * fz
+            val wBase = wBaseX + m11 * fz
+            val xBase = xBaseX + m8 * fz
+            val yBase = yBaseX + m9 * fz
+            val loY = yLow[i].toFloat()
+            val hiY = yHigh[i].toFloat()
+
+            val clipWMin = wBase + m7 * loY
+            val clipWMax = wBase + m7 * hiY
+            val clipZMin = zBase + m6 * loY
+            val clipZMax = zBase + m6 * hiY
+
+            var clipFlags = 0
+            if (clipZMin < -clipWMin && clipZMax < -clipWMax) {
+                clipFlags = 0x10
+            } else if (clipZMin > clipWMin && clipZMax > clipWMax) {
+                clipFlags = 0x20
+            }
+
+            val clipXMin = xBase + m4 * loY
+            val clipXMax = xBase + m4 * hiY
+            if (clipXMin < -clipWMin && clipXMax < -clipWMax) clipFlags = clipFlags or 0x1
+            if (clipXMin > clipWMin && clipXMax > clipWMax) clipFlags = clipFlags or 0x2
+
+            val clipYMin = yBase + m5 * loY
+            val clipYMax = yBase + m5 * hiY
+            if (clipYMin < -clipWMin && clipYMax < -clipWMax) clipFlags = clipFlags or 0x4
+            if (clipYMin > clipWMin && clipYMax > clipWMax) clipFlags = clipFlags or 0x8
+
+            out[i] = clipFlags
         }
     }
 

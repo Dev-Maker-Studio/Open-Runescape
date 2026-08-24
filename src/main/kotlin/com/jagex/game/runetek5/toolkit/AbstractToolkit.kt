@@ -322,6 +322,44 @@ abstract class AbstractToolkit protected constructor(@JvmField val materialProvi
 
     abstract fun calculateProjection(width: Float, height: Float, length: Float, matrix: FloatArray)
 
+    /**
+     * [isOnScreen] for a vertical column at ([x], [z]) spanning [yLow]..[yHigh].
+     *
+     * The scene's tile-visibility grid tests this shape thousands of times a frame;
+     * toolkits that can share the X/Z terms between the two corners override it.
+     */
+    /**
+     * Whether this toolkit's scene pass reads the fixed-function GL light state.
+     *
+     * The scene walk selects up to four lights per entity and pushes them through
+     * [copyLights] on every drawn entity, every frame. A shader-based toolkit that
+     * does its own per-model light selection never reads that state, so both the
+     * selection and the GL_LIGHT calls behind it are pure waste for it.
+     */
+    open fun usesFixedFunctionLights(): Boolean = true
+
+    open fun isColumnOnScreen(x: Int, z: Int, yLow: Int, yHigh: Int): Int =
+        isOnScreen(x, yLow, z, x, yHigh, z)
+
+    /**
+     * [isColumnOnScreen] for a whole run of columns sharing an X, writing the clip
+     * flags into [out].
+     *
+     * The scene tests one of these per tile of the visibility grid — around eleven
+     * thousand a frame. As individual calls that is eleven thousand dispatches
+     * through a method with several toolkit implementations, which is more work than
+     * the arithmetic inside. One call per column of the sweep makes the dispatch
+     * negligible and lets the implementation hoist the matrix out of the loop.
+     *
+     * @param zs scene Z for each entry, already upscaled to world units
+     * @param count number of entries to test
+     */
+    open fun isColumnRunOnScreen(
+        x: Int, zs: IntArray, yLow: IntArray, yHigh: IntArray, out: IntArray, count: Int
+    ) {
+        for (i in 0 until count) out[i] = isColumnOnScreen(x, zs[i], yLow[i], yHigh[i])
+    }
+
     abstract fun debugModeChanged()
 
     abstract fun resetBloom()

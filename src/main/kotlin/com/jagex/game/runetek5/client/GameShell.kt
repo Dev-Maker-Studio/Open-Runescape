@@ -40,6 +40,16 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
     var jaclibLoaded = false
 
     companion object {
+        /**
+         * Nanoseconds inside onPulse, and pulses run, since the last diagnostic reset.
+         *
+         * Game logic runs at a fixed 50Hz while rendering is uncapped, so this is a
+         * per-SECOND load amortised over however many frames fit between pulses — and
+         * a spike on the frames that carry one.
+         */
+        @JvmStatic var pulseNs = 0L
+        @JvmStatic var pulseCount = 0L
+
         @JvmField
         var FPS: Int = 0
 
@@ -682,7 +692,14 @@ abstract class GameShell : Engine, Runnable, FocusListener, WindowListener {
         synchronized(this) {
             appletHasFocus = WindowMode.hasFocus
         }
+        // Timed separately from the render frame: game logic runs at a fixed 50Hz
+        // while rendering is uncapped, so its cost is a per-SECOND load that gets
+        // amortised over however many frames fit between pulses — and a spike on the
+        // frames that carry one.
+        val pulseT0 = System.nanoTime()
         onPulse()
+        pulseNs += System.nanoTime() - pulseT0
+        pulseCount++
     }
 
     fun mainRedrawWrapper() {

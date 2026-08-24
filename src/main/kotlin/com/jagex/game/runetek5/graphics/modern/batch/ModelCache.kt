@@ -64,25 +64,74 @@ class ModelCache(
      */
     class CachedModel(
         /** Number of faces in this model */
-        val faceCount: Int,
+        var faceCount: Int,
         /** Number of vertices (faceCount * 3) */
-        val vertexCount: Int,
+        var vertexCount: Int,
         /**
          * Pre-processed vertex data buffer in GPU format (40 bytes per vertex):
          * position(12) + normal(12) + texcoord(8) + color(4) + modelIndex(4)
          */
-        val vertexData: ByteBuffer,
+        var vertexData: ByteBuffer,
         /**
          * Pre-sorted material batches for fast index buffer building.
          * Sorted by materialId (0 first for untextured, then by ID).
          * This eliminates the per-face material sorting at render time.
          */
-        val materialBatches: Array<MaterialBatch>,
+        var materialBatches: Array<MaterialBatch>,
         /** Frame number when this cache was created (for staleness check) */
-        var creationFrame: Long = 0
+        var creationFrame: Long = 0,
+        /**
+         * True when [vertexData] is a GC-owned heap buffer rather than an LWJGL
+         * native allocation.
+         *
+         * The animated/pose path keeps its geometry ON the ModelGL instance and
+         * rebuilds it in place once per logic tick, so those buffers have no
+         * explicit owner that could free them — a native allocation there would
+         * leak every time a pose model is collected. Heap buffers make the GC the
+         * owner, and [free] must therefore leave them alone.
+         */
+        var heapOwned: Boolean = false
     ) {
+        /**
+         * Set when this entry leaves the cache and its buffer is released.
+         *
+         * Callers may hold a direct reference to an entry to skip the map lookup
+         * (see ModelGL.modernSharedGeometry); this is how they find out that the
+         * reference has gone stale instead of reading freed memory.
+         */
+        @JvmField
+        var evicted: Boolean = false
+
+        /**
+         * The instanced store's entry for this geometry, remembered so repeat
+         * submissions skip the store's boxed-Long map lookup. Typed as [Any] to keep
+         * the cache free of a dependency on the batcher; the batcher re-checks that
+         * the entry still carries the expected key before trusting it.
+         */
+        @JvmField
+        var instanceEntry: Any? = null
+
+        /**
+         * The vertex block as raw 32-bit words, when this model owns its geometry.
+         *
+         * Animated poses are assembled word by word anyway, so holding the words is
+         * free — and it lets the assembly write STRAIGHT into the authoritative copy
+         * and the GPU staging buffer read straight out of it. Routing them through a
+         * ByteBuffer in between meant every changed pose was copied twice, which at a
+         * few megabytes a frame was the largest single cost left in the frame.
+         *
+         * Null for cache-owned entries, which keep their data in [vertexData].
+         */
+        @JvmField
+        var vertexWords: IntArray? = null
+
+        /** Words actually in use in [vertexWords] (the array may be larger). */
+        @JvmField
+        var vertexWordCount: Int = 0
+
+
         fun free() {
-            MemoryUtil.memFree(vertexData)
+            if (!heapOwned) MemoryUtil.memFree(vertexData)
         }
 
         fun getTotalBytes(): Int = vertexData.capacity() +
@@ -166,6 +215,7 @@ class ModelCache(
         val cached = cache.remove(modelId)
         if (cached != null) {
             totalCachedBytes -= cached.getTotalBytes()
+            cached.evicted = true
             cached.free()
             evictions++
         }
@@ -193,6 +243,7 @@ class ModelCache(
 
     fun clear() {
         for (cached in cache.values) {
+            cached.evicted = true
             cached.free()
         }
         cache.clear()

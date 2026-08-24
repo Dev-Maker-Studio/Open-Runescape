@@ -140,6 +140,13 @@ class OptimizedFrameBatcher {
 
     // Pre-allocated CPU staging buffers (NEVER reallocated during normal operation)
     private var vertexBuffer: ByteBuffer? = null
+
+    /**
+     * Base address of [vertexBuffer], refreshed whenever it is (re)allocated.
+     * Used for the modelIndex stamping loop in [addCachedModel] — see the comment
+     * there for why that write bypasses the ByteBuffer API.
+     */
+    private var vertexBufferAddress = 0L
     private var indexBuffer: IntBuffer? = null
     private var matrixBuffer: FloatBuffer? = null  // Model matrices for UBO
 
@@ -247,6 +254,7 @@ class OptimizedFrameBatcher {
 
         // Allocate pooled staging buffers
         vertexBuffer = MemoryUtil.memAlloc(INITIAL_VERTEX_CAPACITY * BYTES_PER_VERTEX)
+        vertexBufferAddress = MemoryUtil.memAddress(vertexBuffer!!)
         indexBuffer = MemoryUtil.memAllocInt(INITIAL_INDEX_CAPACITY)
         matrixBuffer = MemoryUtil.memAllocFloat(MAX_MODELS * 20)
 
@@ -666,38 +674,43 @@ class OptimizedFrameBatcher {
         val neededBytes = vertexCount * BYTES_PER_VERTEX
         if (vb.remaining() < neededBytes) return 0
 
-        val srcData = cachedModel.vertexData
         val baseVertex = totalVertexCount
 
-        // FAST PATH 1: Bulk copy vertex data
+        // FAST PATH 1: Bulk copy vertex data. Model-owned geometry (animated poses)
+        // keeps its authoritative copy as raw words rather than a ByteBuffer, so it
+        // transfers straight from there.
         val t1 = System.nanoTime()
-        srcData.position(0)
-        srcData.limit(vertexCount * BYTES_PER_VERTEX)
         val dstStart = vb.position()
-        vb.put(srcData)
-        srcData.clear()
+        val words = cachedModel.vertexWords
+        if (words != null) {
+            val dup = vb.duplicate()
+            dup.position(dstStart)
+            dup.asIntBuffer().put(words, 0, vertexCount * (BYTES_PER_VERTEX / 4))
+            vb.position(dstStart + vertexCount * BYTES_PER_VERTEX)
+        } else {
+            val srcData = cachedModel.vertexData
+            srcData.position(0)
+            srcData.limit(vertexCount * BYTES_PER_VERTEX)
+            vb.put(srcData)
+            srcData.clear()
+        }
         timeBulkCopy += System.nanoTime() - t1
 
-        // FAST PATH 2: Batch modelIndex patching - write all at once using unsafe or loop unrolling
-        // ModelIndex is at offset 36 in each 40-byte vertex
-        // Optimization: batch 4 vertices at a time to reduce loop overhead
+        // FAST PATH 2: stamp this model's matrix slot into every vertex.
+        //
+        // ModelIndex sits at offset 36 of each 40-byte vertex. Written through
+        // ByteBuffer.putInt this was one bounds-checked absolute put per vertex, and
+        // at a few hundred thousand vertices a frame the checks alone (Unsafe
+        // .checkOffset) were ~9% of the render thread. The buffer is an LWJGL native
+        // allocation whose base address is fixed for its lifetime, and the range was
+        // already validated by the capacity check above, so write it directly.
         val t2 = System.nanoTime()
         val modelIdxBits = java.lang.Float.floatToRawIntBits(modelIndex.toFloat())
-        var patchOffset = dstStart + 36
-        val vertexCount4 = vertexCount and 3.inv()  // Round down to multiple of 4
+        var patchAddress = vertexBufferAddress + dstStart + 36
         var v = 0
-        while (v < vertexCount4) {
-            vb.putInt(patchOffset, modelIdxBits)
-            vb.putInt(patchOffset + BYTES_PER_VERTEX, modelIdxBits)
-            vb.putInt(patchOffset + BYTES_PER_VERTEX * 2, modelIdxBits)
-            vb.putInt(patchOffset + BYTES_PER_VERTEX * 3, modelIdxBits)
-            patchOffset += BYTES_PER_VERTEX * 4
-            v += 4
-        }
-        // Handle remaining vertices
         while (v < vertexCount) {
-            vb.putInt(patchOffset, modelIdxBits)
-            patchOffset += BYTES_PER_VERTEX
+            MemoryUtil.memPutInt(patchAddress, modelIdxBits)
+            patchAddress += BYTES_PER_VERTEX
             v++
         }
         timePatchModelIdx += System.nanoTime() - t2

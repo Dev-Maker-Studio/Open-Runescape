@@ -401,8 +401,51 @@ class ModernGroundRenderer {
      * Ends a render frame.
      */
     fun endFrame() {
+        closeGroundBatch()
         shader?.unbind()
     }
+
+    /**
+     * Releases the pipeline after a run of ground draws.
+     *
+     * Must be called before anything else issues GL, because the pass leaves the
+     * ground shader bound, the ground VAO bound and its attribute arrays enabled.
+     * Idempotent.
+     */
+    fun closeGroundBatch() {
+        if (!groundBatchOpen) return
+        groundBatchOpen = false
+        ShaderProgram.groundPassProgramId = -1
+        ShaderProgram.releaseGroundPass = null
+        glDisableVertexAttribArray(0)
+        glDisableVertexAttribArray(1)
+        glDisableVertexAttribArray(2)
+        glDisableVertexAttribArray(3)
+        externalVao?.unbind()
+        if (boundTexture > 0) GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, 0)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+        // Unbind the program: legacy fixed-function draws interleave with this path
+        // (lights, UI, fallbacks), and a bound program hijacks their vertex processing.
+        texturedShader?.unbind()
+        boundVertexVbo = 0
+        boundTexture = -1
+        boundHasNormals = -1
+        boundCombineMode = Int.MIN_VALUE
+        boundTextureScale = Float.NaN
+        boundStride = -1
+        boundTexCoordSize = -1
+    }
+
+    /** Open-pass state, so consecutive ground draws only re-issue what actually changed. */
+    private val releaseAction = Runnable { closeGroundBatch() }
+    private var groundBatchOpen = false
+    private var boundVertexVbo = 0
+    private var boundStride = -1
+    private var boundTexCoordSize = -1
+    private var boundHasNormals = -1
+    private var boundTexture = -1
+    private var boundCombineMode = Int.MIN_VALUE
+    private var boundTextureScale = Float.NaN
 
     /**
      * Draws terrain with the provided vertex and index data.
@@ -687,17 +730,23 @@ class ModernGroundRenderer {
         vertexData: java.nio.ByteBuffer,
         stride: Int,
         texCoordSize: Int,
-        indexData: ByteArray,
-        indexByteCount: Int,
+        indexShorts: ShortArray,
         indexCount: Int,
         textureHandle: Int,
         textureScale: Float,
         hasNormals: Boolean,
         viewProjection: Matrix44,
-        isBigEndian: Boolean,
         colorVboId: Int = 0,
         colorData: java.nio.ByteBuffer? = null,
-        combineMode: Int = 0
+        combineMode: Int = 0,
+        /**
+         * Resident VBO already holding [vertexData], or 0 to upload into this
+         * renderer's own scratch VBO. Terrain geometry is static between ground
+         * rebuilds, so the caller keeps a resident copy per ground and re-uploads
+         * only when it actually changes — this used to re-send the whole snapshot
+         * on every material draw.
+         */
+        residentVertexVbo: Int = 0
     ) {
         if (indexCount == 0) return
 
@@ -705,117 +754,151 @@ class ModernGroundRenderer {
         val vao = externalVao ?: return
         val ibo = externalIbo ?: return
 
-        // Create VBO if needed
-        if (modernVbo == 0) {
-            modernVbo = glGenBuffers()
-        }
-
-        // Upload vertex data to our own VBO
-        vertexData.position(0)
-        glBindBuffer(GL_ARRAY_BUFFER, modernVbo)
-        glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW)
-
-        // Bind shader
-        s.bind()
-
-        // Set view-projection matrix: RS elements is row-major, upload straight through
-        // for GLSL column-vector trick (row-major + M*v = row-vector convention result).
-        // Negate Y row (indices 1,5,9,13) for OpenGL Y-up convention (RS VP has Y-down).
-        val vp = viewProjection.elements ?: return
-        val colMajor = vpScratch
-        for (i in 0..15) colMajor[i] = vp[i]
-        colMajor[1] = -colMajor[1]
-        colMajor[5] = -colMajor[5]
-        colMajor[9] = -colMajor[9]
-        colMajor[13] = -colMajor[13]
-        glUniformMatrix4fv(uTexViewProjectionLocation, false, colMajor)
-
-        // Set texture scaling
-        s.setUniform(uTexTextureScaleLocation, textureScale)
-
-        // Set lighting parameters. HD_LIGHT grounds bake sunDotProduct = 1.0 into the
-        // vertex colors and expect runtime sun lighting (GroundGL.kt:457-460), so pass
-        // the RAW legacy sun parameters for the shader's legacy-formula lighting.
-        s.setUniform(uTexHasNormalsLocation, if (hasNormals) 1 else 0)
-        s.setUniform(uTexSunDirectionLocation, legacySunDirX, legacySunDirY, legacySunDirZ)
-        s.setUniform("uSunColor", sunColor)
-        uploadPointLights(s)
-        uploadShadowUniforms(s)
-        s.setUniform(uTexAmbientLocation, ambient)
-        s.setUniform(uTexContrastLocation, contrast)
-        s.setUniform(uTexSunBrightnessLocation, legacySunBrightness)
-        s.setUniform(uTexContrastPosLocation, legacyContrastPos)
-        s.setUniform(uTexContrastNegLocation, legacyContrastNeg)
-
-        // Set fog parameters
-        s.setUniform(uTexFogEnabledLocation, if (fogEnabled) 1 else 0)
-        s.setUniform(uTexFogStartLocation, fogStart)
-        s.setUniform(uTexFogEndLocation, fogEnd)
-        s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
-
-        // Set texture parameters
-        val hasTexture = textureHandle > 0
-        s.setUniform(uTexHasTextureLocation, if (hasTexture) 1 else 0)
-        s.setUniform(uTexCombineModeLocation, combineMode)
-        if (hasTexture) {
-            GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
-            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
-            GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_S, GLWrapper.Constants.REPEAT)
-            GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_T, GLWrapper.Constants.REPEAT)
-            s.setUniform(uTexTextureLocation, 0)
-        }
-
-        // Clear depth buffer on the CURRENT FBO before first ground draw call.
-        // The depth buffer on this FBO has stale values (0.0) because the initial
-        // glClear(GL_DEPTH_BUFFER_BIT) in setModelMatrix() runs on a different FBO.
-        // Ground renders inline during scene traversal before batched models flush,
-        // so this clear is safe — no valid depth data has been written yet.
-        if (drawCallsThisFrame == 0) {
-            glClearDepth(1.0)
-            glDepthMask(true)
-            glClear(GL_DEPTH_BUFFER_BIT)
-        }
-
-        // Ensure proper GL state for ground rendering.
-        // Blend must be on: the per-material color VBO carries a per-vertex alpha MASK
-        // (0 for vertices not owned by this material, 255 for owned — written by
-        // GroundMaterialGL.appendToNativeStream), and legacy draws ground with
-        // setBlendMode(1) (alpha blend) via setupMatrixRendering. Without blending the
-        // cross-material tile edges lose their legacy feathering.
-        glEnable(GL_DEPTH_TEST)
-        glDepthFunc(GL_LEQUAL)
-        glDepthMask(true)
-        glDisable(GL_CULL_FACE)
-        glColorMask(true, true, true, true)
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-        // Setup VAO with vertex attributes
-        vao.bind()
-        glBindBuffer(GL_ARRAY_BUFFER, modernVbo)
-
-        // Position: vec3 at offset 0
-        glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L)
-
-        // TexCoord: vec2 or vec3 at offset 16
-        glEnableVertexAttribArray(2)
-        glVertexAttribPointer(2, texCoordSize, GL_FLOAT, false, stride, 16L)
-
-        // Normal: vec3 at offset 16 + texCoordBytes (if hasNormals)
-        val texCoordBytes = texCoordSize * 4
-        if (hasNormals) {
-            val normalOffset = 16L + texCoordBytes
-            glEnableVertexAttribArray(3)
-            glVertexAttribPointer(3, 3, GL_FLOAT, false, stride, normalOffset)
+        val vertexVbo: Int
+        if (residentVertexVbo != 0) {
+            vertexVbo = residentVertexVbo
         } else {
-            glDisableVertexAttribArray(3)
+            if (modernVbo == 0) modernVbo = glGenBuffers()
+            vertexVbo = modernVbo
+            vertexData.position(0)
+            glBindBuffer(GL_ARRAY_BUFFER, vertexVbo)
+            glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW)
+        }
+
+        // ---- Per-PASS state ----
+        //
+        // The terrain draws once per material — about 35 times a frame — and all of
+        // this is identical across those draws. It used to be re-issued for every one
+        // of them, including a 3.5KB re-upload of the point-light arrays and three
+        // string-keyed uniform-location lookups, which put the ground pass among the
+        // most expensive things in the frame despite drawing almost nothing.
+        //
+        // The pass stays open across consecutive ground draws and is closed by
+        // [closeGroundBatch] the moment anything else takes the pipeline.
+        if (!groundBatchOpen) {
+            s.bind()
+
+            // View-projection: RS elements is row-major, upload straight through for
+            // the GLSL column-vector trick (row-major + M*v = row-vector result).
+            // Negate the Y row (1,5,9,13) for OpenGL Y-up (RS VP is Y-down).
+            val vp = viewProjection.elements ?: return
+            val colMajor = vpScratch
+            for (i in 0..15) colMajor[i] = vp[i]
+            colMajor[1] = -colMajor[1]
+            colMajor[5] = -colMajor[5]
+            colMajor[9] = -colMajor[9]
+            colMajor[13] = -colMajor[13]
+            glUniformMatrix4fv(uTexViewProjectionLocation, false, colMajor)
+
+            // Lighting. HD_LIGHT grounds bake sunDotProduct = 1.0 into the vertex
+            // colors and expect runtime sun lighting (GroundGL.kt:457-460), so pass
+            // the RAW legacy sun parameters for the shader's legacy-formula lighting.
+            s.setUniform(uTexSunDirectionLocation, legacySunDirX, legacySunDirY, legacySunDirZ)
+            s.setUniform("uSunColor", sunColor)
+            uploadPointLights(s)
+            uploadShadowUniforms(s)
+            s.setUniform(uTexAmbientLocation, ambient)
+            s.setUniform(uTexContrastLocation, contrast)
+            s.setUniform(uTexSunBrightnessLocation, legacySunBrightness)
+            s.setUniform(uTexContrastPosLocation, legacyContrastPos)
+            s.setUniform(uTexContrastNegLocation, legacyContrastNeg)
+            s.setUniform(uTexTextureLocation, 0)
+
+            s.setUniform(uTexFogEnabledLocation, if (fogEnabled) 1 else 0)
+            s.setUniform(uTexFogStartLocation, fogStart)
+            s.setUniform(uTexFogEndLocation, fogEnd)
+            s.setUniform(uTexFogColorLocation, fogColor[0], fogColor[1], fogColor[2], fogColor[3])
+
+            // Clear depth on the CURRENT FBO before the first ground draw. The depth
+            // buffer here has stale values because the initial clear in setModelMatrix
+            // runs on a different FBO. Ground renders inline during scene traversal
+            // before batched models flush, so this is safe — no valid depth yet.
+            if (drawCallsThisFrame == 0) {
+                glClearDepth(1.0)
+                glDepthMask(true)
+                glClear(GL_DEPTH_BUFFER_BIT)
+            }
+
+            // Blend must be on: the per-material color VBO carries a per-vertex alpha
+            // MASK (0 for vertices not owned by this material, 255 for owned — written
+            // by GroundMaterialGL.appendToNativeStream), and legacy draws ground with
+            // setBlendMode(1) via setupMatrixRendering. Without blending the
+            // cross-material tile edges lose their legacy feathering.
+            glEnable(GL_DEPTH_TEST)
+            glDepthFunc(GL_LEQUAL)
+            glDepthMask(true)
+            glDisable(GL_CULL_FACE)
+            glColorMask(true, true, true, true)
+            glEnable(GL_BLEND)
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+            vao.bind()
+            glEnableVertexAttribArray(0)
+            glEnableVertexAttribArray(1)
+            glEnableVertexAttribArray(2)
+
+            groundBatchOpen = true
+            // Any other program binding now releases the pass — see ShaderProgram.bind.
+            ShaderProgram.groundPassProgramId = s.programId
+            ShaderProgram.releaseGroundPass = releaseAction
+            boundVertexVbo = 0
+            boundHasNormals = -1
+            boundTexture = -1
+            boundCombineMode = Int.MIN_VALUE
+            boundTextureScale = Float.NaN
+        }
+
+        // ---- Per-GROUND state: the interleaved attribute layout ----
+        val texCoordBytes = texCoordSize * 4
+        if (vertexVbo != boundVertexVbo || stride != boundStride || texCoordSize != boundTexCoordSize) {
+            glBindBuffer(GL_ARRAY_BUFFER, vertexVbo)
+            // Position: vec3 at offset 0
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, stride, 0L)
+            // TexCoord: vec2 or vec3 at offset 16
+            glVertexAttribPointer(2, texCoordSize, GL_FLOAT, false, stride, 16L)
+            boundVertexVbo = vertexVbo
+            boundStride = stride
+            boundTexCoordSize = texCoordSize
+            // The normal pointer is relative to the same layout, so it has to follow.
+            boundHasNormals = -1
+        }
+        val hasNormalsFlag = if (hasNormals) 1 else 0
+        if (hasNormalsFlag != boundHasNormals) {
+            s.setUniform(uTexHasNormalsLocation, hasNormalsFlag)
+            if (hasNormals) {
+                glBindBuffer(GL_ARRAY_BUFFER, vertexVbo)
+                glEnableVertexAttribArray(3)
+                glVertexAttribPointer(3, 3, GL_FLOAT, false, stride, 16L + texCoordBytes)
+            } else {
+                glDisableVertexAttribArray(3)
+            }
+            boundHasNormals = hasNormalsFlag
+        }
+
+        // ---- Per-MATERIAL state ----
+        if (textureScale != boundTextureScale) {
+            s.setUniform(uTexTextureScaleLocation, textureScale)
+            boundTextureScale = textureScale
+        }
+        val hasTexture = textureHandle > 0
+        if (textureHandle != boundTexture) {
+            s.setUniform(uTexHasTextureLocation, if (hasTexture) 1 else 0)
+            if (hasTexture) {
+                GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+                GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, textureHandle)
+                GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_S, GLWrapper.Constants.REPEAT)
+                GLWrapper.texParameteri(GLWrapper.Constants.TEXTURE_2D, GLWrapper.Constants.TEXTURE_WRAP_T, GLWrapper.Constants.REPEAT)
+            }
+            boundTexture = textureHandle
+        }
+        if (combineMode != boundCombineMode) {
+            s.setUniform(uTexCombineModeLocation, combineMode)
+            boundCombineMode = combineMode
         }
 
         // Color: from the per-material color VBO (legacy parity — see kdoc above).
         // Attribute pointers latch the ARRAY_BUFFER binding at specification time,
         // so this must come after the interleaved attributes are specified.
-        glEnableVertexAttribArray(1)
         when {
             colorVboId != 0 -> {
                 glBindBuffer(GL_ARRAY_BUFFER, colorVboId)
@@ -834,41 +917,19 @@ class ModernGroundRenderer {
             }
         }
 
-        // Upload index data
+        // Upload index data. The caller builds shorts directly, so this is a bulk
+        // put rather than the byte-pair reassembly loop it used to run per index.
         ensureIndexCapacity(indexCount)
         val shortBuffer = this.indexData!!
         shortBuffer.clear()
-        for (i in 0 until indexCount) {
-            val byteOffset = i * 2
-            val idx = if (isBigEndian) {
-                ((indexData[byteOffset].toInt() and 0xFF) shl 8) or (indexData[byteOffset + 1].toInt() and 0xFF)
-            } else {
-                (indexData[byteOffset].toInt() and 0xFF) or ((indexData[byteOffset + 1].toInt() and 0xFF) shl 8)
-            }
-            shortBuffer.put(idx.toShort())
-        }
+        shortBuffer.put(indexShorts, 0, indexCount)
         shortBuffer.flip()
         ibo.upload(shortBuffer)
         ibo.bind()
 
-        // Draw
+        // Draw. Teardown is deferred to closeGroundBatch — every state this draw set
+        // is either identical for the next material or re-checked above.
         GLWrapper.drawElements(TRIANGLES, indexCount, UNSIGNED_SHORT, 0)
-
-        // Cleanup
-        glDisableVertexAttribArray(0)
-        glDisableVertexAttribArray(1)
-        glDisableVertexAttribArray(2)
-        glDisableVertexAttribArray(3)
-        vao.unbind()
-
-        if (hasTexture) {
-            GLWrapper.bindTexture(GLWrapper.Constants.TEXTURE_2D, 0)
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
-        // Unbind the program: legacy fixed-function draws interleave with this path
-        // (lights, UI, fallbacks), and a bound program hijacks their vertex processing.
-        s.unbind()
 
         drawCallsThisFrame++
         trianglesThisFrame += indexCount / 3

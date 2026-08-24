@@ -31,6 +31,7 @@ import com.jagex.game.runetek5.graphics.sprite.NativeSprite
 import com.jagex.game.runetek5.graphics.sprite.SpriteGL
 import com.jagex.game.runetek5.graphics.sprite.SpriteType
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper
+import com.jagex.game.runetek5.graphics.modern.util.GpuTimer
 import com.jagex.game.runetek5.graphics.modern.util.MeshConverter
 import com.jagex.game.runetek5.graphics.modern.util.ModernModelBuilder
 import com.jagex.game.runetek5.utils.MathUtils
@@ -151,7 +152,10 @@ class ModernGLToolkit(
     private var isSpriteBatchActive = false
 
     // Scratch index buffer for ground material draws (reused across materials/frames)
-    private var groundIndexScratch = ByteArray(0)
+    private var groundIndexScratch = ShortArray(0)
+
+    /** -Drender.groundcolor=true forces the ground shader's vertex-colour debug mode. */
+    private val GROUND_COLOR_DEBUG = System.getProperty("render.groundcolor")?.equals("true", true) == true
 
     // Texture cache for material ID to GL handle lookup
     private val textureHandleCache = mutableMapOf<Int, Int>()
@@ -416,12 +420,49 @@ class ModernGLToolkit(
         this.arbRectangleTexturesSupported = false
     }
 
+    /**
+     * Releases the swap from the display refresh, so the frame rate is bounded by how
+     * fast frames can be produced rather than by the presentation path.
+     *
+     * With the default swap interval, glXSwapBuffers blocked for ~1.4 ms of every
+     * frame on this driver even with the GPU completely idle — and every millisecond
+     * removed from the scene simply moved into that block, which is why frame time sat
+     * flat while measured scene time fell. Any target above the display's refresh rate
+     * requires this; the cost is that presentation is no longer tear-free, so
+     * `-Drender.vsync=true` puts it back.
+     */
+    private fun applySwapInterval() {
+        if (System.getProperty("render.vsync")?.equals("true", true) == true) return
+        // Whichever swap-control extension the driver exposes. LWJGL resolves entry
+        // points lazily, so an unavailable one throws rather than reporting absence.
+        val display = try { org.lwjgl.opengl.GLX14.glXGetCurrentDisplay() } catch (e: Throwable) { 0L }
+        val drawable = try { org.lwjgl.opengl.GLX.glXGetCurrentDrawable() } catch (e: Throwable) { 0L }
+        if (display != 0L && drawable != 0L) {
+            try {
+                org.lwjgl.opengl.GLXEXTSwapControl.glXSwapIntervalEXT(display, drawable, 0)
+                println("[ModernGLToolkit] swap interval 0 via GLX_EXT_swap_control")
+                return
+            } catch (e: Throwable) {
+                // fall through to SGI
+            }
+        }
+        try {
+            org.lwjgl.opengl.GLXSGISwapControl.glXSwapIntervalSGI(0)
+            println("[ModernGLToolkit] swap interval 0 via GLX_SGI_swap_control")
+        } catch (e: Throwable) {
+            println("[ModernGLToolkit] no usable swap-control extension; presentation stays vsynced (${e.message})")
+        }
+    }
+
     private fun initializeModernRenderer() {
         if (isModernRendererInitialized) return
 
         try {
             // GL.createCapabilities() must have been called on this thread already
             // (handled in render() after swapBuffers makes the GL context current)
+
+            gpuTimer.initialize()
+            applySwapInterval()
 
             modernRenderer = ModernModelRenderer()
             modernRenderer!!.initialize()
@@ -465,7 +506,22 @@ class ModernGLToolkit(
     }
 
     // Debug counters (reset each frame in render, logged before swap)
+    /** Animated/pose geometry served from the model's own cache vs rebuilt. */
+    private var streamGeometryHits = 0L
+    private var streamGeometryBuilds = 0L
+
+    /** -Drender.animinstanced=false streams animated poses instead of keeping them resident. */
+    private val animatedInstancing = System.getProperty("render.animinstanced")?.equals("false", true) != true
+
+    /** -Drender.verifyhash: recompute the memoised content hash every frame and report drift. */
+    private val VERIFY_HASH = System.getProperty("render.verifyhash") != null
+    private var hashVerifyChecks = 0L
+    private var hashVerifyBad = 0L
+
     private var debugFrameCount = 0
+
+    /** Frames between [ModernDiag]/[ModernPerf] prints. Override with `-Drender.diaginterval=<n>`. */
+    private val diagInterval = System.getProperty("render.diaginterval")?.toIntOrNull()?.coerceAtLeast(1) ?: 600
 
     /** Times the frame-start guard had to re-make the GL context current on this thread. */
     private var contextReattachCount = 0
@@ -537,7 +593,7 @@ class ModernGLToolkit(
         debugFrameCount++
         // One-line pipeline health diagnostic every ~600 frames. Cheap and easy to
         // delete once the modern renderer is confirmed working on this branch.
-        if (debugFrameCount % 600 == 0 || debugFrameCount == 30 || debugFrameCount == 120) {
+        if (debugFrameCount % diagInterval == 0 || debugFrameCount == 30 || debugFrameCount == 120) {
             println(
                 "[ModernDiag] pipeline=${canUseModernPipeline()} init=$isModernRendererInitialized " +
                     "caps=$ownerThreadHasCapabilities gameState=${try { Client.gameState } catch (_: Exception) { "?" }} " +
@@ -553,6 +609,7 @@ class ModernGLToolkit(
                     "smm=$diagSetModelMatrixCalls(rej=$diagSetModelMatrixRejected) " +
                     "batchOpen=$diagBatchOpens(lazy=$diagLazyBatchOpens) " +
                     "modelDraws=$diagModelGateAccepted/$diagModelGateCalls unwrittenSlots=$unwrittenSlotFaces " +
+                    (if (VERIFY_MODEL_CULL) "cullVerify=$modelCullChecks/bad=$modelCullBad " else "") +
                     "ptLights=$diagPointLights/$diagSceneLights recolour[ran=$recolourChecks bad=$recolourBad shadow=$recolourShadowSeen rev0=$recolourRev0 noMap=$recolourNoMap] " +
                     "${ModernModelBuilder.skipSummary()} " +
                     "inval[${ModelGL.invalidateSummary()}] " +
@@ -568,6 +625,21 @@ class ModernGLToolkit(
                     if (Scene.phaseSamples > 0) Scene.phaseCullNs / 1e6 / Scene.phaseSamples else 0.0,
                     if (Scene.phaseSamples > 0) Scene.phaseTilesNs / 1e6 / Scene.phaseSamples else 0.0
                 ) +
+                gpuTimer.summary() + " " +
+                "modelMs=%.2f(n=%d) groundMs=%.2f(n=%d) gpuWaitMs=%.2f grid[dim=%d items=%d sel=%d cand=%d] ".format(
+                    phaseModelNs / 1e6 / diagInterval, phaseModelCalls / diagInterval,
+                    phaseGroundNs / 1e6 / diagInterval, phaseGroundCalls / diagInterval,
+                    phaseGpuWaitNs / 1e6 / diagInterval, lightGridDim, lightGridItemCount,
+                    lightSelectCalls / diagInterval, lightCandidatesScanned / diagInterval
+                ) +
+                "pulse[n=%d ms=%.2f] planes[%d/%d] walk[nodes=%d tiles=%d drawn=%d walkMs=%.2f sortMs=%.2f drawMs=%.2f floorMs=%.2f] ".format(
+                    GameShell.pulseCount,
+                    if (GameShell.pulseCount > 0) GameShell.pulseNs / 1e6 / GameShell.pulseCount else 0.0,
+                    Scene.planesDrawn / diagInterval, (Scene.planesDrawn + Scene.planesSkipped) / diagInterval,
+                    Scene.walkNodes / diagInterval, Scene.walkTiles / diagInterval, Scene.walkDrawn / diagInterval,
+                    Scene.phaseWalkNs / 1e6 / diagInterval, Scene.phaseSortNs / 1e6 / diagInterval,
+                    Scene.phaseDrawNs / 1e6 / diagInterval, Scene.phaseFloorNs / 1e6 / diagInterval
+                ) +
                 "sceneMs=%.2f ".format(
                     if (Client.sceneDrawSamples > 0) Client.sceneDrawNs / 1e6 / Client.sceneDrawSamples else 0.0
                 ) +
@@ -577,6 +649,12 @@ class ModernGLToolkit(
                     if (perfFrameSamples > 0) perfSwapNsAcc / 1e6 / perfFrameSamples else 0.0
                 ) +
                     "cache=${cacheHits}h/${cacheMisses}m " +
+                    // Animated/pose geometry reuse: builds should track the 50Hz logic
+                    // rate, not the render rate. hits/(hits+builds) rising with fps is
+                    // the whole point of the per-instance stream cache.
+                    "stream=${streamGeometryHits}h/${streamGeometryBuilds}b " +
+                    "bounds=${ModelGL.boundsCalls / diagInterval}/frame(verts=${ModelGL.boundsVertices / diagInterval}) " +
+                    (if (VERIFY_HASH) "hashVerify=$hashVerifyChecks/bad=$hashVerifyBad " else "") +
                     // Mesh-built geometry coverage: models drawn from the clean-mesh
                     // build vs models on the legacy-capture fallback (animated poses,
                     // mutated models, or no build available).
@@ -606,7 +684,7 @@ class ModernGLToolkit(
                     // Geometry-store residency: evicted/overflow should sit at 0 in
                     // steady state; sustained nonzero means the store is undersized
                     // for the working set (raise MAX_TOTAL_VERTICES).
-                    "store[verts=${instStats?.storeVertices ?: 0} evicted=${instStats?.meshesEvicted ?: 0} " +
+                    "store[verts=${instStats?.storeVertices ?: 0} evicted=${instStats?.meshesEvicted ?: 0} refit=${instStats?.refits ?: 0} " +
                     "overflow=${instStats?.capacityFallbacks ?: 0}] " +
                     "mbDrawCalls=${obStats?.drawCalls ?: 0} " +
                     "fog[on=$fogEnabled dens=$fogDensity start=%.0f end=%.0f col=%06X] ".format(fogStartPosition, fogEndPosition, fogColor and 0xffffff) +
@@ -615,6 +693,39 @@ class ModernGLToolkit(
             )
             cacheHits = 0
             cacheMisses = 0
+            streamGeometryHits = 0
+            streamGeometryBuilds = 0
+            ModelGL.boundsCalls = 0
+            ModelGL.boundsVertices = 0
+            // Phase timers are averages over the samples accumulated since the last
+            // print. They used to accumulate for the whole session, which made them
+            // dominated by startup frames and effectively frozen — a change worth
+            // several milliseconds moved the printed value by hundredths.
+            phaseModelNs = 0L
+            phaseModelCalls = 0
+            phaseGroundNs = 0L
+            phaseGroundCalls = 0
+            phaseLightSelectNs = 0L
+            phaseGpuWaitNs = 0L
+            lightSelectCalls = 0L
+            lightCandidatesScanned = 0L
+            gpuTimer.reset()
+            GameShell.pulseNs = 0L
+            GameShell.pulseCount = 0L
+            Scene.planesDrawn = 0L
+            Scene.planesSkipped = 0L
+            Scene.walkNodes = 0L
+            Scene.walkTiles = 0L
+            Scene.walkDrawn = 0L
+            Scene.phaseWalkNs = 0L
+            Scene.phaseSortNs = 0L
+            Scene.phaseDrawNs = 0L
+            Scene.phaseFloorNs = 0L
+            Scene.phaseCullNs = 0L
+            Scene.phaseTilesNs = 0L
+            Scene.phaseSamples = 0
+            Client.sceneDrawNs = 0L
+            Client.sceneDrawSamples = 0
             modernBuiltPathModels = 0L
             modernBuiltFallbackModels = 0L
             legacyCaptureDroppedFaces = 0L
@@ -680,6 +791,8 @@ class ModernGLToolkit(
             diagGroundNoPipeline = 0
             diagGroundNoSnapshot = 0
             diagGroundDrawn = 0
+            modelCullChecks = 0
+            modelCullBad = 0
         }
         debugModernDraws = 0
         debugLegacyDraws = 0
@@ -697,12 +810,24 @@ class ModernGLToolkit(
         optimizedBatcher?.resetCumulativeStats()
         instancedBatcher?.resetFrameStats()
 
+        // -Drender.gpusync: block until the GPU has drained before presenting, and
+        // report how long that took. A large value here means the frame is GPU-bound
+        // and no amount of CPU work removal will raise the frame rate; a near-zero
+        // value means the GPU is idle waiting on us.
+        if (GPU_SYNC) {
+            val fenceStart = System.nanoTime()
+            glFinish()
+            phaseGpuWaitNs += System.nanoTime() - fenceStart
+        }
+
         // Parent render: swapBuffers via jaggl (presents the framebuffer)
         val swapStartNs = System.nanoTime()
         super.render()
         val swapEndNs = System.nanoTime()
         perfSwapNsAcc += swapEndNs - swapStartNs
         perfRenderNsAcc += swapEndNs - perfLastRenderEntryNs
+
+        gpuTimer.nextFrame()
 
         // The framebuffer has been presented: the next scene traversal is a new
         // frame and owes exactly one depth clear (see openSceneBatch).
@@ -1022,11 +1147,15 @@ class ModernGLToolkit(
             // Render instanced geometry first (repeated meshes)
             if (useInstancing && instancedBatcher?.isActive() == true) {
                 instancedBatcher?.setTextureAlphaPredicate(::materialTextureHasAlpha)
+                gpuTimer.begin(GPU_PASS_INSTANCED)
                 instancedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
+                gpuTimer.end(GPU_PASS_INSTANCED)
             }
             // Render remaining non-instanced geometry
             optimizedBatcher?.setTextureAlphaPredicate(::materialTextureHasAlpha)
+            gpuTimer.begin(GPU_PASS_STREAM)
             optimizedBatcher?.endFrame(::lookupTextureHandle, ::lookupCombineMode, ::materialNeedsBlend, alphaDiscardEnabled)
+            gpuTimer.end(GPU_PASS_STREAM)
             mr.endFrame()
             gr.endFrame()
         } else if (batcher.isActive()) {
@@ -1192,6 +1321,13 @@ class ModernGLToolkit(
     /** Light indices for the entity currently being submitted (-1 = unused). */
     private val currentLightIdx = FloatArray(4) { -1f }
 
+    /**
+     * False: the modern scene pass lights models from [selectLightsFor] and the
+     * frame's own light array, and the ground shader uploads its own, so nothing
+     * here reads GL_LIGHT state.
+     */
+    override fun usesFixedFunctionLights(): Boolean = false
+
     override fun copyLights(lightCount: Int, lights: Array<PointLight>?) {
         // Legacy GL_LIGHT state only (the ground's fixed-function pass reads it).
         // Per-model light selection is positional — see selectLightsFor. Deriving it
@@ -1213,31 +1349,320 @@ class ModernGLToolkit(
         currentLightIdx[0] = -1f; currentLightIdx[1] = -1f
         currentLightIdx[2] = -1f; currentLightIdx[3] = -1f
         val n = frameLightCount
-        if (n <= 0) return
+        if (n <= 0) {
+            rememberLightSelection(wx, wy, wz)
+            return
+        }
         // Keep the 4 strongest contributors: attenuation is size^2/d^2, so rank on
         // d^2/size^2 (smaller is stronger) and ignore lights that cannot register on an
         // 8-bit channel at this distance.
+        //
+        // Candidates come from the per-frame XZ grid rather than the whole light list.
+        // A light can only be selected when rank < 255, i.e. only inside a sphere of
+        // radius sqrt(255)/sqrt(kq) around it, and the grid indexes exactly those
+        // spheres — so this considers a strict superset of the selectable lights and
+        // the result is identical to the exhaustive scan, at a fraction of the cost
+        // (this used to be ~90 lights x ~2300 models per frame).
         var b0 = Float.MAX_VALUE; var b1 = Float.MAX_VALUE
         var b2 = Float.MAX_VALUE; var b3 = Float.MAX_VALUE
         var i0 = -1; var i1 = -1; var i2 = -1; var i3 = -1
-        for (i in 0 until n) {
-            val dx = frameLightPos[i * 4] - wx
-            val dy = frameLightPos[i * 4 + 1] - wy
-            val dz = frameLightPos[i * 4 + 2] - wz
-            val d2 = dx * dx + dy * dy + dz * dz
-            // frameLightPos[w] holds kq = 1/size^2, so kq*d^2 is the inverse of att.
-            val rank = frameLightPos[i * 4 + 3] * d2
-            if (rank >= 255f) continue
-            when {
-                rank < b0 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=b0; i1=i0; b0=rank; i0=i }
-                rank < b1 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=rank; i1=i }
-                rank < b2 -> { b3=b2; i3=i2; b2=rank; i2=i }
-                rank < b3 -> { b3=rank; i3=i }
+
+        lightSelectCalls++
+        // Consecutive submissions frequently share a world origin (an entity drawn
+        // from several models, a loc with several submeshes), and the answer depends
+        // only on that origin — so repeat it rather than rescanning the cell.
+        if (wx == lastLightSelectX && wy == lastLightSelectY && wz == lastLightSelectZ && lastLightSelectValid) {
+            currentLightIdx[0] = lastLightIdx0; currentLightIdx[1] = lastLightIdx1
+            currentLightIdx[2] = lastLightIdx2; currentLightIdx[3] = lastLightIdx3
+            return
+        }
+        val dim = lightGridDim
+        var scanStart = 0
+        var scanEnd = n
+        var useGrid = false
+        var cellStart = 0
+        var cellEnd = 0
+        if (dim > 0) {
+            val cx = ((wx - lightGridMinX) * lightGridInvCell).toInt()
+            val cz = ((wz - lightGridMinZ) * lightGridInvCell).toInt()
+            if (cx < 0 || cz < 0 || cx >= dim || cz >= dim) {
+                // Outside the grid is outside every light's influence sphere by
+                // construction (the bounds are expanded by each light's radius).
+                rememberLightSelection(wx, wy, wz)
+                return
+            }
+            val cell = cz * dim + cx
+            cellStart = lightGridStart[cell]
+            cellEnd = lightGridStart[cell + 1]
+            useGrid = true
+            scanStart = cellStart
+            scanEnd = cellEnd
+        }
+
+        if (useGrid) {
+            // The cell's candidates are stored as contiguous (x, y, z, kq) quads with
+            // a parallel index array, so this walks memory in order instead of
+            // gathering each light out of the frame-wide array through an index.
+            //
+            // They are also ORDERED by the smallest rank the light can possibly reach
+            // anywhere in this cell (see buildLightGrid), which makes the scan a
+            // branch and bound: once that floor is no worse than the weakest light
+            // already kept, nothing later in the list can displace it. Exact — it
+            // only skips lights that provably cannot be selected — and it matters,
+            // because near a lit town ~50 influence spheres overlap a single point
+            // while at most four are ever used.
+            val pos = lightCellPos
+            val idx = lightCellIdx
+            val floors = lightCellRankFloor
+            var s = cellStart
+            var p = cellStart * 4
+            while (s < cellEnd) {
+                val floor = floors[s]
+                if (floor >= b3 || floor >= 255f) break
+                val dx = pos[p] - wx
+                val dy = pos[p + 1] - wy
+                val dz = pos[p + 2] - wz
+                // pos[+3] holds kq = 1/size^2, so kq*d^2 is the inverse of attenuation.
+                val rank = pos[p + 3] * (dx * dx + dy * dy + dz * dz)
+                p += 4
+                val i = idx[s]
+                s++
+                lightCandidatesScanned++
+                if (rank >= 255f) continue
+                when {
+                    rank < b0 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=b0; i1=i0; b0=rank; i0=i }
+                    rank < b1 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=rank; i1=i }
+                    rank < b2 -> { b3=b2; i3=i2; b2=rank; i2=i }
+                    rank < b3 -> { b3=rank; i3=i }
+                }
+            }
+        } else {
+            var i = scanStart
+            while (i < scanEnd) {
+                val base = i * 4
+                val dx = frameLightPos[base] - wx
+                val dy = frameLightPos[base + 1] - wy
+                val dz = frameLightPos[base + 2] - wz
+                val rank = frameLightPos[base + 3] * (dx * dx + dy * dy + dz * dz)
+                if (rank < 255f) {
+                    when {
+                        rank < b0 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=b0; i1=i0; b0=rank; i0=i }
+                        rank < b1 -> { b3=b2; i3=i2; b2=b1; i2=i1; b1=rank; i1=i }
+                        rank < b2 -> { b3=b2; i3=i2; b2=rank; i2=i }
+                        rank < b3 -> { b3=rank; i3=i }
+                    }
+                }
+                i++
             }
         }
         currentLightIdx[0] = i0.toFloat(); currentLightIdx[1] = i1.toFloat()
         currentLightIdx[2] = i2.toFloat(); currentLightIdx[3] = i3.toFloat()
+        rememberLightSelection(wx, wy, wz)
     }
+
+    private var lastLightSelectValid = false
+    private var lastLightSelectX = 0f
+    private var lastLightSelectY = 0f
+    private var lastLightSelectZ = 0f
+    private var lastLightIdx0 = -1f
+    private var lastLightIdx1 = -1f
+    private var lastLightIdx2 = -1f
+    private var lastLightIdx3 = -1f
+
+    private fun rememberLightSelection(wx: Float, wy: Float, wz: Float) {
+        lastLightSelectX = wx; lastLightSelectY = wy; lastLightSelectZ = wz
+        lastLightIdx0 = currentLightIdx[0]; lastLightIdx1 = currentLightIdx[1]
+        lastLightIdx2 = currentLightIdx[2]; lastLightIdx3 = currentLightIdx[3]
+        lastLightSelectValid = true
+    }
+
+    // ===== Point-light lookup grid =====
+    // Uniform XZ grid over the frame's lights, rebuilt once per frame by
+    // [buildLightGrid]. Y is deliberately not bucketed: including it would only
+    // narrow the candidate set, and scenes are far flatter in Y than in XZ.
+    private var lightGridDim = 0
+    private var lightGridMinX = 0f
+    private var lightGridMinZ = 0f
+    private var lightGridInvCell = 0f
+    /** CSR offsets: cell c owns items [lightGridStart[c], lightGridStart[c+1]). */
+    private var lightGridStart = IntArray(0)
+
+    /** Light index per CSR slot. */
+    private var lightCellIdx = IntArray(0)
+
+    /** (x, y, z, kq) per CSR slot, so the scan reads one contiguous run per cell. */
+    private var lightCellPos = FloatArray(0)
+
+    /**
+     * Smallest rank this light can reach anywhere inside its cell, i.e. kq times the
+     * squared XZ distance from the light to the nearest point of the cell. A lower
+     * bound on the rank any query in the cell can produce, which is what makes the
+     * ordered scan in [selectLightsFor] able to stop early without changing its result.
+     */
+    private var lightCellRankFloor = FloatArray(0)
+
+    /** Target cells per axis. 32x32 keeps the build cheap and cells small enough to matter. */
+    private val LIGHT_GRID_DIM = 32
+
+    private fun buildLightGrid() {
+        val n = frameLightCount
+        if (n <= 0) {
+            if (lightGridDim != 0) lightEpoch++
+            lightGridDim = 0
+            lightGridSignature = 0L
+            return
+        }
+
+        // The grid depends only on light POSITIONS and radii, which change when the
+        // scene changes — not on colour or the per-frame flicker alpha. Skip the
+        // rebuild when nothing that shapes the grid has moved.
+        var signature = n.toLong() * 1099511628211L
+        for (i in 0 until n) {
+            val base = i * 4
+            signature = signature * 31 + java.lang.Float.floatToRawIntBits(frameLightPos[base])
+            signature = signature * 31 + java.lang.Float.floatToRawIntBits(frameLightPos[base + 2])
+            signature = signature * 31 + java.lang.Float.floatToRawIntBits(frameLightPos[base + 3])
+        }
+        if (signature == lightGridSignature && lightGridDim > 0) return
+        lightGridSignature = signature
+        // Selection depends only on the light positions and radii — the same inputs as
+        // this signature — so the per-model memos stay valid across the frames where
+        // only colour and flicker change, which is nearly all of them.
+        lightEpoch++
+
+        // sqrt(255) — a light contributes only where kq*d^2 < 255, i.e. d < radiusK/sqrt(kq).
+        val radiusK = 15.9687194f
+        var minX = Float.MAX_VALUE; var maxX = -Float.MAX_VALUE
+        var minZ = Float.MAX_VALUE; var maxZ = -Float.MAX_VALUE
+        for (i in 0 until n) {
+            val base = i * 4
+            val kq = frameLightPos[base + 3]
+            val r = if (kq > 0f) radiusK / kotlin.math.sqrt(kq) else 0f
+            val x = frameLightPos[base]
+            val z = frameLightPos[base + 2]
+            if (x - r < minX) minX = x - r
+            if (x + r > maxX) maxX = x + r
+            if (z - r < minZ) minZ = z - r
+            if (z + r > maxZ) maxZ = z + r
+        }
+        val extent = kotlin.math.max(maxX - minX, maxZ - minZ)
+        if (!(extent > 0f) || extent.isNaN()) { lightGridDim = 0; return }
+
+        val dim = LIGHT_GRID_DIM
+        val cell = extent / dim
+        val cells = dim * dim
+        if (lightGridStart.size < cells + 1) lightGridStart = IntArray(cells + 1)
+        val start = lightGridStart
+        java.util.Arrays.fill(start, 0, cells + 1, 0)
+        lightGridDim = dim
+        lightGridMinX = minX
+        lightGridMinZ = minZ
+        lightGridInvCell = 1f / cell
+
+        // Pass 1: count per cell (start[c+1] holds the count for cell c).
+        var total = 0
+        for (i in 0 until n) {
+            val base = i * 4
+            val kq = frameLightPos[base + 3]
+            val r = if (kq > 0f) radiusK / kotlin.math.sqrt(kq) else 0f
+            val x0 = (((frameLightPos[base] - r) - minX) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            val x1 = (((frameLightPos[base] + r) - minX) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            val z0 = (((frameLightPos[base + 2] - r) - minZ) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            val z1 = (((frameLightPos[base + 2] + r) - minZ) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            for (cz in z0..z1) {
+                val row = cz * dim
+                for (cx in x0..x1) start[row + cx + 1]++
+            }
+            total += (x1 - x0 + 1) * (z1 - z0 + 1)
+        }
+        for (c in 0 until cells) start[c + 1] += start[c]
+        if (lightCellIdx.size < total) {
+            lightCellIdx = IntArray(total * 2)
+            lightCellPos = FloatArray(total * 2 * 4)
+            lightCellRankFloor = FloatArray(total * 2)
+        }
+        lightGridItemCount = total
+        val items = lightCellIdx
+        val cellPos = lightCellPos
+
+        // Pass 2: scatter, using a copy of the offsets as write cursors.
+        if (lightGridCursor.size < cells) lightGridCursor = IntArray(cells * 2)
+        val cursor = lightGridCursor
+        System.arraycopy(start, 0, cursor, 0, cells)
+        for (i in 0 until n) {
+            val base = i * 4
+            val kq = frameLightPos[base + 3]
+            val r = if (kq > 0f) radiusK / kotlin.math.sqrt(kq) else 0f
+            val x0 = (((frameLightPos[base] - r) - minX) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            val x1 = (((frameLightPos[base] + r) - minX) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            val z0 = (((frameLightPos[base + 2] - r) - minZ) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            val z1 = (((frameLightPos[base + 2] + r) - minZ) * lightGridInvCell).toInt().coerceIn(0, dim - 1)
+            for (cz in z0..z1) {
+                val row = cz * dim
+                val cellMinZ = minZ + cz * cell
+                val cellMaxZ = cellMinZ + cell
+                val lz = frameLightPos[base + 2]
+                val dzMin = if (lz < cellMinZ) cellMinZ - lz else if (lz > cellMaxZ) lz - cellMaxZ else 0f
+                for (cx in x0..x1) {
+                    val c = row + cx
+                    val slot = cursor[c]++
+                    items[slot] = i
+                    val d = slot * 4
+                    val lx = frameLightPos[base]
+                    cellPos[d] = lx
+                    cellPos[d + 1] = frameLightPos[base + 1]
+                    cellPos[d + 2] = lz
+                    cellPos[d + 3] = kq
+                    val cellMinX = minX + cx * cell
+                    val cellMaxX = cellMinX + cell
+                    val dxMin = if (lx < cellMinX) cellMinX - lx else if (lx > cellMaxX) lx - cellMaxX else 0f
+                    lightCellRankFloor[slot] = kq * (dxMin * dxMin + dzMin * dzMin)
+                }
+            }
+        }
+
+        // Order each cell's candidates by their rank floor so the scan can bound.
+        // Insertion sort: cells hold tens of entries, and this runs only when the
+        // light set actually changes, not per frame.
+        val floors = lightCellRankFloor
+        for (c in 0 until cells) {
+            val from = start[c]
+            val to = start[c + 1]
+            for (a in from + 1 until to) {
+                val keyFloor = floors[a]
+                val keyIdx = items[a]
+                val k0 = cellPos[a * 4]
+                val k1 = cellPos[a * 4 + 1]
+                val k2 = cellPos[a * 4 + 2]
+                val k3 = cellPos[a * 4 + 3]
+                var b = a - 1
+                while (b >= from && floors[b] > keyFloor) {
+                    floors[b + 1] = floors[b]
+                    items[b + 1] = items[b]
+                    val src = b * 4
+                    val dst = src + 4
+                    cellPos[dst] = cellPos[src]
+                    cellPos[dst + 1] = cellPos[src + 1]
+                    cellPos[dst + 2] = cellPos[src + 2]
+                    cellPos[dst + 3] = cellPos[src + 3]
+                    b--
+                }
+                floors[b + 1] = keyFloor
+                items[b + 1] = keyIdx
+                val dst = (b + 1) * 4
+                cellPos[dst] = k0
+                cellPos[dst + 1] = k1
+                cellPos[dst + 2] = k2
+                cellPos[dst + 3] = k3
+            }
+        }
+    }
+
+    private var lightGridCursor = IntArray(0)
+    private var lightGridSignature = 0L
+    private var lightSelectCalls = 0L
+    private var lightCandidatesScanned = 0L
+    private var lightGridItemCount = 0
 
     /**
      * Collects the scene's point lights and packs them for upload.
@@ -1301,6 +1726,8 @@ class ModernGLToolkit(
         for (i in 0 until n) lightIndexOf[frameLights[i]] = i
         frameLightCount = n
         diagPointLights = n
+        lastLightSelectValid = false
+        buildLightGrid()
     }
 
 
@@ -2178,6 +2605,64 @@ class ModernGLToolkit(
     private var reusableSlotColor = IntArray(4096)
     private var reusableSlotStamp = IntArray(4096)
     private var slotStampCounter = 0
+    private var normalBuildStamp = 0
+
+    /** Per-presented-frame phase accumulators (reset in render(), read by [ModernPerf]). */
+    private var phaseModelNs = 0L
+    private var phaseModelCalls = 0
+    private var phaseGroundNs = 0L
+    private var phaseGroundCalls = 0
+    private var phaseLightSelectNs = 0L
+    private var phaseGpuWaitNs = 0L
+
+    /**
+     * Per-pass GPU cost (`-Drender.gputimers`). CPU timers cannot see it: the driver
+     * returns from a draw long before the work runs.
+     */
+    private val gpuTimer = GpuTimer(arrayOf("inst", "stream", "ground", "sprite"))
+    private val GPU_PASS_INSTANCED = 0
+    private val GPU_PASS_STREAM = 1
+    private val GPU_PASS_GROUND = 2
+    private val GPU_PASS_SPRITE = 3
+
+    /** -Drender.gpusync: glFinish before present, to separate GPU-bound from CPU-bound frames. */
+    private val GPU_SYNC = System.getProperty("render.gpusync") != null
+
+    /**
+     * -Drender.phasetimers: time each model draw and each of its stages individually.
+     *
+     * Off by default and deliberately so: the per-stage breakdown needs up to ten
+     * System.nanoTime calls per model draw, which at this model count is a few percent
+     * of the frame spent in clock_gettime — enough to distort what it is measuring.
+     */
+    private val PHASE_TIMERS = System.getProperty("render.phasetimers") != null
+
+    /** [System.nanoTime] when the per-stage timers are enabled, 0 otherwise. */
+    private fun stageNow(): Long = if (PHASE_TIMERS) System.nanoTime() else 0L
+
+    /**
+     * Per-build memo for [buildModelCache]'s normalized vertex normals.
+     *
+     * Faces share normal slots (2-6 faces per slot is typical), and the conversion
+     * costs a sqrt and three divisions, so the un-memoised version paid for the
+     * same normal several times per model. [normalCacheStamp] avoids having to
+     * clear the memo between builds.
+     */
+    private var normalCache = IntArray(4096 * 3)
+    private var normalCacheStamp = IntArray(4096)
+
+    /** Scratch for buildModelCache's material grouping (distinct ids, counts, write cursors). */
+    private var vertexWordScratch = IntArray(0)
+
+    /**
+     * Stand-in for [ModelCache.CachedModel.vertexData] on model-owned entries, whose
+     * geometry lives in the word array instead. Never read.
+     */
+    private val EMPTY_VERTEX_DATA: java.nio.ByteBuffer =
+        java.nio.ByteBuffer.allocate(0).order(java.nio.ByteOrder.nativeOrder())
+    private var matGroupIds = IntArray(64)
+    private var matGroupCount = IntArray(64)
+    private var matGroupCursor = IntArray(64)
 
     /**
      * Computes a content-based hash for a ModelGL.
@@ -2211,7 +2696,40 @@ class ModernGLToolkit(
         return h
     }
 
+    /**
+     * Memoised wrapper around [computeModelContentHashUncached].
+     *
+     * The uncached hash is O(vertices + faces) and used to run for EVERY model on
+     * the legacy-capture path EVERY render frame — ~12% of a logged-in frame. Its
+     * inputs only change when game logic mutates the model (50Hz at most), and
+     * every ModelGL method that writes a geometry array clears
+     * [ModelGL.modernContentValid], so a render frame with no intervening mutation
+     * reuses the stored value.
+     *
+     * `-Drender.verifyhash` recomputes unconditionally and reports disagreement,
+     * which is the direct test that the invalidation set is complete.
+     */
     private fun computeModelContentHash(model: ModelGL): Long {
+        if (model.modernContentValid) {
+            if (VERIFY_HASH) {
+                val fresh = computeModelContentHashUncached(model)
+                if (fresh != model.modernContentHash) {
+                    hashVerifyBad++
+                    if (hashVerifyBad <= 20) System.err.println(
+                        "[HashVerify] STALE memoised hash: cached=${model.modernContentHash} fresh=$fresh " +
+                            "faces=${model.numFaces} verts=${model.maxDepth}")
+                }
+                hashVerifyChecks++
+            }
+            return model.modernContentHash
+        }
+        val hash = computeModelContentHashUncached(model)
+        model.modernContentHash = hash
+        model.modernContentValid = true
+        return hash
+    }
+
+    private fun computeModelContentHashUncached(model: ModelGL): Long {
         // 64-BIT hash. The cache and the PERSISTENT instanced geometry store key on
         // this value; with thousands of unique meshes accumulating per session, a
         // 32-bit key hits birthday collisions readily (~2^16 entries), and since the
@@ -2338,11 +2856,29 @@ class ModernGLToolkit(
         }
         diagModelGateAccepted++
 
+        // Whole-path timer. Everything the scene walk spends submitting models lands
+        // here, so `tilesMs - modelMs - groundMs` is the legacy traversal's own cost —
+        // the split that the per-stage timers below could never give, because most of
+        // the work is not inside any of them.
+        //
+        // Opt-in: two System.nanoTime calls per model draw is ~2% of the frame at this
+        // model count, which is enough to distort the very thing it measures.
+        if (!PHASE_TIMERS) {
+            if (useOptimizedBatcher) {
+                renderModelGLOptimized(model, modelMatrix)
+            } else {
+                renderModelGLLegacy(model, modelMatrix)
+            }
+            return
+        }
+        val t0 = System.nanoTime()
         if (useOptimizedBatcher) {
             renderModelGLOptimized(model, modelMatrix)
         } else {
             renderModelGLLegacy(model, modelMatrix)
         }
+        phaseModelNs += System.nanoTime() - t0
+        phaseModelCalls++
     }
 
     /**
@@ -2394,16 +2930,17 @@ class ModernGLToolkit(
         totalModelsProcessed++
 
         // OPTIMIZATION: Frustum culling at model level
-        val t1 = System.nanoTime()
+        val t1 = stageNow()
         if (frustumCullEnabled && model.boundsCalculated) {
             val vp = viewProjectionMatrix.elements
             if (!isModelVisible(model, modelMatrix, vp)) {
+                if (VERIFY_MODEL_CULL) verifyModelCull(model, modelMatrix, vp)
                 modelsCulled++
-                timeFrustumCull += System.nanoTime() - t1
+                if (PHASE_TIMERS) timeFrustumCull += System.nanoTime() - t1
                 return
             }
         }
-        timeFrustumCull += System.nanoTime() - t1
+        if (PHASE_TIMERS) timeFrustumCull += System.nanoTime() - t1
 
         // renderedFaceCount, NOT numFaces — see buildModelCache: faces in
         // [renderedFaceCount, numFaces) are billboard ANCHOR faces that legacy never
@@ -2442,7 +2979,7 @@ class ModernGLToolkit(
             ModelFunctionMaskGL.altersVertices(model.functionMask)
         val cache = if (isAnimated) null else modelCache
 
-        val t4 = System.nanoTime()
+        val t4 = stageNow()
         if (cache != null) {
             // MESH-BUILT PATH: geometry constructed from the clean decoded mesh
             // at createModel time (ModernModelBuilder) — multi-model locs keep
@@ -2484,7 +3021,7 @@ class ModernGLToolkit(
                 if (VERIFY_RECOLOUR && model.modernColorRevision > 0) {
                     verifyRecolourVsLegacyCapture(model, built)
                 }
-                val cachedModel = cache.getOrCreate(model, geometryKey) {
+                val cachedModel = sharedGeometryFor(model, cache, geometryKey) {
                     if (model.modernColorRevision == 0) {
                         built.toCachedModel()
                     } else {
@@ -2499,12 +3036,12 @@ class ModernGLToolkit(
                     }
                 }
                 if (cachedModel != null) {
-                    timeCacheLookup += System.nanoTime() - t4
+                    if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - t4
                     cacheHits++
                     modernBuiltPathModels++
                     submitCachedModel(
                         batcher, cachedModel, geometryKey,
-                        composeModernModelMatrix(model, modelMatrix)
+                        composeModernModelMatrix(model, modelMatrix), model
                     )
                     return
                 }
@@ -2515,32 +3052,72 @@ class ModernGLToolkit(
             // meaningful for static models; computing it for animated models
             // was pure per-frame waste).
             modernBuiltFallbackModels++
-            val t3 = System.nanoTime()
+            val t3 = stageNow()
             val modelId = computeModelContentHash(model)
-            timeComputeHash += System.nanoTime() - t3
+            if (PHASE_TIMERS) timeComputeHash += System.nanoTime() - t3
 
-            val cachedModel = cache.getOrCreate(model, modelId) {
+            val cachedModel = sharedGeometryFor(model, cache, modelId) {
                 buildModelCache(model)
             }
-            timeCacheLookup += System.nanoTime() - t4
+            if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - t4
 
             if (cachedModel != null) {
                 cacheHits++
                 if (VERIFY_RECOLOUR) verifyRecolourAgainst(model, cachedModel)
-                submitCachedModel(batcher, cachedModel, modelId, modelMatrix)
+                submitCachedModel(batcher, cachedModel, modelId, modelMatrix, model)
                 return
             }
         } else {
             modernBuiltFallbackModels++
-            timeCacheLookup += System.nanoTime() - t4
+            if (PHASE_TIMERS) timeCacheLookup += System.nanoTime() - t4
+
+            // ANIMATED / POSE-SNAPSHOT PATH.
+            //
+            // These models are excluded from the shared content cache on purpose:
+            // every animation tick produces different vertices, so keying them by
+            // content would flood the persistent instanced store with single-use
+            // meshes (see the isAnimated comment above). But that exclusion used to
+            // mean the FULL per-face build ran again on EVERY RENDER FRAME — ~22% of
+            // a logged-in frame — even though the vertices only change when game
+            // logic animates the model, at 50Hz. With the render loop uncapped that
+            // is up to six identical rebuilds per pose.
+            //
+            // So keep the geometry on the model itself, keyed by the same
+            // invalidation stamp the content hash uses, and rebuild it only when a
+            // mutation actually invalidated it. The buffer is reused in place, so a
+            // steady-state pose change allocates nothing.
+            val streamed = animatedGeometryFor(model)
+            if (streamed != null) {
+                val rebuilt = animatedGeometryRebuilt
+                // Preferred: keep the pose in the PERSISTENT instanced store, keyed by
+                // instance, and re-send it only when the pose actually changed. The
+                // streaming alternative re-copied every animated vertex into a staging
+                // buffer and re-stamped a model index into every one of them, every
+                // render frame — together the largest single cost left in the frame.
+                // -Drender.animinstanced=false restores that path.
+                if (animatedInstancing) {
+                    val inst = instancedBatcher
+                    if (inst != null && inst.isActive()) {
+                        selectLightsForModel(model, modelMatrix)
+                        if (inst.addInstance(streamed, model.modernStreamKey, modelMatrix, currentLightIdx, rebuilt)) {
+                            totalFacesProcessed += streamed.faceCount
+                            modelCounter++
+                            debugModelSuccesses++
+                            return
+                        }
+                    }
+                }
+                submitStreamedModel(batcher, streamed, modelMatrix)
+                return
+            }
         }
 
         // Fallback: process faces directly (no cache or cache build failed)
         // Register model matrix with the optimized batcher
         selectLightsFor(modelMatrix.xD, modelMatrix.yD, modelMatrix.zD)
-        val t2 = System.nanoTime()
+        val t2 = stageNow()
         var modelIndex = batcher.beginModel(modelMatrix, currentLightIdx)
-        timeBeginModel += System.nanoTime() - t2
+        if (PHASE_TIMERS) timeBeginModel += System.nanoTime() - t2
 
         if (modelIndex < 0) {
             flushBatchMidFrame(batcher)
@@ -2563,14 +3140,43 @@ class ModernGLToolkit(
      *   batcher groups instances by it, so all instances sharing it must carry
      *   identical vertex data (per-instance placement lives in [matrix]).
      */
+    /**
+     * Fills [currentLightIdx] for [model] at [matrix]'s origin, reusing the model's own
+     * memo when neither its position nor the frame's light set has changed.
+     */
+    private fun selectLightsForModel(model: ModelGL, matrix: Matrix43) {
+        if (model.modernLightEpoch == lightEpoch &&
+            model.modernLightX == matrix.xD &&
+            model.modernLightY == matrix.yD &&
+            model.modernLightZ == matrix.zD
+        ) {
+            val memo = model.modernLightIdx
+            currentLightIdx[0] = memo[0]; currentLightIdx[1] = memo[1]
+            currentLightIdx[2] = memo[2]; currentLightIdx[3] = memo[3]
+            return
+        }
+        selectLightsFor(matrix.xD, matrix.yD, matrix.zD)
+        model.modernLightEpoch = lightEpoch
+        model.modernLightX = matrix.xD
+        model.modernLightY = matrix.yD
+        model.modernLightZ = matrix.zD
+        val memo = model.modernLightIdx
+        memo[0] = currentLightIdx[0]; memo[1] = currentLightIdx[1]
+        memo[2] = currentLightIdx[2]; memo[3] = currentLightIdx[3]
+    }
+
+    /** Bumped whenever the frame's light set is rebuilt, invalidating every per-model memo. */
+    private var lightEpoch = 0
+
     private fun submitCachedModel(
         batcher: OptimizedFrameBatcher,
         cachedModel: ModelCache.CachedModel,
         geometryKey: Long,
-        matrix: Matrix43
+        matrix: Matrix43,
+        model: ModelGL
     ) {
         // Pick this model's lights from its own world origin (see selectLightsFor).
-        selectLightsFor(matrix.xD, matrix.yD, matrix.zD)
+        selectLightsForModel(model, matrix)
         // INSTANCING PATH: groups identical meshes (by geometryKey) and renders
         // them with glDrawElementsInstanced, using one draw call per material
         // regardless of how many instances exist.
@@ -2583,9 +3189,9 @@ class ModernGLToolkit(
         // retries), and the legacy-capture path is ~96% of all models. That
         // overran the 500k-vertex streaming buffer every frame and deleted walls.
         if (instancingEnabled && useInstancing && instancedBatcher?.isActive() == true) {
-            val t5 = System.nanoTime()
+            val t5 = stageNow()
             val added = instancedBatcher!!.addInstance(cachedModel, geometryKey, matrix, currentLightIdx)
-            timeAddCachedModel += System.nanoTime() - t5
+            if (PHASE_TIMERS) timeAddCachedModel += System.nanoTime() - t5
             if (added) {
                 totalFacesProcessed += cachedModel.faceCount
                 modelCounter++
@@ -2596,9 +3202,9 @@ class ModernGLToolkit(
         }
 
         // REGULAR BATCHER PATH: used when instancing is disabled or full
-        val t2 = System.nanoTime()
+        val t2 = stageNow()
         var modelIndex = batcher.beginModel(matrix, currentLightIdx)
-        timeBeginModel += System.nanoTime() - t2
+        if (PHASE_TIMERS) timeBeginModel += System.nanoTime() - t2
 
         if (modelIndex < 0) {
             flushBatchMidFrame(batcher)
@@ -2609,7 +3215,7 @@ class ModernGLToolkit(
         modelCounter++
         debugModelSuccesses++
 
-        val t5 = System.nanoTime()
+        val t5 = stageNow()
         var facesAdded = batcher.addCachedModel(cachedModel, modelIndex)
 
         // addCachedModel returns 0 when its vertex buffer is full and DISCARDS the
@@ -2626,7 +3232,7 @@ class ModernGLToolkit(
             }
             if (facesAdded == 0) streamingModelsDropped++
         }
-        timeAddCachedModel += System.nanoTime() - t5
+        if (PHASE_TIMERS) timeAddCachedModel += System.nanoTime() - t5
         totalFacesProcessed += facesAdded
     }
 
@@ -2737,7 +3343,22 @@ class ModernGLToolkit(
         }
     }
 
-    private fun buildModelCache(model: ModelGL): ModelCache.CachedModel? {
+    /**
+     * Builds the modern vertex/index representation of [model]'s CURRENT legacy arrays.
+     *
+     * @param modelOwned build for the animated/pose path, which keeps the result on
+     *   the ModelGL itself and rebuilds it once per logic tick. Those buffers are
+     *   allocated on the heap so the GC owns them — a pose model can be dropped at
+     *   any tick with nobody left to free a native allocation.
+     * @param reuse when non-null, the result is written back into this instance and
+     *   its vertex buffer is reused if it is large enough, so the steady state
+     *   allocates nothing at all.
+     */
+    private fun buildModelCache(
+        model: ModelGL,
+        modelOwned: Boolean = false,
+        reuse: ModelCache.CachedModel? = null
+    ): ModelCache.CachedModel? {
         // renderedFaceCount, NOT numFaces: faces in [renderedFaceCount, numFaces) are
         // BILLBOARD ANCHOR faces (uid Long.MAX_VALUE, sorted to the tail by
         // Model.addBillboard). Legacy NEVER rasterizes them — it draws only
@@ -2853,7 +3474,19 @@ class ModernGLToolkit(
 
         // Allocate buffers - NEW 40-byte format
         val vertexCount = validFaceCount * 3
-        val vertexData = MemoryUtil.memAlloc(vertexCount * ModelCache.BYTES_PER_VERTEX)  // 40 bytes per vertex
+        val neededBytes = vertexCount * ModelCache.BYTES_PER_VERTEX  // 40 bytes per vertex
+        // Heap buffers for the reuse path (see CachedModel.heapOwned): the GC owns
+        // them, because a pose model can be dropped at any tick with no one to free
+        // a native allocation. nativeOrder is mandatory — the bytes are memcpy'd
+        // straight into the GL staging buffer, so the float encoding must match.
+        val vertexData = if (modelOwned) {
+            // Model-owned geometry lives in its word array; this placeholder only
+            // exists because CachedModel.vertexData is non-null, and is never read
+            // for such an entry.
+            reuse?.vertexData ?: EMPTY_VERTEX_DATA
+        } else {
+            MemoryUtil.memAlloc(neededBytes)
+        }
         val materialIds = ShortArray(validFaceCount)
 
         var outFaceIdx = 0
@@ -2867,42 +3500,80 @@ class ModernGLToolkit(
         // 1.18x measured against legacy.
         val contrastScale = if (model.contrast.toInt() != 0) 768f / model.contrast.toInt() else 1f
 
-        // Helper function to compute normalized normal from legacy format
-        fun writeNormal(normalIdx: Int) {
-            if (hasNormals && normalIdx >= 0 && normalIdx < normalsX!!.size) {
-                val nX = normalsX[normalIdx].toFloat()
-                val nY = normalsY!![normalIdx].toFloat()
-                val nZ = normalsZ!![normalIdx].toFloat()
-                val mag = magnitudes!![normalIdx].toInt() and 0xFF
+        // Normalized normals, memoised per normal slot for the duration of this build.
+        // Faces share normal slots, so the un-memoised version repeated the same
+        // sqrt + three divisions several times per model. The stamp array means no
+        // clearing pass between builds.
+        val normalSlots = if (hasNormals) normalsX!!.size else 0
+        if (normalSlots > 0) {
+            if (normalCacheStamp.size < normalSlots) {
+                normalCacheStamp = IntArray(normalSlots * 2)
+                normalCache = IntArray(normalSlots * 2 * 3)
+            }
+            normalBuildStamp++
+        }
+        val nCache = normalCache
+        val nStamp = normalCacheStamp
+        val nStampNow = normalBuildStamp
+        val contrastScaleBits = java.lang.Float.floatToRawIntBits(contrastScale)
+        val colorWordsAreBigEndian = java.nio.ByteOrder.nativeOrder() == java.nio.ByteOrder.BIG_ENDIAN
 
-                if (mag == 0) {
-                    // mag==0 means pre-normalized with scale factor
-                    val len = kotlin.math.sqrt(nX * nX + nY * nY + nZ * nZ)
-                    if (len > 0.001f) {
-                        vertexData.putFloat(nX / len * contrastScale)
-                        vertexData.putFloat(nY / len * contrastScale)
-                        vertexData.putFloat(nZ / len * contrastScale)
-                    } else {
-                        vertexData.putFloat(0f).putFloat(contrastScale).putFloat(0f)
-                    }
-                } else {
-                    // Normal stored as N*magnitude
-                    val invMag = 1f / (mag * 256f)
+        // Vertices are assembled as raw 32-bit words in a scratch array and copied
+        // into the buffer in ONE bulk transfer at the end. Emitting them with ~30
+        // ByteBuffer puts per vertex — each with its own bounds and byte-order
+        // handling — was the single most expensive thing in this build.
+        val words = vertexCount * (ModelCache.BYTES_PER_VERTEX / 4)
+        // Model-owned geometry keeps the WORDS as its authoritative copy (see
+        // CachedModel.vertexWords), so the assembly below writes straight into it
+        // and no ByteBuffer is involved on this path at all. Cache-owned geometry
+        // still goes through the shared scratch and a native buffer.
+        val vw: IntArray
+        if (modelOwned) {
+            val existing = reuse?.vertexWords
+            vw = if (existing != null && existing.size >= words) existing else IntArray(words)
+        } else {
+            if (vertexWordScratch.size < words) vertexWordScratch = IntArray(words * 2)
+            vw = vertexWordScratch
+        }
+        var wp = 0
+
+        /** Writes the 3 normal words for [normalIdx] at [out], memoised per normal slot. */
+        fun writeNormal(out: Int, normalIdx: Int) {
+            if (hasNormals && normalIdx >= 0 && normalIdx < normalSlots) {
+                val base = normalIdx * 3
+                if (nStamp[normalIdx] != nStampNow) {
+                    nStamp[normalIdx] = nStampNow
+                    val nX = normalsX!![normalIdx].toFloat()
+                    val nY = normalsY!![normalIdx].toFloat()
+                    val nZ = normalsZ!![normalIdx].toFloat()
+                    val mag = magnitudes!![normalIdx].toInt() and 0xFF
+
+                    // mag == 0 means the normal is stored pre-normalized with a scale
+                    // factor; otherwise it is stored as N * magnitude.
+                    val invMag = if (mag == 0) 1f else 1f / (mag * 256f)
                     val rawNx = nX * invMag
                     val rawNy = nY * invMag
                     val rawNz = nZ * invMag
                     val len = kotlin.math.sqrt(rawNx * rawNx + rawNy * rawNy + rawNz * rawNz)
                     if (len > 0.001f) {
-                        vertexData.putFloat(rawNx / len * contrastScale)
-                        vertexData.putFloat(rawNy / len * contrastScale)
-                        vertexData.putFloat(rawNz / len * contrastScale)
+                        val k = contrastScale / len
+                        nCache[base] = java.lang.Float.floatToRawIntBits(rawNx * k)
+                        nCache[base + 1] = java.lang.Float.floatToRawIntBits(rawNy * k)
+                        nCache[base + 2] = java.lang.Float.floatToRawIntBits(rawNz * k)
                     } else {
-                        vertexData.putFloat(0f).putFloat(contrastScale).putFloat(0f)
+                        nCache[base] = 0
+                        nCache[base + 1] = contrastScaleBits
+                        nCache[base + 2] = 0
                     }
                 }
+                vw[out] = nCache[base]
+                vw[out + 1] = nCache[base + 1]
+                vw[out + 2] = nCache[base + 2]
             } else {
                 // Default up normal (carrying the per-model contrast scale)
-                vertexData.putFloat(0f).putFloat(contrastScale).putFloat(0f)
+                vw[out] = 0
+                vw[out + 1] = contrastScaleBits
+                vw[out + 2] = 0
             }
         }
 
@@ -2974,88 +3645,246 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
             val rgbaA = if (useSlot && idxA < slotCount && slotStamp[idxA] == stamp) slotColor[idxA] else { if (useSlot) unwrittenSlotFaces++; faceRgba }
             val rgbaB = if (useSlot && idxB < slotCount && slotStamp[idxB] == stamp) slotColor[idxB] else faceRgba
             val rgbaC = if (useSlot && idxC < slotCount && slotStamp[idxC] == stamp) slotColor[idxC] else faceRgba
-            val colorRA = ((rgbaA ushr 24) and 0xFF).toByte()
-            val colorGA = ((rgbaA ushr 16) and 0xFF).toByte()
-            val colorBA = ((rgbaA ushr 8) and 0xFF).toByte()
-            val colorAA = (rgbaA and 0xFF).toByte()
-            val colorRB = ((rgbaB ushr 24) and 0xFF).toByte()
-            val colorGB = ((rgbaB ushr 16) and 0xFF).toByte()
-            val colorBB = ((rgbaB ushr 8) and 0xFF).toByte()
-            val colorAB = (rgbaB and 0xFF).toByte()
-            val colorRC = ((rgbaC ushr 24) and 0xFF).toByte()
-            val colorGC = ((rgbaC ushr 16) and 0xFF).toByte()
-            val colorBC = ((rgbaC ushr 8) and 0xFF).toByte()
-            val colorAC = (rgbaC and 0xFF).toByte()
+            // Colour word laid out so the bytes land r,g,b,a in ASCENDING ADDRESS
+            // order, matching the four separate puts this replaced. rgba packs as
+            // r<<24|g<<16|b<<8|a, which is already the big-endian layout; on a
+            // little-endian buffer the word has to be reversed.
+            val colorWordA = if (colorWordsAreBigEndian) rgbaA else Integer.reverseBytes(rgbaA)
+            val colorWordB = if (colorWordsAreBigEndian) rgbaB else Integer.reverseBytes(rgbaB)
+            val colorWordC = if (colorWordsAreBigEndian) rgbaC else Integer.reverseBytes(rgbaC)
 
             // Vertex 0: position(12) + normal(12) + texcoord(8) + color(4) + modelIndex(4) = 40 bytes
-            vertexData.putFloat(verticesX[vertA].toFloat())
-            vertexData.putFloat(verticesY[vertA].toFloat())
-            vertexData.putFloat(verticesZ[vertA].toFloat())
-            writeNormal(idxA)  // Pre-computed normalized normal
-            vertexData.putFloat(if (textureU != null && idxA < textureU.size) textureU[idxA] else 0f)
-            vertexData.putFloat(if (textureV != null && idxA < textureV.size) textureV[idxA] else 0f)
-            vertexData.put(colorRA).put(colorGA).put(colorBA).put(colorAA)
-            vertexData.putFloat(0f)  // modelIndex placeholder
+            vw[wp] = java.lang.Float.floatToRawIntBits(verticesX[vertA].toFloat())
+            vw[wp + 1] = java.lang.Float.floatToRawIntBits(verticesY[vertA].toFloat())
+            vw[wp + 2] = java.lang.Float.floatToRawIntBits(verticesZ[vertA].toFloat())
+            writeNormal(wp + 3, idxA)  // Pre-computed normalized normal
+            vw[wp + 6] = if (textureU != null && idxA < textureU.size) java.lang.Float.floatToRawIntBits(textureU[idxA]) else 0
+            vw[wp + 7] = if (textureV != null && idxA < textureV.size) java.lang.Float.floatToRawIntBits(textureV[idxA]) else 0
+            vw[wp + 8] = colorWordA
+            vw[wp + 9] = 0  // modelIndex placeholder
 
             // Vertex 1
-            vertexData.putFloat(verticesX[vertB].toFloat())
-            vertexData.putFloat(verticesY[vertB].toFloat())
-            vertexData.putFloat(verticesZ[vertB].toFloat())
-            writeNormal(idxB)
-            vertexData.putFloat(if (textureU != null && idxB < textureU.size) textureU[idxB] else 0f)
-            vertexData.putFloat(if (textureV != null && idxB < textureV.size) textureV[idxB] else 0f)
-            vertexData.put(colorRB).put(colorGB).put(colorBB).put(colorAB)
-            vertexData.putFloat(0f)
+            vw[wp + 10] = java.lang.Float.floatToRawIntBits(verticesX[vertB].toFloat())
+            vw[wp + 11] = java.lang.Float.floatToRawIntBits(verticesY[vertB].toFloat())
+            vw[wp + 12] = java.lang.Float.floatToRawIntBits(verticesZ[vertB].toFloat())
+            writeNormal(wp + 13, idxB)
+            vw[wp + 16] = if (textureU != null && idxB < textureU.size) java.lang.Float.floatToRawIntBits(textureU[idxB]) else 0
+            vw[wp + 17] = if (textureV != null && idxB < textureV.size) java.lang.Float.floatToRawIntBits(textureV[idxB]) else 0
+            vw[wp + 18] = colorWordB
+            vw[wp + 19] = 0
 
             // Vertex 2
-            vertexData.putFloat(verticesX[vertC].toFloat())
-            vertexData.putFloat(verticesY[vertC].toFloat())
-            vertexData.putFloat(verticesZ[vertC].toFloat())
-            writeNormal(idxC)
-            vertexData.putFloat(if (textureU != null && idxC < textureU.size) textureU[idxC] else 0f)
-            vertexData.putFloat(if (textureV != null && idxC < textureV.size) textureV[idxC] else 0f)
-            vertexData.put(colorRC).put(colorGC).put(colorBC).put(colorAC)
-            vertexData.putFloat(0f)
+            vw[wp + 20] = java.lang.Float.floatToRawIntBits(verticesX[vertC].toFloat())
+            vw[wp + 21] = java.lang.Float.floatToRawIntBits(verticesY[vertC].toFloat())
+            vw[wp + 22] = java.lang.Float.floatToRawIntBits(verticesZ[vertC].toFloat())
+            writeNormal(wp + 23, idxC)
+            vw[wp + 26] = if (textureU != null && idxC < textureU.size) java.lang.Float.floatToRawIntBits(textureU[idxC]) else 0
+            vw[wp + 27] = if (textureV != null && idxC < textureV.size) java.lang.Float.floatToRawIntBits(textureV[idxC]) else 0
+            vw[wp + 28] = colorWordC
+            vw[wp + 29] = 0
+            wp += 30
 
             outFaceIdx++
         }
 
-        vertexData.flip()
-
-        // Build pre-sorted material batches to eliminate runtime sorting
-        // Group faces by material ID and create index arrays
-        val materialToIndices = mutableMapOf<Int, MutableList<Int>>()
-        for (faceIdx in 0 until validFaceCount) {
-            // SIGNED read: untextured faces store materialId -1 (0..N are textured,
-            // INCLUDING material 0 — old-format meshes start texture ids at 0). The
-            // untextured test is `< 0`, NOT `<= 0`: `<= 0` folded valid material-0
-            // faces into the untextured batch → flat green quads on multimodel locs.
-            val materialId = materialIds[faceIdx].toInt()
-            val normalizedId = if (materialId < 0) -1 else materialId
-            val indices = materialToIndices.getOrPut(normalizedId) { mutableListOf() }
-            val baseVertex = faceIdx * 3
-            indices.add(baseVertex)
-            indices.add(baseVertex + 1)
-            indices.add(baseVertex + 2)
+        if (!modelOwned) {
+            // One bulk transfer instead of ~90 puts per face.
+            vertexData.clear()
+            vertexData.asIntBuffer().put(vw, 0, wp)
+            vertexData.position(0)
+            vertexData.limit(wp * 4)
         }
 
-        // Sort materials (untextured first, then by ID) and create batches
-        val sortedMaterials = materialToIndices.keys.sortedBy { if (it < 0) Int.MIN_VALUE else it }
-        val materialBatches = sortedMaterials.map { materialId ->
-            val indices = materialToIndices[materialId]!!
+        // Build pre-sorted material batches to eliminate runtime sorting.
+        //
+        // Deliberately allocation-free apart from the final per-material index
+        // arrays. The previous version grouped through a
+        // `Map<Int, MutableList<Int>>`, which boxed THREE Integers per face plus
+        // ArrayList growth — on the animated path, where this whole build reruns
+        // whenever a pose changes, that dominated the cost of the build.
+        //
+        // SIGNED read: untextured faces store materialId -1 (0..N are textured,
+        // INCLUDING material 0 — old-format meshes start texture ids at 0). The
+        // untextured test is `< 0`, NOT `<= 0`: `<= 0` folded valid material-0
+        // faces into the untextured batch → flat green quads on multimodel locs.
+        var groupCount = 0
+        run {
+            var ids = matGroupIds
+            var counts = matGroupCount
+            faces@ for (faceIdx in 0 until validFaceCount) {
+                val rawId = materialIds[faceIdx].toInt()
+                val materialId = if (rawId < 0) -1 else rawId
+                for (k in 0 until groupCount) {
+                    if (ids[k] == materialId) { counts[k]++; continue@faces }
+                }
+                if (groupCount == ids.size) {
+                    ids = ids.copyOf(ids.size * 2)
+                    counts = counts.copyOf(counts.size * 2)
+                    matGroupIds = ids
+                    matGroupCount = counts
+                    matGroupCursor = IntArray(ids.size)
+                }
+                ids[groupCount] = materialId
+                counts[groupCount] = 1
+                groupCount++
+            }
+        }
+        val groupIds = matGroupIds
+        val groupCounts = matGroupCount
+        // Insertion sort by material id — untextured (-1) sorts first naturally, and
+        // a model has a handful of materials, never enough for anything fancier.
+        for (i in 1 until groupCount) {
+            val id = groupIds[i]
+            val cnt = groupCounts[i]
+            var j = i - 1
+            while (j >= 0 && groupIds[j] > id) {
+                groupIds[j + 1] = groupIds[j]
+                groupCounts[j + 1] = groupCounts[j]
+                j--
+            }
+            groupIds[j + 1] = id
+            groupCounts[j + 1] = cnt
+        }
+        val materialBatches = Array(groupCount) { g ->
             ModelCache.MaterialBatch(
-                materialId = materialId,
-                indices = indices.toIntArray(),
-                indexCount = indices.size
+                materialId = groupIds[g],
+                indices = IntArray(groupCounts[g] * 3),
+                indexCount = groupCounts[g] * 3
             )
-        }.toTypedArray()
+        }
+        val cursors = matGroupCursor
+        for (g in 0 until groupCount) cursors[g] = 0
+        for (faceIdx in 0 until validFaceCount) {
+            val rawId = materialIds[faceIdx].toInt()
+            val materialId = if (rawId < 0) -1 else rawId
+            var g = 0
+            while (groupIds[g] != materialId) g++
+            val out = materialBatches[g].indices
+            val c = cursors[g]
+            val baseVertex = faceIdx * 3
+            out[c] = baseVertex
+            out[c + 1] = baseVertex + 1
+            out[c + 2] = baseVertex + 2
+            cursors[g] = c + 3
+        }
 
-        return ModelCache.CachedModel(
+        if (reuse != null) {
+            reuse.faceCount = validFaceCount
+            reuse.vertexCount = vertexCount
+            reuse.vertexData = vertexData
+            reuse.materialBatches = materialBatches
+            if (modelOwned) {
+                reuse.vertexWords = vw
+                reuse.vertexWordCount = wp
+            }
+            return reuse
+        }
+        val built = ModelCache.CachedModel(
             faceCount = validFaceCount,
             vertexCount = vertexCount,
             vertexData = vertexData,
-            materialBatches = materialBatches
+            materialBatches = materialBatches,
+            heapOwned = modelOwned
         )
+        if (modelOwned) {
+            built.vertexWords = vw
+            built.vertexWordCount = wp
+        }
+        return built
+    }
+
+    /**
+     * Returns [model]'s own geometry for the CURRENT pose, rebuilding it only if a
+     * mutation invalidated it since the last build.
+     *
+     * Unlike the shared [modelCache], this is keyed by instance identity rather than
+     * by content, which is exactly right for pose snapshots: no hashing, no map, and
+     * no chance of one pose's geometry being served for another's.
+     */
+    private fun animatedGeometryFor(model: ModelGL): ModelCache.CachedModel? {
+        val existing = model.modernStreamGeometry as? ModelCache.CachedModel
+        if (existing != null && model.modernStreamValid) {
+            streamGeometryHits++
+            animatedGeometryRebuilt = false
+            return existing
+        }
+        streamGeometryBuilds++
+        val built = buildModelCache(model, modelOwned = true, reuse = existing) ?: return null
+        model.modernStreamGeometry = built
+        model.modernStreamValid = true
+        animatedGeometryRebuilt = true
+        if (model.modernStreamKey == 0L) model.modernStreamKey = ++streamKeyCounter
+        return built
+    }
+
+    /** Whether the last [animatedGeometryFor] actually rebuilt, i.e. the resident copy is stale. */
+    private var animatedGeometryRebuilt = false
+
+    /**
+     * Source of per-instance geometry keys for animated models.
+     *
+     * Starts far above zero and only ever increases, so a key is never reused and
+     * never mistaken for "unassigned". Only the render thread assigns keys.
+     */
+    private var streamKeyCounter = 0x4000_0000_0000_0000L
+
+    /**
+     * Resolves [model]'s entry in the shared content cache, remembering the result on
+     * the model so an unchanged model skips the map lookup entirely.
+     *
+     * The cache is an access-ordered LinkedHashMap keyed by a boxed Long: every get
+     * boxes the key, walks a bucket comparing Longs, and then RESTRUCTURES the list to
+     * record the access. At ~1700 model draws per frame that showed up plainly in the
+     * profile. The memo is keyed by the same invalidation stamp as the content hash,
+     * plus the entry's own eviction flag so a freed buffer can never be handed back.
+     */
+    private inline fun sharedGeometryFor(
+        model: ModelGL,
+        cache: ModelCache,
+        key: Long,
+        noinline build: () -> ModelCache.CachedModel?
+    ): ModelCache.CachedModel? {
+        if (model.modernSharedValid && model.modernSharedKey == key) {
+            val memo = model.modernSharedGeometry as? ModelCache.CachedModel
+            if (memo != null && !memo.evicted) return memo
+        }
+        val resolved = cache.getOrCreate(model, key, build) ?: return null
+        model.modernSharedGeometry = resolved
+        model.modernSharedKey = key
+        model.modernSharedValid = true
+        return resolved
+    }
+
+    /**
+     * Streams a single-use cached model through the regular (non-instanced) batcher.
+     *
+     * Pose geometry is unique per instance, so it must never enter the persistent
+     * instanced store — that is what [submitCachedModel] is for.
+     */
+    private fun submitStreamedModel(
+        batcher: OptimizedFrameBatcher,
+        cached: ModelCache.CachedModel,
+        matrix: Matrix43
+    ) {
+        selectLightsFor(matrix.xD, matrix.yD, matrix.zD)
+        var modelIndex = batcher.beginModel(matrix, currentLightIdx)
+        if (modelIndex < 0) {
+            flushBatchMidFrame(batcher)
+            modelIndex = batcher.beginModel(matrix, currentLightIdx)
+            if (modelIndex < 0) return
+        }
+        modelCounter++
+        debugModelSuccesses++
+        var facesAdded = batcher.addCachedModel(cached, modelIndex)
+        // addCachedModel returns 0 and DISCARDS the model when its vertex buffer is
+        // full; flush and retry once, exactly as submitCachedModel does.
+        if (facesAdded == 0 && cached.faceCount > 0) {
+            flushBatchMidFrame(batcher)
+            modelIndex = batcher.beginModel(matrix, currentLightIdx)
+            if (modelIndex >= 0) facesAdded = batcher.addCachedModel(cached, modelIndex)
+            if (facesAdded == 0) streamingModelsDropped++
+        }
+        totalFacesProcessed += facesAdded
     }
 
     /**
@@ -3753,6 +4582,57 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
      *
      * This is a conservative check - returns true if any part of the AABB might be visible.
      */
+    /**
+     * -Drender.verifycullmodels: for every model the frustum test REJECTS, re-test its
+     * eight transformed AABB corners exactly.
+     *
+     * The test must be conservative — it may keep things that are off screen, but it
+     * must never drop something that is on it. A hit here means it is dropping visible
+     * geometry, which reads on screen as scenery vanishing at the edges while the
+     * camera turns. This is the check that would have caught the old sphere test.
+     */
+    private val VERIFY_MODEL_CULL = System.getProperty("render.verifycullmodels") != null
+    private var modelCullChecks = 0L
+    private var modelCullBad = 0L
+
+    private fun verifyModelCull(model: ModelGL, m: Matrix43, vp: FloatArray) {
+        // A model with no drawn faces has degenerate bounds and paints nothing, so
+        // whether it is culled is unobservable. Counting them only buries real hits.
+        if (model.renderedFaceCount <= 0) return
+        modelCullChecks++
+        val minX = model.minX.toFloat(); val maxX = model.maxX.toFloat()
+        val minY = model.minY.toFloat(); val maxY = model.maxY.toFloat()
+        val minZ = model.minZ.toFloat(); val maxZ = model.maxZ.toFloat()
+        // A rejection is only sound when EVERY corner is outside the SAME plane.
+        var allLeft = true; var allRight = true
+        var allBelow = true; var allAbove = true
+        var allNear = true; var allFar = true
+        for (corner in 0 until 8) {
+            val lx = if (corner and 1 == 0) minX else maxX
+            val ly = if (corner and 2 == 0) minY else maxY
+            val lz = if (corner and 4 == 0) minZ else maxZ
+            val wx = lx * m.xA + ly * m.xB + lz * m.xC + m.xD
+            val wy = lx * m.yA + ly * m.yB + lz * m.yC + m.yD
+            val wz = lx * m.zA + ly * m.zB + lz * m.zC + m.zD
+            val cx = vp[12] + vp[0] * wx + vp[4] * wy + vp[8] * wz
+            val cy = vp[13] + vp[1] * wx + vp[5] * wy + vp[9] * wz
+            val cz = vp[14] + vp[2] * wx + vp[6] * wy + vp[10] * wz
+            val cw = vp[15] + vp[3] * wx + vp[7] * wy + vp[11] * wz
+            if (cx >= -cw) allLeft = false
+            if (cx <= cw) allRight = false
+            if (cy >= -cw) allBelow = false
+            if (cy <= cw) allAbove = false
+            if (cz >= 0f) allNear = false
+            if (cz <= cw) allFar = false
+        }
+        if (!(allLeft || allRight || allBelow || allAbove || allNear || allFar)) {
+            modelCullBad++
+            if (modelCullBad <= 15) System.err.println(
+                "[CullVerify] model culled but its AABB is inside the frustum: " +
+                    "faces=${model.renderedFaceCount} origin=(${m.xD}, ${m.yD}, ${m.zD})")
+        }
+    }
+
     private fun isModelVisible(
         model: ModelGL,
         modelMatrix: Matrix43,
@@ -3795,44 +4675,68 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         val worldExtentY = extentX * absYA + extentY * absYB + extentZ * absYC
         val worldExtentZ = extentX * absZA + extentY * absZB + extentZ * absZC
 
-        // Bounding-sphere radius enclosing the transformed AABB. This is the LENGTH
-        // of the extent vector, not its largest component: max() under-estimates by
-        // up to sqrt(3), which shrinks the test sphere and culls geometry whose real
-        // bounds still cross a frustum plane. Thin geometry (walls, posts, lamp
-        // stems) is hit hardest, since one tiny extent drags the max down while the
-        // true radius stays large.
-        val radius = kotlin.math.sqrt(
-            worldExtentX * worldExtentX + worldExtentY * worldExtentY + worldExtentZ * worldExtentZ
-        )
+        // AABB against the six frustum planes, extracted straight from the VP matrix.
+        //
+        // This used to enclose the box in a sphere, scale its WORLD-space radius by a
+        // single scalar taken from one row of VP, and compare that against clip-space
+        // bounds. Those bounds are ±w, w varies with depth, and the projection's X and
+        // Y scales are not equal — so the comparison was only ever a guess, and it
+        // guessed badly for large objects near the edge of the screen, dropping them
+        // while most of the object was still in view (a market tent vanishing as the
+        // camera turned). The plane test below is exact for an AABB and conservative
+        // by construction: it rejects only when the whole box is outside ONE plane,
+        // so nothing visible can be culled.
+        //
+        // Planes come from the clip-coordinate expressions themselves; inside is
+        // a*x + b*y + c*z + d >= 0. Recomputed per call rather than cached — it is a
+        // couple of dozen adds, and a cache keyed on this matrix is exactly what went
+        // stale here before.
+        val vp0 = vp[0]; val vp1 = vp[1]; val vp2 = vp[2]; val vp3 = vp[3]
+        val vp4 = vp[4]; val vp5 = vp[5]; val vp6 = vp[6]; val vp7 = vp[7]
+        val vp8 = vp[8]; val vp9 = vp[9]; val vp10 = vp[10]; val vp11 = vp[11]
+        val vp12 = vp[12]; val vp13 = vp[13]; val vp14 = vp[14]; val vp15 = vp[15]
 
-        // Transform center to clip space
-        val clipX = vp[12] + vp[0] * worldCenterX + vp[4] * worldCenterY + vp[8] * worldCenterZ
-        val clipY = vp[13] + vp[1] * worldCenterX + vp[5] * worldCenterY + vp[9] * worldCenterZ
-        val clipZ = vp[14] + vp[2] * worldCenterX + vp[6] * worldCenterY + vp[10] * worldCenterZ
-        val clipW = vp[15] + vp[3] * worldCenterX + vp[7] * worldCenterY + vp[11] * worldCenterZ
-
-        // Estimate clip-space radius (conservative)
-        // Use the VP matrix's scale factor approximation
-        val vpScaleApprox = kotlin.math.sqrt(vp[0]*vp[0] + vp[1]*vp[1] + vp[2]*vp[2])
-        val clipRadius = radius * vpScaleApprox
-
-        // Frustum culling with bounding sphere
-        // A point is visible if -w <= x <= w, -w <= y <= w, 0 <= z <= w
-        // For a sphere, we add the radius to each bound
-        if (clipW <= 0.1f) {
-            // Behind the camera - check if sphere might cross near plane
-            return clipZ + clipRadius > 0.1f
-        }
-
-        // Check against all 6 frustum planes (with radius margin)
-        if (clipX + clipRadius < -clipW) return false  // Left
-        if (clipX - clipRadius > clipW) return false   // Right
-        if (clipY + clipRadius < -clipW) return false  // Bottom
-        if (clipY - clipRadius > clipW) return false   // Top
-        if (clipZ + clipRadius < 0f) return false       // Near
-        if (clipZ - clipRadius > clipW) return false   // Far
+        // left: clipX + clipW >= 0
+        if (aabbOutsidePlane(vp0 + vp3, vp4 + vp7, vp8 + vp11, vp12 + vp15,
+                worldCenterX, worldCenterY, worldCenterZ, worldExtentX, worldExtentY, worldExtentZ)) return false
+        // right: clipW - clipX >= 0
+        if (aabbOutsidePlane(vp3 - vp0, vp7 - vp4, vp11 - vp8, vp15 - vp12,
+                worldCenterX, worldCenterY, worldCenterZ, worldExtentX, worldExtentY, worldExtentZ)) return false
+        // bottom: clipY + clipW >= 0
+        if (aabbOutsidePlane(vp1 + vp3, vp5 + vp7, vp9 + vp11, vp13 + vp15,
+                worldCenterX, worldCenterY, worldCenterZ, worldExtentX, worldExtentY, worldExtentZ)) return false
+        // top: clipW - clipY >= 0
+        if (aabbOutsidePlane(vp3 - vp1, vp7 - vp5, vp11 - vp9, vp15 - vp13,
+                worldCenterX, worldCenterY, worldCenterZ, worldExtentX, worldExtentY, worldExtentZ)) return false
+        // near: clipZ >= 0. This projection's depth range is 0..w, not the GL -w..w —
+        // the same convention the previous test used. Taking the GL one "to be safe"
+        // stopped rejecting everything behind the camera and put thousands of extra
+        // models a frame through submission.
+        if (aabbOutsidePlane(vp2, vp6, vp10, vp14,
+                worldCenterX, worldCenterY, worldCenterZ, worldExtentX, worldExtentY, worldExtentZ)) return false
+        // far: clipW - clipZ >= 0
+        if (aabbOutsidePlane(vp3 - vp2, vp7 - vp6, vp11 - vp10, vp15 - vp14,
+                worldCenterX, worldCenterY, worldCenterZ, worldExtentX, worldExtentY, worldExtentZ)) return false
 
         return true
+    }
+
+    /**
+     * True when the axis-aligned box centred at ([cx], [cy], [cz]) with half-extents
+     * ([ex], [ey], [ez]) lies entirely on the negative side of plane (a, b, c, d).
+     *
+     * Standard "n-vertex" form: the box's most negative point along the plane normal
+     * sits at `dot(centre, n) - dot(extent, |n|)`, so the whole box is outside only
+     * when even that point is below the plane.
+     */
+    private fun aabbOutsidePlane(
+        a: Float, b: Float, c: Float, d: Float,
+        cx: Float, cy: Float, cz: Float,
+        ex: Float, ey: Float, ez: Float
+    ): Boolean {
+        val centreDistance = a * cx + b * cy + c * cz + d
+        val reach = kotlin.math.abs(a) * ex + kotlin.math.abs(b) * ey + kotlin.math.abs(c) * ez
+        return centreDistance + reach < 0f
     }
 
     /**
@@ -3866,6 +4770,52 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
      *         non-ingame game state, or a GroundGL built without the modern vertex
      *         snapshot (scene built while a different toolkit was active).
      */
+    /**
+     * Returns a GL buffer holding [ground]'s terrain snapshot, uploading it only when
+     * the snapshot has actually been rebuilt.
+     *
+     * Terrain geometry is static between ground rebuilds, but the ground pass draws
+     * once per material — so the previous unconditional glBufferData re-sent the whole
+     * snapshot ~35 times a frame. Buffers are held in a small access-ordered map and
+     * deleted on eviction, so a session that walks through many regions cannot
+     * accumulate them.
+     */
+    private fun residentGroundVbo(ground: GroundGL, data: java.nio.ByteBuffer): Int {
+        var id = ground.modernVboId
+        if (id == 0) {
+            id = org.lwjgl.opengl.GL33.glGenBuffers()
+            if (id == 0) return 0
+            ground.modernVboId = id
+            ground.modernVboRevision = -1
+            residentGroundVbos[ground] = id
+            while (residentGroundVbos.size > MAX_RESIDENT_GROUND_VBOS) {
+                val oldest = residentGroundVbos.entries.iterator().next()
+                residentGroundVbos.remove(oldest.key)
+                if (oldest.key !== ground) {
+                    org.lwjgl.opengl.GL33.glDeleteBuffers(oldest.value)
+                    oldest.key.modernVboId = 0
+                    oldest.key.modernVboRevision = -1
+                }
+            }
+        } else {
+            // Touch for LRU ordering.
+            residentGroundVbos[ground] = id
+        }
+        if (ground.modernVboRevision != ground.modernVertexRevision) {
+            data.position(0)
+            org.lwjgl.opengl.GL33.glBindBuffer(org.lwjgl.opengl.GL33.GL_ARRAY_BUFFER, id)
+            org.lwjgl.opengl.GL33.glBufferData(
+                org.lwjgl.opengl.GL33.GL_ARRAY_BUFFER, data, org.lwjgl.opengl.GL33.GL_STATIC_DRAW
+            )
+            ground.modernVboRevision = ground.modernVertexRevision
+        }
+        return id
+    }
+
+    /** Access-ordered so eviction drops the ground that has gone longest without a draw. */
+    private val residentGroundVbos = LinkedHashMap<GroundGL, Int>(32, 0.75f, true)
+    private val MAX_RESIDENT_GROUND_VBOS = 24
+
     fun renderGroundMaterialModern(
         material: GroundMaterialGL,
         ground: GroundGL,
@@ -3876,6 +4826,8 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         textureScale: Float,
         hasNormals: Boolean
     ): Boolean {
+        val groundT0 = System.nanoTime()
+        try {
         diagGroundCalls++
         val gr = groundRenderer ?: return false
         if (!canUseModernPipeline()) {
@@ -3902,9 +4854,11 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         var indexCount = 0
         val maxIndices = tileCount * 18  // Max 6 triangles (18 indices) per tile
         // Reuse a scratch buffer: this runs once per material per frame, and a fresh
-        // ByteArray per call showed up as avoidable per-frame allocation churn.
-        if (groundIndexScratch.size < maxIndices * 2) {
-            groundIndexScratch = ByteArray(maxIndices * 2)
+        // array per call showed up as avoidable per-frame allocation churn. Shorts,
+        // not byte pairs — the renderer bulk-copies them straight into the IBO
+        // staging buffer instead of reassembling every index from two bytes.
+        if (groundIndexScratch.size < maxIndices) {
+            groundIndexScratch = ShortArray(maxIndices)
         }
         val indexArray = groundIndexScratch
 
@@ -3914,29 +4868,24 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
             val tileMask = functionMask[tileIdx]
 
             if (tileMask != 0 && materialsByTriangle != null) {
-                var loopIdx = 0
-                var vertIdx = 0
-                while (vertIdx < materialsByTriangle.size) {
-                    if ((tileMask and (1 shl loopIdx++)) != 0) {
-                        // Add 3 indices for this triangle
-                        val idx0 = materialsByTriangle[vertIdx++].toInt() and 0xFFFF
-                        val idx1 = materialsByTriangle[vertIdx++].toInt() and 0xFFFF
-                        val idx2 = materialsByTriangle[vertIdx++].toInt() and 0xFFFF
-
-                        // Write as little-endian shorts
-                        indexArray[indexCount * 2] = (idx0 and 0xFF).toByte()
-                        indexArray[indexCount * 2 + 1] = ((idx0 shr 8) and 0xFF).toByte()
-                        indexCount++
-
-                        indexArray[indexCount * 2] = (idx1 and 0xFF).toByte()
-                        indexArray[indexCount * 2 + 1] = ((idx1 shr 8) and 0xFF).toByte()
-                        indexCount++
-
-                        indexArray[indexCount * 2] = (idx2 and 0xFF).toByte()
-                        indexArray[indexCount * 2 + 1] = ((idx2 shr 8) and 0xFF).toByte()
-                        indexCount++
-                    } else {
-                        vertIdx += 3
+                // The overwhelmingly common case is a tile whose triangles all belong
+                // to this material, which is a straight block copy.
+                val triangleCount = materialsByTriangle.size / 3
+                val allSelected = (1 shl triangleCount) - 1
+                if ((tileMask and allSelected) == allSelected) {
+                    System.arraycopy(materialsByTriangle, 0, indexArray, indexCount, materialsByTriangle.size)
+                    indexCount += materialsByTriangle.size
+                } else {
+                    var loopIdx = 0
+                    var vertIdx = 0
+                    while (vertIdx < materialsByTriangle.size) {
+                        if ((tileMask and (1 shl loopIdx++)) != 0) {
+                            indexArray[indexCount++] = materialsByTriangle[vertIdx++]
+                            indexArray[indexCount++] = materialsByTriangle[vertIdx++]
+                            indexArray[indexCount++] = materialsByTriangle[vertIdx++]
+                        } else {
+                            vertIdx += 3
+                        }
                     }
                 }
             }
@@ -3978,7 +4927,7 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         // material.combineMode and applies it via loadTextureCombineMode(combineMode)
         // (OpenGlToolkit.kt:1910-1915, 1935-1947). materialId -1 draws untextured with
         // the per-material vertex colors only.
-        val combineMode = if (System.getProperty("render.groundcolor")?.equals("true", true) == true) {
+        val combineMode = if (GROUND_COLOR_DEBUG) {
             99
         } else if (materialId >= 0) {
             materialProvider?.getMaterial(materialId)?.combineMode ?: 0
@@ -3995,22 +4944,23 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         if (verifyLiveGeometry) GeometryDiff.recordGround(materialId, combineMode, colorVboId, colorData != null)
 
         // Render through modern ground renderer (pure LWJGL path)
+        gpuTimer.begin(GPU_PASS_GROUND)
         gr.renderWithModernData(
             vertexData = modernData,
             stride = stride,
             texCoordSize = texCoordSize,
-            indexData = indexArray,
-            indexByteCount = indexCount * 2,
+            indexShorts = indexArray,
             indexCount = indexCount,
             textureHandle = textureHandle,
             textureScale = 1.0f / textureScale,
             hasNormals = hasNormals,
             viewProjection = vpMatrix,
-            isBigEndian = false,
             colorVboId = colorVboId,
             colorData = colorData,
-            combineMode = combineMode
+            combineMode = combineMode,
+            residentVertexVbo = residentGroundVbo(ground, modernData)
         )
+        gpuTimer.end(GPU_PASS_GROUND)
         // The VAO pass toggled generic attribute arrays; on most drivers attribute 0
         // aliases the fixed-function GL_VERTEX_ARRAY, so the legacy client-array cache
         // no longer matches real GL state. Drop it so the next legacy draw re-specifies
@@ -4022,5 +4972,9 @@ model.hslToRgb(hsl.toShort(), materialId.toShort(), modelAmbient, fa)
         currentArrayBuffer = null
         currentElementsBuffer = null
         return true
+        } finally {
+            phaseGroundNs += System.nanoTime() - groundT0
+            phaseGroundCalls++
+        }
     }
 }

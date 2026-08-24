@@ -12,6 +12,9 @@ import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED
 import com.jagex.game.runetek5.graphics.modern.util.GLWrapper.Constants.UNSIGNED_INT
 import com.jagex.game.runetek5.math.Matrix43
 import org.lwjgl.opengl.GL33.*
+import org.lwjgl.opengl.GL42.glDrawElementsInstancedBaseInstance
+import org.lwjgl.opengl.GL43.GL_DRAW_INDIRECT_BUFFER
+import org.lwjgl.opengl.GL43.glMultiDrawElementsIndirect
 import org.lwjgl.system.MemoryUtil
 import java.nio.ByteBuffer
 import java.nio.FloatBuffer
@@ -101,6 +104,20 @@ class InstancedModelBatcher {
         /** Maximum instances per instanced draw call */
         private const val MAX_INSTANCES_PER_MESH = 1024
 
+        /**
+         * Capacity of the frame-wide instance buffer.
+         *
+         * Every instance in the frame is packed into ONE buffer and uploaded ONCE.
+         * The previous design uploaded each mesh's matrices separately, immediately
+         * before that mesh's draws — ~800 glBufferSubData calls per frame into a
+         * buffer the preceding draws were still reading. That is a write-after-read
+         * hazard on every one of them, and the driver resolves it by serialising:
+         * the instanced pass measured 6.9ms of GPU time for a scene that shades in a
+         * small fraction of that. One upload plus base-instance draws removes the
+         * hazard entirely.
+         */
+        private const val MAX_INSTANCES_PER_FRAME = 65536
+
         /** Maximum unique meshes tracked per frame */
         private const val MAX_UNIQUE_MESHES = 256
 
@@ -145,6 +162,9 @@ class InstancedModelBatcher {
 
         /** Minimum instance count to use instancing (below this, falls through to regular batcher) */
         const val INSTANCING_THRESHOLD = 2
+
+        /** Ints per glMultiDrawElementsIndirect command: count, instanceCount, firstIndex, baseVertex, baseInstance. */
+        const val INDIRECT_INTS = 5
     }
 
     // GPU resources
@@ -226,6 +246,35 @@ class InstancedModelBatcher {
          */
         var lastUsedFrame: Long = 0
 
+        /**
+         * Index of this mesh's first instance in the frame-wide instance buffer,
+         * assigned during [endFrame]'s packing pass and passed to each draw as its
+         * base instance.
+         */
+        var instanceBase: Int = 0
+
+        /**
+         * False once this entry has been evicted from the store.
+         *
+         * Callers may hold a direct reference to an entry to skip the map lookup
+         * (see ModelCache.CachedModel.instanceEntry). Its key stays the same after
+         * eviction, so the key alone cannot tell them the reference is stale — and
+         * using a stale entry would draw whatever mesh now occupies that arena slot.
+         */
+        var resident: Boolean = true
+
+        /**
+         * Size of the arena block this entry OWNS, which is what it was first
+         * appended with. [vertexCount] and the material batches may describe less
+         * than this after a refit; the difference stays owned rather than becoming a
+         * hole, so the arena cannot fragment.
+         */
+        var vertexCapacity: Int = 0
+        var indexCapacity: Int = 0
+
+        /** First index this entry owns; its material batches are laid out from here. */
+        var indexBase: Int = 0
+
         /** Total indices this mesh owns — one contiguous run in the shared IBO. */
         fun indexSpan(): Int {
             var span = 0
@@ -263,6 +312,43 @@ class InstancedModelBatcher {
     // frames (per-frame re-copy + re-upload of all mesh geometry was the dominant CPU
     // cost). Only the per-entry instance matrices are per-frame state.
     private val meshEntries = LinkedHashMap<Long, MeshEntry>(MAX_UNIQUE_MESHES)
+
+    /**
+     * One draw the frame may issue: a mesh's index run for a single material.
+     *
+     * The index offset lives on the [MaterialBatchEntry] itself and is rewritten in
+     * place by compaction, so these references survive an arena compaction without
+     * needing to be rebuilt.
+     */
+    private class DrawRef(val mesh: MeshEntry, val batch: MaterialBatchEntry)
+
+    /**
+     * Draws grouped by material, maintained as meshes are added and evicted rather
+     * than rebuilt per frame.
+     *
+     * Drawing mesh-major meant the material — and therefore the bound texture and
+     * the combine-mode/alpha uniforms — changed on very nearly every one of ~1500
+     * draws. Grouping by material collapses that to one state change per material
+     * actually present in the scene.
+     */
+    private val drawsByMaterial = HashMap<Int, ArrayList<DrawRef>>()
+
+    /** Material ids in draw order (ascending, untextured first). Rebuilt when the set changes. */
+    private var materialOrder = IntArray(0)
+    private var materialOrderDirty = true
+
+    /**
+     * Entries that received at least one instance since [beginFrame].
+     *
+     * The resident store holds every mesh the session has seen — hundreds of them —
+     * but a frame only draws the handful the scene walk actually reached. Resetting
+     * and packing by walking the whole store made both ends of the frame scale with
+     * the store rather than with the scene.
+     */
+    private val activeEntries = ArrayList<MeshEntry>(MAX_UNIQUE_MESHES)
+
+    /** Heap staging for the frame's packed instance data; see [endFrame]. */
+    private var instancePackScratch = FloatArray(4096 * INSTANCE_FLOATS)
     private var totalVertexCount = 0
     private var totalIndexCount = 0
 
@@ -275,6 +361,153 @@ class InstancedModelBatcher {
      */
     private var uploadedVertexCount = 0
     private var uploadedIndexCount = 0
+
+    /**
+     * Vertex ranges already inside [uploadedVertexCount] whose contents changed and
+     * must be re-sent, as (firstVertex, vertexCount) pairs.
+     *
+     * Animated models live in this store too: their geometry is rebuilt only when the
+     * pose actually changes (at the 50Hz logic rate, not the render rate), and the
+     * rebuild overwrites the mesh in place rather than appending a new one. Without
+     * in-place update every pose would append a single-use mesh and thrash the LRU;
+     * without the dirty list the GPU would keep drawing the previous pose.
+     */
+    private var dirtyRanges = IntArray(256)
+    private var dirtyRangeCount = 0
+
+    /** Times a resident entry was found not to describe the incoming geometry. */
+    private var mismatchReports = 0
+
+    /**
+     * Whether [entry]'s resident geometry still has the same shape as [cachedModel].
+     *
+     * Vertex count alone is not enough: an in-place refresh reuses the stored index
+     * runs, so the material grouping has to match too or the refreshed vertices would
+     * be drawn under the wrong material.
+     */
+    private fun entryMatches(entry: MeshEntry, cachedModel: ModelCache.CachedModel): Boolean {
+        if (entry.vertexCount != cachedModel.vertexCount) return false
+        val stored = entry.materialBatches
+        val incoming = cachedModel.materialBatches
+        if (stored.size != incoming.size) return false
+        for (i in stored.indices) {
+            if (stored[i].materialId != incoming[i].materialId) return false
+            if (stored[i].indexCount != incoming[i].indexCount) return false
+        }
+        return true
+    }
+
+    /**
+     * Rewrites [entry] to describe [cachedModel] inside the arena block it already
+     * owns, or returns false if the new geometry does not fit.
+     *
+     * Animated models are keyed by the ModelGL instance, and those instances come
+     * from a pool of preallocated copy slots — so a slot that held one entity's pose
+     * is later reused for a completely different model. Dropping and re-appending on
+     * every such reuse leaks the old block until the next whole-arena compaction, and
+     * the store climbed toward capacity in a couple of minutes of play. Refitting
+     * keeps the arena bounded by the number of live slots instead.
+     */
+    private fun refitEntry(entry: MeshEntry, cachedModel: ModelCache.CachedModel): Boolean {
+        val newVertexCount = cachedModel.vertexCount
+        var newIndexCount = 0
+        for (b in cachedModel.materialBatches) newIndexCount += b.indexCount
+        if (newVertexCount > entry.vertexCapacity || newIndexCount > entry.indexCapacity) return false
+        // Never rewrite geometry another submission in THIS frame is already drawing
+        // from — that submission recorded its instances against the old contents.
+        if (entry.lastUsedFrame == frameCounter) return false
+
+        copyVerticesInto(cachedModel, entry.vertexOffset, newVertexCount)
+        markVertexRangeDirty(entry.vertexOffset, newVertexCount)
+
+        // Rebuild the material batches over the entry's own index range.
+        val stale = entry
+        val iterator = drawsByMaterial.entries.iterator()
+        while (iterator.hasNext()) {
+            val bucket = iterator.next()
+            bucket.value.removeAll { it.mesh === stale }
+            if (bucket.value.isEmpty()) iterator.remove()
+        }
+        entry.materialBatches.clear()
+
+        val ib = indexBuffer!!
+        val baseVertex = entry.vertexOffset
+        var writeIndex = entry.indexBase
+        val firstIndex = writeIndex
+        for (batch in cachedModel.materialBatches) {
+            val matEntry = MaterialBatchEntry(
+                materialId = batch.materialId,
+                indexOffset = writeIndex,
+                indexCount = batch.indexCount
+            )
+            for (i in 0 until batch.indexCount) {
+                ib.put(writeIndex + i, baseVertex + batch.indices[i])
+            }
+            writeIndex += batch.indexCount
+            entry.materialBatches.add(matEntry)
+            drawsByMaterial.getOrPut(matEntry.materialId) { ArrayList() }.add(DrawRef(entry, matEntry))
+        }
+        materialOrderDirty = true
+        markIndexRangeDirty(firstIndex, writeIndex - firstIndex)
+
+        entry.vertexCount = newVertexCount
+        cachedModel.instanceEntry = entry
+        refits++
+        return true
+    }
+
+    /** Entries refitted in place since the last stats reset. */
+    private var refits = 0
+
+
+    /** Index ranges already uploaded whose contents changed; see [dirtyRanges]. */
+    private var dirtyIndexRanges = IntArray(128)
+    private var dirtyIndexRangeCount = 0
+
+    private fun markIndexRangeDirty(firstIndex: Int, count: Int) {
+        if (count <= 0 || firstIndex >= uploadedIndexCount) return
+        if (dirtyIndexRangeCount * 2 + 2 > dirtyIndexRanges.size) {
+            dirtyIndexRanges = dirtyIndexRanges.copyOf(dirtyIndexRanges.size * 2)
+        }
+        dirtyIndexRanges[dirtyIndexRangeCount * 2] = firstIndex
+        dirtyIndexRanges[dirtyIndexRangeCount * 2 + 1] = count
+        dirtyIndexRangeCount++
+    }
+
+    /**
+     * Copies [cachedModel]'s vertex block into the staging buffer at [firstVertex].
+     *
+     * Model-owned geometry (animated poses) keeps its authoritative copy as raw
+     * words, so it is transferred straight from there — no intermediate ByteBuffer,
+     * and therefore one copy per changed pose instead of two.
+     */
+    private fun copyVerticesInto(cachedModel: ModelCache.CachedModel, firstVertex: Int, vertexCount: Int) {
+        val vb = vertexBuffer!!
+        val words = cachedModel.vertexWords
+        if (words != null) {
+            vb.clear()
+            vb.position(firstVertex * VERTEX_STRIDE)
+            vb.asIntBuffer().put(words, 0, vertexCount * (VERTEX_STRIDE / 4))
+            vb.clear()
+        } else {
+            val srcData = cachedModel.vertexData
+            srcData.position(0)
+            srcData.limit(vertexCount * VERTEX_STRIDE)
+            vb.position(firstVertex * VERTEX_STRIDE)
+            vb.put(srcData)
+            srcData.clear()
+        }
+    }
+
+    private fun markVertexRangeDirty(firstVertex: Int, vertexCount: Int) {
+        if (firstVertex >= uploadedVertexCount) return  // still inside the un-sent tail
+        if (dirtyRangeCount * 2 + 2 > dirtyRanges.size) {
+            dirtyRanges = dirtyRanges.copyOf(dirtyRanges.size * 2)
+        }
+        dirtyRanges[dirtyRangeCount * 2] = firstVertex
+        dirtyRanges[dirtyRangeCount * 2 + 1] = vertexCount
+        dirtyRangeCount++
+    }
 
     /**
      * Presented-frame counter (bumped by [resetFrameStats]). Used only for LRU
@@ -290,6 +523,42 @@ class InstancedModelBatcher {
 
     /** Times a mesh could not fit even after eviction (live set alone oversubscribed). */
     private var capacityFallbacks = 0
+
+    /**
+     * Whether `glDrawElementsInstancedBaseInstance` (GL 4.2 / ARB_base_instance) is
+     * available. When it is, one packed instance buffer serves the whole frame with
+     * no attribute re-pointing at all; the 3.3 fallback re-points instead.
+     */
+    private var baseInstanceSupported = false
+
+    /**
+     * Whether `glMultiDrawElementsIndirect` (GL 4.3 / ARB_multi_draw_indirect) is
+     * available, letting a whole material's draws go out as one GL call.
+     */
+    private var indirectSupported = false
+    private var indirectVbo = 0
+    private var indirectBuffer: IntBuffer? = null
+
+    /** Staging for the indirect command list; five ints per command. */
+    private var indirectScratch = IntArray(MAX_UNIQUE_MESHES * 8 * INDIRECT_INTS)
+
+    /** Per-material slice of the frame's indirect command list. */
+    private val indirectFirst = HashMap<Int, Int>()
+    private val indirectCount = HashMap<Int, Int>()
+
+    /**
+     * Points the per-instance attributes at instance [base] within the packed buffer.
+     * Only used on the no-base-instance fallback path.
+     */
+    private fun repointInstanceAttributes(base: Int) {
+        val byteOffset = base.toLong() * INSTANCE_STRIDE
+        instanceVbo!!.bind()
+        GLWrapper.vertexAttribPointer(5, 4, FLOAT, false, INSTANCE_STRIDE, byteOffset)
+        GLWrapper.vertexAttribPointer(6, 4, FLOAT, false, INSTANCE_STRIDE, byteOffset + 16)
+        GLWrapper.vertexAttribPointer(7, 4, FLOAT, false, INSTANCE_STRIDE, byteOffset + 32)
+        GLWrapper.vertexAttribPointer(8, 4, FLOAT, false, INSTANCE_STRIDE, byteOffset + 48)
+        GLWrapper.vertexAttribPointer(9, 4, FLOAT, false, INSTANCE_STRIDE, byteOffset + 64)
+    }
 
     // State
     private var isInitialized = false
@@ -347,6 +616,16 @@ class InstancedModelBatcher {
         ibo = IndexBuffer(IndexBuffer.BufferUsage.STREAM, IndexBuffer.IndexType.UNSIGNED_INT)
         instanceVbo = VertexBuffer(VertexBuffer.BufferUsage.STREAM)
 
+        val caps = org.lwjgl.opengl.GL.getCapabilities()
+        baseInstanceSupported = caps.OpenGL42 || caps.GL_ARB_base_instance
+        // Indirect draws carry their own baseInstance, so they need that support too.
+        indirectSupported = baseInstanceSupported && (caps.OpenGL43 || caps.GL_ARB_multi_draw_indirect)
+        if (indirectSupported) {
+            indirectVbo = glGenBuffers()
+            indirectBuffer = MemoryUtil.memAllocInt(indirectScratch.size)
+        }
+        println("[InstancedModelBatcher] baseInstance=$baseInstanceSupported multiDrawIndirect=$indirectSupported")
+
         // Setup VAO with vertex format + instanced attributes
         setupVAO()
 
@@ -358,7 +637,7 @@ class InstancedModelBatcher {
         // Allocate CPU staging buffers
         vertexBuffer = MemoryUtil.memAlloc(MAX_TOTAL_VERTICES * VERTEX_STRIDE)
         indexBuffer = MemoryUtil.memAllocInt(MAX_TOTAL_INDICES)
-        instanceBuffer = MemoryUtil.memAllocFloat(MAX_INSTANCES_PER_MESH * INSTANCE_FLOATS)
+        instanceBuffer = MemoryUtil.memAllocFloat(MAX_INSTANCES_PER_FRAME * INSTANCE_FLOATS)
 
         isInitialized = true
     }
@@ -643,10 +922,10 @@ class InstancedModelBatcher {
         check(isInitialized) { "InstancedModelBatcher not initialized" }
         check(!isFrameActive) { "Frame already active" }
 
-        // Geometry persists across frames — only reset the per-BATCH instance lists.
-        for (entry in meshEntries.values) {
-            entry.resetInstances()
-        }
+        // Geometry persists across frames — only reset the per-BATCH instance lists,
+        // and only for the entries that actually collected instances.
+        for (i in activeEntries.indices) activeEntries[i].resetInstances()
+        activeEntries.clear()
         instancesThisBatch = 0
 
         // NOTE: the presented-frame stats (instancedDrawCalls/Triangles/Models/...)
@@ -668,6 +947,7 @@ class InstancedModelBatcher {
         instancedMeshesReused = 0
         meshesEvicted = 0
         capacityFallbacks = 0
+        refits = 0
         timeGeomUpload = 0L
         timeInstanceUpload = 0L
         timeDraw = 0L
@@ -692,20 +972,76 @@ class InstancedModelBatcher {
         cachedModel: ModelCache.CachedModel,
         modelId: Long,
         modelMatrix: Matrix43,
-        lightIdx: FloatArray? = null
+        lightIdx: FloatArray? = null,
+        /**
+         * The caller rebuilt [cachedModel]'s vertex data since the last submission of
+         * this [modelId] (an animated model that changed pose). The resident copy is
+         * overwritten in place and queued for re-upload.
+         */
+        geometryDirty: Boolean = false
     ): Boolean {
         if (!isFrameActive) return false
 
-        var entry = meshEntries[modelId]
-
-        if (entry != null && entry.vertexCount != cachedModel.vertexCount) {
-            // COLLISION GUARD: the persistent store must never serve another mesh's
-            // geometry. If the incoming cached model disagrees with the stored entry
-            // (hash collision or a stale entry after external invalidation), drop
-            // just that entry and re-append below — no whole-store rebuild.
-            println("[InstancedModelBatcher] HASH COLLISION/STALE ENTRY for key=$modelId (stored=${entry.vertexCount}v incoming=${cachedModel.vertexCount}v) — re-appending this mesh")
-            meshEntries.remove(modelId)
+        var entry = cachedModel.instanceEntry as? MeshEntry
+        var shapeKnownGood = false
+        if (entry != null && (!entry.resident || entry.modelId != modelId)) {
+            cachedModel.instanceEntry = null
             entry = null
+        } else if (entry != null && !geometryDirty) {
+            // The memo was set when this exact entry was written from this exact
+            // cached model, and a cached model's shape only changes when the caller
+            // rebuilds it — which is what geometryDirty reports. So the structural
+            // comparison below can be skipped entirely on the common path; it walks
+            // two lists of material batches and, at ~1800 submissions a frame, showed
+            // up as ~4% of the render thread.
+            shapeKnownGood = true
+        }
+        if (entry == null) {
+            // Keyed lookup only on the first submission of this geometry. The map is a
+            // LinkedHashMap with boxed Long keys, and at ~1700 model draws a frame the
+            // boxing and bucket walk were measurable on their own.
+            entry = meshEntries[modelId]
+            if (entry != null) cachedModel.instanceEntry = entry
+        }
+
+        if (!shapeKnownGood && entry != null && !entryMatches(entry, cachedModel) && refitEntry(entry, cachedModel)) {
+            // Refit succeeded: the entry now describes the incoming geometry within
+            // the arena block it already owns, so nothing was dropped or appended.
+            entry.lastUsedFrame = frameCounter
+        } else if (!shapeKnownGood && entry != null && !entryMatches(entry, cachedModel)) {
+            // The persistent store must never serve another mesh's geometry, and an
+            // in-place refresh must never land on a differently-shaped mesh. Either
+            // means the resident entry no longer describes the incoming geometry
+            // (hash collision, external invalidation, or an animated model whose face
+            // set or material grouping changed) — drop that entry and re-append it
+            // below. No whole-store rebuild.
+            if (mismatchReports < 20) {
+                mismatchReports++
+                println("[InstancedModelBatcher] resident entry no longer matches key=$modelId " +
+                    "(stored=${entry.vertexCount}v/${entry.materialBatches.size}batches " +
+                    "incoming=${cachedModel.vertexCount}v/${cachedModel.materialBatches.size}batches) — re-appending")
+            }
+            cachedModel.instanceEntry = null
+            meshEntries.remove(modelId)
+            val stale = entry
+            val iterator = drawsByMaterial.entries.iterator()
+            while (iterator.hasNext()) {
+                val bucket = iterator.next()
+                bucket.value.removeAll { it.mesh === stale }
+                if (bucket.value.isEmpty()) iterator.remove()
+            }
+            materialOrderDirty = true
+            activeEntries.removeAll { it === stale }
+            stale.resident = false
+            entry = null
+        }
+
+        if (entry != null && geometryDirty) {
+            // Same mesh, new contents. Overwrite the resident vertices in place; the
+            // index run is unchanged because a pose change rewrites positions,
+            // normals and colours but never the face set or its material grouping.
+            copyVerticesInto(cachedModel, entry.vertexOffset, entry.vertexCount)
+            markVertexRangeDirty(entry.vertexOffset, entry.vertexCount)
         }
 
         if (entry == null) {
@@ -739,17 +1075,14 @@ class InstancedModelBatcher {
                 vertexOffset = totalVertexCount,
                 vertexCount = vertexCount
             )
+            entry.vertexCapacity = vertexCount
+            entry.indexCapacity = meshIndexCount
+            entry.indexBase = totalIndexCount
 
             // Bulk copy vertex data: staging stride is the cache's native 40-byte
             // format (the 4-byte modelIndex slot is padding the VAO ignores), so a
-            // single ByteBuffer.put replaces the old per-byte strip-copy loop.
-            val vb = vertexBuffer!!
-            val srcData = cachedModel.vertexData
-            srcData.position(0)
-            srcData.limit(vertexCount * VERTEX_STRIDE)
-            vb.position(entry.vertexOffset * VERTEX_STRIDE)
-            vb.put(srcData)
-            srcData.clear()
+            // single transfer replaces the old per-byte strip-copy loop.
+            copyVerticesInto(cachedModel, entry.vertexOffset, vertexCount)
 
             // Record material batches with index offsets
             for (batch in cachedModel.materialBatches) {
@@ -772,6 +1105,11 @@ class InstancedModelBatcher {
 
             totalVertexCount += vertexCount
             meshEntries[modelId] = entry
+            cachedModel.instanceEntry = entry
+            for (matEntry in entry.materialBatches) {
+                drawsByMaterial.getOrPut(matEntry.materialId) { ArrayList() }.add(DrawRef(entry, matEntry))
+            }
+            materialOrderDirty = true
         } else {
             instancedMeshesReused++
         }
@@ -782,6 +1120,8 @@ class InstancedModelBatcher {
 
         // Check instance limit
         if (entry.instanceCount >= MAX_INSTANCES_PER_MESH) return false
+
+        if (entry.instanceCount == 0) activeEntries.add(entry)
 
         // Record instance matrix in place (convert Matrix43 to column-major mat4);
         // no per-instance allocation.
@@ -864,8 +1204,8 @@ class InstancedModelBatcher {
                 totalIndexCount - freedIndices <= targetIndices
             ) break
             evicted.add(candidate.modelId)
-            freedVertices += candidate.vertexCount
-            freedIndices += candidate.indexSpan()
+            freedVertices += candidate.vertexCapacity
+            freedIndices += candidate.indexCapacity
         }
 
         // Cold entries alone may not reach the target; succeeding only requires
@@ -877,8 +1217,19 @@ class InstancedModelBatcher {
         }
 
         if (evicted.isNotEmpty()) {
+            for (candidate in candidates) {
+                if (evicted.contains(candidate.modelId)) candidate.resident = false
+            }
             meshEntries.keys.removeAll(evicted)
             meshesEvicted += evicted.size
+            val iterator = drawsByMaterial.entries.iterator()
+            while (iterator.hasNext()) {
+                val bucket = iterator.next()
+                bucket.value.removeAll { evicted.contains(it.mesh.modelId) }
+                if (bucket.value.isEmpty()) iterator.remove()
+            }
+            materialOrderDirty = true
+            activeEntries.removeAll { evicted.contains(it.modelId) }
             compactGeometryStore()
         }
         return true
@@ -912,6 +1263,7 @@ class InstancedModelBatcher {
                     entry.vertexCount * VERTEX_STRIDE
                 )
             }
+            entry.indexBase = writeIndex
             for (batch in entry.materialBatches) {
                 val src = batch.indexOffset
                 for (i in 0 until batch.indexCount) {
@@ -920,15 +1272,22 @@ class InstancedModelBatcher {
                 batch.indexOffset = writeIndex
                 writeIndex += batch.indexCount
             }
+            // Compaction packs entries tight, so the unused tail of a refitted block
+            // is released here; capacity becomes exactly what is now in use.
+            entry.indexCapacity = writeIndex - entry.indexBase
             entry.vertexOffset = writeVertex
+            entry.vertexCapacity = entry.vertexCount
             writeVertex += entry.vertexCount
         }
 
         totalVertexCount = writeVertex
         totalIndexCount = writeIndex
-        // Every surviving mesh moved, so the GPU copy is stale end to end.
+        // Every surviving mesh moved, so the GPU copy is stale end to end — which
+        // also makes every queued dirty range meaningless.
         uploadedVertexCount = 0
         uploadedIndexCount = 0
+        dirtyRangeCount = 0
+        dirtyIndexRangeCount = 0
     }
 
     /**
@@ -984,7 +1343,7 @@ class InstancedModelBatcher {
         // Render ALL meshes, whether they have 1 or many instances.
         // glDrawElementsInstanced with instanceCount=1 is equivalent to a regular draw.
         // This is simpler than routing single-instance meshes back to the regular batcher.
-        val allEntries = meshEntries.values
+        val allEntries = activeEntries
         if (allEntries.isEmpty() || vpMatrix == null) {
             isFrameActive = false
             return
@@ -1018,6 +1377,38 @@ class InstancedModelBatcher {
                 ibo!!.uploadSubRange(uploadedIndexCount, ibView)
                 uploadedIndexCount = totalIndexCount
             }
+            timeGeomUpload += System.nanoTime() - t0
+        }
+
+        // Re-send meshes whose resident contents were overwritten in place.
+        if (dirtyRangeCount > 0) {
+            val t0 = System.nanoTime()
+            val vbView = vertexBuffer!!.duplicate()
+            for (r in 0 until dirtyRangeCount) {
+                val first = dirtyRanges[r * 2]
+                val count = dirtyRanges[r * 2 + 1]
+                if (first >= uploadedVertexCount) continue
+                vbView.clear()
+                vbView.position(first * VERTEX_STRIDE)
+                vbView.limit((first + count) * VERTEX_STRIDE)
+                vbo!!.uploadSubRange(first.toLong() * VERTEX_STRIDE, vbView)
+            }
+            dirtyRangeCount = 0
+            timeGeomUpload += System.nanoTime() - t0
+        }
+        if (dirtyIndexRangeCount > 0) {
+            val t0 = System.nanoTime()
+            val ibView = indexBuffer!!.duplicate()
+            for (r in 0 until dirtyIndexRangeCount) {
+                val first = dirtyIndexRanges[r * 2]
+                val count = dirtyIndexRanges[r * 2 + 1]
+                if (first >= uploadedIndexCount) continue
+                ibView.clear()
+                ibView.position(first)
+                ibView.limit(first + count)
+                ibo!!.uploadSubRange(first, ibView)
+            }
+            dirtyIndexRangeCount = 0
             timeGeomUpload += System.nanoTime() - t0
         }
 
@@ -1076,67 +1467,165 @@ class InstancedModelBatcher {
         vao!!.bind()
         ibo!!.bind()
 
-        var lastTextureHandle = -1
-        // -1 = unknown, forces the first material batch to establish the state.
-        var lastBlend = -1
-
-        // Render each mesh (instanced or not)
+        // ---- Pack every instance in the frame into ONE buffer, upload ONCE ----
+        //
+        // See MAX_INSTANCES_PER_FRAME: uploading per mesh put a write-after-read
+        // hazard between every draw and the next mesh's matrices, which the driver
+        // resolved by serialising the whole pass.
+        val t1 = System.nanoTime()
+        // Gather on the heap first: array-to-array copies are plain memmoves, whereas
+        // ~1800 small puts straight into the direct buffer each paid the NIO bounds
+        // and pointer checks around Unsafe.copyMemory.
+        var scratch = instancePackScratch
+        var packedInstances = 0
         for (entry in allEntries) {
             val count = entry.instanceCount
             if (count == 0) continue
-
-            // Upload instance matrices for this mesh (bulk copy from the flat array)
-            val t1 = System.nanoTime()
+            if (packedInstances + count > MAX_INSTANCES_PER_FRAME) {
+                // Nothing sensible to do but drop the overflow; surfaced through the
+                // instance counter rather than a per-frame println.
+                entry.instanceCount = 0
+                continue
+            }
+            val floats = count * INSTANCE_FLOATS
+            val at = packedInstances * INSTANCE_FLOATS
+            if (at + floats > scratch.size) {
+                scratch = scratch.copyOf(maxOf(scratch.size * 2, at + floats))
+                instancePackScratch = scratch
+            }
+            entry.instanceBase = packedInstances
+            System.arraycopy(entry.instanceData, 0, scratch, at, floats)
+            packedInstances += count
+        }
+        if (packedInstances > 0) {
             val instBuf = instanceBuffer!!
             instBuf.clear()
-            instBuf.put(entry.instanceData, 0, count * INSTANCE_FLOATS)
+            instBuf.put(scratch, 0, packedInstances * INSTANCE_FLOATS)
             instBuf.flip()
             instanceVbo!!.upload(instBuf)
-            timeInstanceUpload += System.nanoTime() - t1
+        }
+        timeInstanceUpload += System.nanoTime() - t1
 
-            // Render each material batch with instancing
-            for (matBatch in entry.materialBatches) {
-                // -1 = untextured; 0..N = textured (material 0 is valid — see
-                // buildModelCache). Test `>= 0`, not `> 0`.
-                val texId = matBatch.materialId
-                val textureHandle = if (texId >= 0) textureCache(texId) else 0
+        if (packedInstances == 0) {
+            vao!!.unbind()
+            sh.unbind()
+            isFrameActive = false
+            return
+        }
 
-                if (textureHandle != lastTextureHandle) {
-                    if (textureHandle > 0) {
-                        GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
-                        GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
-                        sh.setUniform(uTextureEnabledLocation, 1)
-                        // Legacy per-material combine mode (REPLACE ignores vColor).
-                        sh.setUniform(uCombineModeLocation, if (texId >= 0) combineModeOf(texId) else 0)
-                        sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
-                    } else {
-                        sh.setUniform(uTextureEnabledLocation, 0)
-                    }
-                    lastTextureHandle = textureHandle
+        if (materialOrderDirty) {
+            // Ascending material id: -1 (untextured) first, matching the order the
+            // per-mesh loop used to produce.
+            val ids = drawsByMaterial.keys.toIntArray()
+            java.util.Arrays.sort(ids)
+            materialOrder = ids
+            materialOrderDirty = false
+        }
+
+        val t2 = System.nanoTime()
+
+        // Build EVERY material's indirect commands into one buffer and upload it once.
+        // Uploading per material re-orphaned the indirect buffer between draws that
+        // were still reading it — the same write-after-read hazard that made the
+        // per-mesh instance uploads serialise the whole pass.
+        var indirectCommandCount = 0
+        if (indirectSupported) {
+            val buf = indirectScratch
+            var cursor = 0
+            for (texId in materialOrder) {
+                val refs = drawsByMaterial[texId] ?: continue
+                val first = indirectCommandCount
+                for (r in refs) {
+                    val mesh = r.mesh
+                    val count = mesh.instanceCount
+                    if (count == 0) continue
+                    val matBatch = r.batch
+                    if (cursor + INDIRECT_INTS > buf.size) break
+                    buf[cursor] = matBatch.indexCount        // count
+                    buf[cursor + 1] = count                  // instanceCount
+                    buf[cursor + 2] = matBatch.indexOffset   // firstIndex
+                    buf[cursor + 3] = 0                      // baseVertex (indices are absolute)
+                    buf[cursor + 4] = mesh.instanceBase      // baseInstance
+                    cursor += INDIRECT_INTS
+                    indirectCommandCount++
+                    instancedTriangles += (matBatch.indexCount / 3) * count
                 }
-
-                // Per-material blend state (legacy setBlendMode parity). Opaque
-                // materials MUST draw with GL_BLEND off, or their alpha-carrying
-                // faces go translucent and depth-reject what is behind them.
-                // Blend state is uniform across models (legacy setBlendMode(1) in
-                // setupMatrixRendering), established once per pass in openSceneBatch.
-                // No per-material toggling: legacy does not do it for model faces,
-                // and doing it here made translucent geometry render solid.
-
-                val t2 = System.nanoTime()
-                GLWrapper.drawElementsInstanced(
-                    TRIANGLES,
-                    matBatch.indexCount,
-                    UNSIGNED_INT,
-                    matBatch.indexOffset.toLong() * 4,
-                    count
-                )
-                timeDraw += System.nanoTime() - t2
-
-                instancedDrawCalls++
-                instancedTriangles += (matBatch.indexCount / 3) * count
+                indirectFirst[texId] = first
+                indirectCount[texId] = indirectCommandCount - first
+            }
+            if (indirectCommandCount > 0) {
+                val ib = indirectBuffer!!
+                ib.clear()
+                ib.put(buf, 0, cursor)
+                ib.flip()
+                glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectVbo)
+                glBufferData(GL_DRAW_INDIRECT_BUFFER, ib, GL_STREAM_DRAW)
             }
         }
+
+        for (texId in materialOrder) {
+            val refs = drawsByMaterial[texId] ?: continue
+
+            // One texture/uniform setup per material, not per draw.
+            val textureHandle = if (texId >= 0) textureCache(texId) else 0
+            if (textureHandle > 0) {
+                GLWrapper.activeTexture(GLWrapper.Constants.TEXTURE0)
+                GLWrapper.bindTexture(TEXTURE_2D, textureHandle)
+                sh.setUniform(uTextureEnabledLocation, 1)
+                // Legacy per-material combine mode (REPLACE ignores vColor).
+                sh.setUniform(uCombineModeLocation, combineModeOf(texId))
+                sh.setUniform(uTexAlphaLocation, if (TEX_ALPHA && texHasAlpha(texId)) 1 else 0)
+            } else {
+                sh.setUniform(uTextureEnabledLocation, 0)
+            }
+
+            // Per-material blend state is deliberately NOT toggled here: legacy does
+            // not do it for model faces (setBlendMode(1) once in setupMatrixRendering),
+            // and doing it made translucent geometry render solid. The pass-wide state
+            // is established in openSceneBatch.
+            if (indirectSupported) {
+                // One GL call for the whole material, reading the commands already
+                // resident in the indirect buffer.
+                val commands = indirectCount[texId] ?: 0
+                if (commands > 0) {
+                    val byteOffset = (indirectFirst[texId] ?: 0).toLong() * INDIRECT_INTS * 4
+                    glMultiDrawElementsIndirect(TRIANGLES, UNSIGNED_INT, byteOffset, commands, 0)
+                    instancedDrawCalls++
+                }
+            } else {
+                for (r in refs) {
+                    val mesh = r.mesh
+                    val count = mesh.instanceCount
+                    if (count == 0) continue
+                    val matBatch = r.batch
+                    if (baseInstanceSupported) {
+                        glDrawElementsInstancedBaseInstance(
+                            TRIANGLES,
+                            matBatch.indexCount,
+                            UNSIGNED_INT,
+                            matBatch.indexOffset.toLong() * 4,
+                            count,
+                            mesh.instanceBase
+                        )
+                    } else {
+                        // GL 3.3 fallback: re-point the instance attributes at this mesh's
+                        // slice. Five cheap pointer updates, still no data transfer and
+                        // still no hazard against the buffer.
+                        repointInstanceAttributes(mesh.instanceBase)
+                        GLWrapper.drawElementsInstanced(
+                            TRIANGLES,
+                            matBatch.indexCount,
+                            UNSIGNED_INT,
+                            matBatch.indexOffset.toLong() * 4,
+                            count
+                        )
+                    }
+                    instancedDrawCalls++
+                    instancedTriangles += (matBatch.indexCount / 3) * count
+                }
+            }
+        }
+        timeDraw += System.nanoTime() - t2
 
         vao!!.unbind()
         sh.unbind()
@@ -1161,6 +1650,7 @@ class InstancedModelBatcher {
         meshesEvicted = meshesEvicted,
         capacityFallbacks = capacityFallbacks,
         storeVertices = totalVertexCount,
+        refits = refits,
         geomUploadMs = timeGeomUpload / 1_000_000f,
         instanceUploadMs = timeInstanceUpload / 1_000_000f,
         drawMs = timeDraw / 1_000_000f
@@ -1172,6 +1662,12 @@ class InstancedModelBatcher {
         vbo?.destroy()
         ibo?.destroy()
         instanceVbo?.destroy()
+        if (indirectVbo != 0) {
+            glDeleteBuffers(indirectVbo)
+            indirectVbo = 0
+        }
+        indirectBuffer?.let { MemoryUtil.memFree(it) }
+        indirectBuffer = null
 
         vertexBuffer?.let { MemoryUtil.memFree(it) }
         indexBuffer?.let { MemoryUtil.memFree(it) }
@@ -1202,6 +1698,8 @@ class InstancedModelBatcher {
         val capacityFallbacks: Int = 0,
         /** Vertices currently resident in the persistent geometry store. */
         val storeVertices: Int = 0,
+        /** Entries rewritten inside the arena block they already owned. */
+        val refits: Int = 0,
         val geomUploadMs: Float = 0f,
         val instanceUploadMs: Float = 0f,
         val drawMs: Float = 0f

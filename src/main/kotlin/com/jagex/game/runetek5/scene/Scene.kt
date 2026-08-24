@@ -709,6 +709,7 @@ class Scene(
      * to prevent the floor rendering over an object
      */
     fun separateFromFloor(graphNode: SceneGraphEntity) {
+        walkNodes++
         val absolutePosition = graphNode.getAbsolutePosition().coords
         this.activeToolkit.calculateProjection(absolutePosition.x.toInt().toFloat(), (absolutePosition.y.toInt() + (graphNode.getMinY() shr 1)).toFloat(), absolutePosition.z.toInt().toFloat(), this.renderedGraphNodePosition)
         graphNode.floorDepth = this.renderedGraphNodePosition[2].toInt()
@@ -1005,59 +1006,97 @@ class Scene(
         this.depthObjectCount = 0
         this.layeredObjectCount = 0
         this.tileDrawCycle++
+        val walkT0 = System.nanoTime()
+        // Visibility BEFORE projection.
+        //
+        // hideGameobject rejects a node whose tiles all fall outside the visible
+        // window, and does so without side effects — particleCycle only runs for
+        // nodes that ARE in range, exactly as before. Roughly three quarters of the
+        // scene graph is rejected that way on a typical frame, and every one of them
+        // used to pay a full projection first. The only thing that changes is that a
+        // rejected node's floorDepth is left at its previous value, which nothing
+        // reads: it is the depth sort key for accepted nodes, and the interaction
+        // cache only ever holds nodes that were drawn.
         var graphNode = this.renderObjects3d[graphNodeIndex]
         while (graphNode != null) {
-            separateFromFloor(graphNode)
-            if (graphNode.floorDepth != -1 && !hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
-                this.depthRenderedEntities[++this.depthObjectCount - 1] = graphNode
+            if (!hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
+                separateFromFloor(graphNode)
+                if (graphNode.floorDepth != -1) {
+                    this.depthRenderedEntities[++this.depthObjectCount - 1] = graphNode
+                }
             }
             graphNode = graphNode.child
         }
         graphNode = this.renderObjects2d[graphNodeIndex]
         while (graphNode != null) {
-            separateFromFloor(graphNode)
-            if (graphNode.floorDepth != -1 && !hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
-                this.priorityRenderedEntities[++this.layeredObjectCount - 1] = graphNode
+            if (!hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
+                separateFromFloor(graphNode)
+                if (graphNode.floorDepth != -1) {
+                    this.priorityRenderedEntities[++this.layeredObjectCount - 1] = graphNode
+                }
             }
             graphNode = graphNode.child
         }
         graphNode = this.dynamicRenderObjects[graphNodeIndex]
         while (graphNode != null) {
-            separateFromFloor(graphNode)
-            if (graphNode.floorDepth != -1 && !hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
-                if (graphNode.hasAlpha()) {
-                    this.priorityRenderedEntities[++this.layeredObjectCount - 1] = graphNode
-                } else {
-                    this.depthRenderedEntities[++this.depthObjectCount - 1] = graphNode
+            if (!hideGameobject(graphNode, hideInteratives, settingBits, lowestRenderedPlane, roofPreference)) {
+                separateFromFloor(graphNode)
+                if (graphNode.floorDepth != -1) {
+                    if (graphNode.hasAlpha()) {
+                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = graphNode
+                    } else {
+                        this.depthRenderedEntities[++this.depthObjectCount - 1] = graphNode
+                    }
                 }
             }
             graphNode = graphNode.child
         }
         if (!hideInteratives) {
             for (interactive in 0 until this.interactiveObjectCount) {
-                separateFromFloor(this.interactiveObjects[interactive]!!)
-                if (this.interactiveObjects[interactive]!!.floorDepth != -1 && !hideGameobject(this.interactiveObjects[interactive]!!, false, settingBits, lowestRenderedPlane, roofPreference)) {
-                    if (this.interactiveObjects[interactive]!!.hasAlpha()) {
-                        this.priorityRenderedEntities[++this.layeredObjectCount - 1] = this.interactiveObjects[interactive]
-                    } else {
-                        this.depthRenderedEntities[++this.depthObjectCount - 1] = this.interactiveObjects[interactive]
+                val entity = this.interactiveObjects[interactive]!!
+                if (!hideGameobject(entity, false, settingBits, lowestRenderedPlane, roofPreference)) {
+                    separateFromFloor(entity)
+                    if (entity.floorDepth != -1) {
+                        if (entity.hasAlpha()) {
+                            this.priorityRenderedEntities[++this.layeredObjectCount - 1] = entity
+                        } else {
+                            this.depthRenderedEntities[++this.depthObjectCount - 1] = entity
+                        }
                     }
                 }
             }
         }
+        phaseWalkNs += System.nanoTime() - walkT0
+        walkDrawn += this.depthObjectCount.toLong() + this.layeredObjectCount.toLong()
+
         /**
          * Renders general scene objects, walls
          */
         if (this.depthObjectCount > 0) {
+            val sortT0 = System.nanoTime()
             quicksortBelow(this.depthRenderedEntities, 0, this.depthObjectCount - 1)
+            phaseSortNs += System.nanoTime() - sortT0
+            val drawT0 = System.nanoTime()
             for (objectIndex in 0 until this.depthObjectCount) {
                 placeSceneryObjects(this.depthRenderedEntities[objectIndex]!!, this.activeLights)
             }
+            phaseDrawNs += System.nanoTime() - drawT0
         }
         if (this.copyLights) {
             this.activeToolkit.copyLights(0, null as Array<PointLight>?)
         }
+        val floorT0 = System.nanoTime()
         for (z in 0 until this.regionSizeZ) {
+            // A plane with no floor to draw does not need its per-tile visibility
+            // computed: the only consumer is the renderFloor call below, which would
+            // return immediately. tileOnScreen is fully rewritten by whichever plane
+            // runs next, so skipping leaves nothing stale behind.
+            val planeGround = this.localHeightmap[z]
+            if (planeGround == null || !planeGround.hasRenderableFloor()) {
+                planesSkipped++
+                continue
+            }
+            planesDrawn++
             if (z >= lowestRenderedPlane && settingBits != null) {
                 // These bounds are array indices, and index -> scene tile is
                 // `tileX + visibleToXnegative - visibleToInvertedXnegative`, so the
@@ -1074,22 +1113,29 @@ class Scene(
                     visibleSizeY -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
                 }
                 if (this.calculateTilesOnScreen) {
+                    // Row slices and the index->scene offsets read once per column.
+                    // This sweep runs for every plane over the whole visible grid —
+                    // tens of thousands of iterations a frame — and every one of them
+                    // was re-resolving four two-dimensional array rows and recomputing
+                    // the same two offsets from fields.
+                    val yBase = this.visibleToYnegative - this.visibleToInvertedYnegative
+                    val cullingLocal = this.culling
                     for (tileX in this.visibleToInvertedXnegative until visibleSizeX) {
                         val x = tileX + this.visibleToXnegative - this.visibleToInvertedXnegative
+                        val onScreenRow = this.tileOnScreen[tileX]
+                        val adjacentRow = this.adjacent_tile_on_screen[tileX]
                         for (tileY in this.visibleToInvertedYnegative until visibleSizeY) {
-                            this.tileOnScreen[tileX][tileY] = false
-                            if (this.adjacent_tile_on_screen[tileX][tileY]) {
-                                val y = tileY + this.visibleToYnegative - this.visibleToInvertedYnegative
+                            onScreenRow[tileY] = false
+                            if (adjacentRow[tileY]) {
+                                val y = tileY + yBase
                                 var descendingPlane = z
                                 while (descendingPlane >= 0) {
-                                    if (this.tiles[descendingPlane][x][y] != null && this.tiles[descendingPlane][x][y]!!.plane.toInt() == z) {
+                                    val tile = this.tiles[descendingPlane][x][y]
+                                    if (tile != null && tile.plane.toInt() == z) {
                                         val byLowPlane = descendingPlane < lowestRenderedPlane
                                         val byRoofBits = settingBits[descendingPlane][x][y] != roofPreference
-                                        if ((byLowPlane || byRoofBits) && !this.culling.isTileHidden(z, x, y)) {
-                                            this.tileOnScreen[tileX][tileY] = true
-                                            break
-                                        }
-                                        this.tileOnScreen[tileX][tileY] = false
+                                        onScreenRow[tileY] = (byLowPlane || byRoofBits) &&
+                                            !cullingLocal.isTileHidden(z, x, y)
                                         break
                                     }
                                     --descendingPlane
@@ -1110,16 +1156,23 @@ class Scene(
                     adjacentTileColumnCount -= this.adjacent_tile_on_screen[0].size + this.visibleToYnegative - this.visibleToInvertedYnegative - this.sceneDimensionY
                 }
                 if (this.calculateTilesOnScreen) {
+                    val yBase = this.visibleToYnegative - this.visibleToInvertedYnegative
+                    val cullingLocal = this.culling
                     for (tileX in this.visibleToInvertedXnegative until adjacentTileRowCount) {
                         val adjustedX = tileX + this.visibleToXnegative - this.visibleToInvertedXnegative
+                        val onScreenRow = this.tileOnScreen[tileX]
+                        val adjacentRow = this.adjacent_tile_on_screen[tileX]
                         for (tileY in this.visibleToInvertedYnegative until adjacentTileColumnCount) {
-                            this.tileOnScreen[tileX][tileY] = this.adjacent_tile_on_screen[tileX][tileY] && !this.culling.isTileHidden(z, adjustedX, tileY + this.visibleToYnegative - this.visibleToInvertedYnegative)
+                            onScreenRow[tileY] = adjacentRow[tileY] &&
+                                !cullingLocal.isTileHidden(z, adjustedX, tileY + yBase)
                         }
                     }
                 }
                 this.localHeightmap[z]!!.renderFloor(this.cameraGridPositionX, this.cameraGridPositionY, this.visibleTiles, this.tileOnScreen, true)
             }
         }
+        phaseFloorNs += System.nanoTime() - floorT0
+
         /**
          * Renders ground decoration, light rays, objects with particles, roof / next level decoration
          */
@@ -1166,34 +1219,106 @@ class Scene(
         }
         val unadjustedAdjacentTilesOnScreen = this.adjacent_tile_on_screen
         val unadjustedTilesOnScreen = this.tileOnScreen
-        for (x in 0 until this.visibleTiles + this.visibleTiles + 2) {
+        // Everything the tile-visibility grid needs, read once. This loop runs over
+        // (2*visibleTiles+2)^2 tiles — around eleven thousand — every frame, and each
+        // of the fields below was being re-read from `this` on every one of them,
+        // along with a fresh row lookup into each two-dimensional array.
+        val gridSpan = this.visibleTiles + this.visibleTiles + 2
+        val tileUnitsLocal = this.tileUnits
+        val heightBias = 1000 shl (tileUnitsLocal - 7)
+        val fullTile = this.fullTileDimension
+        val dimX = this.sceneDimensionX
+        val dimY = this.sceneDimensionY
+        val originX = this.cameraGridPositionX - this.visibleTiles
+        val originY = this.cameraGridPositionY - this.visibleTiles
+        val toolkit = this.activeToolkit
+        val visibility = this.tileVisibility
+        val onScreenGrid = this.tileOnScreen
+        val adjacentGrid = this.adjacent_tile_on_screen
+        val topSurface = this.surfaceHeightmap[this.surfaceHeightmap.size - 1]!!
+        val lowSurface = this.underwaterHeightmap?.get(0) ?: this.surfaceHeightmap[0]!!
+        for (x in 0 until gridSpan) {
             var previousOnScreen = 0
             var currentOnScreen = 0
-            for (y in 0 until this.visibleTiles + this.visibleTiles + 2) {
-                if (y > 1) {
-                    this.tileVisibility[y - 2] = previousOnScreen
+            val sceneX = x + originX
+            val xInRange = sceneX >= 0 && sceneX < dimX
+            val upscaledSceneX = sceneX shl tileUnitsLocal
+            // Row slices: the heightmaps and both grids are arrays of rows, so the
+            // outer index only has to be resolved once per column of the sweep.
+            val topRow = if (xInRange) topSurface.tileHeights[sceneX] else null
+            val lowRow = if (xInRange) lowSurface.tileHeights[sceneX] else null
+            val onScreenRow = onScreenGrid[x]
+            val adjacentRow = if (x > 0) adjacentGrid[x - 1] else null
+
+            // Clip flags for the whole column in one call. Testing them one at a time
+            // meant a virtual dispatch per tile — more expensive than the arithmetic
+            // it guarded, at eleven thousand tiles a frame.
+            if (columnScratchZ.size < gridSpan) {
+                columnScratchZ = IntArray(gridSpan)
+                columnScratchLow = IntArray(gridSpan)
+                columnScratchHigh = IntArray(gridSpan)
+                columnScratchOut = IntArray(gridSpan)
+            }
+            val zs = columnScratchZ
+            val lows = columnScratchLow
+            val highs = columnScratchHigh
+            val flags = columnScratchOut
+            var runCount = 0
+            var runFirstY = 0
+            if (xInRange) {
+                runFirstY = if (originY < 0) -originY else 0
+                var y = runFirstY
+                while (y < gridSpan) {
+                    val sceneY = y + originY
+                    if (sceneY >= dimY) break
+                    zs[runCount] = sceneY shl tileUnitsLocal
+                    lows[runCount] = topRow!![sceneY] - heightBias
+                    highs[runCount] = lowRow!![sceneY] + fullTile + heightBias
+                    runCount++
+                    y++
                 }
-                previousOnScreen = currentOnScreen
-                val sceneX = x + (this.cameraGridPositionX - this.visibleTiles)
-                val sceneY = y + (this.cameraGridPositionY - this.visibleTiles)
-                if (sceneX >= 0 && sceneY >= 0 && sceneX < this.sceneDimensionX && sceneY < this.sceneDimensionY) {
-                    val upscaledSceneX = sceneX shl this.tileUnits
-                    val upscaledSceneY = sceneY shl this.tileUnits
-                    val surfaceHeight = this.surfaceHeightmap[this.surfaceHeightmap.size - 1]!!.getHeight(sceneX, sceneY) - (1000 shl this.tileUnits - 7)
-                    val waterHeight = (if (this.underwaterHeightmap != null) this.underwaterHeightmap!![0]!!.getHeight(sceneX, sceneY) + this.fullTileDimension else this.surfaceHeightmap[0]!!.getHeight(sceneX, sceneY) + this.fullTileDimension) + (1000 shl this.tileUnits - 7)
-                    currentOnScreen = this.activeToolkit.isOnScreen(upscaledSceneX, surfaceHeight, upscaledSceneY, upscaledSceneX, waterHeight, upscaledSceneY)
-                    this.tileOnScreen[x][y] = currentOnScreen == 0
-                } else {
-                    currentOnScreen = -1
-                    this.tileOnScreen[x][y] = false
-                }
-                if (x > 0 && y > 0) {
-                    val isOnscreen = this.tileVisibility[y - 1] and this.tileVisibility[y] and previousOnScreen and currentOnScreen
-                    this.adjacent_tile_on_screen[x - 1][y - 1] = isOnscreen == 0
+                if (runCount > 0) {
+                    walkTiles += runCount.toLong()
+                    toolkit.isColumnRunOnScreen(upscaledSceneX, zs, lows, highs, flags, runCount)
+                    if (VERIFY_CULL) {
+                        // Oracle: the batched run must agree with the original
+                        // per-tile call for every tile, or the terrain and the
+                        // entity window disagree about what is on screen.
+                        for (i in 0 until runCount) {
+                            val expected = toolkit.isOnScreen(
+                                upscaledSceneX, lows[i], zs[i], upscaledSceneX, highs[i], zs[i]
+                            )
+                            cullVerifyChecks++
+                            if (expected != flags[i]) {
+                                cullVerifyBad++
+                                if (cullVerifyBad <= 10) System.err.println(
+                                    "[CullVerify] tile x=$upscaledSceneX z=${zs[i]} batched=${flags[i]} expected=$expected")
+                            }
+                        }
+                    }
                 }
             }
-            this.tileVisibility[this.visibleTiles + this.visibleTiles] = previousOnScreen
-            this.tileVisibility[this.visibleTiles + this.visibleTiles + 1] = currentOnScreen
+
+            for (y in 0 until gridSpan) {
+                if (y > 1) {
+                    visibility[y - 2] = previousOnScreen
+                }
+                previousOnScreen = currentOnScreen
+                val runIndex = y - runFirstY
+                if (runIndex in 0 until runCount) {
+                    currentOnScreen = flags[runIndex]
+                    onScreenRow[y] = currentOnScreen == 0
+                } else {
+                    currentOnScreen = -1
+                    onScreenRow[y] = false
+                }
+                if (adjacentRow != null && y > 0) {
+                    val isOnscreen = visibility[y - 1] and visibility[y] and previousOnScreen and currentOnScreen
+                    adjacentRow[y - 1] = isOnscreen == 0
+                }
+            }
+            visibility[gridSpan - 2] = previousOnScreen
+            visibility[gridSpan - 1] = currentOnScreen
         }
         this.culling.visibleBelowDrawheight = visibleBelowDrawheight
         this.culling.visibleAboveX = visibleAboveX
@@ -1320,47 +1445,104 @@ class Scene(
      * disabling this fixes some glitches
      * EG: object is half onscreen but the light is not
      */
+    /**
+     * Extracts each entity's [SceneGraphEntity.floorDepth] into [sortKeys] so the sort
+     * compares ints in a packed array instead of dereferencing an entity per
+     * comparison. The depths do not change during the sort, so this is exact; it just
+     * turns ~26k pointer chases into one pass of [count] plus int compares.
+     */
+    private fun extractSortKeys(graphNodes: Array<SceneGraphEntity?>, count: Int): IntArray {
+        var keys = sortKeys
+        if (keys.size < count) {
+            keys = IntArray(count * 2)
+            sortKeys = keys
+        }
+        for (i in 0 until count) keys[i] = graphNodes[i]!!.floorDepth
+        return keys
+    }
+
+    private var sortKeys = IntArray(0)
+
+    /** -Drender.verifycull: cross-check the batched tile-visibility run against the per-tile call. */
+    private val VERIFY_CULL = System.getProperty("render.verifycull") != null
+
+    /** Per-column staging for the batched tile-visibility test in [drawScene]. */
+    private var columnScratchZ = IntArray(0)
+    private var columnScratchLow = IntArray(0)
+    private var columnScratchHigh = IntArray(0)
+    private var columnScratchOut = IntArray(0)
+
     fun quicksortBelow(graphNodes: Array<SceneGraphEntity?>, startPosition: Int, endPosition: Int) {
+        quicksortBelow(graphNodes, extractSortKeys(graphNodes, endPosition + 1), startPosition, endPosition)
+    }
+
+    private fun quicksortBelow(
+        graphNodes: Array<SceneGraphEntity?>, keys: IntArray, startPosition: Int, endPosition: Int
+    ) {
         if (startPosition < endPosition) {
             val center = (endPosition + startPosition) / 2
             var curPosition = startPosition
             val graphNode = graphNodes[center]
+            val pivotKey = keys[center]
             graphNodes[center] = graphNodes[endPosition]
+            keys[center] = keys[endPosition]
             graphNodes[endPosition] = graphNode
-            val offset = graphNode!!.floorDepth
+            keys[endPosition] = pivotKey
+            val offset = pivotKey
             for (index in startPosition until endPosition) {
-                if (graphNodes[index]!!.floorDepth < (index and 0x1) + offset) {
+                if (keys[index] < (index and 0x1) + offset) {
                     val node = graphNodes[index]
+                    val key = keys[index]
                     graphNodes[index] = graphNodes[curPosition]
-                    graphNodes[curPosition++] = node
+                    keys[index] = keys[curPosition]
+                    graphNodes[curPosition] = node
+                    keys[curPosition] = key
+                    curPosition++
                 }
             }
             graphNodes[endPosition] = graphNodes[curPosition]
+            keys[endPosition] = keys[curPosition]
             graphNodes[curPosition] = graphNode
-            quicksortBelow(graphNodes, startPosition, curPosition - 1)
-            quicksortBelow(graphNodes, curPosition + 1, endPosition)
+            keys[curPosition] = pivotKey
+            quicksortBelow(graphNodes, keys, startPosition, curPosition - 1)
+            quicksortBelow(graphNodes, keys, curPosition + 1, endPosition)
         }
     }
 
     fun quicksortAbove(graphNodes: Array<SceneGraphEntity?>, startPosition: Int, endPosition: Int) {
+        quicksortAbove(graphNodes, extractSortKeys(graphNodes, endPosition + 1), startPosition, endPosition)
+    }
+
+    private fun quicksortAbove(
+        graphNodes: Array<SceneGraphEntity?>, keys: IntArray, startPosition: Int, endPosition: Int
+    ) {
         if (startPosition < endPosition) {
             val center = (endPosition + startPosition) / 2
             var curPosition = startPosition
             val graphNode = graphNodes[center]
+            val pivotKey = keys[center]
             graphNodes[center] = graphNodes[endPosition]
+            keys[center] = keys[endPosition]
             graphNodes[endPosition] = graphNode
-            val offset = graphNode!!.floorDepth
+            keys[endPosition] = pivotKey
+            val offset = pivotKey
             for (index in startPosition until endPosition) {
-                if (graphNodes[index]!!.floorDepth > (index and 0x1) + offset) {
+                if (keys[index] > (index and 0x1) + offset) {
                     val node = graphNodes[index]
+                    val key = keys[index]
                     graphNodes[index] = graphNodes[curPosition]
-                    graphNodes[curPosition++] = node
+                    keys[index] = keys[curPosition]
+                    graphNodes[curPosition] = node
+                    keys[curPosition] = key
+                    curPosition++
                 }
             }
             graphNodes[endPosition] = graphNodes[curPosition]
+            keys[endPosition] = keys[curPosition]
             graphNodes[curPosition] = graphNode
-            quicksortAbove(graphNodes, startPosition, curPosition - 1)
-            quicksortAbove(graphNodes, curPosition + 1, endPosition)
+            keys[curPosition] = pivotKey
+            quicksortAbove(graphNodes, keys, startPosition, curPosition - 1)
+            quicksortAbove(graphNodes, keys, curPosition + 1, endPosition)
         }
     }
 
@@ -1403,7 +1585,11 @@ class Scene(
      * Places any object/entity into the scene
      */
     fun placeSceneryObjects(entity: SceneGraphEntity, lights: Array<PointLight?>) {
-        if (this.copyLights) {
+        // Per-entity light selection feeds the fixed-function GL_LIGHT state, which a
+        // shader toolkit doing its own per-model selection never reads — so under one
+        // this is a per-entity, per-frame walk of the tile's light uids plus four
+        // glLightfv/glLightf calls, all discarded.
+        if (this.copyLights && this.activeToolkit.usesFixedFunctionLights()) {
             val activeLights = entity.getActiveLights(lights)
             this.activeToolkit.copyLights(activeLights, lights as Array<PointLight>)
         }
@@ -1467,6 +1653,19 @@ class Scene(
         @JvmStatic var phaseCullNs = 0L
         @JvmStatic var phaseTilesNs = 0L
         @JvmStatic var phaseSamples = 0
+
+        /** Scene-walk shape, per [ModernPerf] interval: nodes visited, tiles tested, entities drawn. */
+        @JvmStatic var walkNodes = 0L
+        @JvmStatic var walkTiles = 0L
+        @JvmStatic var cullVerifyChecks = 0L
+        @JvmStatic var cullVerifyBad = 0L
+        @JvmStatic var planesDrawn = 0L
+        @JvmStatic var planesSkipped = 0L
+        @JvmStatic var walkDrawn = 0L
+        @JvmStatic var phaseWalkNs = 0L
+        @JvmStatic var phaseSortNs = 0L
+        @JvmStatic var phaseFloorNs = 0L
+        @JvmStatic var phaseDrawNs = 0L
         @JvmStatic
         fun setRoofOverride() {
             val roofToggle = PreferenceManager.preferences!!.removeRoofsOptionOverride!!.getValue()

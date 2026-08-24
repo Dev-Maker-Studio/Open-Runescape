@@ -82,6 +82,10 @@ class ModelGL : Model {
         @JvmStatic val VERIFY_RECOLOUR_CAPTURE = System.getProperty("render.verifyrecolour") != null
         @JvmStatic val INVALIDATE_REASONS = arrayOf("yaxisRotate", "translate", "mirror", "scale", "recolor", "rematerial", "tint", "setAmbient", "envAlpha", "offsetSubmesh", "xaxisRotate", "zaxisRotate", "contourToGround", "hillChange")
         @JvmStatic val invalidateCounts = LongArray(14)
+
+        /** How often [calculateBounds] actually recomputes, and over how many vertices. */
+@JvmStatic var boundsCalls = 0L
+        @JvmStatic var boundsVertices = 0L
         @JvmStatic fun invalidateSummary(): String =
             INVALIDATE_REASONS.indices.joinToString(" ") { "${INVALIDATE_REASONS[it]}=${invalidateCounts[it]}" }
         // Picking scratch (calculateProjection) — game thread only. Construction-time
@@ -244,6 +248,118 @@ class ModelGL : Model {
     /** Bumped by colour-only mutations; geometry stays valid (see invalidateModernBuilt). */
     @JvmField
     var modernColorRevision: Int = 0
+
+    /**
+     * Memoised modern-renderer content hash, and the geometry the modern path
+     * built from THESE vertices.
+     *
+     * Both are keyed by [modernContentValid], which every method that writes to a
+     * geometry array clears (see invalidateModernContent and its call sites — the
+     * set was derived mechanically from every assignment into verticesX/Y/Z,
+     * faces*, normals*, texture*, triangles, vertexNormalIndices and the counts).
+     *
+     * Rationale: the modern renderer used to recompute an O(vertices + faces)
+     * rolling hash for EVERY model EVERY frame (~12% of a logged-in frame at 1400
+     * fallback-path models), and re-run the whole per-face build for every animated
+     * model every frame (~22%). Neither input changes between render frames — game
+     * logic mutates models at 50Hz while the render loop is uncapped — so both are
+     * pure repeated work. Memoising them makes a render frame that follows another
+     * render frame with no intervening logic tick nearly free on the CPU.
+     *
+     * `-Drender.verifyhash` recomputes the hash every frame and reports any
+     * disagreement with the memoised value, which is the direct test that the
+     * invalidation set above is complete.
+     */
+    @JvmField
+    var modernContentValid: Boolean = false
+
+    /** Valid only while [modernContentValid]. */
+    @JvmField
+    var modernContentHash: Long = 0
+
+    /**
+     * Per-instance geometry built from the CURRENT (post-animation) vertices,
+     * owned by this model. Valid only while [modernContentValid]. Typed as [Any]
+     * to keep ModelGL free of a dependency on the modern batch package; the modern
+     * renderer is the only reader and casts it back.
+     */
+    @JvmField
+    var modernStreamGeometry: Any? = null
+
+    /** Valid only while true; cleared alongside [modernContentValid]. */
+    @JvmField
+    var modernStreamValid: Boolean = false
+
+    /**
+     * The shared-cache entry this model resolved to last time, and the key it was
+     * resolved under. Lets the modern renderer skip the cache's hash-map lookup
+     * (an access-ordered LinkedHashMap keyed by a boxed Long, which restructures
+     * on every get) for a model whose geometry has not changed.
+     *
+     * The entry can still be evicted and freed underneath us, so the fast path also
+     * checks the entry's own eviction flag; a miss there just falls back to the map.
+     */
+    @JvmField
+    var modernSharedGeometry: Any? = null
+
+    @JvmField
+    var modernSharedKey: Long = 0
+
+    @JvmField
+    var modernSharedValid: Boolean = false
+
+    /**
+     * Stable identity for this model's per-pose geometry in the instanced store,
+     * assigned once and never reused.
+     *
+     * Animated models cannot be keyed by content — every pose differs — but they can
+     * be keyed by INSTANCE, which is what lets their geometry live in the persistent
+     * store and be rewritten in place when the pose changes, instead of being copied
+     * into a streaming buffer on every render frame.
+     */
+    @JvmField
+    var modernStreamKey: Long = 0
+
+
+    /**
+     * Last point-light selection made for this model, and the world origin and light
+     * epoch it was made at.
+     *
+     * Selecting the four strongest lights for a model is a scan over every light
+     * whose influence reaches its cell. A static loc sits at the same place frame
+     * after frame with the same lights around it, so the answer is the same every
+     * time — this makes the repeat a four-float comparison. The epoch invalidates
+     * every memo at once when the frame's light set is rebuilt.
+     */
+    @JvmField
+    var modernLightEpoch: Int = -1
+
+    @JvmField
+    var modernLightX: Float = 0f
+
+    @JvmField
+    var modernLightY: Float = 0f
+
+    @JvmField
+    var modernLightZ: Float = 0f
+
+    /** Four light indices as floats, matching the per-instance attribute layout. */
+    @JvmField
+    val modernLightIdx: FloatArray = FloatArray(4)
+
+    /**
+     * Clears everything memoised from this model's geometry arrays. Called at the
+     * head of every mutating method; idempotent and cheap enough to be free on the
+     * paths that call it thousands of times per tick.
+     *
+     * The stream geometry BUFFER is deliberately kept (only its validity is
+     * dropped) so the next rebuild can write into it instead of allocating.
+     */
+    fun invalidateModernContent() {
+        modernContentValid = false
+        modernStreamValid = false
+        modernSharedValid = false
+    }
 
     @JvmField
     var preferenceFlags: Int = 0
@@ -1046,6 +1162,7 @@ class ModelGL : Model {
     }
 
     private fun connectNormal(face: Int, uid: Long, x: Int, y: Int, z: Int, magnitude: Int, u: Float, v: Float): Short {
+        invalidateModernContent()
         val startIndex = this.triangles!![face]
         val endIndex = this.triangles!![face + 1]
         var slotIndex = 0
@@ -1112,6 +1229,7 @@ class ModelGL : Model {
     }
 
     override fun applyShading(functionMask: Int) {
+        invalidateModernContent()
         this.functionMask = functionMask
         if (this.mergedNormals != null && (this.functionMask and 0x10000) == 0) {
             this.normalsX = this.mergedNormals!!.normalsX
@@ -1143,6 +1261,7 @@ class ModelGL : Model {
     }
 
     fun copyModelData(dst: ModelGL, src: ModelGL, flags: Int, usesPreallocated: Boolean): Model {
+        dst.invalidateModernContent()
         dst.renderState = 0
         dst.functionMask = flags
         // Capture animation intent NOW, from the copy mask, before any later
@@ -1491,6 +1610,7 @@ class ModelGL : Model {
     }
 
     fun releaseUploadedData() {
+        invalidateModernContent()
         if (this.updateRequired) {
             this.updateRequired = false
             if (this.emissiveTriangles == null && this.effectiveVertices == null && this.billboardEffects == null && !ModelFunctionMaskGL.altersVerticePosition(this.functionMask)) {
@@ -1636,6 +1756,7 @@ class ModelGL : Model {
     }
 
     override fun yaxisRotateWithoutNormals(rotation: Int) {
+        invalidateModernContent()
         // Rotates vertices but deliberately NOT normals — the modern matrix path
         // would rotate both, changing lighting. Not representable; invalidate.
         invalidateModernBuilt(0)
@@ -1656,6 +1777,7 @@ class ModelGL : Model {
     }
 
     override fun rotateWithNormals(rotation: Int) {
+        invalidateModernContent()
         // Yaw is representable in the modern per-instance model matrix; track it
         // instead of invalidating the modern base geometry.
         this.modernYaw = (this.modernYaw + rotation) and 0x3fff
@@ -2562,14 +2684,20 @@ class ModelGL : Model {
         mvpMatrix.copyFrom(workingMatrix)
         mvpMatrix.multiplyBy(this.toolkit.viewProjectionMatrix)
 
+        // Read the matrix once. This runs for every drawn model every frame, and
+        // `m[i]` per term meant a field load plus a null check
+        // (Intrinsics.checkNotNull showed up in the profile in its own right) for
+        // each of the thirty-odd terms below.
+        val m = mvpMatrix.elements!!
+
         val centerX = (this.minX + this.maxX) shr 1
         val centerZ = (this.minZ + this.maxZ) shr 1
         var currentY = this.minY
 
-        val clipX1 = mvpMatrix.elements!![0] * centerX + mvpMatrix.elements!![4] * currentY + mvpMatrix.elements!![8] * centerZ + mvpMatrix.elements!![12]
-        val clipY1 = mvpMatrix.elements!![1] * centerX + mvpMatrix.elements!![5] * currentY + mvpMatrix.elements!![9] * centerZ + mvpMatrix.elements!![13]
-        val clipZ1 = mvpMatrix.elements!![2] * centerX + mvpMatrix.elements!![6] * currentY + mvpMatrix.elements!![10] * centerZ + mvpMatrix.elements!![14]
-        val clipW1 = mvpMatrix.elements!![3] * centerX + mvpMatrix.elements!![7] * currentY + mvpMatrix.elements!![11] * centerZ + mvpMatrix.elements!![15]
+        val clipX1 = m[0] * centerX + m[4] * currentY + m[8] * centerZ + m[12]
+        val clipY1 = m[1] * centerX + m[5] * currentY + m[9] * centerZ + m[13]
+        val clipZ1 = m[2] * centerX + m[6] * currentY + m[10] * centerZ + m[14]
+        val clipW1 = m[3] * centerX + m[7] * currentY + m[11] * centerZ + m[15]
 
         if (clipZ1 >= -clipW1) {
             boundingBox.left = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX1 / clipW1).toInt()
@@ -2577,24 +2705,24 @@ class ModelGL : Model {
         }
 
         currentY = this.maxY
-        val clipX2 = mvpMatrix.elements!![0] * centerX + mvpMatrix.elements!![4] * currentY + mvpMatrix.elements!![8] * centerZ + mvpMatrix.elements!![12]
-        val clipY2 = mvpMatrix.elements!![1] * centerX + mvpMatrix.elements!![5] * currentY + mvpMatrix.elements!![9] * centerZ + mvpMatrix.elements!![13]
-        val clipZ2 = mvpMatrix.elements!![2] * centerX + mvpMatrix.elements!![6] * currentY + mvpMatrix.elements!![10] * centerZ + mvpMatrix.elements!![14]
-        val clipW2 = mvpMatrix.elements!![3] * centerX + mvpMatrix.elements!![7] * currentY + mvpMatrix.elements!![11] * centerZ + mvpMatrix.elements!![15]
+        val clipX2 = m[0] * centerX + m[4] * currentY + m[8] * centerZ + m[12]
+        val clipY2 = m[1] * centerX + m[5] * currentY + m[9] * centerZ + m[13]
+        val clipZ2 = m[2] * centerX + m[6] * currentY + m[10] * centerZ + m[14]
+        val clipW2 = m[3] * centerX + m[7] * currentY + m[11] * centerZ + m[15]
 
         if (clipZ2 >= -clipW2) {
             boundingBox.right = (this.toolkit.viewportOriginX + this.toolkit.imageProducerCenterX * clipX2 / clipW2).toInt()
             boundingBox.top = (this.toolkit.viewportOriginY + this.toolkit.imageProducerCenterY * clipY2 / clipW2).toInt()
         }
 
-        val modelMatrix = this.toolkit.currentModelMatrix
+        val mm = this.toolkit.currentModelMatrix.elements!!
         if (clipZ1 / clipW1 > clipZ2 / clipW2) {
-            val interpX = clipX1 + modelMatrix.elements!![0] * this.size2d + modelMatrix.elements!![12]
-            val interpW = clipW1 + modelMatrix.elements!![3] * this.size2d + modelMatrix.elements!![15]
+            val interpX = clipX1 + mm[0] * this.size2d + mm[12]
+            val interpW = clipW1 + mm[3] * this.size2d + mm[15]
             boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.left + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
         } else {
-            val interpX = clipX2 + modelMatrix.elements!![0] * this.size2d + modelMatrix.elements!![12]
-            val interpW = clipW2 + modelMatrix.elements!![3] * this.size2d + modelMatrix.elements!![15]
+            val interpX = clipX2 + mm[0] * this.size2d + mm[12]
+            val interpW = clipW2 + mm[3] * this.size2d + mm[15]
             boundingBox.size = (this.toolkit.viewportOriginX - boundingBox.right + this.toolkit.imageProducerCenterX * interpX / interpW).toInt()
         }
 
@@ -2602,6 +2730,7 @@ class ModelGL : Model {
     }
 
     override fun translate(x: Int, y: Int, z: Int) {
+        invalidateModernContent()
         invalidateModernBuilt(1)
         for (i in 0 until this.maxDepth) {
             this.verticesX!![i] += x
@@ -2617,6 +2746,7 @@ class ModelGL : Model {
     }
 
     override fun mirror() {
+        invalidateModernContent()
         // Mirroring flips winding; not representable in the modern matrix path
         // without a per-draw cull flip. Invalidate.
         invalidateModernBuilt(2)
@@ -2674,6 +2804,7 @@ class ModelGL : Model {
     }
 
     override fun scale(x: Int, y: Int, z: Int) {
+        invalidateModernContent()
         invalidateModernBuilt(3)
         for (i in 0 until this.maxDepth) {
             this.verticesX!![i] = (this.verticesX!![i] * x) shr 7
@@ -2689,6 +2820,7 @@ class ModelGL : Model {
     }
 
     override fun setContrast(contrast: Int) {
+        invalidateModernContent()
         this.contrast = contrast.toShort()
         if (this.colorsBuffer != null) {
             this.colorsBuffer!!.buffer = null
@@ -2699,6 +2831,7 @@ class ModelGL : Model {
     }
 
     override fun recolor(src: Short, dst: Short) {
+        invalidateModernContent()
         invalidateModernBuilt(4)
         for (face in 0 until this.numFaces) {
             if (this.facesColor!![face] == src) {
@@ -2720,6 +2853,7 @@ class ModelGL : Model {
     }
 
     override fun rematerial(src: Short, dst: Short) {
+        invalidateModernContent()
         invalidateModernBuilt(5)
         val provider = this.toolkit.materialProvider!!
 
@@ -2764,6 +2898,7 @@ class ModelGL : Model {
     }
 
     override fun tint(hue: Int, saturation: Int, lightness: Int, opacity: Int) {
+        invalidateModernContent()
         invalidateModernBuilt(6)
         for (i in 0 until this.numFaces) {
             val hsl = this.facesColor!![i].toInt() and 0xffff
@@ -2796,6 +2931,7 @@ class ModelGL : Model {
     }
 
     override fun setAmbient(ambient: Int) {
+        invalidateModernContent()
         // Modern base colors are baked with the createModel-time ambient.
         invalidateModernBuilt(7)
         this.ambient = ambient.toShort()
@@ -2805,6 +2941,7 @@ class ModelGL : Model {
     }
 
     override fun applyEnvironmentAlpha(alpha: Byte, transparency: ByteArray?) {
+        invalidateModernContent()
         invalidateModernBuilt(8)
         if (transparency == null) {
             for (f in 0 until this.numFaces) {
@@ -2914,6 +3051,7 @@ class ModelGL : Model {
     }
 
     override fun applyShading(model: Model, x: Int, y: Int, z: Int, renderTypeAdjustment: Boolean) {
+        invalidateModernContent()
         val openglModel = model as ModelGL
         if (this.numFaces != 0 && openglModel.numFaces != 0) {
             val glMaxDepth = openglModel.maxDepth
@@ -3068,6 +3206,7 @@ class ModelGL : Model {
     }
 
     override fun offsetSubmesh(var1: Matrix43, functionMask: Int, var3: Boolean) {
+        invalidateModernContent()
         invalidateModernBuilt(9)
         if (this.verticesSubmeshes != null) {
             var matrix44var4 = var1
@@ -3195,6 +3334,7 @@ class ModelGL : Model {
     override fun accountForLayers(): Boolean = this.hasAlphaTransition
 
     override fun xaxisRotateWithoutNormals(rotation: Int) {
+        invalidateModernContent()
         invalidateModernBuilt(10)
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
@@ -3213,6 +3353,7 @@ class ModelGL : Model {
     }
 
     override fun zaxisRotateWithoutNormals(rotation: Int) {
+        invalidateModernContent()
         invalidateModernBuilt(11)
         val sin = MathUtils.SINE[rotation]
         val cos = MathUtils.COSINE[rotation]
@@ -3231,6 +3372,7 @@ class ModelGL : Model {
     }
 
     override fun startAnimation(): Boolean {
+        invalidateModernContent()
         if (this.vertexGroups == null) {
             return false
         }
@@ -3247,6 +3389,7 @@ class ModelGL : Model {
     }
 
     override fun endAnimation() {
+        invalidateModernContent()
         // Scale vertices back down by 16 (shift right 4) after animation
         // Adding 7 before shift provides proper rounding
         for (v in 0 until this.numVertices) {
@@ -3263,6 +3406,7 @@ class ModelGL : Model {
     }
 
     override fun animatePartialtransform(transformationType: Int, labels: IntArray, xIn: Int, yIn: Int, zIn: Int, rotation: Int, lights: Boolean) {
+        invalidateModernContent()
         var x = xIn
         var y = yIn
         var z = zIn
@@ -3557,6 +3701,7 @@ class ModelGL : Model {
     }
 
     override fun animateTransform(transformationType: Int, labels: IntArray, rotationX: Int, rotationY: Int, rotationZ: Int, lights: Boolean, submesh: Int, verticesData: IntArray) {
+        invalidateModernContent()
         var paramX = rotationX
         var paramY = rotationY
         var paramZ = rotationZ
@@ -4043,6 +4188,7 @@ class ModelGL : Model {
     }
 
     override fun animateShadowtransform(transformType: Int, x: Int, y: Int, z: Int) {
+        invalidateModernContent()
         if (transformType == 0) {
             var transformCount = 0
             originX = 0
@@ -4174,6 +4320,7 @@ class ModelGL : Model {
     }
 
     override fun contourToGround(contourType: Int, contourModifier: Int, currentLvl: Ground?, nextLvl: Ground?, sceneX: Int, averageHeight: Int, sceneY: Int) {
+        invalidateModernContent()
         // Ground contouring reshapes vertices per-tile; not matrix-representable.
         invalidateModernBuilt(12)
         if (!this.boundsCalculated) {
@@ -4251,6 +4398,7 @@ class ModelGL : Model {
     }
 
     override fun hillChange(ground: Ground, sceneX: Int, averageHeight: Int, sceneY: Int, width: Int, length: Int, xan: Int, zan: Int) {
+        invalidateModernContent()
         // Per-tile hillskew reshapes vertices; not matrix-representable.
         invalidateModernBuilt(13)
         val sin = MathUtils.SINE[xan]
@@ -4283,6 +4431,8 @@ class ModelGL : Model {
     }
 
     private fun calculateBounds() {
+        boundsCalls++
+        boundsVertices += maxDepth.toLong()
         if (this.verticesX == null || this.verticesY == null || this.verticesZ == null) {
             this.boundsCalculated = true
             return

@@ -14,10 +14,10 @@ import java.util.concurrent.locks.LockSupport
  */
 object FrameLimiter {
 
-    /** Target frames per second; 0 = uncapped. */
+    /** Target frames per second; 0 = uncapped. Startup override: `-Dfps=<n>`. */
     @Volatile
     @JvmStatic
-    var targetFps: Int = DEFAULT_TARGET_FPS
+    var targetFps: Int = System.getProperty("fps")?.trim()?.toIntOrNull() ?: DEFAULT_TARGET_FPS
 
     private var nextFrameAt: Long = 0L
 

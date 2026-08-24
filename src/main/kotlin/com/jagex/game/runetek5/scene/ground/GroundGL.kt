@@ -63,6 +63,22 @@ open class GroundGL(
     @JvmField var modernVertexData: java.nio.ByteBuffer? = null
     @JvmField var modernVertexStride: Int = 0
     @JvmField var modernVertexCount: Int = 0
+
+    /**
+     * Bumped whenever [modernVertexData] is rebuilt.
+     *
+     * The terrain mesh for a ground is static between rebuilds, but the modern path
+     * used to re-upload the WHOLE snapshot with glBufferData on every material draw
+     * — ~35 times a frame, tens of megabytes of PCIe traffic per frame for data that
+     * had not changed. The renderer now uploads only when this revision moves.
+     */
+    @JvmField var modernVertexRevision: Int = 0
+
+    /** GL name of the resident copy of [modernVertexData], 0 until first upload. */
+    @JvmField var modernVboId: Int = 0
+
+    /** [modernVertexRevision] the resident copy was uploaded from; -1 = never. */
+    @JvmField var modernVboRevision: Int = -1
     @JvmField var vertexBuffer: OpenGlArrayDrawBuffer? = null
     @JvmField var colorBuffer: OpenGlArrayDrawBuffer? = null
     @JvmField var textureBuffer: OpenGlArrayDrawBuffer? = null
@@ -660,6 +676,7 @@ open class GroundGL(
                         MemoryUtil.memCopy(nativeAddr, MemoryUtil.memAddress(modernVertexData!!), dataSize.toLong())
                         modernVertexStride = bufferEntrySize
                         modernVertexCount = totalMaterializedTiles
+                        modernVertexRevision++
                     } else {
                         println("[GroundGL] MODERN SNAPSHOT MISSING: nativeAddr=$nativeAddr dataSize=$dataSize — terrain for this ground will not render under toolkit 6")
                     }
@@ -940,6 +957,9 @@ open class GroundGL(
     override fun renderFloor(cameraGridX: Int, cameraGridY: Int, visibleTileRange: Int, tilesOnScreen: Array<BooleanArray>, belowLowestPlane: Boolean) {
         renderShadows(cameraGridX, cameraGridY, visibleTileRange, tilesOnScreen, belowLowestPlane)
     }
+
+    /** [renderShadows] is a no-op without material nodes, so the plane draws nothing. */
+    override fun hasRenderableFloor(): Boolean = goundMaterialNodes != null
 
     override fun createShadowAt(tileX: Int, tileY: Int, shadow: Shadow?): Shadow? {
         if ((shadowFunctionMasks[tileX][tileY].toInt() and GroundFunctionMask.CONTAINS_SHADOW) == 0) {

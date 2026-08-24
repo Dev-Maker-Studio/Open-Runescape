@@ -32,6 +32,17 @@ class ShaderProgram private constructor(
 
     companion object {
         /**
+         * Set by [com.jagex.game.runetek5.graphics.modern.renderer.ModernGroundRenderer]
+         * while it is holding the pipeline across a run of terrain draws: the program
+         * it is holding, and the action that releases it.
+         */
+        @JvmStatic
+        var groundPassProgramId: Int = -1
+
+        @JvmStatic
+        var releaseGroundPass: Runnable? = null
+
+        /**
          * Creates a shader program from vertex and fragment shader source code.
          *
          * @param vertexSource GLSL source code for vertex shader
@@ -127,6 +138,13 @@ class ShaderProgram private constructor(
         // RectangularTextureGL, MaterialEffect9GL...), including glUseProgram(0),
         // with no way to notify us. A redundant bind is one cheap call per batch
         // flush; a missed one silently corrupts a frame.
+        // A run of terrain draws leaves the ground shader, its VAO and its attribute
+        // arrays bound so consecutive materials do not each re-establish them; binding
+        // any other program is the signal that the run is over. This is the one place
+        // every modern draw path passes through, which is why the release lives here
+        // rather than being sprinkled across the call sites that could forget it.
+        if (programId != groundPassProgramId) releaseGroundPass?.run()
+
         GLWrapper.useProgram(programId)
         isBound = true
     }
@@ -135,9 +153,11 @@ class ShaderProgram private constructor(
      * Unbinds this shader program.
      */
     fun unbind() {
+        if (programId != groundPassProgramId) releaseGroundPass?.run()
         GLWrapper.useProgram(0)
         isBound = false
     }
+
 
     /**
      * Gets the location of a uniform variable, caching the result.
